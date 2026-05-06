@@ -1,0 +1,42 @@
+/* ════════════════════════════════════════════════════
+   5ft.mag — 디자인 토큰
+   변경하면 사이트 전체에 반영됩니다.
+   ════════════════════════════════════════════════════ */
+
+:root {
+  /* 컬러 */
+  --bg:           #ffffff;
+  --bg-sub:       #f4f4f4;
+  --text:         #000000;
+  --text-muted:   rgba(0, 0, 0, 0.55);
+  --border:       #e0e0e0;
+
+  /* 매거진 정체성 컬러 */
+  --accent:       #FFE600;   /* 메인 노란색 */
+  --accent-soft:  #FFF399;   /* 카드 배경용 50% 옅은 노란색 */
+  --accent-text:  #111111;
+
+  /* 레이아웃 */
+  --header-h:     60px;
+  --read-width:   720px;    /* 본문 읽기 너비 (한 줄 38~42자) */
+
+  /* 타이포그래피 */
+  --font:         'Pretendard', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --fs-display:   40px;     /* 큰 제목 (Articles, Photo) */
+  --fs-title:     24px;     /* 아티클 제목 + 본문 */
+  --fs-body:      19px;     /* 서브텍스트, 일반 본문 */
+  --fs-nav:       17px;     /* 네비게이션 */
+  --fs-meta:      14px;     /* 페이지네이션, 캡션 */
+  --fw-all:       500;      /* 일반 텍스트 굵기 */
+  --fw-heading:   700;      /* 타이틀/제목 굵기 (Bold) */
+  --ls-default:   -0.02em;
+}
+
+/* 다크 모드 */
+[data-theme="dark"] {
+  --bg:           #0c0c0c;
+  --bg-sub:       #181818;
+  --text:         #f0f0f0;
+  --text-muted:   rgba(240, 240, 240, 0.55);
+  --border:       #282828;
+}

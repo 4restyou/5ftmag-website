@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>창간호를 사면 함께 오는 두 가지 굿즈 — 5ft.mag</title>
+  <!-- SEO & Social Sharing -->
+  <meta name="description" content="5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.">
+  <link rel="canonical" href="https://www.5ftmag.com/stories/06.html">
+
+  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="../rss.xml">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="창간호를 사면 함께 오는 두 가지 굿즈 — 5ft.mag">
+  <meta property="og:description" content="5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.">
+  <meta property="og:image" content="https://www.5ftmag.com/img/stories/06/goods-name-card.jpg">
+  <meta property="og:url" content="https://www.5ftmag.com/stories/06.html">
+  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="창간호를 사면 함께 오는 두 가지 굿즈 — 5ft.mag">
+  <meta name="twitter:description" content="5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.">
+  <meta name="twitter:image" content="https://www.5ftmag.com/img/stories/06/goods-name-card.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../img/favicon/icon-16.png">
+  <link rel="shortcut icon" href="../img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/icon-180.png">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 17px;
+      font-weight: var(--fw-all);
+      line-height: 1.7;
+      letter-spacing: var(--ls-default);
+      transition: background .25s, color .25s;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; height: auto; }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 300;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background .25s, border-color .25s;
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: var(--header-h); padding: 0 24px;
+    }
+    .site-logo {
+      flex-shrink: 0;
+      display: flex; align-items: center;
+      height: var(--header-h);
+    }
+    .site-logo img {
+      height: 40px; width: auto; display: block; transition: opacity .15s;
+    }
+    .site-logo .logo-light { display: block; }
+    .site-logo .logo-dark { display: none; }
+    [data-theme="dark"] .site-logo .logo-light { display: none; }
+    [data-theme="dark"] .site-logo .logo-dark { display: block; }
+    .site-logo:hover img { opacity: 0.7; }
+    .main-nav {
+      display: flex; align-items: center; list-style: none; gap: 0;
+      margin-left: auto;
+    }
+    .main-nav a {
+      display: block; padding: 0 14px; font-size: var(--fs-nav);
+      font-weight: var(--fw-all); letter-spacing: var(--ls-default);
+      color: var(--text); line-height: var(--header-h);
+      transition: opacity .15s; white-space: nowrap;
+    }
+    .main-nav a:hover { opacity: .45; }
+    .main-nav a.current { font-weight: var(--fw-heading); }
+    .main-nav .ext::after { content: ' ↗'; font-size: 13px; }
+    .nav-right { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer; color: var(--text);
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; border-radius: 2px;
+      font-family: var(--font); transition: opacity .15s;
+    }
+    .icon-btn:hover { opacity: .45; }
+    .hamburger { display: none; }
+    .mobile-nav {
+      display: none; flex-direction: column;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      font-size: var(--fs-nav); font-weight: var(--fw-all);
+      letter-spacing: var(--ls-default); color: var(--text);
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+    }
+
+    /* ── 글 헤더 ── */
+    .article-header {
+      max-width: var(--read-width);
+      margin: 0 auto;
+      padding: 64px 24px 40px;
+    }
+    /* 사진 없는 에세이용 — 미디엄 스타일 (제목 크게, 바로 본문으로) */
+    .article-header.no-hero {
+      padding: 96px 24px 64px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+    .article-header.no-hero .article-title {
+      font-size: 56px;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+    }
+    .article-header.no-hero .article-subtitle {
+      font-size: 22px;
+      line-height: 1.55;
+    }
+    @media (max-width: 640px) {
+      .article-header.no-hero { padding: 56px 20px 40px; margin-bottom: 32px; }
+      .article-header.no-hero .article-title { font-size: 32px; }
+      .article-header.no-hero .article-subtitle { font-size: 18px; }
+    }
+    .article-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: var(--fw-heading);
+      letter-spacing: 0.04em; color: var(--text-muted);
+      margin-bottom: 32px; transition: color .15s;
+    }
+    .article-back:hover { color: var(--text); }
+    .article-meta {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .article-tag {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+    }
+    .article-tag.issue {
+      background: var(--accent); color: var(--accent-text);
+      padding: 3px 8px; border-radius: 2px;
+    }
+    .article-meta .dot {
+      width: 3px; height: 3px;
+      background: var(--text-dim); border-radius: 50%;
+    }
+    .article-title {
+      font-size: 44px; font-weight: var(--fw-heading);
+      letter-spacing: -0.03em; line-height: 1.15;
+      margin-bottom: 24px;
+    }
+    .article-subtitle {
+      font-size: 21px;
+      font-weight: var(--fw-all);
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .article-author {
+      display: flex; align-items: center; gap: 14px;
+      font-size: 15px; color: var(--text-muted);
+    }
+    .article-author .author-name {
+      color: var(--text); font-weight: var(--fw-heading);
+    }
+
+    /* ── 메인 이미지 (히어로) ── */
+    .article-hero {
+      max-width: 1200px;
+      margin: 24px auto 56px;
+      padding: 0 24px;
+    }
+    .article-hero img {
+      width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      background: transparent;
+    }
+
+    /* ── 본문 ── */
+    .article-body {
+      max-width: var(--read-width);
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    .article-body p {
+      font-size: 17px; line-height: 1.8;
+      margin-bottom: 24px; color: var(--text);
+    }
+    .article-body p.lead {
+      font-size: 21px; line-height: 1.6;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.015em;
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 28px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      margin-top: 56px; margin-bottom: 18px;
+      line-height: 1.25;
+    }
+    .article-body h3 {
+      font-size: 22px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      margin-top: 40px; margin-bottom: 14px;
+      line-height: 1.3;
+    }
+    .article-body blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 8px 0 8px 24px;
+      margin: 32px 0;
+      font-size: 22px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      line-height: 1.4;
+    }
+    .article-body figure { margin: 40px -40px; }
+    .article-body figure img {
+      width: 100%; height: auto; background: transparent;
+      display: block;
+    }
+    .article-body figcaption {
+      font-size: 13px; color: var(--text-muted);
+      text-align: center; margin-top: 12px;
+    }
+    .article-body figure.full-width {
+      margin: 56px calc(50% - 50vw);
+      max-width: none; width: 100vw;
+    }
+    .article-body figure.full-width img {
+      /* 원본 비율 유지 — 작가 사진을 자르지 않습니다 */
+      max-width: 1400px;
+      margin: 0 auto;
+      max-height: 85vh;
+      object-fit: contain;
+    }
+    .article-body strong { font-weight: var(--fw-heading); }
+    .article-body em { font-style: italic; }
+    .article-body a {
+      color: var(--text);
+      border-bottom: 1px solid var(--text-dim);
+    }
+    .article-body a:hover { border-color: var(--text); }
+
+    /* ── Q&A 박스 (인터뷰 미리보기) ── */
+    .qa-block {
+      margin: 40px 0;
+      padding: 28px 32px;
+      background: var(--bg-sub);
+      border-radius: 4px;
+      border-left: 3px solid var(--text);
+    }
+    .qa-question {
+      font-size: 13px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .qa-question-text {
+      font-size: 17px;
+      font-weight: var(--fw-heading);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .qa-answer {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .qa-answer p { margin-bottom: 12px; font-size: 16px; }
+    .qa-answer p:last-child { margin-bottom: 0; }
+
+    /* 답변 가리기 박스 */
+    .qa-block.locked {
+      position: relative;
+      overflow: hidden;
+    }
+    .qa-block.locked .qa-answer {
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+      max-height: 80px;
+      overflow: hidden;
+    }
+    .qa-locked-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 24px 32px;
+      background: linear-gradient(to top, var(--bg-sub) 60%, transparent);
+      text-align: center;
+    }
+    .qa-locked-overlay .lock-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .qa-locked-overlay .lock-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── 시리즈 갤러리 ── */
+    .series-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 40px 0;
+      align-items: start;
+    }
+    .series-gallery figure {
+      margin: 0;
+    }
+    .series-gallery img {
+      width: 100%;
+      height: auto;
+      /* 원본 비율 유지 — 작가 사진을 자르지 않습니다 */
+      background: transparent;
+      display: block;
+    }
+
+    /* ── CTA 박스 ── */
+    .cta-box {
+      background: var(--bg-sub);
+      padding: 40px;
+      margin: 56px 0;
+      text-align: center;
+      border-radius: 4px;
+    }
+    .cta-box-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.16em;
+      background: var(--accent);
+      color: var(--accent-text);
+      padding: 4px 10px;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    .cta-box-title {
+      font-size: 26px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .cta-box-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .cta-box-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-box-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: var(--fw-heading);
+      border-radius: 2px;
+      transition: opacity .15s;
+      border-bottom: none !important;
+    }
+    /* article-body a 보다 우선되게 명시도 올림 */
+    .article-body a.cta-box-btn-primary,
+    .cta-box-btn-primary {
+      background: var(--text) !important;
+      color: var(--bg) !important;
+      border-bottom: none !important;
+    }
+    .article-body a.cta-box-btn-secondary,
+    .cta-box-btn-secondary {
+      background: transparent !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .cta-box-btn:hover { opacity: 0.85; }
+
+    /* ── 작가 정보 카드 ── */
+    .artist-card {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 24px;
+      background: var(--bg-sub);
+      border-radius: 4px;
+      margin: 40px 0;
+    }
+    .artist-card-photo {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--border);
+    }
+    .artist-card-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .artist-card-info {
+      flex: 1;
+    }
+    .artist-card-name {
+      font-size: 18px;
+      font-weight: var(--fw-heading);
+      margin-bottom: 4px;
+    }
+    .artist-card-bio {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── 글 끝 ── */
+    .article-end {
+      max-width: var(--read-width);
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      border-top: 1px solid var(--border);
+      padding-top: 40px;
+    }
+    .article-signature {
+      font-size: 14px; color: var(--text-muted);
+      margin-bottom: 24px; line-height: 1.6;
+    }
+    .article-signature .role {
+      color: var(--text-dim); margin-right: 8px;
+    }
+    .share-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .share-label {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+      margin-right: 8px;
+    }
+    .share-bar a, .share-bar button {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 7px 14px; font-size: 13px;
+      font-weight: var(--fw-heading); letter-spacing: var(--ls-default);
+      color: var(--text); background: transparent;
+      border: 1px solid var(--border); border-radius: 999px;
+      cursor: pointer; font-family: var(--font);
+      transition: all .15s;
+    }
+    .share-bar a:hover, .share-bar button:hover {
+      border-color: var(--text);
+    }
+
+    /* ── 다음/이전 글 ── */
+    .article-nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .article-nav a {
+      background: var(--bg);
+      padding: 32px;
+      transition: background .15s;
+      display: block;
+      text-align: center;
+    }
+    .article-nav a:hover { background: var(--bg-sub); }
+    .article-nav .nav-label {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+      margin-bottom: 8px; display: block;
+    }
+    .article-nav .nav-title {
+      font-size: 20px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em; line-height: 1.3;
+    }
+
+    /* ── 푸터 위 협력사 로고 띠 ── */
+    .footer-partners {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 56px; flex-wrap: wrap; background: var(--bg);
+    }
+    .footer-partners-label {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.16em; color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .footer-partner { display: flex; align-items: center; transition: opacity .15s; }
+    .footer-partner:hover { opacity: 0.5; }
+    .footer-partner img { height: 18px; width: auto; object-fit: contain; }
+    .footer-partner .logo-light { display: block; }
+    .footer-partner .logo-dark { display: none; }
+    [data-theme="dark"] .footer-partner .logo-light { display: none; }
+    [data-theme="dark"] .footer-partner .logo-dark { display: block; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-inner-left { display: flex; flex-direction: column; gap: 4px; }
+    .footer-logo {
+      font-size: var(--fs-nav); font-weight: var(--fw-heading);
+    }
+    .footer-publisher {
+      font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a {
+      font-size: 17px; color: var(--text-muted);
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--text-muted); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .main-nav { display: none; }
+      .hamburger { display: flex; }
+      .article-title { font-size: 36px; }
+    }
+    @media (max-width: 640px) {
+      .article-header { padding: 40px 20px 32px; }
+      .article-title { font-size: 28px; }
+      .article-subtitle { font-size: 17px; }
+      .article-body { padding: 0 20px 60px; }
+      .article-body p { font-size: 16px; }
+      .article-body p.lead { font-size: 18px; }
+      .article-body h2 { font-size: 23px; }
+      .article-body h3 { font-size: 19px; }
+      .article-body figure { margin: 32px -20px; }
+      .article-body figure.full-width { margin: 40px -20px; width: auto; }
+      .qa-block { padding: 20px 24px; }
+      .cta-box { padding: 24px; }
+      .cta-box-title { font-size: 22px; }
+      .series-gallery { grid-template-columns: 1fr; }
+      .artist-card { flex-direction: column; text-align: center; padding: 20px; }
+      .article-end { padding: 32px 20px 60px; }
+      .article-nav a { padding: 24px 20px; }
+      .footer-partners { gap: 32px; padding: 20px; }
+      .footer-partner img { height: 14px; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+    /* ── 연관 글 추천 ── */
+    .related-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      border-top: 1px solid var(--border);
+    }
+    .related-title {
+      font-size: 22px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.025em;
+      margin-bottom: 24px;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 32px 20px;
+    }
+    .related-card {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .related-card:hover { opacity: 0.78; }
+    .related-card .related-img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: transparent;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .related-card .related-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+    }
+    .related-card .related-img.text-only {
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .related-card .related-img.text-only .related-img-title {
+      font-size: 17px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+      color: #111;
+      text-align: center;
+      word-break: keep-all;
+    }
+    .related-card .related-cat {
+      display: block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .related-card .related-card-title {
+      font-size: 17px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .related-card .related-excerpt {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+    @media (max-width: 640px) {
+      .related-section { padding: 32px 20px 60px; }
+      .related-grid { grid-template-columns: 1fr 1fr; gap: 24px 12px; }
+      .related-card .related-card-title { font-size: 15px; }
+      .related-card .related-excerpt { display: none; }
+    }
+  </style>
+
+  <!-- Schema.org NewsArticle -->
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "창간호를 사면 함께 오는 두 가지 굿즈",
+  "description": "5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.",
+  "image": [
+    "https://www.5ftmag.com/img/stories/06/goods-name-card.jpg",
+    "https://www.5ftmag.com/img/stories/06/goods-sticker-mockup.jpg"
+  ],
+  "datePublished": "2024-12-16",
+  "author": {
+    "@type": "Organization",
+    "name": "5ft.mag 편집부"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "5ft.mag",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.5ftmag.com/img/favicon/icon-512.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.5ftmag.com/stories/06.html"
+  },
+  "articleSection": "Goods",
+  "inLanguage": "ko-KR"
+}
+    </script>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html" class="current">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../about.html#contributors">Contributors</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../about.html#contributors">Contributors</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<!-- ════════ 글 헤더 ════════ -->
+<article>
+
+  <div class="article-header">
+    <a href="../stories.html" class="article-back">← Stories</a>
+    <div class="article-meta">
+      <span class="article-tag issue">Vol.01</span>
+      <span class="article-tag">GOODS</span>
+      <span class="dot"></span>
+      <span class="article-tag">창간호 구매 혜택</span>
+    </div>
+    <h1 class="article-title">창간호를 사면 함께 오는 두 가지 굿즈</h1>
+    <p class="article-subtitle">5ft.mag Vol.01 창간호 구매자에게 함께 보내는 조리개·셔터속도 노출표 카드와 필름 박스 스티커.</p>
+    <div class="article-author">
+      <span class="author-name">5ft.mag 편집부</span>
+      <span class="dot"></span>
+      <span class="date">2024.12.16</span>
+    </div>
+  </div>
+
+  <figure class="article-hero">
+    <picture>
+      <source srcset="../img/stories/06/goods-name-card.webp" type="image/webp">
+      <img src="../img/stories/06/goods-name-card.jpg" alt="5ft.mag 창간호 구매 굿즈인 노출표 카드" loading="eager" />
+    </picture>
+  </figure>
+
+  <div class="article-body">
+
+    <p class="lead">5ft.mag Vol.01 창간호를 주문하면, 매거진과 함께 작은 굿즈 두 가지가 들어갑니다. 책을 읽기 전후의 시간을 조금 더 오래 붙잡아두기 위해 만든 것들입니다.</p>
+
+    <p>첫 호를 종이로 만들면서 가장 오래 고민한 건 책 바깥의 경험이었습니다. 봉투를 열고, 책을 꺼내고, 다시 책상 위에 올려두는 짧은 순간에도 5ft.mag의 감각이 남았으면 했습니다. 그래서 창간호에는 <strong>조리개·셔터속도 노출표 카드</strong>와 <strong>필름 박스 스티커</strong>를 함께 넣었습니다.</p>
+
+    <h2>1. 조리개·셔터속도 노출표 카드</h2>
+
+    <p>필름 카메라를 들고 밖에 나가면 가끔 화면보다 먼저 숫자를 떠올려야 할 때가 있습니다. 햇빛은 어느 정도인지, 구름은 얼마나 끼었는지, 셔터속도와 조리개를 어디쯤에 두면 좋을지. 노출표 카드는 그런 순간을 위해 만든 작은 참고표입니다.</p>
+
+    <p>ASA 100 기준으로 정리한 표를 바탕으로, 밝은 바다나 모래사장부터 흐린 날의 그늘까지 상황별 값을 한눈에 볼 수 있게 구성했습니다. 정확한 답을 대신 정해주는 물건이라기보다, 촬영 전 감을 잡게 해주는 작은 지도에 가깝습니다.</p>
+
+    <figure>
+      <picture>
+        <source srcset="../img/stories/06/goods-name-card.webp" type="image/webp">
+        <img src="../img/stories/06/goods-name-card.jpg" alt="오피트매거진 로고와 사진촬영 노출표가 인쇄된 카드" loading="lazy" />
+      </picture>
+      <figcaption>앞면에는 오피트매거진 로고, 뒷면에는 사진촬영 노출표를 담았습니다.</figcaption>
+    </figure>
+
+    <h2>2. 필름 박스 스티커</h2>
+
+    <p>두 번째 굿즈는 5ft.mag의 시작점이 된 필름 박스 스티커입니다. 창간호의 필름인 Kodak UltraMax 400을 5ft.mag의 그래픽 언어로 다시 그려, 노트북이나 노트, 카메라 케이스에 붙일 수 있는 형태로 만들었습니다.</p>
+
+    <p>스티커는 기능보다 기분에 가까운 물건입니다. 필름을 좋아한다는 표시, 사진을 계속 찍고 싶다는 표시, 혹은 책상 위에 놓인 작은 색감 하나. 창간호를 곁에 두는 또 다른 방식이 되었으면 했습니다.</p>
+
+    <figure>
+      <picture>
+        <source srcset="../img/stories/06/goods-sticker-mockup.webp" type="image/webp">
+        <img src="../img/stories/06/goods-sticker-mockup.jpg" alt="노트북 위에 붙인 5ft.mag 필름 박스 스티커" loading="lazy" />
+      </picture>
+      <figcaption>Kodak UltraMax 400 필름 박스와 5ft.mag 로고 스티커.</figcaption>
+    </figure>
+
+    <h2>책과 함께 남는 작은 것들</h2>
+
+    <p>매거진은 읽고 나면 책장에 꽂히지만, 굿즈는 조금 다른 방식으로 남습니다. 노출표 카드는 촬영 가방 안에, 스티커는 자주 쓰는 물건 위에. 그렇게 책 바깥에서도 창간호의 기분이 이어질 수 있기를 바랍니다.</p>
+
+    <p>두 굿즈는 <strong>5ft.mag Vol.01 창간호 구매 시 함께 제공</strong>됩니다. 준비된 수량 안에서 동봉되며, 구성은 상황에 따라 조기 소진될 수 있습니다.</p>
+
+    <div class="cta-box">
+      <span class="cta-box-tag">Vol.01 Goods</span>
+      <h3 class="cta-box-title">창간호와 함께 받아보세요</h3>
+      <p class="cta-box-desc">5ft.mag Vol.01 창간호 구매 시 노출표 카드와 필름 박스 스티커 2종이 함께 제공됩니다.</p>
+      <div class="cta-box-buttons">
+        <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="cta-box-btn cta-box-btn-primary">스마트스토어에서 구매 →</a>
+        <a href="01.html" class="cta-box-btn cta-box-btn-secondary">창간호 소개 보기 →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="article-end">
+    <p class="article-signature">
+      <span class="role">글</span>5ft.mag 편집부<br />
+      <span class="role">이미지</span>5ft.mag
+    </p>
+    <div class="share-bar">
+      <span class="share-label">SHARE</span>
+      <button onclick="copyLink()">링크 복사</button>
+      <a href="https://www.instagram.com/5ft.magazine" target="_blank" rel="noopener">Instagram ↗</a>
+    </div>
+  </div>
+</article>
+
+<!-- ════════ 목록으로 ════════ -->
+<nav class="article-nav">
+  <a href="../stories.html">
+    <span class="nav-label">← 목록으로</span>
+    <span class="nav-title">Stories 전체 보기</span>
+  </a>
+</nav>
+
+<!-- ════════ 푸터 위 협력사 로고 띠 ════════ -->
+<div class="footer-partners">
+  <span class="footer-partners-label">PARTNERS</span>
+  <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
+    <img src="../img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
+  </a>
+  <a href="https://instagram.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
+    <img src="../img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
+  </a>
+  <a href="https://www.youtube.com/@BRISNAPTV" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
+    <img src="../img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
+  </a>
+  <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+    <img src="../img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+  </a>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft.mag</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+  <span class="footer-copy">© 2024 5ft.mag</span>
+</footer>
+
+<script>
+  const themeBtn = document.getElementById('themeBtn');
+  const html = document.documentElement;
+  const saved = localStorage.getItem('5ftTheme') || 'light';
+  html.dataset.theme = saved;
+  themeBtn.textContent = saved === 'dark' ? '☀' : '☽';
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    themeBtn.textContent = next === 'dark' ? '☀' : '☽';
+    localStorage.setItem('5ftTheme', next);
+  });
+
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn.addEventListener('click', () => {
+    const open = mobileNav.classList.toggle('open');
+    menuBtn.textContent = open ? '✕' : '☰';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      menuBtn.textContent = '☰';
+    });
+  });
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert('링크가 복사되었어요!');
+    });
+  }
+</script>
+
+<script>
+  // 연관 글 추천 — 같은 카테고리/작가 글을 stories.json에서 찾아서 표시
+  (function() {
+    const CURRENT_ID = '06';
+    const CURRENT_CATEGORY = 'goods';
+    const CURRENT_AUTHOR = '5ft.mag 편집부';
+    const MAX_RELATED = 3;
+
+    fetch('../data/stories.json')
+      .then(res => res.json())
+      .then(stories => {
+        const candidates = stories
+          .filter(s => s.published !== false && s.id !== CURRENT_ID);
+
+        // 점수 기반 정렬: 같은 작가 +3점, 같은 카테고리 +2점, 같은 호 +1점
+        const scored = candidates.map(s => {
+          let score = 0;
+          if (s.author && s.author === CURRENT_AUTHOR) score += 3;
+          if (s.category === CURRENT_CATEGORY) score += 2;
+          score += new Date(s.date) / 1e13; // 최신성 가중치
+          return { story: s, score };
+        }).sort((a, b) => b.score - a.score);
+
+        const selected = scored.slice(0, MAX_RELATED).map(x => x.story);
+        if (selected.length === 0) return;
+
+        const grid = document.getElementById('relatedGrid');
+        const section = document.getElementById('relatedSection');
+        if (!grid || !section) return;
+
+        grid.innerHTML = selected.map(s => {
+          const link = '../' + (s.page || '#');
+          const cat = (s.categoryLabel || s.category || '').toUpperCase();
+          const author = s.author ? s.author + ' — ' : '';
+
+          let imgBlock;
+          if (s.thumbnail) {
+            const webp = s.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+            imgBlock = `<div class="related-img">
+              <picture>
+                <source srcset="../${webp}" type="image/webp">
+                <img src="../${s.thumbnail}" loading="lazy" alt="${s.title}" />
+              </picture>
+            </div>`;
+          } else {
+            imgBlock = `<div class="related-img text-only">
+              <span class="related-img-title">${s.title}</span>
+            </div>`;
+          }
+
+          return `
+            <a href="${link}" class="related-card">
+              ${imgBlock}
+              <span class="related-cat">${cat}</span>
+              <h4 class="related-card-title">${s.title}</h4>
+              <p class="related-excerpt">${author}${s.excerpt || ''}</p>
+            </a>
+          `;
+        }).join('');
+
+        section.hidden = false;
+      })
+      .catch(err => console.error('연관 글 로드 실패:', err));
+  })();
+</script>
+
+<script src="../js/site-common.js"></script>
+</body>
+</html>

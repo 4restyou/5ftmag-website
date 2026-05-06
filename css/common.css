@@ -1,0 +1,132 @@
+/* 5ft.mag common interaction layer */
+
+[hidden] {
+  display: none !important;
+}
+
+:where(a, button, input, textarea, select):focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px;
+}
+
+.icon-btn:focus-visible {
+  opacity: 1;
+}
+
+button.disc-cell {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  border-top: 0;
+  border-left: 0;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+
+/* 5ft.mag visual refinement layer */
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+  display: block;
+}
+
+.pagination-bar.is-hidden {
+  display: none !important;
+}
+
+.footer-partners {
+  padding-block: 34px !important;
+  gap: 44px !important;
+}
+
+footer {
+  padding-block: 28px !important;
+}
+
+.footer-links {
+  gap: 24px !important;
+}
+
+.footer-links a {
+  transition: color .15s, opacity .15s;
+}
+
+.post-item {
+  transition: opacity .15s, background .15s !important;
+}
+
+.post-item:hover {
+  opacity: 1 !important;
+  background: color-mix(in srgb, var(--bg-sub) 42%, transparent) !important;
+}
+
+.post-img.text-only,
+.article-img.text-only {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.post-img.text-only .post-img-title,
+.article-img.text-only .text-card-title {
+  max-width: 82%;
+}
+
+.film-card {
+  transition: opacity .2s, transform .2s !important;
+}
+
+.film-card:hover {
+  opacity: 1 !important;
+}
+
+.film-card:hover .film-cta {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.film-card:hover .film-cta::after {
+  transform: translateX(3px);
+}
+
+.film-cta::after {
+  content: "";
+  transition: transform .18s ease;
+}
+
+.hero-body {
+  max-width: 680px !important;
+}
+
+@media (max-width: 640px) {
+  .post-img {
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .footer-partners {
+    padding-block: 24px !important;
+    gap: 28px !important;
+  }
+}
+
+
+/* Yoon essay poster thumbnail: keep Korean title visible in article cards */
+.article-card[href$="stories/07.html"] .article-img,
+.post-item[href$="stories/07.html"] .post-img,
+.related-card[href$="stories/07.html"] .related-img {
+  background: #ffd400 !important;
+}
+
+.article-card[href$="stories/07.html"] .article-img img,
+.post-item[href$="stories/07.html"] .post-img img,
+.related-card[href$="stories/07.html"] .related-img img {
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+.article-card[href$="stories/07.html"]:hover .article-img img,
+.post-item[href$="stories/07.html"]:hover .post-img img {
+  transform: none !important;
+}

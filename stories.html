@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Articles — 5ft.mag</title>
+  <!-- SEO & Social Sharing -->
+  <meta name="description" content="필름과 사진, 매거진을 둘러싼 이야기들. 작가 인터뷰, 에세이, 창간호 리뷰, 그리고 새로운 소식까지.">
+  <link rel="canonical" href="https://www.5ftmag.com/stories.html">
+
+  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="./rss.xml">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Articles — 5ft.mag">
+  <meta property="og:description" content="필름과 사진, 매거진을 둘러싼 이야기들. 작가 인터뷰, 에세이, 창간호 리뷰, 그리고 새로운 소식까지.">
+  <meta property="og:image" content="https://www.5ftmag.com/img/og/og-default.jpg">
+  <meta property="og:url" content="https://www.5ftmag.com/stories.html">
+  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Articles — 5ft.mag">
+  <meta name="twitter:description" content="필름과 사진, 매거진을 둘러싼 이야기들. 작가 인터뷰, 에세이, 창간호 리뷰, 그리고 새로운 소식까지.">
+  <meta name="twitter:image" content="https://www.5ftmag.com/img/og/og-default.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/icon-16.png">
+  <link rel="shortcut icon" href="img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
+  <link rel="stylesheet" href="./pretendard.css" />
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/common.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: var(--fs-body);
+      font-weight: var(--fw-all);
+      line-height: 1.2;
+      letter-spacing: var(--ls-default);
+      transition: background .25s, color .25s;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 300;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background .25s, border-color .25s;
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: var(--header-h); padding: 0 24px;
+    }
+    .site-logo {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      height: var(--header-h);
+    }
+    .site-logo img {
+      height: 40px;
+      width: auto;
+      display: block;
+      transition: opacity .15s;
+    }
+    .site-logo .logo-light { display: block; }
+    .site-logo .logo-dark { display: none; }
+    [data-theme="dark"] .site-logo .logo-light { display: none; }
+    [data-theme="dark"] .site-logo .logo-dark { display: block; }
+    .site-logo:hover img { opacity: 0.7; }
+    .main-nav { display: flex; align-items: center; list-style: none; gap: 0; margin-left: auto; }
+    .main-nav a {
+      display: block; padding: 0 14px; font-size: var(--fs-nav);
+      font-weight: var(--fw-all); letter-spacing: var(--ls-default);
+      color: var(--text); line-height: var(--header-h);
+      transition: opacity .15s; white-space: nowrap;
+    }
+    .main-nav a:hover { opacity: .45; }
+    .main-nav a.current { font-weight: var(--fw-heading); }
+    .main-nav .ext::after { content: ' ↗'; font-size: 13px; }
+    .nav-right { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer; color: var(--text);
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; border-radius: 2px;
+      font-family: var(--font); transition: opacity .15s;
+    }
+    .icon-btn:hover { opacity: .45; }
+    .hamburger { display: none; }
+    .mobile-nav {
+      display: none; flex-direction: column;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      font-size: var(--fs-nav); font-weight: var(--fw-all);
+      letter-spacing: var(--ls-default); color: var(--text);
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+      transition: opacity .15s;
+    }
+    .mobile-nav a:hover { opacity: .5; }
+
+    /* ── 페이지 타이틀 ── */
+    .page-title {
+      padding: 60px 32px 40px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .page-title-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 20px; flex-wrap: wrap;
+    }
+    .page-title h1 {
+      font-size: 56px; font-weight: var(--fw-heading);
+      letter-spacing: -0.03em; line-height: 1;
+    }
+    .page-title .breadcrumb {
+      font-size: var(--fs-meta); font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+    }
+    .page-title-desc {
+      max-width: 1280px;
+      margin: 14px auto 0;
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+    }
+    @media (max-width: 640px) {
+      .page-title-desc { font-size: 15px; margin-top: 10px; }
+    }
+
+    /* ── 페이지네이션 (상단) ── */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pagination-bar .nav-arrow {
+      font-family: inherit;
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font-size: var(--fs-body);
+      color: var(--text-muted);
+      transition: color .15s;
+    }
+    .pagination-bar .nav-arrow:hover { color: var(--text); }
+    .pagination-bar .nav-arrow.disabled { opacity: 0.3; pointer-events: none; cursor: default; }
+    .page-numbers {
+      display: flex; align-items: center; gap: 4px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .page-numbers a, .page-numbers button, .page-numbers span {
+      font-family: inherit;
+      background: none;
+      border: 0;
+      font-size: var(--fs-body);
+      font-weight: var(--fw-all);
+      letter-spacing: var(--ls-default);
+      padding: 4px 10px;
+      color: var(--text-muted);
+      border-radius: 2px;
+      transition: background .15s, color .15s;
+    }
+    .page-numbers a:hover, .page-numbers button:not(:disabled):hover { background: var(--bg-sub); color: var(--text); }
+    .page-numbers button:disabled { cursor: default; opacity: 0.45; }
+    .page-numbers .cur {
+      color: var(--text);
+      font-weight: var(--fw-heading);
+    }
+
+    /* ── 검색바 ── */
+    .search-bar {
+      display: flex; align-items: center; justify-content: center;
+      padding: 28px 32px 0;
+    }
+    .search-input-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px 44px 12px 18px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .search-input:focus {
+      border-color: var(--text);
+    }
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+    .search-icon {
+      position: absolute;
+      right: 16px; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-clear {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: none;
+      background: var(--bg-sub);
+      color: var(--text);
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-family: inherit;
+      padding: 0;
+    }
+    .search-input:not(:placeholder-shown) ~ .search-clear { display: flex; }
+    .search-clear:hover { background: var(--border); }
+    .search-results-count {
+      text-align: center;
+      padding: 8px 32px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .no-results {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    @media (max-width: 640px) {
+      .search-bar { padding: 20px 20px 0; }
+      .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
+    }
+
+    /* ── 카테고리 필터 ── */
+    .filter-bar {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 8px;
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-chip {
+      display: inline-block;
+      padding: 8px 18px;
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .filter-chip:hover {
+      border-color: var(--text);
+    }
+    .filter-chip.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    /* ── 아티클 그리드 (반응형 자동 확장) ──
+       카드 최소 너비 280px 기준으로
+       화면이 넓어지면 컬럼 수가 자동으로 늘어남
+       (모바일 1열 → 태블릿 2~3열 → 데스크탑 4열 → 큰 화면 5열+) */
+    .articles-section {
+      padding: 56px 32px;
+    }
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 56px 32px;
+    }
+    .article-card {
+      display: block;
+      transition: opacity .2s;
+    }
+    .article-card:hover { opacity: 0.78; }
+    .article-img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: transparent;
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .article-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      transition: transform .4s ease;
+    }
+    /* 사진 없는 카드 — 타이포그래피 기반 */
+    .article-img.text-only {
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .article-img.text-only .text-card-title {
+      font-size: 24px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      color: var(--accent-text);
+      text-align: center;
+      word-break: keep-all;
+    }
+    .article-img.text-only .text-card-mark {
+      position: absolute;
+      bottom: 14px; left: 14px;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      color: var(--accent-text);
+      opacity: 0.7;
+    }
+    .article-card:hover .article-img img {
+      transform: scale(1.03);
+    }
+    .article-badge {
+      position: absolute;
+      top: 14px; left: 14px;
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.08em;
+      background: var(--text);
+      color: var(--bg);
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+    .article-category {
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+    .article-title {
+      font-size: 22px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+    .article-excerpt {
+      font-size: 15px;
+      font-weight: var(--fw-all);
+      letter-spacing: var(--ls-default);
+      color: var(--text);
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .article-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: var(--ls-default);
+    }
+
+    /* 빈 결과 (필터링 후) */
+    .empty-state, .loading-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      font-size: var(--fs-body);
+    }
+    .empty-state code {
+      font-family: monospace;
+      font-size: 12px;
+      background: var(--bg-sub);
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+
+    /* ── FOOTER ── */
+
+    /* ── 푸터 위 협력사 로고 띠 ── */
+    .footer-partners {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 56px;
+      flex-wrap: wrap;
+      background: var(--bg);
+    }
+    .footer-partners-label {
+      font-size: 12px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .footer-partner {
+      display: flex;
+      align-items: center;
+      transition: opacity .15s;
+    }
+    .footer-partner:hover { opacity: 0.5; }
+    .footer-partner img {
+      height: 18px;
+      width: auto;
+      object-fit: contain;
+    }
+    .footer-partner .logo-light { display: block; }
+    .footer-partner .logo-dark { display: none; }
+    [data-theme="dark"] .footer-partner .logo-light { display: none; }
+    [data-theme="dark"] .footer-partner .logo-dark { display: block; }
+    @media (max-width: 560px) {
+      .footer-partners { gap: 32px; padding: 20px; }
+      .footer-partner img { height: 14px; }
+    }
+    footer {
+      border-top: 1px solid var(--border); padding: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-inner-left { display: flex; flex-direction: column; gap: 4px; }
+    .footer-logo {
+      font-size: var(--fs-nav); font-weight: var(--fw-heading);
+      letter-spacing: var(--ls-default);
+    }
+    .footer-publisher {
+      font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a {
+      font-size: var(--fs-body); color: var(--text-muted);
+      transition: color .15s;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--text-muted); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      :root { --fs-display: 32px; --fs-body: 16px; --fs-nav: 15px; }
+      .page-title h1 { font-size: 44px; }
+    }
+    @media (max-width: 900px) {
+      .main-nav { display: none; }
+      .hamburger { display: flex; }
+      .articles-section { padding: 40px 24px; }
+    }
+    @media (max-width: 640px) {
+      .articles-grid { gap: 40px 20px; }
+      .page-title { padding: 40px 20px 28px; }
+      .page-title h1 { font-size: 32px; }
+      .pagination-bar { padding: 16px 20px; }
+      .filter-bar { padding: 18px 20px; gap: 6px; }
+      .filter-chip { padding: 6px 14px; font-size: 12px; }
+      .articles-section { padding: 32px 20px; }
+      .article-title { font-size: 19px; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="stories.html" class="current">Articles</a></li>
+      <li><a href="films.html">Films</a></li>
+      <li><a href="about.html#contributors">Contributors</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="stories.html">Articles</a>
+    <a href="films.html">Films</a>
+    <a href="about.html#contributors">Contributors</a>
+    <a href="about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<!-- ════════ 페이지 타이틀 ════════ -->
+<div class="page-title">
+  <div class="page-title-inner">
+    <h1>Articles</h1>
+    <span class="breadcrumb">5FT.MAG / ARTICLES</span>
+  </div>
+  <p class="page-title-desc">필름과 사진, 매거진을 둘러싼 이야기들.</p>
+</div>
+
+<!-- ════════ 페이지네이션 (상단) ════════ -->
+<div class="pagination-bar is-hidden" data-pagination>
+  <button type="button" class="nav-arrow disabled" disabled>← 이전</button>
+  <div class="page-numbers">
+    <span class="cur">1</span>
+    <button type="button" disabled>2</button>
+    <button type="button" disabled>3</button>
+  </div>
+  <button type="button" class="nav-arrow disabled" disabled>다음 →</button>
+</div>
+
+<!-- ════════ 검색바 ════════ -->
+<div class="search-bar">
+  <div class="search-input-wrap">
+    <input type="search" id="searchInput" class="search-input" placeholder="제목, 작가, 키워드로 검색…" autocomplete="off">
+    <svg class="search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="7" cy="7" r="5"/>
+      <line x1="14" y1="14" x2="11" y2="11"/>
+    </svg>
+    <button class="search-clear" id="searchClear" aria-label="검색어 지우기">✕</button>
+  </div>
+</div>
+<div class="search-results-count" id="searchResultsCount"></div>
+
+<!-- ════════ 카테고리 필터 ════════ -->
+<div class="filter-bar">
+  <button class="filter-chip active" data-category="all">All</button>
+  <button class="filter-chip" data-category="photo">Photo</button>
+  <button class="filter-chip" data-category="essay">Essay</button>
+  <button class="filter-chip" data-category="interview">Interview</button>
+  <button class="filter-chip" data-category="review">Review</button>
+  <button class="filter-chip" data-category="goods">Goods</button>
+</div>
+
+<!-- ════════ 아티클 그리드 ════════ -->
+<div class="articles-section">
+  <div class="articles-grid" id="articlesGrid">
+    <!-- 자바스크립트가 data/stories.json을 읽어서 자동 생성 -->
+    <div class="loading-state">불러오는 중...</div>
+  </div>
+</div>
+
+<!-- ════════ 페이지네이션 (하단) ════════ -->
+<div class="pagination-bar is-hidden" data-pagination style="border-top: 1px solid var(--border); border-bottom: none;">
+  <button type="button" class="nav-arrow disabled" disabled>← 이전</button>
+  <div class="page-numbers">
+    <span class="cur">1</span>
+    <button type="button" disabled>2</button>
+    <button type="button" disabled>3</button>
+  </div>
+  <button type="button" class="nav-arrow disabled" disabled>다음 →</button>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<!-- ════════ 푸터 위 협력사 로고 띠 ════════ -->
+<div class="footer-partners">
+  <span class="footer-partners-label">PARTNERS</span>
+  <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
+    <img src="./img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
+  </a>
+  <a href="https://instagram.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
+    <img src="./img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
+  </a>
+  <a href="https://www.youtube.com/@BRISNAPTV" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
+    <img src="./img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
+  </a>
+  <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+    <img src="./img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+  </a>
+</div>
+
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft.mag</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+  <span class="footer-copy">© 2024 5ft.mag</span>
+</footer>
+
+<script>
+  // 다크모드
+  const themeBtn = document.getElementById('themeBtn');
+  const html = document.documentElement;
+  const saved = localStorage.getItem('5ftTheme') || 'light';
+  html.dataset.theme = saved;
+  themeBtn.textContent = saved === 'dark' ? '☀' : '☽';
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    themeBtn.textContent = next === 'dark' ? '☀' : '☽';
+    localStorage.setItem('5ftTheme', next);
+  });
+
+  // 모바일 메뉴
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn.addEventListener('click', () => {
+    const open = mobileNav.classList.toggle('open');
+    menuBtn.textContent = open ? '✕' : '☰';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      menuBtn.textContent = '☰';
+    });
+  });
+
+  // ════════════════════════════
+  // Stories: JSON 로딩 + 카드 자동 생성
+  // ════════════════════════════
+  const grid = document.getElementById('articlesGrid');
+  const paginationBars = document.querySelectorAll('[data-pagination]');
+  const pageSize = 12;
+  let currentPage = 1;
+  let allStories = []; // 전체 글 데이터 캐시
+
+  // 날짜 포맷팅 (2024-11-15 → 2024.11.15)
+  function formatDate(dateStr) {
+    return dateStr.replace(/-/g, '.');
+  }
+
+  // 카테고리 라벨 생성 (PHOTO · 박순렬 형태)
+  function categoryLabel(story) {
+    const label = story.categoryLabel || story.category.toUpperCase();
+    return story.author ? `${label} · ${story.author}` : label;
+  }
+
+  // 카드 HTML 생성
+  function renderCard(story) {
+    const link = story.page || '#';
+    const issueBadge = story.issue ? `<span class="article-badge">${story.issue}</span>` : '';
+
+    // 썸네일 없으면 타이포그래피 카드로
+    const webpThumb = story.thumbnail ? story.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
+    const imgBlock = story.thumbnail
+      ? `<div class="article-img">
+           <picture>
+             <source srcset="${webpThumb}" type="image/webp">
+             <img src="${story.thumbnail}" loading="lazy" alt="${story.title}" />
+           </picture>
+           ${issueBadge}
+         </div>`
+      : `<div class="article-img text-only">
+           <span class="text-card-title">${story.title}</span>
+           <span class="text-card-mark">${(story.categoryLabel || story.category).toUpperCase()}</span>
+           ${issueBadge}
+         </div>`;
+
+    return `
+      <a href="${link}" class="article-card" data-category="${story.category}">
+        ${imgBlock}
+        <span class="article-category">${categoryLabel(story)}</span>
+        <h2 class="article-title">${story.title}</h2>
+        <p class="article-excerpt">${story.excerpt}</p>
+        <span class="article-meta">${formatDate(story.date)}</span>
+      </a>
+    `;
+  }
+
+  // 페이지네이션 렌더링
+  function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / pageSize);
+    paginationBars.forEach(bar => {
+      if (totalPages <= 1) {
+        bar.classList.add('is-hidden');
+        bar.innerHTML = '';
+        return;
+      }
+
+      bar.classList.remove('is-hidden');
+      const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
+        .map(page => page === currentPage
+          ? `<span class="cur">${page}</span>`
+          : `<button type="button" data-page="${page}">${page}</button>`
+        ).join('');
+
+      bar.innerHTML = `
+        <button type="button" class="nav-arrow ${currentPage === 1 ? 'disabled' : ''}" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>← 이전</button>
+        <div class="page-numbers">${pages}</div>
+        <button type="button" class="nav-arrow ${currentPage === totalPages ? 'disabled' : ''}" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>다음 →</button>
+      `;
+    });
+  }
+
+  // 카드 그리드 렌더링
+  function renderGrid(stories) {
+    if (stories.length === 0) {
+      grid.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
+      renderPagination(0);
+      return;
+    }
+
+    const totalPages = Math.ceil(stories.length / pageSize);
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * pageSize;
+    grid.innerHTML = stories.slice(start, start + pageSize).map(renderCard).join('');
+    renderPagination(stories.length);
+  }
+
+  // 현재 필터/검색 상태
+  let currentCategory = 'all';
+  let currentSearchQuery = '';
+
+  // 통합 필터링 (카테고리 + 검색)
+  function applyFilters() {
+    let result = currentCategory === 'all'
+      ? allStories
+      : allStories.filter(s => s.category === currentCategory);
+
+    // 검색어가 있으면 추가 필터
+    if (currentSearchQuery) {
+      const q = currentSearchQuery.toLowerCase();
+      result = result.filter(s => {
+        const haystack = [
+          s.title || '',
+          s.excerpt || '',
+          s.author || '',
+          s.categoryLabel || '',
+          s.category || '',
+          s.issue || ''
+        ].join(' ').toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
+    // 결과 카운트 표시
+    const countEl = document.getElementById('searchResultsCount');
+    if (currentSearchQuery) {
+      countEl.textContent = `"${currentSearchQuery}" 검색 결과: ${result.length}개`;
+    } else {
+      countEl.textContent = '';
+    }
+
+    renderGrid(result);
+  }
+
+  // JSON 로딩
+  fetch('data/stories.json')
+    .then(res => {
+      if (!res.ok) throw new Error('데이터를 불러올 수 없습니다.');
+      return res.json();
+    })
+    .then(data => {
+      // 발행된 글만, 최신순 정렬
+      allStories = data
+        .filter(s => s.published !== false)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+      applyFilters();
+    })
+    .catch(err => {
+      console.error(err);
+      grid.innerHTML = '<div class="empty-state">글을 불러오는 중 오류가 발생했습니다.<br /><small style="opacity:.6">로컬 파일을 직접 열면 보안상 JSON 로딩이 막힐 수 있어요. <code>http://localhost</code> 환경에서 실행하거나 호스팅된 사이트에서 확인해주세요.</small></div>';
+    });
+
+  paginationBars.forEach(bar => {
+    bar.addEventListener('click', (event) => {
+      const pageButton = event.target.closest('[data-page]');
+      if (!pageButton || pageButton.disabled) return;
+      currentPage = Number(pageButton.dataset.page);
+      applyFilters();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // 카테고리 필터 칩 클릭
+  const chips = document.querySelectorAll('.filter-chip');
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentCategory = chip.dataset.category;
+      currentPage = 1;
+      applyFilters();
+    });
+  });
+
+  // 검색 입력 (디바운스)
+  const searchInput = document.getElementById('searchInput');
+  const searchClear = document.getElementById('searchClear');
+  let searchTimer = null;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      currentSearchQuery = e.target.value.trim();
+      currentPage = 1;
+      applyFilters();
+    }, 200);
+  });
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    currentPage = 1;
+    applyFilters();
+    searchInput.focus();
+  });
+  // ESC로 검색어 지우기
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && searchInput.value) {
+      e.preventDefault();
+      searchInput.value = '';
+      currentSearchQuery = '';
+      applyFilters();
+    }
+  });
+</script>
+<script src="./js/site-common.js"></script>
+</body>
+</html>

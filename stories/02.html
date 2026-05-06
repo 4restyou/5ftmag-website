@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>인터뷰 미리보기 — 심규동 작가 〈고시텔〉 — 5ft.mag</title>
+  <!-- SEO & Social Sharing -->
+  <meta name="description" content="사진집 〈고시텔〉로 데뷔한 심규동 작가. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까. 5ft.mag 창간호 인터뷰 미리보기.">
+  <link rel="canonical" href="https://www.5ftmag.com/stories/02.html">
+
+  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="../rss.xml">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="고시텔의 작가, 심규동을 만나다 — 5ft.mag">
+  <meta property="og:description" content="사진집 〈고시텔〉로 데뷔한 심규동 작가. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까. 5ft.mag 창간호 인터뷰 미리보기.">
+  <meta property="og:image" content="https://www.5ftmag.com/img/stories/02/hero-shim.jpg">
+  <meta property="og:url" content="https://www.5ftmag.com/stories/02.html">
+  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="고시텔의 작가, 심규동을 만나다 — 5ft.mag">
+  <meta name="twitter:description" content="사진집 〈고시텔〉로 데뷔한 심규동 작가. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까. 5ft.mag 창간호 인터뷰 미리보기.">
+  <meta name="twitter:image" content="https://www.5ftmag.com/img/stories/02/hero-shim.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../img/favicon/icon-16.png">
+  <link rel="shortcut icon" href="../img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/icon-180.png">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 17px;
+      font-weight: var(--fw-all);
+      line-height: 1.7;
+      letter-spacing: var(--ls-default);
+      transition: background .25s, color .25s;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; height: auto; }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 300;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background .25s, border-color .25s;
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: var(--header-h); padding: 0 24px;
+    }
+    .site-logo {
+      flex-shrink: 0;
+      display: flex; align-items: center;
+      height: var(--header-h);
+    }
+    .site-logo img {
+      height: 40px; width: auto; display: block; transition: opacity .15s;
+    }
+    .site-logo .logo-light { display: block; }
+    .site-logo .logo-dark { display: none; }
+    [data-theme="dark"] .site-logo .logo-light { display: none; }
+    [data-theme="dark"] .site-logo .logo-dark { display: block; }
+    .site-logo:hover img { opacity: 0.7; }
+    .main-nav {
+      display: flex; align-items: center; list-style: none; gap: 0;
+      margin-left: auto;
+    }
+    .main-nav a {
+      display: block; padding: 0 14px; font-size: var(--fs-nav);
+      font-weight: var(--fw-all); letter-spacing: var(--ls-default);
+      color: var(--text); line-height: var(--header-h);
+      transition: opacity .15s; white-space: nowrap;
+    }
+    .main-nav a:hover { opacity: .45; }
+    .main-nav a.current { font-weight: var(--fw-heading); }
+    .main-nav .ext::after { content: ' ↗'; font-size: 13px; }
+    .nav-right { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer; color: var(--text);
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; border-radius: 2px;
+      font-family: var(--font); transition: opacity .15s;
+    }
+    .icon-btn:hover { opacity: .45; }
+    .hamburger { display: none; }
+    .mobile-nav {
+      display: none; flex-direction: column;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      font-size: var(--fs-nav); font-weight: var(--fw-all);
+      letter-spacing: var(--ls-default); color: var(--text);
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+    }
+
+    /* ── 글 헤더 ── */
+    .article-header {
+      max-width: var(--read-width);
+      margin: 0 auto;
+      padding: 64px 24px 40px;
+    }
+    .article-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: var(--fw-heading);
+      letter-spacing: 0.04em; color: var(--text-muted);
+      margin-bottom: 32px; transition: color .15s;
+    }
+    .article-back:hover { color: var(--text); }
+    .article-meta {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .article-tag {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+    }
+    .article-tag.issue {
+      background: var(--accent); color: var(--accent-text);
+      padding: 3px 8px; border-radius: 2px;
+    }
+    .article-meta .dot {
+      width: 3px; height: 3px;
+      background: var(--text-dim); border-radius: 50%;
+    }
+    .article-title {
+      font-size: 44px; font-weight: var(--fw-heading);
+      letter-spacing: -0.03em; line-height: 1.15;
+      margin-bottom: 24px;
+    }
+    .article-subtitle {
+      font-size: 21px;
+      font-weight: var(--fw-all);
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .article-author {
+      display: flex; align-items: center; gap: 14px;
+      font-size: 15px; color: var(--text-muted);
+    }
+    .article-author .author-name {
+      color: var(--text); font-weight: var(--fw-heading);
+    }
+
+    /* ── 메인 이미지 (히어로) ── */
+    .article-hero {
+      max-width: 1200px;
+      margin: 24px auto 56px;
+      padding: 0 24px;
+    }
+    .article-hero img {
+      width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      background: transparent;
+    }
+    /* 세로 인물 사진용 — 사진만 단독으로 표시, 양옆 빈 공간 없음 */
+    .article-hero.portrait {
+      max-width: 720px;
+      margin: 24px auto 56px;
+      padding: 0 24px;
+    }
+    .article-hero.portrait img {
+      width: 100%;
+      height: auto;
+      max-height: 90vh;
+      object-fit: contain;
+      background: transparent;
+    }
+
+    /* ── 본문 ── */
+    .article-body {
+      max-width: var(--read-width);
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    .article-body p {
+      font-size: 17px; line-height: 1.8;
+      margin-bottom: 24px; color: var(--text);
+    }
+    .article-body p.lead {
+      font-size: 21px; line-height: 1.6;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.015em;
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 28px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      margin-top: 56px; margin-bottom: 18px;
+      line-height: 1.25;
+    }
+    .article-body h3 {
+      font-size: 22px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      margin-top: 40px; margin-bottom: 14px;
+      line-height: 1.3;
+    }
+    .article-body blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 8px 0 8px 24px;
+      margin: 32px 0;
+      font-size: 22px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      line-height: 1.4;
+    }
+    .article-body figure { margin: 40px -40px; }
+    .article-body figure img {
+      width: 100%; height: auto; background: transparent;
+      display: block;
+    }
+    .article-body figcaption {
+      font-size: 13px; color: var(--text-muted);
+      text-align: center; margin-top: 12px;
+    }
+    .article-body figure.full-width {
+      margin: 56px calc(50% - 50vw);
+      max-width: none; width: 100vw;
+    }
+    .article-body figure.full-width img {
+      /* 원본 비율 유지 — 작가 사진을 자르지 않습니다 */
+      max-width: 1400px;
+      margin: 0 auto;
+      max-height: 85vh;
+      object-fit: contain;
+    }
+    .article-body strong { font-weight: var(--fw-heading); }
+    .article-body em { font-style: italic; }
+    .article-body a {
+      color: var(--text);
+      border-bottom: 1px solid var(--text-dim);
+    }
+    .article-body a:hover { border-color: var(--text); }
+
+    /* ── Q&A 박스 (인터뷰 미리보기) ── */
+    .qa-block {
+      margin: 40px 0;
+      padding: 28px 32px;
+      background: var(--bg-sub);
+      border-radius: 4px;
+      border-left: 3px solid var(--text);
+    }
+    .qa-question {
+      font-size: 13px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .qa-question-text {
+      font-size: 17px;
+      font-weight: var(--fw-heading);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .qa-answer {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .qa-answer p { margin-bottom: 12px; font-size: 16px; }
+    .qa-answer p:last-child { margin-bottom: 0; }
+
+    /* 답변 가리기 박스 */
+    .qa-block.locked {
+      position: relative;
+      overflow: hidden;
+    }
+    .qa-block.locked .qa-answer {
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+      max-height: 80px;
+      overflow: hidden;
+    }
+    .qa-locked-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 24px 32px;
+      background: linear-gradient(to top, var(--bg-sub) 60%, transparent);
+      text-align: center;
+    }
+    .qa-locked-overlay .lock-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .qa-locked-overlay .lock-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── 시리즈 갤러리 ── */
+    .series-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 40px 0;
+      align-items: start;
+    }
+    .series-gallery figure {
+      margin: 0;
+    }
+    .series-gallery img {
+      width: 100%;
+      height: auto;
+      /* 원본 비율 유지 — 작가 사진을 자르지 않습니다 */
+      background: transparent;
+      display: block;
+    }
+
+    /* ── CTA 박스 ── */
+    .cta-box {
+      background: var(--bg-sub);
+      padding: 40px;
+      margin: 56px 0;
+      text-align: center;
+      border-radius: 4px;
+    }
+    .cta-box-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.16em;
+      background: var(--accent);
+      color: var(--accent-text);
+      padding: 4px 10px;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    .cta-box-title {
+      font-size: 26px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .cta-box-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .cta-box-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-box-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: var(--fw-heading);
+      border-radius: 2px;
+      transition: opacity .15s;
+      border-bottom: none !important;
+    }
+    /* article-body a 보다 우선되게 명시도 올림 */
+    .article-body a.cta-box-btn-primary,
+    .cta-box-btn-primary {
+      background: var(--text) !important;
+      color: var(--bg) !important;
+      border-bottom: none !important;
+    }
+    .article-body a.cta-box-btn-secondary,
+    .cta-box-btn-secondary {
+      background: transparent !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .cta-box-btn:hover { opacity: 0.85; }
+
+    /* ── 작가 정보 카드 ── */
+    .artist-card {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 24px;
+      background: var(--bg-sub);
+      border-radius: 4px;
+      margin: 40px 0;
+    }
+    .artist-card-photo {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--border);
+    }
+    .artist-card-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .artist-card-info {
+      flex: 1;
+    }
+    .artist-card-name {
+      font-size: 18px;
+      font-weight: var(--fw-heading);
+      margin-bottom: 4px;
+    }
+    .artist-card-bio {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── 글 끝 ── */
+    .article-end {
+      max-width: var(--read-width);
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      border-top: 1px solid var(--border);
+      padding-top: 40px;
+    }
+    .article-signature {
+      font-size: 14px; color: var(--text-muted);
+      margin-bottom: 24px; line-height: 1.6;
+    }
+    .article-signature .role {
+      color: var(--text-dim); margin-right: 8px;
+    }
+    .share-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .share-label {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+      margin-right: 8px;
+    }
+    .share-bar a, .share-bar button {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 7px 14px; font-size: 13px;
+      font-weight: var(--fw-heading); letter-spacing: var(--ls-default);
+      color: var(--text); background: transparent;
+      border: 1px solid var(--border); border-radius: 999px;
+      cursor: pointer; font-family: var(--font);
+      transition: all .15s;
+    }
+    .share-bar a:hover, .share-bar button:hover {
+      border-color: var(--text);
+    }
+
+    /* ── 다음/이전 글 ── */
+    .article-nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .article-nav a {
+      background: var(--bg);
+      padding: 32px;
+      transition: background .15s;
+      display: block;
+      text-align: center;
+    }
+    .article-nav a:hover { background: var(--bg-sub); }
+    .article-nav .nav-label {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+      margin-bottom: 8px; display: block;
+    }
+    .article-nav .nav-title {
+      font-size: 20px; font-weight: var(--fw-heading);
+      letter-spacing: -0.02em; line-height: 1.3;
+    }
+
+    /* ── 푸터 위 협력사 로고 띠 ── */
+    .footer-partners {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 56px; flex-wrap: wrap; background: var(--bg);
+    }
+    .footer-partners-label {
+      font-size: 12px; font-weight: var(--fw-heading);
+      letter-spacing: 0.16em; color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .footer-partner { display: flex; align-items: center; transition: opacity .15s; }
+    .footer-partner:hover { opacity: 0.5; }
+    .footer-partner img { height: 18px; width: auto; object-fit: contain; }
+    .footer-partner .logo-light { display: block; }
+    .footer-partner .logo-dark { display: none; }
+    [data-theme="dark"] .footer-partner .logo-light { display: none; }
+    [data-theme="dark"] .footer-partner .logo-dark { display: block; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-inner-left { display: flex; flex-direction: column; gap: 4px; }
+    .footer-logo {
+      font-size: var(--fs-nav); font-weight: var(--fw-heading);
+    }
+    .footer-publisher {
+      font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a {
+      font-size: 17px; color: var(--text-muted);
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--text-muted); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .main-nav { display: none; }
+      .hamburger { display: flex; }
+      .article-title { font-size: 36px; }
+    }
+    @media (max-width: 640px) {
+      .article-header { padding: 40px 20px 32px; }
+      .article-title { font-size: 28px; }
+      .article-subtitle { font-size: 17px; }
+      .article-body { padding: 0 20px 60px; }
+      .article-body p { font-size: 16px; }
+      .article-body p.lead { font-size: 18px; }
+      .article-body h2 { font-size: 23px; }
+      .article-body h3 { font-size: 19px; }
+      .article-body figure { margin: 32px -20px; }
+      .article-body figure.full-width { margin: 40px -20px; width: auto; }
+      .qa-block { padding: 20px 24px; }
+      .cta-box { padding: 24px; }
+      .cta-box-title { font-size: 22px; }
+      .series-gallery { grid-template-columns: 1fr; }
+      .artist-card { flex-direction: column; text-align: center; padding: 20px; }
+      .article-end { padding: 32px 20px 60px; }
+      .article-nav a { padding: 24px 20px; }
+      .footer-partners { gap: 32px; padding: 20px; }
+      .footer-partner img { height: 14px; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+    /* ── 연관 글 추천 ── */
+    .related-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      border-top: 1px solid var(--border);
+    }
+    .related-title {
+      font-size: 22px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.025em;
+      margin-bottom: 24px;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 32px 20px;
+    }
+    .related-card {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .related-card:hover { opacity: 0.78; }
+    .related-card .related-img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: transparent;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .related-card .related-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+    }
+    .related-card .related-img.text-only {
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .related-card .related-img.text-only .related-img-title {
+      font-size: 17px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+      color: #111;
+      text-align: center;
+      word-break: keep-all;
+    }
+    .related-card .related-cat {
+      display: block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .related-card .related-card-title {
+      font-size: 17px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .related-card .related-excerpt {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+    @media (max-width: 640px) {
+      .related-section { padding: 32px 20px 60px; }
+      .related-grid { grid-template-columns: 1fr 1fr; gap: 24px 12px; }
+      .related-card .related-card-title { font-size: 15px; }
+      .related-card .related-excerpt { display: none; }
+    }
+  </style>
+
+  <!-- Schema.org NewsArticle -->
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "고시텔의 작가, 심규동을 만나다",
+  "description": "사진집 〈고시텔〉로 데뷔한 심규동 작가 인터뷰. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까.",
+  "image": [
+    "https://www.5ftmag.com/img/stories/02/hero-shim.jpg"
+  ],
+  "datePublished": "2024-11-20",
+  "author": {
+    "@type": "Person",
+    "name": "5ft.mag 편집부"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "5ft.mag",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.5ftmag.com/img/favicon/icon-512.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.5ftmag.com/stories/02.html"
+  },
+  "articleSection": "Interview",
+  "inLanguage": "ko-KR"
+}
+  </script>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html" class="current">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../about.html#contributors">Contributors</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../about.html#contributors">Contributors</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<!-- ════════ 글 헤더 ════════ -->
+<article>
+  <div class="article-header">
+    <a href="../stories.html" class="article-back">← Stories</a>
+    <div class="article-meta">
+      <span class="article-tag issue">Vol.01</span>
+      <span class="article-tag">INTERVIEW</span>
+      <span class="dot"></span>
+      <span class="article-tag">미리보기</span>
+    </div>
+    <h1 class="article-title">고시텔의 작가, 심규동을 만나다</h1>
+    <p class="article-subtitle">사진 전문 출판사 '눈빛사진가선' 시리즈의 〈고시텔〉로 데뷔한 작가. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까.</p>
+    <div class="article-author">
+      <span class="author-name">5ft.mag 편집부</span>
+      <span class="dot"></span>
+      <span class="date">2024.11.15</span>
+    </div>
+  </div>
+
+  <!-- 메인 이미지: 매거진 표지 인물 사진 -->
+  <div class="article-hero portrait">
+    <picture>
+      <source srcset="../img/stories/02/hero-shim.webp" type="image/webp">
+      <img src="../img/stories/02/hero-shim.jpg" alt="5ft.mag Vol.01 — 심규동 작가" loading="lazy" />
+    </picture>
+  </div>
+
+  <!-- 본문 -->
+  <div class="article-body">
+
+    <p class="lead">"자신의 삶을 만족하고 스스로의 선택으로 생각하는 사람들은 카메라 앞에서 자유로웠습니다."</p>
+
+    <p>창간호 인터뷰의 주인공은 사진작가 <strong>심규동</strong>이다. 2017년 사진 전문 출판사 '눈빛사진가선' 시리즈의 사진집 〈고시텔〉로 데뷔한 그는, 좁은 공간 안에서 살아가는 사람들의 모습을 정면으로 응시한 작가다. 이번 호 5ft.mag은 강릉에서 활동 중인 그를 만나 긴 대화를 나눴다.</p>
+
+    <h2>왜 〈고시텔〉이었나</h2>
+
+    <p>한 평 남짓한 방. 천장에 매달린 카메라가 위에서 내려다보는 듯한 시선. 그 안에서 누군가는 침대에 누워 있고, 누군가는 책을 읽고, 누군가는 카메라를 정면으로 응시한다. 〈고시텔〉 시리즈를 한 번 본 사람은 그 강렬한 구도를 잊기 어렵다.</p>
+
+    <figure class="full-width">
+      <img src="../img/stories/02/gositel-01.jpg" alt="심규동 〈고시텔〉 시리즈 — 책 읽는 사람" />
+      <figcaption>심규동, 〈고시텔〉, 2017 ⓒ 심규동</figcaption>
+    </figure>
+
+    <p>매거진을 펼치면 그의 작품 세계가 차곡차곡 펼쳐진다. 〈고시텔〉뿐만 아니라 최근 진행 중인 〈1인가구〉 시리즈, 그리고 빛에 대한 그만의 철학까지. 우리는 그 중 일부 질문만 미리 공개한다.</p>
+
+    <!-- Q&A 1: 공개 -->
+    <div class="qa-block">
+      <span class="qa-question">Q.01</span>
+      <p class="qa-question-text">'고시텔', '나 홀로 집에', 인물사진까지 모두 사람의 '삶'을 다루고 있는 것 같습니다. 작가님이 생각하는 '삶'이란 무엇인가요?</p>
+      <div class="qa-answer">
+        <p>제가 생각하는 삶은 시대와 문화, 가족 등 처한 상황의 체험이라고 생각해요.</p>
+      </div>
+    </div>
+
+    <p>짧지만 묵직한 답이다. 그가 카메라로 담아내는 것은 단순한 풍경이나 사람의 외형이 아니라, 시대가 누군가에게 새긴 흔적 그 자체다. 그래서 〈고시텔〉의 사진들은 단순한 기록을 넘어선다.</p>
+
+    <figure class="full-width">
+      <img src="../img/stories/02/magazine-spread-1.jpg" alt="매거진 펼침면 — 고시텔 시리즈" />
+      <figcaption>매거진 속에 담긴 〈고시텔〉 시리즈의 일부.</figcaption>
+    </figure>
+
+    <h2>"카메라 앞에서 자유로웠다"는 것</h2>
+
+    <p>인터뷰에서 가장 인상적인 답 중 하나는, 〈고시텔〉을 촬영하는 1년 동안 어떤 사람은 삶을 힘들어했고 어떤 사람은 만족했다는 부분이다. 그리고 그 차이가 그대로 카메라 앞에서 드러났다고 한다.</p>
+
+    <!-- Q&A 2: 공개 (일부) -->
+    <div class="qa-block">
+      <span class="qa-question">Q.02</span>
+      <p class="qa-question-text">고시텔 프로젝트를 진행하면서 삶을 힘들어하는 분도 있고 만족하는 분들도 있었다고 들었습니다. 그 차이는 어디에서 오는 걸까요?</p>
+      <div class="qa-answer">
+        <p>그 차이는 개인을 이루는 가치관의 차이라고 생각해요. '나는 어떤 사람이야!'라고 규정되고, 그것을 충족하지 못했을 때 오는 자괴감이랄까요. 무의식이 관여하는 것으로 마음먹는다고 바뀌기 쉽지 않은 부분 같아요. <strong>자신의 삶을 만족하고 스스로의 선택으로 생각하는 사람들은 카메라 앞에서 자유로웠습니다.</strong></p>
+      </div>
+    </div>
+
+    <p>작가는 이 답변에 이어, 짧은 시간 안에 인물을 어떻게 담아내는지에 대한 자신만의 노하우를 풀어놓는다. 1년이라는 긴 시간이 주는 친밀감과, 짧은 시간 안에 진심을 끌어내는 방법은 어떻게 다른가. 그 이야기는 매거진에서 직접 만나보시길.</p>
+
+    <!-- Q&A 3: 가리기 -->
+    <div class="qa-block locked">
+      <span class="qa-question">Q.03</span>
+      <p class="qa-question-text">짧은 시간 안에 인물을 잘 담아내는 방법이나 철학이 있으신가요?</p>
+      <div class="qa-answer">
+        <p>네 맞아요. 오랜 시간이 주는 친밀감은 다르죠. 하지만 너무 친한 것 또한 그 사람의 어느 특별한 부분을 담아내게 되는것 같아요. 장단점이 있죠. 짧은 시간에 인물을 촬영할 때 저의 노하우는 제가 가진 사진 철학에 관해 이야기를 하고 서로 이해하는 과정을 갖습니다...</p>
+      </div>
+      <div class="qa-locked-overlay">
+        <span class="lock-icon">🔒</span>
+        <span class="lock-text">매거진에서 전체 답변 보기</span>
+      </div>
+    </div>
+
+    <h2>〈1인가구〉, 새로운 시리즈</h2>
+
+    <p>심규동 작가는 〈고시텔〉 이후에도 작업을 멈추지 않았다. 최근에는 〈1인가구〉라는 새 시리즈를 진행 중이다. 이번 호 매거진에서는 그가 직접 공개한 신작도 함께 만날 수 있다.</p>
+
+    <div class="series-gallery">
+      <figure>
+        <img src="../img/stories/02/solo-01.jpg" alt="심규동 〈1인가구〉" />
+      </figure>
+      <figure>
+        <img src="../img/stories/02/solo-04.jpg" alt="심규동 〈1인가구〉" />
+      </figure>
+    </div>
+
+    <p>〈1인가구〉는 〈고시텔〉의 연장선 같으면서도 다르다. 작가는 말한다. <em>"앞으로는 팬 굿즈 가득한 중년 여성, 부유한 1인 가구, 인플루언서, 코스프레 취미인 사람 등 이 시대의 초상을 아카이빙 하려고 해요."</em></p>
+
+    <figure class="full-width">
+      <img src="../img/stories/02/magazine-spread-2.jpg" alt="매거진 펼침면 — 1인가구 시리즈" />
+      <figcaption>매거진 속 〈1인가구〉 시리즈와 인터뷰 페이지.</figcaption>
+    </figure>
+
+    <h2>빛, 그리고 필름</h2>
+
+    <p>이번 호 5ft.mag의 주제는 "빛과 그림자가 남긴 여운". 인터뷰 후반부에는 작가의 빛에 대한 철학과 필름을 선택하는 이유에 대한 깊은 이야기가 이어진다. <strong>"사실 필름 촬영은 빛을 찍는다고 해도 과언이 아니에요"</strong>라고 그는 말했다.</p>
+
+    <!-- Q&A 4: 가리기 -->
+    <div class="qa-block locked">
+      <span class="qa-question">Q.04</span>
+      <p class="qa-question-text">필름으로 작업하는 것이 쉽지 않을 것 같은데, 필름을 고집하시는 이유가 있나요?</p>
+      <div class="qa-answer">
+        <p>딱히 필름만 고집한건 아니에요. 장단점이 있고, 사진 작업에 따라 선택하는거 같아요. 고시텔 촬영할 때는 중형이어야 했고, 디지털 중형을 살 돈이 없었어요. 하지만 필름 중형카메라는 가능했죠...</p>
+      </div>
+      <div class="qa-locked-overlay">
+        <span class="lock-icon">🔒</span>
+        <span class="lock-text">매거진에서 전체 답변 보기</span>
+      </div>
+    </div>
+
+    <!-- Q&A 5: 가리기 -->
+    <div class="qa-block locked">
+      <span class="qa-question">Q.05</span>
+      <p class="qa-question-text">작품에서 빛과 그림자를 활용하는 본인만의 방법이나 철학이 있나요?</p>
+      <div class="qa-answer">
+        <p>저는 인공적인 빛을 좋아하지 않아요. 인공적인 빛은 태양광은 제외한 조명만 말하는 것이 아니에요. 이 시대에서 실내 전등은 자연스럽게 받아들여지죠. 태양광이 강한 도심 거리에서 건물에 반사된 빛도 조명처럼 보이지만 자연스럽다고 느껴져요...</p>
+      </div>
+      <div class="qa-locked-overlay">
+        <span class="lock-icon">🔒</span>
+        <span class="lock-text">매거진에서 전체 답변 보기</span>
+      </div>
+    </div>
+
+    <h2>그 외 매거진에서 만날 수 있는 이야기</h2>
+
+    <p>이 인터뷰에는 우리가 미처 다 옮기지 못한 흥미로운 이야기들이 더 있다.</p>
+
+    <ul style="list-style: none; padding: 0; margin: 24px 0;">
+      <li style="padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: baseline;">
+        <span style="color: var(--accent); font-weight: var(--fw-heading); font-size: 14px;">●</span>
+        <span>웨딩 사진과 다큐멘터리 사진 — 상반된 두 세계를 오가는 작가의 시선</span>
+      </li>
+      <li style="padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: baseline;">
+        <span style="color: var(--accent); font-weight: var(--fw-heading); font-size: 14px;">●</span>
+        <span>2019년에 직접 만든 독립영화에 담은 메시지</span>
+      </li>
+      <li style="padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: baseline;">
+        <span style="color: var(--accent); font-weight: var(--fw-heading); font-size: 14px;">●</span>
+        <span>꾸준한 작업을 가능하게 하는 영감의 원천</span>
+      </li>
+      <li style="padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: baseline;">
+        <span style="color: var(--accent); font-weight: var(--fw-heading); font-size: 14px;">●</span>
+        <span>그가 사진을 시작하게 된 결정적 순간</span>
+      </li>
+      <li style="padding: 12px 0; display: flex; gap: 12px; align-items: baseline;">
+        <span style="color: var(--accent); font-weight: var(--fw-heading); font-size: 14px;">●</span>
+        <span>선호하는 필름과 카메라, 그리고 그 이유</span>
+      </li>
+    </ul>
+
+    <!-- 작가 정보 -->
+    <div class="artist-card">
+      <div class="artist-card-photo">
+        <img src="../img/stories/02/portrait.jpg" alt="심규동 작가" />
+      </div>
+      <div class="artist-card-info">
+        <div class="artist-card-name">심규동 (SHIM Kyu-dong)</div>
+        <div class="artist-card-bio">강릉에서 활동하는 다큐멘터리 사진작가. 2017년 〈고시텔〉로 데뷔, 2024년 온빛 씰리상 수상. 〈1인가구〉, 〈WORKROOM〉 등 다수 개인전 진행.</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <span class="cta-box-tag">Read Full Interview</span>
+      <h3 class="cta-box-title">전체 인터뷰는 매거진에서</h3>
+      <p class="cta-box-desc">심규동 작가의 전체 인터뷰와 미공개 작품 사진들은 5ft.mag Vol.01 창간호에서 만나볼 수 있습니다.</p>
+      <div class="cta-box-buttons">
+        <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="cta-box-btn cta-box-btn-primary">스마트스토어에서 구매 →</a>
+        <a href="01.html" class="cta-box-btn cta-box-btn-secondary">창간호 살펴보기 →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 글 끝 -->
+  <div class="article-end">
+    <p class="article-signature">
+      <span class="role">인터뷰 · 편집</span>5ft.mag 편집부<br />
+      <span class="role">사진</span>ⓒ 심규동 〈고시텔〉, 〈1인가구〉
+    </p>
+    <div class="share-bar">
+      <span class="share-label">SHARE</span>
+      <button onclick="copyLink()">링크 복사</button>
+      <a href="https://www.instagram.com/5ft.magazine" target="_blank" rel="noopener">Instagram ↗</a>
+    </div>
+  </div>
+</article>
+
+<!-- ════════ 목록으로 ════════ -->
+<nav class="article-nav">
+  <a href="../stories.html">
+    <span class="nav-label">← 목록으로</span>
+    <span class="nav-title">Stories 전체 보기</span>
+  </a>
+</nav>
+
+<!-- ════════ 푸터 위 협력사 로고 띠 ════════ -->
+<div class="footer-partners">
+  <span class="footer-partners-label">PARTNERS</span>
+  <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
+    <img src="../img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
+  </a>
+  <a href="https://instagram.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
+    <img src="../img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
+  </a>
+  <a href="https://www.youtube.com/@BRISNAPTV" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
+    <img src="../img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
+  </a>
+  <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+    <img src="../img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+  </a>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft.mag</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+  <span class="footer-copy">© 2024 5ft.mag</span>
+</footer>
+
+<script>
+  const themeBtn = document.getElementById('themeBtn');
+  const html = document.documentElement;
+  const saved = localStorage.getItem('5ftTheme') || 'light';
+  html.dataset.theme = saved;
+  themeBtn.textContent = saved === 'dark' ? '☀' : '☽';
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    themeBtn.textContent = next === 'dark' ? '☀' : '☽';
+    localStorage.setItem('5ftTheme', next);
+  });
+
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn.addEventListener('click', () => {
+    const open = mobileNav.classList.toggle('open');
+    menuBtn.textContent = open ? '✕' : '☰';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      menuBtn.textContent = '☰';
+    });
+  });
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert('링크가 복사되었어요!');
+    });
+  }
+</script>
+
+<script>
+  // 연관 글 추천 — 같은 카테고리/작가 글을 stories.json에서 찾아서 표시
+  (function() {
+    const CURRENT_ID = '02';
+    const CURRENT_CATEGORY = 'interview';
+    const CURRENT_AUTHOR = '5ft.mag 편집부';
+    const MAX_RELATED = 3;
+
+    fetch('../data/stories.json')
+      .then(res => res.json())
+      .then(stories => {
+        const candidates = stories
+          .filter(s => s.published !== false && s.id !== CURRENT_ID);
+
+        // 점수 기반 정렬: 같은 작가 +3점, 같은 카테고리 +2점, 같은 호 +1점
+        const scored = candidates.map(s => {
+          let score = 0;
+          if (s.author && s.author === CURRENT_AUTHOR) score += 3;
+          if (s.category === CURRENT_CATEGORY) score += 2;
+          score += new Date(s.date) / 1e13; // 최신성 가중치
+          return { story: s, score };
+        }).sort((a, b) => b.score - a.score);
+
+        const selected = scored.slice(0, MAX_RELATED).map(x => x.story);
+        if (selected.length === 0) return;
+
+        const grid = document.getElementById('relatedGrid');
+        const section = document.getElementById('relatedSection');
+        if (!grid || !section) return;
+
+        grid.innerHTML = selected.map(s => {
+          const link = '../' + (s.page || '#');
+          const cat = (s.categoryLabel || s.category || '').toUpperCase();
+          const author = s.author ? s.author + ' — ' : '';
+
+          let imgBlock;
+          if (s.thumbnail) {
+            const webp = s.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+            imgBlock = `<div class="related-img">
+              <picture>
+                <source srcset="../${webp}" type="image/webp">
+                <img src="../${s.thumbnail}" loading="lazy" alt="${s.title}" />
+              </picture>
+            </div>`;
+          } else {
+            imgBlock = `<div class="related-img text-only">
+              <span class="related-img-title">${s.title}</span>
+            </div>`;
+          }
+
+          return `
+            <a href="${link}" class="related-card">
+              ${imgBlock}
+              <span class="related-cat">${cat}</span>
+              <h4 class="related-card-title">${s.title}</h4>
+              <p class="related-excerpt">${author}${s.excerpt || ''}</p>
+            </a>
+          `;
+        }).join('');
+
+        section.hidden = false;
+      })
+      .catch(err => console.error('연관 글 로드 실패:', err));
+  })();
+</script>
+
+<script src="../js/site-common.js"></script>
+</body>
+</html>

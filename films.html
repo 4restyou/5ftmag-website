@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Films — 5ft.mag</title>
+  <!-- SEO & Social Sharing -->
+  <meta name="description" content="필름별로 모은 사진들. Kodak UltraMax 400 등 필름 종류별 작가 작품을 한자리에서 감상하세요.">
+  <link rel="canonical" href="https://www.5ftmag.com/films.html">
+
+  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="./rss.xml">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Films — 5ft.mag">
+  <meta property="og:description" content="필름별로 모은 사진들. Kodak UltraMax 400 등 필름 종류별 작가 작품을 한자리에서 감상하세요.">
+  <meta property="og:image" content="https://www.5ftmag.com/img/og/og-default.jpg">
+  <meta property="og:url" content="https://www.5ftmag.com/films.html">
+  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Films — 5ft.mag">
+  <meta name="twitter:description" content="필름별로 모은 사진들. Kodak UltraMax 400 등 필름 종류별 작가 작품을 한자리에서 감상하세요.">
+  <meta name="twitter:image" content="https://www.5ftmag.com/img/og/og-default.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/icon-16.png">
+  <link rel="shortcut icon" href="img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
+  <link rel="stylesheet" href="./pretendard.css" />
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/common.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: var(--fs-body);
+      font-weight: var(--fw-all);
+      line-height: 1.2;
+      letter-spacing: var(--ls-default);
+      transition: background .25s, color .25s;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    body.modal-open { overflow: hidden; }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 300;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background .25s, border-color .25s;
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: var(--header-h); padding: 0 24px;
+    }
+    .site-logo {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      height: var(--header-h);
+    }
+    .site-logo img {
+      height: 40px;
+      width: auto;
+      display: block;
+      transition: opacity .15s;
+    }
+    .site-logo .logo-light { display: block; }
+    .site-logo .logo-dark { display: none; }
+    [data-theme="dark"] .site-logo .logo-light { display: none; }
+    [data-theme="dark"] .site-logo .logo-dark { display: block; }
+    .site-logo:hover img { opacity: 0.7; }
+    .main-nav { display: flex; align-items: center; list-style: none; gap: 0; margin-left: auto; }
+    .main-nav a {
+      display: block; padding: 0 14px; font-size: var(--fs-nav);
+      font-weight: var(--fw-all); letter-spacing: var(--ls-default);
+      color: var(--text); line-height: var(--header-h);
+      transition: opacity .15s; white-space: nowrap;
+    }
+    .main-nav a:hover { opacity: .45; }
+    .main-nav a.current { font-weight: var(--fw-heading); }
+    .main-nav .ext::after { content: ' ↗'; font-size: 13px; }
+    .nav-right { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer; color: var(--text);
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; border-radius: 2px;
+      font-family: var(--font); transition: opacity .15s;
+    }
+    .icon-btn:hover { opacity: .45; }
+    .hamburger { display: none; }
+    .mobile-nav {
+      display: none; flex-direction: column;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      font-size: var(--fs-nav); font-weight: var(--fw-all);
+      letter-spacing: var(--ls-default); color: var(--text);
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+      transition: opacity .15s;
+    }
+    .mobile-nav a:hover { opacity: .5; }
+
+    /* ── 페이지 타이틀 ── */
+    .page-title {
+      padding: 60px 32px 40px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .page-title-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 20px; flex-wrap: wrap;
+    }
+    .page-title h1 {
+      font-size: 56px; font-weight: var(--fw-heading);
+      letter-spacing: -0.03em; line-height: 1;
+    }
+    .page-title .breadcrumb {
+      font-size: var(--fs-meta); font-weight: var(--fw-heading);
+      letter-spacing: 0.12em; color: var(--text-muted);
+    }
+
+    /* ── 인트로 ── */
+    .intro {
+      padding: 40px 32px 60px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .intro-inner {
+      max-width: 720px;
+    }
+    .intro p {
+      font-size: 19px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .intro p .accent {
+      background: var(--accent);
+      color: var(--accent-text);
+      padding: 0 6px;
+    }
+
+    /* ── 필름 그리드 ── */
+    .films-section {
+      padding: 60px 32px 80px;
+    }
+    .films-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 48px 32px;
+    }
+    .film-card {
+      display: block;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      text-align: left;
+      font-family: inherit;
+      transition: opacity .2s;
+    }
+    .film-card:hover { opacity: 0.78; }
+
+    /* 준비 중 카드 — 클릭 안됨, 흐릿하게 */
+    .film-card.coming-soon {
+      opacity: 0.45;
+      cursor: default;
+      pointer-events: none;
+    }
+    .film-card.coming-soon:hover { opacity: 0.45; }
+    .film-card.coming-soon .film-img img { transform: none !important; }
+    .film-coming-tag {
+      position: absolute;
+      top: 14px; right: 14px;
+      display: inline-block;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.1em;
+      border-radius: 2px;
+    }
+    .film-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: var(--bg-sub);
+      margin-bottom: 18px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .film-img picture {
+      width: 70%;
+      height: 70%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .film-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform .4s ease;
+    }
+    .film-card:hover .film-img img {
+      transform: scale(1.05);
+    }
+    .film-issue-tag {
+      position: absolute;
+      top: 14px; left: 14px;
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.08em;
+      background: var(--text);
+      color: var(--bg);
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+    .film-count {
+      position: absolute;
+      bottom: 14px; right: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 5px 10px;
+      border-radius: 999px;
+    }
+    .film-brand {
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .film-name {
+      font-size: 24px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .film-spec {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+    .film-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: var(--fw-heading);
+      color: var(--text);
+      letter-spacing: var(--ls-default);
+    }
+
+    /* ════════════════════════════
+       MODAL (사진 갤러리)
+    ════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: none;
+      overflow-y: auto;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .modal-overlay.open {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-close {
+      position: fixed;
+      top: 20px; right: 24px;
+      z-index: 1010;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: background .15s;
+    }
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .modal-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 80px 32px 80px;
+      color: #fff;
+    }
+    .modal-header {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .modal-brand {
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 12px;
+      display: block;
+    }
+    .modal-name {
+      font-size: 56px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .modal-desc {
+      font-size: 17px;
+      line-height: 1.7;
+      max-width: 720px;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 24px;
+    }
+    .modal-meta {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .modal-meta span strong {
+      color: #fff;
+      font-weight: var(--fw-heading);
+      margin-left: 6px;
+    }
+    .modal-gallery-title {
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 20px;
+      display: block;
+    }
+    .modal-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 8px;
+    }
+    .modal-photo {
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: zoom-in;
+      transition: opacity .15s;
+    }
+    .modal-photo:hover { opacity: 0.85; }
+    .modal-photo img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .modal-photo-caption {
+      padding: 10px 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: var(--ls-default);
+    }
+
+    /* ── 라이트박스 (사진 한 장씩 크게 보기) ── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-img-wrap {
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .lightbox img {
+      max-width: 100%;
+      max-height: calc(100vh - 160px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .lightbox-caption {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+      letter-spacing: var(--ls-default);
+      text-align: center;
+    }
+    .lightbox-caption strong {
+      color: #fff;
+      font-weight: var(--fw-heading);
+      margin-right: 8px;
+    }
+    .lightbox-close,
+    .lightbox-prev,
+    .lightbox-next {
+      position: absolute;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: background .15s, border-color .15s;
+      border-radius: 50%;
+      font-family: inherit;
+    }
+    .lightbox-close:hover,
+    .lightbox-prev:hover,
+    .lightbox-next:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    .lightbox-close { top: 24px; right: 24px; }
+    .lightbox-prev  { left: 24px;  top: 50%; transform: translateY(-50%); }
+    .lightbox-next  { right: 24px; top: 50%; transform: translateY(-50%); }
+
+    @media (max-width: 640px) {
+      .lightbox { padding: 20px; }
+      .lightbox img { max-height: calc(100vh - 120px); }
+      .lightbox-close { top: 16px; right: 16px; width: 40px; height: 40px; }
+      .lightbox-prev  { left: 12px;  width: 40px; height: 40px; }
+      .lightbox-next  { right: 12px; width: 40px; height: 40px; }
+    }
+
+    /* ── FOOTER ── */
+
+    /* ── 푸터 위 협력사 로고 띠 ── */
+    .footer-partners {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 56px;
+      flex-wrap: wrap;
+      background: var(--bg);
+    }
+    .footer-partners-label {
+      font-size: 12px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .footer-partner {
+      display: flex;
+      align-items: center;
+      transition: opacity .15s;
+    }
+    .footer-partner:hover { opacity: 0.5; }
+    .footer-partner img {
+      height: 18px;
+      width: auto;
+      object-fit: contain;
+    }
+    .footer-partner .logo-light { display: block; }
+    .footer-partner .logo-dark { display: none; }
+    [data-theme="dark"] .footer-partner .logo-light { display: none; }
+    [data-theme="dark"] .footer-partner .logo-dark { display: block; }
+    @media (max-width: 560px) {
+      .footer-partners { gap: 32px; padding: 20px; }
+      .footer-partner img { height: 14px; }
+    }
+    footer {
+      border-top: 1px solid var(--border); padding: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-inner-left { display: flex; flex-direction: column; gap: 4px; }
+    .footer-logo {
+      font-size: var(--fs-nav); font-weight: var(--fw-heading);
+      letter-spacing: var(--ls-default);
+    }
+    .footer-publisher {
+      font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a {
+      font-size: var(--fs-body); color: var(--text-muted);
+      transition: color .15s;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--text-muted); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      :root { --fs-display: 32px; --fs-body: 16px; --fs-nav: 15px; }
+      .page-title h1 { font-size: 44px; }
+      .modal-name { font-size: 40px; }
+    }
+    @media (max-width: 900px) {
+      .main-nav { display: none; }
+      .hamburger { display: flex; }
+      .films-section { padding: 48px 24px; }
+    }
+    @media (max-width: 640px) {
+      .page-title { padding: 40px 20px 28px; }
+      .page-title h1 { font-size: 32px; }
+      .intro { padding: 32px 20px 48px; }
+      .films-section { padding: 40px 20px 60px; }
+      .film-name { font-size: 20px; }
+      .modal-content { padding: 64px 20px; }
+      .modal-name { font-size: 28px; }
+      .modal-close { top: 14px; right: 14px; width: 40px; height: 40px; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="stories.html">Articles</a></li>
+      <li><a href="films.html" class="current">Films</a></li>
+      <li><a href="about.html#contributors">Contributors</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="stories.html">Articles</a>
+    <a href="films.html">Films</a>
+    <a href="about.html#contributors">Contributors</a>
+    <a href="about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<!-- ════════ 페이지 타이틀 ════════ -->
+<div class="page-title">
+  <div class="page-title-inner">
+    <h1>Films</h1>
+    <span class="breadcrumb">5FT.MAG / FILMS</span>
+  </div>
+</div>
+
+<!-- ════════ 인트로 ════════ -->
+<div class="intro">
+  <div class="intro-inner">
+    <p>5ft.mag이 선택한 필름들. 같은 필름이라도 <span class="accent">5명의 시선</span>으로 담으면 전혀 다른 이야기가 됩니다. 필름을 클릭하면 그 필름으로 찍은 사진들을 만나볼 수 있어요.</p>
+  </div>
+</div>
+
+<!-- ════════ 필름 그리드 ════════ -->
+<div class="films-section">
+  <div class="films-grid">
+
+    <!-- Film 1: Kodak UltraMax 400 -->
+    <button class="film-card" data-film="ultramax">
+      <div class="film-img">
+        <span class="film-issue-tag">Vol.01</span>
+        <picture>
+          <source srcset="img/films/ultramax-thumb.webp" type="image/webp">
+          <img src="img/films/ultramax-thumb.png" alt="Kodak UltraMax 400" />
+        </picture>
+        <span class="film-count">36 photos</span>
+      </div>
+      <span class="film-brand">KODAK</span>
+      <h2 class="film-name">UltraMax 400</h2>
+      <p class="film-spec">ISO 400 · Color Negative · 35mm</p>
+      <span class="film-cta">사진 보기 →</span>
+    </button>
+
+    <!-- Film 2: Cinestill 800T -->
+    <button class="film-card" data-film="cinestill800t">
+      <div class="film-img">
+        <span class="film-issue-tag">Vol.02</span>
+        <picture>
+          <source srcset="img/films/cinestill800t-thumb.webp" type="image/webp">
+          <img src="img/films/cinestill800t-thumb.png" alt="Cinestill 800T" />
+        </picture>
+        <span class="film-count">36 photos</span>
+      </div>
+      <span class="film-brand">CINESTILL</span>
+      <h2 class="film-name">800T</h2>
+      <p class="film-spec">ISO 800 · Tungsten · 35mm</p>
+      <span class="film-cta">사진 보기 →</span>
+    </button>
+
+    <!-- Film 3: Kodak T-Max 400 (준비 중) -->
+    <div class="film-card coming-soon" aria-disabled="true">
+      <div class="film-img">
+        <span class="film-coming-tag">COMING SOON</span>
+      </div>
+      <span class="film-brand">KODAK</span>
+      <h2 class="film-name">T-Max 400</h2>
+      <p class="film-spec">ISO 400 · Black &amp; White · 35mm</p>
+      <span class="film-cta">준비 중</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════ MODAL ════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <button class="modal-close" id="modalClose" aria-label="닫기">✕</button>
+  <div class="modal-content" id="modalContent">
+    <!-- 자바스크립트로 동적 생성 -->
+  </div>
+</div>
+
+<!-- ════════ 라이트박스 (사진 한 장씩 크게 보기) ════════ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="사진 크게 보기">
+  <button class="lightbox-close" id="lightboxClose" aria-label="닫기">✕</button>
+  <button class="lightbox-prev"  id="lightboxPrev"  aria-label="이전 사진">‹</button>
+  <button class="lightbox-next"  id="lightboxNext"  aria-label="다음 사진">›</button>
+  <div class="lightbox-img-wrap">
+    <img id="lightboxImg" src="" alt="" />
+    <p class="lightbox-caption" id="lightboxCaption"></p>
+  </div>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<!-- ════════ 푸터 위 협력사 로고 띠 ════════ -->
+<div class="footer-partners">
+  <span class="footer-partners-label">PARTNERS</span>
+  <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
+    <img src="./img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
+  </a>
+  <a href="https://instagram.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
+    <img src="./img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
+  </a>
+  <a href="https://www.youtube.com/@BRISNAPTV" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
+    <img src="./img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
+  </a>
+  <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="./img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+    <img src="./img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+  </a>
+</div>
+
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft.mag</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+  <span class="footer-copy">© 2024 5ft.mag</span>
+</footer>
+
+<script>
+  // ── 다크모드 ──
+  const themeBtn = document.getElementById('themeBtn');
+  const html = document.documentElement;
+  const saved = localStorage.getItem('5ftTheme') || 'light';
+  html.dataset.theme = saved;
+  themeBtn.textContent = saved === 'dark' ? '☀' : '☽';
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    themeBtn.textContent = next === 'dark' ? '☀' : '☽';
+    localStorage.setItem('5ftTheme', next);
+  });
+
+  // ── 모바일 메뉴 ──
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn.addEventListener('click', () => {
+    const open = mobileNav.classList.toggle('open');
+    menuBtn.textContent = open ? '✕' : '☰';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      menuBtn.textContent = '☰';
+    });
+  });
+
+  // ════════════════════════════
+  // 필름 데이터: data/films.json에서 로딩
+  // ════════════════════════════
+  let filmsData = {};
+
+  fetch('data/films.json')
+    .then(res => res.json())
+    .then(data => {
+      filmsData = data;
+    })
+    .catch(err => {
+      console.error('Films 데이터 로딩 실패:', err);
+    });
+
+  // ════════════════════════════
+  // 모달 열기/닫기
+  // ════════════════════════════
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalContent = document.getElementById('modalContent');
+  const modalClose = document.getElementById('modalClose');
+
+  function openModal(filmKey) {
+    const data = filmsData[filmKey];
+    if (!data) return;
+    currentFilmKey = filmKey;
+
+    // 모달 내용 채우기 (라이트박스용 data-index 포함)
+    let photosHTML = '';
+    data.photos.forEach((photo, idx) => {
+      // photo.src가 있으면 실제 이미지, 없으면 picsum 자리표시자 (fallback)
+      const imgSrc = photo.src || `https://picsum.photos/seed/${photo.seed}/600/750`;
+      // WebP 폴백 처리 — photo.src가 있으면 WebP 버전 시도
+      const webpSrc = photo.src ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
+      const pictureBlock = webpSrc
+        ? `<picture>
+             <source srcset="${webpSrc}" type="image/webp">
+             <img src="${imgSrc}" loading="lazy" alt="${photo.author || ''}" />
+           </picture>`
+        : `<img src="${imgSrc}" loading="lazy" alt="${photo.author || ''}" />`;
+      photosHTML += `
+        <div>
+          <div class="modal-photo" data-photo-index="${idx}">
+            ${pictureBlock}
+          </div>
+          <p class="modal-photo-caption">${photo.author}</p>
+        </div>
+      `;
+    });
+
+    modalContent.innerHTML = `
+      <div class="modal-header">
+        <span class="modal-brand">${data.brand}</span>
+        <h2 class="modal-name">${data.name}</h2>
+        <p class="modal-desc">${data.desc}</p>
+        <div class="modal-meta">
+          <span>ISO <strong>${data.iso}</strong></span>
+          <span>Type <strong>${data.type}</strong></span>
+          <span>Format <strong>${data.format}</strong></span>
+          <span>Photographers <strong>${data.photographers.join(', ')}</strong></span>
+        </div>
+      </div>
+      <span class="modal-gallery-title">Photos · ${data.photos.length}</span>
+      <div class="modal-gallery">
+        ${photosHTML}
+      </div>
+    `;
+
+    modalOverlay.classList.add('open');
+    document.body.classList.add('modal-open');
+    modalOverlay.scrollTop = 0;
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('open');
+    document.body.classList.remove('modal-open');
+  }
+
+  // 필름 카드 클릭
+  document.querySelectorAll('.film-card').forEach(card => {
+    card.addEventListener('click', () => {
+      openModal(card.dataset.film);
+    });
+  });
+
+  // 닫기 버튼
+  modalClose.addEventListener('click', closeModal);
+
+  // 오버레이 빈 공간 클릭 시 닫기
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
+
+  // ════════════════════════════
+  // 라이트박스 (사진 한 장씩 크게 보기)
+  // ════════════════════════════
+  const lightbox       = document.getElementById('lightbox');
+  const lightboxImg    = document.getElementById('lightboxImg');
+  const lightboxCap    = document.getElementById('lightboxCaption');
+  const lightboxClose  = document.getElementById('lightboxClose');
+  const lightboxPrev   = document.getElementById('lightboxPrev');
+  const lightboxNext   = document.getElementById('lightboxNext');
+  let currentLightboxIndex = 0;
+  let currentFilmKey = null;
+
+  function showLightbox(index) {
+    if (!currentFilmKey) return;
+    const photos = filmsData[currentFilmKey].photos;
+    // 순환: -1이면 마지막으로, 마지막+1이면 처음으로
+    if (index < 0) index = photos.length - 1;
+    if (index >= photos.length) index = 0;
+    currentLightboxIndex = index;
+
+    const photo = photos[index];
+    const src = photo.src || `https://picsum.photos/seed/${photo.seed}/1200/1500`;
+    // WebP 우선 시도, 실패 시 원본 jpg로 폴백
+    const webpSrc = photo.src ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp') : src;
+    lightboxImg.onerror = () => { lightboxImg.onerror = null; lightboxImg.src = src; };
+    lightboxImg.src = webpSrc;
+    lightboxImg.alt = photo.author || '';
+    lightboxCap.innerHTML = `<strong>${photo.author || ''}</strong> ${index + 1} / ${photos.length}`;
+    lightbox.classList.add('open');
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightboxImg.src = '';
+  }
+
+  // 그리드의 사진 클릭 시 라이트박스 열기 (이벤트 위임)
+  modalContent.addEventListener('click', (e) => {
+    const photoEl = e.target.closest('.modal-photo');
+    if (!photoEl) return;
+    const idx = parseInt(photoEl.dataset.photoIndex, 10);
+    if (isNaN(idx)) return;
+    showLightbox(idx);
+  });
+
+  // 라이트박스 컨트롤
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightboxPrev.addEventListener('click', () => showLightbox(currentLightboxIndex - 1));
+  lightboxNext.addEventListener('click', () => showLightbox(currentLightboxIndex + 1));
+
+  // 라이트박스 빈 영역 클릭 시 닫기 (이미지/버튼 클릭은 제외)
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox || e.target.classList.contains('lightbox-img-wrap')) {
+      closeLightbox();
+    }
+  });
+
+  // 키보드 — 라이트박스 우선, 그 다음 모달
+  document.addEventListener('keydown', (e) => {
+    if (lightbox.classList.contains('open')) {
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') showLightbox(currentLightboxIndex - 1);
+      else if (e.key === 'ArrowRight') showLightbox(currentLightboxIndex + 1);
+      return;
+    }
+    if (e.key === 'Escape' && modalOverlay.classList.contains('open')) {
+      closeModal();
+    }
+  });
+
+  // 터치 스와이프 — 모바일에서 좌우로 사진 넘기기
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+
+  lightbox.addEventListener('touchstart', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  lightbox.addEventListener('touchend', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const dt = Date.now() - touchStartTime;
+
+    // 최소 스와이프 조건: 50px 이상, 500ms 이내, 가로가 세로보다 큼
+    if (Math.abs(dx) >= 50 && Math.abs(dx) > Math.abs(dy) && dt < 500) {
+      if (dx < 0) showLightbox(currentLightboxIndex + 1);  // 왼쪽 스와이프 → 다음
+      else        showLightbox(currentLightboxIndex - 1);  // 오른쪽 스와이프 → 이전
+    }
+  }, { passive: true });
+</script>
+<script src="./js/site-common.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code
+.claude/
+
+# Node (혹시 나중에 빌드 도구 추가될 때 대비)
+node_modules/
+npm-debug.log*
+.env
+.env.local
+
+# Netlify
+.netlify/
+
+# Temp
+*.log
+.cache/

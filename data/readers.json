@@ -1,0 +1,90 @@
+[
+  {
+    "id": "waxilaman-01",
+    "image": "img/readers/waxilaman-01.jpg",
+    "author": "@waxilaman",
+    "instagramUrl": "https://instagram.com/waxilaman",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "waxilaman-02",
+    "image": "img/readers/waxilaman-02.jpg",
+    "author": "@waxilaman",
+    "instagramUrl": "https://instagram.com/waxilaman",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "waxilaman-03",
+    "image": "img/readers/waxilaman-03.jpg",
+    "author": "@waxilaman",
+    "instagramUrl": "https://instagram.com/waxilaman",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "alexydiary-01",
+    "image": "img/readers/alexydiary-01.jpg",
+    "author": "@alexydiary",
+    "instagramUrl": "https://instagram.com/alexydiary",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "alexydiary-02",
+    "image": "img/readers/alexydiary-02.jpg",
+    "author": "@alexydiary",
+    "instagramUrl": "https://instagram.com/alexydiary",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "alexydiary-03",
+    "image": "img/readers/alexydiary-03.jpg",
+    "author": "@alexydiary",
+    "instagramUrl": "https://instagram.com/alexydiary",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "alexydiary-04",
+    "image": "img/readers/alexydiary-04.jpg",
+    "author": "@alexydiary",
+    "instagramUrl": "https://instagram.com/alexydiary",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "canamez-01",
+    "image": "img/readers/canamez-01.jpg",
+    "author": "@canamez",
+    "instagramUrl": "https://instagram.com/canamez",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "canamez-02",
+    "image": "img/readers/canamez-02.jpg",
+    "author": "@canamez",
+    "instagramUrl": "https://instagram.com/canamez",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "canamez-03",
+    "image": "img/readers/canamez-03.jpg",
+    "author": "@canamez",
+    "instagramUrl": "https://instagram.com/canamez",
+    "film": "Cinestill 800T",
+    "published": true
+  },
+  {
+    "id": "canamez-04",
+    "image": "img/readers/canamez-04.jpg",
+    "author": "@canamez",
+    "instagramUrl": "https://instagram.com/canamez",
+    "film": "Cinestill 800T",
+    "published": true
+  }
+]

@@ -1,0 +1,324 @@
+{
+  "ultramax": {
+    "brand": "KODAK",
+    "name": "UltraMax 400",
+    "desc": "데일리 컬러 필름의 대표주자. 풍부한 채도와 부드러운 입자감으로 일상을 따뜻하게 담아냅니다. 햇살 아래에서 특히 빛나는 필름이에요.",
+    "iso": "400",
+    "type": "Color Negative",
+    "format": "35mm",
+    "issue": "Vol.01",
+    "thumbnail": "img/films/ultramax-thumb.png",
+    "photographers": [
+      "박순렬",
+      "노애경",
+      "장형수"
+    ],
+    "photos": [
+      {
+        "src": "img/films/ultramax/park-ultra1.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra1.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra1.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra2.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra2.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra2.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra3.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra3.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra3.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra4.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra4.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra4.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra5.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra5.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra5.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra6.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra6.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra6.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra7.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra7.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra7.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra8.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra8.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra8.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra9.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra9.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra9.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra10.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra10.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra10.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra11.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra11.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra11.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/ultramax/park-ultra12.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/ultramax/ae-ultra12.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/ultramax/jang-ultra12.jpg",
+        "author": "장형수"
+      }
+    ]
+  },
+  "cinestill800t": {
+    "brand": "CINESTILL",
+    "name": "800T",
+    "desc": "영화용 텅스텐 필름을 35mm로 재단한 시네필름. 야간의 가로등, 네온, 인공조명 아래에서 특유의 붉은 헐레이션이 피어납니다. 도시의 밤을 가장 영화처럼 담아내는 필름.",
+    "iso": "800",
+    "type": "Tungsten (Color Negative)",
+    "format": "35mm",
+    "issue": "Vol.02",
+    "thumbnail": "img/films/cinestill800t-thumb.png",
+    "photographers": [
+      "박순렬",
+      "노애경",
+      "장형수"
+    ],
+    "photos": [
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t1.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t1.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t1.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t2.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t2.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t2.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t3.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t7.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t3.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t4.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t4.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t4.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t5.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t5.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t5.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t6.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t6.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t6.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t8.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t7.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t7.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t9.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t8.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t8.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t11.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t9.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t9.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t12.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t10.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/jang-cinestill800t10.jpg",
+        "author": "장형수"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t13.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t11.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/park-cinestill800t14.jpg",
+        "author": "박순렬"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t12.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t13.jpg",
+        "author": "노애경"
+      },
+      {
+        "src": "img/films/cinestill800t/ae-cinestill800t14.jpg",
+        "author": "노애경"
+      }
+    ]
+  }
+}

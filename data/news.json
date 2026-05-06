@@ -1,0 +1,12 @@
+[
+  {
+    "id": "01",
+    "tag": "Release",
+    "title": "Vol.01 창간호 발행",
+    "date": "2024-11-15",
+    "thumbnail": "img/stories/01/cover.jpg",
+    "link": "stories/01.html",
+    "external": false,
+    "published": true
+  }
+]
