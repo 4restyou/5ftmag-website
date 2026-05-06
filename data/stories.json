@@ -1,5 +1,19 @@
 [
   {
+    "id": "09",
+    "title": "5월, 사진을 보러 가는 길",
+    "category": "exhibition",
+    "categoryLabel": "EXHIBITION",
+    "author": "5ft.mag 편집부",
+    "date": "2026-05-07",
+    "issue": "Vol.01",
+    "thumbnail": "img/stories/09/hero.jpg",
+    "excerpt": "5월, 봄이 짧기에 미술관은 부지런하다. 서울사진축제 〈컴백홈〉부터 GCP 개관전, 성곡미술관 프랑스 사진전, 그리고 최랄라 개인전까지 — 같은 시간 위에 머무는 네 개의 시선.",
+    "page": "stories/09.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "08",
     "title": "세 명의 사진가, 세 개의 빛",
     "category": "photo",
