@@ -668,7 +668,9 @@
   // 카드 HTML 생성
   function renderCard(story) {
     const link = story.page || '#';
-    const issueBadge = story.issue ? `<span class="article-badge">${story.issue}</span>` : '';
+    // Vol.XX가 있으면 매거진 호 배지, 없으면 카테고리 라벨로 자동 폴백
+    const badgeLabel = story.issue || story.categoryLabel || (story.category || '').toUpperCase();
+    const issueBadge = badgeLabel ? `<span class="article-badge">${badgeLabel}</span>` : '';
 
     // 썸네일 없으면 타이포그래피 카드로
     const webpThumb = story.thumbnail ? story.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
