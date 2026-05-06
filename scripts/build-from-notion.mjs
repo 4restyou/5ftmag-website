@@ -30,12 +30,26 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
+// DB ID 정규화 — URL을 통째로 붙여넣어도 32자 ID만 추출
+function sanitizeDbId(raw) {
+  if (!raw) return '';
+  const cleaned = String(raw).trim();
+  // UUID 형식 (8-4-4-4-12) 또는 32자 hex 모두 매치
+  const uuidMatch = cleaned.match(/[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}/);
+  if (uuidMatch) return uuidMatch[0].replace(/-/g, '');
+  return cleaned;
+}
+
 const TOKEN = process.env.NOTION_TOKEN;
-const STORIES_DB_ID = process.env.STORIES_DB_ID;
-const NEWS_DB_ID = process.env.NEWS_DB_ID;
-const FILMS_DB_ID = process.env.FILMS_DB_ID;
-const READERS_DB_ID = process.env.READERS_DB_ID;
+const STORIES_DB_ID = sanitizeDbId(process.env.STORIES_DB_ID);
+const NEWS_DB_ID = sanitizeDbId(process.env.NEWS_DB_ID);
+const FILMS_DB_ID = sanitizeDbId(process.env.FILMS_DB_ID);
+const READERS_DB_ID = sanitizeDbId(process.env.READERS_DB_ID);
 const DRY_RUN = process.env.DRY_RUN === '1';
+
+if (process.env.STORIES_DB_ID && !STORIES_DB_ID) {
+  console.warn('⚠ STORIES_DB_ID 형식이 이상합니다:', process.env.STORIES_DB_ID);
+}
 
 if (!TOKEN) {
   console.error('❌ NOTION_TOKEN 환경 변수가 없습니다. 빌드를 건너뜁니다.');
@@ -381,15 +395,26 @@ async function buildReaders() {
   console.log('🚀 5ft.mag 빌드 시작');
   if (DRY_RUN) console.log('   (dry-run 모드 — 파일을 쓰지 않습니다)');
 
-  try {
-    await buildStories();
-    await buildNews();
-    await buildFilms();
-    await buildReaders();
-    const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+  let hadError = false;
+  for (const [name, fn] of [
+    ['Stories', buildStories],
+    ['News', buildNews],
+    ['Films', buildFilms],
+    ['Readers', buildReaders],
+  ]) {
+    try {
+      await fn();
+    } catch (err) {
+      hadError = true;
+      console.error(`\n❌ ${name} 빌드 실패:`, err.message || err);
+      if (err.body) console.error('   응답:', err.body);
+    }
+  }
+  const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+  if (hadError) {
+    console.log(`\n⚠ 일부 실패하며 빌드 종료 (${elapsed}초) — 다른 콘텐츠는 정상 배포됩니다.`);
+    // 부분 실패는 배포 차단하지 않음 (정적 자산만으로도 사이트 정상 동작)
+  } else {
     console.log(`\n✅ 빌드 완료 (${elapsed}초)`);
-  } catch (err) {
-    console.error('\n❌ 빌드 실패:', err);
-    process.exit(1);
   }
 })();
