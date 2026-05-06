@@ -10,7 +10,8 @@
     "thumbnail": "img/stories/08/park-main-photo.jpg",
     "excerpt": "5ft.mag Vol.01에 참여한 노애경, 박순렬, 장형수 작가의 대표 사진과 작업노트 일부를 따라가 보는 짧은 소개.",
     "page": "stories/08.html",
-    "published": true
+    "published": true,
+    "manual": true
   },
   {
     "id": "07",
@@ -23,7 +24,8 @@
     "thumbnail": "img/stories/07/yoon-essay-hero.jpg",
     "excerpt": "유튜브 〈수집의 수집〉을 운영하고 서울에서 다큐를 만들고 있는 윤동규 PD가 아이들과 빛, 그리고 우연히 찾아온 좋은 장면에 대해 쓴 에세이.",
     "page": "stories/07.html",
-    "published": true
+    "published": true,
+    "manual": true
   },
   {
     "id": "06",
@@ -36,7 +38,8 @@
     "thumbnail": "img/stories/06/goods-name-card.jpg",
     "excerpt": "5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.",
     "page": "stories/06.html",
-    "published": true
+    "published": true,
+    "manual": true
   },
   {
     "id": "05",
@@ -49,7 +52,8 @@
     "thumbnail": "img/stories/05/pentax17-product-front.jpg",
     "excerpt": "2024년, 펜탁스가 새 필름카메라를 만들었다. 하프 프레임 72컷, 가벼운 보디, 부담 없는 가격. Brisnap TV가 직접 써본 Pentax 17의 첫인상.",
     "page": "stories/05.html",
-    "published": true
+    "published": true,
+    "manual": true
   },
   {
     "id": "04",
@@ -62,7 +66,8 @@
     "thumbnail": "",
     "excerpt": "조용한 추석 첫날, 엄마와 함께 절을 다녀오는 길. 노을이 내려앉은 차창 너머에서 김현아 작가가 발견한 빛과 그림자의 차분한 합.",
     "page": "stories/04.html",
-    "published": true
+    "published": true,
+    "manual": true
   },
   {
     "id": "03",
@@ -75,7 +80,8 @@
     "thumbnail": "",
     "excerpt": "필름 카메라의 낡고 자글한 색감은 오늘의 풍경을 10년 전 추억으로 바꿔놓는다. 김현아 작가가 부르는 그 마법의 이름, '낭만 조작'.",
     "page": "stories/03.html",
-    "published": true
+    "published": true,
+    "manual": true
   },
   {
     "id": "02",
@@ -88,7 +94,8 @@
     "thumbnail": "img/stories/02/hero-shim.jpg",
     "excerpt": "사진집 〈고시텔〉로 데뷔한 심규동 작가. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까. 창간호 인터뷰 미리보기.",
     "page": "stories/02.html",
-    "published": true
+    "published": true,
+    "manual": true
   },
   {
     "id": "01",
@@ -101,6 +108,7 @@
     "thumbnail": "img/stories/01/cover.jpg",
     "excerpt": "E-book 22권을 내고 1년을 다시 준비했다. 마침내 종이 위에 새겨진 5ft.mag 정식 창간호. 그 안에 무엇이 담겼는지 살짝 들여다본다.",
     "page": "stories/01.html",
-    "published": true
+    "published": true,
+    "manual": true
   }
 ]

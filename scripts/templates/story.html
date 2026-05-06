@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{TITLE}} — 5ft.mag</title>
+  <!-- SEO & Social Sharing -->
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="https://www.5ftmag.com/stories/{{ID}}.html">
+
+  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="../rss.xml">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{TITLE}} — 5ft.mag">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:image" content="https://www.5ftmag.com/{{HERO_ABS}}">
+  <meta property="og:url" content="https://www.5ftmag.com/stories/{{ID}}.html">
+  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{TITLE}} — 5ft.mag">
+  <meta name="twitter:description" content="{{DESCRIPTION}}">
+  <meta name="twitter:image" content="https://www.5ftmag.com/{{HERO_ABS}}">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../img/favicon/icon-16.png">
+  <link rel="shortcut icon" href="../img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/icon-180.png">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/article.css">
+
+  <!-- Schema.org NewsArticle -->
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "{{TITLE}}",
+  "description": "{{DESCRIPTION}}",
+  "image": [
+    "https://www.5ftmag.com/{{HERO_ABS}}"
+  ],
+  "datePublished": "{{DATE_ISO}}",
+  "author": {
+    "@type": "Person",
+    "name": "{{AUTHOR}}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "5ft.mag",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.5ftmag.com/img/favicon/icon-512.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.5ftmag.com/stories/{{ID}}.html"
+  },
+  "articleSection": "{{CATEGORY_LABEL}}",
+  "inLanguage": "ko-KR"
+}
+  </script>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html" class="current">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../about.html#contributors">Contributors</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../about.html#contributors">Contributors</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<!-- ════════ 글 헤더 ════════ -->
+<article>
+  <div class="article-header">
+    <a href="../stories.html" class="article-back">← Stories</a>
+    <div class="article-meta">
+      <span class="article-tag issue">{{ISSUE}}</span>
+      <span class="article-tag">{{CATEGORY_LABEL}}</span>
+    </div>
+    <h1 class="article-title">{{TITLE}}</h1>
+    <p class="article-subtitle">{{SUBTITLE}}</p>
+    <div class="article-author">
+      <span class="author-name">{{AUTHOR}}</span>
+      <span class="dot"></span>
+      <span class="date">{{DATE_DISPLAY}}</span>
+    </div>
+  </div>
+
+  <!-- 메인 이미지 -->
+  {{HERO_BLOCK}}
+
+  <!-- 본문 -->
+  <div class="article-body">
+{{BODY_HTML}}
+  </div>
+
+  <!-- 글 끝 -->
+  <div class="article-end">
+    <p class="article-signature">
+      <span class="role">기획 · 편집</span>{{AUTHOR}}
+    </p>
+    <div class="share-bar">
+      <span class="share-label">SHARE</span>
+      <button onclick="copyLink()">링크 복사</button>
+      <a href="https://www.instagram.com/5ft.magazine" target="_blank" rel="noopener">Instagram ↗</a>
+    </div>
+  </div>
+</article>
+
+<!-- ════════ 목록으로 돌아가기 ════════ -->
+<nav class="article-nav" style="grid-template-columns: 1fr;">
+  <a href="../stories.html" class="prev-article" style="text-align: center;">
+    <span class="nav-label">← 목록으로</span>
+    <span class="nav-title">Stories 전체 보기</span>
+  </a>
+</nav>
+
+<!-- ════════ 연관 글 ════════ -->
+<section class="related-section" id="relatedSection" hidden>
+  <h3 class="related-title">함께 읽기 좋은 글</h3>
+  <div class="related-grid" id="relatedGrid"></div>
+</section>
+
+<!-- ════════ 푸터 위 협력사 로고 띠 ════════ -->
+<div class="footer-partners">
+  <span class="footer-partners-label">PARTNERS</span>
+  <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
+    <img src="../img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
+  </a>
+  <a href="https://instagram.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
+    <img src="../img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
+  </a>
+  <a href="https://www.youtube.com/@BRISNAPTV" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
+    <img src="../img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
+  </a>
+  <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+    <img src="../img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+  </a>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft.mag</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+  <span class="footer-copy">© 2024 5ft.mag</span>
+</footer>
+
+<script>
+  const themeBtn = document.getElementById('themeBtn');
+  const html = document.documentElement;
+  const saved = localStorage.getItem('5ftTheme') || 'light';
+  html.dataset.theme = saved;
+  themeBtn.textContent = saved === 'dark' ? '☀' : '☽';
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    themeBtn.textContent = next === 'dark' ? '☀' : '☽';
+    localStorage.setItem('5ftTheme', next);
+  });
+
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn.addEventListener('click', () => {
+    const open = mobileNav.classList.toggle('open');
+    menuBtn.textContent = open ? '✕' : '☰';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      menuBtn.textContent = '☰';
+    });
+  });
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert('링크가 복사되었어요!');
+    });
+  }
+</script>
+
+<script>
+  // 연관 글 추천 — 같은 카테고리/작가 글을 stories.json에서 찾아서 표시
+  (function() {
+    const CURRENT_ID = '{{ID}}';
+    const CURRENT_CATEGORY = '{{CATEGORY}}';
+    const CURRENT_AUTHOR = '{{AUTHOR}}';
+    const MAX_RELATED = 3;
+
+    fetch('../data/stories.json')
+      .then(res => res.json())
+      .then(stories => {
+        const candidates = stories
+          .filter(s => s.published !== false && s.id !== CURRENT_ID);
+
+        const scored = candidates.map(s => {
+          let score = 0;
+          if (s.author && s.author === CURRENT_AUTHOR) score += 3;
+          if (s.category === CURRENT_CATEGORY) score += 2;
+          score += new Date(s.date) / 1e13;
+          return { story: s, score };
+        }).sort((a, b) => b.score - a.score);
+
+        const selected = scored.slice(0, MAX_RELATED).map(x => x.story);
+        if (selected.length === 0) return;
+
+        const grid = document.getElementById('relatedGrid');
+        const section = document.getElementById('relatedSection');
+        if (!grid || !section) return;
+
+        grid.innerHTML = selected.map(s => {
+          const link = '../' + (s.page || '#');
+          const cat = (s.categoryLabel || s.category || '').toUpperCase();
+          const author = s.author ? s.author + ' — ' : '';
+
+          let imgBlock;
+          if (s.thumbnail) {
+            const webp = s.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+            imgBlock = `<div class="related-img">
+              <picture>
+                <source srcset="../${webp}" type="image/webp">
+                <img src="../${s.thumbnail}" loading="lazy" alt="${s.title}" />
+              </picture>
+            </div>`;
+          } else {
+            imgBlock = `<div class="related-img text-only">
+              <span class="related-img-title">${s.title}</span>
+            </div>`;
+          }
+
+          return `
+            <a href="${link}" class="related-card">
+              ${imgBlock}
+              <span class="related-cat">${cat}</span>
+              <h4 class="related-card-title">${s.title}</h4>
+              <p class="related-excerpt">${author}${s.excerpt || ''}</p>
+            </a>
+          `;
+        }).join('');
+
+        section.hidden = false;
+      })
+      .catch(err => console.error('연관 글 로드 실패:', err));
+  })();
+</script>
+
+<script src="../js/site-common.js"></script>
+</body>
+</html>
