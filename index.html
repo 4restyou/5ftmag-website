@@ -2032,10 +2032,8 @@
           const imgBlock = s.thumbnail
             ? `<div class="post-img">
                  <span class="post-label">${cardLabel}</span>
-                 <picture>
-                   <source srcset="${webpThumb}" type="image/webp">
-                   <img src="${s.thumbnail}" loading="lazy" alt="${s.title}" />
-                 </picture>
+                 <img src="${webpThumb}" data-fallback="${s.thumbnail}" loading="lazy" alt="${s.title}"
+                      onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />
                </div>`
             : `<div class="post-img text-only">
                  <span class="post-label">${cardLabel}</span>

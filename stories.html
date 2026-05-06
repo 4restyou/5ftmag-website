@@ -674,10 +674,8 @@
     const webpThumb = story.thumbnail ? story.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
     const imgBlock = story.thumbnail
       ? `<div class="article-img">
-           <picture>
-             <source srcset="${webpThumb}" type="image/webp">
-             <img src="${story.thumbnail}" loading="lazy" alt="${story.title}" />
-           </picture>
+           <img src="${webpThumb}" data-fallback="${story.thumbnail}" loading="lazy" alt="${story.title}"
+                onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />
            ${issueBadge}
          </div>`
       : `<div class="article-img text-only">
