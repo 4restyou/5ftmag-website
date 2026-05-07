@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>그레인은 노이즈가 아니다 — 필름이 새긴 10편의 시네마 — 5ft.mag</title>
+  <!-- SEO & Social Sharing -->
+  <meta name="description" content="디지털의 무결점에는 '감정'이 없다. 〈캐롤〉의 16mm 겨울 공기부터 〈오펜하이머〉의 묵직한 흑백 IMAX까지, 필름이 빛으로 새긴 10편의 시네마. Vol.02 〈Feature〉에서 다룬 영화 중 다섯 편을 먼저 만나본다.">
+  <link rel="canonical" href="https://www.5ftmag.com/stories/11.html">
+
+  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="../rss.xml">
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="그레인은 노이즈가 아니다 — 필름이 새긴 10편의 시네마 — 5ft.mag">
+  <meta property="og:description" content="디지털의 무결점에는 '감정'이 없다. 필름이 빛으로 새긴 10편의 시네마.">
+  <meta property="og:image" content="https://www.5ftmag.com/img/stories/11/cover.jpg">
+  <meta property="og:url" content="https://www.5ftmag.com/stories/11.html">
+  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="그레인은 노이즈가 아니다 — 필름이 새긴 10편의 시네마 — 5ft.mag">
+  <meta name="twitter:description" content="디지털의 무결점에는 '감정'이 없다. 필름이 빛으로 새긴 10편의 시네마.">
+  <meta name="twitter:image" content="https://www.5ftmag.com/img/stories/11/cover.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../img/favicon/icon-16.png">
+  <link rel="shortcut icon" href="../img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../img/favicon/icon-180.png">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/article.css">
+  <style>
+    /* ── 영화 포스터 그리드 ── */
+    .poster-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin: 40px 0;
+    }
+    .poster-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .poster-item img {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      background: var(--bg-sub);
+      border-radius: 2px;
+    }
+    .poster-item .poster-num {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      font-weight: var(--fw-heading);
+    }
+    .poster-item .poster-title {
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--text);
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.01em;
+    }
+    .poster-item .poster-year {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    @media (max-width: 900px) {
+      .poster-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    }
+    @media (max-width: 480px) {
+      .poster-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    }
+
+    /* ── 영화 본문 카드 ── */
+    .film-card {
+      margin: 56px 0;
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+    .film-card-poster {
+      max-width: 280px;
+      margin: 0 auto 24px;
+    }
+    .film-card-poster img {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      background: var(--bg-sub);
+      border-radius: 2px;
+    }
+    .film-card-tag {
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+      text-align: center;
+    }
+    .film-card-title {
+      font-size: 28px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .film-card-orig {
+      font-size: 14px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .film-card-quote {
+      font-size: 18px;
+      font-style: italic;
+      color: var(--text);
+      text-align: center;
+      max-width: 540px;
+      margin: 0 auto 24px;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+    }
+    .film-card-info {
+      background: var(--bg-sub);
+      padding: 24px;
+      border-radius: 4px;
+      margin-top: 24px;
+      display: grid;
+      gap: 16px;
+    }
+    .film-card-info-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 14px;
+      align-items: baseline;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .film-card-info-row .label {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .film-card-info-row .value strong {
+      font-weight: var(--fw-heading);
+    }
+    @media (max-width: 640px) {
+      .film-card-title { font-size: 23px; }
+      .film-card-info-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+
+    /* ── 티저 리스트 (나머지 5편) ── */
+    .teaser-list {
+      list-style: none;
+      padding: 0;
+      margin: 24px 0;
+    }
+    .teaser-list li {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 20px;
+      align-items: baseline;
+    }
+    .teaser-list li:last-child { border-bottom: none; }
+    .teaser-list .teaser-year {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.06em;
+    }
+    .teaser-list .teaser-title {
+      font-size: 18px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.015em;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .teaser-list .teaser-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+
+  <!-- Schema.org NewsArticle -->
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "그레인은 노이즈가 아니다 — 필름이 새긴 10편의 시네마",
+  "description": "필름이 빛으로 새긴 10편의 시네마. Vol.02에서 다룬 영화 중 다섯 편을 먼저 만나본다.",
+  "image": ["https://www.5ftmag.com/img/stories/11/cover.jpg"],
+  "datePublished": "2026-02-08",
+  "author": { "@type": "Organization", "name": "Film Social Club" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "5ft.mag",
+    "logo": { "@type": "ImageObject", "url": "https://www.5ftmag.com/img/favicon/icon-512.png" }
+  },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.5ftmag.com/stories/11.html" },
+  "articleSection": "Feature",
+  "inLanguage": "ko-KR"
+}
+  </script>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html" class="current">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../about.html#contributors">Contributors</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../about.html#contributors">Contributors</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<!-- ════════ 글 헤더 ════════ -->
+<article>
+  <div class="article-header">
+    <a href="../stories.html" class="article-back">← Stories</a>
+    <div class="article-meta">
+      <span class="article-tag issue">Vol.02</span>
+      <span class="article-tag">FEATURE</span>
+    </div>
+    <h1 class="article-title">그레인은 노이즈가 아니다</h1>
+    <p class="article-subtitle">필름이 빛으로 새긴 10편의 시네마. Vol.02 〈Feature〉에서 다룬 영화 중 다섯 편을 먼저 펼쳐본다.</p>
+    <div class="article-author">
+      <span class="author-name">Film Social Club</span>
+      <span class="dot"></span>
+      <span class="date">2026.02.08</span>
+    </div>
+  </div>
+
+  <!-- 메인 이미지 -->
+  <div class="article-hero">
+    <img src="../img/stories/11/cover.jpg" alt="필름이 새긴 10편의 시네마 — 메인 이미지" loading="lazy" />
+  </div>
+
+  <!-- 본문 -->
+  <div class="article-body">
+
+    <p class="lead">"디지털의 무결점에는 감정이 없다."</p>
+
+    <p>디지털 신호가 세상을 지배하는 시대, 최신의 센서는 눈앞의 풍경을 노이즈 하나 없이 완벽하게 복제해 낸다. 하지만 빠르고 효율적인 것이 정답이 된 이 세상에서, 여전히 차가운 메모리 카드 대신 묵직한 필름 매거진을 카메라에 장전하는 창작자들이 있다.</p>
+
+    <p>픽셀로 쪼개진 매끈한 이미지에는 결코 담기지 않는, 오직 화학 반응만이 만들어낼 수 있는 우연과 필연의 미학. 불규칙하게 끓어오르는 필름의 그레인은 마치 인물의 거친 숨소리처럼 화면을 진동시키고, 투박한 색감은 이야기의 질감을 비로소 완성한다.</p>
+
+    <p>Vol.02 〈Feature〉에서 5ft.mag은 필름으로 기록된 10편의 영화를 엄선했다. <strong>〈캐롤〉의 서늘한 겨울 공기부터 〈플로리다 프로젝트〉의 끓어오르는 여름 햇살, 〈중경삼림〉의 텅스텐 야경, 그리고 〈오펜하이머〉의 묵직한 흑백 IMAX 필름까지.</strong> 거장들이 빛을 다루는 방식을 당신의 뷰파인더 안으로 가져올 10가지 영화의 기록.</p>
+
+    <h2>10편의 시네마 한눈에</h2>
+
+    <div class="poster-grid">
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-01.png" alt="캐롤 포스터" loading="lazy" />
+        <span class="poster-num">01</span>
+        <span class="poster-title">캐롤</span>
+        <span class="poster-year">Carol · 2015</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-02.png" alt="미드 90 포스터" loading="lazy" />
+        <span class="poster-num">02</span>
+        <span class="poster-title">미드 90</span>
+        <span class="poster-year">Mid90s · 2018</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-03.png" alt="플로리다 프로젝트 포스터" loading="lazy" />
+        <span class="poster-num">03</span>
+        <span class="poster-title">플로리다 프로젝트</span>
+        <span class="poster-year">The Florida Project · 2017</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-04.png" alt="해피 투게더 포스터" loading="lazy" />
+        <span class="poster-num">04</span>
+        <span class="poster-title">해피 투게더</span>
+        <span class="poster-year">Happy Together · 1997</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-05.png" alt="콜 미 바이 유어 네임 포스터" loading="lazy" />
+        <span class="poster-num">05</span>
+        <span class="poster-title">콜 미 바이 유어 네임</span>
+        <span class="poster-year">Call Me by Your Name · 2017</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-06.png" alt="파리, 텍사스 포스터" loading="lazy" />
+        <span class="poster-num">06</span>
+        <span class="poster-title">파리, 텍사스</span>
+        <span class="poster-year">Paris, Texas · 1984</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-07.png" alt="메리지 스토리 포스터" loading="lazy" />
+        <span class="poster-num">07</span>
+        <span class="poster-title">메리지 스토리</span>
+        <span class="poster-year">Marriage Story · 2019</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-08.png" alt="중경삼림 포스터" loading="lazy" />
+        <span class="poster-num">08</span>
+        <span class="poster-title">중경삼림</span>
+        <span class="poster-year">Chungking Express · 1994</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-09.png" alt="애스터로이드 시티 포스터" loading="lazy" />
+        <span class="poster-num">09</span>
+        <span class="poster-title">애스터로이드 시티</span>
+        <span class="poster-year">Asteroid City · 2023</span>
+      </div>
+      <div class="poster-item">
+        <img src="../img/stories/11/poster-10.png" alt="오펜하이머 포스터" loading="lazy" />
+        <span class="poster-num">10</span>
+        <span class="poster-title">오펜하이머</span>
+        <span class="poster-year">Oppenheimer · 2023</span>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: -16px;">사용된 모든 이미지는 Google Gemini를 이용해 제작되었습니다.</p>
+
+    <h2>다섯 편을 먼저 펼친다</h2>
+
+    <p>10편 중 다섯 편의 빛을 먼저 살펴본다. 각 영화의 사용 필름과 가장 비슷한 결을 만드는 추천 필름, 그리고 그 분위기를 카메라에 옮기는 팁까지.</p>
+
+    <!-- 캐롤 -->
+    <div class="film-card">
+      <span class="film-card-tag">No.01 · Romance / Period Drama</span>
+      <div class="film-card-poster">
+        <img src="../img/stories/11/poster-01.png" alt="캐롤 포스터" loading="lazy" />
+      </div>
+      <h3 class="film-card-title">캐롤</h3>
+      <p class="film-card-orig">Carol · 2015</p>
+      <p class="film-card-quote">하늘에서 떨어진 기적, 나의 천사.</p>
+      <p>1950년대 뉴욕, 백화점 점원과 매혹적인 손님의 운명적이고 금지된 사랑을 다룬다. 차가운 겨울 공기 속에서 피어오르는 감정을 16mm 필름으로 섬세하게 포착했다.</p>
+      <div class="film-card-info">
+        <div class="film-card-info-row">
+          <span class="label">사용 필름</span>
+          <span class="value">Kodak Vision3 500T 7219, 250D 7207, 50D 7203, 200T 7213</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">추천 필름</span>
+          <span class="value"><strong>Lomography 800</strong> — 16mm 필름 특유의 거친 입자감과 붉은 기가 도는 빈티지한 색감을 가장 비슷하게 재현합니다.</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">촬영 팁</span>
+          <span class="value">비 내리는 차 안이나 김 서린 창문 등 '유리'를 통해 피사체를 바라보세요. 사울 레이터의 사진처럼 몽환적인 굴절을 담을 수 있습니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 플로리다 프로젝트 -->
+    <div class="film-card">
+      <span class="film-card-tag">No.03 · Drama / Coming-of-age</span>
+      <div class="film-card-poster">
+        <img src="../img/stories/11/poster-03.png" alt="플로리다 프로젝트 포스터" loading="lazy" />
+      </div>
+      <h3 class="film-card-title">플로리다 프로젝트</h3>
+      <p class="film-card-orig">The Florida Project · 2017</p>
+      <p class="film-card-quote">가장 환상적인 곳 옆, 가장 현실적인 삶.</p>
+      <p>디즈니월드 옆 허름한 모텔에 사는 6살 무니의 눈으로 본 세상. 아이들의 천진난만함과 냉혹한 빈곤의 현실을 팝아트 같은 강렬한 색채 대비로 담았다.</p>
+      <div class="film-card-info">
+        <div class="film-card-info-row">
+          <span class="label">사용 필름</span>
+          <span class="value">Kodak Vision3 250D 7207, 50D 7203</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">추천 필름</span>
+          <span class="value"><strong>Kodak Portra 160</strong> — 밝은 노출에서 파스텔톤의 화사하고 부드러운 색감을 만들어 줍니다. '동화 같은 현실'을 찍고 싶을 때.</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">촬영 팁</span>
+          <span class="value">맑은 날 정오의 순광(해를 등지고 찍기)을 활용하세요. 그림자는 진하게, 색은 선명하게 — 팝아트 같은 이미지를 만들 수 있습니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 콜 미 바이 유어 네임 -->
+    <div class="film-card">
+      <span class="film-card-tag">No.05 · Romance / Summer</span>
+      <div class="film-card-poster">
+        <img src="../img/stories/11/poster-05.png" alt="콜 미 바이 유어 네임 포스터" loading="lazy" />
+      </div>
+      <h3 class="film-card-title">콜 미 바이 유어 네임</h3>
+      <p class="film-card-orig">Call Me by Your Name · 2017</p>
+      <p class="film-card-quote">네 이름으로 나를 불러줘, 내 이름으로 너를 부를게.</p>
+      <p>1983년 이탈리아, 17세 소년과 24세 청년의 뜨거웠던 첫사랑의 기록. 그해 여름의 햇살과 나른한 공기까지 고스란히 필름에 담아냈다.</p>
+      <div class="film-card-info">
+        <div class="film-card-info-row">
+          <span class="label">사용 필름</span>
+          <span class="value">Kodak Vision3 500T 5219</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">추천 필름</span>
+          <span class="value"><strong>Kodak Gold 200</strong> — 따뜻한 황금빛 톤이 한여름의 이탈리아 햇살과 가장 닮았습니다. 일상의 여름을 영화처럼 만드는 필름.</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">촬영 팁</span>
+          <span class="value">늦은 오후의 사선광을 노리세요. 인물의 옆 얼굴, 길게 늘어진 그림자, 잎사귀 사이로 부서지는 빛 — 시간이 천천히 흐르는 장면이 완성됩니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 중경삼림 -->
+    <div class="film-card">
+      <span class="film-card-tag">No.08 · Romance / Hong Kong</span>
+      <div class="film-card-poster">
+        <img src="../img/stories/11/poster-08.png" alt="중경삼림 포스터" loading="lazy" />
+      </div>
+      <h3 class="film-card-title">중경삼림</h3>
+      <p class="film-card-orig">Chungking Express · 1994</p>
+      <p class="film-card-quote">사랑에 유통기한이 있다면, 만 년으로 하고 싶다.</p>
+      <p>화려한 네온사인이 빛나는 홍콩의 밤, 스치고 엇갈리는 네 남녀의 고독과 로맨스. 감각적인 핸드헬드 촬영과 독특한 색감이 홍콩의 밤거리를 아름답게 수놓는다.</p>
+      <div class="film-card-info">
+        <div class="film-card-info-row">
+          <span class="label">사용 필름</span>
+          <span class="value">Agfa XT 320 (단종)</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">추천 필름</span>
+          <span class="value"><strong>Cinestill 800T</strong> — 영화용 텅스텐 필름을 사진용으로 만든 제품. 중경삼림 특유의 차갑고 신비로운 녹색 톤과 야간 조명의 번짐 효과를 완벽하게 구현합니다. <em>Vol.02 메인 필름.</em></span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">촬영 팁</span>
+          <span class="value">야간 촬영을 두려워하지 마세요. 거리의 간판, 쇼윈도의 불빛을 배경 삼아 차가운 톤의 인물 사진을 시도해 보세요.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오펜하이머 -->
+    <div class="film-card">
+      <span class="film-card-tag">No.10 · Biopic / Black & White</span>
+      <div class="film-card-poster">
+        <img src="../img/stories/11/poster-10.png" alt="오펜하이머 포스터" loading="lazy" />
+      </div>
+      <h3 class="film-card-title">오펜하이머</h3>
+      <p class="film-card-orig">Oppenheimer · 2023</p>
+      <p class="film-card-quote">나는 이제 죽음이요, 세상의 파괴자가 되었다.</p>
+      <p>핵무기 개발을 이끈 천재 과학자의 영광과 죄책감을 다룬 전기 영화. 흑백과 컬러를 오가는 세계 최초의 IMAX 흑백 필름 촬영으로 압도적인 몰입감을 선사한다.</p>
+      <div class="film-card-info">
+        <div class="film-card-info-row">
+          <span class="label">사용 필름</span>
+          <span class="value">Kodak Vision3 250D 5207, 500T 5219, Kodak Double-X 5222 (B&amp;W)</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">추천 필름</span>
+          <span class="value"><strong>Cinestill bwXX (Double-X)</strong> — 영화에서 사용된 흑백 필름 Double-X와 정확히 같은 종류. 진득한 블랙과 거친 질감을 그대로 느낄 수 있습니다.</span>
+        </div>
+        <div class="film-card-info-row">
+          <span class="label">촬영 팁</span>
+          <span class="value">흑백 사진에 도전해 보세요. 색이 사라진 자리에 피사체의 질감과 빛의 명암이 드러납니다. 콘트라스트를 높일수록 드라마틱해집니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>나머지 다섯 편은 매거진에서</h2>
+
+    <p>스케이트보드를 타고 90년대 LA의 거리를 누비는 소년의 거친 입자감, 부에노스아이레스의 끈적한 사랑, 사막을 가로지르는 로드무비, 차가운 법정 안의 따뜻한 코닥, 웨스 앤더슨의 강박적인 대칭 — 각자의 빛으로 새겨진 다섯 편의 영화 이야기는 Vol.02에 자세히 담겼다.</p>
+
+    <ul class="teaser-list">
+      <li>
+        <span class="teaser-year">2018</span>
+        <div>
+          <span class="teaser-title">미드 90 <small style="opacity:0.6; font-weight: var(--fw-all);">Mid90s</small></span>
+          <span class="teaser-desc">90년대 LA, 스케이트보드를 통해 세상과 부딪히며 성장하는 13살 소년 — 4:3 화면비와 거친 입자감.</span>
+        </div>
+      </li>
+      <li>
+        <span class="teaser-year">1997</span>
+        <div>
+          <span class="teaser-title">해피 투게더 <small style="opacity:0.6; font-weight: var(--fw-all);">Happy Together</small></span>
+          <span class="teaser-desc">아르헨티나에서 이별과 재회를 반복하는 연인 — 왕가위의 감각적인 영상미와 불안한 앵글.</span>
+        </div>
+      </li>
+      <li>
+        <span class="teaser-year">1984</span>
+        <div>
+          <span class="teaser-title">파리, 텍사스 <small style="opacity:0.6; font-weight: var(--fw-all);">Paris, Texas</small></span>
+          <span class="teaser-desc">사막에서 걸어 나온 남자, 기억을 찾아 길을 떠나는 로드무비 — 황량한 풍경과 네온의 독보적인 색감.</span>
+        </div>
+      </li>
+      <li>
+        <span class="teaser-year">2019</span>
+        <div>
+          <span class="teaser-title">메리지 스토리 <small style="opacity:0.6; font-weight: var(--fw-all);">Marriage Story</small></span>
+          <span class="teaser-desc">이혼을 통해 역설적으로 관계의 본질을 깨닫는 부부 — 코닥 필름의 따뜻한 질감.</span>
+        </div>
+      </li>
+      <li>
+        <span class="teaser-year">2023</span>
+        <div>
+          <span class="teaser-title">애스터로이드 시티 <small style="opacity:0.6; font-weight: var(--fw-all);">Asteroid City</small></span>
+          <span class="teaser-desc">웨스 앤더슨 감독의 강박적인 대칭 구도와 파스텔톤 색감 — 1955년 가상의 사막 도시.</span>
+        </div>
+      </li>
+    </ul>
+
+    <p>각 영화의 사용 필름, 추천 필름, 그리고 그 무드를 카메라에 옮기는 디테일한 촬영 팁은 5ft.mag Vol.02의 〈Feature〉 코너에서 만날 수 있다.</p>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <span class="cta-box-tag">Get Vol.02</span>
+      <h3 class="cta-box-title">남은 다섯 편의 빛, 매거진에서</h3>
+      <p class="cta-box-desc">10편 시네마의 전체 큐레이션과 시네스틸 800T가 담아낸 세 작가의 사진까지 — 종이 위에서 만나보세요.</p>
+      <div class="cta-box-buttons">
+        <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="cta-box-btn cta-box-btn-primary">스마트스토어에서 구매 →</a>
+        <a href="10.html" class="cta-box-btn cta-box-btn-secondary">Vol.02 미리보기 →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 글 끝 -->
+  <div class="article-end">
+    <p class="article-signature">
+      <span class="role">글</span>Film Social Club<br />
+      <span class="role">큐레이션</span>5ft.mag 편집부<br />
+      <span class="role">이미지</span>Google Gemini로 제작
+    </p>
+    <div class="share-bar">
+      <span class="share-label">SHARE</span>
+      <button onclick="copyLink()">링크 복사</button>
+      <a href="https://www.instagram.com/5ft.magazine" target="_blank" rel="noopener">Instagram ↗</a>
+    </div>
+  </div>
+</article>
+
+<!-- ════════ 목록으로 돌아가기 ════════ -->
+<nav class="article-nav" style="grid-template-columns: 1fr;">
+  <a href="../stories.html" class="prev-article" style="text-align: center;">
+    <span class="nav-label">← 목록으로</span>
+    <span class="nav-title">Stories 전체 보기</span>
+  </a>
+</nav>
+
+<!-- ════════ 연관 글 ════════ -->
+<section class="related-section" id="relatedSection" hidden>
+  <h3 class="related-title">함께 읽기 좋은 글</h3>
+  <div class="related-grid" id="relatedGrid"></div>
+</section>
+
+<!-- ════════ 푸터 위 협력사 로고 띠 ════════ -->
+<div class="footer-partners">
+  <span class="footer-partners-label">PARTNERS</span>
+  <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
+    <img src="../img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
+  </a>
+  <a href="https://instagram.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
+    <img src="../img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
+  </a>
+  <a href="https://www.youtube.com/@BRISNAPTV" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
+    <img src="../img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
+  </a>
+  <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
+    <img src="../img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+    <img src="../img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+  </a>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft.mag</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+  <span class="footer-copy">© 2026 5ft.mag</span>
+</footer>
+
+<script>
+  const themeBtn = document.getElementById('themeBtn');
+  const html = document.documentElement;
+  const saved = localStorage.getItem('5ftTheme') || 'light';
+  html.dataset.theme = saved;
+  themeBtn.textContent = saved === 'dark' ? '☀' : '☽';
+  themeBtn.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    themeBtn.textContent = next === 'dark' ? '☀' : '☽';
+    localStorage.setItem('5ftTheme', next);
+  });
+
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn.addEventListener('click', () => {
+    const open = mobileNav.classList.toggle('open');
+    menuBtn.textContent = open ? '✕' : '☰';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      menuBtn.textContent = '☰';
+    });
+  });
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert('링크가 복사되었어요!');
+    });
+  }
+</script>
+
+<script>
+  // 연관 글 추천
+  (function() {
+    const CURRENT_ID = '11';
+    const CURRENT_CATEGORY = 'review';
+    const CURRENT_AUTHOR = 'Film Social Club';
+    const MAX_RELATED = 3;
+
+    fetch('../data/stories.json')
+      .then(res => res.json())
+      .then(stories => {
+        const candidates = stories.filter(s => s.published !== false && s.id !== CURRENT_ID);
+        const scored = candidates.map(s => {
+          let score = 0;
+          if (s.author && s.author === CURRENT_AUTHOR) score += 3;
+          if (s.category === CURRENT_CATEGORY) score += 2;
+          score += new Date(s.date) / 1e13;
+          return { story: s, score };
+        }).sort((a, b) => b.score - a.score);
+
+        const selected = scored.slice(0, MAX_RELATED).map(x => x.story);
+        if (selected.length === 0) return;
+
+        const grid = document.getElementById('relatedGrid');
+        const section = document.getElementById('relatedSection');
+        if (!grid || !section) return;
+
+        grid.innerHTML = selected.map(s => {
+          const link = '../' + (s.page || '#');
+          const cat = (s.categoryLabel || s.category || '').toUpperCase();
+          const author = s.author ? s.author + ' — ' : '';
+          let imgBlock;
+          if (s.thumbnail) {
+            const webp = s.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+            imgBlock = `<div class="related-img"><img src="${webp}" data-fallback="${s.thumbnail}" loading="lazy" alt="${s.title}" onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src='../'+this.dataset.fallback}" /></div>`;
+          } else {
+            imgBlock = `<div class="related-img text-only"><span class="related-img-title">${s.title}</span></div>`;
+          }
+          return `<a href="${link}" class="related-card">${imgBlock}<span class="related-cat">${cat}</span><h4 class="related-card-title">${s.title}</h4><p class="related-excerpt">${author}${s.excerpt || ''}</p></a>`;
+        }).join('');
+
+        section.hidden = false;
+      })
+      .catch(err => console.error('연관 글 로드 실패:', err));
+  })();
+</script>
+
+<script src="../js/site-common.js"></script>
+</body>
+</html>

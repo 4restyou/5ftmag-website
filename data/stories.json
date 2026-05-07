@@ -1,5 +1,19 @@
 [
   {
+    "id": "11",
+    "title": "그레인은 노이즈가 아니다 — 필름이 새긴 10편의 시네마",
+    "category": "review",
+    "categoryLabel": "FEATURE",
+    "author": "Film Social Club",
+    "date": "2026-02-08",
+    "issue": "Vol.02",
+    "thumbnail": "img/stories/11/cover.jpg",
+    "excerpt": "디지털의 무결점에는 '감정'이 없다. 〈캐롤〉의 16mm 겨울 공기부터 〈오펜하이머〉의 묵직한 흑백 IMAX까지, 필름이 빛으로 새긴 10편의 시네마. Vol.02 〈Feature〉에서 다룬 영화 중 다섯 편을 먼저 만나본다.",
+    "page": "stories/11.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "10",
     "title": "Vol.02, 무엇이 담겼나",
     "category": "review",
