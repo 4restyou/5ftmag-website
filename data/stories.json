@@ -1,5 +1,19 @@
 [
   {
+    "id": "10",
+    "title": "Vol.02, 무엇이 담겼나",
+    "category": "review",
+    "categoryLabel": "EDITORIAL",
+    "author": "5ft.mag 편집부",
+    "date": "2026-02-01",
+    "issue": "Vol.02",
+    "thumbnail": "img/stories/10/cover.jpg",
+    "excerpt": "두 번째 이야기. 시네스틸 800T가 펼치는, 당신의 공간 — 그 장르는 무엇인가. 노애경, 박순렬, 장형수 작가의 사진과 신노구치 작가 인터뷰까지 — Vol.02 콘텐츠 전체 미리보기.",
+    "page": "stories/10.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "09",
     "title": "5월, 사진을 보러 가는 길",
     "category": "exhibition",

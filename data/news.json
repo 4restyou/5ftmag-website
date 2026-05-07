@@ -1,5 +1,16 @@
 [
   {
+    "id": "02",
+    "tag": "Release",
+    "title": "Vol.02 두 번째 호 발행",
+    "date": "2026-02-01",
+    "thumbnail": "img/stories/10/cover.jpg",
+    "link": "stories/10.html",
+    "external": false,
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "01",
     "tag": "Release",
     "title": "Vol.01 창간호 발행",
