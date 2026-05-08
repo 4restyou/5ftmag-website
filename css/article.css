@@ -610,3 +610,218 @@
       .related-card .related-card-title { font-size: 15px; }
       .related-card .related-excerpt { display: none; }
     }
+
+/* ════════════════════════════════════
+   통합 마이그레이션 (stories 02-08 unique components)
+   ════════════════════════════════════ */
+
+
+/* — story 02 unique — */
+.article-hero.portrait {
+      max-width: 720px;
+      margin: 24px auto 56px;
+      padding: 0 24px;
+    }
+
+.article-hero.portrait img {
+      width: 100%;
+      height: auto;
+      max-height: 90vh;
+      object-fit: contain;
+      background: transparent;
+    }
+
+.qa-block {
+      margin: 40px 0;
+      padding: 28px 32px;
+      background: var(--bg-sub);
+      border-radius: 4px;
+      border-left: 3px solid var(--text);
+    }
+
+.qa-question {
+      font-size: 13px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+.qa-question-text {
+      font-size: 17px;
+      font-weight: var(--fw-heading);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+.qa-answer {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+.qa-answer p { margin-bottom: 12px; font-size: 16px; }
+
+.qa-answer p:last-child { margin-bottom: 0; }
+
+.qa-block.locked {
+      position: relative;
+      overflow: hidden;
+    }
+
+.qa-block.locked .qa-answer {
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+      max-height: 80px;
+      overflow: hidden;
+    }
+
+.qa-locked-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 24px 32px;
+      background: linear-gradient(to top, var(--bg-sub) 60%, transparent);
+      text-align: center;
+    }
+
+.qa-locked-overlay .lock-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+.qa-locked-overlay .lock-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+    }
+
+.series-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 40px 0;
+      align-items: start;
+    }
+
+.series-gallery figure {
+      margin: 0;
+    }
+
+.series-gallery img {
+      width: 100%;
+      height: auto;
+      /* 원본 비율 유지 — 작가 사진을 자르지 않습니다 */
+      background: transparent;
+      display: block;
+    }
+
+.artist-card {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 24px;
+      background: var(--bg-sub);
+      border-radius: 4px;
+      margin: 40px 0;
+    }
+
+.artist-card-photo {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--border);
+    }
+
+.artist-card-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+.artist-card-info {
+      flex: 1;
+    }
+
+.artist-card-name {
+      font-size: 18px;
+      font-weight: var(--fw-heading);
+      margin-bottom: 4px;
+    }
+
+.artist-card-bio {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+
+/* — story 03 unique — */
+.article-header.no-hero {
+      padding: 96px 24px 64px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+
+.article-header.no-hero .article-title {
+      font-size: 56px;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+    }
+
+.article-header.no-hero .article-subtitle {
+      font-size: 22px;
+      line-height: 1.55;
+    }
+
+
+/* — story 05 unique — */
+.article-body figure.product-shot {
+      margin: 40px 0;
+      background: var(--bg-sub);
+      padding: 24px;
+    }
+
+.article-body figure.product-shot img {
+      max-height: 480px;
+      object-fit: contain;
+      margin: 0 auto;
+    }
+
+.article-body figure.product-pair {
+      margin: 40px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+.article-body figure.product-pair > picture {
+      background: var(--bg-sub);
+      padding: 20px;
+      display: block;
+    }
+
+.article-body figure.product-pair img {
+      width: 100%;
+      height: 320px;
+      object-fit: contain;
+      display: block;
+    }
+
+.article-body figure.product-pair figcaption {
+      grid-column: 1 / -1;
+    }
+
+@media (max-width: 600px) {
+      .article-body figure.product-pair {
+        grid-template-columns: 1fr;
+      }
+      .article-body figure.product-pair img {
+        height: 260px;
+      }
+    }

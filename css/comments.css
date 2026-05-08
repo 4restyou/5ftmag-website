@@ -69,8 +69,6 @@
 }
 .cm-btn-primary:hover { opacity: 0.85; }
 .cm-btn-google { background: var(--bg); }
-.cm-btn-kakao { background: #FEE500; color: #000; border-color: #FEE500; }
-.cm-btn-kakao:hover { border-color: #000; }
 
 .cm-btn-link {
   background: none;

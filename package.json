@@ -5,8 +5,9 @@
   "type": "module",
   "description": "5ft.mag — 필름 매거진 웹사이트",
   "scripts": {
-    "build": "node scripts/build-from-notion.mjs",
-    "build:dry": "DRY_RUN=1 node scripts/build-from-notion.mjs"
+    "build": "node scripts/build-from-notion.mjs && node scripts/build-rss.mjs",
+    "build:dry": "DRY_RUN=1 node scripts/build-from-notion.mjs",
+    "build:rss": "node scripts/build-rss.mjs"
   },
   "engines": {
     "node": ">=18"

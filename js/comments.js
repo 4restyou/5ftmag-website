@@ -142,12 +142,6 @@
   // ════════════════════════════════════════════════════════════
   function renderAuthBar() {
     if (!STATE.user) {
-      // Kakao 버튼은 OIDC 셋업 정상화될 때까지 비활성화 (다음 줄 주석 해제하면 다시 표시)
-      const kakaoBtn = ''; /* `
-        <button class="cm-btn cm-btn-kakao" data-action="login-kakao">
-          <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 1.5C4.86 1.5 1.5 4.18 1.5 7.49c0 2.13 1.4 3.99 3.5 5.05l-.88 3.21c-.07.27.22.49.45.34l3.83-2.55c.2.02.4.04.6.04 4.14 0 7.5-2.68 7.5-5.99S13.14 1.5 9 1.5z" fill="#000"/></svg>
-          Kakao
-        </button>` */
       return `
         <div class="cm-auth">
           <span class="cm-auth-text">댓글을 작성하려면 로그인하세요</span>
@@ -156,7 +150,6 @@
               <svg viewBox="0 0 18 18" width="14" height="14"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.78 2.72v2.26h2.88c1.69-1.55 2.66-3.84 2.66-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.88-2.26c-.8.54-1.83.86-3.07.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.34A8.99 8.99 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.3-1.71V4.96H.96A8.99 8.99 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.97 8.97 0 0 0 9 0C5.48 0 2.44 2.02.96 4.96l3 2.34C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
               Google로 계속하기
             </button>
-            ${kakaoBtn}
           </div>
         </div>`;
     }
@@ -272,7 +265,6 @@
     const action = btn.dataset.action;
 
     if (action === 'login-google') return loginWith('google');
-    if (action === 'login-kakao')  return loginWith('kakao');
     if (action === 'logout')       return logout();
 
     if (action === 'like') {

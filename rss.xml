@@ -6,7 +6,7 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Mon, 04 May 2026 01:54:24 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 08 May 2026 03:34:29 GMT</lastBuildDate>
     <generator>5ft.mag</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
@@ -14,10 +14,64 @@
       <link>https://www.5ftmag.com</link>
     </image>
     <item>
+      <title>5월, 사진을 보러 가는 길</title>
+      <link>https://www.5ftmag.com/stories/09.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/09.html</guid>
+      <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
+      <description>5월, 봄이 짧기에 미술관은 부지런하다. 서울사진축제 〈컴백홈〉부터 GCP 개관전, 성곡미술관 프랑스 사진전, 그리고 최랄라 개인전까지 — 같은 시간 위에 머무는 네 개의 시선.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>그레인은 노이즈가 아니다 — 필름이 새긴 10편의 시네마</title>
+      <link>https://www.5ftmag.com/stories/11.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/11.html</guid>
+      <pubDate>Sun, 08 Feb 2026 00:00:00 GMT</pubDate>
+      <description>디지털의 무결점에는 &apos;감정&apos;이 없다. 〈캐롤〉의 16mm 겨울 공기부터 〈오펜하이머〉의 묵직한 흑백 IMAX까지, 필름이 빛으로 새긴 10편의 시네마. Vol.02 〈Feature〉에서 다룬 영화 중 다섯 편을 먼저 만나본다.</description>
+      <category>FEATURE</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
+    <item>
+      <title>Vol.02, 무엇이 담겼나</title>
+      <link>https://www.5ftmag.com/stories/10.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/10.html</guid>
+      <pubDate>Sun, 01 Feb 2026 00:00:00 GMT</pubDate>
+      <description>두 번째 이야기. 시네스틸 800T가 펼치는, 당신의 공간 — 그 장르는 무엇인가. 노애경, 박순렬, 장형수 작가의 사진과 신노구치 작가 인터뷰까지 — Vol.02 콘텐츠 전체 미리보기.</description>
+      <category>EDITORIAL</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>세 명의 사진가, 세 개의 빛</title>
+      <link>https://www.5ftmag.com/stories/08.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/08.html</guid>
+      <pubDate>Fri, 20 Dec 2024 00:00:00 GMT</pubDate>
+      <description>5ft.mag Vol.01에 참여한 노애경, 박순렬, 장형수 작가의 대표 사진과 작업노트 일부를 따라가 보는 짧은 소개.</description>
+      <category>PHOTO</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>빛과 그림자가 남긴 여운</title>
+      <link>https://www.5ftmag.com/stories/07.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/07.html</guid>
+      <pubDate>Wed, 18 Dec 2024 00:00:00 GMT</pubDate>
+      <description>유튜브 〈수집의 수집〉을 운영하고 서울에서 다큐를 만들고 있는 윤동규 PD가 아이들과 빛, 그리고 우연히 찾아온 좋은 장면에 대해 쓴 에세이.</description>
+      <category>ESSAY</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">윤동규</dc:creator>
+    </item>
+    <item>
+      <title>창간호를 사면 함께 오는 두 가지 굿즈</title>
+      <link>https://www.5ftmag.com/stories/06.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/06.html</guid>
+      <pubDate>Mon, 16 Dec 2024 00:00:00 GMT</pubDate>
+      <description>5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.</description>
+      <category>GOODS</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
       <title>Pentax 17, 당신의 첫 필름카메라로 충분히 괜찮다</title>
       <link>https://www.5ftmag.com/stories/05.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/05.html</guid>
-      <pubDate>Tue, 10 Dec 2024 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 10 Dec 2024 00:00:00 GMT</pubDate>
       <description>2024년, 펜탁스가 새 필름카메라를 만들었다. 하프 프레임 72컷, 가벼운 보디, 부담 없는 가격. Brisnap TV가 직접 써본 Pentax 17의 첫인상.</description>
       <category>CAMERA REVIEW</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Brisnap TV</dc:creator>
@@ -26,7 +80,7 @@
       <title>별일없음에 행복을 느끼는 이유</title>
       <link>https://www.5ftmag.com/stories/04.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/04.html</guid>
-      <pubDate>Mon, 02 Dec 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 02 Dec 2024 00:00:00 GMT</pubDate>
       <description>조용한 추석 첫날, 엄마와 함께 절을 다녀오는 길. 노을이 내려앉은 차창 너머에서 김현아 작가가 발견한 빛과 그림자의 차분한 합.</description>
       <category>ESSAY</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">김현아</dc:creator>
@@ -35,8 +89,8 @@
       <title>낭만 조작 아이템</title>
       <link>https://www.5ftmag.com/stories/03.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/03.html</guid>
-      <pubDate>Mon, 25 Nov 2024 00:00:00 +0000</pubDate>
-      <description>필름 카메라의 낡고 자글한 색감은 오늘의 풍경을 10년 전 추억으로 바꿔놓는다. 김현아 작가가 부르는 그 마법의 이름, '낭만 조작'.</description>
+      <pubDate>Mon, 25 Nov 2024 00:00:00 GMT</pubDate>
+      <description>필름 카메라의 낡고 자글한 색감은 오늘의 풍경을 10년 전 추억으로 바꿔놓는다. 김현아 작가가 부르는 그 마법의 이름, &apos;낭만 조작&apos;.</description>
       <category>ESSAY</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">김현아</dc:creator>
     </item>
@@ -44,7 +98,7 @@
       <title>고시텔의 작가, 심규동을 만나다</title>
       <link>https://www.5ftmag.com/stories/02.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/02.html</guid>
-      <pubDate>Wed, 20 Nov 2024 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 20 Nov 2024 00:00:00 GMT</pubDate>
       <description>사진집 〈고시텔〉로 데뷔한 심규동 작가. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까. 창간호 인터뷰 미리보기.</description>
       <category>INTERVIEW</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
@@ -53,7 +107,7 @@
       <title>창간호, 무엇이 담겼나</title>
       <link>https://www.5ftmag.com/stories/01.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/01.html</guid>
-      <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 15 Nov 2024 00:00:00 GMT</pubDate>
       <description>E-book 22권을 내고 1년을 다시 준비했다. 마침내 종이 위에 새겨진 5ft.mag 정식 창간호. 그 안에 무엇이 담겼는지 살짝 들여다본다.</description>
       <category>EDITORIAL</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
