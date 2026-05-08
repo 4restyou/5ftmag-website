@@ -825,3 +825,45 @@
         height: 260px;
       }
     }
+
+
+/* ════════════════════════════════════
+   Vol.02 essay color override
+   Vol.02 메인 컬러 = 옅은 빨강 (Vol.01 옅은 노랑과 동일한 톤)
+   ════════════════════════════════════ */
+.vol02-essay {
+  --accent: #d94a4a;            /* 메인 빨강 */
+  --accent-soft: #fadcdc;       /* 50% 옅은 빨강 — 헤더 배경용 */
+  --accent-text: #ffffff;
+}
+[data-theme="dark"] .vol02-essay {
+  --accent: #e85a5a;
+  --accent-soft: #4a2828;
+  --accent-text: #ffffff;
+}
+.vol02-essay .article-header.no-hero {
+  background: var(--accent-soft);
+  border-bottom: none;
+  margin-bottom: 0;
+}
+.vol02-essay .article-header.no-hero .article-tag {
+  color: #6b1f1f;
+}
+[data-theme="dark"] .vol02-essay .article-header.no-hero .article-tag {
+  color: #f4c0c0;
+}
+.vol02-essay .article-header.no-hero .article-tag.issue {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.vol02-essay .article-body { padding-top: 56px; }
+
+/* Vol.02 essay listing card (썸네일 없을 때 옅은 빨강 배경) */
+.article-card[data-issue="Vol.02"][data-category="essay"] .article-img.text-only,
+.related-card[data-issue="Vol.02"][data-category="essay"] .related-img.text-only {
+  background: #fadcdc;
+}
+.article-card[data-issue="Vol.02"][data-category="essay"] .article-img.text-only .text-card-title,
+.article-card[data-issue="Vol.02"][data-category="essay"] .article-img.text-only .text-card-mark {
+  color: #6b1f1f;
+}

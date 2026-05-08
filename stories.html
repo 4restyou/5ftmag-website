@@ -688,7 +688,7 @@
          </div>`;
 
     return `
-      <a href="${link}" class="article-card" data-category="${story.category}">
+      <a href="${link}" class="article-card" data-category="${story.category}" data-issue="${story.issue || ''}">
         ${imgBlock}
         <span class="article-category">${categoryLabel(story)}</span>
         <h2 class="article-title">${story.title}</h2>

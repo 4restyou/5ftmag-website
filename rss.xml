@@ -6,13 +6,31 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Fri, 08 May 2026 15:42:23 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 08 May 2026 16:33:07 GMT</lastBuildDate>
     <generator>5ft.mag</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft.mag</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>일상물 같길 바라는 30대 연애</title>
+      <link>https://www.5ftmag.com/stories/17.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/17.html</guid>
+      <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
+      <description>20대의 영화 같은 사랑에서 30대의 잔잔한 일상물 같은 연애로. 쏟아내지 않는 만큼 차근히 모은 마음으로 충만히 좋아하는 방식.</description>
+      <category>ESSAY</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">김현아</dc:creator>
+    </item>
+    <item>
+      <title>CineStill 800T — 당신의 일상은 어떤 장르입니까?</title>
+      <link>https://www.5ftmag.com/stories/15.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/15.html</guid>
+      <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
+      <description>할리우드 영화용 필름 Kodak Vision3 500T가 C-41 현상소에서 쓸 수 있게 변종으로 태어났다. 붉은 할레이션과 ISO 800의 자유, 텅스텐의 양면성과 거친 그레인까지 — 일상을 영화의 한 장면으로 바꾸는 필름.</description>
+      <category>FILM REVIEW</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
     <item>
       <title>Shin Noguchi 인터뷰 — 거리에서 발견한 일상의 특별함</title>
       <link>https://www.5ftmag.com/stories/14.html</link>
