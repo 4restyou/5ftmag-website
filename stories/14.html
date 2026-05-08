@@ -34,13 +34,13 @@
   <link rel="stylesheet" href="../css/comments.css">
   <style>
     /* ── 인터뷰 전용: Q&A 블록 ── */
-    .qa-block {
+    .interview-qa {
       margin: 40px 0;
       padding-top: 32px;
       border-top: 1px solid var(--border);
     }
-    .qa-block:first-of-type { padding-top: 0; border-top: none; }
-    .qa-question {
+    .interview-qa:first-of-type { padding-top: 0; border-top: none; }
+    .interview-q {
       font-size: 19px;
       font-weight: var(--fw-heading);
       letter-spacing: -0.015em;
@@ -50,7 +50,7 @@
       position: relative;
       padding-left: 30px;
     }
-    .qa-question::before {
+    .interview-q::before {
       content: 'Q';
       position: absolute;
       left: 0;
@@ -60,10 +60,10 @@
       letter-spacing: 0.04em;
       color: var(--accent, #c84e2a);
     }
-    .qa-answer p {
+    .interview-a p {
       margin-bottom: 14px;
     }
-    .qa-answer p:last-child { margin-bottom: 0; }
+    .interview-a p:last-child { margin-bottom: 0; }
 
     /* 남은 질문 티저 */
     .question-teasers {
@@ -92,8 +92,8 @@
     }
     .question-teasers li:last-child { border-bottom: none; }
     @media (max-width: 640px) {
-      .qa-question { font-size: 17px; padding-left: 26px; }
-      .qa-question::before { font-size: 15px; }
+      .interview-q { font-size: 17px; padding-left: 26px; }
+      .interview-q::before { font-size: 15px; }
     }
   </style>
 
@@ -190,9 +190,9 @@
 
     <h2>Shin Noguchi와의 대화</h2>
 
-    <div class="qa-block">
-      <p class="qa-question">자신을 소개해주세요. 최근 어떤 장면을 즐겨 찍으시는지, 사진을 통해 전하고 싶은 이야기는 무엇인지 간단히 말씀해주시면 좋을 것 같아요.</p>
-      <div class="qa-answer">
+    <div class="interview-qa">
+      <p class="interview-q">자신을 소개해주세요. 최근 어떤 장면을 즐겨 찍으시는지, 사진을 통해 전하고 싶은 이야기는 무엇인지 간단히 말씀해주시면 좋을 것 같아요.</p>
+      <div class="interview-a">
         <p>안녕하세요. 신 노구치입니다. 1976년 도쿄에서 태어나 지금은 가마쿠라에 살며, 가마쿠라와 도쿄 일대를 중심으로 활동하는 스트리트 포토그래퍼입니다.</p>
         <p>요즘 가장 즐겨 찍는 대상은 제가 오랫동안 몸담아 온 가마쿠라와 도쿄의 평범한 일상 풍경이에요. '포토제닉한 장소'에서 '포토제닉한 사진'을 찍는 식으로, 결과가 뻔히 보이는 작업에는 전혀 흥미가 없습니다. <em>"어디로 가면 좋은 사진이 찍힐까?"</em> 같은 고민도 거의 하지 않죠.</p>
         <p>사진으로 전하고 싶은 메시지는 단순합니다. <strong>"당신은 결코 혼자가 아니다. 이 사회에서 애쓰며 살아가는 당신을 누군가는 반드시 지켜보고 있다."</strong></p>
@@ -205,18 +205,18 @@
       <figcaption>분홍 코트의 뒷모습 위로 모자 디스플레이가 겹쳐진다. 쇼윈도와 거리, 사람과 마네킹이 한 화면에 포개진 신 노구치 특유의 레이어드 컴포지션.</figcaption>
     </figure>
 
-    <div class="qa-block">
-      <p class="qa-question">작가님 사진은 따뜻하고 자연스럽게 다가옵니다. 타인을 바라볼 때의 어떤 마음가짐이 사진 속 온기로 이어진다고 생각하시나요?</p>
-      <div class="qa-answer">
+    <div class="interview-qa">
+      <p class="interview-q">작가님 사진은 따뜻하고 자연스럽게 다가옵니다. 타인을 바라볼 때의 어떤 마음가짐이 사진 속 온기로 이어진다고 생각하시나요?</p>
+      <div class="interview-a">
         <p>제가 셔터를 누르는 이유는 <em>"이 장면이 필요하다"</em> 같은 계산이 아닙니다. 눈앞의 광경에서 무언가를 '느끼는' 순간 카메라가 작동해요. 그 바탕에는 <strong>"당신의 존재를 긍정하고 싶다"</strong>는 마음이 있습니다.</p>
         <p>피사체의 배경과 사정을 전부 알 순 없지만, 그럼에도 "지금 여기 있는 당신이 정말 아름답다"는 메시지를 전하고 싶습니다. 말로 전하지 못해도, 사진이라는 형태로라도 닿았으면 합니다.</p>
         <p>결국 사진을 찍는 행위는 타인의 존재를 긍정하면서 동시에 내 존재도 긍정하는 과정이라 생각합니다.</p>
       </div>
     </div>
 
-    <div class="qa-block">
-      <p class="qa-question">작가님의 사진 중에 벤치에서 졸고 있는 사람과 광고 속 인물이 겹친 장면처럼, 예상치 못한 유머나 아이러니를 잘 포착하시는 것 같아요. 이런 장면들을 어떤 시선으로 바라보시고, 유머나 아이러니가 작품에 어떤 의미를 더한다고 생각하시나요?</p>
-      <div class="qa-answer">
+    <div class="interview-qa">
+      <p class="interview-q">작가님의 사진 중에 벤치에서 졸고 있는 사람과 광고 속 인물이 겹친 장면처럼, 예상치 못한 유머나 아이러니를 잘 포착하시는 것 같아요. 이런 장면들을 어떤 시선으로 바라보시고, 유머나 아이러니가 작품에 어떤 의미를 더한다고 생각하시나요?</p>
+      <div class="interview-a">
         <p>저는 이 아름다운 순간들을 더 많은 사람과 나누고 싶습니다. <strong>"비일상적인 순간은 일상 속 어디에나 숨어 있다"</strong>는 사실을 사람들이 깨닫기를 바라죠.</p>
         <p>마크 트웨인의 "진실은 언제나 허구보다 더 낯설다"는 말을 사진으로 증명하고 싶습니다. 사람들의 강인함, 때로는 우아하면서도 어딘가 우스꽝스러운 모습까지 담아 인간과 사회가 지닌 '모순'을 느끼게 하는 것이 목표입니다.</p>
         <p>이런 유머와 아이러니는 일상의 복잡함과 풍요로움을 보여주는 중요한 장치라고 봅니다. 이는 비판이 아니라 <em>인간다움에 대한 긍정</em>입니다.</p>
