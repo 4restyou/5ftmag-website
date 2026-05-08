@@ -1,5 +1,33 @@
 [
   {
+    "id": "13",
+    "title": "feel:toon — 디지털 사진만 찍던 A씨의 사연",
+    "category": "illustration",
+    "categoryLabel": "FEEL:TOON",
+    "author": "명수경",
+    "date": "2026-05-08",
+    "issue": "Vol.02",
+    "thumbnail": "img/stories/13/feeltoon-1.jpg",
+    "excerpt": "오랜만에 필름카메라를 꺼낸 A씨. 그런데 셔터를 누르고 나서야 깨달았다 — 필름이 없었다는 걸. 명수경 작가의 짧은 만화 한 편.",
+    "page": "stories/13.html",
+    "published": true,
+    "manual": true
+  },
+  {
+    "id": "12",
+    "title": "Voigtländer Vitessa 500 AE — 60년대의 라디오를 닮은 카메라",
+    "category": "review",
+    "categoryLabel": "CAMERA REVIEW",
+    "author": "강혜원",
+    "date": "2026-05-08",
+    "issue": "Vol.02",
+    "thumbnail": "img/stories/12/hero.jpg",
+    "excerpt": "박스형 디자인, 큼직한 다이얼, 그리고 매끈한 셔터. 보이그랜더의 마지막 자존심이 담긴 작은 카메라 — 60년대의 라디오를 닮은 비테사 500 AE를 앨리카메라 강혜원 대표가 들여다본다.",
+    "page": "stories/12.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "11",
     "title": "그레인은 노이즈가 아니다 — 필름이 새긴 10편의 시네마",
     "category": "review",
