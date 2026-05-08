@@ -352,7 +352,7 @@
           }
 
           return `
-            <a href="${link}" class="related-card">
+            <a href="${link}" class="related-card" data-category="${s.category || ''}" data-issue="${s.issue || ''}">
               ${imgBlock}
               <span class="related-cat">${cat}</span>
               <h4 class="related-card-title">${s.title}</h4>

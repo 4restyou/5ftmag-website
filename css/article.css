@@ -864,6 +864,7 @@
   background: #fadcdc;
 }
 .article-card[data-issue="Vol.02"][data-category="essay"] .article-img.text-only .text-card-title,
-.article-card[data-issue="Vol.02"][data-category="essay"] .article-img.text-only .text-card-mark {
+.article-card[data-issue="Vol.02"][data-category="essay"] .article-img.text-only .text-card-mark,
+.related-card[data-issue="Vol.02"][data-category="essay"] .related-img.text-only .related-img-title {
   color: #6b1f1f;
 }

@@ -675,7 +675,7 @@
           } else {
             imgBlock = `<div class="related-img text-only"><span class="related-img-title">${s.title}</span></div>`;
           }
-          return `<a href="${link}" class="related-card">${imgBlock}<span class="related-cat">${cat}</span><h4 class="related-card-title">${s.title}</h4><p class="related-excerpt">${author}${s.excerpt || ''}</p></a>`;
+          return `<a href="${link}" class="related-card" data-category="${s.category || ''}" data-issue="${s.issue || ''}">${imgBlock}<span class="related-cat">${cat}</span><h4 class="related-card-title">${s.title}</h4><p class="related-excerpt">${author}${s.excerpt || ''}</p></a>`;
         }).join('');
 
         section.hidden = false;

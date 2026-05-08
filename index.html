@@ -257,9 +257,12 @@
     .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only {
       background: #fadcdc;
     }
-    .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only .post-img-title,
-    .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only .post-label {
+    .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only .post-img-title {
       color: #6b1f1f;
+    }
+    /* LATEST·ESSAY 뱃지는 어두운 반투명 배경이라 글자는 흰색 유지 */
+    .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only .post-label {
+      color: rgba(255, 255, 255, 0.92);
     }
 
     .post-text { padding: 16px 16px 24px; }
