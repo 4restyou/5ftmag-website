@@ -2188,12 +2188,10 @@
         });
 
         // ════════════════════════════════
-        // 시간 기반 시드 (12시간마다 변경)
-        // 같은 시간대에는 누구나 같은 12장을 봄
+        // 매 로드마다 새 시드 — 새로고침할 때마다 다른 12장
+        // (페이지 한 번 로딩 안에서는 일관된 순서 유지)
         // ════════════════════════════════
-        // 1970년 이후 12시간 단위 (00시/12시 기준 변경)
-        const now = new Date();
-        const slot = Math.floor(now.getTime() / (12 * 60 * 60 * 1000));
+        const seed = Math.floor(Math.random() * 0xFFFFFFFF);
 
         // 시드 기반 의사난수 (mulberry32) — 같은 시드면 같은 결과
         function makeRng(seed) {
@@ -2205,7 +2203,7 @@
             return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
           };
         }
-        const rng = makeRng(slot);
+        const rng = makeRng(seed);
 
         // Fisher-Yates 셔플 (시드 기반 RNG 사용)
         function shuffleSeeded(arr) {
