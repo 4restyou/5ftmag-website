@@ -1,8 +1,11 @@
 {
-  "active": false,
-  "month": "2026-05",
-  "title": "도시의 밤",
-  "description": "네온, 가로등, 야경 — 당신의 도시는 어떤 밤을 보내고 있나요? 이번 달 우수작은 다음 호 종이 매거진에 실릴 수 있습니다.",
-  "deadline": "2026-05-31",
-  "_note": "이 파일을 편집해 매월 테마를 갱신하세요. active: false 면 배너 숨김. month 형식은 YYYY-MM (제출 폼이 이 값을 reader_submissions.theme_month 에 그대로 저장)."
+  "active": true,
+  "issue": "Vol.03",
+  "month": "Vol.03",
+  "title": "Pause & Play",
+  "subtitle": "내 감성을 자극하는 플리",
+  "film": "Kodak T-MAX 400",
+  "description": "잠시 멈추고, 다시 재생되는 한 컷. 흑백의 결이 깊어지는 코닥 T-MAX 400으로, 당신만의 감성을 자극하는 플레이리스트 같은 한 장면을 보내주세요. 우수작은 5ft.mag Vol.03 종이 매거진에 실립니다.",
+  "deadline": null,
+  "_note": "이 파일을 편집해 다음 호 주제를 갱신. active: false면 배너 숨김. month는 reader_submissions.theme_month에 그대로 저장 — 호 단위로 운영하므로 'Vol.03' 같은 값 권장."
 }

@@ -130,14 +130,16 @@
       try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
       catch { return {}; }
     })();
+    const themeIssue = theme?.issue || theme?.month || '다음 호';
+    const themeFilm = theme?.film ? ` · 메인 필름: <strong>${escapeHtml(theme.film)}</strong>` : '';
     const themeBlock = (theme && theme.active) ? `
       <div class="rs-theme">
-        <span class="rs-theme-tag">이번 달 주제</span>
-        <strong class="rs-theme-title">${escapeHtml(theme.title)}</strong>
-        <p class="rs-theme-desc">${escapeHtml(theme.description || '')}</p>
+        <span class="rs-theme-tag">${escapeHtml(themeIssue)} 주제</span>
+        <strong class="rs-theme-title">${escapeHtml(theme.title)}${theme.subtitle ? ` <small style="font-weight: var(--fw-all); color: inherit; opacity: 0.78;">— ${escapeHtml(theme.subtitle)}</small>` : ''}</strong>
+        <p class="rs-theme-desc">${escapeHtml(theme.description || '')}${themeFilm}</p>
         <label class="rs-checkbox rs-theme-check">
           <input type="checkbox" name="theme_apply" value="${escapeAttr(theme.month)}" checked />
-          <span>이 사진을 <strong>"${escapeHtml(theme.title)}"</strong> 주제 응모로 함께 보내기 — 우수작은 다음 호 종이 매거진 후보가 됩니다.</span>
+          <span>이 사진을 <strong>"${escapeHtml(theme.title)}"</strong> 주제 응모로 함께 보내기 — 우수작은 ${escapeHtml(themeIssue)} 종이 매거진 후보가 됩니다.</span>
         </label>
       </div>
     ` : '';

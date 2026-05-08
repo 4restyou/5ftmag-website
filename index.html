@@ -930,24 +930,39 @@
       font-size: 13px;
       color: var(--text-muted);
       line-height: 1.6;
-      margin-bottom: 8px;
+      margin-bottom: 14px;
     }
     .readers-cta strong {
       color: var(--text);
       font-weight: var(--fw-heading);
     }
+    .readers-cta-buttons {
+      display: inline-flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
     .readers-cta a {
-      display: inline-block;
-      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
       font-weight: var(--fw-heading);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       color: var(--text);
-      padding: 6px 14px;
+      padding: 10px 18px;
       border: 1px solid var(--border);
       border-radius: 999px;
-      transition: all .15s;
+      transition: border-color .15s;
+      line-height: 1;
     }
     .readers-cta a:hover { border-color: var(--text); }
+    /* rs-trigger 와 같은 높이로 정렬 */
+    .readers-cta .rs-trigger {
+      font-size: 13px;
+      padding: 10px 18px;
+      line-height: 1;
+    }
 
     /* ════════════════════════════
        ABOUT (PLUS 배너)
@@ -1255,6 +1270,13 @@
       letter-spacing: var(--ls-default);
       color: var(--text-muted);
     }
+    .footer-admin {
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color .15s;
+      opacity: 0.6;
+    }
+    .footer-admin:hover { color: var(--text); opacity: 1; }
 
     /* ════════════════════════════
        ABOUT 미리보기 (메인 페이지)
@@ -1869,11 +1891,13 @@
         당신의 필름 사진을 함께 만들어가요.<br />
         편집부 검토 후 Reader's Roll에 게시되며, 우수작은 다음 호 종이 매거진에 실릴 수 있어요.
       </p>
-      <button type="button" class="rs-trigger" data-action="open-submission" aria-haspopup="dialog">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        내 사진 올리기
-      </button>
-      <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">또는 인스타그램에 <strong>#5ftmag</strong> 태그로 공유 ↗</a>
+      <div class="readers-cta-buttons">
+        <button type="button" class="rs-trigger" data-action="open-submission" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          내 사진 올리기
+        </button>
+        <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">인스타그램에 <strong>#5ftmag</strong> 공유 ↗</a>
+      </div>
     </div>
 
   </div>
@@ -1984,7 +2008,7 @@
     <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
     <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
   </div>
-  <span class="footer-copy">© 2024 5ft.mag</span>
+  <span class="footer-copy">© 2024 5ft.mag · <a href="admin/submissions.html" class="footer-admin" id="footerAdmin">관리</a></span>
 </footer>
 
 <script>
@@ -2124,7 +2148,7 @@
   // ════════════════════════════
   const readersGrid = document.getElementById('readersGrid');
 
-  // 월간 테마 배너 (active 일 때만 노출)
+  // 다음 호 주제 배너 (active 일 때만 노출)
   (function renderThemeBanner() {
     const slot = document.getElementById('readersThemeBanner');
     if (!slot) return;
@@ -2134,11 +2158,14 @@
         if (!theme || !theme.active) return;
         slot.hidden = false;
         slot.className = 'theme-banner';
+        const tag = (theme.issue || theme.month || '다음 호') + ' 주제';
+        const titleHtml = escapeStr(theme.title || '') + (theme.subtitle ? ` <small style="font-weight: var(--fw-all); opacity: 0.72;">— ${escapeStr(theme.subtitle)}</small>` : '');
+        const filmHtml = theme.film ? ` · 메인 필름: <strong>${escapeStr(theme.film)}</strong>` : '';
         slot.innerHTML = `
           <div class="theme-banner-text">
-            <span class="theme-banner-tag">이번 달 주제</span>
-            <span class="theme-banner-title">${escapeStr(theme.title || '')}</span>
-            <p class="theme-banner-desc">${escapeStr(theme.description || '')}</p>
+            <span class="theme-banner-tag">${escapeStr(tag)}</span>
+            <span class="theme-banner-title">${titleHtml}</span>
+            <p class="theme-banner-desc">${escapeStr(theme.description || '')}${filmHtml}</p>
           </div>
           <div class="theme-banner-cta">
             <button type="button" class="rs-trigger" data-action="open-submission">사진 응모하기</button>
