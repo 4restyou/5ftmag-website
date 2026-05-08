@@ -4,8 +4,8 @@
 
 window.SUPABASE_CONFIG = {
   // Supabase 프로젝트 → Settings → API 에서 복사
-  url: 'https://YOUR-PROJECT-ID.supabase.co',
-  anonKey: 'YOUR-ANON-PUBLIC-KEY',
+  url: 'https://pucpqsfwqouqohwsvmnd.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1Y3Bxc2Z3cW91cW9od3N2bW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjYyMDUsImV4cCI6MjA5Mzc0MjIwNX0.adLzT0UrX3e1IbkQ70G6LeFWeKbuGaa0PTL6AmrSBD8',
 };
 
 // Supabase 클라이언트 즉시 생성 (전역 window.sb 로 노출)
