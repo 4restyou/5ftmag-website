@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css">
+  <link rel="stylesheet" href="./css/reader-submissions.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1865,9 +1866,13 @@
     <div class="readers-cta">
       <p>
         당신의 필름 사진을 함께 만들어가요.<br />
-        <strong>#5ftmag</strong> 태그를 달아주세요.
+        편집부 검토 후 Reader's Roll에 게시되며, 우수작은 다음 호 종이 매거진에 실릴 수 있어요.
       </p>
-      <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine 팔로우 ↗</a>
+      <button type="button" class="rs-trigger" data-action="open-submission" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        내 사진 올리기
+      </button>
+      <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">또는 인스타그램에 <strong>#5ftmag</strong> 태그로 공유 ↗</a>
     </div>
 
   </div>
@@ -2119,11 +2124,20 @@
   const readersGrid = document.getElementById('readersGrid');
 
   if (readersGrid) {
-    fetch('data/readers.json')
-      .then(res => res.json())
-      .then(data => {
+    Promise.all([
+      fetch('data/readers.json').then(r => r.json()).catch(() => []),
+      // 승인된 독자 직접 제출도 합쳐서 노출 (Supabase 미연결 시 빈 배열)
+      (typeof window.fetchApprovedSubmissions === 'function')
+        ? window.fetchApprovedSubmissions(50).catch(() => [])
+        : Promise.resolve([])
+    ])
+      .then(([staticData, submissions]) => {
+        const merged = [
+          ...staticData.filter(r => r.published !== false),
+          ...submissions
+        ];
         // 발행된 사진만, 랜덤 셔플, 6장
-        const published = data.filter(r => r.published !== false);
+        const published = merged;
         const shuffled = [...published].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, 6);
 
@@ -2576,5 +2590,8 @@
   }
 </script>
 <script src="./js/site-common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./js/supabase-config.js"></script>
+<script src="./js/reader-submissions.js"></script>
 </body>
 </html>
