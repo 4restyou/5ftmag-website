@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css">
+  <link rel="stylesheet" href="./css/comments.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -793,11 +794,21 @@
       <div class="modal-gallery">
         ${photosHTML}
       </div>
+      <section class="modal-comments" data-comments data-page-id="films/${filmKey}"></section>
     `;
 
     modalOverlay.classList.add('open');
     document.body.classList.add('modal-open');
     modalOverlay.scrollTop = 0;
+
+    // 모달이 열릴 때마다 댓글 위젯 초기화 (필름마다 다른 page_id)
+    if (window.MagComments) {
+      const cmContainer = modalContent.querySelector('[data-comments]');
+      if (cmContainer) window.MagComments.init({
+        pageId: `films/${filmKey}`,
+        container: cmContainer,
+      });
+    }
   }
 
   function closeModal() {
@@ -916,5 +927,8 @@
   }, { passive: true });
 </script>
 <script src="./js/site-common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./js/supabase-config.js"></script>
+<script src="./js/comments.js"></script>
 </body>
 </html>

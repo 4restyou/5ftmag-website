@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="../css/tokens.css">
   <link rel="stylesheet" href="../css/common.css">
   <link rel="stylesheet" href="../css/article.css">
+  <link rel="stylesheet" href="../css/comments.css">
 
   <!-- Schema.org NewsArticle -->
   <script type="application/ld+json">
@@ -131,6 +132,9 @@
     </div>
   </div>
 </article>
+
+<!-- ════════ 댓글 ════════ -->
+<section data-comments data-page-id="stories/{{ID}}"></section>
 
 <!-- ════════ 목록으로 돌아가기 ════════ -->
 <nav class="article-nav" style="grid-template-columns: 1fr;">
@@ -281,5 +285,8 @@
 </script>
 
 <script src="../js/site-common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/comments.js"></script>
 </body>
 </html>
