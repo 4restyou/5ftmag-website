@@ -1,0 +1,8 @@
+{
+  "active": false,
+  "month": "2026-05",
+  "title": "도시의 밤",
+  "description": "네온, 가로등, 야경 — 당신의 도시는 어떤 밤을 보내고 있나요? 이번 달 우수작은 다음 호 종이 매거진에 실릴 수 있습니다.",
+  "deadline": "2026-05-31",
+  "_note": "이 파일을 편집해 매월 테마를 갱신하세요. active: false 면 배너 숨김. month 형식은 YYYY-MM (제출 폼이 이 값을 reader_submissions.theme_month 에 그대로 저장)."
+}

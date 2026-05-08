@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Reader's Roll 검토 — 5ft.mag Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    body { background: var(--bg); color: var(--text); }
+
+    .admin-header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      transition: color .15s;
+    }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .admin-title {
+      font-size: 28px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .admin-user {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .admin-user button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0;
+      font: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .admin-user button:hover { color: var(--text); }
+
+    .admin-tabs {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 24px 0;
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-tab {
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 14px;
+      font-weight: var(--fw-heading);
+      color: var(--text-muted);
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: color .15s, border-color .15s;
+    }
+    .admin-tab:hover { color: var(--text); }
+    .admin-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+    .admin-tab .count {
+      display: inline-block;
+      background: var(--bg-sub);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      margin-left: 6px;
+      font-weight: var(--fw-heading);
+    }
+    .admin-tab.active .count {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .admin-list {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .sub-card {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 24px;
+      padding: 20px;
+      background: var(--bg-sub);
+      border-radius: 6px;
+      align-items: start;
+    }
+    .sub-card-img {
+      width: 220px;
+      aspect-ratio: 1;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+    .sub-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .sub-card-meta {
+      display: grid;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .sub-card-row {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 10px;
+      align-items: baseline;
+      line-height: 1.55;
+    }
+    .sub-card-row .k {
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .sub-card-row .v { color: var(--text); word-break: break-word; }
+    .sub-card-row .v a { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+
+    .sub-card-status {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.1em;
+      padding: 2px 8px;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+    .sub-card-status.pending  { background: #fef3c7; color: #78350f; }
+    .sub-card-status.approved { background: #d1fae5; color: #064e3b; }
+    .sub-card-status.rejected { background: #fee2e2; color: #7f1d1d; }
+
+    .sub-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .sub-btn {
+      font: inherit;
+      font-size: 13px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.02em;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s;
+    }
+    .sub-btn:hover { opacity: 0.85; }
+    .sub-btn:disabled { opacity: 0.4; cursor: progress; }
+    .sub-btn-approve { background: #064e3b; color: #fff; }
+    .sub-btn-reject  { background: #fff; color: #7f1d1d; border: 1px solid #fca5a5; }
+    .sub-btn-delete  { background: none; color: var(--text-muted); }
+    .sub-btn-delete:hover { color: #7f1d1d; }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .gate {
+      max-width: 560px;
+      margin: 80px auto;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .gate h2 { font-size: 22px; font-weight: var(--fw-heading); margin: 0 0 12px; }
+    .gate p { color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
+    .gate .gate-btn {
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: var(--fw-heading);
+      cursor: pointer;
+    }
+
+    /* 사진 확대 라이트박스 */
+    .img-zoom {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+      cursor: zoom-out;
+      padding: 24px;
+    }
+    .img-zoom.open { display: flex; }
+    .img-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    @media (max-width: 720px) {
+      .sub-card { grid-template-columns: 1fr; }
+      .sub-card-img { width: 100%; aspect-ratio: 4/3; }
+      .sub-card-row { grid-template-columns: 1fr; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-header">
+  <a href="../index.html" class="admin-back">← 5ft.mag</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">Reader's Roll 검토 큐</h1>
+    <div class="admin-user" id="adminUser"></div>
+  </div>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<div id="app" hidden>
+  <div class="admin-tabs">
+    <button type="button" class="admin-tab active" data-status="pending">대기 <span class="count" id="cnt-pending">·</span></button>
+    <button type="button" class="admin-tab" data-status="approved">승인됨 <span class="count" id="cnt-approved">·</span></button>
+    <button type="button" class="admin-tab" data-status="rejected">반려됨 <span class="count" id="cnt-rejected">·</span></button>
+  </div>
+  <div class="admin-list" id="list">
+    <div class="empty-state">불러오는 중…</div>
+  </div>
+</div>
+
+<div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script>
+'use strict';
+
+const STATE = {
+  user: null,
+  isEditor: false,
+  status: 'pending',
+  rows: [],
+  counts: { pending: 0, approved: 0, rejected: 0 },
+};
+
+const STORAGE_BUCKET = 'reader-submissions';
+
+function $(id) { return document.getElementById(id); }
+function publicUrl(path) {
+  const base = window.SUPABASE_CONFIG?.url || '';
+  return `${base}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+async function checkAccess() {
+  if (!window.sb) {
+    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
+    return false;
+  }
+  const { data: { session } } = await window.sb.auth.getSession();
+  if (!session) {
+    showGate();
+    return false;
+  }
+  STATE.user = session.user;
+  // 편집부 권한 확인
+  const { data: profile, error } = await window.sb
+    .from('profiles')
+    .select('display_name, is_editor')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+  if (error || !profile?.is_editor) {
+    showGate('이 계정은 편집부 권한이 없어요.');
+    return false;
+  }
+  STATE.isEditor = true;
+  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
+  $('logout').addEventListener('click', async () => {
+    await window.sb.auth.signOut();
+    location.reload();
+  });
+  return true;
+}
+
+function showGate(msg) {
+  $('gate').hidden = false;
+  $('app').hidden = true;
+  if (msg) {
+    $('gate').querySelector('p').textContent = msg;
+    $('gateLogin').style.display = 'none';
+  }
+  $('gateLogin').addEventListener('click', async () => {
+    await window.sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href }
+    });
+  });
+}
+
+async function loadCounts() {
+  for (const status of ['pending', 'approved', 'rejected']) {
+    const { count } = await window.sb
+      .from('reader_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', status);
+    STATE.counts[status] = count || 0;
+    const el = $(`cnt-${status}`);
+    if (el) el.textContent = count || 0;
+  }
+}
+
+async function loadList() {
+  $('list').innerHTML = '<div class="empty-state">불러오는 중…</div>';
+  const { data, error } = await window.sb
+    .from('reader_submissions')
+    .select('*')
+    .eq('status', STATE.status)
+    .order('created_at', { ascending: STATE.status === 'pending' });
+
+  if (error) {
+    $('list').innerHTML = `<div class="empty-state">불러오기 실패: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  STATE.rows = data || [];
+  if (STATE.rows.length === 0) {
+    $('list').innerHTML = `<div class="empty-state">${STATE.status === 'pending' ? '대기 중인 제출이 없어요.' : (STATE.status === 'approved' ? '아직 승인된 제출이 없어요.' : '반려된 제출이 없어요.')}</div>`;
+    return;
+  }
+  $('list').innerHTML = STATE.rows.map(renderCard).join('');
+  bindCardActions();
+}
+
+function renderCard(r) {
+  const url = publicUrl(r.storage_path);
+  const igNorm = (r.instagram || '').replace(/^@/, '');
+  const igUrl = igNorm ? `https://instagram.com/${igNorm}` : null;
+  const themeBadge = r.theme_month ? `<span class="sub-card-status pending" style="margin-left:8px; background:#e0e7ff; color:#3730a3;">테마 ${r.theme_month}</span>` : '';
+
+  return `
+    <div class="sub-card" data-id="${r.id}" data-path="${escapeHtml(r.storage_path)}">
+      <div class="sub-card-img" data-zoom="${escapeHtml(url)}">
+        <img src="${escapeHtml(url)}" alt="" loading="lazy" />
+      </div>
+      <div class="sub-card-meta">
+        <div>
+          <span class="sub-card-status ${escapeHtml(r.status)}">${escapeHtml(r.status)}</span>
+          ${themeBadge}
+        </div>
+        <div class="sub-card-row">
+          <span class="k">제출</span>
+          <span class="v">${fmtDate(r.created_at)}</span>
+        </div>
+        <div class="sub-card-row">
+          <span class="k">인스타</span>
+          <span class="v">${igUrl ? `<a href="${escapeHtml(igUrl)}" target="_blank" rel="noopener">${escapeHtml(r.instagram)}</a>` : escapeHtml(r.instagram || '-')}</span>
+        </div>
+        <div class="sub-card-row">
+          <span class="k">필름</span>
+          <span class="v">${escapeHtml(r.film || '-')}</span>
+        </div>
+        ${r.camera ? `
+        <div class="sub-card-row">
+          <span class="k">카메라</span>
+          <span class="v">${escapeHtml(r.camera)}</span>
+        </div>` : ''}
+        ${r.caption ? `
+        <div class="sub-card-row">
+          <span class="k">메모</span>
+          <span class="v">${escapeHtml(r.caption)}</span>
+        </div>` : ''}
+        ${r.rejection_reason ? `
+        <div class="sub-card-row">
+          <span class="k">반려 사유</span>
+          <span class="v">${escapeHtml(r.rejection_reason)}</span>
+        </div>` : ''}
+        <div class="sub-card-actions">
+          ${STATE.status === 'pending' ? `
+            <button type="button" class="sub-btn sub-btn-approve" data-action="approve">승인</button>
+            <button type="button" class="sub-btn sub-btn-reject" data-action="reject">반려</button>
+          ` : ''}
+          ${STATE.status === 'rejected' ? `
+            <button type="button" class="sub-btn sub-btn-approve" data-action="approve">승인으로 변경</button>
+          ` : ''}
+          ${STATE.status === 'approved' ? `
+            <button type="button" class="sub-btn sub-btn-reject" data-action="reject">반려로 되돌리기</button>
+          ` : ''}
+          <button type="button" class="sub-btn sub-btn-delete" data-action="delete">완전 삭제</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindCardActions() {
+  document.querySelectorAll('.sub-card').forEach(card => {
+    const id = card.dataset.id;
+    const path = card.dataset.path;
+
+    card.querySelector('[data-zoom]')?.addEventListener('click', (e) => {
+      const url = e.currentTarget.dataset.zoom;
+      $('imgZoomTarget').src = url;
+      $('imgZoom').classList.add('open');
+    });
+
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const action = btn.dataset.action;
+        if (action === 'approve') {
+          btn.disabled = true; btn.textContent = '처리 중…';
+          const { error } = await window.sb
+            .from('reader_submissions')
+            .update({ status: 'approved', rejection_reason: null, reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id })
+            .eq('id', id);
+          if (error) { alert('승인 실패: ' + error.message); btn.disabled = false; btn.textContent = '승인'; return; }
+          await Promise.all([loadCounts(), loadList()]);
+        } else if (action === 'reject') {
+          const reason = prompt('반려 사유를 입력하세요 (선택, 비워둬도 됩니다):', '');
+          if (reason === null) return;
+          btn.disabled = true; btn.textContent = '처리 중…';
+          const { error } = await window.sb
+            .from('reader_submissions')
+            .update({ status: 'rejected', rejection_reason: reason || null, reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id })
+            .eq('id', id);
+          if (error) { alert('반려 실패: ' + error.message); btn.disabled = false; btn.textContent = '반려'; return; }
+          await Promise.all([loadCounts(), loadList()]);
+        } else if (action === 'delete') {
+          if (!confirm('완전히 삭제할까요? Storage의 파일과 DB의 기록 모두 지워집니다.')) return;
+          btn.disabled = true; btn.textContent = '삭제 중…';
+          // DB 먼저, Storage는 best-effort
+          const { error: dbErr } = await window.sb.from('reader_submissions').delete().eq('id', id);
+          if (dbErr) { alert('DB 삭제 실패: ' + dbErr.message); btn.disabled = false; btn.textContent = '완전 삭제'; return; }
+          if (path) {
+            await window.sb.storage.from(STORAGE_BUCKET).remove([path]).catch(() => {});
+          }
+          await Promise.all([loadCounts(), loadList()]);
+        }
+      });
+    });
+  });
+}
+
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    STATE.status = tab.dataset.status;
+    loadList();
+  });
+});
+
+$('imgZoom').addEventListener('click', () => {
+  $('imgZoom').classList.remove('open');
+  $('imgZoomTarget').src = '';
+});
+
+(async function main() {
+  // Supabase client 준비 대기 (스크립트 비동기 로드 대응)
+  for (let i = 0; i < 50; i++) {
+    if (window.sb) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  const ok = await checkAccess();
+  if (!ok) return;
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  await Promise.all([loadCounts(), loadList()]);
+})();
+</script>
+
+</body>
+</html>

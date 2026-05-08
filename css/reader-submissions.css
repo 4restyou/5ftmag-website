@@ -88,6 +88,98 @@
   margin: -16px 0 24px;
 }
 
+/* 월간 테마 블록 (모달 안) */
+.rs-theme {
+  background: #fef3c7;
+  border-radius: 4px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  display: grid;
+  gap: 8px;
+}
+.rs-theme-tag {
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #78350f;
+}
+.rs-theme-title {
+  font-size: 18px;
+  font-weight: var(--fw-heading);
+  color: #1f1f1f;
+  letter-spacing: -0.015em;
+}
+.rs-theme-desc {
+  font-size: 13px;
+  color: #5f4a1f;
+  line-height: 1.55;
+  margin: 0;
+}
+.rs-theme-check {
+  background: rgba(255,255,255,0.7);
+  font-size: 12px;
+  padding: 10px 12px;
+}
+[data-theme="dark"] .rs-theme {
+  background: #3a2e0c;
+}
+[data-theme="dark"] .rs-theme-title { color: #fef3c7; }
+[data-theme="dark"] .rs-theme-desc  { color: #d4c08a; }
+[data-theme="dark"] .rs-theme-check { background: rgba(0,0,0,0.25); }
+[data-theme="dark"] .rs-theme-tag   { color: #fbbf24; }
+
+/* 메인 페이지에 노출되는 테마 배너 (작은 카드형) */
+.theme-banner {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 4px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+.theme-banner-text { color: #1f1f1f; }
+.theme-banner-tag {
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #78350f;
+  display: block;
+  margin-bottom: 4px;
+}
+.theme-banner-title {
+  font-size: 18px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.015em;
+  display: block;
+  margin-bottom: 2px;
+}
+.theme-banner-desc {
+  font-size: 13px;
+  color: #5f4a1f;
+  line-height: 1.5;
+  margin: 0;
+}
+.theme-banner-cta {
+  flex-shrink: 0;
+}
+[data-theme="dark"] .theme-banner {
+  background: linear-gradient(135deg, #3a2e0c, #4a3a10);
+}
+[data-theme="dark"] .theme-banner-text,
+[data-theme="dark"] .theme-banner-title { color: #fef3c7; }
+[data-theme="dark"] .theme-banner-desc  { color: #d4c08a; }
+[data-theme="dark"] .theme-banner-tag   { color: #fbbf24; }
+@media (max-width: 600px) {
+  .theme-banner {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+}
+
 /* 폼 */
 .rs-form {
   display: grid;

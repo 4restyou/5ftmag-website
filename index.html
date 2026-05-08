@@ -1860,6 +1860,7 @@
       <h3>Reader's Roll</h3>
       <span class="label">독자들의 한 컷</span>
     </div>
+    <div id="readersThemeBanner" hidden></div>
     <div class="insta-grid" id="readersGrid">
       <!-- 자바스크립트가 자동 생성 -->
     </div>
@@ -2122,6 +2123,32 @@
   // 메인의 Reader's Roll: JSON 로딩 + 랜덤 6장
   // ════════════════════════════
   const readersGrid = document.getElementById('readersGrid');
+
+  // 월간 테마 배너 (active 일 때만 노출)
+  (function renderThemeBanner() {
+    const slot = document.getElementById('readersThemeBanner');
+    if (!slot) return;
+    fetch('data/current-theme.json', { cache: 'no-cache' })
+      .then(r => r.ok ? r.json() : null)
+      .then(theme => {
+        if (!theme || !theme.active) return;
+        slot.hidden = false;
+        slot.className = 'theme-banner';
+        slot.innerHTML = `
+          <div class="theme-banner-text">
+            <span class="theme-banner-tag">이번 달 주제</span>
+            <span class="theme-banner-title">${escapeStr(theme.title || '')}</span>
+            <p class="theme-banner-desc">${escapeStr(theme.description || '')}</p>
+          </div>
+          <div class="theme-banner-cta">
+            <button type="button" class="rs-trigger" data-action="open-submission">사진 응모하기</button>
+          </div>`;
+      })
+      .catch(() => {});
+    function escapeStr(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+  })();
 
   if (readersGrid) {
     Promise.all([

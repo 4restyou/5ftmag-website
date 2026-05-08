@@ -14,6 +14,19 @@
   const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
   const STORAGE_BUCKET = 'reader-submissions';
   const LS_KEY = '5ft_submission_meta'; // 인스타/필름 등 마지막 입력 기억
+  const THEME_PATH = 'data/current-theme.json';
+
+  // 한 번 fetch한 테마는 페이지 로딩 동안 캐시
+  let _themePromise = null;
+  function getCurrentTheme() {
+    if (_themePromise) return _themePromise;
+    // 현재 페이지가 stories/, admin/ 아래라면 상대 경로 보정
+    const depth = (location.pathname.match(/\/(stories|admin)\//) ? '../' : './');
+    _themePromise = fetch(depth + THEME_PATH, { cache: 'no-cache' })
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null);
+    return _themePromise;
+  }
 
   // ════════════════════════════════════════════════════════════
   // 캔버스 리사이즈 + JPEG 인코딩
@@ -112,14 +125,26 @@
       </button>`;
   }
 
-  function renderSubmissionForm() {
+  function renderSubmissionForm(theme) {
     const meta = (() => {
       try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
       catch { return {}; }
     })();
+    const themeBlock = (theme && theme.active) ? `
+      <div class="rs-theme">
+        <span class="rs-theme-tag">이번 달 주제</span>
+        <strong class="rs-theme-title">${escapeHtml(theme.title)}</strong>
+        <p class="rs-theme-desc">${escapeHtml(theme.description || '')}</p>
+        <label class="rs-checkbox rs-theme-check">
+          <input type="checkbox" name="theme_apply" value="${escapeAttr(theme.month)}" checked />
+          <span>이 사진을 <strong>"${escapeHtml(theme.title)}"</strong> 주제 응모로 함께 보내기 — 우수작은 다음 호 종이 매거진 후보가 됩니다.</span>
+        </label>
+      </div>
+    ` : '';
     return `
       <h2 id="rs-modal-title" class="rs-title">사진 올리기</h2>
       <p class="rs-desc">편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).</p>
+      ${themeBlock}
       <form class="rs-form" id="rs-form">
         <label class="rs-field">
           <span class="rs-label">사진 <em>*</em></span>
@@ -206,7 +231,8 @@
       openModal(renderLoginPrompt());
       return;
     }
-    openModal(renderSubmissionForm());
+    const theme = await getCurrentTheme();
+    openModal(renderSubmissionForm(theme));
     bindFormHandlers();
   }
 
@@ -277,6 +303,7 @@
 
         // 3) DB insert
         const igNorm = instagram.replace(/^@/, '');
+        const themeApplyVal = fd.get('theme_apply'); // 체크돼있으면 'YYYY-MM', 아니면 null
         const { error: dbErr } = await window.sb.from('reader_submissions').insert({
           user_id: user.id,
           storage_path: path,
@@ -284,6 +311,7 @@
           film,
           camera: camera || null,
           caption: caption || null,
+          theme_month: themeApplyVal || null,
           consent_publish: true,
         });
         if (dbErr) {
