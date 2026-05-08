@@ -253,6 +253,14 @@
       color: #111;
       opacity: 0.7;
     }
+    /* Vol.02 에세이 — 옅은 빨강 배경 */
+    .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only {
+      background: #fadcdc;
+    }
+    .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only .post-img-title,
+    .post-item[data-issue="Vol.02"][data-category="essay"] .post-img.text-only .post-label {
+      color: #6b1f1f;
+    }
 
     .post-text { padding: 16px 16px 24px; }
     .post-title {
@@ -2041,7 +2049,7 @@
                </div>`;
 
           return `
-            <a href="${link}" class="post-item">
+            <a href="${link}" class="post-item" data-category="${s.category || ''}" data-issue="${s.issue || ''}">
               <div class="post-img-wrap">${imgBlock}</div>
               <div class="post-text">
                 <h3 class="post-title">${s.title}</h3>
