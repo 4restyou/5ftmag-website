@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Fri, 08 May 2026 05:07:58 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 08 May 2026 15:42:23 GMT</lastBuildDate>
     <generator>5ft.mag</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft.mag</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>Shin Noguchi 인터뷰 — 거리에서 발견한 일상의 특별함</title>
+      <link>https://www.5ftmag.com/stories/14.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/14.html</guid>
+      <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
+      <description>&quot;진실은 언제나 허구보다 더 낯설다.&quot; 가마쿠라와 도쿄 거리에서 20년, 일본을 대표하는 스트리트 포토그래퍼 신 노구치가 말하는 일상의 특별함과 사진가의 시선.</description>
+      <category>INTERVIEW</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Shin Noguchi</dc:creator>
+    </item>
     <item>
       <title>feel:toon — 디지털 사진만 찍던 A씨의 사연</title>
       <link>https://www.5ftmag.com/stories/13.html</link>
