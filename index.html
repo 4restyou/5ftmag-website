@@ -150,23 +150,11 @@
     .split-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      align-items: stretch;
+      align-items: start;
       border-bottom: 1px solid var(--border);
     }
     .panel { display: flex; flex-direction: column; }
     .panel-left { border-right: 1px solid var(--border); }
-
-    /* 데스크톱: 우측이 좌측 길이만큼 stretch 되고, 마지막 next-issue
-       promo 블록이 남은 공간을 채워 좌측이 더 길어도 빈 느낌이 안 남. */
-    @media (min-width: 901px) {
-      .next-issue-block {
-        flex: 1 1 auto;
-        min-height: 520px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-    }
 
     /* 다음 호 주제 promo (우측 패널 마지막) — 자연스러운 in-flow 카드 */
     .next-issue-block {
@@ -2240,7 +2228,7 @@
         // 발행된 사진만, 랜덤 셔플, 6장
         const published = merged;
         const shuffled = [...published].sort(() => Math.random() - 0.5);
-        const selected = shuffled.slice(0, 9);
+        const selected = shuffled.slice(0, 16);
 
         if (selected.length === 0) {
           readersGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px;">첫 번째 독자 사진을 기다리는 중입니다.<br /><small>#5ftmag 태그를 달아 사진을 공유해주세요.</small></div>';
@@ -2335,7 +2323,7 @@
         // 작가별로 그룹핑 후, 각 그룹을 셔플하고
         // 한 작가에서 1장씩 돌아가며 12장 뽑기
         // ════════════════════════════════
-        const PHOTO_COUNT = 16;
+        const PHOTO_COUNT = 24;
         const byAuthor = {};
         allPhotos.forEach(p => {
           const key = p.author || 'unknown';
