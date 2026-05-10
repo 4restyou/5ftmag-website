@@ -150,7 +150,7 @@
     .split-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      align-items: stretch;
+      align-items: start;
       border-bottom: 1px solid var(--border);
     }
     .panel { display: flex; flex-direction: column; }
@@ -164,51 +164,6 @@
       text-align: center;
     }
 
-    /* 광고 자리 placeholder — 우측 패널 끝에서 빈 공간을 채움 */
-    .ad-slot {
-      flex: 1;
-      min-height: 280px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 40px 28px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      color: var(--text-muted);
-    }
-    .ad-slot .ad-tag {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: var(--fw-heading);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-    }
-    .ad-slot .ad-title {
-      font-size: 18px;
-      font-weight: var(--fw-heading);
-      letter-spacing: -0.015em;
-      color: var(--text);
-      margin: 0;
-    }
-    .ad-slot .ad-desc {
-      font-size: 13px;
-      line-height: 1.6;
-      max-width: 320px;
-      margin: 0;
-    }
-    .ad-slot a {
-      font-size: 13px;
-      font-weight: var(--fw-heading);
-      color: var(--text);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-    .ad-slot a:hover { opacity: 0.7; }
     .next-issue-block .ni-tag {
       display: block;
       font-size: 11px;
@@ -743,39 +698,39 @@
     [data-theme="dark"] .partner-card .logo-light { display: none; }
     [data-theme="dark"] .partner-card .logo-dark { display: block; }
 
-    /* ── 광고 (작은 배너) ── */
+    /* ── 광고 자리 placeholder (Partners 하단) ── */
     .ad-banner {
-      display: block;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-sub);
-      transition: opacity .15s;
-    }
-    .ad-banner:hover { opacity: .8; }
-    .ad-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      justify-content: center;
+      gap: 12px;
+      min-height: 96px;
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-sub);
+      text-align: center;
     }
-    .ad-text { display: flex; flex-direction: column; gap: 3px; }
-    .ad-label {
-      font-size: var(--fs-meta);
-      font-weight: var(--fw-all);
-      letter-spacing: 0.08em;
+    .ad-banner .ad-label {
+      font-size: 10px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--text-dim);
+      opacity: 0.5;
     }
-    .ad-headline {
-      font-size: var(--fs-body);
+    .ad-banner .ad-headline {
+      font-size: 13px;
       font-weight: var(--fw-all);
-      letter-spacing: var(--ls-default);
-      line-height: 1.25;
-    }
-    .ad-arrow {
-      font-size: var(--fs-title);
+      letter-spacing: 0.04em;
       color: var(--text-muted);
+      opacity: 0.7;
     }
+    .ad-banner .ad-headline a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .ad-banner .ad-headline a:hover { opacity: 0.7; }
 
     /* ── 인스타그램 피드 (3×2 그리드) ── */
     .insta-grid {
@@ -1934,16 +1889,11 @@
       </a>
     </div>
 
-    <!-- ── 광고 (작게) ── -->
-    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ad-banner">
-      <div class="ad-inner">
-        <div class="ad-text">
-          <span class="ad-label">Advertisement</span>
-          <span class="ad-headline">5ft.mag Vol.01 창간호 — Film Social Club에서 구입</span>
-        </div>
-        <span class="ad-arrow">↗</span>
-      </div>
-    </a>
+    <!-- ── 광고 자리 (placeholder) ── -->
+    <div class="ad-banner" aria-label="광고 자리">
+      <span class="ad-label">Advertisement</span>
+      <span class="ad-headline">광고 모집중 · <a href="mailto:4rest_design@naver.com?subject=5ft.mag 광고 문의">4rest_design@naver.com</a></span>
+    </div>
 
     <!-- ── Reader's Roll ──
          독자들이 #5ftmag 태그로 공유한 사진들
@@ -1971,14 +1921,6 @@
 
     <!-- 다음 호 주제 promo (Reader's Roll 하단) -->
     <div class="next-issue-block" id="nextIssueBlock" hidden></div>
-
-    <!-- 광고 자리 — 우측 패널 끝, 좌측이 더 길 때 빈 공간을 채움 -->
-    <aside class="ad-slot" aria-label="광고 자리">
-      <span class="ad-tag">Sponsorship</span>
-      <h4 class="ad-title">이 자리에 광고를 노출하세요</h4>
-      <p class="ad-desc">5ft.mag 메인 페이지 우측 배너 자리. 필름·사진·라이프스타일 브랜드와 함께합니다.</p>
-      <a href="mailto:4rest_design@naver.com?subject=5ft.mag 광고 문의">광고 문의 → 4rest_design@naver.com</a>
-    </aside>
 
   </div>
 
@@ -2123,7 +2065,7 @@
         const all = data
           .filter(s => s.published !== false)
           .sort((a, b) => new Date(b.date) - new Date(a.date));
-        const stories = all.slice(0, 12);
+        const stories = all.slice(0, 9);
 
         // 페이지 번호 네비게이션 (stories.html 의 pageSize=12 와 동일하게 계산)
         const numNav = document.getElementById('storyNumNav');
