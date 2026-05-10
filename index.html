@@ -156,6 +156,26 @@
     .panel { display: flex; flex-direction: column; }
     .panel-left { border-right: 1px solid var(--border); }
 
+    /* BP&O 식 스크롤: 데스크톱에서 좌측 패널이 sticky로 잡혀
+       우측이 더 길면 멈춰 있다가, split-layout 끝에서 함께 풀림.
+       좌측 패널 높이가 뷰포트보다 크면 자체적으로 스크롤 — 페이지가
+       그 안에서 흐르는 것처럼 보임. */
+    @media (min-width: 901px) {
+      .panel-left {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        max-height: 100vh;
+        overflow-y: auto;
+        scrollbar-width: thin;
+      }
+      .panel-left::-webkit-scrollbar { width: 6px; }
+      .panel-left::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+    }
+
     /* ── 패널 헤더 ── */
     .panel-header {
       padding: 36px 24px 28px;
