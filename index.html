@@ -150,11 +150,23 @@
     .split-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      align-items: stretch;
       border-bottom: 1px solid var(--border);
     }
     .panel { display: flex; flex-direction: column; }
     .panel-left { border-right: 1px solid var(--border); }
+
+    /* 데스크톱: 우측이 좌측 길이만큼 stretch 되고, 마지막 next-issue
+       promo 블록이 남은 공간을 채워 좌측이 더 길어도 빈 느낌이 안 남. */
+    @media (min-width: 901px) {
+      .next-issue-block {
+        flex: 1 1 auto;
+        min-height: 520px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
 
     /* 다음 호 주제 promo (우측 패널 마지막) — 자연스러운 in-flow 카드 */
     .next-issue-block {
