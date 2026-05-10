@@ -1723,6 +1723,15 @@
       .hamburger { display: flex; }
       .split-layout { grid-template-columns: 1fr; }
       .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
+      /* 데스크톱용으로 키운 패딩을 모바일에선 정상 사이즈로 */
+      .panel-header { padding: 36px 20px 28px; }
+      .sub-section-head { padding: 28px 20px 16px; }
+      .post-img-wrap { padding: 16px 16px 0; }
+      .post-text { padding: 16px 16px 24px; }
+      .next-issue-block { padding: 28px 20px; }
+      .next-issue-block .ni-title { font-size: 22px; }
+      .ad-banner { min-height: 80px; padding: 18px; }
+      .story-num-nav { padding: 18px 16px; gap: 16px; }
       .plus-inner { grid-template-columns: 1fr; }
       .plus-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,.12); }
       .bottom-section { grid-template-columns: 1fr; }
@@ -1747,7 +1756,10 @@
       .partners-strip { grid-template-columns: 1fr; }
       .partner-card { border-right: none; border-bottom: 1px solid var(--border); padding: 14px; }
       .partner-card:last-child { border-bottom: none; }
-      .ad-inner { gap: 10px; }
+      .ad-banner { flex-direction: column; gap: 4px; min-height: 72px; padding: 18px 16px; }
+      .ad-banner .ad-headline { text-align: center; line-height: 1.5; }
+      .next-issue-block .ni-title { font-size: 20px; }
+      .next-issue-block .ni-desc { font-size: 12px; }
       .newsletter-bar { flex-direction: column; align-items: flex-start; }
       .nl-form { width: 100%; }
       .nl-form input { flex: 1; width: auto; }
