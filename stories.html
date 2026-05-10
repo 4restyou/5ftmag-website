@@ -291,12 +291,24 @@
        화면이 넓어지면 컬럼 수가 자동으로 늘어남
        (모바일 1열 → 태블릿 2~3열 → 데스크탑 4열 → 큰 화면 5열+) */
     .articles-section {
-      padding: 56px 32px;
+      padding: 72px 40px;
+      max-width: 1600px;
+      margin: 0 auto;
     }
+    /* 해상도별 카드 개수 — 최대 4열, 좁아지면 3 → 2 → 1 */
     .articles-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 56px 32px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 64px 32px;
+    }
+    @media (max-width: 1280px) {
+      .articles-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 880px) {
+      .articles-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .articles-grid { grid-template-columns: 1fr; }
     }
     .article-card {
       display: block;
@@ -525,15 +537,6 @@
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
   </nav>
 </header>
-
-<!-- ════════ 페이지 타이틀 ════════ -->
-<div class="page-title">
-  <div class="page-title-inner">
-    <h1>Articles</h1>
-    <span class="breadcrumb">5FT.MAG / ARTICLES</span>
-  </div>
-  <p class="page-title-desc">필름과 사진, 매거진을 둘러싼 이야기들.</p>
-</div>
 
 <!-- ════════ 페이지네이션 (상단) ════════ -->
 <div class="pagination-bar is-hidden" data-pagination>

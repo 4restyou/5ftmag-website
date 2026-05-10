@@ -27,8 +27,8 @@
   --fs-body:      19px;     /* 서브텍스트, 일반 본문 */
   --fs-nav:       17px;     /* 네비게이션 */
   --fs-meta:      14px;     /* 페이지네이션, 캡션 */
-  --fw-all:       500;      /* 일반 텍스트 굵기 */
-  --fw-heading:   700;      /* 타이틀/제목 굵기 (Bold) */
+  --fw-all:       600;      /* 일반 텍스트 굵기 (SemiBold) — 가독성 강화 */
+  --fw-heading:   800;      /* 타이틀/제목 굵기 (ExtraBold) */
   --ls-default:   -0.02em;
 }
 

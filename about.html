@@ -260,17 +260,13 @@
     }
     .contrib-handle {
       font-size: 14px; color: var(--text-muted); margin-top: -4px;
+      text-decoration: none;
+      transition: color .15s;
     }
+    a.contrib-handle:hover { color: var(--text); }
     .contrib-desc {
       font-size: 14px; color: var(--text);
       line-height: 1.6; margin-top: 4px;
-    }
-    .contrib-issue {
-      display: inline-block; font-size: 12px;
-      font-weight: var(--fw-heading);
-      background: var(--accent); color: var(--accent-text);
-      padding: 3px 8px; border-radius: 2px;
-      margin-top: auto; width: fit-content;
     }
 
     /* ── PARTNERS (About 페이지) ── */
@@ -613,40 +609,36 @@
 <div class="contrib-section" id="contributors">
   <div class="contrib-header">
     <h2>Contributors</h2>
-    <p>Issue #01 참여 작가</p>
+    <p>고정 작가</p>
   </div>
   <div class="contrib-grid">
 
     <div class="contrib-card">
       <span class="contrib-role">PHOTO · 편집장</span>
       <span class="contrib-name">박순렬</span>
-      <span class="contrib-handle">@4rest_graphy</span>
+      <a class="contrib-handle" href="https://instagram.com/4rest_graphy" target="_blank" rel="noopener">@4rest_graphy ↗</a>
       <p class="contrib-desc">사진이란 빛을 담는 일이고, 그 빛과 떨어질 수 없는 그림자를 담는 일이기도 했다.</p>
-      <span class="contrib-issue">#01</span>
     </div>
 
     <div class="contrib-card">
       <span class="contrib-role">PHOTO</span>
       <span class="contrib-name">노애경</span>
-      <span class="contrib-handle">@ella_gertrud</span>
+      <a class="contrib-handle" href="https://instagram.com/ella__gertrud" target="_blank" rel="noopener">@ella__gertrud ↗</a>
       <p class="contrib-desc">버려진 놀이공원의 빛과 그림자. 과거와 현재가 공존하는 공간에서 시간의 흔적을 찾는 사진.</p>
-      <span class="contrib-issue">#01</span>
     </div>
 
     <div class="contrib-card">
       <span class="contrib-role">PHOTO</span>
       <span class="contrib-name">장형수</span>
-      <span class="contrib-handle">@brisnaptv</span>
+      <a class="contrib-handle" href="https://instagram.com/brisnaptv" target="_blank" rel="noopener">@brisnaptv ↗</a>
       <p class="contrib-desc">빛과 그림자가 어우러진 기억의 파편들. 과거인지, 앞으로 기억될 장면인지 알 수 없는.</p>
-      <span class="contrib-issue">#01</span>
     </div>
 
     <div class="contrib-card">
-      <span class="contrib-role">ESSAY</span>
+      <span class="contrib-role">ESSAY · 기획</span>
       <span class="contrib-name">김현아</span>
       <span class="contrib-handle">기획 및 글</span>
-      <p class="contrib-desc">낭만 조작 아이템. 별일없음에 행복을 느끼는 이유. 필름카메라와 일상의 낭만에 관한 두 편의 에세이.</p>
-      <span class="contrib-issue">#01</span>
+      <p class="contrib-desc">낭만 조작 아이템. 별일없음에 행복을 느끼는 이유. 필름카메라와 일상의 낭만에 관한 에세이.</p>
     </div>
 
     <div class="contrib-card">
@@ -654,7 +646,6 @@
       <span class="contrib-name">명수경</span>
       <span class="contrib-handle">그림</span>
       <p class="contrib-desc">사진이 담지 못한 여백을 그림으로 채웠다. 필름의 감각을 또 다른 매체로 옮긴 작업.</p>
-      <span class="contrib-issue">#01</span>
     </div>
 
   </div>
@@ -698,6 +689,17 @@
       <div class="partner-block-info">
         <span class="partner-block-name">BRISNAP TV</span>
         <span class="partner-block-role">필름 카메라 콘텐츠</span>
+      </div>
+    </a>
+
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="partner-block">
+      <div class="partner-block-logo">
+        <img src="./img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+        <img src="./img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+      </div>
+      <div class="partner-block-info">
+        <span class="partner-block-name">Street Photography Club</span>
+        <span class="partner-block-role">스트리트 포토 클럽 · 매거진 유통</span>
       </div>
     </a>
 
