@@ -156,17 +156,7 @@
     .panel { display: flex; flex-direction: column; }
     .panel-left { border-right: 1px solid var(--border); }
 
-    /* BP&O 식 스크롤: 좌우 패널 모두 페이지 스크롤로 함께 움직임.
-       우측 패널의 각 서브 섹션 헤더가 차례로 sticky catch — 다음 헤더가
-       위로 올라오면 이전 헤더를 밀어내며 자연스럽게 stacking. */
-    @media (min-width: 901px) {
-      #photo .sub-section-head {
-        position: sticky;
-        top: 0;
-        background: var(--bg);
-        z-index: 2;
-      }
-    }
+    /* 좌우 패널이 페이지 스크롤로 자연스럽게 함께 흐름. (sticky 제거) */
 
     /* ── 패널 헤더 ── */
     .panel-header {
@@ -2171,7 +2161,7 @@
         // 발행된 사진만, 랜덤 셔플, 6장
         const published = merged;
         const shuffled = [...published].sort(() => Math.random() - 0.5);
-        const selected = shuffled.slice(0, 6);
+        const selected = shuffled.slice(0, 9);
 
         if (selected.length === 0) {
           readersGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px;">첫 번째 독자 사진을 기다리는 중입니다.<br /><small>#5ftmag 태그를 달아 사진을 공유해주세요.</small></div>';
@@ -2266,7 +2256,7 @@
         // 작가별로 그룹핑 후, 각 그룹을 셔플하고
         // 한 작가에서 1장씩 돌아가며 12장 뽑기
         // ════════════════════════════════
-        const PHOTO_COUNT = 12;
+        const PHOTO_COUNT = 16;
         const byAuthor = {};
         allPhotos.forEach(p => {
           const key = p.author || 'unknown';
