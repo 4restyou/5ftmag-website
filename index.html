@@ -156,15 +156,15 @@
     .panel { display: flex; flex-direction: column; }
     .panel-left { border-right: 1px solid var(--border); }
 
-    /* BP&O 식 스크롤: 데스크톱에서 좌우가 페이지 스크롤로 함께 움직이다가,
-       좌측 패널 상단이 뷰포트 상단에 닿으면 거기에 catch (sticky).
-       우측은 계속 스크롤되고, split-layout 컨테이너 끝에서 좌측이 함께 풀림.
-       (좌측은 자체 overflow가 없으므로 페이지 스크롤에 종속) */
+    /* BP&O 식 스크롤: 좌우 패널 모두 페이지 스크롤로 함께 움직임.
+       우측 패널의 각 서브 섹션 헤더가 차례로 sticky catch — 다음 헤더가
+       위로 올라오면 이전 헤더를 밀어내며 자연스럽게 stacking. */
     @media (min-width: 901px) {
-      .panel-left {
+      #photo .sub-section-head {
         position: sticky;
         top: 0;
-        align-self: start;
+        background: var(--bg);
+        z-index: 2;
       }
     }
 
