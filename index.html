@@ -150,30 +150,26 @@
     .split-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      align-items: stretch;
+      align-items: start;
       border-bottom: 1px solid var(--border);
     }
     .panel { display: flex; flex-direction: column; }
     .panel-left { border-right: 1px solid var(--border); }
 
-    /* 다음 호 주제 promo (우측 패널 마지막) — 사이트 톤과 어울리는 무채색
-       모바일은 일반 카드, 데스크톱은 sticky 100vh 로 좌측이 스크롤될
-       때 viewport에 머물러 빈 공간이 보이지 않음. */
+    /* 다음 호 주제 promo (우측 패널 상단) — 적당한 사이즈로 sticky 되어
+       좌측이 스크롤되는 동안 우측 상단에 머무름. 우측 컨텐츠가 다 스크롤
+       돼서 하단이 비면 sticky 도 자연스럽게 풀리며 함께 내려감. */
     .next-issue-block {
-      padding: 40px 32px;
+      padding: 32px 28px;
       background: var(--bg-sub);
-      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       text-align: center;
     }
     @media (min-width: 901px) {
       .next-issue-block {
         position: sticky;
         top: 0;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 60px 40px;
+        z-index: 1;
       }
     }
     .next-issue-block .ni-tag {
@@ -186,31 +182,31 @@
       margin-bottom: 14px;
     }
     .next-issue-block .ni-title {
-      font-size: 32px;
+      font-size: 26px;
       font-weight: var(--fw-heading);
       letter-spacing: -0.02em;
       line-height: 1.15;
       color: var(--text);
-      margin: 0 0 8px;
+      margin: 0 0 6px;
     }
     .next-issue-block .ni-sub {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--text-muted);
-      margin: 0 0 20px;
+      margin: 0 0 14px;
     }
     .next-issue-block .ni-desc {
       font-size: 13px;
-      line-height: 1.6;
+      line-height: 1.55;
       color: var(--text-muted);
-      max-width: 440px;
-      margin: 0 auto 16px;
+      max-width: 380px;
+      margin: 0 auto 12px;
     }
     .next-issue-block .ni-film {
       font-size: 12px;
       font-weight: var(--fw-heading);
       letter-spacing: 0.04em;
       color: var(--text-muted);
-      margin: 0 0 24px;
+      margin: 0 0 18px;
     }
     .next-issue-block .ni-cta {
       display: inline-flex;
@@ -1857,6 +1853,9 @@
   <!-- 우: PHOTO + NEWS + PARTNERS + AD -->
   <div class="panel" id="photo">
 
+    <!-- 다음 호 주제 sticky CTA — 우측 패널 상단에 위치, JS로 채워짐 -->
+    <div class="next-issue-block" id="nextIssueBlock" hidden></div>
+
     <!-- ── 소식 ── -->
     <div class="sub-section-head">
       <h3>News</h3>
@@ -1935,9 +1934,6 @@
         <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">인스타그램에 <strong>#5ftmag</strong> 공유 ↗</a>
       </div>
     </div>
-
-    <!-- 다음 호 주제 sticky CTA (BP&O Plus 식) — JS로 채워짐 -->
-    <div class="next-issue-block" id="nextIssueBlock" hidden></div>
 
   </div>
 
