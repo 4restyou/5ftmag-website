@@ -156,7 +156,82 @@
     .panel { display: flex; flex-direction: column; }
     .panel-left { border-right: 1px solid var(--border); }
 
-    /* 좌우 패널이 페이지 스크롤로 자연스럽게 함께 흐름. (sticky 제거) */
+    /* BP&O 식 sticky 패턴: 우측 패널 마지막의 다음 호 주제 CTA가
+       sticky로 catch — 좌측이 계속 흘러가는 동안 우측 promo가
+       뷰포트에 머물러 유지된다. */
+    @media (min-width: 901px) {
+      .next-issue-block {
+        position: sticky;
+        top: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 80px 32px;
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        text-align: center;
+      }
+      [data-theme="dark"] .next-issue-block {
+        background: linear-gradient(135deg, #3a2e0c, #4a3a10);
+      }
+      .next-issue-block .ni-tag {
+        font-size: 12px;
+        font-weight: var(--fw-heading);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #78350f;
+        margin-bottom: 20px;
+      }
+      .next-issue-block .ni-title {
+        font-size: 44px;
+        font-weight: var(--fw-heading);
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        color: #1f1f1f;
+        margin-bottom: 12px;
+      }
+      .next-issue-block .ni-sub {
+        font-size: 18px;
+        color: #1f1f1f;
+        opacity: 0.78;
+        margin-bottom: 20px;
+      }
+      .next-issue-block .ni-desc {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #5f4a1f;
+        max-width: 460px;
+        margin: 0 auto 28px;
+      }
+      .next-issue-block .ni-film {
+        font-size: 13px;
+        font-weight: var(--fw-heading);
+        letter-spacing: 0.04em;
+        color: #5f4a1f;
+        margin-bottom: 32px;
+      }
+      [data-theme="dark"] .next-issue-block .ni-tag,
+      [data-theme="dark"] .next-issue-block .ni-film,
+      [data-theme="dark"] .next-issue-block .ni-desc { color: #d4c08a; }
+      [data-theme="dark"] .next-issue-block .ni-title,
+      [data-theme="dark"] .next-issue-block .ni-sub { color: #fef3c7; }
+      .next-issue-block .ni-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #1f1f1f;
+        color: #fef3c7;
+        padding: 14px 26px;
+        border: none;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: var(--fw-heading);
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition: opacity .15s;
+      }
+      .next-issue-block .ni-cta:hover { opacity: 0.85; }
+    }
 
     /* ── 패널 헤더 ── */
     .panel-header {
@@ -1848,7 +1923,6 @@
       <h3>Reader's Roll</h3>
       <span class="label">독자들의 한 컷</span>
     </div>
-    <div id="readersThemeBanner" hidden></div>
     <div class="insta-grid" id="readersGrid">
       <!-- 자바스크립트가 자동 생성 -->
     </div>
@@ -1865,6 +1939,9 @@
         <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">인스타그램에 <strong>#5ftmag</strong> 공유 ↗</a>
       </div>
     </div>
+
+    <!-- 다음 호 주제 sticky CTA (BP&O Plus 식) — JS로 채워짐 -->
+    <div class="next-issue-block" id="nextIssueBlock" hidden></div>
 
   </div>
 
@@ -2116,28 +2193,26 @@
   // ════════════════════════════
   const readersGrid = document.getElementById('readersGrid');
 
-  // 다음 호 주제 배너 (active 일 때만 노출)
-  (function renderThemeBanner() {
-    const slot = document.getElementById('readersThemeBanner');
+  // 다음 호 주제 sticky 블록 (active 일 때만 노출 — 우측 패널 끝에서 catch)
+  (function renderNextIssueBlock() {
+    const slot = document.getElementById('nextIssueBlock');
     if (!slot) return;
     fetch('data/current-theme.json', { cache: 'no-cache' })
       .then(r => r.ok ? r.json() : null)
       .then(theme => {
         if (!theme || !theme.active) return;
         slot.hidden = false;
-        slot.className = 'theme-banner';
         const tag = (theme.issue || theme.month || '다음 호') + ' 주제';
-        const titleHtml = escapeStr(theme.title || '') + (theme.subtitle ? ` <small style="font-weight: var(--fw-all); opacity: 0.72;">— ${escapeStr(theme.subtitle)}</small>` : '');
-        const filmHtml = theme.film ? ` · 메인 필름: <strong>${escapeStr(theme.film)}</strong>` : '';
         slot.innerHTML = `
-          <div class="theme-banner-text">
-            <span class="theme-banner-tag">${escapeStr(tag)}</span>
-            <span class="theme-banner-title">${titleHtml}</span>
-            <p class="theme-banner-desc">${escapeStr(theme.description || '')}${filmHtml}</p>
-          </div>
-          <div class="theme-banner-cta">
-            <button type="button" class="rs-trigger" data-action="open-submission">사진 응모하기</button>
-          </div>`;
+          <span class="ni-tag">${escapeStr(tag)}</span>
+          <h2 class="ni-title">${escapeStr(theme.title || '')}</h2>
+          ${theme.subtitle ? `<p class="ni-sub">${escapeStr(theme.subtitle)}</p>` : ''}
+          <p class="ni-desc">${escapeStr(theme.description || '')}</p>
+          ${theme.film ? `<p class="ni-film">메인 필름 · ${escapeStr(theme.film)}</p>` : ''}
+          <button type="button" class="ni-cta" data-action="open-submission">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+            지금 응모하기
+          </button>`;
       })
       .catch(() => {});
     function escapeStr(s) {
