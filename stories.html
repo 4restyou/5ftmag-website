@@ -660,7 +660,9 @@
   const grid = document.getElementById('articlesGrid');
   const paginationBars = document.querySelectorAll('[data-pagination]');
   const pageSize = 12;
-  let currentPage = 1;
+  // URL ?page=N 으로 진입한 경우 해당 페이지로 시작
+  const _urlPage = parseInt(new URLSearchParams(location.search).get('page'), 10);
+  let currentPage = (Number.isFinite(_urlPage) && _urlPage > 0) ? _urlPage : 1;
   let allStories = []; // 전체 글 데이터 캐시
 
   // 날짜 포맷팅 (2024-11-15 → 2024.11.15)

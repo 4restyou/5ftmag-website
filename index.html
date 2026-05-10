@@ -306,44 +306,24 @@
     .pagination a:hover { background: var(--bg-sub); color: var(--text); }
     .pagination .cur { color: var(--text); }
 
-    /* Story 번호 칩 */
+    /* 페이지 번호 (텍스트만) */
     .story-num-nav {
-      gap: 6px;
-      padding: 20px 16px;
+      gap: 18px;
+      justify-content: center;
+      padding: 24px 16px;
     }
-    .page-chip {
-      min-width: 32px;
-      text-align: center;
-      font-size: 13px;
+    .page-num {
+      font-size: 14px;
       font-weight: var(--fw-heading);
       letter-spacing: 0.02em;
-      padding: 5px 10px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
       color: var(--text-muted);
-      transition: border-color .15s, background .15s, color .15s;
+      padding: 4px 6px;
       text-decoration: none;
+      transition: color .15s;
     }
-    .page-chip:hover {
-      border-color: var(--text);
+    .page-num:hover { color: var(--text); }
+    .page-num.cur {
       color: var(--text);
-      background: var(--bg);
-    }
-    .page-chip.cur {
-      background: var(--text);
-      color: var(--bg);
-      border-color: var(--text);
-    }
-    .page-chip-all {
-      min-width: auto;
-      padding: 5px 12px;
-      margin-left: 4px;
-      border-color: transparent;
-      color: var(--text-muted);
-    }
-    .page-chip-all:hover {
-      border-color: var(--border);
-      background: var(--bg-sub);
     }
 
     /* ════════════════════════════
@@ -2029,14 +2009,18 @@
           .sort((a, b) => new Date(b.date) - new Date(a.date));
         const stories = all.slice(0, 6);
 
-        // 글 번호 칩 네비게이션 (최신순, 모든 발행 글)
+        // 페이지 번호 네비게이션 (stories.html 의 pageSize=12 와 동일하게 계산)
         const numNav = document.getElementById('storyNumNav');
         if (numNav) {
-          numNav.innerHTML = all.map((s, i) => {
-            const link = s.page || '#';
-            const num = String(parseInt(s.id, 10) || s.id);
-            return `<a href="${link}" class="page-chip${i === 0 ? ' cur' : ''}" title="${s.title}">${num}</a>`;
-          }).join('') + `<a href="stories.html" class="page-chip page-chip-all">전체 →</a>`;
+          const PAGE_SIZE = 12;
+          const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+          let html = '';
+          for (let p = 1; p <= totalPages; p++) {
+            const href = p === 1 ? 'stories.html' : `stories.html?page=${p}`;
+            // 메인은 1페이지(최신 12개)에 해당하는 카드를 보여 주므로 1페이지를 'cur'로 강조
+            html += `<a href="${href}" class="page-num${p === 1 ? ' cur' : ''}" aria-label="${p}페이지">${p}</a>`;
+          }
+          numNav.innerHTML = html;
         }
 
         if (stories.length === 0) {
