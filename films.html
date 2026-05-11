@@ -30,6 +30,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/icon-16.png">
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
+  <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css">
@@ -694,32 +695,7 @@
 </footer>
 
 <script>
-  // ── 다크모드 ──
-  const themeBtn = document.getElementById('themeBtn');
-  const html = document.documentElement;
-  const saved = localStorage.getItem('5ftTheme') || 'light';
-  html.dataset.theme = saved;
-  themeBtn.textContent = saved === 'dark' ? '☀' : '☽';
-  themeBtn.addEventListener('click', () => {
-    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
-    html.dataset.theme = next;
-    themeBtn.textContent = next === 'dark' ? '☀' : '☽';
-    localStorage.setItem('5ftTheme', next);
-  });
-
-  // ── 모바일 메뉴 ──
-  const menuBtn = document.getElementById('menuBtn');
-  const mobileNav = document.getElementById('mobileNav');
-  menuBtn.addEventListener('click', () => {
-    const open = mobileNav.classList.toggle('open');
-    menuBtn.textContent = open ? '✕' : '☰';
-  });
-  mobileNav.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      mobileNav.classList.remove('open');
-      menuBtn.textContent = '☰';
-    });
-  });
+  // 테마/메뉴는 js/site-common.js 에서 처리됨
 
   // ════════════════════════════
   // 필름 데이터: data/films.json에서 로딩

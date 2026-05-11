@@ -868,3 +868,140 @@
 .related-card[data-issue="Vol.02"][data-category="essay"] .related-img.text-only .related-img-title {
   color: #6b1f1f;
 }
+
+
+/* ════════════════════════════════════════════════════
+   재사용 컴포넌트 — 향후 글에서 사용
+   (현재 stories/14, 15, 13은 inline 으로 같은 패턴 보유)
+   ════════════════════════════════════════════════════ */
+
+/* 인터뷰 Q&A — Q 마크 + 좌측 여백 + 상단 보더 (interview 카테고리용) */
+.interview-qa {
+  margin: 40px 0;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.interview-qa:first-of-type { padding-top: 0; border-top: none; }
+.interview-q {
+  font-size: 19px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.015em;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: var(--text);
+  position: relative;
+  padding-left: 30px;
+}
+.interview-q::before {
+  content: 'Q';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 17px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  color: #c84e2a;
+}
+.interview-a p { margin-bottom: 14px; }
+.interview-a p:last-child { margin-bottom: 0; }
+@media (max-width: 640px) {
+  .interview-q { font-size: 17px; padding-left: 26px; }
+  .interview-q::before { font-size: 15px; }
+}
+
+/* 남은 질문 티저 (인터뷰 본문 일부만 노출할 때) */
+.question-teasers {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+}
+.question-teasers li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  padding-left: 30px;
+  position: relative;
+}
+.question-teasers li::before {
+  content: 'Q';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  color: #c84e2a;
+}
+.question-teasers li:last-child { border-bottom: none; }
+
+/* 필름/카메라 스펙 카드 (review 카테고리용) */
+.film-spec {
+  background: var(--bg-sub);
+  border-radius: 4px;
+  padding: 24px 28px;
+  margin: 32px 0;
+  display: grid;
+  gap: 14px;
+}
+.film-spec-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 16px;
+  align-items: baseline;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.film-spec-row .label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.film-spec-row .value strong { font-weight: var(--fw-heading); }
+@media (max-width: 640px) {
+  .film-spec-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* 사진 크레딧 (figcaption 안에 인라인) */
+.photo-credit {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.photo-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.photo-credit a:hover { color: var(--text); }
+
+/* feel:toon webtoon 스트립 (illustration / feeltoon 카테고리용) */
+.toon-strip {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+.toon-strip img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 12px;
+  background: #fff;
+  border-radius: 4px;
+}
+.toon-note {
+  max-width: var(--read-width);
+  margin: 32px auto 0;
+  padding: 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+[data-theme="dark"] .toon-strip img { background: var(--bg-sub); }
