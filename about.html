@@ -45,7 +45,6 @@
     <ul class="main-nav">
       <li><a href="index.html#stories">Articles</a></li>
       <li><a href="films.html">Films</a></li>
-      <li><a href="authors.html">Authors</a></li>
       <li><a href="about.html" class="current">About</a></li>
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
@@ -57,7 +56,6 @@
   <nav class="mobile-nav" id="mobileNav">
     <a href="index.html#stories">Articles</a>
     <a href="films.html">Films</a>
-    <a href="authors.html">Authors</a>
     <a href="about.html">About</a>
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
   </nav>
@@ -178,7 +176,71 @@
     </div>
 
   </div>
+
+  <!-- 객원 · 게스트: 글 한두 편으로 함께한 contributor 들 -->
+  <div class="contrib-subheader">
+    <h3>객원 · 게스트</h3>
+    <p>한두 편으로 함께한 사람들 — 외부 활동 링크와 함께한 글을 만나보세요.</p>
+  </div>
+  <div class="contrib-mini-grid">
+
+    <a href="authors/film-social-club.html" class="contrib-mini">
+      <span class="contrib-mini-name">Film Social Club</span>
+      <span class="contrib-mini-note">광주 충장로 기반의 필름·사진 문화 공간</span>
+      <span class="contrib-mini-links">
+        <span class="contrib-mini-ext" data-href="https://instagram.com/film_socialclub">@film_socialclub ↗</span>
+        <span class="contrib-mini-ext" data-href="https://smartstore.naver.com/film_socialclub">Shop ↗</span>
+        <span class="contrib-mini-archive">글 보기 →</span>
+      </span>
+    </a>
+
+    <a href="authors/brisnap-tv.html" class="contrib-mini">
+      <span class="contrib-mini-name">Brisnap TV</span>
+      <span class="contrib-mini-note">필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널</span>
+      <span class="contrib-mini-links">
+        <span class="contrib-mini-ext" data-href="https://www.youtube.com/@BRISNAPTV">@BRISNAPTV ↗</span>
+        <span class="contrib-mini-archive">글 보기 →</span>
+      </span>
+    </a>
+
+    <a href="authors/kang-hyewon.html" class="contrib-mini">
+      <span class="contrib-mini-name">강혜원</span>
+      <span class="contrib-mini-note">앨리카메라 대표 · 빈티지 카메라와 렌즈를 소개합니다</span>
+      <span class="contrib-mini-links">
+        <span class="contrib-mini-archive">글 보기 →</span>
+      </span>
+    </a>
+
+    <a href="authors/yoon-donggyu.html" class="contrib-mini">
+      <span class="contrib-mini-name">윤동규</span>
+      <span class="contrib-mini-note">유튜브 〈수집의 수집〉 · 다큐멘터리와 사진을 기록합니다</span>
+      <span class="contrib-mini-links">
+        <span class="contrib-mini-archive">글 보기 →</span>
+      </span>
+    </a>
+
+    <a href="authors/shin-noguchi.html" class="contrib-mini">
+      <span class="contrib-mini-name">Shin Noguchi</span>
+      <span class="contrib-mini-note">일본의 스트리트 포토그래퍼 · 일상의 낯선 순간을 거리에서 포착</span>
+      <span class="contrib-mini-links">
+        <span class="contrib-mini-archive">글 보기 →</span>
+      </span>
+    </a>
+
+  </div>
 </div>
+
+<script>
+  // 객원 카드: 외부 링크는 새 탭, 카드 자체 클릭은 작가 아카이브로
+  document.querySelectorAll('.contrib-mini-ext').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const url = el.dataset.href;
+      if (url) window.open(url, '_blank', 'noopener');
+    });
+  });
+</script>
 
 <!-- ════════ PARTNERS ════════ -->
 <div class="partners-section" id="partners">

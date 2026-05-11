@@ -105,7 +105,6 @@ function header(prefix = '') {
     <ul class="main-nav">
       <li><a href="${prefix}stories.html">Articles</a></li>
       <li><a href="${prefix}films.html">Films</a></li>
-      <li><a href="${prefix}authors.html" class="current">Authors</a></li>
       <li><a href="${prefix}about.html">About</a></li>
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
@@ -117,7 +116,6 @@ function header(prefix = '') {
   <nav class="mobile-nav" id="mobileNav">
     <a href="${prefix}stories.html">Articles</a>
     <a href="${prefix}films.html">Films</a>
-    <a href="${prefix}authors.html">Authors</a>
     <a href="${prefix}about.html">About</a>
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
   </nav>

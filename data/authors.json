@@ -4,55 +4,75 @@
     "slug": "5ftmag",
     "note": "필름 매거진 5ft.mag의 기획과 편집을 맡습니다.",
     "count": 6,
-    "page": "authors/5ftmag.html"
+    "page": "authors/5ftmag.html",
+    "externalLinks": [
+      { "type": "instagram", "url": "https://instagram.com/5ft.magazine", "label": "@5ft.magazine" },
+      { "type": "website", "url": "https://www.4rest.net", "label": "4rest.net" }
+    ]
   },
   {
     "name": "김현아",
     "slug": "kim-hyuna",
     "note": "일상과 관계의 결을 짧은 에세이로 기록합니다.",
     "count": 3,
-    "page": "authors/kim-hyuna.html"
+    "page": "authors/kim-hyuna.html",
+    "externalLinks": [
+      { "type": "instagram", "url": "https://instagram.com/aaaaa._.nuyh", "label": "@aaaaa._.nuyh" }
+    ]
   },
   {
     "name": "Film Social Club",
     "slug": "film-social-club",
     "note": "광주 충장로를 기반으로 필름과 사진 문화를 이어가는 공간입니다.",
     "count": 2,
-    "page": "authors/film-social-club.html"
+    "page": "authors/film-social-club.html",
+    "externalLinks": [
+      { "type": "instagram", "url": "https://instagram.com/film_socialclub", "label": "@film_socialclub" },
+      { "type": "shop", "url": "https://smartstore.naver.com/film_socialclub", "label": "Shop" }
+    ]
   },
   {
     "name": "강혜원 (앨리카메라 대표)",
     "slug": "kang-hyewon",
     "note": "앨리카메라를 운영하며 빈티지 카메라와 렌즈를 소개합니다.",
     "count": 1,
-    "page": "authors/kang-hyewon.html"
+    "page": "authors/kang-hyewon.html",
+    "externalLinks": []
   },
   {
     "name": "명수경",
     "slug": "myeong-sugyeong",
     "note": "필름 생활의 작은 장면을 만화로 옮깁니다.",
     "count": 1,
-    "page": "authors/myeong-sugyeong.html"
+    "page": "authors/myeong-sugyeong.html",
+    "externalLinks": [
+      { "type": "instagram", "url": "https://instagram.com/myeungsk", "label": "@myeungsk" }
+    ]
   },
   {
     "name": "윤동규",
     "slug": "yoon-donggyu",
     "note": "유튜브 〈수집의 수집〉을 운영하며 다큐멘터리와 사진을 기록합니다.",
     "count": 1,
-    "page": "authors/yoon-donggyu.html"
+    "page": "authors/yoon-donggyu.html",
+    "externalLinks": []
   },
   {
     "name": "Brisnap TV",
     "slug": "brisnap-tv",
     "note": "필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널입니다.",
     "count": 1,
-    "page": "authors/brisnap-tv.html"
+    "page": "authors/brisnap-tv.html",
+    "externalLinks": [
+      { "type": "youtube", "url": "https://www.youtube.com/@BRISNAPTV", "label": "@BRISNAPTV" }
+    ]
   },
   {
     "name": "Shin Noguchi",
     "slug": "shin-noguchi",
     "note": "일상의 낯선 순간을 거리에서 포착하는 일본의 스트리트 포토그래퍼입니다.",
     "count": 1,
-    "page": "authors/shin-noguchi.html"
+    "page": "authors/shin-noguchi.html",
+    "externalLinks": []
   }
 ]
