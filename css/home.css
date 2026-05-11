@@ -243,12 +243,11 @@
 }
 
 /* ════════════════════════════
-   DISCOVER 그리드
+   DISCOVER 그리드 (통합 Photo: editorial + 독자 사진)
 ════════════════════════════ */
-/* ── Photo 그리드 (인스타와 동일한 1px border 여백) ── */
 .discover-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0;
 }
 .disc-cell {
@@ -261,8 +260,8 @@
   border-bottom: 1px solid var(--border);
   transition: opacity .15s;
 }
-.disc-cell:nth-child(2n) { border-right: none; }
-.disc-cell:nth-last-child(-n+2) { border-bottom: none; }
+.disc-cell:nth-child(3n) { border-right: none; }
+.disc-cell:nth-last-child(-n+3) { border-bottom: none; }
 .disc-cell img {
   width: 100%;
   height: 100%;
@@ -587,70 +586,8 @@ body.modal-open { overflow: hidden; }
 }
 .ad-banner .ad-headline a:hover { opacity: 0.7; }
 
-/* ── 인스타그램 피드 (3×2 그리드) ── */
-.insta-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-.insta-cell {
-  display: block;
-  position: relative;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  background: var(--bg-sub);
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  transition: opacity .15s;
-}
-.insta-cell:nth-child(3n) { border-right: none; }
-.insta-cell:nth-last-child(-n+3) { border-bottom: none; }
-.insta-cell img {
-  transition: transform .4s ease;
-}
-.insta-cell:hover { opacity: .82; }
-.insta-cell:hover img { transform: scale(1.04); }
-.insta-cell-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.0);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity .2s, background .2s;
-  pointer-events: none;
-  padding: 12px;
-}
-.insta-cell:hover .insta-cell-overlay {
-  opacity: 1;
-  background: rgba(0, 0, 0, 0.55);
-}
-.insta-cell-overlay .author {
-  color: #fff;
-  font-size: 13px;
-  font-weight: var(--fw-heading);
-  letter-spacing: var(--ls-default);
-  text-align: center;
-}
-.insta-cell-overlay .film {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 11px;
-  font-weight: var(--fw-all);
-  letter-spacing: 0.04em;
-  text-align: center;
-}
-.insta-cell-overlay span {
-  color: #fff;
-  font-size: var(--fs-meta);
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.06em;
-}
-
 /* ════════════════════════════
-   Reader's Roll 라이트박스
+   Reader's Roll 라이트박스 (DEAD — kept temporarily; remove next cleanup)
    ════════════════════════════ */
 .reader-lightbox {
   position: fixed;
