@@ -497,7 +497,8 @@
         }
 
         // 작가별 라운드 로빈 — 같은 작가가 연속으로 안 나오게
-        const PHOTO_COUNT = 18;
+        // 36 = 한 롤(film roll)과 동일한 카운트. 매거진 메타포와 일치.
+        const PHOTO_COUNT = 36;
         const byAuthor = {};
         allPhotos.forEach(p => {
           const key = p.author || 'unknown';

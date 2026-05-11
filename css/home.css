@@ -244,10 +244,11 @@
 
 /* ════════════════════════════
    DISCOVER 그리드 (통합 Photo: editorial + 독자 사진)
+   2컬럼 × 18행 = 36장. 한 롤(36 frames) 메타포와 일치.
 ════════════════════════════ */
 .discover-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 0;
 }
 .disc-cell {
@@ -260,8 +261,8 @@
   border-bottom: 1px solid var(--border);
   transition: opacity .15s;
 }
-.disc-cell:nth-child(3n) { border-right: none; }
-.disc-cell:nth-last-child(-n+3) { border-bottom: none; }
+.disc-cell:nth-child(2n) { border-right: none; }
+.disc-cell:nth-last-child(-n+2) { border-bottom: none; }
 .disc-cell img {
   width: 100%;
   height: 100%;
