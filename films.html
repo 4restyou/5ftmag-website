@@ -288,10 +288,23 @@
     });
   }
 
+  // Library 정렬: 브랜드 알파벳 → 같은 브랜드 안에서는 displayName 알파벳
+  // (Featured는 매거진 발행 순서가 의미 있으므로 정렬하지 않음)
+  function sortLibrary(entries) {
+    return entries.slice().sort((a, b) => {
+      const fa = a[1], fb = b[1];
+      const bc = (fa.brand || '').localeCompare(fb.brand || '', 'en');
+      if (bc !== 0) return bc;
+      const na = fa.displayName || fa.name || '';
+      const nb = fb.displayName || fb.name || '';
+      return na.localeCompare(nb, 'en', { numeric: true });
+    });
+  }
+
   function renderFilmsGrid() {
     const entries = Object.entries(filmsData);
     const featured = entries.filter(([, f]) => f.tier === 'featured');
-    const library  = entries.filter(([, f]) => f.tier === 'library');
+    const library  = sortLibrary(entries.filter(([, f]) => f.tier === 'library'));
 
     filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f)).join('');
     filmsGridLibrary.innerHTML  = library.map(([slug, f]) => renderFilmCard(slug, f)).join('');
