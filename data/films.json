@@ -20,8 +20,6 @@
     "type": "Color Negative",
     "format": "35mm",
     "issue": "Vol.01",
-    "thumbnail": "img/films/ultramax-thumb.png",
-    "thumbnailStatus": "set",
     "photographers": [
       "박순렬",
       "노애경",
@@ -172,7 +170,11 @@
         "src": "img/films/ultramax/jang-ultra12.jpg",
         "author": "장형수"
       }
-    ]
+    ],
+    "boxThumbnail": "img/films/ultramax-box.png",
+    "boxThumbnailStatus": "set",
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "cinestill800t": {
     "slug": "cinestill800t",
@@ -194,8 +196,6 @@
     "type": "Tungsten",
     "format": "35mm",
     "issue": "Vol.02",
-    "thumbnail": "img/films/cinestill800t-thumb.png",
-    "thumbnailStatus": "set",
     "photographers": [
       "박순렬",
       "노애경",
@@ -346,7 +346,11 @@
         "src": "img/films/cinestill800t/ae-cinestill800t14.jpg",
         "author": "노애경"
       }
-    ]
+    ],
+    "boxThumbnail": "img/films/cinestill800t-box.png",
+    "boxThumbnailStatus": "set",
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "portra160": {
     "slug": "portra160",
@@ -367,10 +371,10 @@
     "iso": "160",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/portra160-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/portra160-can.webp",
+    "canThumbnailStatus": "set"
   },
   "portra400": {
     "slug": "portra400",
@@ -392,10 +396,10 @@
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/portra400-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/portra400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "portra800": {
     "slug": "portra800",
@@ -416,10 +420,10 @@
     "iso": "800",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/portra800-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/portra800-can.webp",
+    "canThumbnailStatus": "set"
   },
   "gold200": {
     "slug": "gold200",
@@ -442,10 +446,10 @@
     "iso": "200",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/gold200-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/gold200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "colorplus200": {
     "slug": "colorplus200",
@@ -469,10 +473,10 @@
     "iso": "200",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/colorplus200-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/colorplus200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "proimage100": {
     "slug": "proimage100",
@@ -496,10 +500,10 @@
     "iso": "100",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/proimage100-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/proimage100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "superia400": {
     "slug": "superia400",
@@ -523,10 +527,10 @@
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/superia400-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/superia400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "c200": {
     "slug": "c200",
@@ -548,10 +552,10 @@
     "iso": "200",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/c200-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/c200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "lomocolor400": {
     "slug": "lomocolor400",
@@ -573,10 +577,10 @@
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/lomocolor400-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/lomocolor400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "phoenix200": {
     "slug": "phoenix200",
@@ -599,10 +603,10 @@
     "iso": "200",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/phoenix200-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/phoenix200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "trix400": {
     "slug": "trix400",
@@ -629,10 +633,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "tmax400": {
     "slug": "tmax400",
@@ -659,10 +663,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "hp5plus": {
     "slug": "hp5plus",
@@ -688,10 +692,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "fp4plus": {
     "slug": "fp4plus",
@@ -716,10 +720,10 @@
     "iso": "125",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "delta400": {
     "slug": "delta400",
@@ -742,10 +746,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "xp2super": {
     "slug": "xp2super",
@@ -771,10 +775,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "acros2": {
     "slug": "acros2",
@@ -805,10 +809,10 @@
     "iso": "100",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "kentmere400": {
     "slug": "kentmere400",
@@ -829,10 +833,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "cinestill50d": {
     "slug": "cinestill50d",
@@ -854,10 +858,10 @@
     "iso": "50",
     "type": "Daylight",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "cinestill400d": {
     "slug": "cinestill400d",
@@ -879,10 +883,10 @@
     "iso": "400",
     "type": "Daylight",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "velvia50": {
     "slug": "velvia50",
@@ -907,10 +911,10 @@
     "iso": "50",
     "type": "Slide (E-6)",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "ektachrome100": {
     "slug": "ektachrome100",
@@ -936,10 +940,10 @@
     "iso": "100",
     "type": "Slide (E-6)",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "ektar100": {
     "slug": "ektar100",
@@ -964,10 +968,10 @@
     "iso": "100",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/ektar100-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/ektar100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "provia100f": {
     "slug": "provia100f",
@@ -996,10 +1000,10 @@
     "iso": "100",
     "type": "Slide (E-6)",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "velvia100": {
     "slug": "velvia100",
@@ -1022,10 +1026,10 @@
     "iso": "100",
     "type": "Slide (E-6)",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "lomocolor100": {
     "slug": "lomocolor100",
@@ -1047,10 +1051,10 @@
     "iso": "100",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/lomocolor100-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/lomocolor100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "lomocolor800": {
     "slug": "lomocolor800",
@@ -1072,10 +1076,10 @@
     "iso": "800",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/lomocolor800-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/lomocolor800-can.webp",
+    "canThumbnailStatus": "set"
   },
   "lomopurple": {
     "slug": "lomopurple",
@@ -1098,10 +1102,10 @@
     "iso": "100/400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "lomometropolis": {
     "slug": "lomometropolis",
@@ -1123,10 +1127,10 @@
     "iso": "100/400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/lomometropolis-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/lomometropolis-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fomapan400": {
     "slug": "fomapan400",
@@ -1151,10 +1155,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "vision250d": {
     "slug": "vision250d",
@@ -1180,10 +1184,10 @@
     "iso": "250",
     "type": "Daylight",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "vision500t": {
     "slug": "vision500t",
@@ -1209,10 +1213,10 @@
     "iso": "500",
     "type": "Tungsten",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "vision250dahu": {
     "slug": "vision250dahu",
@@ -1239,10 +1243,10 @@
     "iso": "250",
     "type": "Daylight",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "vision500tahu": {
     "slug": "vision500tahu",
@@ -1269,10 +1273,10 @@
     "iso": "500",
     "type": "Tungsten",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "doublex": {
     "slug": "doublex",
@@ -1303,10 +1307,10 @@
     "iso": "250/200",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "reala100": {
     "slug": "reala100",
@@ -1333,10 +1337,10 @@
     "iso": "100",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/reala100-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/reala100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "eterna250d": {
     "slug": "eterna250d",
@@ -1363,10 +1367,10 @@
     "iso": "250",
     "type": "Daylight",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "eterna500t": {
     "slug": "eterna500t",
@@ -1390,10 +1394,10 @@
     "iso": "500",
     "type": "Tungsten",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "agfaapx400": {
     "slug": "agfaapx400",
@@ -1418,10 +1422,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "agfavista200": {
     "slug": "agfavista200",
@@ -1445,10 +1449,10 @@
     "iso": "200",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/agfavista200-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/agfavista200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "agfaultra100": {
     "slug": "agfaultra100",
@@ -1472,10 +1476,10 @@
     "iso": "100",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/agfaultra100-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/agfaultra100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fujipro400h": {
     "slug": "fujipro400h",
@@ -1502,10 +1506,10 @@
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/fujipro400h-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/fujipro400h-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fujiastia100f": {
     "slug": "fujiastia100f",
@@ -1534,10 +1538,10 @@
     "iso": "100",
     "type": "Slide (E-6)",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "fujivelvia100f": {
     "slug": "fujivelvia100f",
@@ -1561,10 +1565,10 @@
     "iso": "100",
     "type": "Slide (E-6)",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "fujineopan400": {
     "slug": "fujineopan400",
@@ -1592,10 +1596,10 @@
     "iso": "400",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "agfavista400": {
     "slug": "agfavista400",
@@ -1618,10 +1622,10 @@
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/agfavista400-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/agfavista400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "konicacenturia400": {
     "slug": "konicacenturia400",
@@ -1648,10 +1652,10 @@
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "thumbnail": "img/films/konicacenturia400-thumb.webp",
-    "thumbnailStatus": "set",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/konicacenturia400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "panfplus50": {
     "slug": "panfplus50",
@@ -1684,10 +1688,10 @@
     "iso": "50",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "delta100": {
     "slug": "delta100",
@@ -1708,10 +1712,10 @@
     "iso": "100",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "delta3200": {
     "slug": "delta3200",
@@ -1732,10 +1736,10 @@
     "iso": "3200",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "sfx200": {
     "slug": "sfx200",
@@ -1762,10 +1766,10 @@
     "iso": "200",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "kentmere100": {
     "slug": "kentmere100",
@@ -1790,10 +1794,10 @@
     "iso": "100",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "kentmere200": {
     "slug": "kentmere200",
@@ -1818,10 +1822,10 @@
     "iso": "200",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "tmax100": {
     "slug": "tmax100",
@@ -1845,10 +1849,10 @@
     "iso": "100",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   },
   "fomapan100": {
     "slug": "fomapan100",
@@ -1872,9 +1876,9 @@
     "iso": "100",
     "type": "Black & White",
     "format": "35mm",
-    "thumbnail": null,
-    "thumbnailStatus": "pending",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   }
 }

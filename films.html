@@ -195,13 +195,16 @@
 
   function renderFilmCard(slug, film, context = 'library-grid') {
     const isLibrary = film.tier === 'library';
-    const hasThumb  = film.thumbnailStatus === 'set' && film.thumbnail;
     const isFeatured = film.tier === 'featured';
     // 컨텍스트:
-    //  - 'featured-grid' : 위 5ft Issue 영역. 매거진 editorial 강조.
-    //  - 'library-grid'  : 아래 Library 영역. 구독자 Reader's Roll 강조.
-    //  같은 필름이 두 곳에 등장할 때 카드 표현(카운트/CTA)을 컨텍스트별로 분기.
+    //  - 'featured-grid' : 위 5ft Issue 영역. 매거진 editorial 강조. 필름 박스 썸네일 사용.
+    //  - 'library-grid'  : 아래 Library 영역. 구독자 Reader's Roll 강조. 필름 캔 썸네일 사용.
+    //  같은 필름이 두 곳에 등장할 때 카드 표현(썸네일·카운트·CTA)을 컨텍스트별로 분기.
     const isEditorialView = context === 'featured-grid' && isFeatured;
+    const thumbField = isEditorialView ? 'boxThumbnail' : 'canThumbnail';
+    const statusField = isEditorialView ? 'boxThumbnailStatus' : 'canThumbnailStatus';
+    const thumbPath = film[thumbField];
+    const hasThumb = film[statusField] === 'set' && thumbPath;
 
     let badgeHtml = '';
     if (isFeatured && film.issue) {
@@ -212,11 +215,11 @@
 
     let imgHtml = '';
     if (hasThumb) {
-      const webp = film.thumbnail.replace(/\.(png|jpe?g)$/i, '.webp');
+      const webp = thumbPath.replace(/\.(png|jpe?g)$/i, '.webp');
       imgHtml = `
         <picture>
           <source srcset="${escapeAttr(webp)}" type="image/webp">
-          <img src="${escapeAttr(film.thumbnail)}" alt="${escapeAttr(film.displayName || film.name)}" />
+          <img src="${escapeAttr(thumbPath)}" alt="${escapeAttr(film.displayName || film.name)}" />
         </picture>`;
     } else {
       // 썸네일 대기 중 — 캐니스터 실루엣 플레이스홀더
