@@ -116,6 +116,29 @@
   <div class="lightbox-thumbs" id="lightboxThumbs" aria-label="사진 썸네일"></div>
 </div>
 
+<!-- ════════ Reader's Roll 라이트박스 (구독자 사진 크게 보기) ════════ -->
+<div class="reader-lightbox" id="filmReaderLightbox" role="dialog" aria-modal="true" aria-label="독자 사진 크게 보기">
+  <button class="reader-lb-close" id="filmReaderLbClose" aria-label="닫기">✕</button>
+  <button class="reader-lb-prev"  id="filmReaderLbPrev"  aria-label="이전 사진">‹</button>
+  <button class="reader-lb-next"  id="filmReaderLbNext"  aria-label="다음 사진">›</button>
+  <div class="reader-lb-wrap">
+    <img id="filmReaderLbImg" src="" alt="" />
+    <div class="reader-lb-info">
+      <span class="author" id="filmReaderLbAuthor"></span>
+      <span class="film" id="filmReaderLbFilm"></span>
+      <span class="counter" id="filmReaderLbCounter"></span>
+      <a href="#" target="_blank" rel="noopener" class="reader-lb-instagram" id="filmReaderLbInsta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+        Instagram에서 보기
+      </a>
+    </div>
+  </div>
+</div>
+
 <!-- ════════ FOOTER ════════ -->
 <!-- ════════ 푸터 위 협력사 로고 띠 ════════ -->
 <div class="footer-partners">
@@ -494,13 +517,111 @@
       slot.classList.remove('is-empty');
       slot.classList.add('is-filled');
       slot.innerHTML = `
-        <a href="${sub.instagramUrl}" target="_blank" rel="noopener" class="reader-slot-link" aria-label="${escapeAttr(sub.author || '')}의 사진">
+        <button type="button" class="reader-slot-link" aria-label="${escapeAttr(sub.author || '')}의 사진 크게 보기">
           <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
           <span class="reader-slot-author">${escapeAttr(sub.author || '')}</span>
-        </a>`;
+        </button>`;
     });
 
     if (counter) counter.textContent = `${matched.length} / ${ROLL_LIMIT}`;
+
+    // 채워진 슬롯 클릭 → reader 라이트박스 (인스타로 바로 점프 X)
+    grid.addEventListener('click', (e) => {
+      const slot = e.target.closest('.reader-slot.is-filled');
+      if (!slot) return;
+      const idx = parseInt(slot.dataset.slotIndex, 10);
+      if (Number.isNaN(idx) || idx >= matched.length) return;
+      openFilmReaderLightbox(matched, idx);
+    });
+  }
+
+  // ════════════════════════════
+  // Reader's Roll 라이트박스 (films 모달 안의 독자 사진 크게 보기)
+  // ════════════════════════════
+  const filmReaderLightbox = document.getElementById('filmReaderLightbox');
+  const filmReaderLbImg    = document.getElementById('filmReaderLbImg');
+  const filmReaderLbAuthor = document.getElementById('filmReaderLbAuthor');
+  const filmReaderLbFilm   = document.getElementById('filmReaderLbFilm');
+  const filmReaderLbCounter = document.getElementById('filmReaderLbCounter');
+  const filmReaderLbInsta  = document.getElementById('filmReaderLbInsta');
+  const filmReaderLbClose  = document.getElementById('filmReaderLbClose');
+  const filmReaderLbPrev   = document.getElementById('filmReaderLbPrev');
+  const filmReaderLbNext   = document.getElementById('filmReaderLbNext');
+
+  let filmReaderRoll = [];
+  let filmReaderIndex = 0;
+
+  function openFilmReaderLightbox(photos, index) {
+    filmReaderRoll = photos;
+    showFilmReaderPhoto(index);
+  }
+
+  function showFilmReaderPhoto(index) {
+    if (!filmReaderRoll.length) return;
+    if (index < 0) index = filmReaderRoll.length - 1;
+    if (index >= filmReaderRoll.length) index = 0;
+    filmReaderIndex = index;
+    const p = filmReaderRoll[index];
+    filmReaderLbImg.src = p.image || '';
+    filmReaderLbImg.alt = p.author || '';
+    filmReaderLbAuthor.textContent = p.author || '';
+    filmReaderLbFilm.textContent = p.film || '';
+    filmReaderLbCounter.textContent = `${index + 1} / ${filmReaderRoll.length}`;
+    if (p.instagramUrl) {
+      filmReaderLbInsta.href = p.instagramUrl;
+      filmReaderLbInsta.style.display = '';
+    } else {
+      filmReaderLbInsta.style.display = 'none';
+    }
+    filmReaderLightbox.classList.add('open');
+  }
+
+  function closeFilmReaderLightbox() {
+    filmReaderLightbox.classList.remove('open');
+    filmReaderLbImg.src = '';
+  }
+
+  if (filmReaderLbClose) filmReaderLbClose.addEventListener('click', closeFilmReaderLightbox);
+  if (filmReaderLbPrev)  filmReaderLbPrev.addEventListener('click', () => showFilmReaderPhoto(filmReaderIndex - 1));
+  if (filmReaderLbNext)  filmReaderLbNext.addEventListener('click', () => showFilmReaderPhoto(filmReaderIndex + 1));
+
+  // 빈 영역 클릭 시 닫기 (이미지·버튼·링크 클릭 제외)
+  if (filmReaderLightbox) {
+    filmReaderLightbox.addEventListener('click', (e) => {
+      if (e.target === filmReaderLightbox || e.target.classList.contains('reader-lb-wrap')) {
+        closeFilmReaderLightbox();
+      }
+    });
+  }
+
+  // 키보드 — reader 라이트박스 우선
+  document.addEventListener('keydown', (e) => {
+    if (filmReaderLightbox && filmReaderLightbox.classList.contains('open')) {
+      if (e.key === 'Escape') closeFilmReaderLightbox();
+      else if (e.key === 'ArrowLeft') showFilmReaderPhoto(filmReaderIndex - 1);
+      else if (e.key === 'ArrowRight') showFilmReaderPhoto(filmReaderIndex + 1);
+    }
+  });
+
+  // 터치 스와이프
+  let frTouchStartX = 0, frTouchStartY = 0, frTouchStartTime = 0;
+  if (filmReaderLightbox) {
+    filmReaderLightbox.addEventListener('touchstart', (e) => {
+      if (!filmReaderLightbox.classList.contains('open')) return;
+      frTouchStartX = e.changedTouches[0].clientX;
+      frTouchStartY = e.changedTouches[0].clientY;
+      frTouchStartTime = Date.now();
+    }, { passive: true });
+    filmReaderLightbox.addEventListener('touchend', (e) => {
+      if (!filmReaderLightbox.classList.contains('open')) return;
+      const dx = e.changedTouches[0].clientX - frTouchStartX;
+      const dy = e.changedTouches[0].clientY - frTouchStartY;
+      const dt = Date.now() - frTouchStartTime;
+      if (Math.abs(dx) >= 50 && Math.abs(dx) > Math.abs(dy) && dt < 500) {
+        if (dx < 0) showFilmReaderPhoto(filmReaderIndex + 1);
+        else        showFilmReaderPhoto(filmReaderIndex - 1);
+      }
+    }, { passive: true });
   }
 
   function closeModal() {
