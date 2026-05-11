@@ -73,6 +73,7 @@ for (const file of [
   'css/tokens.css',
   'css/article.css',
   'css/authors.css',
+  'css/films.css',
   'js/site-common.js',
 ]) {
   check(existsSync(join(ROOT, file)), `Missing core file: ${file}`);
