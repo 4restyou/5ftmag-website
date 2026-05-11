@@ -49,6 +49,25 @@
 
 `img/stories/XX/` 폴더 만들고 사진 업로드.
 
+권장 파일명:
+
+```text
+cover.jpg       대표 이미지 / 카드 썸네일
+detail-01.jpg   카메라·제품·현장 디테일
+detail-02.jpg
+sample-01.jpg   촬영 샘플
+sample-02.jpg
+```
+
+이미지를 추가하거나 이름을 바꾼 뒤에는 반드시 확인합니다.
+
+```bash
+npm run optimize-images -- img/stories/XX
+npm run qa
+```
+
+`data/stories.json`의 `thumbnail`과 본문 HTML의 이미지 경로가 실제 파일명과 일치해야 합니다.
+
 ---
 
 ## 2. News (소식) 추가

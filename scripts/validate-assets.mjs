@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * 5ft.mag 자산 검증
- * - HTML 파일의 src/href 이미지 참조 → 실제 파일 존재 여부
- * - JSON 데이터 파일의 image/thumbnail 필드 → 실제 파일 존재 여부
+ * - HTML 파일의 로컬 src/href 참조 → 실제 파일 존재 여부
+ * - JSON 데이터 파일의 내부 page/link/image/thumbnail/photo 참조 → 실제 파일 존재 여부
+ * - 병합 충돌 마커와 오래된 stories/12 이미지명 회귀 여부
  * - 누락 발견 시 exit 1 (빌드 실패)
  *
  * 사용:
@@ -29,10 +30,35 @@ function walk(dir, ext, out = []) {
 }
 
 const broken = [];
+const warnings = [];
 let refCount = 0;
 
-// 1) HTML에서 src/href로 참조하는 이미지 경로
-const htmlRe = /(?:src|href)=["'](\.{0,2}\/?img\/[^"']+\.(?:jpg|jpeg|png|webp|svg))["']/gi;
+function isLocalRef(ref) {
+  if (!ref || ref.startsWith('#') || ref.startsWith('mailto:') || ref.startsWith('tel:')) return false;
+  if (ref.startsWith('http://') || ref.startsWith('https://') || ref.startsWith('//')) return false;
+  if (ref.startsWith('data:') || ref.startsWith('javascript:')) return false;
+  if (ref.includes('${')) return false;
+  return true;
+}
+
+function stripRef(ref) {
+  return ref.split('#')[0].split('?')[0];
+}
+
+function checkRef(file, ref, baseDir, label = ref) {
+  const clean = stripRef(ref);
+  if (!clean) return;
+  const target = ref.startsWith('/')
+    ? resolve(ROOT, `.${clean}`)
+    : resolve(baseDir, clean);
+  refCount++;
+  if (!existsSync(target)) {
+    broken.push({ file, ref: label, expected: relative(ROOT, target) });
+  }
+}
+
+// 1) HTML에서 src/href로 참조하는 로컬 자산/페이지
+const htmlRe = /(?:src|href)=["']([^"']+)["']/gi;
 const htmlFiles = walk(ROOT, /\.html$/).filter(p => {
   const rel = relative(ROOT, p);
   // 빌드 워크트리 / node_modules / 템플릿 (path resolution 이 빌드 후에 일어남) 제외
@@ -43,21 +69,18 @@ const htmlFiles = walk(ROOT, /\.html$/).filter(p => {
 
 for (const html of htmlFiles) {
   const text = readFileSync(html, 'utf8');
+  if (/<<<<<<<|=======|>>>>>>>/.test(text)) {
+    broken.push({ file: relative(ROOT, html), ref: 'MERGE CONFLICT MARKER', expected: 'resolve conflict markers before deploy' });
+  }
   let m;
   while ((m = htmlRe.exec(text))) {
     const ref = m[1];
-    let target;
-    if (ref.startsWith('../')) target = resolve(dirname(html), ref);
-    else if (ref.startsWith('./')) target = resolve(dirname(html), ref.slice(2));
-    else target = resolve(ROOT, ref);
-    refCount++;
-    if (!existsSync(target)) {
-      broken.push({ file: relative(ROOT, html), ref, expected: relative(ROOT, target) });
-    }
+    if (!isLocalRef(ref)) continue;
+    checkRef(relative(ROOT, html), ref, dirname(html));
   }
 }
 
-// 2) JSON 데이터 파일의 image/thumbnail 필드
+// 2) JSON 데이터 파일의 내부 page/link/image/thumbnail/photos[].src 참조
 const dataFiles = ['data/readers.json', 'data/stories.json', 'data/films.json', 'data/news.json'];
 for (const jf of dataFiles) {
   const p = join(ROOT, jf);
@@ -68,35 +91,42 @@ for (const jf of dataFiles) {
     broken.push({ file: jf, ref: 'INVALID JSON', expected: e.message });
     continue;
   }
-  const items = Array.isArray(data) ? data : Object.values(data);
-  for (const entry of items) {
-    if (!entry || typeof entry !== 'object') continue;
-    for (const key of ['image', 'thumbnail']) {
-      const v = entry[key];
-      if (v && typeof v === 'string' && v.trim() && !v.startsWith('http')) {
-        const target = resolve(ROOT, v);
-        refCount++;
-        if (!existsSync(target)) {
-          broken.push({ file: jf, ref: v, expected: `${key} of id=${entry.id || '(no id)'}` });
+  function scan(value, trail = []) {
+    if (Array.isArray(value)) {
+      value.forEach((item, i) => scan(item, trail.concat(i)));
+      return;
+    }
+    if (!value || typeof value !== 'object') return;
+    for (const [key, v] of Object.entries(value)) {
+      const nextTrail = trail.concat(key);
+      if (typeof v === 'string' && isLocalRef(v)) {
+        const shouldCheck =
+          ['image', 'thumbnail', 'src', 'page', 'link'].includes(key)
+          || /\.(?:html|xml|css|js|jpg|jpeg|png|webp|svg|ico|woff2?|ttf|otf)$/i.test(stripRef(v));
+        if (shouldCheck) {
+          checkRef(jf, v, ROOT, `${nextTrail.join('.')}: ${v}`);
         }
       }
+      scan(v, nextTrail);
     }
-    // films.json 의 photos 배열
-    if (Array.isArray(entry.photos)) {
-      for (const ph of entry.photos) {
-        if (ph?.src && !ph.src.startsWith('http')) {
-          const target = resolve(ROOT, ph.src);
-          refCount++;
-          if (!existsSync(target)) {
-            broken.push({ file: jf, ref: ph.src, expected: `photos[].src` });
-          }
-        }
-      }
-    }
+  }
+  scan(data);
+}
+
+// 3) 오래된 stories/12 파일명으로 회귀했는지 검사
+const legacyStory12 = /\bimg\/stories\/12\/(?:hero|side|angles-\d|sample-\d-\d)\.jpe?g\b/;
+for (const file of [...htmlFiles, ...dataFiles.map(f => join(ROOT, f)).filter(existsSync)]) {
+  const text = readFileSync(file, 'utf8');
+  if (legacyStory12.test(text)) {
+    broken.push({
+      file: relative(ROOT, file),
+      ref: 'legacy stories/12 image name',
+      expected: 'use img/stories/12/3.jpg, 4.jpg, 7.jpg, sample1.jpeg, sample2.jpeg',
+    });
   }
 }
 
-// 3) WebP 페어 누락 (참조는 아니지만 권장)
+// 4) WebP 페어 누락 (참조는 아니지만 권장)
 const webpMissing = [];
 const imgDir = join(ROOT, 'img');
 if (existsSync(imgDir)) {
@@ -108,6 +138,7 @@ if (existsSync(imgDir)) {
     if (!existsSync(webp)) webpMissing.push(rel);
   }
 }
+if (webpMissing.length) warnings.push(`${webpMissing.length} WebP pair(s) missing`);
 
 // 결과 출력
 console.log(`\n자산 검증: ${htmlFiles.length} HTML / ${dataFiles.length} JSON 검사`);
@@ -125,6 +156,10 @@ if (webpMissing.length) {
   console.warn(`\n  ⚠️  WebP 페어 누락 ${webpMissing.length}개 (성능 저하 가능):`);
   for (const m of webpMissing.slice(0, 10)) console.warn(`     ${m}`);
   if (webpMissing.length > 10) console.warn(`     ... ${webpMissing.length - 10}개 더`);
+}
+
+if (warnings.length && !broken.length) {
+  console.warn(`\n  경고: ${warnings.join(', ')}`);
 }
 
 if (!broken.length && !webpMissing.length) {
