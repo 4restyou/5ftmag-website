@@ -508,8 +508,6 @@
   .modal-name { font-size: 40px; }
 }
 @media (max-width: 900px) {
-  .main-nav { display: none; }
-  .hamburger { display: flex; }
   .films-section { padding: 48px 24px; }
 }
 @media (max-width: 640px) {

@@ -502,8 +502,6 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .main-nav { display: none; }
-      .hamburger { display: flex; }
       .article-title { font-size: 36px; }
       .contributors-mini { grid-template-columns: 1fr; }
     }

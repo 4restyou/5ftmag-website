@@ -384,6 +384,16 @@ footer {
   }
 }
 
+@media (max-width: 900px) {
+  .main-nav {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+}
+
 @media (max-width: 640px) {
   .post-img {
     aspect-ratio: 16 / 9 !important;

@@ -1493,8 +1493,6 @@ body.modal-open { overflow: hidden; }
   }
 }
 @media (max-width: 900px) {
-  .main-nav { display: none; }
-  .hamburger { display: flex; }
   .split-layout { grid-template-columns: 1fr; }
   .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
   /* 데스크톱용으로 키운 패딩을 모바일에선 정상 사이즈로 */
