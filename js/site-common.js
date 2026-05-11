@@ -94,6 +94,36 @@
   window.copyLink = copyCurrentLink;
 
   // ════════════════════════════════════════════════
+  // 글 상세 author 이름을 author archive로 연결
+  // ════════════════════════════════════════════════
+  const AUTHOR_LINKS = {
+    '5ft.mag 편집부': '../authors/5ftmag.html',
+    'Film Social Club': '../authors/film-social-club.html',
+    'Shin Noguchi': '../authors/shin-noguchi.html',
+    'Brisnap TV': '../authors/brisnap-tv.html',
+    '김현아': '../authors/kim-hyuna.html',
+    '명수경': '../authors/myeong-sugyeong.html',
+    '강혜원': '../authors/kang-hyewon.html',
+    '윤동규': '../authors/yoon-donggyu.html',
+  };
+
+  function linkArticleAuthor() {
+    const el = document.querySelector('.article-author .author-name');
+    if (!el || el.querySelector('a')) return;
+    const text = el.textContent.trim();
+    const key = Object.keys(AUTHOR_LINKS).find(function (name) {
+      return text.includes(name);
+    });
+    if (!key) return;
+    const link = document.createElement('a');
+    link.href = AUTHOR_LINKS[key];
+    link.className = 'author-link';
+    link.textContent = text;
+    el.textContent = '';
+    el.appendChild(link);
+  }
+
+  // ════════════════════════════════════════════════
   // 초기화
   // ════════════════════════════════════════════════
   function init() {
@@ -142,6 +172,8 @@
       const t = e.target.closest('[data-action="copy-link"]');
       if (t) { e.preventDefault(); copyCurrentLink(t); }
     });
+
+    linkArticleAuthor();
   }
 
   if (document.readyState === 'loading') {

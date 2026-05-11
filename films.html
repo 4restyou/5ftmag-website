@@ -415,6 +415,7 @@
       justify-content: center;
       flex-direction: column;
       gap: 16px;
+      overflow: auto;
     }
     .lightbox img {
       max-width: 100%;
@@ -423,6 +424,22 @@
       height: auto;
       object-fit: contain;
       display: block;
+      cursor: zoom-in;
+      transition: transform .18s ease;
+      transform-origin: center center;
+    }
+    .lightbox.is-zoomed img {
+      max-width: min(92vw, 1600px);
+      max-height: none;
+      transform: scale(1.45);
+      cursor: zoom-out;
+    }
+    .lightbox-toolbar {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      display: flex;
+      gap: 8px;
     }
     .lightbox-caption {
       color: rgba(255, 255, 255, 0.7);
@@ -437,7 +454,9 @@
     }
     .lightbox-close,
     .lightbox-prev,
-    .lightbox-next {
+    .lightbox-next,
+    .lightbox-zoom,
+    .lightbox-fullscreen {
       position: absolute;
       background: transparent;
       border: 1px solid rgba(255, 255, 255, 0.3);
@@ -455,20 +474,51 @@
     }
     .lightbox-close:hover,
     .lightbox-prev:hover,
-    .lightbox-next:hover {
+    .lightbox-next:hover,
+    .lightbox-zoom:hover,
+    .lightbox-fullscreen:hover {
       background: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.6);
+    }
+    .lightbox-zoom,
+    .lightbox-fullscreen {
+      position: static;
+      font-size: 13px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
     }
     .lightbox-close { top: 24px; right: 24px; }
     .lightbox-prev  { left: 24px;  top: 50%; transform: translateY(-50%); }
     .lightbox-next  { right: 24px; top: 50%; transform: translateY(-50%); }
 
+    @media (min-width: 641px) and (max-width: 1100px) {
+      .modal-content {
+        padding: 72px 28px 48px;
+      }
+      .modal-name {
+        font-size: clamp(42px, 7vw, 64px);
+      }
+      .modal-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+    }
+
     @media (max-width: 640px) {
       .lightbox { padding: 20px; }
       .lightbox img { max-height: calc(100vh - 120px); }
+      .lightbox.is-zoomed img { transform: scale(1.28); }
+      .lightbox-toolbar { top: 16px; left: 16px; }
       .lightbox-close { top: 16px; right: 16px; width: 40px; height: 40px; }
       .lightbox-prev  { left: 12px;  width: 40px; height: 40px; }
       .lightbox-next  { right: 12px; width: 40px; height: 40px; }
+      .modal-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .modal-photo-caption {
+        font-size: 11px;
+        line-height: 1.35;
+      }
     }
 
     /* ── FOOTER ── */
@@ -564,7 +614,7 @@
     <ul class="main-nav">
       <li><a href="stories.html">Articles</a></li>
       <li><a href="films.html" class="current">Films</a></li>
-      <li><a href="about.html#contributors">Contributors</a></li>
+      <li><a href="authors.html">Authors</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
@@ -576,7 +626,7 @@
   <nav class="mobile-nav" id="mobileNav">
     <a href="stories.html">Articles</a>
     <a href="films.html">Films</a>
-    <a href="about.html#contributors">Contributors</a>
+    <a href="authors.html">Authors</a>
     <a href="about.html">About</a>
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
   </nav>
@@ -650,6 +700,10 @@
 <!-- ════════ 라이트박스 (사진 한 장씩 크게 보기) ════════ -->
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="사진 크게 보기">
   <button class="lightbox-close" id="lightboxClose" aria-label="닫기">✕</button>
+  <div class="lightbox-toolbar" aria-label="사진 보기 옵션">
+    <button class="lightbox-zoom" id="lightboxZoom" type="button" aria-label="사진 확대">ZOOM</button>
+    <button class="lightbox-fullscreen" id="lightboxFullscreen" type="button" aria-label="전체 화면">FULL</button>
+  </div>
   <button class="lightbox-prev"  id="lightboxPrev"  aria-label="이전 사진">‹</button>
   <button class="lightbox-next"  id="lightboxNext"  aria-label="다음 사진">›</button>
   <div class="lightbox-img-wrap">
@@ -808,8 +862,18 @@
   const lightboxClose  = document.getElementById('lightboxClose');
   const lightboxPrev   = document.getElementById('lightboxPrev');
   const lightboxNext   = document.getElementById('lightboxNext');
+  const lightboxZoom   = document.getElementById('lightboxZoom');
+  const lightboxFullscreen = document.getElementById('lightboxFullscreen');
   let currentLightboxIndex = 0;
   let currentFilmKey = null;
+
+  function resetLightboxView() {
+    lightbox.classList.remove('is-zoomed');
+    if (lightboxZoom) {
+      lightboxZoom.textContent = 'ZOOM';
+      lightboxZoom.setAttribute('aria-label', '사진 확대');
+    }
+  }
 
   function showLightbox(index) {
     if (!currentFilmKey) return;
@@ -823,16 +887,39 @@
     const src = photo.src || `https://picsum.photos/seed/${photo.seed}/1200/1500`;
     // WebP 우선 시도, 실패 시 원본 jpg로 폴백
     const webpSrc = photo.src ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp') : src;
+    resetLightboxView();
     lightboxImg.onerror = () => { lightboxImg.onerror = null; lightboxImg.src = src; };
     lightboxImg.src = webpSrc;
     lightboxImg.alt = photo.author || '';
-    lightboxCap.innerHTML = `<strong>${photo.author || ''}</strong> ${index + 1} / ${photos.length}`;
+    lightboxCap.innerHTML = `<strong>${photo.author || ''}</strong> ${filmsData[currentFilmKey].name} · ${index + 1} / ${photos.length}`;
     lightbox.classList.add('open');
   }
 
   function closeLightbox() {
     lightbox.classList.remove('open');
+    resetLightboxView();
+    if (document.fullscreenElement === lightbox && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
     lightboxImg.src = '';
+  }
+
+  function toggleZoom() {
+    const zoomed = lightbox.classList.toggle('is-zoomed');
+    if (lightboxZoom) {
+      lightboxZoom.textContent = zoomed ? 'FIT' : 'ZOOM';
+      lightboxZoom.setAttribute('aria-label', zoomed ? '화면에 맞추기' : '사진 확대');
+    }
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && lightbox.requestFullscreen) {
+      lightbox.requestFullscreen().catch(() => {});
+      return;
+    }
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
   }
 
   // 그리드의 사진 클릭 시 라이트박스 열기 (이벤트 위임)
@@ -848,6 +935,9 @@
   lightboxClose.addEventListener('click', closeLightbox);
   lightboxPrev.addEventListener('click', () => showLightbox(currentLightboxIndex - 1));
   lightboxNext.addEventListener('click', () => showLightbox(currentLightboxIndex + 1));
+  lightboxImg.addEventListener('click', toggleZoom);
+  if (lightboxZoom) lightboxZoom.addEventListener('click', toggleZoom);
+  if (lightboxFullscreen) lightboxFullscreen.addEventListener('click', toggleFullscreen);
 
   // 라이트박스 빈 영역 클릭 시 닫기 (이미지/버튼 클릭은 제외)
   lightbox.addEventListener('click', (e) => {
@@ -862,6 +952,7 @@
       if (e.key === 'Escape') closeLightbox();
       else if (e.key === 'ArrowLeft') showLightbox(currentLightboxIndex - 1);
       else if (e.key === 'ArrowRight') showLightbox(currentLightboxIndex + 1);
+      else if (e.key === '+' || e.key === '=') toggleZoom();
       return;
     }
     if (e.key === 'Escape' && modalOverlay.classList.contains('open')) {

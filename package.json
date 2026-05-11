@@ -9,9 +9,11 @@
     "qa": "npm run validate && node scripts/qa-smoke.mjs",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
-    "build": "node scripts/build-from-notion.mjs && node scripts/build-rss.mjs",
+    "build": "node scripts/build-from-notion.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs",
     "build:dry": "DRY_RUN=1 node scripts/build-from-notion.mjs",
-    "build:rss": "node scripts/build-rss.mjs"
+    "build:rss": "node scripts/build-rss.mjs",
+    "build:authors": "node scripts/build-authors.mjs",
+    "build:sitemap": "node scripts/build-sitemap.mjs"
   },
   "engines": {
     "node": ">=18"

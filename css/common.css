@@ -96,8 +96,26 @@ footer {
   transition: transform .18s ease;
 }
 
+.author-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
 .hero-body {
   max-width: 680px !important;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .footer-partners {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  footer {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
 }
 
 @media (max-width: 640px) {

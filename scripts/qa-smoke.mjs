@@ -65,10 +65,14 @@ for (const file of [
   'stories.html',
   'films.html',
   'about.html',
+  'authors.html',
   'rss.xml',
+  'sitemap.xml',
+  'robots.txt',
   'css/common.css',
   'css/tokens.css',
   'css/article.css',
+  'css/authors.css',
   'js/site-common.js',
 ]) {
   check(existsSync(join(ROOT, file)), `Missing core file: ${file}`);
@@ -90,6 +94,15 @@ for (const story of stories) {
   }
 }
 console.log(`  Published stories: ${seenIds.size}`);
+
+// 5) Author archive contract
+const authors = JSON.parse(readFileSync(join(ROOT, 'data/authors.json'), 'utf8'));
+for (const author of authors) {
+  check(author.name, 'Author missing name');
+  check(author.slug, `Author missing slug: ${author.name || '(unknown)'}`);
+  check(author.page && existsSync(join(ROOT, author.page)), `Author page missing: ${author.name || author.slug} -> ${author.page}`);
+}
+console.log(`  Author archives: ${authors.length}`);
 
 if (failures.length) {
   console.error('\n  QA 실패:');
