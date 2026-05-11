@@ -357,10 +357,62 @@
     .then(data => {
       filmsData = data;
       renderFilmsGrid();
+      updateReaderCounts(); // 비동기 — Supabase 승인 제출 수 집계 후 카드 카운트 갱신
     })
     .catch(err => {
       console.error('Films 데이터 로딩 실패:', err);
     });
+
+  // ════════════════════════════
+  // Library 카드들의 "X / 36" 카운트를 실제 승인된 제출 수로 업데이트
+  //  - 모든 카드 일괄로 한 번에 처리 (필름별 alias 매칭)
+  //  - 5ft Issue 영역의 featured 카드(editorial "36 photos")는 건드리지 않음
+  // ════════════════════════════
+  async function updateReaderCounts() {
+    // reader-submissions.js 가 노출하는 헬퍼 대기 (최대 ~3초)
+    for (let i = 0; i < 30; i++) {
+      if (typeof window.fetchApprovedSubmissions === 'function') break;
+      await new Promise(r => setTimeout(r, 100));
+    }
+    if (typeof window.fetchApprovedSubmissions !== 'function') return;
+
+    let submissions = [];
+    try {
+      submissions = await window.fetchApprovedSubmissions(200);
+    } catch (e) {
+      console.warn('승인된 제출 fetch 실패:', e);
+      return;
+    }
+    if (!submissions || !submissions.length) return;
+
+    const normalize = window.normalizeFilmName
+      || ((s) => String(s || '').toLowerCase().replace(/[\s\-_+()/.]+/g, ''));
+
+    // 필름별 카운트 집계
+    const countPerSlug = new Map();
+    for (const slug of Object.keys(filmsData)) {
+      const film = filmsData[slug];
+      const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
+      const aliasSet = new Set(aliases.map(normalize));
+      const n = submissions.filter(s => aliasSet.has(normalize(s.film))).length;
+      if (n > 0) countPerSlug.set(slug, n);
+    }
+    if (!countPerSlug.size) return;
+
+    // Library 그리드 카드만 갱신 (5ft Issue의 editorial 카운트는 그대로)
+    const libraryGrid = document.getElementById('filmsGridLibrary');
+    if (!libraryGrid) return;
+
+    for (const [slug, count] of countPerSlug) {
+      const card = libraryGrid.querySelector(`.film-card[data-film="${slug}"]`);
+      if (!card) continue;
+      const countEl = card.querySelector('.film-count');
+      const ctaEl = card.querySelector('.film-cta');
+      const cappedCount = Math.min(count, ROLL_LIMIT);
+      if (countEl) countEl.textContent = `${cappedCount} / ${ROLL_LIMIT}`;
+      if (ctaEl) ctaEl.textContent = '자리 채우기 →';
+    }
+  }
 
   // ════════════════════════════
   // 모달 열기/닫기
