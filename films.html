@@ -84,6 +84,7 @@
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
   </div>
+  <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
   <div class="films-grid" id="filmsGridLibrary" aria-label="라이브러리 필름"></div>
 </div>
 
@@ -217,7 +218,7 @@
     const tierClass = isLibrary ? ' film-card-library' : '';
 
     return `
-      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}">
+      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}">
         <div class="film-img">
           ${badgeHtml}
           ${imgHtml}
@@ -230,6 +231,63 @@
       </button>`;
   }
 
+  // 필름 type → 필터 카테고리 매핑
+  function filterCategoryOf(film) {
+    const t = (film.type || '').toLowerCase();
+    if (t.includes('color negative')) return 'color';
+    if (t.includes('black') || t.includes('white')) return 'bw';
+    if (t.includes('slide') || t.includes('e-6') || t.includes('reversal')) return 'slide';
+    if (t.includes('tungsten') || t.includes('daylight') || t.includes('cinema')) return 'cinema';
+    return 'other';
+  }
+  const FILTER_LABELS = {
+    all: '전체',
+    color: 'Color',
+    bw: 'B&W',
+    slide: 'Slide',
+    cinema: 'Cinema',
+  };
+  let currentFilter = 'all';
+
+  function renderLibraryFilterChips(libraryFilms) {
+    const filterBar = document.getElementById('libraryFilter');
+    if (!filterBar) return;
+    // 사용 중인 카테고리 + 개수 집계
+    const counts = { all: libraryFilms.length };
+    for (const [, f] of libraryFilms) {
+      const cat = filterCategoryOf(f);
+      counts[cat] = (counts[cat] || 0) + 1;
+    }
+    const order = ['all', 'color', 'bw', 'slide', 'cinema'];
+    filterBar.innerHTML = order
+      .filter(k => counts[k])
+      .map(k => `
+        <button type="button" class="library-filter-chip${k === currentFilter ? ' is-active' : ''}"
+                data-filter="${k}" role="tab" aria-selected="${k === currentFilter}">
+          ${FILTER_LABELS[k]}<span class="library-filter-count">${counts[k]}</span>
+        </button>
+      `).join('');
+    filterBar.querySelectorAll('.library-filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        currentFilter = chip.dataset.filter;
+        applyLibraryFilter();
+        filterBar.querySelectorAll('.library-filter-chip').forEach(c => {
+          const active = c.dataset.filter === currentFilter;
+          c.classList.toggle('is-active', active);
+          c.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+      });
+    });
+  }
+
+  function applyLibraryFilter() {
+    filmsGridLibrary.querySelectorAll('.film-card').forEach(card => {
+      const cat = card.dataset.filterCategory;
+      const show = currentFilter === 'all' || cat === currentFilter;
+      card.hidden = !show;
+    });
+  }
+
   function renderFilmsGrid() {
     const entries = Object.entries(filmsData);
     const featured = entries.filter(([, f]) => f.tier === 'featured');
@@ -237,6 +295,9 @@
 
     filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f)).join('');
     filmsGridLibrary.innerHTML  = library.map(([slug, f]) => renderFilmCard(slug, f)).join('');
+
+    renderLibraryFilterChips(library);
+    applyLibraryFilter();
 
     // 새로 렌더된 카드들에 클릭 핸들러 연결
     document.querySelectorAll('.film-card').forEach(card => {
@@ -609,6 +670,12 @@
 
   // 그리드의 사진 클릭 시 라이트박스 열기 (이벤트 위임)
   modalContent.addEventListener('click', (e) => {
+    // 자리 채우기 클릭 시 films 모달을 먼저 닫고 reader-submissions 위젯에 위임
+    // (모달 위 모달이 겹쳐 보이는 혼란을 방지)
+    if (e.target.closest('.reader-submit-btn')) {
+      closeModal();
+      return; // 클릭은 계속 버블링 → reader-submissions.js 글로벌 위임이 prefill을 받아 rs-modal 오픈
+    }
     const photoEl = e.target.closest('.modal-photo');
     if (!photoEl) return;
     const idx = parseInt(photoEl.dataset.photoIndex, 10);
