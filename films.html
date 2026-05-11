@@ -170,10 +170,15 @@
     ));
   }
 
-  function renderFilmCard(slug, film) {
+  function renderFilmCard(slug, film, context = 'library-grid') {
     const isLibrary = film.tier === 'library';
     const hasThumb  = film.thumbnailStatus === 'set' && film.thumbnail;
     const isFeatured = film.tier === 'featured';
+    // 컨텍스트:
+    //  - 'featured-grid' : 위 5ft Issue 영역. 매거진 editorial 강조.
+    //  - 'library-grid'  : 아래 Library 영역. 구독자 Reader's Roll 강조.
+    //  같은 필름이 두 곳에 등장할 때 카드 표현(카운트/CTA)을 컨텍스트별로 분기.
+    const isEditorialView = context === 'featured-grid' && isFeatured;
 
     let badgeHtml = '';
     if (isFeatured && film.issue) {
@@ -205,16 +210,19 @@
         </div>`;
     }
 
-    const readerCount = 0; // Supabase에서 동적으로 채워질 자리. 현재는 0.
-    const photoCount = film.photos?.length || 0;
     let countLabel;
-    if (isFeatured) {
+    let cta;
+    if (isEditorialView) {
+      // 5ft Issue 위치: editorial 36 강조
+      const photoCount = film.photos?.length || 0;
       countLabel = `${photoCount} photos`;
+      cta = '사진 보기 →';
     } else {
+      // Library 위치: 구독자 Reader's Roll 강조 (featured 필름도 동일 표현)
+      const readerCount = 0; // Supabase에서 동적으로 채워질 자리. 현재는 0.
       countLabel = `${readerCount} / ${ROLL_LIMIT}`;
+      cta = readerCount === 0 ? '첫 자리 채우기 →' : '자리 채우기 →';
     }
-
-    const cta = isFeatured ? '사진 보기 →' : (readerCount === 0 ? '첫 자리 채우기 →' : '자리 채우기 →');
     const tierClass = isLibrary ? ' film-card-library' : '';
 
     return `
@@ -304,14 +312,15 @@
   function renderFilmsGrid() {
     const entries = Object.entries(filmsData);
     const featured = entries.filter(([, f]) => f.tier === 'featured');
-    // 5ft Issue = 편집부 큐레이션, Library = 독자 사진으로 채워가는 카탈로그.
-    // 두 운영 모델을 명확히 분리하기 위해 Library 그리드는 tier=library만 노출.
-    const library = sortLibrary(entries.filter(([, f]) => f.tier === 'library'));
+    // 5ft Issue 섹션: editorial 강조 (사진 보기, 36 photos)
+    // Library 섹션: 구독자 카탈로그 — featured 필름도 포함되어 알파벳 정렬
+    //  단, Library 컨텍스트로 렌더되므로 같은 필름이라도 "0 / 36 · 자리 채우기" 표현
+    const libraryAll = sortLibrary(entries);
 
-    filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f)).join('');
-    filmsGridLibrary.innerHTML  = library.map(([slug, f]) => renderFilmCard(slug, f)).join('');
+    filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f, 'featured-grid')).join('');
+    filmsGridLibrary.innerHTML  = libraryAll.map(([slug, f]) => renderFilmCard(slug, f, 'library-grid')).join('');
 
-    renderLibraryFilterChips(library);
+    renderLibraryFilterChips(libraryAll);
     applyLibraryFilter();
 
     // 새로 렌더된 카드들에 클릭 핸들러 연결
