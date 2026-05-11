@@ -74,6 +74,7 @@ for (const file of [
   'css/article.css',
   'css/authors.css',
   'css/films.css',
+  'css/home.css',
   'css/stories.css',
   'js/site-common.js',
 ]) {
