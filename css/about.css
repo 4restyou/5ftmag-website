@@ -296,66 +296,6 @@ a.contrib-handle:hover { color: var(--text); }
 .connect-item:last-child { border-bottom: none; }
 .connect-item:hover { opacity: 0.5; }
 
-/* ── FOOTER ── */
-
-/* ── 푸터 위 협력사 로고 띠 ── */
-.footer-partners {
-  border-top: 1px solid var(--border);
-  padding: 28px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 56px;
-  flex-wrap: wrap;
-  background: var(--bg);
-}
-.footer-partners-label {
-  font-size: 12px;
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.16em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-.footer-partner {
-  display: flex;
-  align-items: center;
-  transition: opacity .15s;
-}
-.footer-partner:hover { opacity: 0.5; }
-.footer-partner img {
-  height: 18px;
-  width: auto;
-  object-fit: contain;
-}
-.footer-partner .logo-light { display: block; }
-.footer-partner .logo-dark { display: none; }
-[data-theme="dark"] .footer-partner .logo-light { display: none; }
-[data-theme="dark"] .footer-partner .logo-dark { display: block; }
-@media (max-width: 560px) {
-  .footer-partners { gap: 32px; padding: 20px; }
-  .footer-partner img { height: 14px; }
-}
-footer {
-  border-top: 1px solid var(--border); padding: 24px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 16px;
-}
-.footer-inner-left { display: flex; flex-direction: column; gap: 4px; }
-.footer-logo {
-  font-size: var(--fs-nav); font-weight: var(--fw-heading);
-  letter-spacing: var(--ls-default);
-}
-.footer-publisher {
-  font-size: 12px; color: var(--text-muted); line-height: 1.5;
-}
-.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-.footer-links a {
-  font-size: var(--fs-body); color: var(--text-muted);
-  transition: color .15s;
-}
-.footer-links a:hover { color: var(--text); }
-.footer-copy { font-size: 12px; color: var(--text-muted); }
-
 /* ── RESPONSIVE ── */
 @media (max-width: 1100px) {
   :root { --fs-display: 32px; --fs-body: 16px; --fs-nav: 15px; }
@@ -390,5 +330,4 @@ footer {
   .contact-cell:last-child { border-bottom: none; }
   .contact-cta-left, .contact-cta-right { padding: 40px 24px; }
   .cta-title { font-size: 26px; }
-  footer { flex-direction: column; align-items: flex-start; }
 }
