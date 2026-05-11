@@ -14,12 +14,12 @@
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, must-revalidate"
+    Cache-Control = "public, max-age=300, must-revalidate"
 
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, must-revalidate"
+    Cache-Control = "public, max-age=300, must-revalidate"
 
 [[headers]]
   for = "/data/*"

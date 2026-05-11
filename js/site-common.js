@@ -41,27 +41,54 @@
   // ════════════════════════════════════════════════
   // 글 끝 SHARE 영역의 "링크 복사" 버튼
   // ════════════════════════════════════════════════
-  function copyCurrentLink() {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(window.location.href).then(function () {
-        alert('링크가 복사되었어요!');
-      }).catch(function () {
-        fallbackCopy();
-      });
-    } else {
-      fallbackCopy();
-    }
+  function setCopyButtonState(btn, text) {
+    if (!btn) return;
+    const original = btn.dataset.copyLabel || btn.textContent;
+    btn.dataset.copyLabel = original;
+    btn.textContent = text;
+    window.clearTimeout(btn._copyTimer);
+    btn._copyTimer = window.setTimeout(function () {
+      btn.textContent = btn.dataset.copyLabel || original;
+    }, 1600);
   }
-  function fallbackCopy() {
+
+  function copyWithTextarea() {
     const ta = document.createElement('textarea');
     ta.value = window.location.href;
     ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
     ta.style.opacity = '0';
+    ta.setAttribute('readonly', '');
     document.body.appendChild(ta);
+    ta.focus();
     ta.select();
-    try { document.execCommand('copy'); alert('링크가 복사되었어요!'); }
-    catch { alert('복사에 실패했어요. 주소창에서 직접 복사해주세요.'); }
+    ta.setSelectionRange(0, ta.value.length);
+    let ok = false;
+    try { ok = document.execCommand('copy'); }
+    catch { ok = false; }
     ta.remove();
+    return ok;
+  }
+
+  function copyCurrentLink(btn) {
+    // execCommand is still the most reliable path for click-initiated copy
+    // across older WebViews; clipboard.writeText covers modern browsers.
+    if (copyWithTextarea()) {
+      setCopyButtonState(btn, '복사 완료');
+      return;
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(window.location.href).then(function () {
+        setCopyButtonState(btn, '복사 완료');
+      }).catch(function () {
+        setCopyButtonState(btn, '복사 실패');
+      });
+      return;
+    }
+
+    setCopyButtonState(btn, '복사 실패');
   }
   // 글로벌로도 노출 (기존 onclick="copyLink()" 호환)
   window.copyLink = copyCurrentLink;
@@ -113,7 +140,7 @@
     // (기존 inline onclick="copyLink()" 도 동작하지만, data-action 패턴도 지원)
     document.addEventListener('click', function (e) {
       const t = e.target.closest('[data-action="copy-link"]');
-      if (t) { e.preventDefault(); copyCurrentLink(); }
+      if (t) { e.preventDefault(); copyCurrentLink(t); }
     });
   }
 
