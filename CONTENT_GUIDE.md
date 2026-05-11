@@ -116,36 +116,104 @@ npm run qa
 
 ## 3. Films (필름) 추가
 
-### data/films.json
+`films.html`의 그리드는 `data/films.json`을 읽어 **자동으로 카드를 만듭니다**. HTML 수정 불필요.
 
-새 필름을 추가하려면 객체 키를 추가합니다:
+필름은 두 종류:
+
+- **`tier: "featured"`** — 매거진이 한 호를 통째로 다룬 필름. 사진가 36컷이 들어가는 풀 큐레이션.
+- **`tier: "library"`** — 독자 Reader's Roll로 채워가는 필름. 썸네일은 사후에 업로드해도 됨.
+
+### data/films.json — Featured 필름
 
 ```json
 {
-  "ultramax": { ... },
-  "cinestill": { ... },
-  "tmax": { ... },
-  "portra": {
+  "ultramax": {
+    "slug": "ultramax",
+    "tier": "featured",
     "brand": "KODAK",
-    "name": "Portra 400",
+    "name": "UltraMax 400",
+    "displayName": "Kodak UltraMax 400",
+    "aliases": ["UltraMax 400", "코닥 울트라맥스 400", "울트라맥스", "..."],
     "desc": "필름 설명...",
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "issue": "Vol.02",
-    "thumbnail": "img/films/portra/box.jpg",
-    "photographers": ["박순렬", "노애경"],
+    "issue": "Vol.01",
+    "thumbnail": "img/films/ultramax-thumb.png",
+    "thumbnailStatus": "set",
+    "photographers": ["박순렬", "노애경", "장형수"],
     "photos": [
-      { "seed": "p1", "author": "박순렬" },
-      ...
+      { "src": "img/films/ultramax/park-ultra1.jpg", "author": "박순렬" }
     ]
   }
 }
 ```
 
-### films.html 카드 추가
+### data/films.json — Library 필름
 
-새 필름이 추가되면 `films.html` 안의 카드 HTML도 추가해야 카탈로그에 노출됩니다. (자동 생성은 아직 안 됨)
+```json
+{
+  "portra400": {
+    "slug": "portra400",
+    "tier": "library",
+    "brand": "KODAK",
+    "name": "Portra 400",
+    "displayName": "Kodak Portra 400",
+    "aliases": ["Portra 400", "Kodak Portra 400", "포트라 400", "포트라400", "코닥 포트라 400"],
+    "desc": "필름 설명...",
+    "iso": "400",
+    "type": "Color Negative",
+    "format": "35mm",
+    "thumbnail": null,
+    "thumbnailStatus": "pending",
+    "photographers": [],
+    "photos": []
+  }
+}
+```
+
+**핵심 필드 설명**
+
+- `slug`: 객체 키와 동일하게. URL/매칭에서 쓰임
+- `tier`: `"featured"` 또는 `"library"`
+- `displayName`: 카드/모달에 보여지는 정식 표기 (`"Kodak Portra 400"` 같이 풀네임 권장)
+- `aliases`: **표기 변형 목록**. 독자가 어떻게 입력하든 이 배열에 있으면 자동으로 이 필름에 매칭됨 (대소문자/공백/하이픈 무시)
+- `thumbnailStatus`: `"set"` 또는 `"pending"`. `pending`이면 카드에 캐니스터 실루엣 placeholder가 표시됨
+- `issue`: featured 필름에만. Vol.01 같은 배지로 표시
+- `photos`: featured 필름의 매거진 36컷. library는 빈 배열
+
+### Library 필름 추가 워크플로우
+
+1. `data/films.json`에 새 entry 추가 (`thumbnailStatus: "pending"`, `thumbnail: null`)
+2. **이게 끝** — 사이트에 자동 노출됨 (캐니스터 실루엣 + LIBRARY 배지)
+3. 나중에 시간 날 때 썸네일 촬영 → `img/films/{slug}-thumb.png` 저장 → `thumbnail` 채우고 `thumbnailStatus: "set"`
+
+### 새 alias 등록 (운영 중 가장 자주 하는 작업)
+
+독자가 응모할 때 표기가 다양하게 들어옵니다. admin 페이지에서 "직접 수정" 또는 "이 필름으로 정정"으로 그때그때 처리하지만, **같은 변형이 반복**되면 aliases에 등록하는 게 효율적입니다.
+
+**언제 등록?**
+- admin에서 fuzzy 매칭 추천이 자주 뜨는 패턴 → aliases 추가
+- 독자가 같은 변형을 2번 이상 입력했을 때
+
+**어떻게 등록?**
+
+`data/films.json`의 해당 필름 `aliases` 배열에 새 변형을 추가:
+
+```json
+"aliases": [
+  "Portra 400",
+  "Kodak Portra 400",
+  "포트라 400",
+  "코닥 포트라 400",
+  "포트라400",
+  "Kodak 포트라"      ← 새로 들어온 변형 추가
+]
+```
+
+저장하면 다음부터는 같은 변형이 자동으로 매칭됩니다 — 시간이 지날수록 aliases가 풍부해지는 자기 강화 구조.
+
+**팁**: 정규화 함수는 공백/하이픈/언더스코어/괄호/소문자를 무시합니다. 따라서 "portra 400", "Portra 400", "portra400", "PORTRA 400", "Portra-400"은 모두 같은 alias로 매칭되니 굳이 다 등록할 필요 없어요. **시각적으로 다른 단어 조합만** 추가하면 됩니다.
 
 ---
 
