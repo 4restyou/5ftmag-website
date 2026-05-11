@@ -21,6 +21,7 @@ const AUTHOR_SLUGS = new Map([
   ['명수경', 'myeong-sugyeong'],
   ['강혜원 (앨리카메라 대표)', 'kang-hyewon'],
   ['윤동규', 'yoon-donggyu'],
+  ['심규동', 'shim-kyudong'],
 ]);
 
 const AUTHOR_NOTES = new Map([
@@ -32,6 +33,35 @@ const AUTHOR_NOTES = new Map([
   ['명수경', '필름 생활의 작은 장면을 만화로 옮깁니다.'],
   ['강혜원 (앨리카메라 대표)', '앨리카메라를 운영하며 빈티지 카메라와 렌즈를 소개합니다.'],
   ['윤동규', '유튜브 〈수집의 수집〉을 운영하며 다큐멘터리와 사진을 기록합니다.'],
+  ['심규동', '사진집 〈고시텔〉·〈1인가구〉를 펴낸 사진가. 사람과 공간의 관계를 카메라로 기록합니다.'],
+]);
+
+const AUTHOR_EXTERNAL_LINKS = new Map([
+  ['5ft.mag 편집부', [
+    { type: 'instagram', url: 'https://instagram.com/5ft.magazine', label: '@5ft.magazine' },
+    { type: 'website',   url: 'https://www.4rest.net',              label: '4rest.net' },
+  ]],
+  ['Film Social Club', [
+    { type: 'instagram', url: 'https://instagram.com/film_socialclub',           label: '@film_socialclub' },
+    { type: 'shop',      url: 'https://smartstore.naver.com/film_socialclub',    label: 'Shop' },
+  ]],
+  ['Shin Noguchi', [
+    { type: 'website',   url: 'https://www.shinnoguchiphotography.com', label: 'shinnoguchiphotography.com' },
+    { type: 'instagram', url: 'https://instagram.com/shinnoguchiphotos', label: '@shinnoguchiphotos' },
+  ]],
+  ['Brisnap TV', [
+    { type: 'youtube',   url: 'https://www.youtube.com/@BRISNAPTV', label: '@BRISNAPTV' },
+  ]],
+  ['김현아', [
+    { type: 'instagram', url: 'https://instagram.com/aaaaa._.nuyh', label: '@aaaaa._.nuyh' },
+  ]],
+  ['명수경', [
+    { type: 'instagram', url: 'https://instagram.com/myeungsk', label: '@myeungsk' },
+  ]],
+  // 외부 활동 미파악 — 알려지면 추가
+  ['강혜원 (앨리카메라 대표)', []],
+  ['윤동규', []],
+  ['심규동', []],
 ]);
 
 function escapeHtml(value = '') {
@@ -165,6 +195,7 @@ for (const story of stories) {
       name: author,
       slug: slugify(author),
       note: AUTHOR_NOTES.get(author) || '5ft.mag에 글과 사진으로 참여한 contributor입니다.',
+      externalLinks: AUTHOR_EXTERNAL_LINKS.get(author) || [],
       stories: [],
     });
   }
@@ -233,6 +264,7 @@ writeFileSync(
     note: author.note,
     count: author.stories.length,
     page: `authors/${author.slug}.html`,
+    externalLinks: author.externalLinks || [],
   })), null, 2)}\n`,
 );
 

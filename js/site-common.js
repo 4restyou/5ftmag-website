@@ -105,6 +105,7 @@
     '명수경': '../authors/myeong-sugyeong.html',
     '강혜원': '../authors/kang-hyewon.html',
     '윤동규': '../authors/yoon-donggyu.html',
+    '심규동': '../authors/shim-kyudong.html',
   };
 
   function linkArticleAuthor() {

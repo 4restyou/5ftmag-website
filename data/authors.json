@@ -3,11 +3,19 @@
     "name": "5ft.mag 편집부",
     "slug": "5ftmag",
     "note": "필름 매거진 5ft.mag의 기획과 편집을 맡습니다.",
-    "count": 6,
+    "count": 5,
     "page": "authors/5ftmag.html",
     "externalLinks": [
-      { "type": "instagram", "url": "https://instagram.com/5ft.magazine", "label": "@5ft.magazine" },
-      { "type": "website", "url": "https://www.4rest.net", "label": "4rest.net" }
+      {
+        "type": "instagram",
+        "url": "https://instagram.com/5ft.magazine",
+        "label": "@5ft.magazine"
+      },
+      {
+        "type": "website",
+        "url": "https://www.4rest.net",
+        "label": "4rest.net"
+      }
     ]
   },
   {
@@ -17,7 +25,11 @@
     "count": 3,
     "page": "authors/kim-hyuna.html",
     "externalLinks": [
-      { "type": "instagram", "url": "https://instagram.com/aaaaa._.nuyh", "label": "@aaaaa._.nuyh" }
+      {
+        "type": "instagram",
+        "url": "https://instagram.com/aaaaa._.nuyh",
+        "label": "@aaaaa._.nuyh"
+      }
     ]
   },
   {
@@ -27,8 +39,16 @@
     "count": 2,
     "page": "authors/film-social-club.html",
     "externalLinks": [
-      { "type": "instagram", "url": "https://instagram.com/film_socialclub", "label": "@film_socialclub" },
-      { "type": "shop", "url": "https://smartstore.naver.com/film_socialclub", "label": "Shop" }
+      {
+        "type": "instagram",
+        "url": "https://instagram.com/film_socialclub",
+        "label": "@film_socialclub"
+      },
+      {
+        "type": "shop",
+        "url": "https://smartstore.naver.com/film_socialclub",
+        "label": "Shop"
+      }
     ]
   },
   {
@@ -46,8 +66,20 @@
     "count": 1,
     "page": "authors/myeong-sugyeong.html",
     "externalLinks": [
-      { "type": "instagram", "url": "https://instagram.com/myeungsk", "label": "@myeungsk" }
+      {
+        "type": "instagram",
+        "url": "https://instagram.com/myeungsk",
+        "label": "@myeungsk"
+      }
     ]
+  },
+  {
+    "name": "심규동",
+    "slug": "shim-kyudong",
+    "note": "사진집 〈고시텔〉·〈1인가구〉를 펴낸 사진가. 사람과 공간의 관계를 카메라로 기록합니다.",
+    "count": 1,
+    "page": "authors/shim-kyudong.html",
+    "externalLinks": []
   },
   {
     "name": "윤동규",
@@ -64,7 +96,11 @@
     "count": 1,
     "page": "authors/brisnap-tv.html",
     "externalLinks": [
-      { "type": "youtube", "url": "https://www.youtube.com/@BRISNAPTV", "label": "@BRISNAPTV" }
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/@BRISNAPTV",
+        "label": "@BRISNAPTV"
+      }
     ]
   },
   {
@@ -73,6 +109,17 @@
     "note": "일상의 낯선 순간을 거리에서 포착하는 일본의 스트리트 포토그래퍼입니다.",
     "count": 1,
     "page": "authors/shin-noguchi.html",
-    "externalLinks": []
+    "externalLinks": [
+      {
+        "type": "website",
+        "url": "https://www.shinnoguchiphotography.com",
+        "label": "shinnoguchiphotography.com"
+      },
+      {
+        "type": "instagram",
+        "url": "https://instagram.com/shinnoguchiphotos",
+        "label": "@shinnoguchiphotos"
+      }
+    ]
   }
 ]
