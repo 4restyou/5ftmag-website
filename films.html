@@ -304,12 +304,14 @@
   function renderFilmsGrid() {
     const entries = Object.entries(filmsData);
     const featured = entries.filter(([, f]) => f.tier === 'featured');
-    const library  = sortLibrary(entries.filter(([, f]) => f.tier === 'library'));
+    // Library는 카탈로그 전체 — featured까지 포함해서 브랜드→이름 알파벳 정렬
+    // (위 5ft Issue 섹션은 매거진 강조용 별도 highlight; 카드 클릭 시 동일 모달)
+    const allFilms = sortLibrary(entries);
 
     filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f)).join('');
-    filmsGridLibrary.innerHTML  = library.map(([slug, f]) => renderFilmCard(slug, f)).join('');
+    filmsGridLibrary.innerHTML  = allFilms.map(([slug, f]) => renderFilmCard(slug, f)).join('');
 
-    renderLibraryFilterChips(library);
+    renderLibraryFilterChips(allFilms);
     applyLibraryFilter();
 
     // 새로 렌더된 카드들에 클릭 핸들러 연결
