@@ -353,6 +353,55 @@
   background: #333;
 }
 
+/* ════════════════════════════
+   필름 입력 — 실시간 fuzzy match 힌트
+   ════════════════════════════ */
+.rs-film-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.rs-film-hint-match,
+.rs-film-hint-suggest,
+.rs-film-hint-new {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+.rs-film-hint-match {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text);
+}
+.rs-film-hint-suggest {
+  background: var(--bg-sub);
+  color: var(--text);
+}
+.rs-film-hint-new {
+  background: var(--bg-sub);
+  color: var(--text-muted);
+  font-style: italic;
+}
+.rs-film-hint strong {
+  font-weight: var(--fw-heading);
+}
+.rs-film-hint-apply {
+  font: inherit;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  border: none;
+  background: var(--text);
+  color: var(--bg);
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.rs-film-hint-apply:hover { opacity: 0.85; }
+
 @media (max-width: 520px) {
   .rs-modal-card {
     padding: 28px 20px;

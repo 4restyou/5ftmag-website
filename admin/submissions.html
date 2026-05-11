@@ -231,6 +231,73 @@
       .sub-card-img { width: 100%; aspect-ratio: 4/3; }
       .sub-card-row { grid-template-columns: 1fr; gap: 2px; }
     }
+
+    /* 필름 매칭 — 정정 추천 / 직접 수정 */
+    .film-current {
+      font-weight: var(--fw-heading);
+    }
+    .film-edit-btn {
+      margin-left: 8px;
+      font: inherit;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .film-edit-btn:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+    .film-match {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.45;
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
+    .film-match strong {
+      font-weight: var(--fw-heading);
+    }
+    .film-match-exact {
+      background: #d1fae5;
+      color: #064e3b;
+    }
+    .film-match-fuzzy {
+      background: #fef3c7;
+      color: #78350f;
+    }
+    .film-match-new {
+      background: var(--bg);
+      color: var(--text-muted);
+      border: 1px dashed var(--border);
+      font-style: italic;
+    }
+    .film-match-apply {
+      font: inherit;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      background: #064e3b;
+      color: #fff;
+      transition: opacity .15s;
+    }
+    .film-match-apply:hover { opacity: 0.88; }
+    .film-match-fuzzy .film-match-apply {
+      background: #78350f;
+    }
   </style>
 </head>
 <body>
@@ -264,6 +331,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/supabase-config.js"></script>
+<script src="../js/reader-submissions.js"></script>
 <script>
 'use strict';
 
@@ -273,6 +341,7 @@ const STATE = {
   status: 'pending',
   rows: [],
   counts: { pending: 0, approved: 0, rejected: 0 },
+  films: {},
 };
 
 const STORAGE_BUCKET = 'reader-submissions';
@@ -368,11 +437,35 @@ async function loadList() {
   bindCardActions();
 }
 
+function getFilmMatchHint(filmText) {
+  if (!filmText || typeof window.findFilmMatch !== 'function') return '';
+  const match = window.findFilmMatch(filmText, STATE.films);
+  if (!match) {
+    return `<div class="film-match film-match-new">현재 라이브러리에 없는 필름. 승인 시 새 항목으로 잡거나, 정확한 표기를 직접 입력하세요.</div>`;
+  }
+  const normalize = window.normalizeFilmName;
+  if (match.type === 'exact') {
+    if (normalize(filmText) === normalize(match.canonical) && filmText.trim() === match.canonical) {
+      return ''; // 이미 정식 표기 그대로 — 표시 안 함
+    }
+    return `<div class="film-match film-match-exact">
+      정식 표기: <strong>${escapeHtml(match.canonical)}</strong>
+      <button class="film-match-apply" data-action="apply-film" data-canonical="${escapeHtml(match.canonical)}">이 이름으로 저장</button>
+    </div>`;
+  }
+  // fuzzy
+  return `<div class="film-match film-match-fuzzy">
+    추천: <strong>${escapeHtml(match.canonical)}</strong>
+    <button class="film-match-apply" data-action="apply-film" data-canonical="${escapeHtml(match.canonical)}">이 필름으로 정정</button>
+  </div>`;
+}
+
 function renderCard(r) {
   const url = publicUrl(r.storage_path);
   const igNorm = (r.instagram || '').replace(/^@/, '');
   const igUrl = igNorm ? `https://instagram.com/${igNorm}` : null;
   const themeBadge = r.theme_month ? `<span class="sub-card-status pending" style="margin-left:8px; background:#e0e7ff; color:#3730a3;">테마 ${r.theme_month}</span>` : '';
+  const filmMatchHint = getFilmMatchHint(r.film);
 
   return `
     <div class="sub-card" data-id="${r.id}" data-path="${escapeHtml(r.storage_path)}">
@@ -394,7 +487,11 @@ function renderCard(r) {
         </div>
         <div class="sub-card-row">
           <span class="k">필름</span>
-          <span class="v">${escapeHtml(r.film || '-')}</span>
+          <span class="v">
+            <span class="film-current">${escapeHtml(r.film || '-')}</span>
+            <button class="film-edit-btn" data-action="edit-film" data-film="${escapeHtml(r.film || '')}">직접 수정</button>
+            ${filmMatchHint}
+          </span>
         </div>
         ${r.camera ? `
         <div class="sub-card-row">
@@ -442,7 +539,31 @@ function bindCardActions() {
     card.querySelectorAll('[data-action]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const action = btn.dataset.action;
-        if (action === 'approve') {
+        if (action === 'apply-film') {
+          const canonical = btn.dataset.canonical || '';
+          if (!canonical) return;
+          btn.disabled = true;
+          const { error } = await window.sb
+            .from('reader_submissions')
+            .update({ film: canonical })
+            .eq('id', id);
+          if (error) { alert('필름 정정 실패: ' + error.message); btn.disabled = false; return; }
+          await loadList();
+        } else if (action === 'edit-film') {
+          const current = btn.dataset.film || '';
+          const v = prompt('필름 표기를 직접 수정합니다.\n(예: Kodak Portra 400)', current);
+          if (v === null) return;
+          const trimmed = String(v).trim();
+          if (!trimmed) { alert('필름 표기는 비워둘 수 없습니다.'); return; }
+          if (trimmed === current) return;
+          btn.disabled = true;
+          const { error } = await window.sb
+            .from('reader_submissions')
+            .update({ film: trimmed })
+            .eq('id', id);
+          if (error) { alert('수정 실패: ' + error.message); btn.disabled = false; return; }
+          await loadList();
+        } else if (action === 'approve') {
           btn.disabled = true; btn.textContent = '처리 중…';
           const { error } = await window.sb
             .from('reader_submissions')
@@ -490,17 +611,32 @@ $('imgZoom').addEventListener('click', () => {
   $('imgZoomTarget').src = '';
 });
 
+async function loadFilms() {
+  try {
+    const r = await fetch('../data/films.json', { cache: 'no-cache' });
+    if (!r.ok) return;
+    STATE.films = await r.json();
+  } catch (e) {
+    console.warn('films.json 로드 실패:', e);
+  }
+}
+
 (async function main() {
   // Supabase client 준비 대기 (스크립트 비동기 로드 대응)
   for (let i = 0; i < 50; i++) {
     if (window.sb) break;
     await new Promise(r => setTimeout(r, 50));
   }
+  // findFilmMatch가 노출될 때까지 짧게 대기 (reader-submissions.js 로드 타이밍)
+  for (let i = 0; i < 20; i++) {
+    if (typeof window.findFilmMatch === 'function') break;
+    await new Promise(r => setTimeout(r, 25));
+  }
   const ok = await checkAccess();
   if (!ok) return;
   $('gate').hidden = true;
   $('app').hidden = false;
-  await Promise.all([loadCounts(), loadList()]);
+  await Promise.all([loadFilms(), loadCounts(), loadList()]);
 })();
 </script>
 
