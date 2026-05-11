@@ -480,6 +480,53 @@
 }
 
 /* ════════════════════════════
+   Library 필터 칩
+   ════════════════════════════ */
+.library-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 28px;
+}
+.library-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.library-filter-chip:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+.library-filter-chip.is-active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.library-filter-count {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--bg-sub);
+  color: var(--text-muted);
+  font-weight: var(--fw-heading);
+}
+.library-filter-chip.is-active .library-filter-count {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--bg);
+}
+
+/* ════════════════════════════
    섹션 헤드 (5ft Issue / Library)
    ════════════════════════════ */
 .films-section-head {

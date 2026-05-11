@@ -351,6 +351,7 @@
       return;
     }
     const prefillFilm = triggerEl?.dataset?.prefillFilm || '';
+    console.log('[5ft.mag] open submission · prefillFilm =', JSON.stringify(prefillFilm), '· trigger =', triggerEl?.className || '(none)');
     const { data: { session } } = await window.sb.auth.getSession();
     if (!session) {
       // 로그인 후 prefill을 복원하기 위해 sessionStorage에 잠시 저장
@@ -371,6 +372,15 @@
     const filmOptions = buildFilmOptions(films);
     openModal(renderSubmissionForm(theme, savedPrefill, filmOptions));
     bindFormHandlers(films);
+
+    // 방어: prefill이 있을 때 HTML value가 어떤 이유로든 미적용된 경우 JS로 강제 주입
+    if (savedPrefill) {
+      const input = document.getElementById('rs-film-input');
+      if (input && input.value !== savedPrefill) {
+        input.value = savedPrefill;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
   }
 
   async function handleLogin() {
