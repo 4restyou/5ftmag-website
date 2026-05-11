@@ -278,12 +278,12 @@
       .then(res => res.json())
       .then(data => {
         // 발행된 글만, 최신순
-        // 36장 Photo 그리드와 좌우 시각 균형을 위해 12장 노출
-        // (stories.html PAGE_SIZE=12 와 동일 — 1페이지를 메인에 그대로 보여주는 형태)
+        // 24장 Photo 그리드(2×12)와 좌우 시각 균형을 위해 8장 노출
+        // 나머지는 stories.html 페이지네이션으로 이어짐
         const all = data
           .filter(s => s.published !== false)
           .sort((a, b) => new Date(b.date) - new Date(a.date));
-        const stories = all.slice(0, 12);
+        const stories = all.slice(0, 8);
 
         // 페이지 번호 네비게이션 (stories.html 의 pageSize=12 와 동일하게 계산)
         const numNav = document.getElementById('storyNumNav');
@@ -499,8 +499,8 @@
         }
 
         // 작가별 라운드 로빈 — 같은 작가가 연속으로 안 나오게
-        // 36 = 한 롤(film roll)과 동일한 카운트. 매거진 메타포와 일치.
-        const PHOTO_COUNT = 36;
+        // 24 = 2컬럼 × 12행. 한 롤(36 frames)의 2/3 — 짧고 깔끔한 분량.
+        const PHOTO_COUNT = 24;
         const byAuthor = {};
         allPhotos.forEach(p => {
           const key = p.author || 'unknown';
