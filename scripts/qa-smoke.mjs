@@ -71,6 +71,7 @@ for (const file of [
   'robots.txt',
   'css/common.css',
   'css/tokens.css',
+  'css/about.css',
   'css/article.css',
   'css/authors.css',
   'css/films.css',
