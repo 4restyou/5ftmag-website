@@ -1,24 +1,4 @@
 /* 5ft.mag films page */
-/* ── 페이지 타이틀 ── */
-.page-title {
-  padding: 60px 32px 40px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-}
-.page-title-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 20px; flex-wrap: wrap;
-}
-.page-title h1 {
-  font-size: 56px; font-weight: var(--fw-heading);
-  letter-spacing: -0.03em; line-height: 1;
-}
-.page-title .breadcrumb {
-  font-size: var(--fs-meta); font-weight: var(--fw-heading);
-  letter-spacing: 0.12em; color: var(--text-muted);
-}
-
 /* ── 인트로 ── */
 .intro {
   padding: 40px 32px 60px;
@@ -511,8 +491,6 @@
   .films-section { padding: 48px 24px; }
 }
 @media (max-width: 640px) {
-  .page-title { padding: 40px 20px 28px; }
-  .page-title h1 { font-size: 32px; }
   .intro { padding: 32px 20px 48px; }
   .films-section { padding: 40px 20px 60px; }
   .film-name { font-size: 20px; }
