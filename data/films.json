@@ -748,7 +748,7 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": "img/films/delta400-can.webp",
+    "canThumbnail": "img/films/delta400-can.webp?v=20260512-swap",
     "canThumbnailStatus": "set"
   },
   "xp2super": {
@@ -1732,7 +1732,7 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": "img/films/delta3200-can.webp",
+    "canThumbnail": "img/films/delta3200-can.webp?v=20260512-swap",
     "canThumbnailStatus": "set"
   },
   "sfx200": {
