@@ -349,8 +349,8 @@
     ],
     "boxThumbnail": "img/films/cinestill800t-box.png",
     "boxThumbnailStatus": "set",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/cinestill800t-can.webp",
+    "canThumbnailStatus": "set"
   },
   "portra160": {
     "slug": "portra160",
@@ -860,8 +860,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/cinestill50d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "cinestill400d": {
     "slug": "cinestill400d",
@@ -885,8 +885,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/cinestill400d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "velvia50": {
     "slug": "velvia50",
@@ -913,8 +913,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/velvia50-can.webp",
+    "canThumbnailStatus": "set"
   },
   "ektachrome100": {
     "slug": "ektachrome100",
@@ -942,8 +942,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/ektachrome100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "ektar100": {
     "slug": "ektar100",
@@ -1002,8 +1002,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/provia100f-can.webp",
+    "canThumbnailStatus": "set"
   },
   "velvia100": {
     "slug": "velvia100",
@@ -1028,8 +1028,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/velvia100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "lomocolor100": {
     "slug": "lomocolor100",
@@ -1186,8 +1186,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/vision250d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "vision500t": {
     "slug": "vision500t",
@@ -1215,8 +1215,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/vision500t-can.webp",
+    "canThumbnailStatus": "set"
   },
   "vision250dahu": {
     "slug": "vision250dahu",
@@ -1245,8 +1245,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/vision250dahu-can.webp",
+    "canThumbnailStatus": "set"
   },
   "vision500tahu": {
     "slug": "vision500tahu",
@@ -1275,8 +1275,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/vision500tahu-can.webp",
+    "canThumbnailStatus": "set"
   },
   "doublex": {
     "slug": "doublex",
@@ -1369,8 +1369,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/eterna250d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "eterna500t": {
     "slug": "eterna500t",
@@ -1396,8 +1396,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/eterna500t-can.webp",
+    "canThumbnailStatus": "set"
   },
   "agfaapx400": {
     "slug": "agfaapx400",
@@ -1422,8 +1422,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/agfaapx400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "agfavista200": {
     "slug": "agfavista200",
@@ -1538,8 +1538,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fujiastia100f-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fujivelvia100f": {
     "slug": "fujivelvia100f",
@@ -1565,8 +1565,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fujivelvia100f-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fujineopan400": {
     "slug": "fujineopan400",
