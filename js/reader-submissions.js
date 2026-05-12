@@ -302,8 +302,13 @@
           <div class="rs-preview" id="rs-preview"></div>
         </label>
         <label class="rs-field">
-          <span class="rs-label">인스타그램 ID <em>*</em></span>
-          <input type="text" name="instagram" placeholder="@your_id" value="${escapeAttr(meta.instagram || '')}" required maxlength="60" />
+          <span class="rs-label">이름 <small>(선택)</small></span>
+          <input type="text" name="submitter_name" placeholder="인스타그램이 없을 때 표시할 이름" value="${escapeAttr(meta.submitterName || '')}" maxlength="40" autocomplete="name" />
+        </label>
+        <label class="rs-field">
+          <span class="rs-label">인스타그램 ID <small>(선택)</small></span>
+          <input type="text" name="instagram" placeholder="@your_id" value="${escapeAttr(meta.instagram || '')}" maxlength="60" autocomplete="off" />
+          <span class="rs-hint">이름과 인스타그램 ID 중 하나는 꼭 입력해 주세요.</span>
         </label>
 
         <div class="rs-field">
@@ -362,7 +367,8 @@
         편집부 검토 후 Reader's Roll에 게시될 거예요 (보통 24~48시간).
       </p>
       <p class="rs-desc-sub">
-        ${meta.instagram ? `인스타: <strong>${escapeHtml(meta.instagram)}</strong> · ` : ''}
+        ${meta.author ? `<strong>${escapeHtml(meta.author)}</strong>` : ''}
+        ${meta.author && meta.film ? ' · ' : ''}
         ${meta.film ? `필름: <strong>${escapeHtml(meta.film)}</strong>` : ''}
       </p>
       <div class="rs-actions" style="justify-content: center;">
@@ -551,12 +557,13 @@
         if (!file || !file.size) throw new Error('사진을 선택해주세요.');
         if (!file.type.startsWith('image/')) throw new Error('이미지 파일만 업로드할 수 있어요.');
 
+        const submitterName = String(fd.get('submitter_name') || '').trim();
         const instagram = String(fd.get('instagram') || '').trim();
         let film = String(fd.get('film') || '').trim();
         const camera = String(fd.get('camera') || '').trim();
         const caption = String(fd.get('caption') || '').trim();
         const consent = fd.get('consent') === 'on';
-        if (!instagram) throw new Error('인스타그램 ID를 입력해주세요.');
+        if (!submitterName && !instagram) throw new Error('이름이나 인스타그램 ID 중 하나는 입력해 주세요.');
         if (!film) throw new Error('필름 종류를 입력해주세요.');
         if (!consent) throw new Error('게재 동의에 체크해주세요.');
 
@@ -583,18 +590,22 @@
         if (upErr) throw new Error('업로드 실패: ' + upErr.message);
 
         // 3) DB insert
-        const igNorm = instagram.replace(/^@/, '');
+        const igNorm = instagram ? instagram.replace(/^@/, '') : '';
         const themeApplyVal = fd.get('theme_apply'); // 체크돼있으면 'YYYY-MM', 아니면 null
-        const { error: dbErr } = await window.sb.from('reader_submissions').insert({
+        const insertData = {
           user_id: user.id,
           storage_path: path,
-          instagram: '@' + igNorm,
+          instagram: igNorm ? '@' + igNorm : null,
           film,
           camera: camera || null,
           caption: caption || null,
           theme_month: themeApplyVal || null,
           consent_publish: true,
-        });
+        };
+        // submitter_name 컬럼은 마이그레이션 후에 존재 — 값 있을 때만 키 포함
+        // (컬럼이 아직 없는 환경에서 빈 키를 보내면 PostgREST 가 오류)
+        if (submitterName) insertData.submitter_name = submitterName;
+        const { error: dbErr } = await window.sb.from('reader_submissions').insert(insertData);
         if (dbErr) {
           // 업로드된 객체 정리 (보내고 잊기)
           window.sb.storage.from(STORAGE_BUCKET).remove([path]).catch(() => {});
@@ -604,12 +615,18 @@
         // 4) 메타 기억
         try {
           localStorage.setItem(LS_KEY, JSON.stringify({
-            instagram: '@' + igNorm, film, camera,
+            submitterName,
+            instagram: igNorm ? '@' + igNorm : '',
+            film,
+            camera,
           }));
         } catch {}
 
         // 5) 확인 화면
-        openModal(renderSubmittedConfirm({ instagram: '@' + igNorm, film }));
+        const displayAuthor = submitterName && igNorm
+          ? `${submitterName} (@${igNorm})`
+          : submitterName || (igNorm ? '@' + igNorm : '');
+        openModal(renderSubmittedConfirm({ author: displayAuthor, film }));
       } catch (err) {
         console.error('[5ft.mag submission]', err);
         showError(err.message || '오류가 발생했어요.');
@@ -650,16 +667,27 @@
       return [];
     }
     const baseUrl = window.SUPABASE_CONFIG?.url;
-    return (data || []).map(r => ({
-      id: 'sub-' + r.id,
-      image: `${baseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${r.storage_path}`,
-      author: r.instagram,
-      instagramUrl: r.instagram ? `https://instagram.com/${r.instagram.replace(/^@/, '')}` : '#',
-      film: r.film,
-      camera: r.camera,
-      caption: r.caption,
-      published: true,
-      _source: 'submission',
-    }));
+    return (data || []).map(r => {
+      // submitter_name 은 마이그레이션 이후 row 에만 존재 (없으면 undefined)
+      const sname = r.submitter_name || '';
+      const ig = r.instagram || '';
+      let author;
+      if (sname && ig)      author = `${sname} (${ig})`;
+      else if (sname)       author = sname;
+      else                  author = ig;
+      return {
+        id: 'sub-' + r.id,
+        image: `${baseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${r.storage_path}`,
+        author,
+        submitterName: sname,
+        instagram: ig,
+        instagramUrl: ig ? `https://instagram.com/${ig.replace(/^@/, '')}` : '',
+        film: r.film,
+        camera: r.camera,
+        caption: r.caption,
+        published: true,
+        _source: 'submission',
+      };
+    });
   };
 })();

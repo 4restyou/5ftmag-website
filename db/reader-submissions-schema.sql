@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS public.reader_submissions (
   storage_path  TEXT NOT NULL,
 
   -- 제출자 정보 (자동 채움 + 수정 가능)
+  -- submitter_name: 표시용 이름 (인스타그램 없는 사용자 대응). 둘 중 하나는 필수 (JS 검증)
+  submitter_name TEXT,
   instagram     TEXT,
   film          TEXT,
   camera        TEXT,
@@ -46,6 +48,7 @@ CREATE OR REPLACE VIEW public.reader_submissions_approved AS
 SELECT
   rs.id,
   rs.storage_path,
+  rs.submitter_name,
   rs.instagram,
   rs.film,
   rs.camera,
@@ -57,6 +60,14 @@ SELECT
 FROM public.reader_submissions rs
 LEFT JOIN public.profiles p ON p.user_id = rs.user_id
 WHERE rs.status = 'approved';
+
+-- ────────────────────────────────────────────────────────────
+-- ★ 마이그레이션 (이미 schema 가 적용된 환경에서 submitter_name 컬럼 추가)
+--   Supabase SQL Editor 에 따로 한 번만 실행:
+-- ────────────────────────────────────────────────────────────
+-- ALTER TABLE public.reader_submissions
+--   ADD COLUMN IF NOT EXISTS submitter_name TEXT;
+-- (그 후 위 CREATE OR REPLACE VIEW 블록을 다시 한 번 실행)
 
 -- ════════════════════════════════════════════════════════════
 -- RLS 정책

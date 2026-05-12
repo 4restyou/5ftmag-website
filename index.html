@@ -432,13 +432,12 @@
       .then(([data, staticReaders, supabaseReaders]) => {
         filmsData = data;
 
-        const editorialPool = [];
-        const readerPool = [];
+        const allPhotos = [];
 
         // 1) Editorial (featured 필름의 photos)
         Object.entries(data).forEach(([filmKey, film]) => {
           (film.photos || []).forEach(photo => {
-            editorialPool.push({
+            allPhotos.push({
               source: 'editorial',
               src: photo.src,
               seed: photo.seed,
@@ -453,7 +452,7 @@
         (Array.isArray(staticReaders) ? staticReaders : [])
           .filter(r => r.published !== false && r.image)
           .forEach(r => {
-            readerPool.push({
+            allPhotos.push({
               source: 'reader',
               src: r.image,
               author: r.author || '',
@@ -468,7 +467,7 @@
         (Array.isArray(supabaseReaders) ? supabaseReaders : [])
           .filter(r => r.image)
           .forEach(r => {
-            readerPool.push({
+            allPhotos.push({
               source: 'reader',
               src: r.image,
               author: r.author || '',
@@ -500,42 +499,10 @@
           return a;
         }
 
-        // 24 = 2컬럼 × 12행. 한 롤(36 frames)의 2/3 — 짧고 깔끔한 분량.
-        // editorial 보장 비율(50%) + 나머지 reader. 부족한 쪽은 다른 풀에서 채움.
-        // 같은 작가 연속 방지 위해 마지막에 라운드 로빈 셔플로 인터리브.
+        // 24 = 2컬럼 × 12행. 한 롤(36 frames)의 2/3.
+        // editorial / reader 구분 없이 통합 풀에서 완전 랜덤 셔플.
         const PHOTO_COUNT = 24;
-        const EDITORIAL_TARGET = Math.min(Math.floor(PHOTO_COUNT * 0.5), editorialPool.length);
-        const READER_TARGET    = Math.min(PHOTO_COUNT - EDITORIAL_TARGET, readerPool.length);
-        const TOTAL_PICK       = EDITORIAL_TARGET + READER_TARGET;
-        // 한 쪽이 부족하면 다른 쪽에서 추가로 채우기
-        const slackEditorial = Math.min(editorialPool.length - EDITORIAL_TARGET, PHOTO_COUNT - TOTAL_PICK);
-        const slackReader    = Math.min(readerPool.length - READER_TARGET, PHOTO_COUNT - TOTAL_PICK - slackEditorial);
-        const editorialPick = shuffleSeeded(editorialPool).slice(0, EDITORIAL_TARGET + slackEditorial);
-        const readerPick    = shuffleSeeded(readerPool).slice(0, READER_TARGET + slackReader);
-
-        // 같은 작가 연속 방지 — 작가별로 묶고 라운드 로빈으로 인터리브
-        const combined = [...editorialPick, ...readerPick];
-        const byAuthor = {};
-        combined.forEach(p => {
-          const key = p.author || 'unknown';
-          (byAuthor[key] ||= []).push(p);
-        });
-        Object.keys(byAuthor).forEach(k => { byAuthor[k] = shuffleSeeded(byAuthor[k]); });
-        const authorOrder = shuffleSeeded(Object.keys(byAuthor));
-
-        const selected = [];
-        let round = 0;
-        while (selected.length < combined.length) {
-          let added = false;
-          for (const author of authorOrder) {
-            if (byAuthor[author][round]) {
-              selected.push(byAuthor[author][round]);
-              added = true;
-            }
-          }
-          if (!added) break;
-          round++;
-        }
+        const selected = shuffleSeeded(allPhotos).slice(0, PHOTO_COUNT);
 
         if (selected.length === 0) {
           photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">첫 번째 사진을 기다리는 중입니다.</div>';
