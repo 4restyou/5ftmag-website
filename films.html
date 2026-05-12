@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css">
   <link rel="stylesheet" href="./css/reader-submissions.css">
-  <link rel="stylesheet" href="./css/films.css">
+  <link rel="stylesheet" href="./css/films.css?v=20260512-relocate">
 </head>
 <body>
 
@@ -508,6 +508,7 @@
           <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
             ${isFeatured ? '컷 채우기' : '첫 컷 채우기'}
           </button>
+          <a href="me.html" class="reader-mine-link">내 사진 관리 →</a>
         </div>
       </div>`;
 
@@ -939,10 +940,10 @@
     }
   }, { passive: true });
 </script>
-<script src="./js/site-common.js?v=20260512-mypage"></script>
+<script src="./js/site-common.js?v=20260512-relocate"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260512-magdb"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
-<script src="./js/reader-submissions.js?v=20260512-magdb"></script>
+<script src="./js/reader-submissions.js?v=20260512-relocate"></script>
 </body>
 </html>
