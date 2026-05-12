@@ -263,6 +263,17 @@
 <script>
 
   // ════════════════════════════
+  // XSS 가드: 동적 HTML 삽입 시 사용자/외부 입력은 반드시 escapeHtml/escapeAttr
+  // (Notion 데이터도 일관성 위해 동일 적용 — 편집자 계정 탈취 대비)
+  // ════════════════════════════
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => (
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+    ));
+  }
+  const escapeAttr = escapeHtml;
+
+  // ════════════════════════════
   // 메인의 Stories: JSON 로딩
   // (stories.html과 같은 데이터를 읽어서 메인에 표시)
   // ════════════════════════════
@@ -305,7 +316,7 @@
 
         storyList.innerHTML = stories.map((s, idx) => {
           const link = s.page || '#';
-          const authorPart = s.author ? `${s.author} — ` : '';
+          const authorPart = s.author ? `${escapeHtml(s.author)} — ` : '';
           const categoryLabel = (s.categoryLabel || s.category || '').toUpperCase();
           const cardLabel = idx === 0 ? `LATEST · ${categoryLabel}` : categoryLabel;
 
@@ -313,21 +324,21 @@
           const webpThumb = s.thumbnail ? s.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
           const imgBlock = s.thumbnail
             ? `<div class="post-img">
-                 <span class="post-label">${cardLabel}</span>
-                 <img src="${webpThumb}" data-fallback="${s.thumbnail}" loading="lazy" alt="${s.title}"
+                 <span class="post-label">${escapeHtml(cardLabel)}</span>
+                 <img src="${escapeAttr(webpThumb)}" data-fallback="${escapeAttr(s.thumbnail)}" loading="lazy" alt="${escapeAttr(s.title)}"
                       onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />
                </div>`
             : `<div class="post-img text-only">
-                 <span class="post-label">${cardLabel}</span>
-                 <span class="post-img-title">${s.title}</span>
+                 <span class="post-label">${escapeHtml(cardLabel)}</span>
+                 <span class="post-img-title">${escapeHtml(s.title)}</span>
                </div>`;
 
           return `
-            <a href="${link}" class="post-item" data-category="${s.category || ''}" data-issue="${s.issue || ''}">
+            <a href="${escapeAttr(link)}" class="post-item" data-category="${escapeAttr(s.category || '')}" data-issue="${escapeAttr(s.issue || '')}">
               <div class="post-img-wrap">${imgBlock}</div>
               <div class="post-text">
-                <h3 class="post-title">${s.title}</h3>
-                <p class="post-excerpt">${authorPart}${s.excerpt}</p>
+                <h3 class="post-title">${escapeHtml(s.title)}</h3>
+                <p class="post-excerpt">${authorPart}${escapeHtml(s.excerpt)}</p>
               </div>
             </a>
           `;
@@ -365,14 +376,14 @@
           const thumb = n.thumbnail || `https://picsum.photos/seed/news${n.id}/200/200`;
           const date = n.date ? n.date.replace(/-/g, '.') : '';
           return `
-            <a href="${n.link || '#'}"${target} class="news-card">
+            <a href="${escapeAttr(n.link || '#')}"${target} class="news-card">
               <div class="news-thumb">
-                <img src="${thumb}" loading="lazy" alt="${n.title}" />
+                <img src="${escapeAttr(thumb)}" loading="lazy" alt="${escapeAttr(n.title)}" />
               </div>
               <div class="news-body">
-                <span class="news-tag">${n.tag}</span>
-                <h4 class="news-title">${n.title}</h4>
-                <span class="news-date">${date}</span>
+                <span class="news-tag">${escapeHtml(n.tag)}</span>
+                <h4 class="news-title">${escapeHtml(n.title)}</h4>
+                <span class="news-date">${escapeHtml(date)}</span>
               </div>
             </a>
           `;
@@ -525,18 +536,20 @@
           const webpSrc = (photo.source === 'editorial' && photo.src)
             ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp')
             : null;
+          const author = photo.author || '';
+          const filmName = photo.filmName || '';
           const pictureBlock = webpSrc
             ? `<picture>
-                 <source srcset="${webpSrc}" type="image/webp">
-                 <img src="${imgSrc}" loading="lazy" alt="${photo.author || ''}" />
+                 <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
+                 <img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />
                </picture>`
-            : `<img src="${imgSrc}" loading="lazy" alt="${photo.author || ''}" />`;
+            : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />`;
           return `
-            <button type="button" class="disc-cell" data-photo-index="${idx}" aria-label="${photo.filmName} - ${photo.author}">
+            <button type="button" class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
               ${pictureBlock}
               <span class="disc-info">
-                <span class="disc-author">${photo.author || ''}</span>
-                <span class="disc-film">${photo.filmName || ''}</span>
+                <span class="disc-author">${escapeHtml(author)}</span>
+                <span class="disc-film">${escapeHtml(filmName)}</span>
               </span>
             </button>
           `;
@@ -567,30 +580,30 @@
       const webpSrc = photo.src ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
       const pictureBlock = webpSrc
         ? `<picture>
-             <source srcset="${webpSrc}" type="image/webp">
-             <img src="${imgSrc}" loading="lazy" alt="${photo.author || ''}" />
+             <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
+             <img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(photo.author || '')}" />
            </picture>`
-        : `<img src="${imgSrc}" loading="lazy" alt="" />`;
+        : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="" />`;
       photosHTML += `
         <div>
           <div class="modal-photo">
             ${pictureBlock}
           </div>
-          <p class="modal-photo-caption">${photo.author}</p>
+          <p class="modal-photo-caption">${escapeHtml(photo.author || '')}</p>
         </div>
       `;
     });
 
     modalContent.innerHTML = `
       <div class="modal-header">
-        <span class="modal-brand">${film.brand}</span>
-        <h2 class="modal-name">${film.name}</h2>
-        <p class="modal-desc">${film.desc}</p>
+        <span class="modal-brand">${escapeHtml(film.brand || '')}</span>
+        <h2 class="modal-name">${escapeHtml(film.name || '')}</h2>
+        <p class="modal-desc">${escapeHtml(film.desc || '')}</p>
         <div class="modal-meta">
-          <span>ISO <strong>${film.iso}</strong></span>
-          <span>Type <strong>${film.type}</strong></span>
-          <span>Format <strong>${film.format}</strong></span>
-          <span>Photographers <strong>${film.photographers.join(', ')}</strong></span>
+          <span>ISO <strong>${escapeHtml(film.iso || '')}</strong></span>
+          <span>Type <strong>${escapeHtml(film.type || '')}</strong></span>
+          <span>Format <strong>${escapeHtml(film.format || '')}</strong></span>
+          <span>Photographers <strong>${escapeHtml((film.photographers || []).join(', '))}</strong></span>
         </div>
         <a href="films.html" class="modal-cta">필름 페이지에서 더 보기 →</a>
       </div>
