@@ -3217,5 +3217,35 @@
     "format": "35mm",
     "photographers": [],
     "photos": []
+  },
+  "luckyshd400": {
+    "slug": "luckyshd400",
+    "tier": "library",
+    "brand": "LUCKY",
+    "name": "SHD 400",
+    "displayName": "Lucky SHD 400",
+    "aliases": [
+      "SHD 400",
+      "Lucky SHD",
+      "Lucky SHD 400",
+      "Luckypan SHD 400",
+      "Lucky Pan SHD 400",
+      "Luckypan 400",
+      "LuckyPan SHD400",
+      "Lucky Film 400",
+      "럭키 SHD",
+      "럭키 SHD 400",
+      "럭키 400",
+      "럭키팬 400",
+      "럭키 팬 400",
+      "럭키필름 400",
+      "luckyshd400"
+    ],
+    "desc": "중국 Lucky 의 ISO 400 흑백 필름. 2000년대 초 Kodak 협력으로 생산되다 2012년 단종됐던 라인이 2024년 3월 부활. 넓은 노출 라티튜드와 입자 디테일이 특징으로 야외·스튜디오 양쪽에서 다루기 편해요. D-76 표준 현상, EI 200 으로 살짝 언더 레이트 권장.",
+    "iso": "400",
+    "type": "Black & White",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
   }
 }
