@@ -1,8 +1,8 @@
 // 5ft.mag 댓글 위젯
 // 사용법:
-//   <div id="comments-section" data-page-id="stories/12"></div>
+//   <div data-comments data-page-id="stories/12"></div>
 //   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-//   <script src="../js/supabase-config.js"></script>
+//   <script src="../js/db-client.js"></script>
 //   <script src="../js/comments.js"></script>
 
 (function () {
@@ -17,9 +17,6 @@
     realtimeChannel: null,
   };
 
-  // ════════════════════════════════════════════════════════════
-  // 유틸
-  // ════════════════════════════════════════════════════════════
   function escapeHtml(s) {
     return String(s ?? '')
       .replace(/&/g, '&amp;')
@@ -44,7 +41,6 @@
   }
 
   function defaultAvatar(name) {
-    // 이름 첫 글자로 placeholder
     const ch = (name || '?').trim().charAt(0).toUpperCase();
     const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
     const hash = (name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -54,70 +50,26 @@
     )}`;
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 데이터
-  // ════════════════════════════════════════════════════════════
-  async function fetchComments() {
-    if (!window.sb) return [];
-    const { data, error } = await window.sb
-      .from('comments_with_meta')
-      .select('*')
-      .eq('page_id', STATE.pageId)
-      .order('created_at', { ascending: true });
-    if (error) {
-      console.error('[5ft.mag comments] fetch error:', error);
-      return [];
-    }
-    return data || [];
-  }
-
-  async function fetchMyLikes() {
-    if (!window.sb || !STATE.user) return new Set();
-    const { data, error } = await window.sb
-      .from('likes')
-      .select('comment_id')
-      .eq('user_id', STATE.user.id);
-    if (error) return new Set();
-    return new Set((data || []).map(r => r.comment_id));
-  }
+  function db() { return window.MagDB; }
 
   async function postComment(body, parentId = null) {
-    if (!window.sb || !STATE.user) return;
-    const { error } = await window.sb.from('comments').insert({
-      page_id: STATE.pageId,
-      user_id: STATE.user.id,
-      parent_id: parentId,
-      body: body.trim(),
+    const { error } = await db().comments.insert({
+      pageId: STATE.pageId, body, parentId,
     });
-    if (error) {
-      alert('댓글 작성 실패: ' + error.message);
-      return false;
-    }
+    if (error) { alert('댓글 작성 실패: ' + error.message); return false; }
     return true;
   }
 
   async function updateComment(id, body) {
-    const { error } = await window.sb
-      .from('comments')
-      .update({ body: body.trim(), updated_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) {
-      alert('수정 실패: ' + error.message);
-      return false;
-    }
+    const { error } = await db().comments.update(id, body);
+    if (error) { alert('수정 실패: ' + error.message); return false; }
     return true;
   }
 
   async function deleteComment(id) {
     if (!confirm('정말 삭제하시겠어요?')) return false;
-    const { error } = await window.sb
-      .from('comments')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) {
-      alert('삭제 실패: ' + error.message);
-      return false;
-    }
+    const { error } = await db().comments.softDelete(id);
+    if (error) { alert('삭제 실패: ' + error.message); return false; }
     return true;
   }
 
@@ -126,20 +78,11 @@
       alert('좋아요는 로그인 후에 누를 수 있어요.');
       return;
     }
-    if (alreadyLiked) {
-      await window.sb.from('likes').delete()
-        .eq('comment_id', commentId).eq('user_id', STATE.user.id);
-    } else {
-      await window.sb.from('likes').insert({
-        comment_id: commentId, user_id: STATE.user.id,
-      });
-    }
+    if (alreadyLiked) await db().likes.remove(commentId);
+    else              await db().likes.add(commentId);
     await refresh();
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 렌더링
-  // ════════════════════════════════════════════════════════════
   function renderAuthBar() {
     if (!STATE.user) {
       return `
@@ -217,13 +160,11 @@
   }
 
   async function renderAll() {
-    const myLikes = await fetchMyLikes();
+    const myLikes = await db().likes.listMine();
     const topLevel = STATE.comments.filter(c => !c.parent_id);
     const repliesMap = {};
     for (const c of STATE.comments) {
-      if (c.parent_id) {
-        (repliesMap[c.parent_id] ||= []).push(c);
-      }
+      if (c.parent_id) (repliesMap[c.parent_id] ||= []).push(c);
     }
     const totalCount = STATE.comments.filter(c => !c.deleted_at).length;
 
@@ -251,9 +192,6 @@
     bindHandlers();
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 이벤트
-  // ════════════════════════════════════════════════════════════
   function bindHandlers() {
     STATE.container.addEventListener('click', onClick);
     STATE.container.addEventListener('submit', onSubmit);
@@ -264,7 +202,7 @@
     if (!btn) return;
     const action = btn.dataset.action;
 
-    if (action === 'login-google') return loginWith('google');
+    if (action === 'login-google') return loginWithGoogle();
     if (action === 'logout')       return logout();
 
     if (action === 'like') {
@@ -327,32 +265,20 @@
     const parentId = form.dataset.parentId || null;
 
     let ok = false;
-    if (editId) {
-      ok = await updateComment(editId, body);
-    } else {
-      ok = await postComment(body, parentId);
-    }
-    if (ok) {
-      form.reset();
-      await refresh();
-    }
+    if (editId) ok = await updateComment(editId, body);
+    else        ok = await postComment(body, parentId);
+    if (ok) { form.reset(); await refresh(); }
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 인증
-  // ════════════════════════════════════════════════════════════
-  async function loginWith(provider) {
-    if (!window.sb) return alert('댓글 시스템이 아직 준비되지 않았어요.');
-    const { error } = await window.sb.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: window.location.href },
-    });
+  async function loginWithGoogle() {
+    if (!db() || !db().isReady()) return alert('댓글 시스템이 아직 준비되지 않았어요.');
+    const { error } = await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
     if (error) alert('로그인 실패: ' + error.message);
   }
 
   async function logout() {
-    if (!window.sb) return;
-    await window.sb.auth.signOut();
+    if (!db()) return;
+    await db().auth.signOut();
     STATE.user = null;
     STATE.profile = null;
     await refresh();
@@ -360,69 +286,40 @@
 
   async function loadProfile() {
     if (!STATE.user) { STATE.profile = null; return; }
-    const { data } = await window.sb
-      .from('profiles')
-      .select('*')
-      .eq('user_id', STATE.user.id)
-      .single();
-    STATE.profile = data || null;
+    STATE.profile = await db().profiles.getMine();
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 새로고침 + Realtime
-  // ════════════════════════════════════════════════════════════
   async function refresh() {
-    STATE.comments = await fetchComments();
+    STATE.comments = await db().comments.list(STATE.pageId);
     await renderAll();
   }
 
   function setupRealtime() {
-    if (!window.sb || STATE.realtimeChannel) return;
-    STATE.realtimeChannel = window.sb
-      .channel(`comments-${STATE.pageId}`)
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'comments', filter: `page_id=eq.${STATE.pageId}` },
-        () => refresh()
-      )
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'likes' },
-        () => refresh()
-      )
-      .subscribe();
+    if (STATE.realtimeChannel) return;
+    STATE.realtimeChannel = db().realtime.subscribeComments(STATE.pageId, refresh);
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 초기화
-  // ════════════════════════════════════════════════════════════
   async function init({ pageId, container } = {}) {
     container = container || document.querySelector('[data-comments]');
     if (!container) return;
     pageId = pageId || container.dataset.pageId;
-    if (!pageId) {
-      console.warn('[5ft.mag comments] pageId가 필요합니다.');
-      return;
-    }
-    if (!window.sb) {
-      container.innerHTML = '<p class="cm-error">댓글 시스템 설정이 필요합니다. (Supabase 미연결)</p>';
+    if (!pageId) return;
+    if (!db() || !db().isReady()) {
+      container.innerHTML = '<p class="cm-error">댓글 시스템 설정이 필요합니다.</p>';
       return;
     }
 
     STATE.pageId = pageId;
     STATE.container = container;
 
-    // 현재 세션
-    const { data: { session } } = await window.sb.auth.getSession();
+    const session = await db().auth.getSession();
     STATE.user = session?.user || null;
     await loadProfile();
 
-    // 첫 렌더
     await refresh();
-
-    // Realtime 구독
     setupRealtime();
 
-    // 인증 변경 시 다시 로드
-    window.sb.auth.onAuthStateChange(async (_event, sess) => {
+    db().auth.onChange(async (_event, sess) => {
       STATE.user = sess?.user || null;
       await loadProfile();
       await refresh();
@@ -431,7 +328,6 @@
 
   window.MagComments = { init };
 
-  // 자동 초기화 — DOMContentLoaded 후 [data-comments] 발견되면 init
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       if (document.querySelector('[data-comments]')) init();

@@ -1,0 +1,211 @@
+// 5ft.mag DB 클라이언트
+// supabase-js 인스턴스를 클로저에 감싸서 외부에는 도메인 함수만 노출.
+// 외부 사용은 window.MagDB.* 만 — 임의 from/select/update 호출 불가.
+
+(function () {
+  'use strict';
+
+  const URL_  = 'https://pucpqsfwqouqohwsvmnd.supabase.co';
+  const ANON_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1Y3Bxc2Z3cW91cW9od3N2bW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjYyMDUsImV4cCI6MjA5Mzc0MjIwNX0.adLzT0UrX3e1IbkQ70G6LeFWeKbuGaa0PTL6AmrSBD8';
+  const BUCKET = 'reader-submissions';
+
+  let _client = null;
+  function client() {
+    if (_client) return _client;
+    if (!window.supabase) return null;
+    _client = window.supabase.createClient(URL_, ANON_, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    });
+    return _client;
+  }
+  client();
+
+  async function session() {
+    const c = client(); if (!c) return null;
+    const { data } = await c.auth.getSession();
+    return data.session;
+  }
+  async function userId() {
+    const s = await session();
+    return s?.user?.id || null;
+  }
+
+  // ─── 인증 ───
+  const auth = {
+    getSession: session,
+    async getUser() {
+      const c = client(); if (!c) return null;
+      const { data } = await c.auth.getUser();
+      return data.user;
+    },
+    async signInWithGoogle(redirectTo) {
+      const c = client(); if (!c) throw new Error('client unavailable');
+      return c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+    },
+    async signOut() {
+      const c = client(); if (!c) return;
+      return c.auth.signOut();
+    },
+    onChange(cb) {
+      const c = client(); if (!c) return { unsubscribe() {} };
+      const { data } = c.auth.onAuthStateChange((event, sess) => cb(event, sess));
+      return data?.subscription || { unsubscribe() {} };
+    },
+  };
+
+  // ─── 프로필 (profiles_public view) ───
+  const profiles = {
+    async getMine() {
+      const c = client(); if (!c) return null;
+      const uid = await userId();
+      if (!uid) return null;
+      const { data } = await c.from('profiles_public')
+        .select('display_name, avatar_url, is_editor')
+        .eq('user_id', uid)
+        .maybeSingle();
+      return data || null;
+    },
+  };
+
+  // ─── 댓글 (read via view, write via base table) ───
+  const comments = {
+    async list(pageId) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('comments_with_meta')
+        .select('*').eq('page_id', pageId).order('created_at', { ascending: true });
+      if (error) return [];
+      return data || [];
+    },
+    async insert({ pageId, body, parentId }) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('comments').insert({
+        page_id: pageId,
+        user_id: uid,
+        parent_id: parentId || null,
+        body: String(body || '').trim(),
+      });
+    },
+    async update(id, body) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('comments').update({
+        body: String(body || '').trim(),
+        updated_at: new Date().toISOString(),
+      }).eq('id', id);
+    },
+    async softDelete(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('comments').update({ deleted_at: new Date().toISOString() }).eq('id', id);
+    },
+  };
+
+  // ─── 좋아요 ───
+  const likes = {
+    async listMine() {
+      const c = client(); if (!c) return new Set();
+      const uid = await userId();
+      if (!uid) return new Set();
+      const { data } = await c.from('likes').select('comment_id').eq('user_id', uid);
+      return new Set((data || []).map(r => r.comment_id));
+    },
+    async add(commentId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('likes').insert({ comment_id: commentId, user_id: uid });
+    },
+    async remove(commentId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('likes').delete().eq('comment_id', commentId).eq('user_id', uid);
+    },
+  };
+
+  // ─── 독자 사진 (공개 read view + 본인 INSERT + Storage 업로드) ───
+  const submissions = {
+    async listApproved(limit = 50) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('reader_submissions_approved')
+        .select('*').order('created_at', { ascending: false }).limit(limit);
+      if (error) return [];
+      return (data || []).map(r => {
+        const sname = r.submitter_name || '';
+        const ig    = r.instagram || '';
+        const author = sname && ig ? `${sname} (${ig})` : (sname || ig);
+        return {
+          id: 'sub-' + r.id,
+          image: `${URL_}/storage/v1/object/public/${BUCKET}/${r.storage_path}`,
+          author,
+          submitterName: sname,
+          instagram: ig,
+          instagramUrl: ig ? `https://instagram.com/${ig.replace(/^@/, '')}` : '',
+          film: r.film,
+          camera: r.camera,
+          caption: r.caption,
+          published: true,
+          _source: 'submission',
+        };
+      });
+    },
+    async create(record) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('reader_submissions').insert(record);
+    },
+    async uploadPhoto(path, blob) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.storage.from(BUCKET).upload(path, blob, {
+        contentType: 'image/jpeg', upsert: false,
+      });
+    },
+    async removePhoto(path) {
+      const c = client(); if (!c) return;
+      try { await c.storage.from(BUCKET).remove([path]); } catch (_) {}
+    },
+  };
+
+  // ─── 편집부 검토 — RLS 가 권한 검증 ───
+  const review = {
+    async count(status) {
+      const c = client(); if (!c) return 0;
+      const { count } = await c.from('reader_submissions')
+        .select('id', { count: 'exact', head: true }).eq('status', status);
+      return count || 0;
+    },
+    async list(status, from, to) {
+      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
+      return c.from('reader_submissions').select('*').eq('status', status)
+        .order('created_at', { ascending: status === 'pending' }).range(from, to);
+    },
+    async patch(id, patch) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('reader_submissions').update(patch).eq('id', id);
+    },
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('reader_submissions').delete().eq('id', id);
+    },
+  };
+
+  // ─── Realtime ───
+  const realtime = {
+    subscribeComments(pageId, onChange) {
+      const c = client(); if (!c) return null;
+      return c.channel(`comments-${pageId}`)
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'comments', filter: `page_id=eq.${pageId}` },
+          () => onChange())
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'likes' },
+          () => onChange())
+        .subscribe();
+    },
+  };
+
+  window.MagDB = {
+    isReady() { return !!_client; },
+    storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
+    auth, profiles, comments, likes, submissions, review, realtime,
+  };
+})();

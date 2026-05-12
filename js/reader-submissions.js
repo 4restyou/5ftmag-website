@@ -1,21 +1,19 @@
 // 5ft.mag Reader's Roll 직접 제출 위젯
 // 사용법:
 //   <button data-action="open-submission">내 사진 올리기</button>
-//   <script src="js/supabase-config.js"></script>
+//   <script src="js/db-client.js"></script>
 //   <script src="js/reader-submissions.js"></script>
-//
-// 의존성: window.sb (supabase-js), window.SUPABASE_CONFIG.url
 
 (function () {
   'use strict';
 
-  const MAX_LONG_SIDE = 2000;     // 긴 변 px
+  const MAX_LONG_SIDE = 2000;
   const JPEG_QUALITY = 0.85;
   const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
-  const STORAGE_BUCKET = 'reader-submissions';
-  const LS_KEY = '5ft_submission_meta'; // 인스타/필름 등 마지막 입력 기억
+  const LS_KEY = '5ft_submission_meta';
   const THEME_PATH = 'data/current-theme.json';
   const FILMS_PATH = 'data/films.json';
+  const db = () => window.MagDB;
 
   // 한 번 fetch한 테마는 페이지 로딩 동안 캐시
   let _themePromise = null;
@@ -398,25 +396,20 @@
     if (el) el.textContent = msg;
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 핸들러
-  // ════════════════════════════════════════════════════════════
   // sessionStorage keys
-  //  - 5ft_prefill_film : 로그인 전에 클릭한 필름명 (로그인 후 prefill 복원)
+  //  - 5ft_prefill_film : 로그인 전 클릭한 필름명 복원용
   //  - 5ft_pending_submission_open : 로그인 후 폼 모달 자동 재진입 플래그
   const SS_PREFILL = '5ft_prefill_film';
   const SS_PENDING = '5ft_pending_submission_open';
 
   async function handleOpen(triggerEl) {
-    if (!window.sb) {
-      alert('잠시 후 다시 시도해주세요 (인증 모듈 로딩 중).');
+    if (!db() || !db().isReady()) {
+      alert('잠시 후 다시 시도해주세요.');
       return;
     }
     const prefillFilm = triggerEl?.dataset?.prefillFilm || '';
-    console.log('[5ft.mag] open submission · prefillFilm =', JSON.stringify(prefillFilm), '· trigger =', triggerEl?.className || '(none)');
-    const { data: { session } } = await window.sb.auth.getSession();
+    const session = await db().auth.getSession();
     if (!session) {
-      // 로그인 후 prefill 과 자동 폼 재진입을 위해 플래그 저장
       try {
         if (prefillFilm) sessionStorage.setItem(SS_PREFILL, prefillFilm);
         sessionStorage.setItem(SS_PENDING, '1');
@@ -437,46 +430,31 @@
   }
 
   async function handleLogin() {
-    // 현재 URL 통째로 redirect — 보던 페이지(필름 모달 컨텍스트 등) 그대로 복원.
-    // OAuth 콜백이 hash 에 access_token 등을 붙이므로 기존 hash 만 제거.
     const redirect = window.location.href.split('#')[0];
-    await window.sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: redirect }
-    });
+    await db().auth.signInWithGoogle(redirect);
   }
 
-  // 로그인 후 자동 재진입 — 사용자가 폼 진입을 의도했었으면 (SS_PENDING)
-  // 페이지 복귀 시 한 번 더 자리 채우기 버튼을 누르지 않아도 폼 모달이 뜨도록.
   async function autoReopenIfPending() {
     let pending = false;
-    try {
-      pending = sessionStorage.getItem(SS_PENDING) === '1';
-    } catch {}
+    try { pending = sessionStorage.getItem(SS_PENDING) === '1'; } catch {}
     if (!pending) return;
 
-    // supabase 클라이언트 준비 대기
     for (let i = 0; i < 60; i++) {
-      if (window.sb) break;
+      if (db() && db().isReady()) break;
       await new Promise(r => setTimeout(r, 50));
     }
-    if (!window.sb) return;
+    if (!db() || !db().isReady()) return;
 
-    // OAuth 콜백의 hash/?code 처리가 끝나서 session 이 잡힐 때까지 대기
     let session = null;
     for (let i = 0; i < 40; i++) {
-      const { data } = await window.sb.auth.getSession();
-      session = data.session;
+      session = await db().auth.getSession();
       if (session) break;
       await new Promise(r => setTimeout(r, 100));
     }
-    // 세션 없으면(취소 등) 플래그만 비우고 종료
     if (!session) {
       try { sessionStorage.removeItem(SS_PENDING); } catch {}
       return;
     }
-
-    // 플래그 소비 후 폼 모달 자동 오픈
     try { sessionStorage.removeItem(SS_PENDING); } catch {}
     handleOpen({ dataset: {} });
   }
@@ -618,24 +596,19 @@
           if (m?.type === 'exact') film = m.canonical;
         }
 
-        // 1) 클라이언트 리사이즈 → JPEG
         submitBtn.textContent = '사진 변환 중…';
         const { blob } = await resizeToJpeg(file);
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('파일이 너무 큽니다 (5MB 이하).');
 
-        // 2) Storage 업로드
-        const { data: { user } } = await window.sb.auth.getUser();
+        const user = await db().auth.getUser();
         if (!user) throw new Error('로그인이 만료되었어요. 다시 시도해주세요.');
         const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
         submitBtn.textContent = '업로드 중…';
-        const { error: upErr } = await window.sb.storage
-          .from(STORAGE_BUCKET)
-          .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+        const { error: upErr } = await db().submissions.uploadPhoto(path, blob);
         if (upErr) throw new Error('업로드 실패: ' + upErr.message);
 
-        // 3) DB insert
         const igNorm = instagram ? instagram.replace(/^@/, '') : '';
-        const themeApplyVal = fd.get('theme_apply'); // 체크돼있으면 'YYYY-MM', 아니면 null
+        const themeApplyVal = fd.get('theme_apply');
         const insertData = {
           user_id: user.id,
           storage_path: path,
@@ -646,13 +619,11 @@
           theme_month: themeApplyVal || null,
           consent_publish: true,
         };
-        // submitter_name 컬럼은 마이그레이션 후에 존재 — 값 있을 때만 키 포함
-        // (컬럼이 아직 없는 환경에서 빈 키를 보내면 PostgREST 가 오류)
+        // submitter_name 컬럼이 없는 구버전 환경 대비: 값 있을 때만 키 포함
         if (submitterName) insertData.submitter_name = submitterName;
-        const { error: dbErr } = await window.sb.from('reader_submissions').insert(insertData);
+        const { error: dbErr } = await db().submissions.create(insertData);
         if (dbErr) {
-          // 업로드된 객체 정리 (보내고 잊기)
-          window.sb.storage.from(STORAGE_BUCKET).remove([path]).catch(() => {});
+          db().submissions.removePhoto(path);
           throw new Error('등록 실패: ' + dbErr.message);
         }
 
@@ -672,7 +643,6 @@
           : submitterName || (igNorm ? '@' + igNorm : '');
         openModal(renderSubmittedConfirm({ author: displayAuthor, film }));
       } catch (err) {
-        console.error('[5ft.mag submission]', err);
         showError(err.message || '오류가 발생했어요.');
         submitBtn.disabled = false;
         submitBtn.textContent = '제출';
@@ -703,42 +673,9 @@
     autoReopenIfPending();
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 외부에서 사용할 헬퍼: 승인된 제출 가져오기
-  // ════════════════════════════════════════════════════════════
+  // 외부 노출: 승인된 제출 가져오기 (MagDB 위임 — 호환성 유지)
   window.fetchApprovedSubmissions = async function (limit = 50) {
-    if (!window.sb) return [];
-    const { data, error } = await window.sb
-      .from('reader_submissions_approved')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
-    if (error) {
-      console.warn('[5ft.mag] fetchApprovedSubmissions:', error);
-      return [];
-    }
-    const baseUrl = window.SUPABASE_CONFIG?.url;
-    return (data || []).map(r => {
-      // submitter_name 은 마이그레이션 이후 row 에만 존재 (없으면 undefined)
-      const sname = r.submitter_name || '';
-      const ig = r.instagram || '';
-      let author;
-      if (sname && ig)      author = `${sname} (${ig})`;
-      else if (sname)       author = sname;
-      else                  author = ig;
-      return {
-        id: 'sub-' + r.id,
-        image: `${baseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${r.storage_path}`,
-        author,
-        submitterName: sname,
-        instagram: ig,
-        instagramUrl: ig ? `https://instagram.com/${ig.replace(/^@/, '')}` : '',
-        film: r.film,
-        camera: r.camera,
-        caption: r.caption,
-        published: true,
-        _source: 'submission',
-      };
-    });
+    if (!db()) return [];
+    return db().submissions.listApproved(limit);
   };
 })();
