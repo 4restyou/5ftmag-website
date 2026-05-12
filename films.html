@@ -233,7 +233,7 @@
       // Library 위치: 구독자 Reader's Roll 강조 (featured 필름도 동일 표현)
       const readerCount = 0; // Supabase에서 동적으로 채워질 자리. 현재는 0.
       countLabel = `${readerCount} / ${ROLL_LIMIT}`;
-      cta = readerCount === 0 ? '첫 자리 채우기 →' : '자리 채우기 →';
+      cta = readerCount === 0 ? '첫 컷 채우기 →' : '컷 채우기 →';
     }
     const tierClass = isLibrary ? ' film-card-library' : '';
 
@@ -428,7 +428,7 @@
       const ctaEl = card.querySelector('.film-cta');
       const cappedCount = Math.min(count, ROLL_LIMIT);
       if (countEl) countEl.textContent = `${cappedCount} / ${ROLL_LIMIT}`;
-      if (ctaEl) ctaEl.textContent = '자리 채우기 →';
+      if (ctaEl) ctaEl.textContent = '컷 채우기 →';
     }
   }
 
@@ -506,7 +506,7 @@
         </div>
         <div class="reader-roll-actions">
           <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
-            ${isFeatured ? '자리 채우기' : '첫 자리 채우기'}
+            ${isFeatured ? '컷 채우기' : '첫 컷 채우기'}
           </button>
         </div>
       </div>`;

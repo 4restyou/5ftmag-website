@@ -401,6 +401,12 @@
   // ════════════════════════════════════════════════════════════
   // 핸들러
   // ════════════════════════════════════════════════════════════
+  // sessionStorage keys
+  //  - 5ft_prefill_film : 로그인 전에 클릭한 필름명 (로그인 후 prefill 복원)
+  //  - 5ft_pending_submission_open : 로그인 후 폼 모달 자동 재진입 플래그
+  const SS_PREFILL = '5ft_prefill_film';
+  const SS_PENDING = '5ft_pending_submission_open';
+
   async function handleOpen(triggerEl) {
     if (!window.sb) {
       alert('잠시 후 다시 시도해주세요 (인증 모듈 로딩 중).');
@@ -410,18 +416,19 @@
     console.log('[5ft.mag] open submission · prefillFilm =', JSON.stringify(prefillFilm), '· trigger =', triggerEl?.className || '(none)');
     const { data: { session } } = await window.sb.auth.getSession();
     if (!session) {
-      // 로그인 후 prefill을 복원하기 위해 sessionStorage에 잠시 저장
-      if (prefillFilm) {
-        try { sessionStorage.setItem('5ft_prefill_film', prefillFilm); } catch {}
-      }
+      // 로그인 후 prefill 과 자동 폼 재진입을 위해 플래그 저장
+      try {
+        if (prefillFilm) sessionStorage.setItem(SS_PREFILL, prefillFilm);
+        sessionStorage.setItem(SS_PENDING, '1');
+      } catch {}
       openModal(renderLoginPrompt());
       return;
     }
     let savedPrefill = prefillFilm;
     if (!savedPrefill) {
       try {
-        savedPrefill = sessionStorage.getItem('5ft_prefill_film') || '';
-        if (savedPrefill) sessionStorage.removeItem('5ft_prefill_film');
+        savedPrefill = sessionStorage.getItem(SS_PREFILL) || '';
+        if (savedPrefill) sessionStorage.removeItem(SS_PREFILL);
       } catch {}
     }
     const [theme, films] = await Promise.all([getCurrentTheme(), getFilms()]);
@@ -430,11 +437,48 @@
   }
 
   async function handleLogin() {
-    const redirect = window.location.origin + window.location.pathname;
+    // 현재 URL 통째로 redirect — 보던 페이지(필름 모달 컨텍스트 등) 그대로 복원.
+    // OAuth 콜백이 hash 에 access_token 등을 붙이므로 기존 hash 만 제거.
+    const redirect = window.location.href.split('#')[0];
     await window.sb.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: redirect }
     });
+  }
+
+  // 로그인 후 자동 재진입 — 사용자가 폼 진입을 의도했었으면 (SS_PENDING)
+  // 페이지 복귀 시 한 번 더 자리 채우기 버튼을 누르지 않아도 폼 모달이 뜨도록.
+  async function autoReopenIfPending() {
+    let pending = false;
+    try {
+      pending = sessionStorage.getItem(SS_PENDING) === '1';
+    } catch {}
+    if (!pending) return;
+
+    // supabase 클라이언트 준비 대기
+    for (let i = 0; i < 60; i++) {
+      if (window.sb) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    if (!window.sb) return;
+
+    // OAuth 콜백의 hash/?code 처리가 끝나서 session 이 잡힐 때까지 대기
+    let session = null;
+    for (let i = 0; i < 40; i++) {
+      const { data } = await window.sb.auth.getSession();
+      session = data.session;
+      if (session) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
+    // 세션 없으면(취소 등) 플래그만 비우고 종료
+    if (!session) {
+      try { sessionStorage.removeItem(SS_PENDING); } catch {}
+      return;
+    }
+
+    // 플래그 소비 후 폼 모달 자동 오픈
+    try { sessionStorage.removeItem(SS_PENDING); } catch {}
+    handleOpen({ dataset: {} });
   }
 
   function bindFormHandlers(films) {
@@ -651,6 +695,13 @@
       handleLogin();
     }
   });
+
+  // 페이지 로드 시 자동 재진입 체크 (OAuth 콜백으로 돌아온 직후)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoReopenIfPending);
+  } else {
+    autoReopenIfPending();
+  }
 
   // ════════════════════════════════════════════════════════════
   // 외부에서 사용할 헬퍼: 승인된 제출 가져오기
