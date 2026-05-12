@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css">
   <link rel="stylesheet" href="./css/reader-submissions.css">
-  <link rel="stylesheet" href="./css/films.css?v=20260512-libfast">
+  <link rel="stylesheet" href="./css/films.css?v=20260512-cta">
 </head>
 <body>
 
@@ -244,6 +244,14 @@
       ...(film.aliases || []), slug
     ].filter(Boolean).join(' ').toLowerCase();
 
+    // Library 그리드 컨텍스트의 CTA('컷 채우기')는 클릭 시 모달 거치지 않고
+    // 바로 업로드 모달로 — reader-submissions.js 글로벌 위임이 처리.
+    // 카드 본체 클릭은 그대로 모달(뷰어). 사진 보기는 비로그인 OK.
+    const ctaIsUpload = context === 'library-grid';
+    const ctaHtml = ctaIsUpload
+      ? `<span class="film-cta film-cta-action" role="button" tabindex="0" data-action="open-submission" data-prefill-film="${escapeAttr(film.displayName || film.name)}">${cta}</span>`
+      : `<span class="film-cta">${cta}</span>`;
+
     return `
       <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-search="${escapeAttr(searchTokens)}">
         <div class="film-img">
@@ -254,7 +262,7 @@
         <span class="film-brand">${escapeAttr(film.brand)}</span>
         <h2 class="film-name">${escapeAttr(film.name)}</h2>
         <p class="film-spec">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)} · ${escapeAttr(film.format)}</p>
-        <span class="film-cta">${cta}</span>
+        ${ctaHtml}
       </button>`;
   }
 
@@ -366,8 +374,12 @@
     applyLibraryFilter();
 
     // 새로 렌더된 카드들에 클릭 핸들러 연결
+    // CTA(.film-cta-action) 클릭은 reader-submissions.js 글로벌 위임이 처리하므로 모달 안 띄움
     document.querySelectorAll('.film-card').forEach(card => {
-      card.addEventListener('click', () => openModal(card.dataset.film));
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.film-cta-action')) return;
+        openModal(card.dataset.film);
+      });
     });
   }
 

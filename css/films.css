@@ -123,6 +123,19 @@
   color: var(--text);
   letter-spacing: var(--ls-default);
 }
+.film-cta-action {
+  cursor: pointer;
+  padding: 4px 10px;
+  margin-left: -10px;
+  border-radius: 3px;
+  transition: background .12s, color .12s;
+}
+.film-cta-action:hover,
+.film-cta-action:focus-visible {
+  background: var(--text);
+  color: var(--bg);
+  outline: none;
+}
 
 /* ════════════════════════════
    MODAL (사진 갤러리)
