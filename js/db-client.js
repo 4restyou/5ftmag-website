@@ -8,6 +8,7 @@
   const URL_  = 'https://pucpqsfwqouqohwsvmnd.supabase.co';
   const ANON_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1Y3Bxc2Z3cW91cW9od3N2bW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjYyMDUsImV4cCI6MjA5Mzc0MjIwNX0.adLzT0UrX3e1IbkQ70G6LeFWeKbuGaa0PTL6AmrSBD8';
   const BUCKET = 'reader-submissions';
+  const MARKET_BUCKET = 'market-listings';
 
   const SS_LOGIN_ORIGIN = '5ft_login_origin';
 
@@ -243,6 +244,81 @@
     async remove(id) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('reader_submissions').delete().eq('id', id);
+    },
+  };
+
+  // ─── Market (중고 장터) ───
+  const market = {
+    storageBaseUrl: `${URL_}/storage/v1/object/public/${MARKET_BUCKET}/`,
+    publicUrl(path) {
+      return `${URL_}/storage/v1/object/public/${MARKET_BUCKET}/${path}`;
+    },
+    async list({ category = 'all', limit = 200 } = {}) {
+      const c = client(); if (!c) return [];
+      let q = c.from('market_listings_public').select('*')
+        .order('created_at', { ascending: false }).limit(limit);
+      if (category && category !== 'all') q = q.eq('category', category);
+      const { data, error } = await q;
+      if (error) return [];
+      return data || [];
+    },
+    async getOne(id) {
+      const c = client(); if (!c) return null;
+      const { data } = await c.from('market_listings_public').select('*').eq('id', id).maybeSingle();
+      return data || null;
+    },
+    async listMine() {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      const { data, error } = await c.from('market_listings')
+        .select('*').eq('user_id', uid).order('created_at', { ascending: false });
+      if (error) return [];
+      return data || [];
+    },
+    async create(record) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('market_listings').insert({ ...record, user_id: uid, status: 'available' });
+    },
+    async updateMine(id, patch) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('market_listings').update(patch).eq('id', id).eq('user_id', uid);
+    },
+    async cycleStatusMine(id, currentStatus) {
+      // available → reserved → sold → available
+      const next = currentStatus === 'available' ? 'reserved'
+                 : currentStatus === 'reserved' ? 'sold'
+                 : 'available';
+      const r = await this.updateMine(id, { status: next });
+      return { next, error: r.error };
+    },
+    async deleteMine(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('market_listings').delete().eq('id', id).eq('user_id', uid);
+    },
+    async uploadPhoto(path, blob) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.storage.from(MARKET_BUCKET).upload(path, blob, {
+        contentType: 'image/jpeg', upsert: false,
+      });
+    },
+    async removePhotos(paths) {
+      const c = client(); if (!c || !paths?.length) return;
+      try { await c.storage.from(MARKET_BUCKET).remove(paths); } catch (_) {}
+    },
+    async report(listingId, reason) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('market_reports').insert({
+        listing_id: listingId, reporter_id: uid, reason: String(reason || '').trim(),
+      });
     },
   };
 

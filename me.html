@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>내 사진 — 5ft.mag</title>
+  <title>내 정보 — 5ft.mag</title>
   <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
   <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
   <link rel="stylesheet" href="pretendard.css" />
@@ -22,6 +22,32 @@
     .me-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
     .me-user button:hover { color: var(--text); }
 
+    /* ── 상위 페이지 탭 (사진 / 매물) ── */
+    .me-pagetabs {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 24px 0;
+      display: flex;
+      gap: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .me-pagetab {
+      padding: 12px 0;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font: inherit;
+      font-size: 15px;
+      font-weight: var(--fw-heading);
+      letter-spacing: -0.01em;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .me-pagetab:hover { color: var(--text); }
+    .me-pagetab.active { color: var(--text); border-bottom-color: var(--text); }
+
+    /* ── 사진 탭 내 status 칩 ── */
     .me-tabs { max-width: 1100px; margin: 0 auto; padding: 24px 24px 0; display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
     .me-tab  { padding: 10px 16px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 14px; font-weight: var(--fw-heading); color: var(--text-muted); cursor: pointer; letter-spacing: 0.02em; transition: color .15s, border-color .15s; }
     .me-tab:hover { color: var(--text); }
@@ -46,9 +72,13 @@
     .me-card-status.pending  { background: #fef3c7; color: #78350f; }
     .me-card-status.approved { background: #d1fae5; color: #064e3b; }
     .me-card-status.rejected { background: #fee2e2; color: #7f1d1d; }
+    .me-card-status.available { background: #d1fae5; color: #064e3b; }
+    .me-card-status.reserved  { background: #fef3c7; color: #78350f; }
+    .me-card-status.sold      { background: #e5e7eb; color: #4b5563; }
+    .me-card-status.hidden    { background: #fee2e2; color: #7f1d1d; }
 
     .me-card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .me-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 8px 14px; border-radius: 4px; cursor: pointer; border: none; transition: opacity .15s; }
+    .me-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 8px 14px; border-radius: 4px; cursor: pointer; border: none; transition: opacity .15s; text-decoration: none; display: inline-flex; align-items: center; }
     .me-btn:hover { opacity: 0.85; }
     .me-btn:disabled { opacity: 0.4; cursor: progress; }
     .me-btn-primary { background: var(--text); color: var(--bg); }
@@ -68,6 +98,12 @@
     .img-zoom.open { display: flex; }
     .img-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
+    /* ── 매물 카드 (me 페이지 전용) ── */
+    .me-market-toolbar { max-width: 1100px; margin: 24px auto 0; padding: 0 24px; display: flex; justify-content: flex-end; }
+    .me-market-card-title { font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 0; }
+    .me-market-card-price { font-size: 15px; font-weight: var(--fw-heading); color: var(--text); }
+    .me-market-card-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
+
     @media (max-width: 720px) {
       .me-card { grid-template-columns: 1fr; }
       .me-card-img { width: 100%; aspect-ratio: 4/3; }
@@ -80,37 +116,66 @@
 <div class="me-header">
   <a href="index.html" class="me-back">← 5ft.mag</a>
   <div class="me-title-row">
-    <h1 class="me-title">내 사진</h1>
+    <h1 class="me-title">내 정보</h1>
     <div class="me-user" id="meUser"></div>
   </div>
 </div>
 
 <div id="gate" class="gate" hidden>
   <h2>로그인이 필요해요</h2>
-  <p>Reader's Roll에 올린 내 사진을 보고 수정·삭제하려면 로그인해주세요.</p>
+  <p>내가 올린 사진과 매물을 보고 관리하려면 로그인해주세요.</p>
   <button class="gate-btn" id="gateLogin">Google로 로그인</button>
 </div>
 
 <div id="app" hidden>
-  <div class="me-tabs">
-    <button type="button" class="me-tab active" data-status="all">전체 <span class="count" id="cnt-all">·</span></button>
-    <button type="button" class="me-tab" data-status="pending">대기 <span class="count" id="cnt-pending">·</span></button>
-    <button type="button" class="me-tab" data-status="approved">공개 중 <span class="count" id="cnt-approved">·</span></button>
-    <button type="button" class="me-tab" data-status="rejected">반려 <span class="count" id="cnt-rejected">·</span></button>
+  <!-- 상위 페이지 탭 -->
+  <div class="me-pagetabs">
+    <button type="button" class="me-pagetab active" data-section="photos">사진</button>
+    <button type="button" class="me-pagetab" data-section="market">매물</button>
   </div>
-  <div class="me-list" id="list">
-    <div class="me-empty">불러오는 중…</div>
-  </div>
+
+  <!-- ─── 사진 섹션 ─── -->
+  <section id="section-photos">
+    <div class="me-tabs">
+      <button type="button" class="me-tab active" data-status="all">전체 <span class="count" id="cnt-all">·</span></button>
+      <button type="button" class="me-tab" data-status="pending">대기 <span class="count" id="cnt-pending">·</span></button>
+      <button type="button" class="me-tab" data-status="approved">공개 중 <span class="count" id="cnt-approved">·</span></button>
+      <button type="button" class="me-tab" data-status="rejected">반려 <span class="count" id="cnt-rejected">·</span></button>
+    </div>
+    <div class="me-list" id="list">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
+
+  <!-- ─── 매물 섹션 ─── -->
+  <section id="section-market" hidden>
+    <div class="me-market-toolbar">
+      <a href="market.html#new" class="me-btn me-btn-primary">+ 매물 올리기</a>
+    </div>
+    <div class="me-list" id="marketList">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
 </div>
 
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260512-pool"></script>
+<script src="./js/db-client.js?v=20260512-mkt1"></script>
 <script>
 'use strict';
 
-const STATE = { user: null, rows: [], filter: 'all' };
+const STATE = {
+  user: null,
+  section: 'photos',     // 'photos' | 'market'
+  // photos
+  rows: [],
+  filter: 'all',
+  // market
+  marketRows: [],
+};
+
+const CAT_LABELS = { film:'필름', camera:'카메라', lens:'렌즈', accessory:'액세서리', etc:'기타' };
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
@@ -122,8 +187,16 @@ function fmtDate(iso) {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
+function fmtDateShort(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
 function statusLabel(s) {
-  return s === 'pending' ? '대기' : s === 'approved' ? '공개 중' : s === 'rejected' ? '반려' : s;
+  return ({ pending:'대기', approved:'공개 중', rejected:'반려',
+           available:'판매중', reserved:'예약중', sold:'판매완료', hidden:'숨김' })[s] || s;
+}
+function nextStatusOf(s) {
+  return s === 'available' ? 'reserved' : s === 'reserved' ? 'sold' : 'available';
 }
 
 async function checkAuth() {
@@ -152,14 +225,17 @@ function showGate() {
   });
 }
 
-async function loadList() {
+// ═════════════════════════════════════════
+// 사진 섹션 (기존)
+// ═════════════════════════════════════════
+async function loadPhotos() {
   $('list').innerHTML = '<div class="me-empty">불러오는 중…</div>';
   STATE.rows = await db().submissions.listMine();
-  renderCounts();
-  renderList();
+  renderPhotoCounts();
+  renderPhotoList();
 }
 
-function renderCounts() {
+function renderPhotoCounts() {
   const counts = { all: STATE.rows.length, pending: 0, approved: 0, rejected: 0 };
   for (const r of STATE.rows) counts[r.status] = (counts[r.status] || 0) + 1;
   for (const k of ['all', 'pending', 'approved', 'rejected']) {
@@ -168,7 +244,7 @@ function renderCounts() {
   }
 }
 
-function renderList() {
+function renderPhotoList() {
   const rows = STATE.filter === 'all' ? STATE.rows : STATE.rows.filter(r => r.status === STATE.filter);
   if (rows.length === 0) {
     $('list').innerHTML = `
@@ -178,11 +254,11 @@ function renderList() {
       </div>`;
     return;
   }
-  $('list').innerHTML = rows.map(renderCard).join('');
-  bindCardActions();
+  $('list').innerHTML = rows.map(renderPhotoCard).join('');
+  bindPhotoCardActions();
 }
 
-function renderCard(r) {
+function renderPhotoCard(r) {
   const url = db().submissions.publicUrl(r.storage_path);
   const igNorm = (r.instagram || '').replace(/^@/, '');
   return `
@@ -194,35 +270,13 @@ function renderCard(r) {
         <div>
           <span class="me-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
         </div>
-        <div class="me-card-row">
-          <span class="k">제출</span>
-          <span class="v">${fmtDate(r.created_at)}</span>
-        </div>
-        <div class="me-card-row">
-          <span class="k">이름</span>
-          <span class="v" data-field="submitter_name">${escapeHtml(r.submitter_name || '-')}</span>
-        </div>
-        <div class="me-card-row">
-          <span class="k">인스타</span>
-          <span class="v" data-field="instagram">${escapeHtml(r.instagram || '-')}</span>
-        </div>
-        <div class="me-card-row">
-          <span class="k">필름</span>
-          <span class="v" data-field="film">${escapeHtml(r.film || '-')}</span>
-        </div>
-        <div class="me-card-row">
-          <span class="k">카메라</span>
-          <span class="v" data-field="camera">${escapeHtml(r.camera || '-')}</span>
-        </div>
-        <div class="me-card-row">
-          <span class="k">메모</span>
-          <span class="v" data-field="caption">${escapeHtml(r.caption || '-')}</span>
-        </div>
-        ${r.rejection_reason ? `
-        <div class="me-card-row">
-          <span class="k">반려 사유</span>
-          <span class="v">${escapeHtml(r.rejection_reason)}</span>
-        </div>` : ''}
+        <div class="me-card-row"><span class="k">제출</span><span class="v">${fmtDate(r.created_at)}</span></div>
+        <div class="me-card-row"><span class="k">이름</span><span class="v" data-field="submitter_name">${escapeHtml(r.submitter_name || '-')}</span></div>
+        <div class="me-card-row"><span class="k">인스타</span><span class="v" data-field="instagram">${escapeHtml(r.instagram || '-')}</span></div>
+        <div class="me-card-row"><span class="k">필름</span><span class="v" data-field="film">${escapeHtml(r.film || '-')}</span></div>
+        <div class="me-card-row"><span class="k">카메라</span><span class="v" data-field="camera">${escapeHtml(r.camera || '-')}</span></div>
+        <div class="me-card-row"><span class="k">메모</span><span class="v" data-field="caption">${escapeHtml(r.caption || '-')}</span></div>
+        ${r.rejection_reason ? `<div class="me-card-row"><span class="k">반려 사유</span><span class="v">${escapeHtml(r.rejection_reason)}</span></div>` : ''}
         <div class="me-card-actions">
           <button type="button" class="me-btn me-btn-secondary" data-action="edit">수정</button>
           ${r.status === 'pending' ? `<button type="button" class="me-btn me-btn-danger" data-action="delete">제출 취소</button>` : ''}
@@ -235,7 +289,6 @@ function enterEditMode(card) {
   const id = card.dataset.id;
   const row = STATE.rows.find(r => r.id === id);
   if (!row) return;
-
   const fields = ['submitter_name', 'instagram', 'film', 'camera', 'caption'];
   for (const f of fields) {
     const cell = card.querySelector(`[data-field="${f}"]`);
@@ -252,7 +305,7 @@ function enterEditMode(card) {
     <button type="button" class="me-btn me-btn-secondary" data-action="cancel-edit">취소</button>`;
 }
 
-async function saveEdits(card) {
+async function savePhotoEdits(card) {
   const id = card.dataset.id;
   const patch = {};
   card.querySelectorAll('[data-edit]').forEach(el => {
@@ -260,10 +313,7 @@ async function saveEdits(card) {
     const v = el.value.trim();
     patch[f] = v === '' ? null : v;
   });
-  // 인스타그램 정규화 (@ 보장)
-  if (patch.instagram) {
-    patch.instagram = '@' + patch.instagram.replace(/^@/, '');
-  }
+  if (patch.instagram) patch.instagram = '@' + patch.instagram.replace(/^@/, '');
   const saveBtn = card.querySelector('[data-action="save"]');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중…'; }
   const { error } = await db().submissions.updateMine(id, patch);
@@ -272,10 +322,10 @@ async function saveEdits(card) {
     if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장'; }
     return;
   }
-  await loadList();
+  await loadPhotos();
 }
 
-async function deleteRow(card) {
+async function deletePhoto(card) {
   if (!confirm('이 사진의 제출을 취소할까요? 저장된 파일도 함께 삭제됩니다.')) return;
   const id   = card.dataset.id;
   const row  = STATE.rows.find(r => r.id === id);
@@ -289,11 +339,11 @@ async function deleteRow(card) {
     return;
   }
   if (path) await db().submissions.removePhoto(path);
-  await loadList();
+  await loadPhotos();
 }
 
-function bindCardActions() {
-  document.querySelectorAll('.me-card').forEach(card => {
+function bindPhotoCardActions() {
+  document.querySelectorAll('#section-photos .me-card').forEach(card => {
     card.querySelector('[data-zoom]')?.addEventListener('click', e => {
       $('imgZoomTarget').src = e.currentTarget.dataset.zoom;
       $('imgZoom').classList.add('open');
@@ -302,20 +352,123 @@ function bindCardActions() {
       btn.addEventListener('click', () => {
         const a = btn.dataset.action;
         if (a === 'edit')        enterEditMode(card);
-        else if (a === 'save')   saveEdits(card);
-        else if (a === 'cancel-edit') renderList();
-        else if (a === 'delete') deleteRow(card);
+        else if (a === 'save')   savePhotoEdits(card);
+        else if (a === 'cancel-edit') renderPhotoList();
+        else if (a === 'delete') deletePhoto(card);
       });
     });
   });
 }
+
+// ═════════════════════════════════════════
+// 매물 섹션
+// ═════════════════════════════════════════
+async function loadMarket() {
+  $('marketList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  STATE.marketRows = await db().market.listMine();
+  renderMarketList();
+}
+
+function renderMarketList() {
+  const rows = STATE.marketRows;
+  if (rows.length === 0) {
+    $('marketList').innerHTML = `
+      <div class="me-empty">
+        아직 올린 매물이 없어요.
+        <br /><a class="me-empty-cta" href="market.html#new">매물 올리러 가기 →</a>
+      </div>`;
+    return;
+  }
+  $('marketList').innerHTML = rows.map(renderMarketCard).join('');
+  bindMarketCardActions();
+}
+
+function renderMarketCard(r) {
+  const firstPath = r.storage_paths?.[0];
+  const url = firstPath ? db().market.publicUrl(firstPath) : '';
+  const next = nextStatusOf(r.status);
+  const canEdit = r.status !== 'hidden';
+  return `
+    <div class="me-card" data-id="${r.id}" data-status="${escapeAttr(r.status)}">
+      <div class="me-card-img" data-zoom="${escapeAttr(url)}">
+        ${url ? `<img src="${escapeAttr(url)}" alt="" loading="lazy" />` : ''}
+      </div>
+      <div class="me-card-meta">
+        <div>
+          <span class="me-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
+        </div>
+        <h3 class="me-market-card-title">${escapeHtml(r.title)}</h3>
+        <div class="me-market-card-price">${escapeHtml(r.price)}</div>
+        <div class="me-market-card-meta">
+          <span>${escapeHtml(CAT_LABELS[r.category] || r.category)}</span>
+          ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
+          <span>· ${fmtDateShort(r.created_at)}</span>
+          <span>· 사진 ${r.storage_paths?.length || 0}장</span>
+        </div>
+        <div class="me-card-actions">
+          ${canEdit ? `<button type="button" class="me-btn me-btn-secondary" data-action="cycle">${escapeHtml(statusLabel(r.status))} → ${escapeHtml(statusLabel(next))}</button>` : ''}
+          ${canEdit ? `<a href="market.html?edit=${escapeAttr(r.id)}" class="me-btn me-btn-secondary">수정</a>` : ''}
+          <button type="button" class="me-btn me-btn-danger" data-action="delete">삭제</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindMarketCardActions() {
+  document.querySelectorAll('#section-market .me-card').forEach(card => {
+    card.querySelector('[data-zoom]')?.addEventListener('click', e => {
+      const src = e.currentTarget.dataset.zoom;
+      if (!src) return;
+      $('imgZoomTarget').src = src;
+      $('imgZoom').classList.add('open');
+    });
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = card.dataset.id;
+        const status = card.dataset.status;
+        const a = btn.dataset.action;
+        if (a === 'cycle') {
+          btn.disabled = true;
+          const { error } = await db().market.cycleStatusMine(id, status);
+          if (error) { alert('상태 변경 실패: ' + error.message); btn.disabled = false; return; }
+          await loadMarket();
+        } else if (a === 'delete') {
+          if (!confirm('이 매물을 삭제할까요? 사진 파일도 함께 삭제됩니다.')) return;
+          btn.disabled = true; btn.textContent = '삭제 중…';
+          const row = STATE.marketRows.find(r => r.id === id);
+          const { error } = await db().market.deleteMine(id);
+          if (error) { alert('삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '삭제'; return; }
+          if (row?.storage_paths?.length) await db().market.removePhotos(row.storage_paths);
+          await loadMarket();
+        }
+      });
+    });
+  });
+}
+
+// ═════════════════════════════════════════
+// 페이지 탭 전환
+// ═════════════════════════════════════════
+function switchSection(sec) {
+  STATE.section = sec;
+  document.querySelectorAll('.me-pagetab').forEach(t => t.classList.toggle('active', t.dataset.section === sec));
+  $('section-photos').hidden = sec !== 'photos';
+  $('section-market').hidden = sec !== 'market';
+  if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
+  // URL hash 동기화 (#market 또는 #photos)
+  try { history.replaceState(null, '', '#' + sec); } catch (_) {}
+}
+
+document.querySelectorAll('.me-pagetab').forEach(t => {
+  t.addEventListener('click', () => switchSection(t.dataset.section));
+});
 
 document.querySelectorAll('.me-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.me-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     STATE.filter = tab.dataset.status;
-    renderList();
+    renderPhotoList();
   });
 });
 
@@ -333,7 +486,9 @@ $('imgZoom').addEventListener('click', () => {
   if (!ok) return;
   $('gate').hidden = true;
   $('app').hidden = false;
-  await loadList();
+  await loadPhotos();
+  // URL hash 가 #market 이면 매물 탭으로 시작
+  if (location.hash === '#market') switchSection('market');
 })();
 </script>
 
