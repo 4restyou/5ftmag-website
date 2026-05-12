@@ -438,7 +438,7 @@
       const step = 100;
       for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
         if (typeof window.fetchApprovedSubmissions === 'function') {
-          return window.fetchApprovedSubmissions(80).catch(() => []);
+          return window.fetchApprovedSubmissions(1000).catch(() => []);
         }
         await new Promise(r => setTimeout(r, step));
       }
@@ -788,7 +788,7 @@
 
 <script src="./js/site-common.js?v=20260512-relocate"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260512-origin"></script>
-<script src="./js/reader-submissions.js?v=20260512-relocate"></script>
+<script src="./js/db-client.js?v=20260512-pool"></script>
+<script src="./js/reader-submissions.js?v=20260512-pool"></script>
 </body>
 </html>

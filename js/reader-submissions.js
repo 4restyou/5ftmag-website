@@ -677,7 +677,7 @@
   }
 
   // 외부 노출: 승인된 제출 가져오기 (MagDB 위임 — 호환성 유지)
-  window.fetchApprovedSubmissions = async function (limit = 50) {
+  window.fetchApprovedSubmissions = async function (limit = 1000) {
     if (!db()) return [];
     return db().submissions.listApproved(limit);
   };

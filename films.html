@@ -409,7 +409,7 @@
 
     let submissions = [];
     try {
-      submissions = await window.fetchApprovedSubmissions(200);
+      submissions = await window.fetchApprovedSubmissions(1000);
     } catch (e) {
       console.warn('승인된 제출 fetch 실패:', e);
       return;
@@ -574,7 +574,7 @@
 
     let submissions = [];
     try {
-      submissions = await window.fetchApprovedSubmissions(200);
+      submissions = await window.fetchApprovedSubmissions(1000);
     } catch (e) {
       console.warn('Reader submissions fetch 실패:', e);
       return;
@@ -955,8 +955,8 @@
 </script>
 <script src="./js/site-common.js?v=20260512-relocate"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260512-origin"></script>
+<script src="./js/db-client.js?v=20260512-pool"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
-<script src="./js/reader-submissions.js?v=20260512-relocate"></script>
+<script src="./js/reader-submissions.js?v=20260512-pool"></script>
 </body>
 </html>

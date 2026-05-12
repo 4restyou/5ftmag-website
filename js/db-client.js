@@ -157,7 +157,7 @@
 
   // ─── 독자 사진 (공개 read view + 본인 INSERT + Storage 업로드) ───
   const submissions = {
-    async listApproved(limit = 50) {
+    async listApproved(limit = 1000) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.from('reader_submissions_approved')
         .select('*').order('created_at', { ascending: false }).limit(limit);
