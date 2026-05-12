@@ -298,6 +298,51 @@
     .film-match-fuzzy .film-match-apply {
       background: #78350f;
     }
+
+    /* 페이지네이션 */
+    .admin-pagination {
+      max-width: 1100px;
+      margin: 8px auto 48px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .admin-page {
+      min-width: 32px;
+      padding: 6px 10px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .admin-page:hover:not(:disabled):not(.is-active) {
+      border-color: var(--text);
+    }
+    .admin-page.is-active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+    .admin-page:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+    .admin-page-gap {
+      color: var(--text-muted);
+      padding: 0 4px;
+      font-size: 13px;
+    }
+    .admin-page-info {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -325,6 +370,7 @@
   <div class="admin-list" id="list">
     <div class="empty-state">불러오는 중…</div>
   </div>
+  <nav class="admin-pagination" id="pagination" aria-label="페이지" hidden></nav>
 </div>
 
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
@@ -342,9 +388,11 @@ const STATE = {
   rows: [],
   counts: { pending: 0, approved: 0, rejected: 0 },
   films: {},
+  page: 1,
 };
 
 const STORAGE_BUCKET = 'reader-submissions';
+const PAGE_SIZE = 10;
 
 function $(id) { return document.getElementById(id); }
 function publicUrl(path) {
@@ -418,11 +466,22 @@ async function loadCounts() {
 
 async function loadList() {
   $('list').innerHTML = '<div class="empty-state">불러오는 중…</div>';
+  const pageNav = $('pagination');
+  if (pageNav) pageNav.hidden = true;
+
+  const total = STATE.counts[STATE.status] || 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (STATE.page > totalPages) STATE.page = totalPages;
+  if (STATE.page < 1) STATE.page = 1;
+  const from = (STATE.page - 1) * PAGE_SIZE;
+  const to   = from + PAGE_SIZE - 1;
+
   const { data, error } = await window.sb
     .from('reader_submissions')
     .select('*')
     .eq('status', STATE.status)
-    .order('created_at', { ascending: STATE.status === 'pending' });
+    .order('created_at', { ascending: STATE.status === 'pending' })
+    .range(from, to);
 
   if (error) {
     $('list').innerHTML = `<div class="empty-state">불러오기 실패: ${escapeHtml(error.message)}</div>`;
@@ -435,6 +494,47 @@ async function loadList() {
   }
   $('list').innerHTML = STATE.rows.map(renderCard).join('');
   bindCardActions();
+  renderPagination(total, totalPages);
+}
+
+function renderPagination(total, totalPages) {
+  const nav = $('pagination');
+  if (!nav) return;
+  if (totalPages <= 1) { nav.hidden = true; nav.innerHTML = ''; return; }
+  const cur = STATE.page;
+  const btn = (label, page, opts = {}) => {
+    const disabled = opts.disabled ? ' disabled' : '';
+    const active   = opts.active ? ' is-active' : '';
+    return `<button type="button" class="admin-page${active}" data-page="${page}"${disabled} aria-label="${escapeHtml(opts.aria || label)}">${escapeHtml(label)}</button>`;
+  };
+  // 페이지 윈도우 (cur 주변 ±2)
+  const pages = [];
+  const start = Math.max(1, cur - 2);
+  const end   = Math.min(totalPages, cur + 2);
+  for (let p = start; p <= end; p++) pages.push(p);
+  let html = btn('‹', cur - 1, { disabled: cur === 1, aria: '이전 페이지' });
+  if (start > 1) {
+    html += btn('1', 1);
+    if (start > 2) html += `<span class="admin-page-gap">…</span>`;
+  }
+  for (const p of pages) html += btn(String(p), p, { active: p === cur });
+  if (end < totalPages) {
+    if (end < totalPages - 1) html += `<span class="admin-page-gap">…</span>`;
+    html += btn(String(totalPages), totalPages);
+  }
+  html += btn('›', cur + 1, { disabled: cur === totalPages, aria: '다음 페이지' });
+  html += `<span class="admin-page-info">총 ${total}건 · ${cur} / ${totalPages}페이지</span>`;
+  nav.innerHTML = html;
+  nav.hidden = false;
+  nav.querySelectorAll('.admin-page').forEach(b => {
+    b.addEventListener('click', () => {
+      const p = Number(b.dataset.page);
+      if (!Number.isFinite(p) || b.disabled || p === cur) return;
+      STATE.page = p;
+      loadList();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
 }
 
 function getFilmMatchHint(filmText) {
@@ -602,6 +702,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     STATE.status = tab.dataset.status;
+    STATE.page = 1;
     loadList();
   });
 });

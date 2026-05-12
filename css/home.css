@@ -735,6 +735,11 @@ body.modal-open { overflow: hidden; }
   color: rgba(255, 255, 255, 0.55);
   font-size: 12px;
 }
+.photo-lb-info .camera {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 12px;
+  font-style: italic;
+}
 .photo-lb-info .counter {
   color: rgba(255, 255, 255, 0.55);
   font-size: 12px;

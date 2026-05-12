@@ -216,6 +216,7 @@
     <div class="photo-lb-info">
       <span class="author" id="photoLbAuthor"></span>
       <span class="film" id="photoLbFilm"></span>
+      <span class="camera" id="photoLbCamera"></span>
       <span class="counter" id="photoLbCounter"></span>
       <a href="films.html" class="photo-lb-link" id="photoLbFilmLink">필름 페이지에서 더 보기 →</a>
     </div>
@@ -431,17 +432,18 @@
       .then(([data, staticReaders, supabaseReaders]) => {
         filmsData = data;
 
-        const allPhotos = [];
+        const editorialPool = [];
+        const readerPool = [];
 
-        // 1) Editorial (featured 36)
+        // 1) Editorial (featured 필름의 photos)
         Object.entries(data).forEach(([filmKey, film]) => {
           (film.photos || []).forEach(photo => {
-            allPhotos.push({
+            editorialPool.push({
               source: 'editorial',
               src: photo.src,
               seed: photo.seed,
               author: photo.author || '',
-              filmName: film.name,
+              filmName: film.displayName || film.name,
               filmKey: filmKey,
             });
           });
@@ -451,11 +453,13 @@
         (Array.isArray(staticReaders) ? staticReaders : [])
           .filter(r => r.published !== false && r.image)
           .forEach(r => {
-            allPhotos.push({
+            readerPool.push({
               source: 'reader',
               src: r.image,
               author: r.author || '',
               filmName: r.film || '',
+              camera: r.camera || '',
+              caption: r.caption || '',
               instagramUrl: r.instagramUrl || '',
             });
           });
@@ -464,18 +468,19 @@
         (Array.isArray(supabaseReaders) ? supabaseReaders : [])
           .filter(r => r.image)
           .forEach(r => {
-            allPhotos.push({
+            readerPool.push({
               source: 'reader',
               src: r.image,
               author: r.author || '',
               filmName: r.film || '',
+              camera: r.camera || '',
+              caption: r.caption || '',
               instagramUrl: r.instagramUrl || '',
             });
           });
 
         // 매 로드마다 새 시드 — 새로고침할 때마다 다른 선택
         const seed = Math.floor(Math.random() * 0xFFFFFFFF);
-
         function makeRng(seed) {
           let t = seed >>> 0;
           return function() {
@@ -486,7 +491,6 @@
           };
         }
         const rng = makeRng(seed);
-
         function shuffleSeeded(arr) {
           const a = [...arr];
           for (let i = a.length - 1; i > 0; i--) {
@@ -496,29 +500,37 @@
           return a;
         }
 
-        // 작가별 라운드 로빈 — 같은 작가가 연속으로 안 나오게
         // 24 = 2컬럼 × 12행. 한 롤(36 frames)의 2/3 — 짧고 깔끔한 분량.
+        // editorial 보장 비율(50%) + 나머지 reader. 부족한 쪽은 다른 풀에서 채움.
+        // 같은 작가 연속 방지 위해 마지막에 라운드 로빈 셔플로 인터리브.
         const PHOTO_COUNT = 24;
+        const EDITORIAL_TARGET = Math.min(Math.floor(PHOTO_COUNT * 0.5), editorialPool.length);
+        const READER_TARGET    = Math.min(PHOTO_COUNT - EDITORIAL_TARGET, readerPool.length);
+        const TOTAL_PICK       = EDITORIAL_TARGET + READER_TARGET;
+        // 한 쪽이 부족하면 다른 쪽에서 추가로 채우기
+        const slackEditorial = Math.min(editorialPool.length - EDITORIAL_TARGET, PHOTO_COUNT - TOTAL_PICK);
+        const slackReader    = Math.min(readerPool.length - READER_TARGET, PHOTO_COUNT - TOTAL_PICK - slackEditorial);
+        const editorialPick = shuffleSeeded(editorialPool).slice(0, EDITORIAL_TARGET + slackEditorial);
+        const readerPick    = shuffleSeeded(readerPool).slice(0, READER_TARGET + slackReader);
+
+        // 같은 작가 연속 방지 — 작가별로 묶고 라운드 로빈으로 인터리브
+        const combined = [...editorialPick, ...readerPick];
         const byAuthor = {};
-        allPhotos.forEach(p => {
+        combined.forEach(p => {
           const key = p.author || 'unknown';
-          if (!byAuthor[key]) byAuthor[key] = [];
-          byAuthor[key].push(p);
+          (byAuthor[key] ||= []).push(p);
         });
-        Object.keys(byAuthor).forEach(k => {
-          byAuthor[k] = shuffleSeeded(byAuthor[k]);
-        });
+        Object.keys(byAuthor).forEach(k => { byAuthor[k] = shuffleSeeded(byAuthor[k]); });
         const authorOrder = shuffleSeeded(Object.keys(byAuthor));
 
         const selected = [];
         let round = 0;
-        while (selected.length < PHOTO_COUNT) {
+        while (selected.length < combined.length) {
           let added = false;
           for (const author of authorOrder) {
             if (byAuthor[author][round]) {
               selected.push(byAuthor[author][round]);
               added = true;
-              if (selected.length >= PHOTO_COUNT) break;
             }
           }
           if (!added) break;
@@ -676,6 +688,7 @@
   const photoLbImg     = document.getElementById('photoLbImg');
   const photoLbAuthor  = document.getElementById('photoLbAuthor');
   const photoLbFilm    = document.getElementById('photoLbFilm');
+  const photoLbCamera  = document.getElementById('photoLbCamera');
   const photoLbCounter = document.getElementById('photoLbCounter');
   const photoLbLink    = document.getElementById('photoLbFilmLink');
   const photoLbClose   = document.getElementById('photoLbClose');
@@ -708,6 +721,10 @@
 
     photoLbAuthor.textContent = p.author || '';
     photoLbFilm.textContent = p.filmName || '';
+    if (photoLbCamera) {
+      photoLbCamera.textContent = p.camera || '';
+      photoLbCamera.hidden = !p.camera;
+    }
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;
 
     // 링크: 독자 사진이면 Instagram, editorial이면 필름 페이지
