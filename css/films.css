@@ -594,9 +594,34 @@
   gap: 8px;
   margin: 0;
 }
+.library-brand-select {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 32px 8px 14px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+.library-brand-select:hover,
+.library-brand-select:focus-visible {
+  border-color: var(--text);
+  outline: none;
+}
 @media (max-width: 640px) {
   .library-controls { flex-direction: column; align-items: stretch; gap: 12px; }
   .library-search-label { max-width: none; }
+  .library-brand-select { width: 100%; }
 }
 .library-filter-chip {
   display: inline-flex;
