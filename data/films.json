@@ -173,8 +173,8 @@
     ],
     "boxThumbnail": "img/films/ultramax-box.png",
     "boxThumbnailStatus": "set",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/ultramax-can.webp",
+    "canThumbnailStatus": "set"
   },
   "cinestill800t": {
     "slug": "cinestill800t",
@@ -635,8 +635,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/trix400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "tmax400": {
     "slug": "tmax400",
@@ -665,8 +665,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/tmax400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "hp5plus": {
     "slug": "hp5plus",
@@ -694,8 +694,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/hp5plus-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fp4plus": {
     "slug": "fp4plus",
@@ -722,8 +722,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fp4plus-can.webp",
+    "canThumbnailStatus": "set"
   },
   "delta400": {
     "slug": "delta400",
@@ -748,8 +748,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/delta400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "xp2super": {
     "slug": "xp2super",
@@ -777,8 +777,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/xp2super-can.webp",
+    "canThumbnailStatus": "set"
   },
   "acros2": {
     "slug": "acros2",
@@ -811,8 +811,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/acros2-can.webp",
+    "canThumbnailStatus": "set"
   },
   "kentmere400": {
     "slug": "kentmere400",
@@ -835,8 +835,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/kentmere400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "cinestill50d": {
     "slug": "cinestill50d",
@@ -1104,8 +1104,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/lomopurple-can.webp",
+    "canThumbnailStatus": "set"
   },
   "lomometropolis": {
     "slug": "lomometropolis",
@@ -1157,8 +1157,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fomapan400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "vision250d": {
     "slug": "vision250d",
@@ -1309,8 +1309,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/doublex-can.webp",
+    "canThumbnailStatus": "set"
   },
   "reala100": {
     "slug": "reala100",
@@ -1596,8 +1596,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fujineopan400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "agfavista400": {
     "slug": "agfavista400",
@@ -1688,8 +1688,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/panfplus50-can.webp",
+    "canThumbnailStatus": "set"
   },
   "delta100": {
     "slug": "delta100",
@@ -1712,8 +1712,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/delta100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "delta3200": {
     "slug": "delta3200",
@@ -1736,8 +1736,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/delta3200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "sfx200": {
     "slug": "sfx200",
@@ -1766,8 +1766,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/sfx200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "kentmere100": {
     "slug": "kentmere100",
@@ -1794,8 +1794,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/kentmere100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "kentmere200": {
     "slug": "kentmere200",
@@ -1822,8 +1822,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/kentmere200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "tmax100": {
     "slug": "tmax100",
@@ -1849,8 +1849,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/tmax100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fomapan100": {
     "slug": "fomapan100",
@@ -1876,8 +1876,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fomapan100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "agfaapx100": {
     "slug": "agfaapx100",
@@ -1902,8 +1902,8 @@
     "format": "35mm",
     "boxThumbnail": null,
     "boxThumbnailStatus": "pending",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/agfaapx100-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   },
@@ -1925,8 +1925,8 @@
     "iso": "250",
     "type": "Daylight",
     "format": "35mm",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/fotocola250d-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   },
@@ -1948,8 +1948,8 @@
     "iso": "500",
     "type": "Tungsten",
     "format": "35mm",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/fotocola500t-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   },
@@ -1978,8 +1978,8 @@
     "iso": "800",
     "type": "Color Negative",
     "format": "35mm",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/superiavenus800-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   },
@@ -2006,8 +2006,8 @@
     "iso": "400",
     "type": "Color Negative",
     "format": "35mm",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/superiapremium400-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   },
@@ -2036,8 +2036,8 @@
     "iso": "1600",
     "type": "Color Negative",
     "format": "35mm",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/natura1600-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   },
@@ -2064,8 +2064,8 @@
     "iso": "125",
     "type": "Color Negative",
     "format": "35mm",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/aerocolor-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   },
@@ -2092,8 +2092,8 @@
     "iso": "250",
     "type": "Black & White",
     "format": "35mm",
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending",
+    "canThumbnail": "img/films/cinestillxx-can.webp",
+    "canThumbnailStatus": "set",
     "photographers": [],
     "photos": []
   }
