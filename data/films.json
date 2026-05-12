@@ -3020,29 +3020,6 @@
     "photographers": [],
     "photos": []
   },
-  "fujifilm800": {
-    "slug": "fujifilm800",
-    "tier": "library",
-    "brand": "FUJIFILM",
-    "name": "Fujicolor 800",
-    "displayName": "Fujifilm 800",
-    "aliases": [
-      "Fujifilm 800",
-      "Fujicolor 800",
-      "Fuji 800",
-      "후지필름 800",
-      "후지컬러 800",
-      "후지 800",
-      "fujifilm800",
-      "fujicolor800"
-    ],
-    "desc": "후지의 고감도 컬러 네거티브 800. 후지필름 200/400 시리즈의 형제로 어두운 실내·야경에서 손쉽게 셔터를 끊을 수 있어요. 따스한 톤은 유지하면서도 입자감이 또렷합니다.",
-    "iso": "800",
-    "type": "Color Negative",
-    "format": "35mm",
-    "photographers": [],
-    "photos": []
-  },
   "realaace100": {
     "slug": "realaace100",
     "tier": "library",
