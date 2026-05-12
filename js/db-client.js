@@ -340,6 +340,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
-    auth, profiles, comments, likes, submissions, review, realtime,
+    auth, profiles, comments, likes, submissions, review, market, realtime,
   };
 })();
