@@ -3192,5 +3192,30 @@
     "format": "35mm",
     "photographers": [],
     "photos": []
+  },
+  "luckycolor200": {
+    "slug": "luckycolor200",
+    "tier": "library",
+    "brand": "LUCKY",
+    "name": "Color 200",
+    "displayName": "Lucky Color 200",
+    "aliases": [
+      "Lucky 200",
+      "Lucky C200",
+      "Lucky Color 200",
+      "Color 200",
+      "Lucky Colour 200",
+      "럭키 200",
+      "럭키 컬러 200",
+      "럭키컬러200",
+      "럭키 C200",
+      "luckycolor200"
+    ],
+    "desc": "2012년 단종됐던 중국 Lucky 의 컬러 네거티브가 2025년 상반기 부활한 첫 컬러 라인. ISO 200, C-41 표준 현상. 중립 톤에 약간의 레드 캐스트, 곱은 입자와 펀치한 콘트라스트가 특징이에요. 35mm·120 모두 출시.",
+    "iso": "200",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
   }
 }
