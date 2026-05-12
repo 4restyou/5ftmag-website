@@ -421,13 +421,24 @@
   let filmsData = {};
 
   if (photoGrid) {
+    // reader-submissions.js 가 body 끝에서 로드되어 fetchApprovedSubmissions 가
+    // 아직 정의되지 않았을 수 있음 → 최대 3초 폴링 후 사용 (없으면 빈 배열)
+    async function waitForSupabaseFetcher(timeoutMs = 3000) {
+      const step = 100;
+      for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
+        if (typeof window.fetchApprovedSubmissions === 'function') {
+          return window.fetchApprovedSubmissions(80).catch(() => []);
+        }
+        await new Promise(r => setTimeout(r, step));
+      }
+      return [];
+    }
+
     // 통합 풀: editorial(films.json) + 독자 승인 제출(readers.json + Supabase)
     Promise.all([
       fetch('data/films.json').then(r => r.json()).catch(() => ({})),
       fetch('data/readers.json').then(r => r.json()).catch(() => []),
-      (typeof window.fetchApprovedSubmissions === 'function')
-        ? window.fetchApprovedSubmissions(80).catch(() => [])
-        : Promise.resolve([])
+      waitForSupabaseFetcher()
     ])
       .then(([data, staticReaders, supabaseReaders]) => {
         filmsData = data;
