@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market — 5ft.mag</title>
+  <meta name="description" content="5ft.mag 구독자들이 직접 올리는 필름·카메라·렌즈 중고 장터. 거래는 개인 간 진행됩니다.">
+  <link rel="canonical" href="https://www.5ftmag.com/market.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Market — 5ft.mag">
+  <meta property="og:description" content="5ft.mag 구독자 중고 장터.">
+  <meta property="og:url" content="https://www.5ftmag.com/market.html">
+
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="shortcut icon" href="img/favicon/favicon.ico">
+  <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
+  <link rel="stylesheet" href="./pretendard.css" />
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
+  <link rel="stylesheet" href="./css/market.css?v=20260512-mkt1">
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="stories.html">Articles</a></li>
+      <li><a href="films.html">Films</a></li>
+      <li><a href="market.html" class="current">Market</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="stories.html">Articles</a>
+    <a href="films.html">Films</a>
+    <a href="market.html">Market</a>
+    <a href="about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<div class="market-intro">
+  <p>구독자들이 직접 매물을 올리는 <span class="accent">중고 장터</span>예요. 거래·결제는 판매자와 구매자가 직접 진행해주세요. 사기나 부적절한 매물은 매물 상세에서 <strong>신고</strong>해주시면 편집부가 검토합니다.</p>
+</div>
+
+<section class="market-section">
+  <div class="market-controls">
+    <label class="market-search-label">
+      <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+        <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <input type="search" class="market-search" id="marketSearch" placeholder="제목·설명으로 검색" autocomplete="off" />
+    </label>
+    <div class="market-controls-right">
+      <div class="market-filter" id="marketFilter" role="tablist" aria-label="카테고리"></div>
+      <button type="button" class="market-new-btn" id="marketNewBtn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        매물 올리기
+      </button>
+    </div>
+  </div>
+
+  <div class="market-grid" id="marketGrid">
+    <div class="market-empty">불러오는 중…</div>
+  </div>
+</section>
+
+<!-- ════════ 상세 모달 ════════ -->
+<div class="mkt-modal" id="mktDetailModal" role="dialog" aria-modal="true" aria-label="매물 상세">
+  <div class="mkt-modal-card" id="mktDetailCard">
+    <!-- 동적 생성 -->
+  </div>
+</div>
+
+<!-- ════════ 폼 모달 ════════ -->
+<div class="mkt-modal mkt-form-modal" id="mktFormModal" role="dialog" aria-modal="true" aria-label="매물 폼">
+  <div class="mkt-modal-card mkt-form-card" id="mktFormCard">
+    <!-- 동적 생성 -->
+  </div>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft.mag</span>
+    <p class="footer-tag">필름 한 롤의 길이, 5ft.</p>
+  </div>
+  <div class="footer-inner-right">
+    <p class="footer-contact">Contact · <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./js/db-client.js?v=20260512-mkt1"></script>
+<script src="./js/site-common.js?v=20260512-mypage"></script>
+<script>
+'use strict';
+
+const CATEGORIES = [
+  { key: 'all',       label: '전체' },
+  { key: 'film',      label: '필름' },
+  { key: 'camera',    label: '카메라' },
+  { key: 'lens',      label: '렌즈' },
+  { key: 'accessory', label: '액세서리' },
+  { key: 'etc',       label: '기타' },
+];
+
+const STATE = {
+  user: null,
+  rows: [],
+  filter: 'all',
+  search: '',
+  detailId: null,
+  galleryIndex: 0,
+  editId: null,        // 수정 모드일 때 listing id
+  formPhotos: [],      // [{ blob, previewUrl, existingPath? }]
+};
+
+const MAX_LONG_SIDE = 2000;
+const JPEG_QUALITY = 0.85;
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+function $(id) { return document.getElementById(id); }
+function db() { return window.MagDB; }
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+function nl2br(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+function categoryLabel(k) {
+  return (CATEGORIES.find(c => c.key === k) || {}).label || k;
+}
+function statusLabel(s) {
+  return s === 'available' ? '판매중' : s === 'reserved' ? '예약중' : s === 'sold' ? '판매완료' : s;
+}
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// ═════════════════════════════════════════
+// 데이터 로드 + 렌더
+// ═════════════════════════════════════════
+async function loadList() {
+  $('marketGrid').innerHTML = '<div class="market-empty">불러오는 중…</div>';
+  STATE.rows = await db().market.list({ limit: 500 });
+  renderFilterChips();
+  renderGrid();
+}
+
+function renderFilterChips() {
+  const bar = $('marketFilter');
+  if (!bar) return;
+  const counts = { all: STATE.rows.length };
+  for (const r of STATE.rows) counts[r.category] = (counts[r.category] || 0) + 1;
+  bar.innerHTML = CATEGORIES
+    .filter(c => c.key === 'all' || counts[c.key])
+    .map(c => `
+      <button type="button" class="market-category-chip${c.key === STATE.filter ? ' is-active' : ''}"
+              data-cat="${escapeAttr(c.key)}" role="tab" aria-selected="${c.key === STATE.filter}">
+        ${escapeHtml(c.label)}<span class="market-category-count">${counts[c.key] || 0}</span>
+      </button>
+    `).join('');
+  bar.querySelectorAll('.market-category-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      STATE.filter = chip.dataset.cat;
+      renderFilterChips();
+      renderGrid();
+    });
+  });
+}
+
+function applyFilters() {
+  const q = STATE.search.trim().toLowerCase();
+  return STATE.rows.filter(r => {
+    if (STATE.filter !== 'all' && r.category !== STATE.filter) return false;
+    if (q) {
+      const hay = (r.title + ' ' + (r.description || '') + ' ' + (r.location || '')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderGrid() {
+  const rows = applyFilters();
+  const grid = $('marketGrid');
+  if (!rows.length) {
+    grid.innerHTML = '<div class="market-empty">' +
+      (STATE.search ? `"${escapeHtml(STATE.search)}" 검색 결과가 없어요.` : '아직 올라온 매물이 없어요. 첫 매물의 주인공이 되어보세요.') +
+      '</div>';
+    return;
+  }
+  grid.innerHTML = rows.map(renderCard).join('');
+  grid.querySelectorAll('.market-card').forEach(card => {
+    card.addEventListener('click', () => openDetail(card.dataset.id));
+  });
+}
+
+function renderCard(r) {
+  const firstPath = r.storage_paths?.[0];
+  const url = firstPath ? db().market.publicUrl(firstPath) : '';
+  const soldClass = r.status === 'sold' ? ' is-sold' : '';
+  return `
+    <button type="button" class="market-card" data-id="${escapeAttr(r.id)}">
+      <div class="market-card-img${soldClass}">
+        <span class="market-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
+        ${url ? `<img src="${escapeAttr(url)}" alt="${escapeAttr(r.title)}" loading="lazy" />` : ''}
+      </div>
+      <div class="market-card-body">
+        <h3 class="market-card-title">${escapeHtml(r.title)}</h3>
+        <span class="market-card-price">${escapeHtml(r.price)}</span>
+        <span class="market-card-meta">
+          <span>${escapeHtml(categoryLabel(r.category))}</span>
+          ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
+          <span>· ${fmtDate(r.created_at)}</span>
+        </span>
+      </div>
+    </button>`;
+}
+
+// ═════════════════════════════════════════
+// 상세 모달
+// ═════════════════════════════════════════
+async function openDetail(id) {
+  STATE.detailId = id;
+  STATE.galleryIndex = 0;
+  const row = STATE.rows.find(r => r.id === id) || await db().market.getOne(id);
+  if (!row) return;
+  renderDetail(row);
+  $('mktDetailModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  $('mktDetailModal').classList.remove('open');
+  document.body.style.overflow = '';
+  STATE.detailId = null;
+}
+
+function renderDetail(r) {
+  const paths = r.storage_paths || [];
+  const idx = STATE.galleryIndex;
+  const mainUrl = paths[idx] ? db().market.publicUrl(paths[idx]) : '';
+  const nav = paths.length > 1 ? `
+    <button type="button" class="mkt-gallery-nav prev" data-action="prev" aria-label="이전 사진">‹</button>
+    <button type="button" class="mkt-gallery-nav next" data-action="next" aria-label="다음 사진">›</button>
+  ` : '';
+  const thumbs = paths.length > 1 ? `
+    <div class="mkt-gallery-thumbs">
+      ${paths.map((p, i) => `
+        <button type="button" class="mkt-gallery-thumb${i === idx ? ' is-active' : ''}" data-action="thumb" data-i="${i}">
+          <img src="${escapeAttr(db().market.publicUrl(p))}" alt="" />
+        </button>`).join('')}
+    </div>` : '';
+
+  const author = r.display_name || '회원';
+  const isMine = STATE.user && STATE.user.id === r.user_id;
+
+  $('mktDetailCard').innerHTML = `
+    <button type="button" class="mkt-modal-close" data-action="close" aria-label="닫기">✕</button>
+    <div class="mkt-gallery">
+      <div class="mkt-gallery-main">
+        ${mainUrl ? `<img src="${escapeAttr(mainUrl)}" alt="${escapeAttr(r.title)}" />` : ''}
+        ${nav}
+      </div>
+      ${thumbs}
+    </div>
+    <div class="mkt-detail">
+      <span class="mkt-detail-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
+      <h2 class="mkt-detail-title">${escapeHtml(r.title)}</h2>
+      <div class="mkt-detail-price">${escapeHtml(r.price)}</div>
+      <div class="mkt-detail-meta">
+        <span>${escapeHtml(categoryLabel(r.category))}</span>
+        ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
+        <span>· ${fmtDate(r.created_at)}</span>
+      </div>
+      ${r.description ? `<div class="mkt-detail-desc">${nl2br(r.description)}</div>` : ''}
+      <div class="mkt-detail-contact">
+        <strong>판매자 연락처</strong>
+        ${nl2br(r.contact)}
+      </div>
+      <div class="mkt-detail-author">올린 사람 · ${escapeHtml(author)}</div>
+      <div class="mkt-detail-actions">
+        ${isMine ? `
+          <button type="button" class="mkt-btn-link" data-action="edit">수정</button>
+          <button type="button" class="mkt-btn-link" data-action="cycle">상태 변경 (${escapeHtml(statusLabel(r.status))} →)</button>
+          <button type="button" class="mkt-btn-link" data-action="delete">삭제</button>
+        ` : `
+          <button type="button" class="mkt-btn-link" data-action="report">신고하기</button>
+        `}
+      </div>
+    </div>`;
+
+  bindDetailHandlers(r);
+}
+
+function bindDetailHandlers(r) {
+  $('mktDetailCard').querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', async (e) => {
+      const a = el.dataset.action;
+      if (a === 'close') return closeDetail();
+      if (a === 'prev') {
+        STATE.galleryIndex = (STATE.galleryIndex - 1 + r.storage_paths.length) % r.storage_paths.length;
+        return renderDetail(r);
+      }
+      if (a === 'next') {
+        STATE.galleryIndex = (STATE.galleryIndex + 1) % r.storage_paths.length;
+        return renderDetail(r);
+      }
+      if (a === 'thumb') {
+        STATE.galleryIndex = Number(el.dataset.i) || 0;
+        return renderDetail(r);
+      }
+      if (a === 'edit') {
+        closeDetail();
+        return openForm(r);
+      }
+      if (a === 'cycle') {
+        const { next, error } = await db().market.cycleStatusMine(r.id, r.status);
+        if (error) return alert('상태 변경 실패: ' + error.message);
+        r.status = next;
+        await loadList();
+        renderDetail(r);
+        $('mktDetailModal').classList.add('open');
+        return;
+      }
+      if (a === 'delete') {
+        if (!confirm('이 매물을 삭제할까요? 사진 파일도 함께 삭제됩니다.')) return;
+        const { error } = await db().market.deleteMine(r.id);
+        if (error) return alert('삭제 실패: ' + error.message);
+        if (r.storage_paths?.length) await db().market.removePhotos(r.storage_paths);
+        closeDetail();
+        return loadList();
+      }
+      if (a === 'report') {
+        if (!STATE.user) return alert('신고는 로그인 후에 가능해요.');
+        const reason = prompt('신고 사유를 적어주세요 (300자 이내):', '');
+        if (!reason) return;
+        const { error } = await db().market.report(r.id, reason);
+        if (error) return alert('신고 실패: ' + error.message);
+        alert('신고가 접수되었습니다. 편집부에서 검토할게요.');
+      }
+    });
+  });
+}
+
+// ═════════════════════════════════════════
+// 폼 모달 (신규/수정)
+// ═════════════════════════════════════════
+async function openForm(existing) {
+  if (!STATE.user) {
+    renderGate();
+    $('mktFormModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+  STATE.editId = existing?.id || null;
+  STATE.formPhotos = (existing?.storage_paths || []).map(p => ({
+    existingPath: p, previewUrl: db().market.publicUrl(p),
+  }));
+  renderForm(existing);
+  $('mktFormModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeForm() {
+  // 신규 추가 시 생성한 blob URL 정리
+  for (const p of STATE.formPhotos) {
+    if (p.blobUrl) URL.revokeObjectURL(p.blobUrl);
+  }
+  STATE.formPhotos = [];
+  STATE.editId = null;
+  $('mktFormModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderGate() {
+  $('mktFormCard').innerHTML = `
+    <div class="mkt-gate">
+      <h2>로그인이 필요해요</h2>
+      <p>매물을 올리거나 관리하려면 Google 로 로그인해주세요.</p>
+      <button type="button" class="mkt-btn mkt-btn-primary" data-action="login">Google로 계속하기</button>
+      <button type="button" class="mkt-btn-link" data-action="close" style="margin-left:8px;">취소</button>
+    </div>`;
+  $('mktFormCard').querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', async () => {
+      const a = el.dataset.action;
+      if (a === 'login') await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
+      if (a === 'close') closeForm();
+    });
+  });
+}
+
+function renderForm(existing) {
+  const e = existing || {};
+  $('mktFormCard').innerHTML = `
+    <button type="button" class="mkt-modal-close" data-action="close" aria-label="닫기">✕</button>
+    <form class="mkt-form" id="mktForm">
+      <h2 class="mkt-form-title">${existing ? '매물 수정' : '매물 올리기'}</h2>
+
+      <div class="mkt-field">
+        <span class="mkt-field-label">사진 <em>*</em> <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">(최대 3장, 5MB 이하)</small></span>
+        <div class="mkt-photo-row" id="mktPhotoRow"></div>
+      </div>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">제목 <em>*</em></span>
+        <input type="text" name="title" maxlength="60" required value="${escapeAttr(e.title || '')}" placeholder="예: Pentax 17 미사용 박풀세트" />
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">가격 <em>*</em></span>
+        <input type="text" name="price" maxlength="40" required value="${escapeAttr(e.price || '')}" placeholder="예: 25만원 / 5만원 (택포)" />
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">카테고리 <em>*</em></span>
+        <select name="category" required>
+          ${CATEGORIES.filter(c => c.key !== 'all').map(c => `
+            <option value="${escapeAttr(c.key)}" ${e.category === c.key ? 'selected' : ''}>${escapeHtml(c.label)}</option>
+          `).join('')}
+        </select>
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">설명 <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">(1000자 이내)</small></span>
+        <textarea name="description" maxlength="1000" placeholder="상태, 사용 기간, 거래 방식 등 자유롭게 적어주세요.">${escapeHtml(e.description || '')}</textarea>
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">거래 지역 <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">(선택, 60자)</small></span>
+        <input type="text" name="location" maxlength="60" value="${escapeAttr(e.location || '')}" placeholder="예: 서울 마포 / 택배만" />
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">판매자 연락처 <em>*</em></span>
+        <textarea name="contact" maxlength="100" required placeholder="전화번호, 카톡 ID, 인스타 DM 등 본인이 받을 수 있는 방법">${escapeHtml(e.contact || '')}</textarea>
+        <span class="mkt-field-hint">공개적으로 노출되니 본인이 감당 가능한 정보만 적어주세요.</span>
+      </label>
+
+      <div class="mkt-form-actions">
+        <button type="button" class="mkt-btn mkt-btn-secondary" data-action="close">취소</button>
+        <button type="submit" class="mkt-btn mkt-btn-primary" id="mktFormSubmit">${existing ? '저장' : '올리기'}</button>
+      </div>
+      <p class="mkt-form-error" id="mktFormError" aria-live="polite"></p>
+    </form>`;
+
+  renderPhotoSlots();
+  $('mktFormCard').querySelectorAll('[data-action="close"]').forEach(b => b.addEventListener('click', closeForm));
+  $('mktForm').addEventListener('submit', onSubmit);
+}
+
+function renderPhotoSlots() {
+  const row = $('mktPhotoRow');
+  if (!row) return;
+  const slots = [];
+  for (let i = 0; i < 3; i++) {
+    const p = STATE.formPhotos[i];
+    if (p) {
+      slots.push(`
+        <div class="mkt-photo-slot" data-i="${i}">
+          <img src="${escapeAttr(p.previewUrl)}" alt="" />
+          <button type="button" class="mkt-photo-remove" data-action="remove" data-i="${i}" aria-label="삭제">✕</button>
+        </div>`);
+    } else {
+      slots.push(`
+        <label class="mkt-photo-slot" data-i="${i}">
+          + 추가
+          <input type="file" accept="image/jpeg,image/png,image/webp" data-i="${i}" />
+        </label>`);
+    }
+  }
+  row.innerHTML = slots.join('');
+  row.querySelectorAll('input[type=file]').forEach(el => {
+    el.addEventListener('change', async () => {
+      const file = el.files?.[0];
+      if (!file) return;
+      try {
+        const { blob } = await resizeToJpeg(file);
+        if (blob.size > MAX_UPLOAD_BYTES) throw new Error('파일이 너무 큽니다 (5MB 이하).');
+        const blobUrl = URL.createObjectURL(blob);
+        STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl };
+        renderPhotoSlots();
+      } catch (err) {
+        alert(err.message || '이미지 처리 실패');
+      }
+    });
+  });
+  row.querySelectorAll('[data-action="remove"]').forEach(el => {
+    el.addEventListener('click', () => {
+      const i = Number(el.dataset.i);
+      const p = STATE.formPhotos[i];
+      if (p?.blobUrl) URL.revokeObjectURL(p.blobUrl);
+      STATE.formPhotos.splice(i, 1);
+      renderPhotoSlots();
+    });
+  });
+}
+
+// 이미지 리사이즈 (reader-submissions.js 와 동일 패턴 — 자체 구현으로 의존성 ↓)
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+async function resizeToJpeg(file) {
+  const img = await loadImage(file);
+  let { width: w, height: h } = img;
+  if (Math.max(w, h) > MAX_LONG_SIDE) {
+    if (w >= h) { h = Math.round(h * MAX_LONG_SIDE / w); w = MAX_LONG_SIDE; }
+    else        { w = Math.round(w * MAX_LONG_SIDE / h); h = MAX_LONG_SIDE; }
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, w, h);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (!blob) return reject(new Error('이미지 변환 실패'));
+      resolve({ blob, width: w, height: h });
+    }, 'image/jpeg', JPEG_QUALITY);
+  });
+}
+
+async function onSubmit(e) {
+  e.preventDefault();
+  const err = $('mktFormError');
+  err.textContent = '';
+  const form = e.target;
+  const submit = $('mktFormSubmit');
+  submit.disabled = true; submit.textContent = '처리 중…';
+  try {
+    if (!STATE.formPhotos.length) throw new Error('사진을 1장 이상 올려주세요.');
+    const fd = new FormData(form);
+    const title       = String(fd.get('title') || '').trim();
+    const price       = String(fd.get('price') || '').trim();
+    const category    = String(fd.get('category') || '').trim();
+    const description = String(fd.get('description') || '').trim() || null;
+    const location    = String(fd.get('location') || '').trim() || null;
+    const contact     = String(fd.get('contact') || '').trim();
+    if (!title || !price || !category || !contact) throw new Error('필수 항목을 모두 입력해주세요.');
+
+    // 사진 업로드 — 신규 추가된 것만
+    const user = await db().auth.getUser();
+    if (!user) throw new Error('로그인이 만료되었어요.');
+    const finalPaths = [];
+    const uploadedNew = [];
+    for (const p of STATE.formPhotos) {
+      if (p.existingPath) { finalPaths.push(p.existingPath); continue; }
+      const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
+      const { error: upErr } = await db().market.uploadPhoto(path, p.blob);
+      if (upErr) {
+        // 실패 시 이번 세션에서 올린 것들 정리
+        if (uploadedNew.length) await db().market.removePhotos(uploadedNew);
+        throw new Error('사진 업로드 실패: ' + upErr.message);
+      }
+      finalPaths.push(path);
+      uploadedNew.push(path);
+    }
+
+    const record = { title, price, category, description, location, contact, storage_paths: finalPaths };
+
+    if (STATE.editId) {
+      // 수정: 제거된 사진 (formPhotos 에서 빠진 existingPath) 들 storage 정리
+      const existing = STATE.rows.find(r => r.id === STATE.editId);
+      const droppedPaths = (existing?.storage_paths || []).filter(p => !finalPaths.includes(p));
+      const { error } = await db().market.updateMine(STATE.editId, record);
+      if (error) throw new Error('수정 실패: ' + error.message);
+      if (droppedPaths.length) await db().market.removePhotos(droppedPaths);
+    } else {
+      const { error } = await db().market.create(record);
+      if (error) {
+        if (uploadedNew.length) await db().market.removePhotos(uploadedNew);
+        throw new Error('등록 실패: ' + error.message);
+      }
+    }
+
+    closeForm();
+    await loadList();
+  } catch (e) {
+    err.textContent = e.message || '오류가 발생했어요.';
+    submit.disabled = false;
+    submit.textContent = STATE.editId ? '저장' : '올리기';
+  }
+}
+
+// ═════════════════════════════════════════
+// 이벤트 바인딩
+// ═════════════════════════════════════════
+$('marketNewBtn').addEventListener('click', () => openForm());
+$('marketSearch').addEventListener('input', (e) => {
+  STATE.search = e.target.value;
+  renderGrid();
+});
+$('mktDetailModal').addEventListener('click', (e) => {
+  if (e.target === $('mktDetailModal')) closeDetail();
+});
+$('mktFormModal').addEventListener('click', (e) => {
+  if (e.target === $('mktFormModal')) closeForm();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if ($('mktDetailModal').classList.contains('open')) closeDetail();
+  else if ($('mktFormModal').classList.contains('open')) closeForm();
+});
+
+(async function main() {
+  for (let i = 0; i < 50; i++) {
+    if (db() && db().isReady()) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  if (!db() || !db().isReady()) {
+    $('marketGrid').innerHTML = '<div class="market-empty">DB 연결 실패. 새로고침해주세요.</div>';
+    return;
+  }
+  const session = await db().auth.getSession();
+  STATE.user = session?.user || null;
+  await loadList();
+
+  // URL 파라미터로 진입 — ?edit=id 면 본인 매물 수정 폼, #new 면 신규 폼
+  try {
+    const params = new URLSearchParams(location.search);
+    const editId = params.get('edit');
+    if (editId) {
+      const row = await db().market.getOne(editId);
+      if (row && row.user_id === STATE.user?.id) {
+        openForm(row);
+      }
+    } else if (location.hash === '#new') {
+      openForm();
+    }
+  } catch (_) {}
+})();
+</script>
+
+</body>
+</html>
