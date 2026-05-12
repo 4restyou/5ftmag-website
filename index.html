@@ -522,9 +522,18 @@
         }
 
         // 24 = 2컬럼 × 12행. 한 롤(36 frames)의 2/3.
-        // editorial / reader 구분 없이 통합 풀에서 완전 랜덤 셔플.
+        // editorial(5ft.mag 작가) 사진은 풀이 커도 노출 비율을 2% 로 제한 — 메인 Photo 는
+        // 독자 사진 중심으로 보이게. 나머지 자리는 reader 풀에서 채움.
         const PHOTO_COUNT = 24;
-        const selected = shuffleSeeded(allPhotos).slice(0, PHOTO_COUNT);
+        const EDITORIAL_RATIO = 0.02;
+        const editorialPool = allPhotos.filter(p => p.source === 'editorial');
+        const readerPool    = allPhotos.filter(p => p.source !== 'editorial');
+        // 24 × 0.02 = 0.48 → 정수 부분(0) + 소수 부분 확률(0.48)로 0 또는 1장
+        const expectedEditorial = PHOTO_COUNT * EDITORIAL_RATIO;
+        const editorialN = Math.floor(expectedEditorial) + (rng() < (expectedEditorial % 1) ? 1 : 0);
+        const editorialPick = shuffleSeeded(editorialPool).slice(0, Math.min(editorialN, editorialPool.length));
+        const readerPick    = shuffleSeeded(readerPool).slice(0, PHOTO_COUNT - editorialPick.length);
+        const selected = shuffleSeeded([...editorialPick, ...readerPick]);
 
         if (selected.length === 0) {
           photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">첫 번째 사진을 기다리는 중입니다.</div>';
