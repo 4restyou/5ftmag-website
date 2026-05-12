@@ -166,6 +166,14 @@
   let currentPage = (Number.isFinite(_urlPage) && _urlPage > 0) ? _urlPage : 1;
   let allStories = []; // 전체 글 데이터 캐시
 
+  // XSS 가드: 동적 삽입 escape
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => (
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+    ));
+  }
+  const escapeAttr = escapeHtml;
+
   // 날짜 포맷팅 (2024-11-15 → 2024.11.15)
   function formatDate(dateStr) {
     return dateStr.replace(/-/g, '.');
@@ -182,29 +190,29 @@
     const link = story.page || '#';
     // Vol.XX가 있으면 매거진 호 배지, 없으면 카테고리 라벨로 자동 폴백
     const badgeLabel = story.issue || story.categoryLabel || (story.category || '').toUpperCase();
-    const issueBadge = badgeLabel ? `<span class="article-badge">${badgeLabel}</span>` : '';
+    const issueBadge = badgeLabel ? `<span class="article-badge">${escapeHtml(badgeLabel)}</span>` : '';
 
     // 썸네일 없으면 타이포그래피 카드로
     const webpThumb = story.thumbnail ? story.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
     const imgBlock = story.thumbnail
       ? `<div class="article-img">
-           <img src="${webpThumb}" data-fallback="${story.thumbnail}" loading="lazy" alt="${story.title}"
+           <img src="${escapeAttr(webpThumb)}" data-fallback="${escapeAttr(story.thumbnail)}" loading="lazy" alt="${escapeAttr(story.title)}"
                 onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />
            ${issueBadge}
          </div>`
       : `<div class="article-img text-only">
-           <span class="text-card-title">${story.title}</span>
-           <span class="text-card-mark">${(story.categoryLabel || story.category).toUpperCase()}</span>
+           <span class="text-card-title">${escapeHtml(story.title)}</span>
+           <span class="text-card-mark">${escapeHtml((story.categoryLabel || story.category).toUpperCase())}</span>
            ${issueBadge}
          </div>`;
 
     return `
-      <a href="${link}" class="article-card" data-category="${story.category}" data-issue="${story.issue || ''}">
+      <a href="${escapeAttr(link)}" class="article-card" data-category="${escapeAttr(story.category)}" data-issue="${escapeAttr(story.issue || '')}">
         ${imgBlock}
-        <span class="article-category">${categoryLabel(story)}</span>
-        <h2 class="article-title">${story.title}</h2>
-        <p class="article-excerpt">${story.excerpt}</p>
-        <span class="article-meta">${formatDate(story.date)}</span>
+        <span class="article-category">${escapeHtml(categoryLabel(story))}</span>
+        <h2 class="article-title">${escapeHtml(story.title)}</h2>
+        <p class="article-excerpt">${escapeHtml(story.excerpt)}</p>
+        <span class="article-meta">${escapeHtml(formatDate(story.date))}</span>
       </a>
     `;
   }
@@ -275,7 +283,7 @@
       });
     }
 
-    // 결과 카운트 표시
+    // 결과 카운트 표시 (textContent 사용 — XSS 안전)
     const countEl = document.getElementById('searchResultsCount');
     if (currentSearchQuery) {
       countEl.textContent = `"${currentSearchQuery}" 검색 결과: ${result.length}개`;

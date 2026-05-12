@@ -6,13 +6,20 @@
   NODE_VERSION = "20"
 
 # 기본 보안 헤더 — 정적 사이트 + Supabase 댓글/투고 폼 기준
+# NOTE: script-src 의 'unsafe-inline' 은 각 페이지에 인라인 <script> 블록이 다수 있어
+#       당장 제거하기 어려움. 후속 작업으로 인라인 → js/ 외부 파일 분리 + nonce 도입 필요.
+#       그동안 동적 innerHTML 삽입은 모두 escapeHtml/escapeAttr 로 가드함 (XSS 1차 차단).
 [[headers]]
   for = "/*"
   [headers.values]
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://pucpqsfwqouqohwsvmnd.supabase.co wss://pucpqsfwqouqohwsvmnd.supabase.co; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; worker-src 'self' blob:; upgrade-insecure-requests"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=()"
+    Cross-Origin-Opener-Policy = "same-origin-allow-popups"
+    Cross-Origin-Resource-Policy = "same-site"
 
 # 빌드 후 캐시 헤더 — 정적 자산 장기 캐시
 [[headers]]

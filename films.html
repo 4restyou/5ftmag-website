@@ -233,7 +233,7 @@
       // Library 위치: 구독자 Reader's Roll 강조 (featured 필름도 동일 표현)
       const readerCount = 0; // Supabase에서 동적으로 채워질 자리. 현재는 0.
       countLabel = `${readerCount} / ${ROLL_LIMIT}`;
-      cta = readerCount === 0 ? '첫 자리 채우기 →' : '자리 채우기 →';
+      cta = readerCount === 0 ? '첫 컷 채우기 →' : '컷 채우기 →';
     }
     const tierClass = isLibrary ? ' film-card-library' : '';
 
@@ -428,7 +428,7 @@
       const ctaEl = card.querySelector('.film-cta');
       const cappedCount = Math.min(count, ROLL_LIMIT);
       if (countEl) countEl.textContent = `${cappedCount} / ${ROLL_LIMIT}`;
-      if (ctaEl) ctaEl.textContent = '자리 채우기 →';
+      if (ctaEl) ctaEl.textContent = '컷 채우기 →';
     }
   }
 
@@ -456,24 +456,24 @@
         const webpSrc = photo.src ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
         const pictureBlock = webpSrc
           ? `<picture>
-               <source srcset="${webpSrc}" type="image/webp">
-               <img src="${imgSrc}" loading="lazy" alt="${photo.author || ''}" />
+               <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
+               <img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(photo.author || '')}" />
              </picture>`
-          : `<img src="${imgSrc}" loading="lazy" alt="${photo.author || ''}" />`;
+          : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(photo.author || '')}" />`;
         photosHTML += `
           <div>
             <div class="modal-photo" data-photo-index="${idx}">
               ${pictureBlock}
             </div>
-            <p class="modal-photo-caption">${photo.author || ''}</p>
+            <p class="modal-photo-caption">${escapeAttr(photo.author || '')}</p>
           </div>
         `;
       });
       editorialBlock = `
         <div class="modal-section">
           <div class="modal-section-head">
-            <span class="modal-section-tag">${data.issue || 'ISSUE'} · EDITORIAL</span>
-            <span class="modal-section-meta">사진가 ${photographers.join(', ')}</span>
+            <span class="modal-section-tag">${escapeAttr(data.issue || 'ISSUE')} · EDITORIAL</span>
+            <span class="modal-section-meta">사진가 ${escapeAttr(photographers.join(', '))}</span>
           </div>
           <div class="modal-gallery">
             ${photosHTML}
@@ -505,32 +505,32 @@
           ${slotsHTML}
         </div>
         <div class="reader-roll-actions">
-          <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${data.displayName || data.name}">
-            ${isFeatured ? '자리 채우기' : '첫 자리 채우기'}
+          <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
+            ${isFeatured ? '컷 채우기' : '첫 컷 채우기'}
           </button>
         </div>
       </div>`;
 
     // ── 3) 모달 헤더 (썸네일 상태 별 분기) ──
     const photographerLine = photographers.length
-      ? `<span>Photographers <strong>${photographers.join(', ')}</strong></span>`
+      ? `<span>Photographers <strong>${escapeAttr(photographers.join(', '))}</strong></span>`
       : '';
 
     modalContent.innerHTML = `
       <div class="modal-header">
-        <span class="modal-brand">${data.brand}</span>
-        <h2 class="modal-name">${data.displayName || data.name}</h2>
-        <p class="modal-desc">${data.desc || ''}</p>
+        <span class="modal-brand">${escapeAttr(data.brand || '')}</span>
+        <h2 class="modal-name">${escapeAttr(data.displayName || data.name || '')}</h2>
+        <p class="modal-desc">${escapeAttr(data.desc || '')}</p>
         <div class="modal-meta">
-          <span>ISO <strong>${data.iso}</strong></span>
-          <span>Type <strong>${data.type}</strong></span>
-          <span>Format <strong>${data.format}</strong></span>
+          <span>ISO <strong>${escapeAttr(data.iso || '')}</strong></span>
+          <span>Type <strong>${escapeAttr(data.type || '')}</strong></span>
+          <span>Format <strong>${escapeAttr(data.format || '')}</strong></span>
           ${photographerLine}
         </div>
       </div>
       ${editorialBlock}
       ${readerBlock}
-      <section class="modal-comments" data-comments data-page-id="films/${filmKey}"></section>
+      <section class="modal-comments" data-comments data-page-id="films/${escapeAttr(filmKey)}"></section>
     `;
 
     modalOverlay.classList.add('open');
@@ -941,7 +941,7 @@
 </script>
 <script src="./js/site-common.js?v=20260511-linkfix"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/supabase-config.js"></script>
+<script src="./js/db-client.js"></script>
 <script src="./js/comments.js"></script>
 <script src="./js/reader-submissions.js"></script>
 </body>

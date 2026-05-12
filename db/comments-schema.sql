@@ -104,6 +104,16 @@ LEFT JOIN (
 ) l ON l.comment_id = c.id;
 
 -- ════════════════════════════════════════════════════════════
+-- 공개 프로필 뷰 — 클라이언트가 base 테이블 대신 이 view 로 조회
+-- 메타(created_at/updated_at) 가리고 표시용 컬럼만 노출
+-- ════════════════════════════════════════════════════════════
+CREATE OR REPLACE VIEW public.profiles_public AS
+SELECT user_id, display_name, avatar_url, is_editor
+FROM public.profiles;
+
+GRANT SELECT ON public.profiles_public TO anon, authenticated;
+
+-- ════════════════════════════════════════════════════════════
 -- Row Level Security (RLS)
 -- ════════════════════════════════════════════════════════════
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -159,6 +169,7 @@ CREATE POLICY "likes_delete_own"
 
 -- 뷰에 대한 권한 (RLS는 base 테이블 통해 적용됨)
 GRANT SELECT ON public.comments_with_meta TO anon, authenticated;
+-- profiles_public 권한은 view 정의 직후에 부여됨 (위 참조)
 
 -- ════════════════════════════════════════════════════════════
 -- Realtime 활성화 (새 댓글 즉시 표시)

@@ -376,7 +376,7 @@
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/supabase-config.js"></script>
+<script src="../js/db-client.js"></script>
 <script src="../js/reader-submissions.js"></script>
 <script>
 'use strict';
@@ -391,13 +391,12 @@ const STATE = {
   page: 1,
 };
 
-const STORAGE_BUCKET = 'reader-submissions';
 const PAGE_SIZE = 10;
 
 function $(id) { return document.getElementById(id); }
+function db() { return window.MagDB; }
 function publicUrl(path) {
-  const base = window.SUPABASE_CONFIG?.url || '';
-  return `${base}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+  return (db()?.storageBaseUrl || '') + path;
 }
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -408,30 +407,23 @@ function fmtDate(iso) {
 }
 
 async function checkAccess() {
-  if (!window.sb) {
+  if (!db() || !db().isReady()) {
     document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
     return false;
   }
-  const { data: { session } } = await window.sb.auth.getSession();
-  if (!session) {
-    showGate();
-    return false;
-  }
+  const session = await db().auth.getSession();
+  if (!session) { showGate(); return false; }
   STATE.user = session.user;
-  // 편집부 권한 확인
-  const { data: profile, error } = await window.sb
-    .from('profiles')
-    .select('display_name, is_editor')
-    .eq('user_id', session.user.id)
-    .maybeSingle();
-  if (error || !profile?.is_editor) {
-    showGate('이 계정은 편집부 권한이 없어요.');
+
+  const profile = await db().profiles.getMine();
+  if (!profile?.is_editor) {
+    showGate('접근 권한이 없어요.');
     return false;
   }
   STATE.isEditor = true;
   $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
   $('logout').addEventListener('click', async () => {
-    await window.sb.auth.signOut();
+    await db().auth.signOut();
     location.reload();
   });
   return true;
@@ -445,22 +437,16 @@ function showGate(msg) {
     $('gateLogin').style.display = 'none';
   }
   $('gateLogin').addEventListener('click', async () => {
-    await window.sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.href }
-    });
+    await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
   });
 }
 
 async function loadCounts() {
   for (const status of ['pending', 'approved', 'rejected']) {
-    const { count } = await window.sb
-      .from('reader_submissions')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', status);
-    STATE.counts[status] = count || 0;
+    const n = await db().review.count(status);
+    STATE.counts[status] = n;
     const el = $(`cnt-${status}`);
-    if (el) el.textContent = count || 0;
+    if (el) el.textContent = n;
   }
 }
 
@@ -476,12 +462,7 @@ async function loadList() {
   const from = (STATE.page - 1) * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
 
-  const { data, error } = await window.sb
-    .from('reader_submissions')
-    .select('*')
-    .eq('status', STATE.status)
-    .order('created_at', { ascending: STATE.status === 'pending' })
-    .range(from, to);
+  const { data, error } = await db().review.list(STATE.status, from, to);
 
   if (error) {
     $('list').innerHTML = `<div class="empty-state">불러오기 실패: ${escapeHtml(error.message)}</div>`;
@@ -648,10 +629,7 @@ function bindCardActions() {
           const canonical = btn.dataset.canonical || '';
           if (!canonical) return;
           btn.disabled = true;
-          const { error } = await window.sb
-            .from('reader_submissions')
-            .update({ film: canonical })
-            .eq('id', id);
+          const { error } = await db().review.patch(id, { film: canonical });
           if (error) { alert('필름 정정 실패: ' + error.message); btn.disabled = false; return; }
           await loadList();
         } else if (action === 'edit-film') {
@@ -662,39 +640,33 @@ function bindCardActions() {
           if (!trimmed) { alert('필름 표기는 비워둘 수 없습니다.'); return; }
           if (trimmed === current) return;
           btn.disabled = true;
-          const { error } = await window.sb
-            .from('reader_submissions')
-            .update({ film: trimmed })
-            .eq('id', id);
+          const { error } = await db().review.patch(id, { film: trimmed });
           if (error) { alert('수정 실패: ' + error.message); btn.disabled = false; return; }
           await loadList();
         } else if (action === 'approve') {
           btn.disabled = true; btn.textContent = '처리 중…';
-          const { error } = await window.sb
-            .from('reader_submissions')
-            .update({ status: 'approved', rejection_reason: null, reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id })
-            .eq('id', id);
+          const { error } = await db().review.patch(id, {
+            status: 'approved', rejection_reason: null,
+            reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id,
+          });
           if (error) { alert('승인 실패: ' + error.message); btn.disabled = false; btn.textContent = '승인'; return; }
           await Promise.all([loadCounts(), loadList()]);
         } else if (action === 'reject') {
           const reason = prompt('반려 사유를 입력하세요 (선택, 비워둬도 됩니다):', '');
           if (reason === null) return;
           btn.disabled = true; btn.textContent = '처리 중…';
-          const { error } = await window.sb
-            .from('reader_submissions')
-            .update({ status: 'rejected', rejection_reason: reason || null, reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id })
-            .eq('id', id);
+          const { error } = await db().review.patch(id, {
+            status: 'rejected', rejection_reason: reason || null,
+            reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id,
+          });
           if (error) { alert('반려 실패: ' + error.message); btn.disabled = false; btn.textContent = '반려'; return; }
           await Promise.all([loadCounts(), loadList()]);
         } else if (action === 'delete') {
           if (!confirm('완전히 삭제할까요? Storage의 파일과 DB의 기록 모두 지워집니다.')) return;
           btn.disabled = true; btn.textContent = '삭제 중…';
-          // DB 먼저, Storage는 best-effort
-          const { error: dbErr } = await window.sb.from('reader_submissions').delete().eq('id', id);
+          const { error: dbErr } = await db().review.remove(id);
           if (dbErr) { alert('DB 삭제 실패: ' + dbErr.message); btn.disabled = false; btn.textContent = '완전 삭제'; return; }
-          if (path) {
-            await window.sb.storage.from(STORAGE_BUCKET).remove([path]).catch(() => {});
-          }
+          if (path) await db().submissions.removePhoto(path);
           await Promise.all([loadCounts(), loadList()]);
         }
       });
@@ -722,18 +694,14 @@ async function loadFilms() {
     const r = await fetch('../data/films.json', { cache: 'no-cache' });
     if (!r.ok) return;
     STATE.films = await r.json();
-  } catch (e) {
-    console.warn('films.json 로드 실패:', e);
-  }
+  } catch (_) {}
 }
 
 (async function main() {
-  // Supabase client 준비 대기 (스크립트 비동기 로드 대응)
   for (let i = 0; i < 50; i++) {
-    if (window.sb) break;
+    if (db() && db().isReady()) break;
     await new Promise(r => setTimeout(r, 50));
   }
-  // findFilmMatch가 노출될 때까지 짧게 대기 (reader-submissions.js 로드 타이밍)
   for (let i = 0; i < 20; i++) {
     if (typeof window.findFilmMatch === 'function') break;
     await new Promise(r => setTimeout(r, 25));

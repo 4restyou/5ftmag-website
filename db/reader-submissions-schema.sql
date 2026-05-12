@@ -14,10 +14,11 @@ CREATE TABLE IF NOT EXISTS public.reader_submissions (
 
   -- 제출자 정보 (자동 채움 + 수정 가능)
   -- submitter_name: 표시용 이름 (인스타그램 없는 사용자 대응). 둘 중 하나는 필수 (JS 검증)
-  submitter_name TEXT,
-  instagram     TEXT,
-  film          TEXT,
-  camera        TEXT,
+  -- 길이 CHECK 는 클라이언트 maxlength 와 동일 — DB 레벨에서도 한 번 더 가드 (RLS bypass / API 직접 호출 대비)
+  submitter_name TEXT CHECK (submitter_name IS NULL OR char_length(submitter_name) <= 60),
+  instagram     TEXT CHECK (instagram IS NULL OR char_length(instagram) <= 80),
+  film          TEXT CHECK (film IS NULL OR char_length(film) <= 120),
+  camera        TEXT CHECK (camera IS NULL OR char_length(camera) <= 80),
   caption       TEXT CHECK (caption IS NULL OR char_length(caption) <= 200),
 
   -- 월간 테마 응모 여부 (예: '2026-05' / NULL이면 일반 제출)
@@ -26,7 +27,7 @@ CREATE TABLE IF NOT EXISTS public.reader_submissions (
   -- 워크플로우
   status        TEXT NOT NULL DEFAULT 'pending'
                 CHECK (status IN ('pending', 'approved', 'rejected')),
-  rejection_reason TEXT,
+  rejection_reason TEXT CHECK (rejection_reason IS NULL OR char_length(rejection_reason) <= 500),
 
   -- 동의 (게재 동의 + 저작권 본인 확인)
   consent_publish BOOLEAN NOT NULL DEFAULT FALSE,
@@ -168,12 +169,19 @@ ON CONFLICT (id) DO UPDATE
       allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- 업로드 정책: 인증 사용자가 자기 user_id 폴더에만 업로드
+-- 확장자 화이트리스트도 RLS 단에서 추가 가드 (bucket allowed_mime_types 와 이중 가드)
 DROP POLICY IF EXISTS "user upload to own folder" ON storage.objects;
 CREATE POLICY "user upload to own folder" ON storage.objects
   FOR INSERT TO authenticated
   WITH CHECK (
     bucket_id = 'reader-submissions'
     AND (storage.foldername(name))[1] = auth.uid()::text
+    AND (
+      lower(name) LIKE '%.jpg'
+      OR lower(name) LIKE '%.jpeg'
+      OR lower(name) LIKE '%.png'
+      OR lower(name) LIKE '%.webp'
+    )
   );
 
 -- 본인은 자기 폴더 객체 DELETE 가능 (제출 취소 시)
@@ -202,3 +210,23 @@ DROP POLICY IF EXISTS "public read submissions" ON storage.objects;
 CREATE POLICY "public read submissions" ON storage.objects
   FOR SELECT TO anon, authenticated
   USING (bucket_id = 'reader-submissions');
+
+-- ════════════════════════════════════════════════════════════
+-- 기존 환경용 마이그레이션 (이미 schema 적용된 프로젝트)
+-- Supabase SQL Editor 에서 따로 한 번만 실행:
+-- ════════════════════════════════════════════════════════════
+-- ALTER TABLE public.reader_submissions
+--   ADD CONSTRAINT reader_submissions_submitter_name_len
+--     CHECK (submitter_name IS NULL OR char_length(submitter_name) <= 60);
+-- ALTER TABLE public.reader_submissions
+--   ADD CONSTRAINT reader_submissions_instagram_len
+--     CHECK (instagram IS NULL OR char_length(instagram) <= 80);
+-- ALTER TABLE public.reader_submissions
+--   ADD CONSTRAINT reader_submissions_film_len
+--     CHECK (film IS NULL OR char_length(film) <= 120);
+-- ALTER TABLE public.reader_submissions
+--   ADD CONSTRAINT reader_submissions_camera_len
+--     CHECK (camera IS NULL OR char_length(camera) <= 80);
+-- ALTER TABLE public.reader_submissions
+--   ADD CONSTRAINT reader_submissions_rejection_len
+--     CHECK (rejection_reason IS NULL OR char_length(rejection_reason) <= 500);
