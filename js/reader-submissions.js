@@ -40,23 +40,6 @@
     return _filmsPromise;
   }
 
-  // films.json → autocomplete 옵션 목록 (displayName 우선, 별칭은 보조)
-  function buildFilmOptions(films) {
-    const out = [];
-    const seen = new Set();
-    for (const slug of Object.keys(films || {})) {
-      const f = films[slug];
-      const label = f.displayName || f.name;
-      if (label && !seen.has(label)) {
-        seen.add(label);
-        out.push(label);
-      }
-    }
-    // 알파벳/가나다 정렬 — 코닥, 시네스틸, 일포드, 후지 순으로 자연스럽게 묶이도록 brand 우선
-    out.sort((a, b) => a.localeCompare(b, 'ko'));
-    return out;
-  }
-
   // ════════════════════════════════════════════════════════════
   // 필름명 정규화 + 매칭 (films.html, admin과 공유)
   //  - 정규화: 소문자 + 공백/하이픈/언더스코어/괄호 등 제거 (Hangul은 그대로)
@@ -237,7 +220,7 @@
       </button>`;
   }
 
-  function renderSubmissionForm(theme, prefillFilm, filmOptions) {
+  function renderSubmissionForm(theme, prefillFilm, films) {
     const meta = (() => {
       try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
       catch { return {}; }
@@ -255,13 +238,58 @@
         </label>
       </div>
     ` : '';
-    const filmValue = prefillFilm || meta.film || '';
-    const baseHint = prefillFilm
-      ? `이 사진은 <strong>${escapeHtml(prefillFilm)}</strong> Reader's Roll에 자리를 채웁니다. 다른 필름이라면 직접 수정해 주세요.`
-      : `목록에서 선택하거나 직접 입력해 주세요. 비슷한 표기는 편집부가 정리합니다.`;
-    const datalistHtml = (filmOptions || []).length
-      ? `<datalist id="rs-film-list">${filmOptions.map(o => `<option value="${escapeAttr(o)}"></option>`).join('')}</datalist>`
-      : '';
+
+    // 필름 카탈로그 → 브랜드별 그룹화 (알파벳 정렬)
+    const filmsArr = Object.values(films || {});
+    const byBrand = {};
+    for (const f of filmsArr) {
+      const b = f.brand || 'OTHER';
+      if (!byBrand[b]) byBrand[b] = [];
+      byBrand[b].push(f);
+    }
+    for (const b of Object.keys(byBrand)) {
+      byBrand[b].sort((x, y) => (x.displayName || x.name || '').localeCompare(y.displayName || y.name || '', 'en', { numeric: true }));
+    }
+    const brandKeys = Object.keys(byBrand).sort((a, b) => a.localeCompare(b));
+
+    // prefillFilm 이 카탈로그에 있는지 확인 (있으면 picker 선택 상태로 시작)
+    let initialSelectedName = '';
+    let initialRequestMode = false;
+    let initialRequestText = '';
+    if (prefillFilm) {
+      const match = findFilmMatch(prefillFilm, films);
+      if (match && match.type === 'exact') {
+        initialSelectedName = match.canonical;
+      } else {
+        initialRequestMode = true;
+        initialRequestText = prefillFilm;
+      }
+    } else if (meta.film) {
+      const match = findFilmMatch(meta.film, films);
+      if (match && match.type === 'exact') {
+        initialSelectedName = match.canonical;
+      }
+    }
+
+    const groupsHtml = brandKeys.map(brand => `
+      <div class="rs-film-group">
+        <div class="rs-film-group-label">${escapeHtml(brand)}</div>
+        ${byBrand[brand].map(f => {
+          const name = f.displayName || f.name;
+          const searchTokens = [
+            f.displayName, f.name, brand, f.iso,
+            ...(f.aliases || [])
+          ].filter(Boolean).join(' ').toLowerCase();
+          return `
+            <button type="button" class="rs-film-option${name === initialSelectedName ? ' is-selected' : ''}"
+                    data-film-name="${escapeAttr(name)}"
+                    data-search="${escapeAttr(searchTokens)}">
+              <span class="rs-film-option-name">${escapeHtml(name)}</span>
+              <span class="rs-film-option-iso">ISO ${escapeHtml(f.iso)}</span>
+            </button>`;
+        }).join('')}
+      </div>`).join('');
+
     return `
       <h2 id="rs-modal-title" class="rs-title">사진 올리기</h2>
       <p class="rs-desc">편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).</p>
@@ -277,13 +305,35 @@
           <span class="rs-label">인스타그램 ID <em>*</em></span>
           <input type="text" name="instagram" placeholder="@your_id" value="${escapeAttr(meta.instagram || '')}" required maxlength="60" />
         </label>
-        <label class="rs-field">
+
+        <div class="rs-field">
           <span class="rs-label">필름 <em>*</em></span>
-          <input type="text" name="film" id="rs-film-input" list="rs-film-list" placeholder="예: Kodak Portra 400" value="${escapeAttr(filmValue)}" required maxlength="60" autocomplete="off" />
-          ${datalistHtml}
-          <span class="rs-hint">${baseHint}</span>
-          <div class="rs-film-hint" id="rs-film-hint" hidden aria-live="polite"></div>
-        </label>
+          <div class="rs-film-picker" id="rs-film-picker" data-mode="${initialRequestMode ? 'request' : 'catalog'}">
+            <!-- 카탈로그 모드: picker 버튼 + 드롭다운 -->
+            <button type="button" class="rs-film-trigger" id="rs-film-trigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="rs-film-selected" id="rs-film-selected">${initialSelectedName ? escapeHtml(initialSelectedName) : '필름을 선택해 주세요'}</span>
+              <span class="rs-film-caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="rs-film-dropdown" id="rs-film-dropdown" hidden>
+              <input type="text" class="rs-film-search" id="rs-film-search" placeholder="🔍 브랜드 · 필름명 · ISO 검색" autocomplete="off" />
+              <div class="rs-film-list" id="rs-film-list" role="listbox">
+                ${groupsHtml}
+              </div>
+              <button type="button" class="rs-film-request-toggle" id="rs-film-request-toggle">
+                목록에 없어요 — 필름 신청하기 →
+              </button>
+            </div>
+            <!-- 신청 모드: 자유 텍스트 입력 -->
+            <div class="rs-film-request" id="rs-film-request">
+              <input type="text" id="rs-film-request-input" placeholder="예: Foma Retropan 320" maxlength="80" value="${escapeAttr(initialRequestText)}" />
+              <span class="rs-hint">목록에 없는 필름. 편집부 검토 후 라이브러리에 추가될 수 있어요.</span>
+              <button type="button" class="rs-film-request-cancel" id="rs-film-request-cancel">← 목록에서 선택하기</button>
+            </div>
+            <!-- 실제 form value -->
+            <input type="hidden" name="film" id="rs-film-input" value="${escapeAttr(initialSelectedName || initialRequestText)}" required />
+          </div>
+        </div>
+
         <label class="rs-field">
           <span class="rs-label">카메라 <small>(선택)</small></span>
           <input type="text" name="camera" placeholder="예: Pentax 17" value="${escapeAttr(meta.camera || '')}" maxlength="60" />
@@ -369,18 +419,8 @@
       } catch {}
     }
     const [theme, films] = await Promise.all([getCurrentTheme(), getFilms()]);
-    const filmOptions = buildFilmOptions(films);
-    openModal(renderSubmissionForm(theme, savedPrefill, filmOptions));
+    openModal(renderSubmissionForm(theme, savedPrefill, films));
     bindFormHandlers(films);
-
-    // 방어: prefill이 있을 때 HTML value가 어떤 이유로든 미적용된 경우 JS로 강제 주입
-    if (savedPrefill) {
-      const input = document.getElementById('rs-film-input');
-      if (input && input.value !== savedPrefill) {
-        input.value = savedPrefill;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-    }
   }
 
   async function handleLogin() {
@@ -411,60 +451,92 @@
       }
     });
 
-    // 필름 입력 — 실시간 fuzzy match 힌트
-    const filmInput = document.getElementById('rs-film-input');
-    const filmHint = document.getElementById('rs-film-hint');
-    let hintDebounce = null;
-    function showFilmHint() {
-      if (!filmInput || !filmHint || !films) return;
-      const v = filmInput.value.trim();
-      if (v.length < 2) {
-        filmHint.hidden = true;
-        filmHint.innerHTML = '';
-        return;
-      }
-      const match = findFilmMatch(v, films);
-      if (!match) {
-        filmHint.hidden = false;
-        filmHint.innerHTML = `<span class="rs-film-hint-new">목록에 없는 필름이에요. 편집부가 확인 후 정리합니다.</span>`;
-        return;
-      }
-      if (match.type === 'exact') {
-        // 정확히 일치 — 보조 표시만 (혼란 줄이려고 짧게)
-        if (normalizeFilmName(v) === normalizeFilmName(match.canonical)) {
-          // 사용자가 이미 정식 표기 그대로 적었음 → 힌트 숨김
-          filmHint.hidden = true;
-          filmHint.innerHTML = '';
-        } else {
-          filmHint.hidden = false;
-          filmHint.innerHTML = `
-            <span class="rs-film-hint-match">
-              정식 표기: <strong>${escapeHtml(match.canonical)}</strong>
-              <button type="button" class="rs-film-hint-apply" data-canonical="${escapeAttr(match.canonical)}">이 이름으로 정정</button>
-            </span>`;
-        }
-        return;
-      }
-      // fuzzy
-      filmHint.hidden = false;
-      filmHint.innerHTML = `
-        <span class="rs-film-hint-suggest">
-          혹시 이 필름인가요? <strong>${escapeHtml(match.canonical)}</strong>
-          <button type="button" class="rs-film-hint-apply" data-canonical="${escapeAttr(match.canonical)}">맞아요, 이걸로</button>
-        </span>`;
+    // 필름 picker — 카탈로그 모드 / 신청 모드
+    const picker         = document.getElementById('rs-film-picker');
+    const filmInput      = document.getElementById('rs-film-input'); // hidden, 실제 form value
+    const trigger        = document.getElementById('rs-film-trigger');
+    const selectedLabel  = document.getElementById('rs-film-selected');
+    const dropdown       = document.getElementById('rs-film-dropdown');
+    const search         = document.getElementById('rs-film-search');
+    const optionList     = document.getElementById('rs-film-list');
+    const reqToggle      = document.getElementById('rs-film-request-toggle');
+    const reqInput       = document.getElementById('rs-film-request-input');
+    const reqCancel      = document.getElementById('rs-film-request-cancel');
+
+    function setMode(mode) {
+      if (picker) picker.dataset.mode = mode; // 'catalog' | 'request'
     }
-    filmInput?.addEventListener('input', () => {
-      clearTimeout(hintDebounce);
-      hintDebounce = setTimeout(showFilmHint, 180);
+
+    function openDropdown() {
+      if (!dropdown || !trigger) return;
+      dropdown.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      // 검색창 포커스 (모바일에서는 자동 키보드 방지 위해 timeout)
+      setTimeout(() => search?.focus(), 50);
+    }
+    function closeDropdown() {
+      if (!dropdown || !trigger) return;
+      dropdown.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+    trigger?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dropdown.hidden) openDropdown(); else closeDropdown();
     });
-    filmHint?.addEventListener('click', (e) => {
-      const btn = e.target.closest('.rs-film-hint-apply');
-      if (!btn || !filmInput) return;
-      filmInput.value = btn.dataset.canonical || filmInput.value;
-      showFilmHint();
+    // 모달 외부(폼 아닌 곳) 클릭 시 닫기
+    document.addEventListener('click', (e) => {
+      if (!picker || dropdown?.hidden) return;
+      if (!picker.contains(e.target)) closeDropdown();
     });
-    // 초기 prefill이 있으면 즉시 힌트 평가
-    showFilmHint();
+
+    // 검색 필터
+    search?.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      const groups = optionList.querySelectorAll('.rs-film-group');
+      groups.forEach(group => {
+        let groupHasMatch = false;
+        group.querySelectorAll('.rs-film-option').forEach(opt => {
+          const tokens = opt.dataset.search || '';
+          const match = !q || tokens.includes(q);
+          opt.hidden = !match;
+          if (match) groupHasMatch = true;
+        });
+        group.hidden = !groupHasMatch;
+      });
+    });
+
+    // 옵션 선택
+    optionList?.addEventListener('click', (e) => {
+      const opt = e.target.closest('.rs-film-option');
+      if (!opt) return;
+      const name = opt.dataset.filmName || '';
+      // 이전 선택 해제
+      optionList.querySelectorAll('.rs-film-option.is-selected').forEach(el => el.classList.remove('is-selected'));
+      opt.classList.add('is-selected');
+      if (selectedLabel) selectedLabel.textContent = name;
+      if (filmInput) filmInput.value = name;
+      setMode('catalog');
+      closeDropdown();
+    });
+
+    // 신청 모드 토글
+    reqToggle?.addEventListener('click', () => {
+      setMode('request');
+      closeDropdown();
+      // 기존 catalog 선택 해제, hidden input 은 reqInput 값으로 동기화
+      optionList?.querySelectorAll('.rs-film-option.is-selected').forEach(el => el.classList.remove('is-selected'));
+      if (selectedLabel) selectedLabel.textContent = '필름을 선택해 주세요';
+      if (filmInput) filmInput.value = reqInput?.value?.trim() || '';
+      setTimeout(() => reqInput?.focus(), 50);
+    });
+    reqInput?.addEventListener('input', () => {
+      if (filmInput) filmInput.value = reqInput.value.trim();
+    });
+    reqCancel?.addEventListener('click', () => {
+      setMode('catalog');
+      if (reqInput) reqInput.value = '';
+      if (filmInput) filmInput.value = '';
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
