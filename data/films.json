@@ -2973,5 +2973,99 @@
     "format": "35mm",
     "photographers": [],
     "photos": []
+  },
+  "fujifilm200": {
+    "slug": "fujifilm200",
+    "tier": "library",
+    "brand": "FUJIFILM",
+    "name": "Fujicolor 200",
+    "displayName": "Fujifilm 200",
+    "aliases": [
+      "Fujifilm 200",
+      "Fujicolor 200",
+      "Fuji 200",
+      "후지필름 200",
+      "후지컬러 200",
+      "후지 200",
+      "fujifilm200",
+      "fujicolor200"
+    ],
+    "desc": "후지의 데일리 컬러 네거티브 200. 단순 박스 디자인으로 재유통되는 라인으로, 부담 없는 콘트라스트와 깨끗한 톤이 특징이에요. 일상 스냅에 가장 보편적으로 권장되는 한 롤입니다.",
+    "iso": "200",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
+  },
+  "fujifilm400": {
+    "slug": "fujifilm400",
+    "tier": "library",
+    "brand": "FUJIFILM",
+    "name": "Fujicolor 400",
+    "displayName": "Fujifilm 400",
+    "aliases": [
+      "Fujifilm 400",
+      "Fujicolor 400",
+      "Fuji 400",
+      "후지필름 400",
+      "후지컬러 400",
+      "후지 400",
+      "fujifilm400",
+      "fujicolor400"
+    ],
+    "desc": "2022년 단순 박스 라인으로 재출시된 후지의 데일리 컬러 네거티브 400. 따스한 톤과 자연스러운 입자, 넓은 라티튜드로 햇볕부터 흐린 날까지 두루 쓸 수 있어요. 후지필름 200/800 과 같은 시리즈입니다.",
+    "iso": "400",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
+  },
+  "fujifilm800": {
+    "slug": "fujifilm800",
+    "tier": "library",
+    "brand": "FUJIFILM",
+    "name": "Fujicolor 800",
+    "displayName": "Fujifilm 800",
+    "aliases": [
+      "Fujifilm 800",
+      "Fujicolor 800",
+      "Fuji 800",
+      "후지필름 800",
+      "후지컬러 800",
+      "후지 800",
+      "fujifilm800",
+      "fujicolor800"
+    ],
+    "desc": "후지의 고감도 컬러 네거티브 800. 후지필름 200/400 시리즈의 형제로 어두운 실내·야경에서 손쉽게 셔터를 끊을 수 있어요. 따스한 톤은 유지하면서도 입자감이 또렷합니다.",
+    "iso": "800",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
+  },
+  "realaace100": {
+    "slug": "realaace100",
+    "tier": "library",
+    "brand": "FUJIFILM",
+    "name": "Reala Ace 100",
+    "displayName": "Fujifilm Reala Ace 100",
+    "aliases": [
+      "Reala Ace",
+      "Reala Ace 100",
+      "Fujifilm Reala Ace",
+      "Fuji Reala Ace",
+      "리얼라 에이스",
+      "리얼라 에이스 100",
+      "리얼라",
+      "리얼라100",
+      "realaace100",
+      "realaace"
+    ],
+    "desc": "2024년 한·일 시장 한정으로 출시된 후지의 새 프로 컬러 네거티브 100. 1세대 Reala 의 4세대 컬러레이어 구조를 잇는 라인으로, 풍부한 색재현과 부드러운 톤·미세 입자가 특징이에요. 인물·정물에 권장되는 귀한 한 롤입니다.",
+    "iso": "100",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
   }
 }
