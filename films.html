@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css">
   <link rel="stylesheet" href="./css/reader-submissions.css">
-  <link rel="stylesheet" href="./css/films.css?v=20260512-relocate">
+  <link rel="stylesheet" href="./css/films.css?v=20260512-libfast">
 </head>
 <body>
 
@@ -81,6 +81,7 @@
   <div class="films-section-head films-section-head-library">
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
+    <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
   </div>
   <div class="library-controls">
     <label class="library-search-label">
@@ -243,8 +244,15 @@
       ...(film.aliases || []), slug
     ].filter(Boolean).join(' ').toLowerCase();
 
+    // 라이브러리 카드는 클릭 자체가 '컷 채우기' 액션 — 모달 거치지 않고
+    // 바로 업로드 모달이 뜨도록 data-action 직접 부여 (reader-submissions.js 위임)
+    const isLibraryCard = context === 'library-grid' && film.tier === 'library';
+    const actionAttr = isLibraryCard
+      ? ` data-action="open-submission" data-prefill-film="${escapeAttr(film.displayName || film.name)}"`
+      : '';
+
     return `
-      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-search="${escapeAttr(searchTokens)}">
+      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-search="${escapeAttr(searchTokens)}"${actionAttr}>
         <div class="film-img">
           ${badgeHtml}
           ${imgHtml}
@@ -365,7 +373,10 @@
     applyLibraryFilter();
 
     // 새로 렌더된 카드들에 클릭 핸들러 연결
+    // 단, data-action="open-submission" 인 라이브러리 카드는 reader-submissions.js
+    // 글로벌 위임이 처리하므로 여기서 별도 모달을 열지 않음
     document.querySelectorAll('.film-card').forEach(card => {
+      if (card.dataset.action === 'open-submission') return;
       card.addEventListener('click', () => openModal(card.dataset.film));
     });
   }

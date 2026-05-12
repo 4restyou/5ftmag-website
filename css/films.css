@@ -629,11 +629,31 @@
 .films-section-head {
   max-width: 720px;
   margin: 0 0 28px;
+  position: relative;
 }
 .films-section-head-library {
   margin-top: 88px;
   padding-top: 36px;
   border-top: 1px solid var(--border);
+}
+.library-mine-link {
+  position: absolute;
+  right: 0;
+  bottom: 4px;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.library-mine-link:hover {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+@media (max-width: 720px) {
+  .library-mine-link { position: static; display: inline-block; margin-top: 8px; }
 }
 .films-section-title {
   font-size: 32px;
