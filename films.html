@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css">
   <link rel="stylesheet" href="./css/reader-submissions.css">
-  <link rel="stylesheet" href="./css/films.css?v=20260512-cta">
+  <link rel="stylesheet" href="./css/films.css?v=20260512-brand">
 </head>
 <body>
 
@@ -91,6 +91,9 @@
       </svg>
       <input type="search" class="library-search" id="librarySearch" placeholder="필름 이름·브랜드·ISO로 검색" autocomplete="off" />
     </label>
+    <select class="library-brand-select" id="libraryBrand" aria-label="브랜드로 필터">
+      <option value="all">브랜드 전체</option>
+    </select>
     <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
   </div>
   <p class="library-empty" id="libraryEmpty" hidden>검색 결과가 없어요.</p>
@@ -253,7 +256,7 @@
       : `<span class="film-cta">${cta}</span>`;
 
     return `
-      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-search="${escapeAttr(searchTokens)}">
+      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-brand="${escapeAttr(film.brand || '')}" data-search="${escapeAttr(searchTokens)}">
         <div class="film-img">
           ${badgeHtml}
           ${imgHtml}
@@ -283,6 +286,7 @@
     cinema: 'Cinema',
   };
   let currentFilter = 'all';
+  let currentBrand  = 'all';
   let currentSearch = '';
 
   function renderLibraryFilterChips(libraryFilms) {
@@ -321,15 +325,37 @@
     let visible = 0;
     filmsGridLibrary.querySelectorAll('.film-card').forEach(card => {
       const cat = card.dataset.filterCategory;
+      const brand = card.dataset.brand || '';
       const tokens = card.dataset.search || '';
-      const matchCat = currentFilter === 'all' || cat === currentFilter;
+      const matchCat    = currentFilter === 'all' || cat === currentFilter;
+      const matchBrand  = currentBrand === 'all' || brand === currentBrand;
       const matchSearch = !q || tokens.includes(q);
-      const show = matchCat && matchSearch;
+      const show = matchCat && matchBrand && matchSearch;
       card.hidden = !show;
       if (show) visible++;
     });
     const emptyEl = document.getElementById('libraryEmpty');
     if (emptyEl) emptyEl.hidden = visible !== 0;
+  }
+
+  // 브랜드 드롭다운 옵션 빌드 (라이브러리 그리드의 모든 카드 대상)
+  function renderLibraryBrandSelect(libraryFilms) {
+    const select = document.getElementById('libraryBrand');
+    if (!select) return;
+    const brands = new Set();
+    for (const [, f] of libraryFilms) if (f.brand) brands.add(f.brand);
+    const sorted = Array.from(brands).sort((a, b) => a.localeCompare(b, 'en'));
+    // 첫 옵션 보존 ('브랜드 전체') 후 기존 동적 옵션 정리
+    select.innerHTML = '<option value="all">브랜드 전체</option>'
+      + sorted.map(b => `<option value="${escapeAttr(b)}">${escapeAttr(b)}</option>`).join('');
+    select.value = currentBrand;
+    if (!select.dataset.bound) {
+      select.addEventListener('change', () => {
+        currentBrand = select.value || 'all';
+        applyLibraryFilter();
+      });
+      select.dataset.bound = '1';
+    }
   }
 
   // 검색 입력 핸들러 (페이지 로드 직후 한 번 wiring)
@@ -371,6 +397,7 @@
     filmsGridLibrary.innerHTML  = libraryAll.map(([slug, f]) => renderFilmCard(slug, f, 'library-grid')).join('');
 
     renderLibraryFilterChips(libraryAll);
+    renderLibraryBrandSelect(libraryAll);
     applyLibraryFilter();
 
     // 새로 렌더된 카드들에 클릭 핸들러 연결
