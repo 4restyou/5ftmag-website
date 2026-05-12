@@ -125,6 +125,50 @@
   }
 
   // ════════════════════════════════════════════════
+  // 헤더에 "내 사진" 링크 주입
+  //  - main-nav 와 mobile-nav 양쪽에 일관되게 추가
+  //  - me.html 페이지 자체가 비로그인 시 로그인 게이트를 보여줌
+  // ════════════════════════════════════════════════
+  function injectMyPageLink() {
+    function hrefFor() {
+      // 현재 페이지 깊이에 따라 상대 경로 조정 (stories/, authors/, admin/ 하위면 ../)
+      return /\/(stories|authors|admin)\//.test(location.pathname) ? '../me.html' : 'me.html';
+    }
+    const isHere = /\/me\.html$/.test(location.pathname);
+    const target = hrefFor();
+
+    // 데스크탑 nav
+    const mainNav = document.querySelector('.main-nav');
+    if (mainNav && !mainNav.querySelector('a[data-me-link]')) {
+      const aboutLi = Array.from(mainNav.children).find(li => {
+        const a = li.querySelector('a');
+        return a && /about\.html$/.test(a.getAttribute('href') || '');
+      });
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = target;
+      a.textContent = '내 사진';
+      a.setAttribute('data-me-link', '');
+      if (isHere) a.className = 'current';
+      li.appendChild(a);
+      if (aboutLi && aboutLi.nextSibling) mainNav.insertBefore(li, aboutLi.nextSibling);
+      else mainNav.appendChild(li);
+    }
+
+    // 모바일 nav
+    const mob = document.getElementById('mobileNav');
+    if (mob && !mob.querySelector('a[data-me-link]')) {
+      const aboutA = Array.from(mob.querySelectorAll('a')).find(a => /about\.html$/.test(a.getAttribute('href') || ''));
+      const a = document.createElement('a');
+      a.href = target;
+      a.textContent = '내 사진';
+      a.setAttribute('data-me-link', '');
+      if (aboutA && aboutA.nextSibling) mob.insertBefore(a, aboutA.nextSibling);
+      else mob.appendChild(a);
+    }
+  }
+
+  // ════════════════════════════════════════════════
   // 초기화
   // ════════════════════════════════════════════════
   function init() {
@@ -132,6 +176,8 @@
     if (!document.documentElement.dataset.theme) {
       document.documentElement.dataset.theme = localStorage.getItem(THEME_KEY) || 'light';
     }
+
+    injectMyPageLink();
 
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');

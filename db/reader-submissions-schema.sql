@@ -134,6 +134,43 @@ CREATE POLICY "editors review" ON public.reader_submissions
             WHERE user_id = auth.uid() AND is_editor = TRUE)
   );
 
+-- 본인은 자기 제출의 메타(필름/카메라/캡션/IG/이름)만 UPDATE 가능.
+-- status, storage_path, user_id, rejection_reason, reviewed_* 는
+-- 아래 트리거로 막아서 본인이 변경할 수 없게 가드.
+DROP POLICY IF EXISTS "own submissions updatable" ON public.reader_submissions;
+CREATE POLICY "own submissions updatable" ON public.reader_submissions
+  FOR UPDATE TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+-- 컬럼 보호 트리거: 편집부가 아닌 사용자의 UPDATE 가
+-- 핵심 컬럼을 바꾸지 못하게 막음
+CREATE OR REPLACE FUNCTION public.reader_submissions_owner_guard()
+RETURNS TRIGGER AS $$
+DECLARE
+  is_editor_now BOOLEAN;
+BEGIN
+  SELECT COALESCE(is_editor, FALSE) INTO is_editor_now
+  FROM public.profiles WHERE user_id = auth.uid();
+  IF NOT COALESCE(is_editor_now, FALSE) THEN
+    IF NEW.status           IS DISTINCT FROM OLD.status           THEN RAISE EXCEPTION 'status 는 본인이 변경할 수 없습니다'; END IF;
+    IF NEW.rejection_reason IS DISTINCT FROM OLD.rejection_reason THEN RAISE EXCEPTION 'rejection_reason 은 본인이 변경할 수 없습니다'; END IF;
+    IF NEW.reviewed_at      IS DISTINCT FROM OLD.reviewed_at      THEN RAISE EXCEPTION 'reviewed_at 는 본인이 변경할 수 없습니다'; END IF;
+    IF NEW.reviewed_by      IS DISTINCT FROM OLD.reviewed_by      THEN RAISE EXCEPTION 'reviewed_by 는 본인이 변경할 수 없습니다'; END IF;
+    IF NEW.user_id          IS DISTINCT FROM OLD.user_id          THEN RAISE EXCEPTION 'user_id 변경 불가'; END IF;
+    IF NEW.storage_path     IS DISTINCT FROM OLD.storage_path     THEN RAISE EXCEPTION '사진 교체는 별도 절차로만 가능합니다'; END IF;
+    IF NEW.theme_month      IS DISTINCT FROM OLD.theme_month      THEN RAISE EXCEPTION 'theme_month 은 본인이 변경할 수 없습니다'; END IF;
+    IF NEW.consent_publish  IS DISTINCT FROM OLD.consent_publish  THEN RAISE EXCEPTION 'consent_publish 는 변경할 수 없습니다'; END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS reader_submissions_owner_guard ON public.reader_submissions;
+CREATE TRIGGER reader_submissions_owner_guard
+  BEFORE UPDATE ON public.reader_submissions
+  FOR EACH ROW EXECUTE FUNCTION public.reader_submissions_owner_guard();
+
 -- 편집부는 모든 제출 DELETE 가능
 DROP POLICY IF EXISTS "editors delete any" ON public.reader_submissions;
 CREATE POLICY "editors delete any" ON public.reader_submissions

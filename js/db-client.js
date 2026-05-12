@@ -163,6 +163,32 @@
       const c = client(); if (!c) return;
       try { await c.storage.from(BUCKET).remove([path]); } catch (_) {}
     },
+    publicUrl(path) {
+      return `${URL_}/storage/v1/object/public/${BUCKET}/${path}`;
+    },
+    async listMine() {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      const { data, error } = await c.from('reader_submissions')
+        .select('*').eq('user_id', uid).order('created_at', { ascending: false });
+      if (error) return [];
+      return data || [];
+    },
+    async updateMine(id, patch) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      // 본인 row 만 매칭 — RLS 가 한 번 더 가드, trigger 가 핵심 컬럼 보호
+      return c.from('reader_submissions').update(patch).eq('id', id).eq('user_id', uid);
+    },
+    async deleteMine(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      // RLS: pending 만 본인 삭제 허용
+      return c.from('reader_submissions').delete().eq('id', id).eq('user_id', uid);
+    },
   };
 
   // ─── 편집부 검토 — RLS 가 권한 검증 ───

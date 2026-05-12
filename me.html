@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>내 사진 — 5ft.mag</title>
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
+  <link rel="stylesheet" href="pretendard.css" />
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/common.css?v=20260511-imgfix">
+  <style>
+    body { background: var(--bg); color: var(--text); }
+
+    .me-header { max-width: 1100px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .me-back   { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; transition: color .15s; }
+    .me-back:hover { color: var(--text); }
+    .me-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .me-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .me-user  { font-size: 13px; color: var(--text-muted); }
+    .me-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .me-user button:hover { color: var(--text); }
+
+    .me-tabs { max-width: 1100px; margin: 0 auto; padding: 24px 24px 0; display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+    .me-tab  { padding: 10px 16px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 14px; font-weight: var(--fw-heading); color: var(--text-muted); cursor: pointer; letter-spacing: 0.02em; transition: color .15s, border-color .15s; }
+    .me-tab:hover { color: var(--text); }
+    .me-tab.active { color: var(--text); border-bottom-color: var(--text); }
+    .me-tab .count { display: inline-block; background: var(--bg-sub); color: var(--text-muted); font-size: 11px; padding: 1px 7px; border-radius: 999px; margin-left: 6px; font-weight: var(--fw-heading); }
+    .me-tab.active .count { background: var(--text); color: var(--bg); }
+
+    .me-list { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 20px; }
+
+    .me-card { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 20px; background: var(--bg-sub); border-radius: 6px; align-items: start; }
+    .me-card-img { width: 220px; aspect-ratio: 1; background: var(--bg); border-radius: 4px; overflow: hidden; cursor: zoom-in; }
+    .me-card-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    .me-card-meta { display: grid; gap: 10px; font-size: 14px; }
+    .me-card-row  { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: baseline; line-height: 1.55; }
+    .me-card-row .k { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+    .me-card-row .v { color: var(--text); word-break: break-word; }
+    .me-card-row .v input, .me-card-row .v textarea { width: 100%; font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 3px; background: var(--bg); color: var(--text); }
+    .me-card-row .v textarea { resize: vertical; min-height: 60px; }
+
+    .me-card-status { display: inline-block; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.1em; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; }
+    .me-card-status.pending  { background: #fef3c7; color: #78350f; }
+    .me-card-status.approved { background: #d1fae5; color: #064e3b; }
+    .me-card-status.rejected { background: #fee2e2; color: #7f1d1d; }
+
+    .me-card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .me-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 8px 14px; border-radius: 4px; cursor: pointer; border: none; transition: opacity .15s; }
+    .me-btn:hover { opacity: 0.85; }
+    .me-btn:disabled { opacity: 0.4; cursor: progress; }
+    .me-btn-primary { background: var(--text); color: var(--bg); }
+    .me-btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .me-btn-danger { background: none; color: var(--text-muted); }
+    .me-btn-danger:hover { color: #7f1d1d; }
+
+    .me-empty { text-align: center; padding: 80px 24px; color: var(--text-muted); font-size: 14px; }
+    .me-empty .me-empty-cta { display: inline-block; margin-top: 16px; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+
+    .gate { max-width: 560px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; font-weight: var(--fw-heading); margin: 0 0 12px; }
+    .gate p { color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
+    .gate .gate-btn { background: var(--text); color: var(--bg); border: none; padding: 12px 24px; border-radius: 4px; font-size: 14px; font-weight: var(--fw-heading); cursor: pointer; }
+
+    .img-zoom { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; padding: 24px; }
+    .img-zoom.open { display: flex; }
+    .img-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    @media (max-width: 720px) {
+      .me-card { grid-template-columns: 1fr; }
+      .me-card-img { width: 100%; aspect-ratio: 4/3; }
+      .me-card-row { grid-template-columns: 1fr; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="me-header">
+  <a href="index.html" class="me-back">← 5ft.mag</a>
+  <div class="me-title-row">
+    <h1 class="me-title">내 사진</h1>
+    <div class="me-user" id="meUser"></div>
+  </div>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>로그인이 필요해요</h2>
+  <p>Reader's Roll에 올린 내 사진을 보고 수정·삭제하려면 로그인해주세요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<div id="app" hidden>
+  <div class="me-tabs">
+    <button type="button" class="me-tab active" data-status="all">전체 <span class="count" id="cnt-all">·</span></button>
+    <button type="button" class="me-tab" data-status="pending">대기 <span class="count" id="cnt-pending">·</span></button>
+    <button type="button" class="me-tab" data-status="approved">공개 중 <span class="count" id="cnt-approved">·</span></button>
+    <button type="button" class="me-tab" data-status="rejected">반려 <span class="count" id="cnt-rejected">·</span></button>
+  </div>
+  <div class="me-list" id="list">
+    <div class="me-empty">불러오는 중…</div>
+  </div>
+</div>
+
+<div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./js/db-client.js?v=20260512-me"></script>
+<script>
+'use strict';
+
+const STATE = { user: null, rows: [], filter: 'all' };
+
+function $(id) { return document.getElementById(id); }
+function db() { return window.MagDB; }
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function statusLabel(s) {
+  return s === 'pending' ? '대기' : s === 'approved' ? '공개 중' : s === 'rejected' ? '반려' : s;
+}
+
+async function checkAuth() {
+  if (!db() || !db().isReady()) {
+    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
+    return false;
+  }
+  const session = await db().auth.getSession();
+  if (!session) { showGate(); return false; }
+  STATE.user = session.user;
+  const profile = await db().profiles.getMine();
+  const name = profile?.display_name || STATE.user.email?.split('@')[0] || '사용자';
+  $('meUser').innerHTML = `${escapeHtml(name)} · <button id="logout">로그아웃</button>`;
+  $('logout').addEventListener('click', async () => {
+    await db().auth.signOut();
+    location.reload();
+  });
+  return true;
+}
+
+function showGate() {
+  $('gate').hidden = false;
+  $('app').hidden = true;
+  $('gateLogin').addEventListener('click', async () => {
+    await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
+  });
+}
+
+async function loadList() {
+  $('list').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  STATE.rows = await db().submissions.listMine();
+  renderCounts();
+  renderList();
+}
+
+function renderCounts() {
+  const counts = { all: STATE.rows.length, pending: 0, approved: 0, rejected: 0 };
+  for (const r of STATE.rows) counts[r.status] = (counts[r.status] || 0) + 1;
+  for (const k of ['all', 'pending', 'approved', 'rejected']) {
+    const el = $(`cnt-${k}`);
+    if (el) el.textContent = counts[k];
+  }
+}
+
+function renderList() {
+  const rows = STATE.filter === 'all' ? STATE.rows : STATE.rows.filter(r => r.status === STATE.filter);
+  if (rows.length === 0) {
+    $('list').innerHTML = `
+      <div class="me-empty">
+        ${STATE.filter === 'all' ? '아직 올린 사진이 없어요.' : '이 분류에 해당하는 사진이 없어요.'}
+        <br /><a class="me-empty-cta" href="index.html">메인에서 사진 올리러 가기 →</a>
+      </div>`;
+    return;
+  }
+  $('list').innerHTML = rows.map(renderCard).join('');
+  bindCardActions();
+}
+
+function renderCard(r) {
+  const url = db().submissions.publicUrl(r.storage_path);
+  const igNorm = (r.instagram || '').replace(/^@/, '');
+  return `
+    <div class="me-card" data-id="${r.id}">
+      <div class="me-card-img" data-zoom="${escapeAttr(url)}">
+        <img src="${escapeAttr(url)}" alt="" loading="lazy" />
+      </div>
+      <div class="me-card-meta">
+        <div>
+          <span class="me-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
+        </div>
+        <div class="me-card-row">
+          <span class="k">제출</span>
+          <span class="v">${fmtDate(r.created_at)}</span>
+        </div>
+        <div class="me-card-row">
+          <span class="k">이름</span>
+          <span class="v" data-field="submitter_name">${escapeHtml(r.submitter_name || '-')}</span>
+        </div>
+        <div class="me-card-row">
+          <span class="k">인스타</span>
+          <span class="v" data-field="instagram">${escapeHtml(r.instagram || '-')}</span>
+        </div>
+        <div class="me-card-row">
+          <span class="k">필름</span>
+          <span class="v" data-field="film">${escapeHtml(r.film || '-')}</span>
+        </div>
+        <div class="me-card-row">
+          <span class="k">카메라</span>
+          <span class="v" data-field="camera">${escapeHtml(r.camera || '-')}</span>
+        </div>
+        <div class="me-card-row">
+          <span class="k">메모</span>
+          <span class="v" data-field="caption">${escapeHtml(r.caption || '-')}</span>
+        </div>
+        ${r.rejection_reason ? `
+        <div class="me-card-row">
+          <span class="k">반려 사유</span>
+          <span class="v">${escapeHtml(r.rejection_reason)}</span>
+        </div>` : ''}
+        <div class="me-card-actions">
+          <button type="button" class="me-btn me-btn-secondary" data-action="edit">수정</button>
+          ${r.status === 'pending' ? `<button type="button" class="me-btn me-btn-danger" data-action="delete">제출 취소</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function enterEditMode(card) {
+  const id = card.dataset.id;
+  const row = STATE.rows.find(r => r.id === id);
+  if (!row) return;
+
+  const fields = ['submitter_name', 'instagram', 'film', 'camera', 'caption'];
+  for (const f of fields) {
+    const cell = card.querySelector(`[data-field="${f}"]`);
+    if (!cell) continue;
+    const v = row[f] || '';
+    const max = f === 'caption' ? 200 : f === 'film' ? 120 : f === 'instagram' || f === 'camera' ? 80 : 60;
+    cell.innerHTML = f === 'caption'
+      ? `<textarea data-edit="${f}" maxlength="${max}">${escapeHtml(v)}</textarea>`
+      : `<input type="text" data-edit="${f}" maxlength="${max}" value="${escapeAttr(v)}" />`;
+  }
+  const actions = card.querySelector('.me-card-actions');
+  actions.innerHTML = `
+    <button type="button" class="me-btn me-btn-primary" data-action="save">저장</button>
+    <button type="button" class="me-btn me-btn-secondary" data-action="cancel-edit">취소</button>`;
+}
+
+async function saveEdits(card) {
+  const id = card.dataset.id;
+  const patch = {};
+  card.querySelectorAll('[data-edit]').forEach(el => {
+    const f = el.dataset.edit;
+    const v = el.value.trim();
+    patch[f] = v === '' ? null : v;
+  });
+  // 인스타그램 정규화 (@ 보장)
+  if (patch.instagram) {
+    patch.instagram = '@' + patch.instagram.replace(/^@/, '');
+  }
+  const saveBtn = card.querySelector('[data-action="save"]');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중…'; }
+  const { error } = await db().submissions.updateMine(id, patch);
+  if (error) {
+    alert('수정 실패: ' + error.message);
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장'; }
+    return;
+  }
+  await loadList();
+}
+
+async function deleteRow(card) {
+  if (!confirm('이 사진의 제출을 취소할까요? 저장된 파일도 함께 삭제됩니다.')) return;
+  const id   = card.dataset.id;
+  const row  = STATE.rows.find(r => r.id === id);
+  const path = row?.storage_path;
+  const btn  = card.querySelector('[data-action="delete"]');
+  if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
+  const { error } = await db().submissions.deleteMine(id);
+  if (error) {
+    alert('삭제 실패: ' + error.message);
+    if (btn) { btn.disabled = false; btn.textContent = '제출 취소'; }
+    return;
+  }
+  if (path) await db().submissions.removePhoto(path);
+  await loadList();
+}
+
+function bindCardActions() {
+  document.querySelectorAll('.me-card').forEach(card => {
+    card.querySelector('[data-zoom]')?.addEventListener('click', e => {
+      $('imgZoomTarget').src = e.currentTarget.dataset.zoom;
+      $('imgZoom').classList.add('open');
+    });
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const a = btn.dataset.action;
+        if (a === 'edit')        enterEditMode(card);
+        else if (a === 'save')   saveEdits(card);
+        else if (a === 'cancel-edit') renderList();
+        else if (a === 'delete') deleteRow(card);
+      });
+    });
+  });
+}
+
+document.querySelectorAll('.me-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.me-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    STATE.filter = tab.dataset.status;
+    renderList();
+  });
+});
+
+$('imgZoom').addEventListener('click', () => {
+  $('imgZoom').classList.remove('open');
+  $('imgZoomTarget').src = '';
+});
+
+(async function main() {
+  for (let i = 0; i < 50; i++) {
+    if (db() && db().isReady()) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  const ok = await checkAuth();
+  if (!ok) return;
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  await loadList();
+})();
+</script>
+
+</body>
+</html>
