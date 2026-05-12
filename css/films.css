@@ -588,6 +588,13 @@
   border-radius: 6px;
 }
 
+.library-controls-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-end;
+}
 .library-filter {
   display: flex;
   flex-wrap: wrap;
@@ -620,6 +627,7 @@
 }
 @media (max-width: 640px) {
   .library-controls { flex-direction: column; align-items: stretch; gap: 12px; }
+  .library-controls-right { justify-content: flex-start; gap: 12px; }
   .library-search-label { max-width: none; }
   .library-brand-select { width: 100%; }
 }

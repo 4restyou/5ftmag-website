@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css">
   <link rel="stylesheet" href="./css/reader-submissions.css">
-  <link rel="stylesheet" href="./css/films.css?v=20260512-brand">
+  <link rel="stylesheet" href="./css/films.css?v=20260512-brandright">
 </head>
 <body>
 
@@ -91,10 +91,12 @@
       </svg>
       <input type="search" class="library-search" id="librarySearch" placeholder="필름 이름·브랜드·ISO로 검색" autocomplete="off" />
     </label>
-    <select class="library-brand-select" id="libraryBrand" aria-label="브랜드로 필터">
-      <option value="all">브랜드 전체</option>
-    </select>
-    <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
+    <div class="library-controls-right">
+      <select class="library-brand-select" id="libraryBrand" aria-label="브랜드로 필터">
+        <option value="all">브랜드 전체</option>
+      </select>
+      <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
+    </div>
   </div>
   <p class="library-empty" id="libraryEmpty" hidden>검색 결과가 없어요.</p>
   <div class="films-grid" id="filmsGridLibrary" aria-label="라이브러리 필름"></div>
