@@ -9,14 +9,41 @@
   const ANON_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1Y3Bxc2Z3cW91cW9od3N2bW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjYyMDUsImV4cCI6MjA5Mzc0MjIwNX0.adLzT0UrX3e1IbkQ70G6LeFWeKbuGaa0PTL6AmrSBD8';
   const BUCKET = 'reader-submissions';
 
+  const SS_LOGIN_ORIGIN = '5ft_login_origin';
+
   let _client = null;
+  let _originRestoreInstalled = false;
   function client() {
     if (_client) return _client;
     if (!window.supabase) return null;
     _client = window.supabase.createClient(URL_, ANON_, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
     });
+    installOriginRestore();
     return _client;
+  }
+  // 신규 로그인 콜백을 어디서(예: Supabase Site URL fallback 으로 메인) 받든
+  // 사용자가 로그인 시작한 페이지로 자동 복귀.
+  function installOriginRestore() {
+    if (_originRestoreInstalled || !_client) return;
+    _originRestoreInstalled = true;
+    _client.auth.onAuthStateChange((event) => {
+      if (event !== 'SIGNED_IN') return;
+      let origin = null;
+      try { origin = sessionStorage.getItem(SS_LOGIN_ORIGIN); } catch (_) {}
+      if (!origin) return;
+      try { sessionStorage.removeItem(SS_LOGIN_ORIGIN); } catch (_) {}
+      const here = window.location.href.split('#')[0];
+      if (origin && origin !== here) {
+        // 같은 도메인 내 URL 인지 안전성 체크 (외부 URL 주입 방지)
+        try {
+          const u = new URL(origin, window.location.origin);
+          if (u.origin === window.location.origin) {
+            window.location.replace(u.href);
+          }
+        } catch (_) {}
+      }
+    });
   }
   client();
 
@@ -40,7 +67,12 @@
     },
     async signInWithGoogle(redirectTo) {
       const c = client(); if (!c) throw new Error('client unavailable');
-      return c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+      // 콜백이 다른 페이지(예: Supabase Site URL) 로 오더라도 원래 페이지로 복귀하기 위해
+      // 로그인 시작 URL 을 sessionStorage 에 보관. installOriginRestore() 가 SIGNED_IN
+      // 이벤트에서 이 값을 읽어 location.replace 로 강제 복귀시킴.
+      const origin = redirectTo || window.location.href.split('#')[0];
+      try { sessionStorage.setItem(SS_LOGIN_ORIGIN, origin); } catch (_) {}
+      return c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: origin } });
     },
     async signOut() {
       const c = client(); if (!c) return;
