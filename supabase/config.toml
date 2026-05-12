@@ -1,0 +1,4 @@
+# Supabase 프로젝트 설정 (CLI 용)
+# 이 파일은 supabase CLI / GitHub Actions 에서 참조됩니다.
+# 로컬 실행 안 함 — production DB 마이그레이션만 사용.
+project_id = "5ftmag-website"
