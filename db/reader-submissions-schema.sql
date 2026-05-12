@@ -64,10 +64,29 @@ WHERE rs.status = 'approved';
 -- ────────────────────────────────────────────────────────────
 -- ★ 마이그레이션 (이미 schema 가 적용된 환경에서 submitter_name 컬럼 추가)
 --   Supabase SQL Editor 에 따로 한 번만 실행:
+--   ※ CREATE OR REPLACE VIEW 는 칼럼 순서 변경을 거부하므로 DROP + CREATE 로
 -- ────────────────────────────────────────────────────────────
 -- ALTER TABLE public.reader_submissions
 --   ADD COLUMN IF NOT EXISTS submitter_name TEXT;
--- (그 후 위 CREATE OR REPLACE VIEW 블록을 다시 한 번 실행)
+--
+-- DROP VIEW IF EXISTS public.reader_submissions_approved;
+--
+-- CREATE VIEW public.reader_submissions_approved AS
+-- SELECT
+--   rs.id,
+--   rs.storage_path,
+--   rs.submitter_name,
+--   rs.instagram,
+--   rs.film,
+--   rs.camera,
+--   rs.caption,
+--   rs.theme_month,
+--   rs.created_at,
+--   p.display_name,
+--   p.avatar_url
+-- FROM public.reader_submissions rs
+-- LEFT JOIN public.profiles p ON p.user_id = rs.user_id
+-- WHERE rs.status = 'approved';
 
 -- ════════════════════════════════════════════════════════════
 -- RLS 정책
