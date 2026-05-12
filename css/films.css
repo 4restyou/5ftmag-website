@@ -831,6 +831,9 @@
   margin-top: 32px;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 .reader-submit-btn {
   display: inline-flex;
@@ -850,6 +853,19 @@
 }
 .reader-submit-btn:hover { opacity: 0.85; }
 .reader-submit-btn:active { transform: translateY(1px); }
+.reader-mine-link {
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.reader-mine-link:hover {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
 
 /* Reader's Roll 그리드 — 반응형 */
 @media (max-width: 900px) {

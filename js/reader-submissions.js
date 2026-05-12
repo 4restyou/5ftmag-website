@@ -358,6 +358,8 @@
   }
 
   function renderSubmittedConfirm(meta) {
+    // 페이지 깊이에 따라 me.html 상대 경로 보정
+    const meHref = /\/(stories|admin)\//.test(location.pathname) ? '../me.html' : 'me.html';
     return `
       <h2 id="rs-modal-title" class="rs-title">제출 완료 🎞</h2>
       <p class="rs-desc">
@@ -369,7 +371,8 @@
         ${meta.author && meta.film ? ' · ' : ''}
         ${meta.film ? `필름: <strong>${escapeHtml(meta.film)}</strong>` : ''}
       </p>
-      <div class="rs-actions" style="justify-content: center;">
+      <div class="rs-actions" style="justify-content: center; gap: 12px;">
+        <a href="${meHref}" class="rs-btn-link">내 사진 보기 →</a>
         <button type="button" class="rs-btn rs-btn-primary" data-action="rs-close">확인</button>
       </div>`;
   }
