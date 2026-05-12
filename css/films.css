@@ -506,13 +506,84 @@
 }
 
 /* ════════════════════════════
-   Library 필터 칩
+   Library 컨트롤 (검색 + 필터 칩)
    ════════════════════════════ */
+.library-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 0 0 28px;
+}
+.library-search-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 240px;
+  max-width: 360px;
+  padding: 9px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  transition: border-color .15s, color .15s;
+}
+.library-search-label:focus-within {
+  border-color: var(--text);
+  color: var(--text);
+}
+.library-search-label svg {
+  flex-shrink: 0;
+}
+.library-search {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  min-width: 0;
+}
+.library-search::placeholder {
+  color: var(--text-muted);
+}
+/* 브라우저 네이티브 search clear 버튼 정리 */
+.library-search::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M2 2l10 10M12 2L2 12' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M2 2l10 10M12 2L2 12' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat;
+  cursor: pointer;
+  opacity: 0.5;
+}
+.library-search::-webkit-search-cancel-button:hover { opacity: 1; }
+
+.library-empty {
+  margin: 0 0 24px;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  background: var(--bg-sub);
+  border-radius: 6px;
+}
+
 .library-filter {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 0 0 28px;
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .library-controls { flex-direction: column; align-items: stretch; gap: 12px; }
+  .library-search-label { max-width: none; }
 }
 .library-filter-chip {
   display: inline-flex;

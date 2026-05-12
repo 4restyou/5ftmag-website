@@ -82,7 +82,17 @@
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
   </div>
-  <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
+  <div class="library-controls">
+    <label class="library-search-label">
+      <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+        <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <input type="search" class="library-search" id="librarySearch" placeholder="필름 이름·브랜드·ISO로 검색" autocomplete="off" />
+    </label>
+    <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
+  </div>
+  <p class="library-empty" id="libraryEmpty" hidden>검색 결과가 없어요.</p>
   <div class="films-grid" id="filmsGridLibrary" aria-label="라이브러리 필름"></div>
 </div>
 
@@ -227,8 +237,14 @@
     }
     const tierClass = isLibrary ? ' film-card-library' : '';
 
+    // 검색용 토큰: 브랜드 · displayName · name · iso · type · aliases · slug
+    const searchTokens = [
+      film.brand, film.displayName, film.name, film.iso, film.type,
+      ...(film.aliases || []), slug
+    ].filter(Boolean).join(' ').toLowerCase();
+
     return `
-      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}">
+      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-search="${escapeAttr(searchTokens)}">
         <div class="film-img">
           ${badgeHtml}
           ${imgHtml}
@@ -258,6 +274,7 @@
     cinema: 'Cinema',
   };
   let currentFilter = 'all';
+  let currentSearch = '';
 
   function renderLibraryFilterChips(libraryFilms) {
     const filterBar = document.getElementById('libraryFilter');
@@ -291,12 +308,34 @@
   }
 
   function applyLibraryFilter() {
+    const q = currentSearch.trim().toLowerCase();
+    let visible = 0;
     filmsGridLibrary.querySelectorAll('.film-card').forEach(card => {
       const cat = card.dataset.filterCategory;
-      const show = currentFilter === 'all' || cat === currentFilter;
+      const tokens = card.dataset.search || '';
+      const matchCat = currentFilter === 'all' || cat === currentFilter;
+      const matchSearch = !q || tokens.includes(q);
+      const show = matchCat && matchSearch;
       card.hidden = !show;
+      if (show) visible++;
     });
+    const emptyEl = document.getElementById('libraryEmpty');
+    if (emptyEl) emptyEl.hidden = visible !== 0;
   }
+
+  // 검색 입력 핸들러 (페이지 로드 직후 한 번 wiring)
+  (function bindLibrarySearch() {
+    const input = document.getElementById('librarySearch');
+    if (!input) return;
+    let debounce = null;
+    input.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        currentSearch = input.value;
+        applyLibraryFilter();
+      }, 120);
+    });
+  })();
 
   // Library 정렬: 브랜드 알파벳 → 같은 브랜드 안에서는 displayName 알파벳
   // (Featured는 매거진 발행 순서가 의미 있으므로 정렬하지 않음)
