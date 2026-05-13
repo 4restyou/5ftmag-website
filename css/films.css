@@ -809,18 +809,18 @@
   gap: 12px;
   padding-bottom: 14px;
   margin-bottom: 28px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
 }
 .modal-section-tag {
   font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.16em;
-  color: var(--text);
+  color: #fff;
 }
 .modal-section-meta {
   font-size: 12px;
   letter-spacing: 0.04em;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.72);
   font-weight: var(--fw-heading);
 }
 
@@ -831,7 +831,7 @@
 .reader-roll-intro {
   font-size: 14px;
   line-height: 1.6;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.78);
   max-width: 560px;
   margin: -10px 0 22px;
 }
