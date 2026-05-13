@@ -58,8 +58,16 @@
     .me-list { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 20px; }
 
     .me-card { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 20px; background: var(--bg-sub); border-radius: 6px; align-items: start; }
-    .me-card-img { width: 220px; aspect-ratio: 1; background: var(--bg); border-radius: 4px; overflow: hidden; cursor: zoom-in; }
+    .me-card-img { width: 220px; aspect-ratio: 1; background: var(--bg); border-radius: 4px; overflow: hidden; cursor: zoom-in; position: relative; }
     .me-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    /* storage 가 사라진 orphan — onerror 가 is-missing 클래스를 붙임 */
+    .me-card-img.is-missing { cursor: default; background: repeating-linear-gradient(45deg, var(--bg) 0 8px, var(--bg-sub) 8px 16px); }
+    .me-card-img.is-missing::after {
+      content: '사진 파일이 사라졌습니다 — 삭제 버튼으로 정리해주세요';
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      padding: 12px; text-align: center; font-size: 11px; line-height: 1.5; letter-spacing: 0.04em;
+      color: var(--text-muted); font-weight: var(--fw-heading);
+    }
 
     .me-card-meta { display: grid; gap: 10px; font-size: 14px; }
     .me-card-row  { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: baseline; line-height: 1.55; }
@@ -161,7 +169,7 @@
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260512-mkt2"></script>
+<script src="./js/db-client.js?v=20260513-deletefix"></script>
 <script>
 'use strict';
 
@@ -265,7 +273,7 @@ function renderPhotoCard(r) {
   return `
     <div class="me-card" data-id="${r.id}">
       <div class="me-card-img" data-zoom="${escapeAttr(url)}">
-        <img src="${escapeAttr(url)}" alt="" loading="lazy" />
+        <img src="${escapeAttr(url)}" alt="" loading="lazy" onerror="this.closest('.me-card-img').classList.add('is-missing'); this.remove();" />
       </div>
       <div class="me-card-meta">
         <div>
@@ -332,11 +340,14 @@ async function deletePhoto(card) {
   const row  = STATE.rows.find(r => r.id === id);
   const path = row?.storage_path;
   const btn  = card.querySelector('[data-action="delete"]');
+  const origLabel = btn?.textContent;
   if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
-  const { error } = await db().submissions.deleteMine(id);
-  if (error) {
-    alert('삭제 실패: ' + error.message);
-    if (btn) { btn.disabled = false; btn.textContent = '제출 취소'; }
+  const { data, error } = await db().submissions.deleteMine(id);
+  // RLS 가 silently 차단하면 error 없이 data: [] 로 돌아옴 — 반드시 명시 검사.
+  // 검사 없이 storage 만 지우면 DB row 남아서 깨진 썸네일이 생김.
+  if (error || !data?.length) {
+    alert('삭제 실패: ' + (error?.message || '서버에서 거부했습니다. 관리자에게 문의해주세요.'));
+    if (btn) { btn.disabled = false; btn.textContent = origLabel || '삭제'; }
     return;
   }
   if (path) await db().submissions.removePhoto(path);
@@ -446,8 +457,13 @@ function bindMarketCardActions() {
           if (!confirm('이 매물을 삭제할까요? 사진 파일도 함께 삭제됩니다.')) return;
           btn.disabled = true; btn.textContent = '삭제 중…';
           const row = STATE.marketRows.find(r => r.id === id);
-          const { error } = await db().market.deleteMine(id);
-          if (error) { alert('삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '삭제'; return; }
+          const { data, error } = await db().market.deleteMine(id);
+          // RLS silent block 가드 — data 비면 storage 건드리지 않고 종료
+          if (error || !data?.length) {
+            alert('삭제 실패: ' + (error?.message || '서버에서 거부했습니다.'));
+            btn.disabled = false; btn.textContent = '삭제';
+            return;
+          }
           if (row?.storage_paths?.length) await db().market.removePhotos(row.storage_paths);
           await loadMarket();
         }

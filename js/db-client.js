@@ -219,8 +219,10 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const uid = await userId();
       if (!uid) return { error: { message: 'login required' } };
-      // RLS: pending 만 본인 삭제 허용
-      return c.from('reader_submissions').delete().eq('id', id).eq('user_id', uid);
+      // .select() 를 체이닝해서 실제로 삭제된 row 가 반환되도록 함.
+      // 안 그러면 RLS 가 silently 차단해도 data:null/error:null 로 통과되어
+      // storage 파일만 지워지고 DB row 가 남는 orphan(=깨진 썸네일) 발생.
+      return c.from('reader_submissions').delete().eq('id', id).eq('user_id', uid).select('id');
     },
   };
 
@@ -300,7 +302,8 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const uid = await userId();
       if (!uid) return { error: { message: 'login required' } };
-      return c.from('market_listings').delete().eq('id', id).eq('user_id', uid);
+      // .select() — RLS silent block 가드 (submissions.deleteMine 와 동일)
+      return c.from('market_listings').delete().eq('id', id).eq('user_id', uid).select('id');
     },
     async uploadPhoto(path, blob) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
