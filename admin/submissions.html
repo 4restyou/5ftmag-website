@@ -98,6 +98,38 @@
       background: var(--text);
       color: var(--bg);
     }
+    /* 테마만 보기 토글 — status 탭 옆 */
+    .admin-tabs-spacer { flex: 1; }
+    .admin-filter-chip {
+      align-self: center;
+      margin-bottom: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      color: #3730a3;
+      background: #e0e7ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .admin-filter-chip:hover { background: #c7d2fe; }
+    .admin-filter-chip.is-active {
+      background: #3730a3;
+      color: #e0e7ff;
+      border-color: #3730a3;
+    }
+    [data-theme="dark"] .admin-filter-chip {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border-color: rgba(99, 102, 241, 0.35);
+    }
+    [data-theme="dark"] .admin-filter-chip.is-active {
+      background: #a5b4fc;
+      color: #1e1b4b;
+      border-color: #a5b4fc;
+    }
 
     .admin-list {
       max-width: 1100px;
@@ -366,6 +398,8 @@
     <button type="button" class="admin-tab active" data-status="pending">대기 <span class="count" id="cnt-pending">·</span></button>
     <button type="button" class="admin-tab" data-status="approved">승인됨 <span class="count" id="cnt-approved">·</span></button>
     <button type="button" class="admin-tab" data-status="rejected">반려됨 <span class="count" id="cnt-rejected">·</span></button>
+    <span class="admin-tabs-spacer"></span>
+    <button type="button" class="admin-filter-chip" id="themeFilter" aria-pressed="false">테마 응모만</button>
   </div>
   <div class="admin-list" id="list">
     <div class="empty-state">불러오는 중…</div>
@@ -376,8 +410,8 @@
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260513-deletefix"></script>
-<script src="../js/reader-submissions.js?v=20260512-pool"></script>
+<script src="../js/db-client.js?v=20260513-theme"></script>
+<script src="../js/reader-submissions.js?v=20260513-theme"></script>
 <script>
 'use strict';
 
@@ -389,6 +423,7 @@ const STATE = {
   counts: { pending: 0, approved: 0, rejected: 0 },
   films: {},
   page: 1,
+  themeOnly: false, // 테마 응모만 필터링 (theme_month NOT NULL)
 };
 
 const PAGE_SIZE = 10;
@@ -442,8 +477,9 @@ function showGate(msg) {
 }
 
 async function loadCounts() {
+  const opts = { themeOnly: STATE.themeOnly };
   for (const status of ['pending', 'approved', 'rejected']) {
-    const n = await db().review.count(status);
+    const n = await db().review.count(status, opts);
     STATE.counts[status] = n;
     const el = $(`cnt-${status}`);
     if (el) el.textContent = n;
@@ -462,7 +498,7 @@ async function loadList() {
   const from = (STATE.page - 1) * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
 
-  const { data, error } = await db().review.list(STATE.status, from, to);
+  const { data, error } = await db().review.list(STATE.status, from, to, { themeOnly: STATE.themeOnly });
 
   if (error) {
     $('list').innerHTML = `<div class="empty-state">불러오기 실패: ${escapeHtml(error.message)}</div>`;
@@ -470,7 +506,11 @@ async function loadList() {
   }
   STATE.rows = data || [];
   if (STATE.rows.length === 0) {
-    $('list').innerHTML = `<div class="empty-state">${STATE.status === 'pending' ? '대기 중인 제출이 없어요.' : (STATE.status === 'approved' ? '아직 승인된 제출이 없어요.' : '반려된 제출이 없어요.')}</div>`;
+    const baseMsg = STATE.status === 'pending' ? '대기 중인 제출이 없어요.'
+                  : STATE.status === 'approved' ? '아직 승인된 제출이 없어요.'
+                  : '반려된 제출이 없어요.';
+    const msg = STATE.themeOnly ? `테마 응모 중 ${baseMsg}` : baseMsg;
+    $('list').innerHTML = `<div class="empty-state">${escapeHtml(msg)}</div>`;
     return;
   }
   $('list').innerHTML = STATE.rows.map(renderCard).join('');
@@ -682,6 +722,16 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     STATE.page = 1;
     loadList();
   });
+});
+
+$('themeFilter').addEventListener('click', async () => {
+  STATE.themeOnly = !STATE.themeOnly;
+  STATE.page = 1;
+  const chip = $('themeFilter');
+  chip.classList.toggle('is-active', STATE.themeOnly);
+  chip.setAttribute('aria-pressed', String(STATE.themeOnly));
+  // count 도 filter 반영해서 다시 — 상태탭의 ·숫자 가 같이 변함
+  await Promise.all([loadCounts(), loadList()]);
 });
 
 $('imgZoom').addEventListener('click', () => {
