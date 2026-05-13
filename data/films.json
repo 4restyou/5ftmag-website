@@ -478,6 +478,56 @@
     "canThumbnail": "img/films/colorplus200-can.webp",
     "canThumbnailStatus": "set"
   },
+  "kodacolor100": {
+    "slug": "kodacolor100",
+    "tier": "library",
+    "brand": "KODAK",
+    "name": "Kodacolor 100",
+    "displayName": "Kodak Kodacolor 100",
+    "aliases": [
+      "Kodacolor 100",
+      "Kodacolor100",
+      "Kodak Kodacolor 100",
+      "Kodak Color 100",
+      "코다컬러 100",
+      "코다컬러100",
+      "코닥 코다컬러 100",
+      "코닥 코다컬러",
+      "kodacolor100"
+    ],
+    "desc": "Kodak이 다시 꺼낸 저감도 데이라이트 컬러 네거티브. Pro Image 100 계열과 아주 가까운 자연스러운 색감으로 알려졌지만, 조금 더 차분하고 중립적인 인상이라 별도 필름으로 다루는 편이 안전합니다.",
+    "iso": "100",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnailStatus": "pending"
+  },
+  "kodacolor200": {
+    "slug": "kodacolor200",
+    "tier": "library",
+    "brand": "KODAK",
+    "name": "Kodacolor 200",
+    "displayName": "Kodak Kodacolor 200",
+    "aliases": [
+      "Kodacolor 200",
+      "Kodacolor200",
+      "Kodak Kodacolor 200",
+      "Kodak Color 200",
+      "코다컬러 200",
+      "코다컬러200",
+      "코닥 코다컬러 200",
+      "코닥 코다컬러",
+      "kodacolor200"
+    ],
+    "desc": "중간 감도의 데일리 컬러 네거티브. Gold 200과는 다른 성격으로, ColorPlus 200 계열에 가까운 부드럽고 부담 없는 색을 보여주는 필름으로 보는 게 좋습니다.",
+    "iso": "200",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnailStatus": "pending"
+  },
   "proimage100": {
     "slug": "proimage100",
     "tier": "library",
