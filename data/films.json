@@ -1342,6 +1342,35 @@
     "canThumbnail": "img/films/reala100-can.webp",
     "canThumbnailStatus": "set"
   },
+  "reala500d": {
+    "slug": "reala500d",
+    "tier": "library",
+    "brand": "FUJIFILM",
+    "name": "Reala 500D",
+    "displayName": "Fujifilm Reala 500D",
+    "aliases": [
+      "Reala 500D",
+      "Reala500D",
+      "Reala-500D",
+      "Fuji Reala 500D",
+      "Fujifilm Reala 500D",
+      "Fujicolor Reala 500D",
+      "Fujicolor Negative Film Reala 500D",
+      "리얼라 500D",
+      "리얼라500D",
+      "후지 리얼라 500D",
+      "후지필름 리얼라 500D",
+      "후지컬러 리얼라 500D",
+      "reala500d"
+    ],
+    "desc": "Fujifilm이 영화 촬영용으로 만든 데이라이트 컬러 네거티브. ISO 500의 빠른 감도와 4th Color Layer 기술로 복잡한 혼합광에서도 색 재현을 안정적으로 잡아내는 것이 특징입니다. 정식 처리는 ECN-2 공정이며, 현재는 단종된 빈티지 시네마 스톡입니다.",
+    "iso": "500",
+    "type": "Daylight",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnailStatus": "pending"
+  },
   "eterna250d": {
     "slug": "eterna250d",
     "tier": "library",
