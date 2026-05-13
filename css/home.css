@@ -189,6 +189,8 @@
   letter-spacing: var(--ls-default);
   line-height: 1.2;
   margin-bottom: 8px;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 .post-excerpt {
   font-size: var(--fs-title);
@@ -196,6 +198,8 @@
   letter-spacing: var(--ls-default);
   color: var(--text-muted);
   line-height: 1.2;
+  word-break: keep-all;
+  overflow-wrap: normal;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -508,6 +512,8 @@ body.modal-open { overflow: hidden; }
   font-size: var(--fs-body);
   font-weight: var(--fw-heading);
   letter-spacing: var(--ls-default);
+  word-break: keep-all;
+  overflow-wrap: normal;
   line-height: 1.25;
 }
 .news-date {
