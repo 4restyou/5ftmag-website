@@ -28,6 +28,10 @@ const TARGETS = [
   { name: 'films-desktop', path: '/films.html', width: 1440, height: 1200 },
   { name: 'films-mobile', path: '/films.html', width: 390, height: 1200 },
   { name: 'stories-mobile', path: '/stories.html', width: 390, height: 1200 },
+  { name: 'lomo-article-desktop', path: '/stories/lomo-mca.html', width: 1552, height: 900 },
+  { name: 'lomo-article-mobile', path: '/stories/lomo-mca.html', width: 390, height: 1200 },
+  { name: 'china-article-desktop', path: '/stories/ch-revival.html', width: 1552, height: 900 },
+  { name: 'china-article-mobile', path: '/stories/ch-revival.html', width: 390, height: 1200 },
   { name: 'market-desktop', path: '/market.html', width: 1440, height: 1200 },
   { name: 'market-mobile', path: '/market.html', width: 390, height: 1200 },
 ];

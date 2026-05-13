@@ -47,6 +47,12 @@ body {
   word-break: keep-all;
   overflow-wrap: normal;
 }
+.article-title .title-break {
+  display: block;
+}
+.article-title .title-break::before {
+  content: "";
+}
 .article-subtitle {
   font-size: 21px;
   font-weight: var(--fw-all);
