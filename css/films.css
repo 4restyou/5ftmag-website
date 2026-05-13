@@ -57,7 +57,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
 }
 .film-img img {
   width: 100%;
@@ -68,18 +67,6 @@
   user-select: none;
   -webkit-user-select: none;
   pointer-events: none;
-}
-.film-img picture::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='100'><text x='90' y='55' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='13' letter-spacing='1' fill='rgba(0,0,0,0.10)' transform='rotate(-25,90,50)'>5ft.mag</text></svg>");
-  background-repeat: repeat;
-  pointer-events: none;
-  z-index: 2;
-}
-[data-theme='dark'] .film-img picture::before {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='100'><text x='90' y='55' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='13' letter-spacing='1' fill='rgba(255,255,255,0.09)' transform='rotate(-25,90,50)'>5ft.mag</text></svg>");
 }
 .film-card:hover .film-img img {
   transform: scale(1.05);
