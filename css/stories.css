@@ -248,6 +248,8 @@
   letter-spacing: -0.02em;
   line-height: 1.25;
   margin-bottom: 10px;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 .article-excerpt {
   font-size: 15px;
@@ -255,6 +257,8 @@
   letter-spacing: var(--ls-default);
   color: var(--text);
   line-height: 1.55;
+  word-break: keep-all;
+  overflow-wrap: normal;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;

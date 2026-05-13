@@ -43,6 +43,9 @@ body {
   font-size: 44px; font-weight: var(--fw-heading);
   letter-spacing: -0.03em; line-height: 1.15;
   margin-bottom: 24px;
+  /* 한국어 단어 단위 줄바꿈 — '세 풍|경' 같이 어절이 끊기지 않음 */
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 .article-subtitle {
   font-size: 21px;
@@ -50,6 +53,8 @@ body {
   color: var(--text-muted);
   line-height: 1.5;
   margin-bottom: 24px;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 .article-author {
   display: flex; align-items: center; gap: 14px;
