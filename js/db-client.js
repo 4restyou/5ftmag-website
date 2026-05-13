@@ -228,16 +228,19 @@
 
   // ─── 편집부 검토 — RLS 가 권한 검증 ───
   const review = {
-    async count(status) {
+    async count(status, opts = {}) {
       const c = client(); if (!c) return 0;
-      const { count } = await c.from('reader_submissions')
+      let q = c.from('reader_submissions')
         .select('id', { count: 'exact', head: true }).eq('status', status);
+      if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+      const { count } = await q;
       return count || 0;
     },
-    async list(status, from, to) {
+    async list(status, from, to, opts = {}) {
       const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
-      return c.from('reader_submissions').select('*').eq('status', status)
-        .order('created_at', { ascending: status === 'pending' }).range(from, to);
+      let q = c.from('reader_submissions').select('*').eq('status', status);
+      if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+      return q.order('created_at', { ascending: status === 'pending' }).range(from, to);
     },
     async patch(id, patch) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };

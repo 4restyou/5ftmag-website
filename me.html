@@ -84,6 +84,8 @@
     .me-card-status.reserved  { background: #fef3c7; color: #78350f; }
     .me-card-status.sold      { background: #e5e7eb; color: #4b5563; }
     .me-card-status.hidden    { background: #fee2e2; color: #7f1d1d; }
+    /* 테마 응모 칩 — status 옆에 보조 노출 */
+    .me-card-theme { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; padding: 2px 8px; border-radius: 2px; background: #e0e7ff; color: #3730a3; }
 
     .me-card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
     .me-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 8px 14px; border-radius: 4px; cursor: pointer; border: none; transition: opacity .15s; text-decoration: none; display: inline-flex; align-items: center; }
@@ -169,7 +171,7 @@
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260513-deletefix"></script>
+<script src="./js/db-client.js?v=20260513-theme"></script>
 <script>
 'use strict';
 
@@ -278,6 +280,7 @@ function renderPhotoCard(r) {
       <div class="me-card-meta">
         <div>
           <span class="me-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
+          ${r.theme_month ? `<span class="me-card-theme">🎬 ${escapeHtml(r.theme_month)} 응모</span>` : ''}
         </div>
         <div class="me-card-row"><span class="k">제출</span><span class="v">${fmtDate(r.created_at)}</span></div>
         <div class="me-card-row"><span class="k">이름</span><span class="v" data-field="submitter_name">${escapeHtml(r.submitter_name || '-')}</span></div>

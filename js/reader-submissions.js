@@ -225,17 +225,12 @@
     })();
     const themeIssue = theme?.issue || theme?.month || '다음 호';
     const themeFilm = theme?.film ? ` · 메인 필름: <strong>${escapeHtml(theme.film)}</strong>` : '';
-    const themeBlock = (theme && theme.active) ? `
-      <div class="rs-theme">
-        <span class="rs-theme-tag">${escapeHtml(themeIssue)} 주제</span>
-        <strong class="rs-theme-title">${escapeHtml(theme.title)}${theme.subtitle ? ` <small style="font-weight: var(--fw-all); color: inherit; opacity: 0.78;">— ${escapeHtml(theme.subtitle)}</small>` : ''}</strong>
-        <p class="rs-theme-desc">${escapeHtml(theme.description || '')}${themeFilm}</p>
-        <label class="rs-checkbox rs-theme-check">
-          <input type="checkbox" name="theme_apply" value="${escapeAttr(theme.month)}" checked />
-          <span>이 사진을 <strong>"${escapeHtml(theme.title)}"</strong> 주제 응모로 함께 보내기 — 우수작은 ${escapeHtml(themeIssue)} 종이 매거진 후보가 됩니다.</span>
-        </label>
-      </div>
-    ` : '';
+    // 테마 main film 의 canonical 이름 — 체크박스 ↔ 필름 picker 바인딩 기준
+    const themeCanonical = (() => {
+      if (!theme?.film) return '';
+      const m = findFilmMatch(theme.film, films);
+      return m?.type === 'exact' ? m.canonical : theme.film;
+    })();
 
     // 필름 카탈로그 → 브랜드별 그룹화 (알파벳 정렬)
     const filmsArr = Object.values(films || {});
@@ -268,6 +263,24 @@
         initialSelectedName = match.canonical;
       }
     }
+
+    // 응모 체크박스 초기 상태 — 선택된 필름이 테마 main film 과 일치할 때만 자동 체크.
+    // (이후 picker 변경 시 bindFormHandlers 의 syncThemeCheckbox 가 동기화)
+    const initialThemeChecked = !!(themeCanonical && initialSelectedName &&
+      normalizeFilmName(initialSelectedName) === normalizeFilmName(themeCanonical));
+
+    const themeBlock = (theme && theme.active) ? `
+      <div class="rs-theme" data-theme-canonical="${escapeAttr(themeCanonical)}">
+        <span class="rs-theme-tag">${escapeHtml(themeIssue)} 주제</span>
+        <strong class="rs-theme-title">${escapeHtml(theme.title)}${theme.subtitle ? ` <small style="font-weight: var(--fw-all); color: inherit; opacity: 0.78;">— ${escapeHtml(theme.subtitle)}</small>` : ''}</strong>
+        <p class="rs-theme-desc">${escapeHtml(theme.description || '')}${themeFilm}</p>
+        <label class="rs-checkbox rs-theme-check">
+          <input type="checkbox" name="theme_apply" value="${escapeAttr(theme.month)}"${initialThemeChecked ? ' checked' : ''} />
+          <span>이 사진을 <strong>"${escapeHtml(theme.title)}"</strong> 주제 응모로 함께 보내기 — 우수작은 ${escapeHtml(themeIssue)} 종이 매거진 후보가 됩니다.</span>
+        </label>
+        ${themeCanonical ? `<p class="rs-theme-hint" id="rs-theme-hint" hidden>이번 호 응모는 <strong>${escapeHtml(themeCanonical)}</strong> 사진만 함께 보낼 수 있어요.</p>` : ''}
+      </div>
+    ` : '';
 
     const groupsHtml = brandKeys.map(brand => `
       <div class="rs-film-group">
@@ -487,6 +500,31 @@
     const filmInput      = document.getElementById('rs-film-input'); // hidden, 실제 form value
     const trigger        = document.getElementById('rs-film-trigger');
     const selectedLabel  = document.getElementById('rs-film-selected');
+
+    // 테마 응모 체크박스 — 선택된 필름이 테마 main film 과 같을 때만 자동 체크.
+    // 사용자가 수동 토글했어도 필름이 바뀌면 다시 동기화 (혼동 방지 — 매번 의도 재확인).
+    const themeRoot     = document.querySelector('.rs-theme');
+    const themeCheckbox = themeRoot?.querySelector('input[name="theme_apply"]') || null;
+    const themeHint     = document.getElementById('rs-theme-hint');
+    const themeCanonical = themeRoot?.dataset?.themeCanonical || '';
+
+    function filmMatchesTheme(filmName) {
+      if (!themeCanonical || !filmName) return false;
+      if (normalizeFilmName(filmName) === normalizeFilmName(themeCanonical)) return true;
+      const m = findFilmMatch(filmName, films);
+      return !!(m?.type === 'exact' &&
+        normalizeFilmName(m.canonical) === normalizeFilmName(themeCanonical));
+    }
+    function syncThemeCheckbox(filmName) {
+      if (!themeCheckbox) return;
+      const match = filmMatchesTheme(filmName);
+      // 필름이 바뀔 때마다 의도를 다시 묻는다 — 일치하면 ON, 아니면 OFF.
+      // disabled 는 걸지 않음 — 사용자가 의도적으로 다시 체크해 응모할 여지는 남김.
+      themeCheckbox.checked = match;
+      if (themeHint) themeHint.hidden = match || !filmName;
+    }
+    // 초기 동기화 — render 시점에 calc 한 initialThemeChecked 와 정합
+    syncThemeCheckbox(filmInput?.value || '');
     const dropdown       = document.getElementById('rs-film-dropdown');
     const search         = document.getElementById('rs-film-search');
     const optionList     = document.getElementById('rs-film-list');
@@ -548,6 +586,7 @@
       if (filmInput) filmInput.value = name;
       setMode('catalog');
       closeDropdown();
+      syncThemeCheckbox(name);
     });
 
     // 신청 모드 토글
@@ -559,14 +598,17 @@
       if (selectedLabel) selectedLabel.textContent = '필름을 선택해 주세요';
       if (filmInput) filmInput.value = reqInput?.value?.trim() || '';
       setTimeout(() => reqInput?.focus(), 50);
+      syncThemeCheckbox(filmInput?.value || '');
     });
     reqInput?.addEventListener('input', () => {
       if (filmInput) filmInput.value = reqInput.value.trim();
+      syncThemeCheckbox(reqInput.value.trim());
     });
     reqCancel?.addEventListener('click', () => {
       setMode('catalog');
       if (reqInput) reqInput.value = '';
       if (filmInput) filmInput.value = '';
+      syncThemeCheckbox('');
     });
 
     form.addEventListener('submit', async (e) => {

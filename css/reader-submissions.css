@@ -121,12 +121,25 @@
   font-size: 12px;
   padding: 10px 12px;
 }
+.rs-theme-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #78350f;
+  background: rgba(255,255,255,0.55);
+  border-radius: 3px;
+  padding: 8px 10px;
+  margin: 0;
+}
+.rs-theme-hint strong {
+  font-weight: var(--fw-heading);
+}
 [data-theme="dark"] .rs-theme {
   background: #3a2e0c;
 }
 [data-theme="dark"] .rs-theme-title { color: #fef3c7; }
 [data-theme="dark"] .rs-theme-desc  { color: #d4c08a; }
 [data-theme="dark"] .rs-theme-check { background: rgba(0,0,0,0.25); }
+[data-theme="dark"] .rs-theme-hint  { background: rgba(0,0,0,0.25); color: #fbbf24; }
 [data-theme="dark"] .rs-theme-tag   { color: #fbbf24; }
 
 /* 메인 페이지에 노출되는 테마 배너 (작은 카드형) */
