@@ -7,6 +7,7 @@
   "scripts": {
     "validate": "node scripts/validate-assets.mjs",
     "qa": "npm run validate && node scripts/qa-smoke.mjs",
+    "qa:visual": "node scripts/qa-visual.mjs",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
     "build": "node scripts/build-from-notion.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs",

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
-  <link rel="stylesheet" href="./css/market.css?v=20260512-mkt1">
+  <link rel="stylesheet" href="./css/market.css?v=20260513-safety">
 </head>
 <body>
 
@@ -48,6 +48,14 @@
 
 <div class="market-intro">
   <p>구독자들이 직접 매물을 올리는 <span class="accent">중고 장터</span>예요. 거래·결제는 판매자와 구매자가 직접 진행해주세요. 사기나 부적절한 매물은 매물 상세에서 <strong>신고</strong>해주시면 편집부가 검토합니다.</p>
+  <div class="market-safety" aria-label="거래 전 확인사항">
+    <strong>거래 전 확인</strong>
+    <ul>
+      <li>5ft.mag는 매물 노출과 신고 접수만 돕고, 결제·배송·환불을 중개하지 않습니다.</li>
+      <li>상태와 구성품을 사진으로 확인하고, 고가 장비는 직거래나 안전결제를 우선해주세요.</li>
+      <li>도난품·가품·불법 개조품·매거진 성격과 무관한 물품은 숨김 처리될 수 있습니다.</li>
+    </ul>
+  </div>
 </div>
 
 <section class="market-section">
@@ -453,6 +461,11 @@ function renderForm(existing) {
         <span class="mkt-field-hint">공개적으로 노출되니 본인이 감당 가능한 정보만 적어주세요.</span>
       </label>
 
+      <label class="mkt-safety-check">
+        <input type="checkbox" name="safety_agree" ${existing ? 'checked' : ''} />
+        <span>거래는 개인 간 직접 진행되며, 도난품·가품·불법 물품을 올리지 않는다는 점을 확인했습니다.</span>
+      </label>
+
       <div class="mkt-form-actions">
         <button type="button" class="mkt-btn mkt-btn-secondary" data-action="close">취소</button>
         <button type="submit" class="mkt-btn mkt-btn-primary" id="mktFormSubmit">${existing ? '저장' : '올리기'}</button>
@@ -559,6 +572,7 @@ async function onSubmit(e) {
     const location    = String(fd.get('location') || '').trim() || null;
     const contact     = String(fd.get('contact') || '').trim();
     if (!title || !price || !category || !contact) throw new Error('필수 항목을 모두 입력해주세요.');
+    if (fd.get('safety_agree') !== 'on') throw new Error('거래 전 확인사항에 동의해주세요.');
 
     // 사진 업로드 — 신규 추가된 것만
     const user = await db().auth.getUser();

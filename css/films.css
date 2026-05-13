@@ -12,6 +12,8 @@
   font-size: 19px;
   line-height: 1.65;
   color: var(--text);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 .intro p .accent {
   background: var(--accent);
@@ -30,6 +32,8 @@
 }
 .film-card {
   display: block;
+  width: 100%;
+  min-width: 0;
   cursor: pointer;
   background: none;
   border: none;
@@ -515,6 +519,11 @@
 }
 @media (max-width: 640px) {
   .intro { padding: 32px 20px 48px; }
+  .intro p,
+  .films-section-sub {
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
   .films-section { padding: 40px 20px 60px; }
   .film-name { font-size: 20px; }
   .modal-content { padding: 64px 20px; }
@@ -598,12 +607,14 @@
   flex-wrap: wrap;
   gap: 16px;
   justify-content: flex-end;
+  min-width: 0;
 }
 .library-filter {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin: 0;
+  min-width: 0;
 }
 .library-brand-select {
   appearance: none;
@@ -716,6 +727,8 @@
   line-height: 1.6;
   color: var(--text-muted);
   margin: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 /* ════════════════════════════
@@ -947,6 +960,30 @@
   .films-section-title { font-size: 26px; }
   .modal-section { margin-top: 48px; }
   .modal-section-reader { margin-top: 56px; }
+  .films-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+  .film-img {
+    aspect-ratio: 1 / 1;
+  }
+  .film-img picture {
+    width: min(78%, 280px);
+    height: min(78%, 280px);
+  }
+  .library-controls-right,
+  .library-filter {
+    width: 100%;
+  }
+  .library-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .library-filter-chip {
+    flex: 0 0 auto;
+  }
 }
 
 /* (Reader's Roll 라이트박스는 editorial lightbox 와 통합됨 — dead CSS 제거) */
