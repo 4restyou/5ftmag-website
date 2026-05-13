@@ -119,11 +119,12 @@ CREATE POLICY "authenticated can submit" ON public.reader_submissions
     AND consent_publish = TRUE
   );
 
--- 본인은 pending 상태일 때만 자기 제출 취소(삭제) 가능
+-- 본인은 자기 제출을 status 무관 삭제 가능 (마이그레이션 20260513000001)
 DROP POLICY IF EXISTS "own pending deletable" ON public.reader_submissions;
-CREATE POLICY "own pending deletable" ON public.reader_submissions
+DROP POLICY IF EXISTS "own deletable" ON public.reader_submissions;
+CREATE POLICY "own deletable" ON public.reader_submissions
   FOR DELETE TO authenticated
-  USING (user_id = auth.uid() AND status = 'pending');
+  USING (user_id = auth.uid());
 
 -- 편집부는 모든 제출 UPDATE 가능 (status, rejection_reason 등)
 DROP POLICY IF EXISTS "editors review" ON public.reader_submissions;

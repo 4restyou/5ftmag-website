@@ -261,6 +261,7 @@ function renderPhotoList() {
 function renderPhotoCard(r) {
   const url = db().submissions.publicUrl(r.storage_path);
   const igNorm = (r.instagram || '').replace(/^@/, '');
+  const deleteLabel = r.status === 'pending' ? '제출 취소' : '삭제';
   return `
     <div class="me-card" data-id="${r.id}">
       <div class="me-card-img" data-zoom="${escapeAttr(url)}">
@@ -279,7 +280,7 @@ function renderPhotoCard(r) {
         ${r.rejection_reason ? `<div class="me-card-row"><span class="k">반려 사유</span><span class="v">${escapeHtml(r.rejection_reason)}</span></div>` : ''}
         <div class="me-card-actions">
           <button type="button" class="me-btn me-btn-secondary" data-action="edit">수정</button>
-          ${r.status === 'pending' ? `<button type="button" class="me-btn me-btn-danger" data-action="delete">제출 취소</button>` : ''}
+          <button type="button" class="me-btn me-btn-danger" data-action="delete">${escapeHtml(deleteLabel)}</button>
         </div>
       </div>
     </div>`;
@@ -343,19 +344,28 @@ async function deletePhoto(card) {
 }
 
 function bindPhotoCardActions() {
+  // 이벤트 위임 — 카드 자체에 click 한 번만 바인딩.
+  // enterEditMode 가 액션 버튼을 새 HTML 로 교체하기 때문에 개별 버튼
+  // addEventListener 방식은 새 버튼(저장/취소) 에 핸들러가 안 붙어 동작 X.
   document.querySelectorAll('#section-photos .me-card').forEach(card => {
-    card.querySelector('[data-zoom]')?.addEventListener('click', e => {
-      $('imgZoomTarget').src = e.currentTarget.dataset.zoom;
-      $('imgZoom').classList.add('open');
-    });
-    card.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const a = btn.dataset.action;
-        if (a === 'edit')        enterEditMode(card);
-        else if (a === 'save')   savePhotoEdits(card);
-        else if (a === 'cancel-edit') renderPhotoList();
-        else if (a === 'delete') deletePhoto(card);
-      });
+    if (card.dataset.bound === '1') return;
+    card.dataset.bound = '1';
+    card.addEventListener('click', (e) => {
+      // 사진 영역 클릭 → 라이트박스
+      const zoom = e.target.closest('[data-zoom]');
+      if (zoom) {
+        $('imgZoomTarget').src = zoom.dataset.zoom;
+        $('imgZoom').classList.add('open');
+        return;
+      }
+      // 액션 버튼
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const a = btn.dataset.action;
+      if (a === 'edit')             enterEditMode(card);
+      else if (a === 'save')        savePhotoEdits(card);
+      else if (a === 'cancel-edit') renderPhotoList();
+      else if (a === 'delete')      deletePhoto(card);
     });
   });
 }
