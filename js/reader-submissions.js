@@ -123,33 +123,108 @@
 
   // ════════════════════════════════════════════════════════════
   // 캔버스 리사이즈 + JPEG 인코딩
+  // 모바일(특히 iOS) 안정성을 위해:
+  //  · HEIC/HEIF 사전 차단 (<img> 가 디코딩 못해 onload 안 불려서 무한 대기)
+  //  · loadImage 에 30초 timeout
+  //  · createImageBitmap 우선 사용 (iOS 15+, 메모리 효율 + EXIF 자동 처리)
+  //  · 큰 사진(>2x MAX) 은 단계적 다운샘플 (한 번에 그리면 Safari 캔버스
+  //    픽셀 한도/메모리 부족으로 toBlob 이 null 또는 hang)
   // ════════════════════════════════════════════════════════════
+  function isUnsupportedHeic(file) {
+    if (!file) return false;
+    const t = (file.type || '').toLowerCase();
+    if (t === 'image/heic' || t === 'image/heif' ||
+        t === 'image/heic-sequence' || t === 'image/heif-sequence') return true;
+    // 파일명으로도 한 번 더 (iOS 가 type 비워서 보내는 케이스)
+    const n = (file.name || '').toLowerCase();
+    if (!t && (n.endsWith('.heic') || n.endsWith('.heif'))) return true;
+    return false;
+  }
+
   function loadImage(file) {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
       const img = new Image();
-      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-      img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+      let done = false;
+      const cleanup = () => { try { URL.revokeObjectURL(url); } catch (_) {} };
+      const timer = setTimeout(() => {
+        if (done) return;
+        done = true; cleanup();
+        reject(new Error('이미지 로딩 시간 초과 — 사진이 너무 크거나 지원되지 않는 형식일 수 있어요.'));
+      }, 30000);
+      img.onload  = () => { if (done) return; done = true; clearTimeout(timer); cleanup(); resolve(img); };
+      img.onerror = () => { if (done) return; done = true; clearTimeout(timer); cleanup();
+        reject(new Error('이미지를 읽을 수 없어요 — JPG/PNG/WebP 인지 확인해주세요.')); };
       img.src = url;
     });
   }
 
-  async function resizeToJpeg(file) {
-    const img = await loadImage(file);
-    let { width: w, height: h } = img;
-    if (Math.max(w, h) > MAX_LONG_SIDE) {
-      if (w >= h) { h = Math.round(h * MAX_LONG_SIDE / w); w = MAX_LONG_SIDE; }
-      else        { w = Math.round(w * MAX_LONG_SIDE / h); h = MAX_LONG_SIDE; }
+  // 큰 이미지를 한 번에 줄이면 Safari 가 hang 하거나 toBlob 이 null 을 줌.
+  // 긴 변이 목표보다 2배 이상이면 단계별로 절반씩 축소.
+  function drawScaled(source, srcW, srcH, dstW, dstH) {
+    let curW = srcW, curH = srcH;
+    let cur = source;
+    while (curW > dstW * 2 && curH > dstH * 2) {
+      const nextW = Math.round(curW / 2);
+      const nextH = Math.round(curH / 2);
+      const c = document.createElement('canvas');
+      c.width = nextW; c.height = nextH;
+      const cx = c.getContext('2d');
+      cx.imageSmoothingQuality = 'high';
+      cx.drawImage(cur, 0, 0, nextW, nextH);
+      cur = c; curW = nextW; curH = nextH;
     }
-    const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(img, 0, 0, w, h);
+    const out = document.createElement('canvas');
+    out.width = dstW; out.height = dstH;
+    const ox = out.getContext('2d');
+    ox.imageSmoothingQuality = 'high';
+    ox.drawImage(cur, 0, 0, dstW, dstH);
+    return out;
+  }
+
+  async function resizeToJpeg(file) {
+    if (isUnsupportedHeic(file)) {
+      throw new Error('HEIC/HEIF 형식은 지원하지 않아요. iOS 설정 → 카메라 → 포맷 → "호환성 우선" 으로 두거나, 사진을 JPG 로 변환한 뒤 다시 올려주세요.');
+    }
+
+    // 1) 가능한 경우 createImageBitmap 사용 (메모리 효율 + EXIF 자동 회전)
+    let src = null, srcW = 0, srcH = 0;
+    if (typeof createImageBitmap === 'function') {
+      try {
+        const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+        src = bmp; srcW = bmp.width; srcH = bmp.height;
+      } catch (_) { /* 폴백으로 진행 */ }
+    }
+    if (!src) {
+      const img = await loadImage(file);
+      src = img; srcW = img.naturalWidth || img.width; srcH = img.naturalHeight || img.height;
+    }
+
+    // 2) 목표 크기 계산
+    let dstW = srcW, dstH = srcH;
+    if (Math.max(srcW, srcH) > MAX_LONG_SIDE) {
+      if (srcW >= srcH) { dstH = Math.round(srcH * MAX_LONG_SIDE / srcW); dstW = MAX_LONG_SIDE; }
+      else              { dstW = Math.round(srcW * MAX_LONG_SIDE / srcH); dstH = MAX_LONG_SIDE; }
+    }
+
+    // 3) 단계 다운샘플
+    const canvas = drawScaled(src, srcW, srcH, dstW, dstH);
+    // ImageBitmap 메모리 해제
+    if (typeof src.close === 'function') { try { src.close(); } catch (_) {} }
+
+    // 4) toBlob — 모바일에서 가끔 hang 하므로 timeout 가드
     return new Promise((resolve, reject) => {
+      let settled = false;
+      const t = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        reject(new Error('이미지 변환 시간 초과 — 더 작은 사진으로 시도해주세요.'));
+      }, 30000);
       canvas.toBlob(blob => {
-        if (!blob) return reject(new Error('이미지 변환 실패'));
-        resolve({ blob, width: w, height: h });
+        if (settled) return;
+        settled = true; clearTimeout(t);
+        if (!blob) return reject(new Error('이미지 변환 실패 — 다른 사진으로 시도해주세요.'));
+        resolve({ blob, width: dstW, height: dstH });
       }, 'image/jpeg', JPEG_QUALITY);
     });
   }
