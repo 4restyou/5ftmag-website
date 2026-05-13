@@ -6,13 +6,31 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Mon, 11 May 2026 03:50:27 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 13 May 2026 03:09:30 GMT</lastBuildDate>
     <generator>5ft.mag</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft.mag</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>필름이 자동으로 잡힐 때 — Lomo MC-A</title>
+      <link>https://www.5ftmag.com/stories/lomo-mca.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/lomo-mca.html</guid>
+      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
+      <description>2025년 10월, 로모그래피가 처음 자동 초점을 단 35mm 컴팩트를 내놓았다. 변화는 분명했고, 첫 물량의 흔들림도 분명했다.</description>
+      <category>CAMERA</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>다시 굴러가는 깡통 — 중국 필름의 세 풍경</title>
+      <link>https://www.5ftmag.com/stories/ch-revival.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/ch-revival.html</guid>
+      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
+      <description>Lucky가 컬러를 되돌리고, Shanghai는 흑백을 이어가고, Reflx Lab은 시네필름을 가정용으로 옮긴다. 중국 필름 생태계의 세 풍경.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>일상물 같길 바라는 30대 연애</title>
       <link>https://www.5ftmag.com/stories/17.html</link>
@@ -146,7 +164,7 @@
       <pubDate>Wed, 20 Nov 2024 00:00:00 GMT</pubDate>
       <description>사진집 〈고시텔〉로 데뷔한 심규동 작가. 그의 카메라 앞에서, 사람들은 어떻게 자유로워졌을까. 창간호 인터뷰 미리보기.</description>
       <category>INTERVIEW</category>
-      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">심규동</dc:creator>
     </item>
     <item>
       <title>창간호, 무엇이 담겼나</title>
