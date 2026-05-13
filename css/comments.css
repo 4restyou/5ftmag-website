@@ -252,8 +252,50 @@
 
 /* Films 모달 안에서는 다른 패딩 */
 .modal-content .cm-root {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  color: #fff;
   margin: 0;
   padding: 40px 0 0;
   max-width: 100%;
+}
+.modal-content .cm-auth,
+.modal-content .cm-error {
+  background: rgba(255, 255, 255, 0.08);
+}
+.modal-content .cm-auth-text,
+.modal-content .cm-time,
+.modal-content .cm-action,
+.modal-content .cm-empty,
+.modal-content .cm-deleted {
+  color: rgba(255, 255, 255, 0.62);
+}
+.modal-content .cm-btn,
+.modal-content .cm-textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+.modal-content .cm-btn:hover,
+.modal-content .cm-textarea:focus {
+  border-color: rgba(255, 255, 255, 0.68);
+}
+.modal-content .cm-btn-primary {
+  background: #fff;
+  color: #111;
+  border-color: #fff;
+}
+.modal-content .cm-btn-link:hover,
+.modal-content .cm-action:hover,
+.modal-content .cm-text,
+.modal-content .cm-text a {
+  color: #fff;
+}
+.modal-content .cm-item {
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+.modal-content .cm-avatar {
+  background: rgba(255, 255, 255, 0.12);
+}
+.modal-content .cm-replies {
+  border-left-color: rgba(255, 255, 255, 0.18);
 }
