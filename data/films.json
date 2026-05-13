@@ -1369,7 +1369,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/reala500d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "eterna250d": {
     "slug": "eterna250d",
