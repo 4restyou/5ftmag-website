@@ -501,7 +501,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/kodacolor100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "kodacolor200": {
     "slug": "kodacolor200",
@@ -526,7 +527,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/kodacolor200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "proimage100": {
     "slug": "proimage100",
