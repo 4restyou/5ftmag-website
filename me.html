@@ -114,10 +114,33 @@
     .me-market-card-price { font-size: 15px; font-weight: var(--fw-heading); color: var(--text); }
     .me-market-card-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
 
+    /* ── 좋아한 사진 / 좋아한 필름 그리드 ── */
+    .me-fav-grid       { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .me-fav-films-grid { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 28px; }
+    .me-fav-photo { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 4px; background: var(--bg-sub); cursor: zoom-in; }
+    .me-fav-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s; }
+    .me-fav-photo:hover img { transform: scale(1.03); }
+    .me-fav-photo .me-fav-meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px 9px; background: linear-gradient(to top, rgba(0,0,0,0.55), transparent); color: #fff; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.02em; line-height: 1.35; }
+    .me-fav-photo .me-fav-meta .author { display: block; font-weight: var(--fw-heading); }
+    .me-fav-photo .me-fav-meta .film   { display: block; opacity: 0.78; font-weight: var(--fw-all); margin-top: 1px; }
+    .me-fav-photo .me-fav-unbtn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.55); color: #fff; border: none; border-radius: 999px; width: 26px; height: 26px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+    .me-fav-photo .me-fav-unbtn:hover { background: rgba(0,0,0,0.75); }
+    .me-fav-film-card { position: relative; text-align: left; }
+    .me-fav-film-card a { display: block; text-decoration: none; color: inherit; }
+    .me-fav-film-card .me-fav-film-img { aspect-ratio: 1; background: var(--bg-sub); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .me-fav-film-card .me-fav-film-img img { width: 78%; height: 78%; object-fit: contain; }
+    .me-fav-film-card .me-fav-film-brand { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); margin-top: 10px; display: block; }
+    .me-fav-film-card .me-fav-film-name { font-size: 17px; font-weight: var(--fw-heading); letter-spacing: -0.015em; margin: 2px 0 4px; }
+    .me-fav-film-card .me-fav-film-spec { font-size: 12px; color: var(--text-muted); margin: 0; }
+    .me-fav-film-card .me-fav-unbtn { position: absolute; top: 10px; right: 10px; background: var(--bg); color: var(--text-muted); border: none; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: color .15s; }
+    .me-fav-film-card .me-fav-unbtn:hover { color: #e0245e; }
+
     @media (max-width: 720px) {
       .me-card { grid-template-columns: 1fr; }
       .me-card-img { width: 100%; aspect-ratio: 4/3; }
       .me-card-row { grid-template-columns: 1fr; gap: 2px; }
+      .me-pagetabs { overflow-x: auto; flex-wrap: nowrap; }
+      .me-pagetab { flex: 0 0 auto; }
     }
   </style>
 </head>
@@ -142,6 +165,8 @@
   <div class="me-pagetabs">
     <button type="button" class="me-pagetab active" data-section="photos">사진</button>
     <button type="button" class="me-pagetab" data-section="market">매물</button>
+    <button type="button" class="me-pagetab" data-section="fav-photos">좋아한 사진</button>
+    <button type="button" class="me-pagetab" data-section="fav-films">좋아한 필름</button>
   </div>
 
   <!-- ─── 사진 섹션 ─── -->
@@ -166,23 +191,41 @@
       <div class="me-empty">불러오는 중…</div>
     </div>
   </section>
+
+  <!-- ─── 좋아한 사진 섹션 ─── -->
+  <section id="section-fav-photos" hidden>
+    <div class="me-fav-grid" id="favPhotosGrid">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 필름 섹션 ─── -->
+  <section id="section-fav-films" hidden>
+    <div class="me-fav-films-grid" id="favFilmsGrid">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
 </div>
 
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260514-authreturn"></script>
+<script src="./js/db-client.js?v=20260514-favorites"></script>
 <script>
 'use strict';
 
 const STATE = {
   user: null,
-  section: 'photos',     // 'photos' | 'market'
+  section: 'photos',     // 'photos' | 'market' | 'fav-photos' | 'fav-films'
   // photos
   rows: [],
   filter: 'all',
   // market
   marketRows: [],
+  // favorites
+  favPhotos: null,       // null = 미로딩, [] = 비어있음
+  favFilms:  null,
+  filmsData: null,       // films.json 캐시 (좋아한 필름 렌더용)
 };
 
 const CAT_LABELS = { film:'필름', camera:'카메라', lens:'렌즈', accessory:'액세서리', etc:'기타' };
@@ -484,16 +527,142 @@ function bindMarketCardActions() {
 function switchSection(sec) {
   STATE.section = sec;
   document.querySelectorAll('.me-pagetab').forEach(t => t.classList.toggle('active', t.dataset.section === sec));
-  $('section-photos').hidden = sec !== 'photos';
-  $('section-market').hidden = sec !== 'market';
+  $('section-photos').hidden     = sec !== 'photos';
+  $('section-market').hidden     = sec !== 'market';
+  $('section-fav-photos').hidden = sec !== 'fav-photos';
+  $('section-fav-films').hidden  = sec !== 'fav-films';
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
-  // URL hash 동기화 (#market 또는 #photos)
+  if (sec === 'fav-photos' && STATE.favPhotos === null) loadFavPhotos();
+  if (sec === 'fav-films'  && STATE.favFilms === null)  loadFavFilms();
+  // URL hash 동기화
   try { history.replaceState(null, '', '#' + sec); } catch (_) {}
 }
 
 document.querySelectorAll('.me-pagetab').forEach(t => {
   t.addEventListener('click', () => switchSection(t.dataset.section));
 });
+
+// ═════════════════════════════════════════
+// 좋아한 사진 (reader_submissions 중 본인이 ♡ 한 것)
+// ═════════════════════════════════════════
+async function loadFavPhotos() {
+  $('favPhotosGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  const favs = await db().favorites.list('submission');
+  if (favs.length === 0) {
+    STATE.favPhotos = [];
+    $('favPhotosGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 사진이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 페이지에서 사진 보러 가기 →</a></div>`;
+    return;
+  }
+  const ids = favs.map(f => f.target_id);
+  // 승인된 사진만 노출 (반려/대기로 바뀌었거나 삭제된 경우 자동 숨김 — 공개 view 가 status='approved' 만)
+  const rows = await db().submissions.listByIds(ids);
+  // 좋아요 시점 순서 (favs 의 created_at DESC) 로 정렬
+  const byId = new Map(rows.map(r => [r.id, r]));
+  STATE.favPhotos = favs.map(f => byId.get(f.target_id)).filter(Boolean);
+  renderFavPhotos();
+}
+
+function renderFavPhotos() {
+  const rows = STATE.favPhotos || [];
+  if (rows.length === 0) {
+    $('favPhotosGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 사진이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 페이지에서 사진 보러 가기 →</a></div>`;
+    return;
+  }
+  $('favPhotosGrid').innerHTML = rows.map(r => {
+    const url = db().submissions.publicUrl(r.storage_path);
+    const author = r.submitter_name || (r.instagram || '').replace(/^@/, '') || '';
+    const film = r.film || '';
+    return `
+      <div class="me-fav-photo" data-id="${escapeAttr(r.id)}" data-zoom="${escapeAttr(url)}">
+        <img src="${escapeAttr(url)}" alt="" loading="lazy" />
+        <button type="button" class="me-fav-unbtn" data-action="unfav-photo" data-id="${escapeAttr(r.id)}" aria-label="즐겨찾기 해제" title="즐겨찾기 해제">♥</button>
+        <span class="me-fav-meta">
+          ${author ? `<span class="author">${escapeHtml(author)}</span>` : ''}
+          ${film ? `<span class="film">${escapeHtml(film)}</span>` : ''}
+        </span>
+      </div>`;
+  }).join('');
+  // 클릭 위임
+  $('favPhotosGrid').querySelectorAll('.me-fav-photo').forEach(card => {
+    card.addEventListener('click', async (e) => {
+      const unbtn = e.target.closest('[data-action="unfav-photo"]');
+      if (unbtn) {
+        e.stopPropagation();
+        const id = unbtn.dataset.id;
+        const { error } = await db().favorites.remove('submission', id);
+        if (error) { alert('해제 실패: ' + error.message); return; }
+        STATE.favPhotos = STATE.favPhotos.filter(r => r.id !== id);
+        renderFavPhotos();
+        return;
+      }
+      const zoom = card.dataset.zoom;
+      if (zoom) {
+        $('imgZoomTarget').src = zoom;
+        $('imgZoom').classList.add('open');
+      }
+    });
+  });
+}
+
+// ═════════════════════════════════════════
+// 좋아한 필름 (films.json 중 본인이 ♡ 한 것)
+// ═════════════════════════════════════════
+async function loadFavFilms() {
+  $('favFilmsGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  const favs = await db().favorites.list('film');
+  if (favs.length === 0) {
+    STATE.favFilms = [];
+    $('favFilmsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 필름이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 라이브러리 둘러보기 →</a></div>`;
+    return;
+  }
+  if (!STATE.filmsData) {
+    try {
+      const res = await fetch('data/films.json', { cache: 'no-cache' });
+      STATE.filmsData = await res.json();
+    } catch (_) {
+      STATE.filmsData = {};
+    }
+  }
+  STATE.favFilms = favs
+    .map(f => ({ slug: f.target_id, film: STATE.filmsData[f.target_id] }))
+    .filter(x => x.film);
+  renderFavFilms();
+}
+
+function renderFavFilms() {
+  const items = STATE.favFilms || [];
+  if (items.length === 0) {
+    $('favFilmsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 필름이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 라이브러리 둘러보기 →</a></div>`;
+    return;
+  }
+  $('favFilmsGrid').innerHTML = items.map(({ slug, film }) => {
+    const thumb = film.canThumbnail || '';
+    const thumbHtml = thumb
+      ? `<img src="${escapeAttr(thumb)}" alt="${escapeAttr(film.displayName || film.name)}" loading="lazy" />`
+      : `<span style="color:var(--text-muted); font-size:12px;">${escapeHtml(film.name || '')}</span>`;
+    return `
+      <div class="me-fav-film-card" data-slug="${escapeAttr(slug)}">
+        <button type="button" class="me-fav-unbtn" data-action="unfav-film" data-slug="${escapeAttr(slug)}" aria-label="즐겨찾기 해제" title="즐겨찾기 해제">♥</button>
+        <a href="films.html#${encodeURIComponent(slug)}">
+          <div class="me-fav-film-img">${thumbHtml}</div>
+          <span class="me-fav-film-brand">${escapeHtml(film.brand || '')}</span>
+          <h3 class="me-fav-film-name">${escapeHtml(film.name || '')}</h3>
+          <p class="me-fav-film-spec">ISO ${escapeHtml(film.iso || '')} · ${escapeHtml(film.type || '')} · ${escapeHtml(film.format || '')}</p>
+        </a>
+      </div>`;
+  }).join('');
+  $('favFilmsGrid').querySelectorAll('[data-action="unfav-film"]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const slug = btn.dataset.slug;
+      const { error } = await db().favorites.remove('film', slug);
+      if (error) { alert('해제 실패: ' + error.message); return; }
+      STATE.favFilms = STATE.favFilms.filter(x => x.slug !== slug);
+      renderFavFilms();
+    });
+  });
+}
 
 document.querySelectorAll('.me-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -519,8 +688,12 @@ $('imgZoom').addEventListener('click', () => {
   $('gate').hidden = true;
   $('app').hidden = false;
   await loadPhotos();
-  // URL hash 가 #market 이면 매물 탭으로 시작
-  if (location.hash === '#market') switchSection('market');
+  // URL hash 로 초기 탭 결정
+  const validSections = ['photos', 'market', 'fav-photos', 'fav-films'];
+  const hashSection = (location.hash || '').replace(/^#/, '');
+  if (validSections.includes(hashSection) && hashSection !== 'photos') {
+    switchSection(hashSection);
+  }
 })();
 </script>
 
