@@ -293,6 +293,26 @@
   let currentBrand  = 'all';
   let currentSearch = '';
 
+  function normalizeFilmLabel(s) {
+    return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
+  }
+
+  function normalizeContributorKey(s) {
+    return String(s ?? '').trim().replace(/^@/, '').toLowerCase();
+  }
+
+  function resolveFilmKey(input) {
+    const raw = String(input || '').trim();
+    if (!raw) return '';
+    if (filmsData[raw]) return raw;
+    const q = normalizeFilmLabel(raw);
+    for (const [slug, film] of Object.entries(filmsData || {})) {
+      const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
+      if (aliases.some(alias => normalizeFilmLabel(alias) === q)) return slug;
+    }
+    return '';
+  }
+
   function renderLibraryFilterChips(libraryFilms) {
     const filterBar = document.getElementById('libraryFilter');
     if (!filterBar) return;
@@ -414,12 +434,13 @@
     });
   }
 
-  fetch('data/films.json?v=20260514-format120')
+  fetch('data/films.json?v=20260514-photo-links')
     .then(res => res.json())
     .then(data => {
       filmsData = data;
       renderFilmsGrid();
       updateReaderCounts(); // 비동기 — Supabase 승인 제출 수 집계 후 카드 카운트 갱신
+      handleInitialDeepLink();
     })
     .catch(err => {
       console.error('Films 데이터 로딩 실패:', err);
@@ -483,7 +504,41 @@
   const modalContent = document.getElementById('modalContent');
   const modalClose = document.getElementById('modalClose');
 
-  function openModal(filmKey) {
+  async function waitForApprovedSubmissions(timeoutMs = 3000) {
+    const step = 100;
+    for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
+      if (typeof window.fetchApprovedSubmissions === 'function') {
+        return window.fetchApprovedSubmissions(1000).catch(() => []);
+      }
+      await new Promise(r => setTimeout(r, step));
+    }
+    return [];
+  }
+
+  async function handleInitialDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const contributor = normalizeContributorKey(params.get('contributor'));
+    let filmKey = resolveFilmKey(params.get('film') || params.get('slug'));
+
+    if (!filmKey && contributor) {
+      const submissions = await waitForApprovedSubmissions();
+      const personKeyOf = (sub) => normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
+      const first = submissions.find(sub => personKeyOf(sub) === contributor);
+      if (first) {
+        const match = typeof window.findFilmMatch === 'function'
+          ? window.findFilmMatch(first.film, filmsData)
+          : null;
+        filmKey = match?.slug || resolveFilmKey(first.film);
+      } else {
+        const contributorCard = document.getElementById('filmsGridLibrary');
+        if (contributorCard) contributorCard.scrollIntoView({ block: 'start' });
+      }
+    }
+
+    if (filmKey) openModal(filmKey, { contributor });
+  }
+
+  function openModal(filmKey, options = {}) {
     const data = filmsData[filmKey];
     if (!data) return;
     currentFilmKey = filmKey;
@@ -594,24 +649,19 @@
     }
 
     // Reader's Roll: 승인된 제출을 lazy fetch 해서 빈 자리 채우기
-    loadReaderRollForFilm(filmKey);
+    loadReaderRollForFilm(filmKey, options);
   }
 
   // ════════════════════════════
   // Reader's Roll: 필름별 승인된 제출 가져와서 슬롯 채우기
   // ════════════════════════════
-  async function loadReaderRollForFilm(filmKey) {
+  async function loadReaderRollForFilm(filmKey, options = {}) {
     const film = filmsData[filmKey];
     if (!film) return;
-    if (typeof window.fetchApprovedSubmissions !== 'function') return; // supabase 위젯이 아직 로드되기 전이면 패스
+    const isFeatured = film.tier === 'featured';
 
-    let submissions = [];
-    try {
-      submissions = await window.fetchApprovedSubmissions(1000);
-    } catch (e) {
-      console.warn('Reader submissions fetch 실패:', e);
-      return;
-    }
+    const submissions = await waitForApprovedSubmissions();
+    if (!submissions.length) return;
 
     // 필름 alias 매칭 — reader-submissions.js의 공유 정규화 함수 사용
     // (없으면 안전한 폴백: 공백/하이픈/언더스코어/괄호 제거 + 소문자)
@@ -630,10 +680,7 @@
     const contributorView = document.getElementById(`readerContributorView-${filmKey}`);
     if (!grid) return;
 
-    const personKeyOf = (sub) => {
-      const raw = sub.instagram || sub.submitterName || sub.author || '';
-      return String(raw).trim().toLowerCase().replace(/^@/, '');
-    };
+    const personKeyOf = (sub) => normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
     const personLabelOf = (sub) => sub.submitterName || sub.author || sub.instagram || '이름 없음';
     const authorBuckets = new Map();
     matched.forEach((sub) => {
@@ -830,6 +877,11 @@
         if (Number.isNaN(idx) || idx >= group.length) return;
         openFilmReaderLightbox(group, idx);
       };
+    }
+
+    const requestedContributor = normalizeContributorKey(options.contributor);
+    if (requestedContributor) {
+      renderContributorView(requestedContributor);
     }
   }
 

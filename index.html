@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260513-theme">
-  <link rel="stylesheet" href="./css/home.css?v=20260513-keepall">
+  <link rel="stylesheet" href="./css/home.css?v=20260514-photo-links">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -433,6 +433,40 @@
   const modalClose = document.getElementById('modalClose');
   let filmsData = {};
 
+  function normalizeFilmLabel(s) {
+    return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
+  }
+
+  function resolveFilmKeyByName(filmName) {
+    const q = normalizeFilmLabel(filmName);
+    if (!q) return '';
+    for (const [slug, film] of Object.entries(filmsData || {})) {
+      const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
+      if (aliases.some(alias => normalizeFilmLabel(alias) === q)) return slug;
+    }
+    return '';
+  }
+
+  function contributorKeyOf(photo) {
+    return String(photo.instagram || photo.author || '').trim().replace(/^@/, '').toLowerCase();
+  }
+
+  function filmLinkFor(photo) {
+    const filmKey = photo.filmKey || resolveFilmKeyByName(photo.filmName);
+    if (!filmKey) return 'films.html';
+    const params = new URLSearchParams({ film: filmKey });
+    return `films.html?${params.toString()}`;
+  }
+
+  function contributorLinkFor(photo) {
+    const key = contributorKeyOf(photo);
+    if (!key) return filmLinkFor(photo);
+    const params = new URLSearchParams({ contributor: key });
+    const filmKey = photo.filmKey || resolveFilmKeyByName(photo.filmName);
+    if (filmKey) params.set('film', filmKey);
+    return `films.html?${params.toString()}`;
+  }
+
   if (photoGrid) {
     // reader-submissions.js 가 body 끝에서 로드되어 fetchApprovedSubmissions 가
     // 아직 정의되지 않았을 수 있음 → 최대 3초 폴링 후 사용 (없으면 빈 배열)
@@ -481,8 +515,10 @@
               src: r.image,
               author: r.author || '',
               filmName: r.film || '',
+              filmKey: resolveFilmKeyByName(r.film),
               camera: r.camera || '',
               caption: r.caption || '',
+              instagram: r.instagram || '',
               instagramUrl: r.instagramUrl || '',
             });
           });
@@ -496,8 +532,10 @@
               src: r.image,
               author: r.author || '',
               filmName: r.film || '',
+              filmKey: resolveFilmKeyByName(r.film),
               camera: r.camera || '',
               caption: r.caption || '',
+              instagram: r.instagram || '',
               instagramUrl: r.instagramUrl || '',
             });
           });
@@ -549,6 +587,8 @@
             : null;
           const author = photo.author || '';
           const filmName = photo.filmName || '';
+          const filmHref = filmLinkFor(photo);
+          const contributorHref = contributorLinkFor(photo);
           const pictureBlock = webpSrc
             ? `<picture>
                  <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
@@ -556,23 +596,17 @@
                </picture>`
             : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />`;
           return `
-            <button type="button" class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
-              ${pictureBlock}
+            <article class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
+              <a class="disc-photo-link" href="${escapeAttr(filmHref)}" aria-label="${escapeAttr(filmName)} 필름 사진 보기">
+                ${pictureBlock}
+              </a>
               <span class="disc-info">
-                <span class="disc-author">${escapeHtml(author)}</span>
-                <span class="disc-film">${escapeHtml(filmName)}</span>
+                <a class="disc-author" href="${escapeAttr(contributorHref)}">${escapeHtml(author)}</a>
+                <a class="disc-film" href="${escapeAttr(filmHref)}">${escapeHtml(filmName)}</a>
               </span>
-            </button>
+            </article>
           `;
         }).join('');
-
-        photoGrid.querySelectorAll('.disc-cell').forEach(cell => {
-          cell.addEventListener('click', (e) => {
-            e.preventDefault();
-            const idx = parseInt(cell.dataset.photoIndex, 10);
-            openPhotoLightbox(selected, idx);
-          });
-        });
       })
       .catch(err => {
         console.error('Photo 그리드 로딩 실패:', err);
@@ -737,7 +771,7 @@
         photoLbLink.rel = 'noopener';
         photoLbLink.textContent = 'Instagram에서 보기 ↗';
       } else {
-        photoLbLink.href = 'films.html';
+        photoLbLink.href = filmLinkFor(p);
         photoLbLink.removeAttribute('target');
         photoLbLink.removeAttribute('rel');
         photoLbLink.textContent = '필름 페이지에서 더 보기 →';
