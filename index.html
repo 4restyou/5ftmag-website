@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260513-theme">
-  <link rel="stylesheet" href="./css/home.css?v=20260514-photo-viewer-actions">
+  <link rel="stylesheet" href="./css/home.css?v=20260514-photo-fav">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -221,6 +221,12 @@
       <span class="camera" id="photoLbCamera"></span>
       <span class="counter" id="photoLbCounter"></span>
       <span class="photo-lb-actions">
+        <button type="button" class="photo-lb-fav" id="photoLbFav" aria-pressed="false" aria-label="즐겨찾기 추가" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
+            <path stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
+          </svg>
+        </button>
         <a href="films.html" class="photo-lb-link" id="photoLbFilmLink">필름 보기 →</a>
         <a href="films.html" class="photo-lb-link" id="photoLbContributorLink">촬영자 보기 →</a>
       </span>
@@ -526,7 +532,7 @@
             });
           });
 
-        // 3) 독자 사진 (Supabase 승인된 제출)
+        // 3) 독자 사진 (Supabase 승인된 제출) — submissionId 도 함께 보관 (♡ 토글용)
         (Array.isArray(supabaseReaders) ? supabaseReaders : [])
           .filter(r => r.image)
           .forEach(r => {
@@ -540,6 +546,7 @@
               caption: r.caption || '',
               instagram: r.instagram || '',
               instagramUrl: r.instagramUrl || '',
+              submissionId: typeof r.id === 'string' ? r.id.replace(/^sub-/, '') : '',
             });
           });
 
@@ -738,14 +745,85 @@
   const photoLbClose   = document.getElementById('photoLbClose');
   const photoLbPrev    = document.getElementById('photoLbPrev');
   const photoLbNext    = document.getElementById('photoLbNext');
+  const photoLbFav     = document.getElementById('photoLbFav');
 
   let currentPhotos = [];
   let currentPhotoIndex = 0;
+  // 본인이 ♡ 한 submission id 집합 — 로그인 후 비동기 로드
+  let photoFavIds = new Set();
+
+  async function loadPhotoFavorites() {
+    if (!window.MagDB || !window.MagDB.isReady()) return;
+    try {
+      const sess = await window.MagDB.auth.getSession();
+      if (!sess) { photoFavIds = new Set(); return; }
+      photoFavIds = await window.MagDB.favorites.idsForType('submission');
+    } catch (_) {
+      photoFavIds = new Set();
+    }
+  }
+  // db-client 준비된 뒤 비동기 로드 — 라이트박스 열 때 사용
+  (async () => {
+    for (let i = 0; i < 60; i++) {
+      if (window.MagDB && window.MagDB.isReady()) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    await loadPhotoFavorites();
+  })();
 
   function openPhotoLightbox(photos, index) {
     currentPhotos = photos;
     showPhoto(index);
   }
+
+  function syncPhotoLbFav() {
+    if (!photoLbFav) return;
+    const p = currentPhotos[currentPhotoIndex];
+    const subId = p && p.source === 'reader' && p.submissionId ? p.submissionId : '';
+    if (!subId) {
+      photoLbFav.hidden = true;
+      photoLbFav.removeAttribute('data-submission-id');
+      photoLbFav.classList.remove('is-fav', 'is-busy');
+      return;
+    }
+    photoLbFav.hidden = false;
+    photoLbFav.dataset.submissionId = subId;
+    const isFav = photoFavIds.has(subId);
+    photoLbFav.classList.toggle('is-fav', isFav);
+    photoLbFav.setAttribute('aria-pressed', String(isFav));
+    photoLbFav.setAttribute('aria-label', isFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
+  }
+
+  async function togglePhotoLbFav() {
+    if (!photoLbFav || photoLbFav.hidden) return;
+    if (photoLbFav.classList.contains('is-busy')) return;
+    const subId = photoLbFav.dataset.submissionId || '';
+    if (!subId) return;
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      alert('잠시 후 다시 시도해주세요.');
+      return;
+    }
+    const sess = await window.MagDB.auth.getSession();
+    if (!sess) {
+      if (!confirm('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return;
+      window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+      return;
+    }
+    const wasFav = photoFavIds.has(subId);
+    if (wasFav) photoFavIds.delete(subId); else photoFavIds.add(subId);
+    photoLbFav.classList.toggle('is-fav', !wasFav);
+    photoLbFav.setAttribute('aria-pressed', String(!wasFav));
+    photoLbFav.classList.add('is-busy');
+    const { error } = await window.MagDB.favorites.toggle('submission', subId, wasFav);
+    photoLbFav.classList.remove('is-busy');
+    if (error) {
+      if (wasFav) photoFavIds.add(subId); else photoFavIds.delete(subId);
+      photoLbFav.classList.toggle('is-fav', wasFav);
+      photoLbFav.setAttribute('aria-pressed', String(wasFav));
+      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+    }
+  }
+  if (photoLbFav) photoLbFav.addEventListener('click', togglePhotoLbFav);
 
   function showPhoto(index) {
     if (currentPhotos.length === 0) return;
@@ -770,6 +848,7 @@
       photoLbCamera.hidden = !p.camera;
     }
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;
+    syncPhotoLbFav();
 
     if (photoLbLink) {
       photoLbLink.href = filmLinkFor(p);
@@ -837,7 +916,7 @@
   }
 </script>
 
-<script src="./js/site-common.js?v=20260512-relocate"></script>
+<script src="./js/site-common.js?v=20260514-authnav"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260514-favorites"></script>
 <script src="./js/reader-submissions.js?v=20260514-authreturn"></script>
