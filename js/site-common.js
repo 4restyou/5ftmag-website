@@ -175,7 +175,104 @@
     });
 
     linkArticleAuthor();
+    setupAuthNav();
   }
+
+  // ════════════════════════════════════════════════
+  // Auth nav — 로그인 상태/편집부 여부에 따라 헤더에 항목 inject
+  //   기본 헤더 마크업은 28개 페이지에 중복돼 있어서 DOM 변경은 여기서만 함.
+  //   - 비로그인: "로그인"
+  //   - 로그인  : "내 정보"
+  //   - 편집부  : "관리" + "내 정보"
+  //   - Shop ↗ 다음 자리에 노출 (메인 nav + 모바일 nav 모두)
+  // ════════════════════════════════════════════════
+  function isStoryPath() { return /\/stories\//.test(location.pathname); }
+  function isAdminPath() { return /\/admin\//.test(location.pathname); }
+  function authPathTo(name) {
+    // me.html · admin/submissions.html 로의 상대 경로 계산
+    if (isStoryPath() || isAdminPath()) {
+      return '../' + name;
+    }
+    return name;
+  }
+  async function setupAuthNav() {
+    const mainNav = document.querySelector('.main-nav');
+    const mobileNav = document.getElementById('mobileNav');
+    if (!mainNav && !mobileNav) return;
+    // db-client 준비 대기 (최대 3초)
+    for (let i = 0; i < 60; i++) {
+      if (window.MagDB && window.MagDB.isReady()) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    let session = null;
+    let isEditor = false;
+    if (window.MagDB && window.MagDB.isReady()) {
+      try {
+        session = await window.MagDB.auth.getSession();
+        if (session && window.MagDB.profiles && typeof window.MagDB.profiles.getMine === 'function') {
+          const profile = await window.MagDB.profiles.getMine();
+          isEditor = !!(profile && profile.is_editor);
+        }
+      } catch (_) { /* silent — 익명/오프라인 모두 OK */ }
+    }
+    renderAuthNav({ mainNav, mobileNav, loggedIn: !!session, isEditor });
+  }
+  function renderAuthNav({ mainNav, mobileNav, loggedIn, isEditor }) {
+    // 기존 inject 항목 제거 (auth 상태 바뀌었을 때 재호출 가능)
+    document.querySelectorAll('[data-nav-auth]').forEach(el => el.remove());
+    const meHref    = authPathTo('me.html');
+    const adminHref = authPathTo('admin/submissions.html');
+    const items = [];
+    if (!loggedIn) {
+      items.push({ label: '로그인', action: 'auth-login' });
+    } else {
+      if (isEditor) items.push({ label: '관리', href: adminHref });
+      items.push({ label: '내 정보', href: meHref });
+    }
+    // 메인 nav (Shop 다음에 끼움 — Shop 은 .ext 클래스로 식별)
+    if (mainNav) {
+      const shopLi = mainNav.querySelector('.ext')?.parentElement || null;
+      items.forEach(it => {
+        const li = document.createElement('li');
+        li.setAttribute('data-nav-auth', '1');
+        const a = document.createElement('a');
+        if (it.href) a.href = it.href;
+        else {
+          a.href = '#';
+          a.dataset.action = it.action;
+        }
+        a.textContent = it.label;
+        li.appendChild(a);
+        if (shopLi && shopLi.nextSibling) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
+        else mainNav.appendChild(li);
+      });
+    }
+    // 모바일 nav (Shop 링크 뒤에 끼움)
+    if (mobileNav) {
+      const shopA = mobileNav.querySelector('a[href*="smartstore"]') || null;
+      items.forEach(it => {
+        const a = document.createElement('a');
+        a.setAttribute('data-nav-auth', '1');
+        if (it.href) a.href = it.href;
+        else { a.href = '#'; a.dataset.action = it.action; }
+        a.textContent = it.label;
+        if (shopA && shopA.nextSibling) shopA.parentNode.insertBefore(a, shopA.nextSibling);
+        else mobileNav.appendChild(a);
+      });
+    }
+  }
+  // 로그인 액션 위임
+  document.addEventListener('click', async (e) => {
+    const t = e.target.closest('[data-action="auth-login"]');
+    if (!t) return;
+    e.preventDefault();
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      alert('잠시 후 다시 시도해주세요.');
+      return;
+    }
+    // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
+    window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

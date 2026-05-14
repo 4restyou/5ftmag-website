@@ -776,6 +776,27 @@ body.modal-open { overflow: hidden; }
   background: rgba(255, 255, 255, 0.1);
   border-color: #fff;
 }
+.photo-lb-fav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.photo-lb-fav:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+}
+.photo-lb-fav svg path { transition: fill .15s, stroke .15s; }
+.photo-lb-fav.is-fav svg path { fill: #ff6b8a; stroke: #ff6b8a; }
+.photo-lb-fav:active { transform: scale(0.92); }
+.photo-lb-fav.is-busy { opacity: 0.55; pointer-events: none; }
 @media (max-width: 520px) {
   .photo-lb-actions {
     width: min(100%, 320px);
