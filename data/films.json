@@ -3180,6 +3180,31 @@
     "canThumbnail": "img/films/orientalseagull100-can.webp",
     "canThumbnailStatus": "set"
   },
+  "orientalseagull400": {
+    "slug": "orientalseagull400",
+    "tier": "library",
+    "brand": "ORIENTAL",
+    "name": "Seagull 400",
+    "displayName": "Oriental Seagull 400",
+    "aliases": [
+      "Seagull 400",
+      "Oriental Seagull 400",
+      "New Seagull 400",
+      "Seagull",
+      "오리엔탈 시걸 400",
+      "시걸 400",
+      "시걸",
+      "orientalseagull400"
+    ],
+    "desc": "Harman(일포드와 같은 영국 공장)이 일본 시장용으로 만드는 흑백 필름의 고감도 라인. 2016년 ISO 100 과 함께 출시된 입문·학생용 라인의 400 버전으로, 한 단 빨라진 감도로 실내·저조도에서도 셔터를 자유롭게 끊을 수 있습니다. UK 생산·일본 유통의 한 롤.",
+    "iso": "400",
+    "type": "Black & White",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": "img/films/orientalseagull400-can.webp",
+    "canThumbnailStatus": "set"
+  },
   "profotoxl100": {
     "slug": "profotoxl100",
     "tier": "library",
