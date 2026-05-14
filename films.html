@@ -663,14 +663,14 @@
       .slice(0, 120);
 
     function renderPersonFilter() {
-      if (!personFilter || authors.length < 2) return;
+      if (!personFilter || authors.length < 1) return;
       personFilter.hidden = false;
       personFilter.innerHTML = `
-        <button type="button" class="reader-person-chip is-active" data-person-key="all">
+        ${authors.length > 1 ? `<button type="button" class="reader-person-chip is-active" data-person-key="all">
           ALL <span>${matched.length}</span>
-        </button>
+        </button>` : ''}
         ${authors.map(([key, info]) => `
-          <button type="button" class="reader-person-chip" data-person-key="${escapeAttr(key)}">
+          <button type="button" class="reader-person-chip${authors.length === 1 ? ' is-active' : ''}" data-person-key="${escapeAttr(key)}">
             ${escapeAttr(info.label)} <span>${info.count}</span>
             <em class="reader-person-all">전체</em>
           </button>
@@ -684,7 +684,7 @@
         : matched.filter(sub => personKeyOf(sub) === activePerson);
       if (contributorView) contributorView.hidden = true;
       grid.hidden = false;
-      if (personFilter) personFilter.hidden = authors.length < 2;
+      if (personFilter) personFilter.hidden = authors.length < 1;
       if (rollIntro) {
         rollIntro.textContent = isFeatured
           ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.'
