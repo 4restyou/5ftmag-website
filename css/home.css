@@ -267,17 +267,6 @@
 }
 .disc-cell:nth-child(2n) { border-right: none; }
 .disc-cell:nth-last-child(-n+2) { border-bottom: none; }
-.disc-photo-link {
-  display: block;
-  width: 100%;
-  height: 100%;
-  color: inherit;
-}
-.disc-photo-link picture {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
 .disc-cell img {
   width: 100%;
   height: 100%;
@@ -305,27 +294,17 @@
   transform: translateY(8px);
   transition: opacity .2s ease, transform .2s ease;
   text-align: left;
-}
-.disc-info .disc-author,
-.disc-info .disc-film {
-  display: block;
-  width: fit-content;
-  max-width: 100%;
-  color: inherit;
-  text-decoration: none;
+  pointer-events: none;
 }
 .disc-info .disc-author {
+  display: block;
   font-size: 18px;
   font-weight: var(--fw-heading);
   letter-spacing: var(--ls-default);
   line-height: 1.15;
 }
-.disc-info .disc-author:hover,
-.disc-info .disc-film:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 .disc-info .disc-film {
+  display: block;
   margin-top: 4px;
   font-size: 12px;
   font-weight: var(--fw-heading);
@@ -335,16 +314,15 @@
   opacity: 0.74;
 }
 .disc-cell:hover::after,
-.disc-cell:focus-within::after { opacity: 1; }
+.disc-cell:focus-visible::after { opacity: 1; }
 .disc-cell:hover .disc-info,
-.disc-cell:focus-within .disc-info {
+.disc-cell:focus-visible .disc-info {
   opacity: 1;
   transform: translateY(0);
 }
 .disc-cell:hover img,
-.disc-cell:focus-within img { transform: scale(1.04); }
-.disc-cell { cursor: default; }
-.disc-photo-link { cursor: pointer; }
+.disc-cell:focus-visible img { transform: scale(1.04); }
+.disc-cell { cursor: pointer; }
 
 /* ════════════════════════════
    MODAL (사진 클릭 시 필름 정보)
@@ -772,6 +750,13 @@ body.modal-open { overflow: hidden; }
   color: rgba(255, 255, 255, 0.55);
   font-size: 12px;
 }
+.photo-lb-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 .photo-lb-link {
   display: inline-flex;
   align-items: center;
@@ -825,6 +810,7 @@ body.modal-open { overflow: hidden; }
   .photo-lb-prev  { left: 12px;  width: 40px; height: 40px; }
   .photo-lb-next  { right: 12px; width: 40px; height: 40px; }
   .photo-lb-info { flex-direction: column; gap: 8px; text-align: center; }
+  .photo-lb-actions { gap: 6px; }
 }
 
 /* Reader's Roll 안내문 */

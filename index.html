@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260513-theme">
-  <link rel="stylesheet" href="./css/home.css?v=20260514-photo-links">
+  <link rel="stylesheet" href="./css/home.css?v=20260514-photo-viewer-actions">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -220,7 +220,10 @@
       <span class="film" id="photoLbFilm"></span>
       <span class="camera" id="photoLbCamera"></span>
       <span class="counter" id="photoLbCounter"></span>
-      <a href="films.html" class="photo-lb-link" id="photoLbFilmLink">필름 페이지에서 더 보기 →</a>
+      <span class="photo-lb-actions">
+        <a href="films.html" class="photo-lb-link" id="photoLbFilmLink">필름 보기 →</a>
+        <a href="films.html" class="photo-lb-link" id="photoLbContributorLink">촬영자 사진 보기 →</a>
+      </span>
     </div>
   </div>
 </div>
@@ -587,8 +590,6 @@
             : null;
           const author = photo.author || '';
           const filmName = photo.filmName || '';
-          const filmHref = filmLinkFor(photo);
-          const contributorHref = contributorLinkFor(photo);
           const pictureBlock = webpSrc
             ? `<picture>
                  <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
@@ -596,17 +597,23 @@
                </picture>`
             : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />`;
           return `
-            <article class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
-              <a class="disc-photo-link" href="${escapeAttr(filmHref)}" aria-label="${escapeAttr(filmName)} 필름 사진 보기">
-                ${pictureBlock}
-              </a>
+            <button type="button" class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
+              ${pictureBlock}
               <span class="disc-info">
-                <a class="disc-author" href="${escapeAttr(contributorHref)}">${escapeHtml(author)}</a>
-                <a class="disc-film" href="${escapeAttr(filmHref)}">${escapeHtml(filmName)}</a>
+                <span class="disc-author">${escapeHtml(author)}</span>
+                <span class="disc-film">${escapeHtml(filmName)}</span>
               </span>
-            </article>
+            </button>
           `;
         }).join('');
+
+        photoGrid.querySelectorAll('.disc-cell').forEach(cell => {
+          cell.addEventListener('click', (e) => {
+            e.preventDefault();
+            const idx = parseInt(cell.dataset.photoIndex, 10);
+            openPhotoLightbox(selected, idx);
+          });
+        });
       })
       .catch(err => {
         console.error('Photo 그리드 로딩 실패:', err);
@@ -727,6 +734,7 @@
   const photoLbCamera  = document.getElementById('photoLbCamera');
   const photoLbCounter = document.getElementById('photoLbCounter');
   const photoLbLink    = document.getElementById('photoLbFilmLink');
+  const photoLbContributorLink = document.getElementById('photoLbContributorLink');
   const photoLbClose   = document.getElementById('photoLbClose');
   const photoLbPrev    = document.getElementById('photoLbPrev');
   const photoLbNext    = document.getElementById('photoLbNext');
@@ -763,19 +771,17 @@
     }
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;
 
-    // 링크: 독자 사진이면 Instagram, editorial이면 필름 페이지
     if (photoLbLink) {
-      if (p.source === 'reader' && p.instagramUrl) {
-        photoLbLink.href = p.instagramUrl;
-        photoLbLink.target = '_blank';
-        photoLbLink.rel = 'noopener';
-        photoLbLink.textContent = 'Instagram에서 보기 ↗';
-      } else {
-        photoLbLink.href = filmLinkFor(p);
-        photoLbLink.removeAttribute('target');
-        photoLbLink.removeAttribute('rel');
-        photoLbLink.textContent = '필름 페이지에서 더 보기 →';
-      }
+      photoLbLink.href = filmLinkFor(p);
+      photoLbLink.removeAttribute('target');
+      photoLbLink.removeAttribute('rel');
+      photoLbLink.textContent = '필름 보기 →';
+    }
+    if (photoLbContributorLink) {
+      photoLbContributorLink.href = contributorLinkFor(p);
+      photoLbContributorLink.removeAttribute('target');
+      photoLbContributorLink.removeAttribute('rel');
+      photoLbContributorLink.hidden = !contributorKeyOf(p);
     }
 
     photoLightbox.classList.add('open');
