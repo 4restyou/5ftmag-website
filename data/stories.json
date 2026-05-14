@@ -1,5 +1,19 @@
 [
   {
+    "id": "spc-issue01",
+    "title": "해소의 바다, 부산 — SPC 사진첩 ISSUE.01",
+    "category": "review",
+    "categoryLabel": "PHOTOBOOK",
+    "author": "Street Photography Club",
+    "date": "2026-05-14",
+    "issue": "",
+    "thumbnail": "img/stories/spc-issue01/1.jpg",
+    "excerpt": "Street Photography Club 이 시작한 사진첩 시리즈의 첫 권. 김지훈이 부산의 바다 앞에서 마주한 사람들의 표정 36장. A5 변형 · 100부 한정.",
+    "page": "stories/spc-issue01.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "lomo-mca",
     "title": "필름이 자동으로 잡힐 때 — Lomo MC-A",
     "category": "review",
