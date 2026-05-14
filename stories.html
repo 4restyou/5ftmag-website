@@ -92,11 +92,13 @@
   <button class="filter-chip active" data-category="all">All</button>
   <button class="filter-chip" data-category="photo">Photo</button>
   <button class="filter-chip" data-category="essay">Essay</button>
+  <button class="filter-chip" data-category="film">Film</button>
+  <button class="filter-chip" data-category="camera">Camera</button>
   <button class="filter-chip" data-category="interview">Interview</button>
-  <button class="filter-chip" data-category="review">Review</button>
   <button class="filter-chip" data-category="goods">Goods</button>
   <button class="filter-chip" data-category="exhibition">Exhibition</button>
   <button class="filter-chip" data-category="illustration">Illustration</button>
+  <button class="filter-chip" data-category="editorial">Editorial</button>
 </div>
 
 <!-- ════════ 아티클 그리드 ════════ -->
@@ -187,6 +189,21 @@
     return story.author ? `${label} · ${story.author}` : label;
   }
 
+  function storyFilterKey(story) {
+    const label = String(story.categoryLabel || '').toUpperCase();
+    const category = String(story.category || '').toLowerCase();
+    if (label.includes('PHOTOBOOK') || label === 'PHOTO') return 'photo';
+    if (label.includes('FILM')) return 'film';
+    if (label.includes('CAMERA')) return 'camera';
+    if (label === 'ESSAY') return 'essay';
+    if (label === 'INTERVIEW') return 'interview';
+    if (label === 'GOODS') return 'goods';
+    if (label === 'EXHIBITION') return 'exhibition';
+    if (label === 'FEEL:TOON' || label === 'ILLUSTRATION') return 'illustration';
+    if (label === 'EDITORIAL' || label === 'FEATURE') return 'editorial';
+    return category || 'editorial';
+  }
+
   // 카드 HTML 생성
   function renderCard(story) {
     const link = story.page || '#';
@@ -209,7 +226,7 @@
          </div>`;
 
     return `
-      <a href="${escapeAttr(link)}" class="article-card" data-category="${escapeAttr(story.category)}" data-issue="${escapeAttr(story.issue || '')}">
+      <a href="${escapeAttr(link)}" class="article-card" data-category="${escapeAttr(storyFilterKey(story))}" data-issue="${escapeAttr(story.issue || '')}">
         ${imgBlock}
         <span class="article-category">${escapeHtml(categoryLabel(story))}</span>
         <h2 class="article-title">${escapeHtml(story.title)}</h2>
@@ -267,7 +284,7 @@
   function applyFilters() {
     let result = currentCategory === 'all'
       ? allStories
-      : allStories.filter(s => s.category === currentCategory);
+      : allStories.filter(s => storyFilterKey(s) === currentCategory);
 
     // 검색어가 있으면 추가 필터
     if (currentSearchQuery) {
