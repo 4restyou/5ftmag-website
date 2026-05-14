@@ -965,7 +965,7 @@
   function resetLightboxView() {
     lightbox.classList.remove('is-zoomed');
     if (lightboxZoom) {
-      lightboxZoom.textContent = 'ZOOM';
+      lightboxZoom.textContent = '확대';
       lightboxZoom.setAttribute('aria-label', '사진 확대');
     }
   }
@@ -1137,7 +1137,7 @@
   function toggleZoom() {
     const zoomed = lightbox.classList.toggle('is-zoomed');
     if (lightboxZoom) {
-      lightboxZoom.textContent = zoomed ? 'FIT' : 'ZOOM';
+      lightboxZoom.textContent = zoomed ? '맞춤' : '확대';
       lightboxZoom.setAttribute('aria-label', zoomed ? '화면에 맞추기' : '사진 확대');
     }
   }
