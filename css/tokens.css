@@ -30,6 +30,11 @@
   --fw-all:       600;      /* 일반 텍스트 굵기 (SemiBold) — 가독성 강화 */
   --fw-heading:   800;      /* 타이틀/제목 굵기 (ExtraBold) */
   --ls-default:   -0.02em;
+
+  /* 인터랙션 형태 — 매거진 표면은 낮은 반경, 기능 표면은 안정적인 4px */
+  --btn-radius:   4px;
+  --chip-radius:  4px;
+  --ctrl-border:  #c4c4c4;
 }
 
 /* 다크 모드 */

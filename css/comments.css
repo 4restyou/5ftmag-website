@@ -57,7 +57,7 @@
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   cursor: pointer;
   transition: all .15s;
 }

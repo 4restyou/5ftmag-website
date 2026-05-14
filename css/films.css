@@ -626,7 +626,7 @@
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   padding: 8px 32px 8px 14px;
   cursor: pointer;
   transition: border-color .15s, color .15s;
@@ -653,8 +653,8 @@
   padding: 7px 14px;
   background: var(--bg);
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 1px solid var(--ctrl-border);
+  border-radius: var(--chip-radius);
   font: inherit;
   font-size: 13px;
   font-weight: var(--fw-heading);
@@ -674,7 +674,7 @@
 .library-filter-count {
   font-size: 11px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--bg-sub);
   color: var(--text-muted);
   font-weight: var(--fw-heading);
@@ -851,7 +851,7 @@
   border: 1px solid rgba(255, 255, 255, 0.24);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.68);
-  border-radius: 999px;
+  border-radius: var(--chip-radius);
   font: inherit;
   font-size: 11px;
   font-weight: var(--fw-heading);
@@ -934,7 +934,7 @@
   border: 1px solid rgba(255, 255, 255, 0.24);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.74);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   font: inherit;
   font-size: 12px;
   font-weight: var(--fw-heading);

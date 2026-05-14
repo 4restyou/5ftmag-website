@@ -247,7 +247,7 @@
   // 카드 그리드 렌더링
   function renderGrid(stories) {
     if (stories.length === 0) {
-      grid.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
+      grid.innerHTML = '<div class="no-results">일치하는 글이 없습니다. 제목, 카테고리, 작가명을 줄여서 다시 검색해 보세요.</div>';
       renderPagination(0);
       return;
     }
@@ -311,7 +311,7 @@
     })
     .catch(err => {
       console.error(err);
-      grid.innerHTML = '<div class="empty-state">글을 불러오는 중 오류가 발생했습니다.<br /><small style="opacity:.6">로컬 파일을 직접 열면 보안상 JSON 로딩이 막힐 수 있어요. <code>http://localhost</code> 환경에서 실행하거나 호스팅된 사이트에서 확인해주세요.</small></div>';
+      grid.innerHTML = '<div class="empty-state">글 목록을 불러오지 못했습니다.<br /><small style="opacity:.6">네트워크 상태를 확인한 뒤 새로고침해 주세요. 로컬 파일을 직접 열었다면 <code>http://localhost</code> 환경에서 확인해야 합니다.</small></div>';
     });
 
   paginationBars.forEach(bar => {

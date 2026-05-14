@@ -646,7 +646,7 @@ body.modal-open { overflow: hidden; }
   background: transparent;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.06em;

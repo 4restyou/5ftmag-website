@@ -315,7 +315,7 @@
         }
 
         if (stories.length === 0) {
-          storyList.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">첫 번째 글을 기다리는 중...</div>';
+          storyList.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">아직 공개된 글이 없습니다. 새 이슈가 발행되면 이곳에 먼저 쌓입니다.</div>';
           return;
         }
 
@@ -351,7 +351,7 @@
       })
       .catch(err => {
         console.error('Stories 로딩 실패:', err);
-        storyList.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">글을 불러올 수 없습니다.</div>';
+        storyList.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">글 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.</div>';
       });
   }
 
@@ -371,7 +371,7 @@
           .slice(0, 4);
 
         if (news.length === 0) {
-          newsList.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">아직 소식이 없습니다.</div>';
+          newsList.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">아직 등록된 소식이 없습니다.</div>';
           return;
         }
 
@@ -396,7 +396,7 @@
       })
       .catch(err => {
         console.error('News 로딩 실패:', err);
-        newsList.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">소식을 불러올 수 없습니다.</div>';
+        newsList.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">소식 데이터를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</div>';
       });
   }
 
@@ -579,7 +579,7 @@
         const selected = shuffleSeeded([...editorialPick, ...readerPick]);
 
         if (selected.length === 0) {
-          photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">첫 번째 사진을 기다리는 중입니다.</div>';
+          photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">아직 공개된 Reader\\'s Roll 사진이 없습니다. 첫 컷이 승인되면 이곳에 표시됩니다.</div>';
           return;
         }
 
@@ -617,7 +617,7 @@
       })
       .catch(err => {
         console.error('Photo 그리드 로딩 실패:', err);
-        photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">사진을 불러올 수 없습니다.</div>';
+        photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">사진 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.</div>';
       });
   }
 
