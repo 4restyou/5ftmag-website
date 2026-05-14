@@ -116,6 +116,12 @@
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="사진 크게 보기" data-mode="editorial">
   <button class="lightbox-close" id="lightboxClose" aria-label="닫기">✕</button>
   <div class="lightbox-toolbar" aria-label="사진 보기 옵션">
+    <button class="lightbox-fav" id="lightboxFav" type="button" aria-pressed="false" aria-label="즐겨찾기 추가" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
+        <path stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"
+              d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
+      </svg>
+    </button>
     <a href="#" target="_blank" rel="noopener" class="lightbox-insta" id="lightboxInsta" hidden>Instagram ↗</a>
     <button class="lightbox-zoom" id="lightboxZoom" type="button" aria-label="사진 확대">확대</button>
     <button class="lightbox-fullscreen" id="lightboxFullscreen" type="button" aria-label="전체 화면">전체</button>
@@ -259,10 +265,22 @@
       ? `<span class="film-cta film-cta-action" role="button" tabindex="0" data-action="open-submission" data-prefill-film="${escapeAttr(film.displayName || film.name)}">${cta}</span>`
       : `<span class="film-cta">${cta}</span>`;
 
+    const isFav = filmFavSlugs.has(slug);
+    const favHtml = `
+      <span class="film-fav${isFav ? ' is-fav' : ''}" role="button" tabindex="0"
+            data-action="toggle-film-fav" data-film-slug="${escapeAttr(slug)}"
+            aria-pressed="${isFav}" aria-label="${isFav ? '즐겨찾기 해제' : '즐겨찾기 추가'}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
+        </svg>
+      </span>`;
+
     return `
       <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-brand="${escapeAttr(film.brand || '')}" data-search="${escapeAttr(searchTokens)}">
         <div class="film-img">
           ${badgeHtml}
+          ${favHtml}
           ${imgHtml}
           <span class="film-count">${countLabel}</span>
         </div>
@@ -294,6 +312,9 @@
   let currentSearch = '';
   let approvedSubmissionsCache = null;
   let approvedSubmissionsPromise = null;
+  // 본인이 즐겨찾기한 필름 slug / 사진 ID 집합 — 페이지 로드 후 한 번 fetch
+  let filmFavSlugs = new Set();
+  let photoFavIds  = new Set();
 
   function normalizeFilmLabel(s) {
     return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
@@ -428,21 +449,89 @@
 
     // 새로 렌더된 카드들에 클릭 핸들러 연결
     // CTA(.film-cta-action) 클릭은 reader-submissions.js 글로벌 위임이 처리하므로 모달 안 띄움
+    // ♡ 즐겨찾기 토글 클릭은 toggleFilmFav 가 별도 처리 — 카드 모달 안 열림
     document.querySelectorAll('.film-card').forEach(card => {
       card.addEventListener('click', (e) => {
+        const fav = e.target.closest('.film-fav');
+        if (fav) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleFilmFav(fav);
+          return;
+        }
         if (e.target.closest('.film-cta-action')) return;
         openModal(card.dataset.film);
       });
     });
   }
 
-  fetch('data/films.json?v=20260514-seagull400')
+  // ════════════════════════════
+  // 즐겨찾기 — 필름
+  // ════════════════════════════
+  async function loadFilmFavorites() {
+    if (!window.MagDB || !window.MagDB.isReady()) return;
+    try {
+      const sess = await window.MagDB.auth.getSession();
+      if (!sess) { filmFavSlugs = new Set(); return; }
+      filmFavSlugs = await window.MagDB.favorites.idsForType('film');
+    } catch (_) {
+      filmFavSlugs = new Set();
+    }
+  }
+  function syncFilmFavMarks() {
+    document.querySelectorAll('.film-fav').forEach(el => {
+      const slug = el.dataset.filmSlug;
+      const on   = filmFavSlugs.has(slug);
+      el.classList.toggle('is-fav', on);
+      el.setAttribute('aria-pressed', String(on));
+      el.setAttribute('aria-label', on ? '즐겨찾기 해제' : '즐겨찾기 추가');
+    });
+  }
+  async function toggleFilmFav(el) {
+    if (el.classList.contains('is-busy')) return;
+    const slug = el.dataset.filmSlug;
+    if (!slug) return;
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      alert('잠시 후 다시 시도해주세요.');
+      return;
+    }
+    const sess = await window.MagDB.auth.getSession();
+    if (!sess) {
+      if (!confirm('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return;
+      window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+      return;
+    }
+    const wasFav = filmFavSlugs.has(slug);
+    // optimistic update
+    if (wasFav) filmFavSlugs.delete(slug); else filmFavSlugs.add(slug);
+    el.classList.add('is-busy');
+    syncFilmFavMarks();
+    const { error } = await window.MagDB.favorites.toggle('film', slug, wasFav);
+    el.classList.remove('is-busy');
+    if (error) {
+      // 롤백
+      if (wasFav) filmFavSlugs.add(slug); else filmFavSlugs.delete(slug);
+      syncFilmFavMarks();
+      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+    }
+  }
+
+  fetch('data/films.json?v=20260514-favorites')
     .then(res => res.json())
     .then(data => {
       filmsData = data;
       renderFilmsGrid();
       updateReaderCounts(); // 비동기 — Supabase 승인 제출 수 집계 후 카드 카운트 갱신
       handleInitialDeepLink();
+      // DB 준비된 뒤 즐겨찾기 마킹 — 비동기, 카드 렌더 막지 않음
+      (async () => {
+        for (let i = 0; i < 60; i++) {
+          if (window.MagDB && window.MagDB.isReady()) break;
+          await new Promise(r => setTimeout(r, 50));
+        }
+        await Promise.all([loadFilmFavorites(), loadPhotoFavorites()]);
+        syncFilmFavMarks();
+      })();
     })
     .catch(err => {
       console.error('Films 데이터 로딩 실패:', err);
@@ -901,8 +990,8 @@
   //  (editorial 과 동일한 컴포넌트 사용 — zoom / fullscreen / thumb strip)
   // ════════════════════════════
   function openFilmReaderLightbox(matched, index) {
-    // matched (Supabase 형식: {image, author, film, camera, instagramUrl})
-    // → 라이트박스가 기대하는 {src, author, film, camera, instagramUrl, _source} 로 매핑
+    // matched (Supabase 형식: {id: 'sub-<uuid>', image, author, film, camera, instagramUrl})
+    // → 라이트박스가 기대하는 {src, author, film, camera, instagramUrl, _source, submissionId} 로 매핑
     currentReaderPhotos = matched.map(m => ({
       src: m.image,
       author: m.author || '',
@@ -910,6 +999,7 @@
       camera: m.camera || '',
       caption: m.caption || '',
       instagramUrl: m.instagramUrl || '',
+      submissionId: typeof m.id === 'string' ? m.id.replace(/^sub-/, '') : '',
       _source: 'reader',
     }));
     showLightbox(index, 'reader');
@@ -949,6 +1039,7 @@
   const lightboxFullscreen = document.getElementById('lightboxFullscreen');
   const lightboxThumbs = document.getElementById('lightboxThumbs');
   const lightboxInsta = document.getElementById('lightboxInsta');
+  const lightboxFav   = document.getElementById('lightboxFav');
   let currentLightboxIndex = 0;
   let currentFilmKey = null;
   let lastFocusedElement = null;
@@ -1107,6 +1198,21 @@
         lightboxInsta.removeAttribute('href');
       }
     }
+    // 즐겨찾기(♡): reader 모드 + submissionId 있을 때만 노출
+    if (lightboxFav) {
+      const subId = photo.submissionId || '';
+      if (currentLightboxMode === 'reader' && subId) {
+        lightboxFav.hidden = false;
+        lightboxFav.dataset.submissionId = subId;
+        const isFav = photoFavIds.has(subId);
+        lightboxFav.classList.toggle('is-fav', isFav);
+        lightboxFav.setAttribute('aria-pressed', String(isFav));
+        lightboxFav.setAttribute('aria-label', isFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
+      } else {
+        lightboxFav.hidden = true;
+        lightboxFav.removeAttribute('data-submission-id');
+      }
+    }
     lightbox.dataset.mode = currentLightboxMode;
 
     lightbox.classList.add('open');
@@ -1129,8 +1235,56 @@
       lightboxInsta.hidden = true;
       lightboxInsta.removeAttribute('href');
     }
+    if (lightboxFav) {
+      lightboxFav.hidden = true;
+      lightboxFav.removeAttribute('data-submission-id');
+      lightboxFav.classList.remove('is-fav', 'is-busy');
+    }
     if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
       lastFocusedElement.focus();
+    }
+  }
+
+  // 라이트박스 ♡ 클릭 — 현재 photo 의 submissionId 로 토글
+  async function togglePhotoFav() {
+    if (!lightboxFav || lightboxFav.hidden) return;
+    if (lightboxFav.classList.contains('is-busy')) return;
+    const subId = lightboxFav.dataset.submissionId || '';
+    if (!subId) return;
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      alert('잠시 후 다시 시도해주세요.');
+      return;
+    }
+    const sess = await window.MagDB.auth.getSession();
+    if (!sess) {
+      if (!confirm('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return;
+      window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+      return;
+    }
+    const wasFav = photoFavIds.has(subId);
+    if (wasFav) photoFavIds.delete(subId); else photoFavIds.add(subId);
+    lightboxFav.classList.toggle('is-fav', !wasFav);
+    lightboxFav.setAttribute('aria-pressed', String(!wasFav));
+    lightboxFav.setAttribute('aria-label', !wasFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
+    lightboxFav.classList.add('is-busy');
+    const { error } = await window.MagDB.favorites.toggle('submission', subId, wasFav);
+    lightboxFav.classList.remove('is-busy');
+    if (error) {
+      // 롤백
+      if (wasFav) photoFavIds.add(subId); else photoFavIds.delete(subId);
+      lightboxFav.classList.toggle('is-fav', wasFav);
+      lightboxFav.setAttribute('aria-pressed', String(wasFav));
+      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+    }
+  }
+  async function loadPhotoFavorites() {
+    if (!window.MagDB || !window.MagDB.isReady()) return;
+    try {
+      const sess = await window.MagDB.auth.getSession();
+      if (!sess) { photoFavIds = new Set(); return; }
+      photoFavIds = await window.MagDB.favorites.idsForType('submission');
+    } catch (_) {
+      photoFavIds = new Set();
     }
   }
 
@@ -1174,6 +1328,7 @@
   lightboxImg.addEventListener('click', toggleZoom);
   if (lightboxZoom) lightboxZoom.addEventListener('click', toggleZoom);
   if (lightboxFullscreen) lightboxFullscreen.addEventListener('click', toggleFullscreen);
+  if (lightboxFav) lightboxFav.addEventListener('click', togglePhotoFav);
   lightboxThumbs.addEventListener('click', (e) => {
     const thumb = e.target.closest('.lightbox-thumb');
     if (!thumb) return;
@@ -1232,7 +1387,7 @@
 </script>
 <script src="./js/site-common.js?v=20260512-relocate"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260514-authreturn"></script>
+<script src="./js/db-client.js?v=20260514-favorites"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
 <script src="./js/reader-submissions.js?v=20260514-authreturn"></script>
 </body>

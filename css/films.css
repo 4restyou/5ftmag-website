@@ -101,6 +101,37 @@
   padding: 5px 10px;
   border-radius: var(--badge-radius);
 }
+
+/* ── 즐겨찾기 토글 (필름 카드 좌상단) ── */
+.film-fav {
+  position: absolute;
+  top: 12px; left: 12px;
+  width: 34px; height: 34px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  background: var(--bg);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform .15s, background .15s;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.film-fav:hover { transform: scale(1.08); }
+.film-fav:active { transform: scale(0.92); }
+.film-fav svg {
+  width: 18px; height: 18px;
+  stroke: var(--text);
+  stroke-width: 1.8;
+  fill: none;
+  transition: fill .15s, stroke .15s;
+}
+.film-fav.is-fav svg {
+  fill: #e0245e;
+  stroke: #e0245e;
+}
+.film-fav.is-busy { opacity: 0.55; pointer-events: none; }
+[data-theme="dark"] .film-fav { background: rgba(0, 0, 0, 0.55); }
+[data-theme="dark"] .film-fav.is-fav svg { fill: #ff6b8a; stroke: #ff6b8a; }
 .film-brand {
   font-size: var(--fs-meta);
   font-weight: var(--fw-heading);
@@ -330,6 +361,27 @@
   background: rgba(255, 255, 255, 0.1);
   border-color: #fff;
 }
+.lightbox-fav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.lightbox-fav:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+}
+.lightbox-fav svg path { transition: fill .15s, stroke .15s; }
+.lightbox-fav.is-fav svg path { fill: #ff6b8a; stroke: #ff6b8a; }
+.lightbox-fav:active { transform: scale(0.92); }
+.lightbox-fav.is-busy { opacity: 0.55; pointer-events: none; }
 .lightbox-caption-film,
 .lightbox-caption-camera {
   color: rgba(255, 255, 255, 0.62);

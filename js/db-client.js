@@ -240,6 +240,15 @@
       if (error) return [];
       return data || [];
     },
+    // 승인된 제출 중 주어진 ID 목록만 일괄 조회 (즐겨찾기 사진 뷰용).
+    // 공개 view 사용 → 다른 사람의 사진도 같은 RLS 로 안전하게 노출.
+    async listByIds(ids) {
+      const c = client(); if (!c || !ids?.length) return [];
+      const { data, error } = await c.from('reader_submissions_approved')
+        .select('*').in('id', ids);
+      if (error) return [];
+      return data || [];
+    },
     async updateMine(id, patch) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const uid = await userId();
@@ -360,6 +369,50 @@
     },
   };
 
+  // ─── 즐겨찾기 (본인용 · 공개 카운터 없음) ───
+  //   target_type: 'submission' (UUID) | 'film' (slug)
+  //   target_id  : TEXT — 두 타입 공통 컬럼
+  const favorites = {
+    async list(targetType) {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      let q = c.from('user_favorites')
+        .select('target_type, target_id, created_at')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false });
+      if (targetType) q = q.eq('target_type', targetType);
+      const { data, error } = await q;
+      if (error) return [];
+      return data || [];
+    },
+    async idsForType(targetType) {
+      const rows = await this.list(targetType);
+      return new Set(rows.map(r => r.target_id));
+    },
+    async add(targetType, targetId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      // PK conflict 무시 — 이미 좋아요한 항목 재클릭도 멱등하게 통과
+      return c.from('user_favorites')
+        .upsert({ user_id: uid, target_type: targetType, target_id: targetId },
+                { onConflict: 'user_id,target_type,target_id', ignoreDuplicates: true });
+    },
+    async remove(targetType, targetId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('user_favorites').delete()
+        .eq('user_id', uid).eq('target_type', targetType).eq('target_id', targetId);
+    },
+    async toggle(targetType, targetId, currentlyFav) {
+      return currentlyFav
+        ? this.remove(targetType, targetId)
+        : this.add(targetType, targetId);
+    },
+  };
+
   // ─── Realtime ───
   const realtime = {
     subscribeComments(pageId, onChange) {
@@ -378,6 +431,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
-    auth, profiles, comments, likes, submissions, review, market, realtime,
+    auth, profiles, comments, likes, submissions, review, market, favorites, realtime,
   };
 })();
