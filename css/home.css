@@ -776,6 +776,18 @@ body.modal-open { overflow: hidden; }
   background: rgba(255, 255, 255, 0.1);
   border-color: #fff;
 }
+@media (max-width: 520px) {
+  .photo-lb-actions {
+    width: min(100%, 320px);
+  }
+  .photo-lb-link {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    padding-inline: 10px;
+    white-space: nowrap;
+  }
+}
 .photo-lb-close,
 .photo-lb-prev,
 .photo-lb-next {
