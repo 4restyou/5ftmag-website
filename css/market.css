@@ -60,7 +60,7 @@
   max-width: 420px;
   padding: 10px 16px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--field-radius);
   background: var(--bg);
   transition: border-color .15s;
 }
@@ -89,7 +89,7 @@
   background: var(--bg);
   color: var(--text-muted);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--chip-radius);
   font: inherit;
   font-size: 13px;
   font-weight: var(--fw-heading);
@@ -107,7 +107,7 @@
   color: var(--text-muted);
   font-size: 11px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--badge-radius);
   font-weight: var(--fw-heading);
 }
 .market-category-chip.is-active .market-category-count {
@@ -127,7 +127,7 @@
   font-weight: var(--fw-heading);
   letter-spacing: 0.04em;
   cursor: pointer;
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   transition: opacity .15s, transform .15s;
 }
 .market-new-btn:hover { opacity: 0.88; }

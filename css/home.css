@@ -63,7 +63,7 @@
   color: var(--bg);
   padding: 11px 22px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   font-size: 13px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.02em;
@@ -765,7 +765,7 @@ body.modal-open { overflow: hidden; }
   background: transparent;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.06em;
@@ -845,7 +845,7 @@ body.modal-open { overflow: hidden; }
   color: var(--text);
   padding: 10px 18px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   transition: border-color .15s;
   line-height: 1;
 }

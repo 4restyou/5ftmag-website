@@ -34,6 +34,8 @@
   /* 인터랙션 형태 — 매거진 표면은 낮은 반경, 기능 표면은 안정적인 4px */
   --btn-radius:   4px;
   --chip-radius:  4px;
+  --badge-radius: 2px;
+  --field-radius: 4px;
   --ctrl-border:  #c4c4c4;
 }
 

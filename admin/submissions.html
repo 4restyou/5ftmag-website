@@ -90,7 +90,7 @@
       color: var(--text-muted);
       font-size: 11px;
       padding: 1px 7px;
-      border-radius: 999px;
+      border-radius: var(--badge-radius);
       margin-left: 6px;
       font-weight: var(--fw-heading);
     }
@@ -107,28 +107,31 @@
       font-size: 12px;
       font-weight: var(--fw-heading);
       letter-spacing: 0.04em;
-      color: #3730a3;
-      background: #e0e7ff;
-      border: 1px solid #c7d2fe;
-      border-radius: 999px;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--chip-radius);
       cursor: pointer;
       transition: background .15s, color .15s;
     }
-    .admin-filter-chip:hover { background: #c7d2fe; }
+    .admin-filter-chip:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
     .admin-filter-chip.is-active {
-      background: #3730a3;
-      color: #e0e7ff;
-      border-color: #3730a3;
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
     }
     [data-theme="dark"] .admin-filter-chip {
-      background: rgba(99, 102, 241, 0.15);
-      color: #a5b4fc;
-      border-color: rgba(99, 102, 241, 0.35);
+      background: var(--bg);
+      color: var(--text-muted);
+      border-color: var(--border);
     }
     [data-theme="dark"] .admin-filter-chip.is-active {
-      background: #a5b4fc;
-      color: #1e1b4b;
-      border-color: #a5b4fc;
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
     }
 
     .admin-list {

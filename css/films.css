@@ -99,7 +99,7 @@
   color: var(--text-muted);
   background: var(--bg);
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: var(--badge-radius);
 }
 .film-brand {
   font-size: var(--fs-meta);
@@ -319,7 +319,7 @@
   background: transparent;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 999px;
+  border-radius: var(--btn-radius);
   font-size: 11px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.06em;
@@ -553,7 +553,7 @@
   padding: 9px 14px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--field-radius);
   color: var(--text-muted);
   transition: border-color .15s, color .15s;
 }

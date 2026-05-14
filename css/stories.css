@@ -60,7 +60,7 @@
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--field-radius);
   outline: none;
   transition: border-color .15s, box-shadow .15s;
 }
@@ -130,7 +130,7 @@
   color: var(--text);
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--chip-radius);
   cursor: pointer;
   transition: all .15s;
 }

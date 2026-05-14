@@ -373,7 +373,7 @@ body {
   padding: 7px 14px; font-size: 13px;
   font-weight: var(--fw-heading); letter-spacing: var(--ls-default);
   color: var(--text); background: transparent;
-  border: 1px solid var(--border); border-radius: 999px;
+  border: 1px solid var(--border); border-radius: var(--btn-radius);
   cursor: pointer; font-family: var(--font);
   transition: all .15s;
 }
