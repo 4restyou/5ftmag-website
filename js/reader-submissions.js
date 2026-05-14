@@ -412,11 +412,41 @@
     if (el) el.textContent = msg;
   }
 
-  // sessionStorage keys
+  // OAuth 복귀 후 모달 상태 복원용 keys
   //  - 5ft_prefill_film : 로그인 전 클릭한 필름명 복원용
   //  - 5ft_pending_submission_open : 로그인 후 폼 모달 자동 재진입 플래그
   const SS_PREFILL = '5ft_prefill_film';
   const SS_PENDING = '5ft_pending_submission_open';
+  const LS_PREFILL = '5ft_prefill_film_fallback';
+  const LS_PENDING = '5ft_pending_submission_open_fallback';
+
+  function saveTransient(key, fallbackKey, value) {
+    const payload = JSON.stringify({ value, ts: Date.now() });
+    try { sessionStorage.setItem(key, payload); } catch {}
+    try { localStorage.setItem(fallbackKey, payload); } catch {}
+  }
+
+  function readTransient(key, fallbackKey, { remove = true } = {}) {
+    const maxAge = 10 * 60 * 1000;
+    const read = (storage, storageKey) => {
+      try {
+        const raw = storage.getItem(storageKey);
+        if (!raw) return '';
+        if (remove) storage.removeItem(storageKey);
+        const parsed = JSON.parse(raw);
+        if (Date.now() - Number(parsed.ts || 0) > maxAge) return '';
+        return parsed.value || '';
+      } catch {
+        return '';
+      }
+    };
+    return read(sessionStorage, key) || read(localStorage, fallbackKey);
+  }
+
+  function clearTransient(key, fallbackKey) {
+    try { sessionStorage.removeItem(key); } catch {}
+    try { localStorage.removeItem(fallbackKey); } catch {}
+  }
 
   async function handleOpen(triggerEl) {
     if (!db() || !db().isReady()) {
@@ -426,19 +456,14 @@
     const prefillFilm = triggerEl?.dataset?.prefillFilm || '';
     const session = await db().auth.getSession();
     if (!session) {
-      try {
-        if (prefillFilm) sessionStorage.setItem(SS_PREFILL, prefillFilm);
-        sessionStorage.setItem(SS_PENDING, '1');
-      } catch {}
+      if (prefillFilm) saveTransient(SS_PREFILL, LS_PREFILL, prefillFilm);
+      saveTransient(SS_PENDING, LS_PENDING, '1');
       openModal(renderLoginPrompt());
       return;
     }
     let savedPrefill = prefillFilm;
     if (!savedPrefill) {
-      try {
-        savedPrefill = sessionStorage.getItem(SS_PREFILL) || '';
-        if (savedPrefill) sessionStorage.removeItem(SS_PREFILL);
-      } catch {}
+      savedPrefill = readTransient(SS_PREFILL, LS_PREFILL);
     }
     const [theme, films] = await Promise.all([getCurrentTheme(), getFilms()]);
     openModal(renderSubmissionForm(theme, savedPrefill, films));
@@ -451,8 +476,7 @@
   }
 
   async function autoReopenIfPending() {
-    let pending = false;
-    try { pending = sessionStorage.getItem(SS_PENDING) === '1'; } catch {}
+    const pending = readTransient(SS_PENDING, LS_PENDING, { remove: false }) === '1';
     if (!pending) return;
 
     for (let i = 0; i < 60; i++) {
@@ -468,10 +492,9 @@
       await new Promise(r => setTimeout(r, 100));
     }
     if (!session) {
-      try { sessionStorage.removeItem(SS_PENDING); } catch {}
       return;
     }
-    try { sessionStorage.removeItem(SS_PENDING); } catch {}
+    clearTransient(SS_PENDING, LS_PENDING);
     handleOpen({ dataset: {} });
   }
 

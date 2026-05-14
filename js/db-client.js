@@ -11,6 +11,7 @@
   const MARKET_BUCKET = 'market-listings';
 
   const SS_LOGIN_ORIGIN = '5ft_login_origin';
+  const LS_LOGIN_ORIGIN = '5ft_login_origin_fallback';
 
   let _client = null;
   let _originRestoreInstalled = false;
@@ -23,6 +24,47 @@
     installOriginRestore();
     return _client;
   }
+  function normalizeReturnUrl(value) {
+    try {
+      const u = new URL(value || window.location.href.split('#')[0], window.location.origin);
+      if (u.origin !== window.location.origin) return window.location.href.split('#')[0];
+      u.hash = '';
+      return u.href;
+    } catch (_) {
+      return window.location.href.split('#')[0];
+    }
+  }
+
+  function saveLoginOrigin(value) {
+    const origin = normalizeReturnUrl(value);
+    const payload = JSON.stringify({ url: origin, ts: Date.now() });
+    try { sessionStorage.setItem(SS_LOGIN_ORIGIN, payload); } catch (_) {}
+    // OAuth 제공자/브라우저 조합에 따라 sessionStorage가 사라지는 경우가 있어
+    // 같은 origin에서 유지되는 localStorage를 짧은 TTL 백업으로 함께 둔다.
+    try { localStorage.setItem(LS_LOGIN_ORIGIN, payload); } catch (_) {}
+    return origin;
+  }
+
+  function readLoginOrigin() {
+    const now = Date.now();
+    const maxAge = 10 * 60 * 1000;
+    const read = (storage, key) => {
+      try {
+        const raw = storage.getItem(key);
+        if (!raw) return null;
+        storage.removeItem(key);
+        const parsed = JSON.parse(raw);
+        if (!parsed?.url || now - Number(parsed.ts || 0) > maxAge) return null;
+        return normalizeReturnUrl(parsed.url);
+      } catch (_) {
+        return null;
+      }
+    };
+    const fromSession = read(sessionStorage, SS_LOGIN_ORIGIN);
+    const fromLocal = read(localStorage, LS_LOGIN_ORIGIN);
+    return fromSession || fromLocal;
+  }
+
   // 신규 로그인 콜백을 어디서(예: Supabase Site URL fallback 으로 메인) 받든
   // 사용자가 로그인 시작한 페이지로 자동 복귀.
   function installOriginRestore() {
@@ -30,19 +72,11 @@
     _originRestoreInstalled = true;
     _client.auth.onAuthStateChange((event) => {
       if (event !== 'SIGNED_IN') return;
-      let origin = null;
-      try { origin = sessionStorage.getItem(SS_LOGIN_ORIGIN); } catch (_) {}
+      const origin = readLoginOrigin();
       if (!origin) return;
-      try { sessionStorage.removeItem(SS_LOGIN_ORIGIN); } catch (_) {}
       const here = window.location.href.split('#')[0];
       if (origin && origin !== here) {
-        // 같은 도메인 내 URL 인지 안전성 체크 (외부 URL 주입 방지)
-        try {
-          const u = new URL(origin, window.location.origin);
-          if (u.origin === window.location.origin) {
-            window.location.replace(u.href);
-          }
-        } catch (_) {}
+        window.location.replace(origin);
       }
     });
   }
@@ -68,11 +102,9 @@
     },
     async signInWithGoogle(redirectTo) {
       const c = client(); if (!c) throw new Error('client unavailable');
-      // 콜백이 다른 페이지(예: Supabase Site URL) 로 오더라도 원래 페이지로 복귀하기 위해
-      // 로그인 시작 URL 을 sessionStorage 에 보관. installOriginRestore() 가 SIGNED_IN
-      // 이벤트에서 이 값을 읽어 location.replace 로 강제 복귀시킴.
-      const origin = redirectTo || window.location.href.split('#')[0];
-      try { sessionStorage.setItem(SS_LOGIN_ORIGIN, origin); } catch (_) {}
+      // Supabase Redirect URL allowlist가 현재 페이지를 허용하면 바로 복귀하고,
+      // Site URL fallback으로 메인에 도착해도 installOriginRestore()가 원래 URL로 돌려보낸다.
+      const origin = saveLoginOrigin(redirectTo);
       return c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: origin } });
     },
     async signOut() {
