@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260513-theme">
-  <link rel="stylesheet" href="./css/films.css?v=20260514-contributors">
+  <link rel="stylesheet" href="./css/films.css?v=20260514-fav-cleanup">
 </head>
 <body>
 
@@ -206,11 +206,10 @@
     const thumbPath = film[thumbField];
     const hasThumb = film[statusField] === 'set' && thumbPath;
 
+    // Vol 호수에 게재된 필름만 뱃지 노출 — 100개 넘는 Library 에서는 굳이 표시 안 함
     let badgeHtml = '';
     if (isFeatured && film.issue) {
       badgeHtml = `<span class="film-issue-tag">${escapeAttr(film.issue)}</span>`;
-    } else if (isLibrary) {
-      badgeHtml = `<span class="film-issue-tag film-issue-tag-library">LIBRARY</span>`;
     }
 
     let imgHtml = '';
