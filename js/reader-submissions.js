@@ -204,8 +204,8 @@
     return `
       <h2 id="rs-modal-title" class="rs-title">사진 올리기</h2>
       <p class="rs-desc">
-        Reader's Roll에 사진을 올리려면 로그인이 필요해요.<br />
-        편집부 검토 후(보통 24~48시간) 메인에 게시됩니다.
+        로그인하면 지금 보던 화면으로 돌아와 사진 올리기를 이어갈 수 있어요.<br />
+        사진은 편집부 검토 후 보통 24~48시간 안에 Reader's Roll에 반영됩니다.
       </p>
       <button type="button" class="rs-btn rs-btn-google" data-action="rs-login-google">
         <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">
@@ -303,7 +303,7 @@
 
     return `
       <h2 id="rs-modal-title" class="rs-title">사진 올리기</h2>
-      <p class="rs-desc">편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).</p>
+      <p class="rs-desc">한 컷을 보내주세요. 편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).</p>
       ${themeBlock}
       <form class="rs-form" id="rs-form">
         <label class="rs-field">
@@ -364,7 +364,7 @@
         </label>
         <div class="rs-actions">
           <button type="button" class="rs-btn-link" data-action="rs-close">취소</button>
-          <button type="submit" class="rs-btn rs-btn-primary">제출</button>
+          <button type="submit" class="rs-btn rs-btn-primary">검토 요청 보내기</button>
         </div>
         <p class="rs-error" id="rs-error" aria-live="polite"></p>
       </form>`;
@@ -644,8 +644,8 @@
       try {
         const fd = new FormData(form);
         const file = fd.get('photo');
-        if (!file || !file.size) throw new Error('사진을 선택해주세요.');
-        if (!file.type.startsWith('image/')) throw new Error('이미지 파일만 업로드할 수 있어요.');
+        if (!file || !file.size) throw new Error('올릴 사진을 1장 선택해 주세요.');
+        if (!file.type.startsWith('image/')) throw new Error('JPG, PNG, WebP 같은 이미지 파일만 올릴 수 있어요.');
 
         const submitterName = String(fd.get('submitter_name') || '').trim();
         const instagram = String(fd.get('instagram') || '').trim();
@@ -654,8 +654,8 @@
         const caption = String(fd.get('caption') || '').trim();
         const consent = fd.get('consent') === 'on';
         if (!submitterName && !instagram) throw new Error('이름이나 인스타그램 ID 중 하나는 입력해 주세요.');
-        if (!film) throw new Error('필름 종류를 입력해주세요.');
-        if (!consent) throw new Error('게재 동의에 체크해주세요.');
+        if (!film) throw new Error('촬영한 필름을 선택하거나 직접 신청해 주세요.');
+        if (!consent) throw new Error('사이트와 매거진에 게재해도 되는 사진인지 확인 체크가 필요해요.');
 
         // 4겹 B: alias 정확히 일치 시 정식 표기로 자동 치환
         // (사용자가 "포트라400"이라 적었으면 DB엔 "Kodak Portra 400"으로 저장됨)
@@ -666,14 +666,14 @@
 
         submitBtn.textContent = '사진 변환 중…';
         const { blob } = await resizeToJpeg(file);
-        if (blob.size > MAX_UPLOAD_BYTES) throw new Error('파일이 너무 큽니다 (5MB 이하).');
+        if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
 
         const user = await db().auth.getUser();
-        if (!user) throw new Error('로그인이 만료되었어요. 다시 시도해주세요.');
+        if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
         const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
         submitBtn.textContent = '업로드 중…';
         const { error: upErr } = await db().submissions.uploadPhoto(path, blob);
-        if (upErr) throw new Error('업로드 실패: ' + upErr.message);
+        if (upErr) throw new Error('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (' + upErr.message + ')');
 
         const igNorm = instagram ? instagram.replace(/^@/, '') : '';
         const themeApplyVal = fd.get('theme_apply');
@@ -692,7 +692,7 @@
         const { error: dbErr } = await db().submissions.create(insertData);
         if (dbErr) {
           db().submissions.removePhoto(path);
-          throw new Error('등록 실패: ' + dbErr.message);
+          throw new Error('사진은 올라갔지만 제출 기록 저장에 실패했어요. 잠시 뒤 다시 시도해 주세요. (' + dbErr.message + ')');
         }
 
         // 4) 메타 기억
@@ -711,9 +711,9 @@
           : submitterName || (igNorm ? '@' + igNorm : '');
         openModal(renderSubmittedConfirm({ author: displayAuthor, film }));
       } catch (err) {
-        showError(err.message || '오류가 발생했어요.');
+        showError(err.message || '제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.');
         submitBtn.disabled = false;
-        submitBtn.textContent = '제출';
+        submitBtn.textContent = '검토 요청 보내기';
       }
     });
   }

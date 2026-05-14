@@ -63,7 +63,7 @@
     /* storage 가 사라진 orphan — onerror 가 is-missing 클래스를 붙임 */
     .me-card-img.is-missing { cursor: default; background: repeating-linear-gradient(45deg, var(--bg) 0 8px, var(--bg-sub) 8px 16px); }
     .me-card-img.is-missing::after {
-      content: '사진 파일이 사라졌습니다 — 삭제 버튼으로 정리해주세요';
+      content: '사진 파일을 찾지 못했습니다. 삭제 후 다시 올려주세요';
       position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
       padding: 12px; text-align: center; font-size: 11px; line-height: 1.5; letter-spacing: 0.04em;
       color: var(--text-muted); font-weight: var(--fw-heading);
@@ -211,7 +211,7 @@ function nextStatusOf(s) {
 
 async function checkAuth() {
   if (!db() || !db().isReady()) {
-    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
+    document.body.innerHTML = '<div class="gate"><h2>인증 모듈을 불러오지 못했습니다</h2><p>새로고침 후에도 반복되면 편집부에 알려주세요.</p></div>';
     return false;
   }
   const session = await db().auth.getSession();
@@ -257,9 +257,12 @@ function renderPhotoCounts() {
 function renderPhotoList() {
   const rows = STATE.filter === 'all' ? STATE.rows : STATE.rows.filter(r => r.status === STATE.filter);
   if (rows.length === 0) {
+    const photoEmpty = STATE.filter === 'all'
+      ? '아직 올린 사진이 없습니다. 독자 사진 영역에 보낼 사진을 메인에서 제출해 보세요.'
+      : `${statusLabel(STATE.filter)} 상태의 사진이 없습니다. 다른 분류를 선택해 보세요.`;
     $('list').innerHTML = `
       <div class="me-empty">
-        ${STATE.filter === 'all' ? '아직 올린 사진이 없어요.' : '이 분류에 해당하는 사진이 없어요.'}
+        ${photoEmpty}
         <br /><a class="me-empty-cta" href="index.html">메인에서 사진 올리러 가기 →</a>
       </div>`;
     return;
@@ -330,7 +333,7 @@ async function savePhotoEdits(card) {
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중…'; }
   const { error } = await db().submissions.updateMine(id, patch);
   if (error) {
-    alert('수정 실패: ' + error.message);
+    alert('수정 내용을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')');
     if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장'; }
     return;
   }
@@ -338,7 +341,7 @@ async function savePhotoEdits(card) {
 }
 
 async function deletePhoto(card) {
-  if (!confirm('이 사진의 제출을 취소할까요? 저장된 파일도 함께 삭제됩니다.')) return;
+  if (!confirm('이 사진 제출을 삭제할까요? 저장된 사진 파일도 함께 삭제되어 복구할 수 없습니다.')) return;
   const id   = card.dataset.id;
   const row  = STATE.rows.find(r => r.id === id);
   const path = row?.storage_path;
@@ -349,7 +352,7 @@ async function deletePhoto(card) {
   // RLS 가 silently 차단하면 error 없이 data: [] 로 돌아옴 — 반드시 명시 검사.
   // 검사 없이 storage 만 지우면 DB row 남아서 깨진 썸네일이 생김.
   if (error || !data?.length) {
-    alert('삭제 실패: ' + (error?.message || '서버에서 거부했습니다. 관리자에게 문의해주세요.'));
+    alert('사진 제출을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다. 관리자에게 문의해 주세요.') + ')');
     if (btn) { btn.disabled = false; btn.textContent = origLabel || '삭제'; }
     return;
   }
@@ -398,7 +401,7 @@ function renderMarketList() {
   if (rows.length === 0) {
     $('marketList').innerHTML = `
       <div class="me-empty">
-        아직 올린 매물이 없어요.
+        아직 올린 매물이 없습니다. 사용하지 않는 카메라, 렌즈, 필름을 마켓에 등록해 보세요.
         <br /><a class="me-empty-cta" href="market.html#new">매물 올리러 가기 →</a>
       </div>`;
     return;
@@ -454,16 +457,16 @@ function bindMarketCardActions() {
         if (a === 'cycle') {
           btn.disabled = true;
           const { error } = await db().market.cycleStatusMine(id, status);
-          if (error) { alert('상태 변경 실패: ' + error.message); btn.disabled = false; return; }
+          if (error) { alert('매물 상태를 변경하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); btn.disabled = false; return; }
           await loadMarket();
         } else if (a === 'delete') {
-          if (!confirm('이 매물을 삭제할까요? 사진 파일도 함께 삭제됩니다.')) return;
+          if (!confirm('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.')) return;
           btn.disabled = true; btn.textContent = '삭제 중…';
           const row = STATE.marketRows.find(r => r.id === id);
           const { data, error } = await db().market.deleteMine(id);
           // RLS silent block 가드 — data 비면 storage 건드리지 않고 종료
           if (error || !data?.length) {
-            alert('삭제 실패: ' + (error?.message || '서버에서 거부했습니다.'));
+            alert('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다.') + ')');
             btn.disabled = false; btn.textContent = '삭제';
             return;
           }

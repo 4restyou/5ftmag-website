@@ -234,7 +234,7 @@ function renderGrid() {
   const grid = $('marketGrid');
   if (!rows.length) {
     grid.innerHTML = '<div class="market-empty">' +
-      (STATE.search ? `"${escapeHtml(STATE.search)}" 검색 결과가 없어요.` : '아직 올라온 매물이 없어요. 첫 매물의 주인공이 되어보세요.') +
+      (STATE.search ? `"${escapeHtml(STATE.search)}"에 맞는 매물이 없습니다. 검색어를 줄이거나 카테고리를 바꿔보세요.` : '아직 올라온 매물이 없습니다. 카메라, 필름, 액세서리를 첫 매물로 올려보세요.') +
       '</div>';
     return;
   }
@@ -364,8 +364,9 @@ function bindDetailHandlers(r) {
         return openForm(r);
       }
       if (a === 'cycle') {
+        el.disabled = true;
         const { next, error } = await db().market.cycleStatusMine(r.id, r.status);
-        if (error) return alert('상태 변경 실패: ' + error.message);
+        if (error) { el.disabled = false; return alert('상태를 바꾸지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); }
         r.status = next;
         await loadList();
         renderDetail(r);
@@ -373,19 +374,20 @@ function bindDetailHandlers(r) {
         return;
       }
       if (a === 'delete') {
-        if (!confirm('이 매물을 삭제할까요? 사진 파일도 함께 삭제됩니다.')) return;
+        if (!confirm('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.')) return;
+        el.disabled = true;
         const { error } = await db().market.deleteMine(r.id);
-        if (error) return alert('삭제 실패: ' + error.message);
+        if (error) { el.disabled = false; return alert('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + error.message + ')'); }
         if (r.storage_paths?.length) await db().market.removePhotos(r.storage_paths);
         closeDetail();
         return loadList();
       }
       if (a === 'report') {
-        if (!STATE.user) return alert('신고는 로그인 후에 가능해요.');
+        if (!STATE.user) return alert('신고는 로그인 후에 가능해요. 로그인하면 보던 매물로 다시 돌아옵니다.');
         const reason = prompt('신고 사유를 적어주세요 (300자 이내):', '');
         if (!reason) return;
         const { error } = await db().market.report(r.id, reason);
-        if (error) return alert('신고 실패: ' + error.message);
+        if (error) return alert('신고를 접수하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')');
         alert('신고가 접수되었습니다. 편집부에서 검토할게요.');
       }
     });
@@ -426,7 +428,7 @@ function renderGate() {
   $('mktFormCard').innerHTML = `
     <div class="mkt-gate">
       <h2>로그인이 필요해요</h2>
-      <p>매물을 올리거나 관리하려면 Google 로 로그인해주세요.</p>
+      <p>로그인하면 지금 화면으로 돌아와 매물 올리기를 이어갈 수 있어요.</p>
       <button type="button" class="mkt-btn mkt-btn-primary" data-action="login">Google로 계속하기</button>
       <button type="button" class="mkt-btn-link" data-action="close" style="margin-left:8px;">취소</button>
     </div>`;
@@ -535,7 +537,7 @@ function renderPhotoSlots() {
         STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl };
         renderPhotoSlots();
       } catch (err) {
-        alert(err.message || '이미지 처리 실패');
+        alert(err.message || '이미지를 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.');
       }
     });
   });
@@ -586,9 +588,9 @@ async function onSubmit(e) {
   err.textContent = '';
   const form = e.target;
   const submit = $('mktFormSubmit');
-  submit.disabled = true; submit.textContent = '처리 중…';
+  submit.disabled = true; submit.textContent = '내용 확인 중…';
   try {
-    if (!STATE.formPhotos.length) throw new Error('사진을 1장 이상 올려주세요.');
+    if (!STATE.formPhotos.length) throw new Error('상품 상태를 볼 수 있는 사진을 1장 이상 올려주세요.');
     const fd = new FormData(form);
     const title       = String(fd.get('title') || '').trim();
     const price       = String(fd.get('price') || '').trim();
@@ -596,22 +598,23 @@ async function onSubmit(e) {
     const description = String(fd.get('description') || '').trim() || null;
     const location    = String(fd.get('location') || '').trim() || null;
     const contact     = String(fd.get('contact') || '').trim();
-    if (!title || !price || !category || !contact) throw new Error('필수 항목을 모두 입력해주세요.');
-    if (fd.get('safety_agree') !== 'on') throw new Error('거래 전 확인사항에 동의해주세요.');
+    if (!title || !price || !category || !contact) throw new Error('제목, 가격, 카테고리, 연락처는 반드시 입력해 주세요.');
+    if (fd.get('safety_agree') !== 'on') throw new Error('개인 간 거래 확인사항에 동의해야 매물을 올릴 수 있어요.');
 
     // 사진 업로드 — 신규 추가된 것만
     const user = await db().auth.getUser();
-    if (!user) throw new Error('로그인이 만료되었어요.');
+    if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 저장해 주세요.');
     const finalPaths = [];
     const uploadedNew = [];
     for (const p of STATE.formPhotos) {
       if (p.existingPath) { finalPaths.push(p.existingPath); continue; }
+      submit.textContent = `사진 업로드 중… (${uploadedNew.length + 1}/${STATE.formPhotos.filter(x => !x.existingPath).length})`;
       const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
       const { error: upErr } = await db().market.uploadPhoto(path, p.blob);
       if (upErr) {
         // 실패 시 이번 세션에서 올린 것들 정리
         if (uploadedNew.length) await db().market.removePhotos(uploadedNew);
-        throw new Error('사진 업로드 실패: ' + upErr.message);
+        throw new Error('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (' + upErr.message + ')');
       }
       finalPaths.push(path);
       uploadedNew.push(path);
@@ -620,24 +623,26 @@ async function onSubmit(e) {
     const record = { title, price, category, description, location, contact, storage_paths: finalPaths };
 
     if (STATE.editId) {
+      submit.textContent = '수정 저장 중…';
       // 수정: 제거된 사진 (formPhotos 에서 빠진 existingPath) 들 storage 정리
       const existing = STATE.rows.find(r => r.id === STATE.editId);
       const droppedPaths = (existing?.storage_paths || []).filter(p => !finalPaths.includes(p));
       const { error } = await db().market.updateMine(STATE.editId, record);
-      if (error) throw new Error('수정 실패: ' + error.message);
+      if (error) throw new Error('수정 내용을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')');
       if (droppedPaths.length) await db().market.removePhotos(droppedPaths);
     } else {
+      submit.textContent = '매물 등록 중…';
       const { error } = await db().market.create(record);
       if (error) {
         if (uploadedNew.length) await db().market.removePhotos(uploadedNew);
-        throw new Error('등록 실패: ' + error.message);
+        throw new Error('매물을 등록하지 못했어요. 입력 내용과 네트워크를 확인해 주세요. (' + error.message + ')');
       }
     }
 
     closeForm();
     await loadList();
   } catch (e) {
-    err.textContent = e.message || '오류가 발생했어요.';
+    err.textContent = e.message || '저장을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.';
     submit.disabled = false;
     submit.textContent = STATE.editId ? '저장' : '올리기';
   }
@@ -669,7 +674,7 @@ document.addEventListener('keydown', (e) => {
     await new Promise(r => setTimeout(r, 50));
   }
   if (!db() || !db().isReady()) {
-    $('marketGrid').innerHTML = '<div class="market-empty">DB 연결 실패. 새로고침해주세요.</div>';
+    $('marketGrid').innerHTML = '<div class="market-empty">마켓 데이터를 불러오지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.</div>';
     return;
   }
   const session = await db().auth.getSession();

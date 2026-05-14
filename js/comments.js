@@ -56,26 +56,26 @@
     const { error } = await db().comments.insert({
       pageId: STATE.pageId, body, parentId,
     });
-    if (error) { alert('댓글 작성 실패: ' + error.message); return false; }
+    if (error) { alert('댓글을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')'); return false; }
     return true;
   }
 
   async function updateComment(id, body) {
     const { error } = await db().comments.update(id, body);
-    if (error) { alert('수정 실패: ' + error.message); return false; }
+    if (error) { alert('댓글 수정을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); return false; }
     return true;
   }
 
   async function deleteComment(id) {
-    if (!confirm('정말 삭제하시겠어요?')) return false;
+    if (!confirm('이 댓글을 삭제할까요? 삭제 후에는 본문을 다시 볼 수 없습니다.')) return false;
     const { error } = await db().comments.softDelete(id);
-    if (error) { alert('삭제 실패: ' + error.message); return false; }
+    if (error) { alert('댓글을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + error.message + ')'); return false; }
     return true;
   }
 
   async function toggleLike(commentId, alreadyLiked) {
     if (!STATE.user) {
-      alert('좋아요는 로그인 후에 누를 수 있어요.');
+      alert('좋아요는 로그인 후에 누를 수 있어요. 로그인하면 이 글로 다시 돌아옵니다.');
       return;
     }
     if (alreadyLiked) await db().likes.remove(commentId);
@@ -87,7 +87,7 @@
     if (!STATE.user) {
       return `
         <div class="cm-auth">
-          <span class="cm-auth-text">댓글을 작성하려면 로그인하세요</span>
+          <span class="cm-auth-text">로그인하면 댓글과 좋아요를 남길 수 있어요.</span>
           <div class="cm-auth-buttons">
             <button class="cm-btn cm-btn-google" data-action="login-google">
               <svg viewBox="0 0 18 18" width="14" height="14"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.78 2.72v2.26h2.88c1.69-1.55 2.66-3.84 2.66-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.88-2.26c-.8.54-1.83.86-3.07.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.34A8.99 8.99 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.3-1.71V4.96H.96A8.99 8.99 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.97 8.97 0 0 0 9 0C5.48 0 2.44 2.02.96 4.96l3 2.34C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
@@ -185,7 +185,7 @@
         ${renderAuthBar()}
         ${STATE.user ? renderComposer() : ''}
         <div class="cm-list">
-          ${itemsHtml || '<p class="cm-empty">첫 댓글의 주인공이 되어보세요.</p>'}
+          ${itemsHtml || '<p class="cm-empty">아직 댓글이 없습니다. 이 글에 대한 첫 의견을 남겨보세요.</p>'}
         </div>
       </div>`;
 
@@ -263,17 +263,27 @@
     if (!body) return;
     const editId = form.dataset.editId;
     const parentId = form.dataset.parentId || null;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalLabel = submitBtn?.textContent || '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = editId ? '수정 중…' : (parentId ? '답글 저장 중…' : '댓글 저장 중…');
+    }
 
     let ok = false;
     if (editId) ok = await updateComment(editId, body);
     else        ok = await postComment(body, parentId);
     if (ok) { form.reset(); await refresh(); }
+    else if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalLabel;
+    }
   }
 
   async function loginWithGoogle() {
-    if (!db() || !db().isReady()) return alert('댓글 시스템이 아직 준비되지 않았어요.');
+    if (!db() || !db().isReady()) return alert('댓글 시스템을 불러오는 중이에요. 잠시 뒤 다시 시도해 주세요.');
     const { error } = await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
-    if (error) alert('로그인 실패: ' + error.message);
+    if (error) alert('로그인을 시작하지 못했어요. 팝업 차단이나 네트워크 상태를 확인해 주세요. (' + error.message + ')');
   }
 
   async function logout() {
@@ -305,7 +315,7 @@
     pageId = pageId || container.dataset.pageId;
     if (!pageId) return;
     if (!db() || !db().isReady()) {
-      container.innerHTML = '<p class="cm-error">댓글 시스템 설정이 필요합니다.</p>';
+      container.innerHTML = '<p class="cm-error">댓글을 불러오지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.</p>';
       return;
     }
 
