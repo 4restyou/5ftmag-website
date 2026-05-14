@@ -102,35 +102,35 @@
   border-radius: var(--badge-radius);
 }
 
-/* ── 즐겨찾기 토글 (필름 카드 좌상단) ── */
+/* ── 즐겨찾기 토글 (필름 카드 우상단, 라인-only) ── */
 .film-fav {
   position: absolute;
-  top: 12px; left: 12px;
-  width: 34px; height: 34px;
+  top: 12px; right: 12px;
+  width: 28px; height: 28px;
   display: inline-flex;
   align-items: center; justify-content: center;
-  background: var(--bg);
-  border-radius: 999px;
+  background: transparent;
   cursor: pointer;
-  transition: transform .15s, background .15s;
+  transition: transform .15s;
   z-index: 2;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-.film-fav:hover { transform: scale(1.08); }
-.film-fav:active { transform: scale(0.92); }
+.film-fav:hover { transform: scale(1.12); }
+.film-fav:active { transform: scale(0.9); }
 .film-fav svg {
-  width: 18px; height: 18px;
+  width: 22px; height: 22px;
   stroke: var(--text);
-  stroke-width: 1.8;
+  stroke-width: 1.6;
   fill: none;
   transition: fill .15s, stroke .15s;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18));
 }
+.film-fav:hover svg { stroke-width: 2; }
 .film-fav.is-fav svg {
   fill: #e0245e;
   stroke: #e0245e;
 }
 .film-fav.is-busy { opacity: 0.55; pointer-events: none; }
-[data-theme="dark"] .film-fav { background: rgba(0, 0, 0, 0.55); }
+[data-theme="dark"] .film-fav svg { stroke: #fff; }
 [data-theme="dark"] .film-fav.is-fav svg { fill: #ff6b8a; stroke: #ff6b8a; }
 .film-brand {
   font-size: var(--fs-meta);
