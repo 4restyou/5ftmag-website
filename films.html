@@ -292,6 +292,8 @@
   let currentFilter = 'all';
   let currentBrand  = 'all';
   let currentSearch = '';
+  let approvedSubmissionsCache = null;
+  let approvedSubmissionsPromise = null;
 
   function normalizeFilmLabel(s) {
     return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
@@ -452,20 +454,7 @@
   //  - 5ft Issue 영역의 featured 카드(editorial "36 photos")는 건드리지 않음
   // ════════════════════════════
   async function updateReaderCounts() {
-    // reader-submissions.js 가 노출하는 헬퍼 대기 (최대 ~3초)
-    for (let i = 0; i < 30; i++) {
-      if (typeof window.fetchApprovedSubmissions === 'function') break;
-      await new Promise(r => setTimeout(r, 100));
-    }
-    if (typeof window.fetchApprovedSubmissions !== 'function') return;
-
-    let submissions = [];
-    try {
-      submissions = await window.fetchApprovedSubmissions(1000);
-    } catch (e) {
-      console.warn('승인된 제출 fetch 실패:', e);
-      return;
-    }
+    const submissions = await getApprovedSubmissions({ force: true });
     if (!submissions || !submissions.length) return;
 
     const normalize = window.normalizeFilmName
@@ -504,15 +493,37 @@
   const modalContent = document.getElementById('modalContent');
   const modalClose = document.getElementById('modalClose');
 
-  async function waitForApprovedSubmissions(timeoutMs = 3000) {
+  async function waitForApprovedFetcher(timeoutMs = 5000) {
     const step = 100;
     for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
       if (typeof window.fetchApprovedSubmissions === 'function') {
-        return window.fetchApprovedSubmissions(1000).catch(() => []);
+        return window.fetchApprovedSubmissions;
       }
       await new Promise(r => setTimeout(r, step));
     }
-    return [];
+    return null;
+  }
+
+  async function getApprovedSubmissions({ force = false } = {}) {
+    if (!force && approvedSubmissionsCache) return approvedSubmissionsCache;
+    if (!force && approvedSubmissionsPromise) return approvedSubmissionsPromise;
+
+    approvedSubmissionsPromise = (async () => {
+      const fetcher = await waitForApprovedFetcher();
+      if (!fetcher) return approvedSubmissionsCache || [];
+      try {
+        const rows = await fetcher(1000);
+        approvedSubmissionsCache = Array.isArray(rows) ? rows : [];
+        return approvedSubmissionsCache;
+      } catch (e) {
+        console.warn('승인된 제출 fetch 실패:', e);
+        return approvedSubmissionsCache || [];
+      } finally {
+        approvedSubmissionsPromise = null;
+      }
+    })();
+
+    return approvedSubmissionsPromise;
   }
 
   async function handleInitialDeepLink() {
@@ -521,7 +532,7 @@
     let filmKey = resolveFilmKey(params.get('film') || params.get('slug'));
 
     if (!filmKey && contributor) {
-      const submissions = await waitForApprovedSubmissions();
+      const submissions = await getApprovedSubmissions();
       const personKeyOf = (sub) => normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
       const first = submissions.find(sub => personKeyOf(sub) === contributor);
       if (first) {
@@ -660,7 +671,7 @@
     if (!film) return;
     const isFeatured = film.tier === 'featured';
 
-    const submissions = await waitForApprovedSubmissions();
+    const submissions = await getApprovedSubmissions();
     if (!submissions.length) return;
 
     // 필름 alias 매칭 — reader-submissions.js의 공유 정규화 함수 사용
