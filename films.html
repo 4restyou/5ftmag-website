@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260513-theme">
-  <link rel="stylesheet" href="./css/films.css?v=20260514-readerpeople">
+  <link rel="stylesheet" href="./css/films.css?v=20260514-contributors">
 </head>
 <body>
 
@@ -549,6 +549,7 @@
         <div class="reader-grid" id="readerGrid-${filmKey}">
           ${slotsHTML}
         </div>
+        <div class="reader-contributor-view" id="readerContributorView-${filmKey}" hidden></div>
         <div class="reader-roll-actions">
           <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
             ${isFeatured ? '컷 채우기' : '첫 컷 채우기'}
@@ -626,6 +627,7 @@
     const grid = document.getElementById(`readerGrid-${filmKey}`);
     const counter = document.getElementById(`readerRollCounter-${filmKey}`);
     const personFilter = document.getElementById(`readerPersonFilter-${filmKey}`);
+    const contributorView = document.getElementById(`readerContributorView-${filmKey}`);
     if (!grid) return;
 
     const personKeyOf = (sub) => {
@@ -647,6 +649,18 @@
     });
     let activePerson = 'all';
     let visible = matched;
+    const rollIntro = modalContent.querySelector('.reader-roll-intro');
+
+    const filmLabelOf = (filmName) => {
+      const match = typeof window.findFilmMatch === 'function'
+        ? window.findFilmMatch(filmName, filmsData)
+        : null;
+      return match?.canonical || filmName || 'Unknown Film';
+    };
+
+    const submissionsForPerson = (personKey) => submissions
+      .filter(sub => personKeyOf(sub) === personKey)
+      .slice(0, 120);
 
     function renderPersonFilter() {
       if (!personFilter || authors.length < 2) return;
@@ -658,6 +672,7 @@
         ${authors.map(([key, info]) => `
           <button type="button" class="reader-person-chip" data-person-key="${escapeAttr(key)}">
             ${escapeAttr(info.label)} <span>${info.count}</span>
+            <em class="reader-person-all">전체</em>
           </button>
         `).join('')}`;
     }
@@ -667,6 +682,14 @@
       visible = activePerson === 'all'
         ? matched
         : matched.filter(sub => personKeyOf(sub) === activePerson);
+      if (contributorView) contributorView.hidden = true;
+      grid.hidden = false;
+      if (personFilter) personFilter.hidden = authors.length < 2;
+      if (rollIntro) {
+        rollIntro.textContent = isFeatured
+          ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.'
+          : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.';
+      }
       renderReaderSlots();
       if (personFilter) {
         personFilter.querySelectorAll('.reader-person-chip').forEach(chip => {
@@ -702,6 +725,63 @@
       }
     }
 
+    function renderContributorView(personKey) {
+      if (!contributorView) return;
+      const personEntries = submissionsForPerson(personKey);
+      if (!personEntries.length) return;
+      const first = personEntries[0];
+      const label = personLabelOf(first);
+      const instagram = first.instagram || '';
+      const instagramUrl = first.instagramUrl || (instagram ? `https://instagram.com/${instagram.replace(/^@/, '')}` : '');
+      const grouped = new Map();
+      personEntries.forEach((sub) => {
+        const filmName = filmLabelOf(sub.film);
+        if (!grouped.has(filmName)) grouped.set(filmName, []);
+        grouped.get(filmName).push(sub);
+      });
+      const groups = [...grouped.entries()].sort((a, b) => {
+        const featuredA = a[0] === filmLabelOf(film.displayName || film.name) ? -1 : 0;
+        const featuredB = b[0] === filmLabelOf(film.displayName || film.name) ? -1 : 0;
+        if (featuredA !== featuredB) return featuredA - featuredB;
+        return b[1].length - a[1].length || a[0].localeCompare(b[0], 'ko');
+      });
+
+      grid.hidden = true;
+      if (personFilter) personFilter.hidden = true;
+      contributorView.hidden = false;
+      if (rollIntro) {
+        rollIntro.textContent = `${label}님이 5ft.mag에 올린 전체 Reader's Roll 사진입니다.`;
+      }
+      if (counter) {
+        counter.textContent = `${personEntries.length} photos · ${groups.length} films`;
+      }
+      contributorView.innerHTML = `
+        <div class="reader-contributor-head">
+          <div>
+            <span class="reader-contributor-kicker">CONTRIBUTOR</span>
+            <h3>${escapeAttr(label)}</h3>
+            <p>${personEntries.length}컷 · ${groups.length}개 필름</p>
+          </div>
+          <div class="reader-contributor-actions">
+            ${instagramUrl ? `<a href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener" class="reader-contributor-link">Instagram ↗</a>` : ''}
+            <button type="button" class="reader-contributor-back">← ${escapeAttr(film.displayName || film.name)}로 돌아가기</button>
+          </div>
+        </div>
+        ${groups.map(([filmName, rows]) => `
+          <section class="reader-contributor-group">
+            <h4>${escapeAttr(filmName)} <span>${rows.length}컷</span></h4>
+            <div class="reader-contributor-grid">
+              ${rows.map((sub, idx) => `
+                <button type="button" class="reader-contributor-photo" data-person-key="${escapeAttr(personKey)}" data-photo-index="${idx}" data-film-name="${escapeAttr(filmName)}" aria-label="${escapeAttr(filmName)} ${idx + 1}번째 사진 크게 보기">
+                  <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
+                  <span>${escapeAttr(sub.camera || sub.film || filmName)}</span>
+                </button>
+              `).join('')}
+            </div>
+          </section>
+        `).join('')}`;
+    }
+
     renderPersonFilter();
     renderReaderSlots();
 
@@ -722,9 +802,33 @@
     };
     if (personFilter) {
       personFilter.onclick = (e) => {
+        const allFilms = e.target.closest('.reader-person-all');
+        if (allFilms) {
+          const chip = allFilms.closest('.reader-person-chip');
+          if (chip) renderContributorView(chip.dataset.personKey);
+          return;
+        }
         const chip = e.target.closest('.reader-person-chip');
         if (!chip) return;
         setActivePerson(chip.dataset.personKey);
+      };
+    }
+    if (contributorView) {
+      contributorView.onclick = (e) => {
+        const back = e.target.closest('.reader-contributor-back');
+        if (back) {
+          setActivePerson(activePerson);
+          return;
+        }
+        const photo = e.target.closest('.reader-contributor-photo');
+        if (!photo) return;
+        const key = photo.dataset.personKey;
+        const all = submissionsForPerson(key);
+        const filmName = photo.dataset.filmName;
+        const group = all.filter(sub => filmLabelOf(sub.film) === filmName);
+        const idx = parseInt(photo.dataset.photoIndex, 10);
+        if (Number.isNaN(idx) || idx >= group.length) return;
+        openFilmReaderLightbox(group, idx);
       };
     }
   }
