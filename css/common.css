@@ -129,6 +129,11 @@ header {
 
 /* ────────── 알림 종 + 뱃지 + 드롭다운 ────────── */
 .notif-bell { position: relative; }
+.notif-bell svg {
+  /* 종 SVG 의 시각적 중심이 24-viewBox 안에서 위쪽으로 치우쳐 있어,
+     달(테마) 아이콘과 수직 정렬을 맞추기 위해 1px 내림 */
+  transform: translateY(1px);
+}
 .notif-badge {
   position: absolute;
   top: 5px; right: 5px;
