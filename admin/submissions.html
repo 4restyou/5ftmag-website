@@ -219,6 +219,13 @@
     .sub-card-status.pending  { background: #fef3c7; color: #78350f; }
     .sub-card-status.approved { background: #d1fae5; color: #064e3b; }
     .sub-card-status.rejected { background: #fee2e2; color: #7f1d1d; }
+    /* ♡ 카운트 배지 (편집부 전용 — 우수작 선정 보조) */
+    .sub-card-likes {
+      display: inline-block; margin-left: 8px;
+      font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.04em;
+      padding: 2px 8px; border-radius: 2px;
+      background: #fce7f3; color: #9d174d;
+    }
 
     .sub-card-actions {
       display: flex;
@@ -427,6 +434,7 @@
     <button type="button" class="admin-tab" data-status="approved">승인됨 <span class="count" id="cnt-approved">·</span></button>
     <button type="button" class="admin-tab" data-status="rejected">반려됨 <span class="count" id="cnt-rejected">·</span></button>
     <span class="admin-tabs-spacer"></span>
+    <button type="button" class="admin-filter-chip" id="likeSort" aria-pressed="false" title="종이 매거진 우수작 선정 보조용 — 편집부에만 보입니다">좋아요 순</button>
     <button type="button" class="admin-filter-chip" id="themeFilter" aria-pressed="false">테마 응모만</button>
   </div>
   <div class="admin-list" id="list">
@@ -438,7 +446,7 @@
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260515-reports"></script>
+<script src="../js/db-client.js?v=20260515-likes"></script>
 <script src="../js/image-processor.js?v=20260515-imgproc"></script>
 <script src="../js/reader-submissions.js?v=20260515-ctafix"></script>
 <script>
@@ -453,6 +461,9 @@ const STATE = {
   films: {},
   page: 1,
   themeOnly: false, // 테마 응모만 필터링 (theme_month NOT NULL)
+  likeSort: false,  // 좋아요 순 정렬 모드 — 편집부 우수작 선정 보조
+  likes: new Map(), // submission_id → like_count
+  allRows: [],      // 좋아요 순 모드일 때 status 전체를 한 번 끌어와 정렬한 결과
 };
 
 const PAGE_SIZE = 10;
@@ -515,11 +526,51 @@ async function loadCounts() {
   }
 }
 
+async function loadLikes() {
+  STATE.likes = await db().review.adminLikeCounts();
+}
+
 async function loadList() {
   $('list').innerHTML = '<div class="empty-state">불러오는 중…</div>';
   const pageNav = $('pagination');
   if (pageNav) pageNav.hidden = true;
 
+  // ── 좋아요 순 모드 ── status 안의 모든 row 한 번에 끌어와 정렬 후 클라이언트 페이지네이션
+  if (STATE.likeSort) {
+    const { data, error } = await db().review.listAll(STATE.status, { themeOnly: STATE.themeOnly });
+    if (error) {
+      $('list').innerHTML = `<div class="empty-state">검토 큐를 불러오지 못했습니다.<br><small>${escapeHtml(error.message)}</small></div>`;
+      return;
+    }
+    const rows = (data || []).slice().sort((a, b) => {
+      const la = STATE.likes.get(String(a.id)) || 0;
+      const lb = STATE.likes.get(String(b.id)) || 0;
+      if (lb !== la) return lb - la;
+      return new Date(b.created_at) - new Date(a.created_at); // 동률은 최신 먼저
+    });
+    STATE.allRows = rows;
+    const totalAll = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalAll / PAGE_SIZE));
+    if (STATE.page > totalPages) STATE.page = totalPages;
+    if (STATE.page < 1) STATE.page = 1;
+    const from = (STATE.page - 1) * PAGE_SIZE;
+    const slice = rows.slice(from, from + PAGE_SIZE);
+    if (slice.length === 0) {
+      const baseMsg = STATE.status === 'pending' ? '대기 중인 사진이 없습니다.'
+                    : STATE.status === 'approved' ? '승인된 사진이 없습니다.'
+                    : '반려된 사진이 없습니다.';
+      const msg = STATE.themeOnly ? `테마 응모 중 ${baseMsg}` : baseMsg;
+      $('list').innerHTML = `<div class="empty-state">${escapeHtml(msg)}</div>`;
+      return;
+    }
+    STATE.rows = slice;
+    $('list').innerHTML = slice.map(renderCard).join('');
+    bindCardActions();
+    renderPagination(totalAll, totalPages);
+    return;
+  }
+
+  // ── 기본 모드 (서버 페이지네이션, 시간순) ──
   const total = STATE.counts[STATE.status] || 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   if (STATE.page > totalPages) STATE.page = totalPages;
@@ -615,6 +666,10 @@ function renderCard(r) {
   const igNorm = (r.instagram || '').replace(/^@/, '');
   const igUrl = igNorm ? `https://instagram.com/${igNorm}` : null;
   const themeBadge = r.theme_month ? `<span class="sub-card-status pending" style="margin-left:8px; background:#e0e7ff; color:#3730a3;">테마 ${r.theme_month}</span>` : '';
+  const likeCount = STATE.likes.get(String(r.id)) || 0;
+  const likeBadge = likeCount > 0
+    ? `<span class="sub-card-likes" title="이 사진에 ♡ 누른 사용자 수">♡ ${likeCount}</span>`
+    : '';
   const filmMatchHint = getFilmMatchHint(r.film);
 
   return `
@@ -626,6 +681,7 @@ function renderCard(r) {
         <div>
           <span class="sub-card-status ${escapeHtml(r.status)}">${escapeHtml(r.status)}</span>
           ${themeBadge}
+          ${likeBadge}
         </div>
         <div class="sub-card-row">
           <span class="k">제출</span>
@@ -763,6 +819,17 @@ $('themeFilter').addEventListener('click', async () => {
   await Promise.all([loadCounts(), loadList()]);
 });
 
+$('likeSort').addEventListener('click', async () => {
+  STATE.likeSort = !STATE.likeSort;
+  STATE.page = 1;
+  const chip = $('likeSort');
+  chip.classList.toggle('is-active', STATE.likeSort);
+  chip.setAttribute('aria-pressed', String(STATE.likeSort));
+  // 좋아요 카운트는 최신화 — 토글 켤 때마다 다시 fetch
+  if (STATE.likeSort) await loadLikes();
+  await loadList();
+});
+
 $('imgZoom').addEventListener('click', () => {
   $('imgZoom').classList.remove('open');
   $('imgZoomTarget').src = '';
@@ -799,7 +866,7 @@ async function loadReportBadge() {
   if (!ok) return;
   $('gate').hidden = true;
   $('app').hidden = false;
-  await Promise.all([loadFilms(), loadCounts(), loadList(), loadReportBadge()]);
+  await Promise.all([loadFilms(), loadCounts(), loadLikes(), loadList(), loadReportBadge()]);
 })();
 </script>
 

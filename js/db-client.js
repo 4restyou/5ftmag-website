@@ -304,6 +304,25 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('reader_submissions').delete().eq('id', id);
     },
+    // 편집부 전용 — 사진 좋아요 수 집계 (개인정보 노출 X)
+    // RPC SECURITY DEFINER 함수가 caller 의 is_editor 검사
+    async adminLikeCounts() {
+      const c = client(); if (!c) return new Map();
+      const { data, error } = await c.rpc('admin_submission_like_counts');
+      if (error) {
+        console.warn('[admin] like counts:', error.message);
+        return new Map();
+      }
+      return new Map((data || []).map(r => [String(r.target_id), Number(r.like_count) || 0]));
+    },
+    // 좋아요 순 정렬용 — 페이지네이션 무시하고 status 안의 모든 row 일괄 조회
+    //   (5ft.mag 규모에서 approved 가 10k 넘어가기 전엔 한 페이지로 충분)
+    async listAll(status, opts = {}) {
+      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
+      let q = c.from('reader_submissions').select('*').eq('status', status);
+      if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+      return q.order('created_at', { ascending: false }).limit(2000);
+    },
   };
 
   // ─── Market (중고 장터) ───
