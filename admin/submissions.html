@@ -866,7 +866,10 @@ async function loadReportBadge() {
   if (!ok) return;
   $('gate').hidden = true;
   $('app').hidden = false;
-  await Promise.all([loadFilms(), loadCounts(), loadLikes(), loadList(), loadReportBadge()]);
+  // 필름 카탈로그를 먼저 로드 — getFilmMatchHint 가 STATE.films 에 의존
+  // (loadList 가 먼저 끝나면 모든 카드에 "라이브러리에 없는 필름" 으로 잘못 표시됨)
+  await loadFilms();
+  await Promise.all([loadCounts(), loadLikes(), loadList(), loadReportBadge()]);
 })();
 </script>
 
