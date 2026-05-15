@@ -132,7 +132,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260516-notifications"></script>
+<script src="./js/db-client.js?v=20260516-mktrpc"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
 <script src="./js/site-common.js?v=20260516-notifications"></script>
 <script>
@@ -372,7 +372,10 @@ function showShareToast(msg) {
 async function openDetail(id) {
   STATE.detailId = id;
   STATE.galleryIndex = 0;
-  const row = STATE.rows.find(r => r.id === id) || await db().market.getOne(id);
+  // 로그인 사용자는 항상 getOne 으로 — 카드 캐시에는 PII 없어서 보강 필요
+  const row = STATE.user
+    ? (await db().market.getOne(id))
+    : (STATE.rows.find(r => r.id === id) || await db().market.getOne(id));
   if (!row) return;
   renderDetail(row);
   $('mktDetailModal').classList.add('open');
