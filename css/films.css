@@ -1237,7 +1237,13 @@
   .modal-section-reader { margin-top: 56px; }
   .films-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28px 14px;
+    gap: 30px 14px;
+    align-items: start;
+  }
+  .film-card {
+    display: grid;
+    grid-template-rows: auto 18px 38px 44px 24px;
+    align-items: start;
   }
   .film-img {
     aspect-ratio: 1 / 1;
@@ -1250,17 +1256,32 @@
   .film-brand {
     font-size: 10px;
     letter-spacing: 0.08em;
-    margin-bottom: 5px;
+    line-height: 1.2;
+    margin: 0;
+    align-self: end;
   }
   .film-name {
     font-size: 15px;
     line-height: 1.18;
-    margin-bottom: 5px;
+    margin: 0;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .film-spec {
     font-size: 11px;
     line-height: 1.35;
-    margin-bottom: 8px;
+    margin: 0;
+    color: var(--text-muted);
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .film-count {
     right: 8px;
@@ -1280,6 +1301,7 @@
   }
   .film-cta {
     font-size: 11px;
+    align-self: end;
   }
   .library-controls-right,
   .library-filter {
