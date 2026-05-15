@@ -1236,15 +1236,50 @@
   .modal-section { margin-top: 48px; }
   .modal-section-reader { margin-top: 56px; }
   .films-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 44px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 14px;
   }
   .film-img {
     aspect-ratio: 1 / 1;
+    margin-bottom: 10px;
   }
   .film-img picture {
-    width: min(78%, 280px);
-    height: min(78%, 280px);
+    width: 76%;
+    height: 76%;
+  }
+  .film-brand {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+  .film-name {
+    font-size: 15px;
+    line-height: 1.18;
+    margin-bottom: 5px;
+  }
+  .film-spec {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+  .film-count {
+    right: 8px;
+    bottom: 8px;
+    padding: 4px 7px;
+    font-size: 10px;
+  }
+  .film-fav {
+    top: 7px;
+    right: 7px;
+    width: 24px;
+    height: 24px;
+  }
+  .film-fav svg {
+    width: 19px;
+    height: 19px;
+  }
+  .film-cta {
+    font-size: 11px;
   }
   .library-controls-right,
   .library-filter {
@@ -1258,6 +1293,18 @@
   }
   .library-filter-chip {
     flex: 0 0 auto;
+  }
+}
+@media (min-width: 480px) and (max-width: 640px) {
+  .films-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 26px 12px;
+  }
+  .film-name {
+    font-size: 14px;
+  }
+  .film-spec {
+    font-size: 10px;
   }
 }
 
