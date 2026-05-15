@@ -118,19 +118,20 @@
 .film-fav:active { transform: scale(0.9); }
 .film-fav svg {
   width: 22px; height: 22px;
-  stroke: var(--text);
+  stroke: var(--text-muted);
   stroke-width: 1.6;
   fill: none;
   transition: fill .15s, stroke .15s;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18));
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
 }
-.film-fav:hover svg { stroke-width: 2; }
+.film-fav:hover svg { stroke: var(--text); stroke-width: 1.8; }
 .film-fav.is-fav svg {
   fill: #e0245e;
   stroke: #e0245e;
 }
 .film-fav.is-busy { opacity: 0.55; pointer-events: none; }
-[data-theme="dark"] .film-fav svg { stroke: #fff; }
+[data-theme="dark"] .film-fav svg { stroke: rgba(255, 255, 255, 0.55); }
+[data-theme="dark"] .film-fav:hover svg { stroke: #fff; }
 [data-theme="dark"] .film-fav.is-fav svg { fill: #ff6b8a; stroke: #ff6b8a; }
 .film-brand {
   font-size: var(--fs-meta);
