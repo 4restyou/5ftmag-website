@@ -1537,6 +1537,33 @@
     "canThumbnail": "img/films/agfaapx400-can.webp",
     "canThumbnailStatus": "set"
   },
+  "agfavista100": {
+    "slug": "agfavista100",
+    "tier": "library",
+    "brand": "AGFA",
+    "name": "Vista 100",
+    "displayName": "Agfa Vista 100",
+    "aliases": [
+      "Vista 100",
+      "Vista100",
+      "Agfa Vista 100",
+      "AgfaPhoto Vista 100",
+      "Agfa Vista plus 100",
+      "AgfaPhoto Vista plus 100",
+      "아그파 비스타 100",
+      "비스타 100",
+      "agfavista100",
+      "vista100"
+    ],
+    "desc": "Agfa Vista 라인의 저감도 컬러 네거티브. 부드러운 콘트라스트와 자연스러운 피부 톤으로 일상 스냅 · 야외 컬러 프린트용으로 자주 호명되던 한 롤. Vista 200/400 과 함께 2018년 단종.",
+    "iso": "100",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": "img/films/agfavista100-can.webp",
+    "canThumbnailStatus": "set"
+  },
   "agfavista200": {
     "slug": "agfavista200",
     "tier": "library",
@@ -1735,6 +1762,38 @@
     "photographers": [],
     "photos": [],
     "canThumbnail": "img/films/agfavista400-can.webp",
+    "canThumbnailStatus": "set"
+  },
+  "agfactprecisa100": {
+    "slug": "agfactprecisa100",
+    "tier": "library",
+    "brand": "AGFA",
+    "name": "CT Precisa 100",
+    "displayName": "Agfa CT Precisa 100",
+    "aliases": [
+      "CT Precisa",
+      "CT Precisa 100",
+      "CTPrecisa 100",
+      "Agfa CT",
+      "Agfa CT 100",
+      "Agfa CT Precisa",
+      "Agfa CT Precisa 100",
+      "AgfaPhoto CT Precisa 100",
+      "아그파 CT",
+      "아그파 CT 100",
+      "아그파 CT 프레시사",
+      "CT 프레시사",
+      "프레시사 100",
+      "agfactprecisa100",
+      "ctprecisa100"
+    ],
+    "desc": "Agfa 의 데일리 컬러 슬라이드 (E-6) 필름. 채도 높은 컬러와 풍부한 디테일로 풍경 · 여행 사진에 자주 쓰였고, 후기에는 Fuji 의 이멀젼을 재포장해 유통됐어요. 현재는 단종.",
+    "iso": "100",
+    "type": "Slide (E-6)",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": "img/films/agfactprecisa100-can.webp",
     "canThumbnailStatus": "set"
   },
   "konicacenturia400": {
