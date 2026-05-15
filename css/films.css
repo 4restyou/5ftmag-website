@@ -887,6 +887,42 @@
   max-width: 560px;
   margin: -10px 0 22px;
 }
+.reader-roll-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.reader-roll-chip {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: var(--chip-radius);
+  font: inherit;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.reader-roll-chip span {
+  color: rgba(255, 255, 255, 0.48);
+}
+.reader-roll-chip:hover,
+.reader-roll-chip.is-active {
+  border-color: rgba(255, 255, 255, 0.78);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.13);
+}
+.reader-roll-chip.is-active span {
+  color: rgba(255, 255, 255, 0.76);
+}
 .reader-person-filter {
   display: flex;
   flex-wrap: wrap;

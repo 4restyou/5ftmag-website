@@ -221,6 +221,7 @@
           film: r.film,
           camera: r.camera,
           caption: r.caption,
+          createdAt: r.created_at,
           published: true,
           _source: 'submission',
         };

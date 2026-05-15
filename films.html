@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260513-theme">
-  <link rel="stylesheet" href="./css/films.css?v=20260514-fav-cleanup">
+  <link rel="stylesheet" href="./css/films.css?v=20260515-rolls">
 </head>
 <body>
 
@@ -537,7 +537,7 @@
     });
 
   // ════════════════════════════
-  // Library 카드들의 "X / 36" 카운트를 실제 승인된 제출 수로 업데이트
+  // Library 카드들의 "X / 36" 카운트를 현재 진행 중인 롤 기준으로 업데이트
   //  - 모든 카드 일괄로 한 번에 처리 (필름별 alias 매칭)
   //  - 5ft Issue 영역의 featured 카드(editorial "36 photos")는 건드리지 않음
   // ════════════════════════════
@@ -554,8 +554,10 @@
       const film = filmsData[slug];
       const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
       const aliasSet = new Set(aliases.map(normalize));
-      const n = submissions.filter(s => aliasSet.has(normalize(s.film))).length;
-      if (n > 0) countPerSlug.set(slug, n);
+      const matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
+      if (matched.length > 0) {
+        countPerSlug.set(slug, buildReaderRollState(matched).currentRows.length);
+      }
     }
     if (!countPerSlug.size) return;
 
@@ -568,8 +570,7 @@
       if (!card) continue;
       const countEl = card.querySelector('.film-count');
       const ctaEl = card.querySelector('.film-cta');
-      const cappedCount = Math.min(count, ROLL_LIMIT);
-      if (countEl) countEl.textContent = `${cappedCount} / ${ROLL_LIMIT}`;
+      if (countEl) countEl.textContent = `${count} / ${ROLL_LIMIT}`;
       if (ctaEl) ctaEl.textContent = '컷 채우기 →';
     }
   }
@@ -612,6 +613,48 @@
     })();
 
     return approvedSubmissionsPromise;
+  }
+
+  function sortReaderSubmissionsOldestFirst(rows) {
+    return rows.slice().sort((a, b) => {
+      const at = Date.parse(a.createdAt || a.created_at || '') || 0;
+      const bt = Date.parse(b.createdAt || b.created_at || '') || 0;
+      if (at !== bt) return at - bt;
+      return String(a.id || '').localeCompare(String(b.id || ''));
+    });
+  }
+
+  function buildReaderRollState(rows) {
+    const ordered = sortReaderSubmissionsOldestFirst(rows);
+    const completedCount = Math.floor(ordered.length / ROLL_LIMIT);
+    const remainder = ordered.length % ROLL_LIMIT;
+    const rolls = [];
+
+    for (let i = 0; i < completedCount; i++) {
+      rolls.push({
+        number: i + 1,
+        rows: ordered.slice(i * ROLL_LIMIT, (i + 1) * ROLL_LIMIT),
+        complete: true,
+      });
+    }
+
+    const currentNumber = completedCount + 1;
+    const currentRows = remainder
+      ? ordered.slice(completedCount * ROLL_LIMIT)
+      : [];
+    rolls.push({
+      number: currentNumber,
+      rows: currentRows,
+      complete: false,
+      current: true,
+    });
+
+    return {
+      total: ordered.length,
+      rolls,
+      currentNumber,
+      currentRows,
+    };
   }
 
   async function handleInitialDeepLink() {
@@ -699,6 +742,7 @@
             ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.'
             : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.'}
         </p>
+        <div class="reader-roll-switcher" id="readerRollSwitcher-${filmKey}" hidden></div>
         <div class="reader-person-filter" id="readerPersonFilter-${filmKey}" hidden></div>
         <div class="reader-grid" id="readerGrid-${filmKey}">
           ${slotsHTML}
@@ -769,12 +813,12 @@
     const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
     const aliasSet = new Set(aliases.map(normalize));
 
-    const matched = submissions
-      .filter(s => aliasSet.has(normalize(s.film)))
-      .slice(0, ROLL_LIMIT);
+    const matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
+    const rollState = buildReaderRollState(matched);
 
     const grid = document.getElementById(`readerGrid-${filmKey}`);
     const counter = document.getElementById(`readerRollCounter-${filmKey}`);
+    const rollSwitcher = document.getElementById(`readerRollSwitcher-${filmKey}`);
     const personFilter = document.getElementById(`readerPersonFilter-${filmKey}`);
     const contributorView = document.getElementById(`readerContributorView-${filmKey}`);
     const submitBtn = modalContent.querySelector('.reader-submit-btn');
@@ -782,7 +826,18 @@
 
     const personKeyOf = (sub) => normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
     const personLabelOf = (sub) => sub.submitterName || sub.author || sub.instagram || '이름 없음';
-    const rollIntroText = (count) => {
+    const rollByNumber = (number) => rollState.rolls.find(roll => roll.number === number) || rollState.rolls[rollState.rolls.length - 1];
+    const rollIntroText = (roll) => {
+      const count = roll?.rows?.length || 0;
+      if (roll?.current && rollState.total >= ROLL_LIMIT && count === 0) {
+        return `이전 롤이 36컷으로 채워져 보관됐습니다. Roll ${roll.number}의 첫 자리를 채워보세요.`;
+      }
+      if (roll?.current && rollState.total > ROLL_LIMIT) {
+        return `Roll ${roll.number}가 진행 중입니다. 이전 롤은 위 버튼에서 다시 볼 수 있어요.`;
+      }
+      if (!roll?.current) {
+        return `보관된 Roll ${roll.number}입니다. 36컷이 채워진 지난 롤을 다시 볼 수 있어요.`;
+      }
       if (isFeatured) {
         return count > 0
           ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤입니다. 남은 빈 자리에 당신의 한 컷도 더해보세요.'
@@ -792,22 +847,12 @@
         ? `${count}컷이 먼저 채워졌습니다. 남은 빈 자리를 독자들의 사진으로 함께 채워가요.`
         : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.';
     };
-    const authorBuckets = new Map();
-    matched.forEach((sub) => {
-      const key = personKeyOf(sub);
-      if (!key) return;
-      if (!authorBuckets.has(key)) authorBuckets.set(key, { label: personLabelOf(sub), count: 0 });
-      authorBuckets.get(key).count += 1;
-    });
-    const authors = [...authorBuckets.entries()].sort((a, b) => {
-      const countDiff = b[1].count - a[1].count;
-      if (countDiff) return countDiff;
-      return a[1].label.localeCompare(b[1].label, 'ko');
-    });
+    let activeRoll = rollState.currentNumber;
     let activePerson = 'all';
-    let visible = matched;
+    let rollRows = rollByNumber(activeRoll).rows;
+    let visible = rollRows;
     const rollIntro = modalContent.querySelector('.reader-roll-intro');
-    if (submitBtn) submitBtn.textContent = matched.length > 0 ? '컷 채우기' : (isFeatured ? '컷 채우기' : '첫 컷 채우기');
+    if (submitBtn) submitBtn.textContent = rollState.total > 0 ? '컷 채우기' : (isFeatured ? '컷 채우기' : '첫 컷 채우기');
 
     const filmLabelOf = (filmName) => {
       const match = typeof window.findFilmMatch === 'function'
@@ -820,15 +865,48 @@
       .filter(sub => personKeyOf(sub) === personKey)
       .slice(0, 120);
 
+    function authorsForRoll(rows) {
+      const authorBuckets = new Map();
+      rows.forEach((sub) => {
+        const key = personKeyOf(sub);
+        if (!key) return;
+        if (!authorBuckets.has(key)) authorBuckets.set(key, { label: personLabelOf(sub), count: 0 });
+        authorBuckets.get(key).count += 1;
+      });
+      return [...authorBuckets.entries()].sort((a, b) => {
+        const countDiff = b[1].count - a[1].count;
+        if (countDiff) return countDiff;
+        return a[1].label.localeCompare(b[1].label, 'ko');
+      });
+    }
+
+    function renderRollSwitcher() {
+      if (!rollSwitcher || rollState.rolls.length <= 1) return;
+      rollSwitcher.hidden = false;
+      rollSwitcher.innerHTML = rollState.rolls.slice().reverse().map((roll) => {
+        const label = roll.current ? `Roll ${roll.number} · 진행 중` : `Roll ${roll.number} · 보관`;
+        return `
+          <button type="button" class="reader-roll-chip${roll.number === activeRoll ? ' is-active' : ''}" data-roll-number="${roll.number}">
+            ${escapeAttr(label)} <span>${roll.rows.length}/${ROLL_LIMIT}</span>
+          </button>`;
+      }).join('');
+    }
+
     function renderPersonFilter() {
-      if (!personFilter || authors.length < 1) return;
+      const authors = authorsForRoll(rollRows);
+      if (!personFilter) return;
+      if (authors.length < 1) {
+        personFilter.hidden = true;
+        personFilter.innerHTML = '';
+        return;
+      }
       personFilter.hidden = false;
       personFilter.innerHTML = `
-        ${authors.length > 1 ? `<button type="button" class="reader-person-chip is-active" data-person-key="all">
-          ALL <span>${matched.length}</span>
+        ${authors.length > 1 ? `<button type="button" class="reader-person-chip${activePerson === 'all' ? ' is-active' : ''}" data-person-key="all">
+          ALL <span>${rollRows.length}</span>
         </button>` : ''}
         ${authors.map(([key, info]) => `
-          <button type="button" class="reader-person-chip${authors.length === 1 ? ' is-active' : ''}" data-person-key="${escapeAttr(key)}">
+          <button type="button" class="reader-person-chip${activePerson === key || authors.length === 1 ? ' is-active' : ''}" data-person-key="${escapeAttr(key)}">
             ${escapeAttr(info.label)} <span>${info.count}</span>
             <em class="reader-person-all">전체</em>
           </button>
@@ -838,20 +916,30 @@
     function setActivePerson(nextKey) {
       activePerson = nextKey || 'all';
       visible = activePerson === 'all'
-        ? matched
-        : matched.filter(sub => personKeyOf(sub) === activePerson);
+        ? rollRows
+        : rollRows.filter(sub => personKeyOf(sub) === activePerson);
       if (contributorView) contributorView.hidden = true;
       grid.hidden = false;
-      if (personFilter) personFilter.hidden = authors.length < 1;
       if (rollIntro) {
-        rollIntro.textContent = rollIntroText(matched.length);
+        rollIntro.textContent = rollIntroText(rollByNumber(activeRoll));
       }
       renderReaderSlots();
-      if (personFilter) {
-        personFilter.querySelectorAll('.reader-person-chip').forEach(chip => {
-          chip.classList.toggle('is-active', chip.dataset.personKey === activePerson);
-        });
-      }
+      renderPersonFilter();
+      renderRollSwitcher();
+    }
+
+    function setActiveRoll(nextNumber) {
+      const nextRoll = rollByNumber(nextNumber);
+      activeRoll = nextRoll.number;
+      activePerson = 'all';
+      rollRows = nextRoll.rows;
+      visible = rollRows;
+      if (contributorView) contributorView.hidden = true;
+      grid.hidden = false;
+      if (rollIntro) rollIntro.textContent = rollIntroText(nextRoll);
+      renderReaderSlots();
+      renderRollSwitcher();
+      renderPersonFilter();
     }
 
     function renderReaderSlots() {
@@ -876,8 +964,8 @@
       }
       if (counter) {
         counter.textContent = activePerson === 'all'
-          ? `${matched.length} / ${ROLL_LIMIT}`
-          : `${visible.length} / ${matched.length}`;
+          ? `${rollRows.length} / ${ROLL_LIMIT} · Roll ${activeRoll}`
+          : `${visible.length} / ${rollRows.length} · Roll ${activeRoll}`;
       }
     }
 
@@ -938,9 +1026,7 @@
         `).join('')}`;
     }
 
-    renderPersonFilter();
-    if (rollIntro) rollIntro.textContent = rollIntroText(matched.length);
-    renderReaderSlots();
+    setActiveRoll(rollState.currentNumber);
 
     // 채워진 슬롯 클릭 → reader 라이트박스 (인스타로 바로 점프 X)
     grid.onclick = (e) => {
@@ -957,6 +1043,14 @@
       if (Number.isNaN(idx) || idx >= visible.length) return;
       openFilmReaderLightbox(visible, idx);
     };
+    if (rollSwitcher) {
+      rollSwitcher.onclick = (e) => {
+        const chip = e.target.closest('.reader-roll-chip');
+        if (!chip) return;
+        const number = parseInt(chip.dataset.rollNumber, 10);
+        if (!Number.isNaN(number)) setActiveRoll(number);
+      };
+    }
     if (personFilter) {
       personFilter.onclick = (e) => {
         const allFilms = e.target.closest('.reader-person-all');
@@ -1397,7 +1491,7 @@
 </script>
 <script src="./js/site-common.js?v=20260515-authnav"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260515-session"></script>
+<script src="./js/db-client.js?v=20260515-rolls"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
 <script src="./js/reader-submissions.js?v=20260515-uploadfix"></script>
 </body>
