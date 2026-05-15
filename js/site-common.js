@@ -176,6 +176,7 @@
 
     linkArticleAuthor();
     setupAuthNav();
+    setupNotifications();
     setupArticleScrap();
     injectFooterLegalLinks();
     injectSkipLink();
@@ -426,6 +427,165 @@
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
     window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
   });
+
+  // ════════════════════════════════════════════════
+  // 사용자 알림 (in-app) — 헤더 종 아이콘 + 드롭다운
+  //   로그인 사용자에게만 .nav-right 에 종 버튼 inject.
+  //   클릭 시 드롭다운 패널 표시. 실시간 INSERT 토스트.
+  // ════════════════════════════════════════════════
+  function bellIconSvg() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18a2 2 0 0 0 4 0"/></svg>';
+  }
+  async function setupNotifications() {
+    const navRight = document.querySelector('.nav-right');
+    if (!navRight) return;
+    if (document.documentElement.dataset.notifBound === '1') return;
+
+    // db-client 준비 + 로그인 여부 확인
+    for (let i = 0; i < 60; i++) {
+      if (window.MagDB && window.MagDB.isReady()) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    if (!window.MagDB || !window.MagDB.isReady()) return;
+    let session = null;
+    try { session = await window.MagDB.auth.getSession(); } catch (_) {}
+
+    // auth 변화 시 다시 호출되도록 — onChange 한 번만 바인딩
+    if (typeof window.MagDB.auth.onChange === 'function' && !document.documentElement.dataset.notifAuthBound) {
+      document.documentElement.dataset.notifAuthBound = '1';
+      window.MagDB.auth.onChange((_event, _next) => {
+        // 로그인 상태 변경 시 종 inject/remove 재시도
+        const btn = document.getElementById('notifBell');
+        if (btn) btn.remove();
+        const panel = document.getElementById('notifPanel');
+        if (panel) panel.remove();
+        document.documentElement.dataset.notifBound = '';
+        setupNotifications();
+      });
+    }
+
+    if (!session) return;
+    document.documentElement.dataset.notifBound = '1';
+
+    // 종 버튼 inject — theme 버튼 앞
+    const themeBtn = document.getElementById('themeBtn');
+    const bell = document.createElement('button');
+    bell.id = 'notifBell';
+    bell.type = 'button';
+    bell.className = 'icon-btn notif-bell';
+    bell.setAttribute('aria-label', '알림 열기');
+    bell.setAttribute('aria-expanded', 'false');
+    bell.innerHTML = bellIconSvg() + '<span class="notif-badge" id="notifBadge" hidden></span>';
+    if (themeBtn) navRight.insertBefore(bell, themeBtn);
+    else navRight.appendChild(bell);
+
+    // 드롭다운 패널 (body 끝에 부착)
+    const panel = document.createElement('div');
+    panel.id = 'notifPanel';
+    panel.className = 'notif-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', '알림');
+    panel.hidden = true;
+    panel.innerHTML = `
+      <div class="notif-panel-head">
+        <span class="notif-panel-title">알림</span>
+        <button type="button" class="notif-panel-allread" id="notifAllRead">전체 읽음</button>
+      </div>
+      <div class="notif-panel-list" id="notifList">
+        <div class="notif-panel-empty">불러오는 중…</div>
+      </div>`;
+    document.body.appendChild(panel);
+
+    function updateBadge(n) {
+      const badge = document.getElementById('notifBadge');
+      if (!badge) return;
+      if (n > 0) {
+        badge.textContent = n > 99 ? '99+' : String(n);
+        badge.hidden = false;
+      } else {
+        badge.hidden = true;
+      }
+    }
+    async function refreshBadge() {
+      try { updateBadge(await window.MagDB.notifications.unreadCount()); } catch (_) {}
+    }
+    function fmtAgo(iso) {
+      const d = new Date(iso);
+      const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+      if (diff < 60) return '방금 전';
+      if (diff < 3600)   return Math.floor(diff / 60) + '분 전';
+      if (diff < 86400)  return Math.floor(diff / 3600) + '시간 전';
+      if (diff < 604800) return Math.floor(diff / 86400) + '일 전';
+      return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    async function openPanel() {
+      panel.hidden = false;
+      bell.setAttribute('aria-expanded', 'true');
+      const list = document.getElementById('notifList');
+      list.innerHTML = '<div class="notif-panel-empty">불러오는 중…</div>';
+      const rows = await window.MagDB.notifications.list({ limit: 30 });
+      if (!rows.length) {
+        list.innerHTML = '<div class="notif-panel-empty">새 알림이 없어요.</div>';
+        return;
+      }
+      list.innerHTML = rows.map(n => `
+        <a class="notif-item${n.read_at ? '' : ' is-unread'}" href="${escapeHtml(n.link || '#')}" data-id="${escapeHtml(n.id)}">
+          <div class="notif-item-title">${escapeHtml(n.title)}</div>
+          ${n.body ? `<div class="notif-item-body">${escapeHtml(n.body)}</div>` : ''}
+          <div class="notif-item-time">${fmtAgo(n.created_at)}</div>
+        </a>`).join('');
+      // 클릭 시 해당 알림 읽음 처리
+      list.querySelectorAll('.notif-item').forEach(el => {
+        el.addEventListener('click', async () => {
+          const id = el.dataset.id;
+          if (id && el.classList.contains('is-unread')) {
+            await window.MagDB.notifications.markRead([id]);
+            el.classList.remove('is-unread');
+            refreshBadge();
+          }
+        });
+      });
+    }
+    function closePanel() {
+      panel.hidden = true;
+      bell.setAttribute('aria-expanded', 'false');
+    }
+    bell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (panel.hidden) openPanel(); else closePanel();
+    });
+    document.addEventListener('click', (e) => {
+      if (panel.hidden) return;
+      if (panel.contains(e.target) || bell.contains(e.target)) return;
+      closePanel();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hidden) closePanel();
+    });
+    document.getElementById('notifAllRead').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await window.MagDB.notifications.markAllRead();
+      refreshBadge();
+      // 패널이 열려있으면 list 의 is-unread 클래스 모두 제거
+      document.querySelectorAll('#notifList .notif-item.is-unread').forEach(el => el.classList.remove('is-unread'));
+    });
+
+    // 초기 뱃지
+    refreshBadge();
+
+    // 실시간 — 새 알림 도착 시 뱃지 + 토스트
+    try {
+      await window.MagDB.realtime.subscribeNotifications((n) => {
+        refreshBadge();
+        if (typeof window.showToast === 'function') {
+          window.showToast(n.title || '새 알림', { type: 'info', duration: 4200 });
+        }
+      });
+    } catch (_) {}
+  }
 
   // ════════════════════════════════════════════════
   // Article scrap — 글 페이지에 "스크랩" 토글 버튼 자동 inject

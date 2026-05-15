@@ -508,6 +508,58 @@
     },
   };
 
+  // ─── 사용자 알림 (in-app) ───
+  const notifications = {
+    async list({ limit = 30, unreadOnly = false } = {}) {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      let q = c.from('user_notifications').select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (unreadOnly) q = q.is('read_at', null);
+      const { data, error } = await q;
+      if (error) return [];
+      return data || [];
+    },
+    async unreadCount() {
+      const c = client(); if (!c) return 0;
+      const uid = await userId();
+      if (!uid) return 0;
+      const { count } = await c.from('user_notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', uid)
+        .is('read_at', null);
+      return count || 0;
+    },
+    async markRead(ids) {
+      const c = client(); if (!c || !ids?.length) return { error: null };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('user_notifications')
+        .update({ read_at: new Date().toISOString() })
+        .in('id', ids)
+        .eq('user_id', uid)
+        .is('read_at', null);
+    },
+    async markAllRead() {
+      const c = client(); if (!c) return { error: null };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('user_notifications')
+        .update({ read_at: new Date().toISOString() })
+        .eq('user_id', uid)
+        .is('read_at', null);
+    },
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('user_notifications').delete().eq('id', id).eq('user_id', uid);
+    },
+  };
+
   // ─── Realtime ───
   const realtime = {
     subscribeComments(pageId, onChange) {
@@ -521,11 +573,21 @@
           () => onChange())
         .subscribe();
     },
+    async subscribeNotifications(onChange) {
+      const c = client(); if (!c) return null;
+      const uid = await userId();
+      if (!uid) return null;
+      return c.channel(`user-notifications-${uid}`)
+        .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'user_notifications', filter: `user_id=eq.${uid}` },
+          (payload) => onChange(payload.new))
+        .subscribe();
+    },
   };
 
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
-    auth, profiles, comments, likes, submissions, review, market, favorites, realtime,
+    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, realtime,
   };
 })();
