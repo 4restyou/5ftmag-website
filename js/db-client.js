@@ -19,7 +19,13 @@
     if (_client) return _client;
     if (!window.supabase) return null;
     _client = window.supabase.createClient(URL_, ANON_, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce',
+        storage: window.localStorage,
+      },
     });
     installOriginRestore();
     return _client;
@@ -82,10 +88,16 @@
   }
   client();
 
+  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
   async function session() {
     const c = client(); if (!c) return null;
-    const { data } = await c.auth.getSession();
-    return data.session;
+    for (let i = 0; i < 5; i++) {
+      const { data } = await c.auth.getSession();
+      if (data.session) return data.session;
+      if (i < 4) await wait(120);
+    }
+    return null;
   }
   async function userId() {
     const s = await session();

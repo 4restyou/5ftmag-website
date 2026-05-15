@@ -216,6 +216,19 @@
       } catch (_) { /* silent — 익명/오프라인 모두 OK */ }
     }
     renderAuthNav({ mainNav, mobileNav, loggedIn: !!session, isEditor });
+    if (window.MagDB && window.MagDB.auth && typeof window.MagDB.auth.onChange === 'function' && !document.documentElement.dataset.authNavBound) {
+      document.documentElement.dataset.authNavBound = '1';
+      window.MagDB.auth.onChange(async (_event, nextSession) => {
+        let nextIsEditor = false;
+        if (nextSession && window.MagDB.profiles && typeof window.MagDB.profiles.getMine === 'function') {
+          try {
+            const profile = await window.MagDB.profiles.getMine();
+            nextIsEditor = !!(profile && profile.is_editor);
+          } catch (_) { /* keep anonymous fallback */ }
+        }
+        renderAuthNav({ mainNav, mobileNav, loggedIn: !!nextSession, isEditor: nextIsEditor });
+      });
+    }
   }
   function renderAuthNav({ mainNav, mobileNav, loggedIn, isEditor }) {
     // 기존 inject 항목 제거 (auth 상태 바뀌었을 때 재호출 가능)

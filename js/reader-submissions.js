@@ -14,6 +14,13 @@
   const THEME_PATH = 'data/current-theme.json';
   const FILMS_PATH = 'data/films.json';
   const db = () => window.MagDB;
+  let formOutsideClickHandler = null;
+
+  function clearFormOutsideClickHandler() {
+    if (!formOutsideClickHandler) return;
+    document.removeEventListener('click', formOutsideClickHandler);
+    formOutsideClickHandler = null;
+  }
 
   // 한 번 fetch한 테마는 페이지 로딩 동안 캐시
   let _themePromise = null;
@@ -186,6 +193,7 @@
   function openModal(html) {
     createModal();
     const wrap = document.getElementById('rs-modal');
+    clearFormOutsideClickHandler();
     wrap.querySelector('.rs-modal-body').innerHTML = html;
     wrap.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -193,6 +201,7 @@
 
   function closeModal() {
     const wrap = document.getElementById('rs-modal');
+    clearFormOutsideClickHandler();
     if (wrap) wrap.classList.remove('open');
     document.body.style.overflow = '';
   }
@@ -575,11 +584,13 @@
       e.stopPropagation();
       if (dropdown.hidden) openDropdown(); else closeDropdown();
     });
-    // 모달 외부(폼 아닌 곳) 클릭 시 닫기
-    document.addEventListener('click', (e) => {
+    // 모달 외부(폼 아닌 곳) 클릭 시 닫기. 폼이 다시 렌더될 때 이전 리스너는 제거.
+    clearFormOutsideClickHandler();
+    formOutsideClickHandler = (e) => {
       if (!picker || dropdown?.hidden) return;
       if (!picker.contains(e.target)) closeDropdown();
-    });
+    };
+    document.addEventListener('click', formOutsideClickHandler);
 
     // 검색 필터
     search?.addEventListener('input', () => {
@@ -638,6 +649,7 @@
       e.preventDefault();
       showError('');
       const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn?.disabled) return;
       submitBtn.disabled = true;
       submitBtn.textContent = '업로드 중…';
 

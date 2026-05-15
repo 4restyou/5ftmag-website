@@ -299,12 +299,12 @@
       .then(res => res.json())
       .then(data => {
         // 발행된 글만, 최신순
-        // 24장 Photo 그리드(2×12)와 좌우 시각 균형을 위해 8장 노출
+        // 메인 좌측 여백을 줄이되 너무 무겁지 않게 최신 글 10장 노출
         // 나머지는 stories.html 페이지네이션으로 이어짐
         const all = data
           .filter(s => s.published !== false)
           .sort((a, b) => new Date(b.date) - new Date(a.date));
-        const stories = all.slice(0, 8);
+        const stories = all.slice(0, 10);
 
         // 페이지 번호 네비게이션 (stories.html 의 pageSize=12 와 동일하게 계산)
         const numNav = document.getElementById('storyNumNav');
@@ -916,9 +916,9 @@
   }
 </script>
 
-<script src="./js/site-common.js?v=20260514-authnav"></script>
+<script src="./js/site-common.js?v=20260515-authnav"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260514-favorites"></script>
-<script src="./js/reader-submissions.js?v=20260514-authreturn"></script>
+<script src="./js/db-client.js?v=20260515-session"></script>
+<script src="./js/reader-submissions.js?v=20260515-uploadfix"></script>
 </body>
 </html>

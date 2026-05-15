@@ -777,10 +777,21 @@
     const counter = document.getElementById(`readerRollCounter-${filmKey}`);
     const personFilter = document.getElementById(`readerPersonFilter-${filmKey}`);
     const contributorView = document.getElementById(`readerContributorView-${filmKey}`);
+    const submitBtn = modalContent.querySelector('.reader-submit-btn');
     if (!grid) return;
 
     const personKeyOf = (sub) => normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
     const personLabelOf = (sub) => sub.submitterName || sub.author || sub.instagram || '이름 없음';
+    const rollIntroText = (count) => {
+      if (isFeatured) {
+        return count > 0
+          ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤입니다. 남은 빈 자리에 당신의 한 컷도 더해보세요.'
+          : '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.';
+      }
+      return count > 0
+        ? `${count}컷이 먼저 채워졌습니다. 남은 빈 자리를 독자들의 사진으로 함께 채워가요.`
+        : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.';
+    };
     const authorBuckets = new Map();
     matched.forEach((sub) => {
       const key = personKeyOf(sub);
@@ -796,6 +807,7 @@
     let activePerson = 'all';
     let visible = matched;
     const rollIntro = modalContent.querySelector('.reader-roll-intro');
+    if (submitBtn) submitBtn.textContent = matched.length > 0 ? '컷 채우기' : (isFeatured ? '컷 채우기' : '첫 컷 채우기');
 
     const filmLabelOf = (filmName) => {
       const match = typeof window.findFilmMatch === 'function'
@@ -832,9 +844,7 @@
       grid.hidden = false;
       if (personFilter) personFilter.hidden = authors.length < 1;
       if (rollIntro) {
-        rollIntro.textContent = isFeatured
-          ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.'
-          : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.';
+        rollIntro.textContent = rollIntroText(matched.length);
       }
       renderReaderSlots();
       if (personFilter) {
@@ -929,6 +939,7 @@
     }
 
     renderPersonFilter();
+    if (rollIntro) rollIntro.textContent = rollIntroText(matched.length);
     renderReaderSlots();
 
     // 채워진 슬롯 클릭 → reader 라이트박스 (인스타로 바로 점프 X)
@@ -1384,10 +1395,10 @@
     }
   }, { passive: true });
 </script>
-<script src="./js/site-common.js?v=20260514-authnav"></script>
+<script src="./js/site-common.js?v=20260515-authnav"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260514-favorites"></script>
+<script src="./js/db-client.js?v=20260515-session"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
-<script src="./js/reader-submissions.js?v=20260514-authreturn"></script>
+<script src="./js/reader-submissions.js?v=20260515-uploadfix"></script>
 </body>
 </html>
