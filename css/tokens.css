@@ -94,6 +94,13 @@
   --duration-base:  .2s;
   --duration-slow:  .35s;
   --easing:         cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ────── 반응형 브레이크포인트 (참고용 — CSS @media 는 변수 못 받으므로 동일 px 직접 입력)
+       --bp-sm: 640px   (모바일 ↔ 큰 폰)
+       --bp-md: 768px   (큰 폰 ↔ 태블릿)
+       --bp-lg: 1024px  (태블릿 ↔ 데스크탑)
+       --bp-xl: 1280px  (데스크탑 ↔ 큰 데스크탑)
+     컨벤션: 모바일 first — 베이스는 모바일, @media (min-width: N) 로 큰 화면 추가. */
 }
 
 /* 다크 모드 */

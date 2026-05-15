@@ -178,7 +178,40 @@
     setupAuthNav();
     setupArticleScrap();
     injectFooterLegalLinks();
+    injectSkipLink();
+    setAriaCurrentOnNav();
     loadAnalyticsOnce();
+  }
+
+  // ════════════════════════════════════════════════
+  // 접근성 — Skip to main content 링크
+  //   Tab 처음 누르면 화면 최상단에 "본문으로 건너뛰기" 노출.
+  //   스크린리더/키보드 사용자가 매 페이지 매번 nav 반복 안 듣고 본문으로 이동.
+  // ════════════════════════════════════════════════
+  function injectSkipLink() {
+    if (document.querySelector('.skip-link')) return;
+    // 본문 후보 — <article> 또는 <main> 또는 첫 <section>
+    const main = document.querySelector('article, main, [role="main"], section');
+    if (!main) return;
+    if (!main.id) main.id = 'main';
+    const a = document.createElement('a');
+    a.className = 'skip-link';
+    a.href = '#' + main.id;
+    a.textContent = '본문으로 건너뛰기';
+    document.body.insertBefore(a, document.body.firstChild);
+  }
+
+  // 현재 페이지 nav 링크에 aria-current="page" — 스크린리더에게 위치 안내
+  function setAriaCurrentOnNav() {
+    const here = location.pathname.replace(/\/index\.html$/, '/');
+    document.querySelectorAll('.main-nav a, .mobile-nav a').forEach(a => {
+      try {
+        const url = new URL(a.href, location.origin);
+        if (url.origin !== location.origin) return;
+        const ap = url.pathname.replace(/\/index\.html$/, '/');
+        if (ap === here) a.setAttribute('aria-current', 'page');
+      } catch (_) {}
+    });
   }
 
   // js/analytics.js (Plausible + Sentry bootstrapper) + js/icons.js 한 번만 로드

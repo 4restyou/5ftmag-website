@@ -1,4 +1,5 @@
 /* 5ft.mag home page */
+/* TODO mobile-first 리팩토링 대기 — @media (max-width) → (min-width) 플립. base 가 모바일 값을 갖도록 조정 필요. 회귀 위험 있어 별도 라운드에서 처리. (PoC: comments.css / market.css)*/
 /* ════════════════════════════
    SPLIT LAYOUT
 ════════════════════════════ */

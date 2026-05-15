@@ -3,7 +3,7 @@
 .cm-root {
   max-width: var(--read-width);
   margin: 0 auto;
-  padding: 56px 24px 80px;
+  padding: 40px 20px 60px;       /* 모바일 기본 */
   border-top: 1px solid var(--border);
   font-family: var(--font);
   color: var(--text);
@@ -22,7 +22,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 14px 16px;            /* 모바일 기본 */
   background: var(--bg-sub);
   border-radius: 4px;
   margin-bottom: 20px;
@@ -93,7 +93,7 @@
   min-height: 80px;
   padding: 14px 16px;
   font-family: var(--font);
-  font-size: 15px;
+  font-size: 14px;               /* 모바일 기본 */
   line-height: 1.6;
   color: var(--text);
   background: var(--bg);
@@ -128,15 +128,15 @@
 /* 단일 댓글 */
 .cm-item {
   display: grid;
-  grid-template-columns: 40px 1fr;
-  gap: 14px;
-  padding: 20px 0;
+  grid-template-columns: 32px 1fr; /* 모바일 기본 */
+  gap: 10px;
+  padding: 16px 0;
   border-bottom: 1px solid var(--border);
 }
 .cm-item:last-child { border-bottom: none; }
 
 .cm-avatar {
-  width: 40px; height: 40px;
+  width: 32px; height: 32px;     /* 모바일 기본 */
   border-radius: 50%;
   object-fit: cover;
   background: var(--bg-sub);
@@ -185,7 +185,7 @@
 .cm-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;                     /* 모바일 기본 */
   margin-top: 10px;
   flex-wrap: wrap;
 }
@@ -215,9 +215,8 @@
 /* 답글 영역 */
 .cm-replies {
   margin-top: 16px;
-  padding-left: 0;
+  padding-left: 14px;            /* 모바일 기본 */
   border-left: 2px solid var(--border);
-  padding-left: 20px;
 }
 .cm-reply { padding: 16px 0; }
 .cm-reply:first-child { padding-top: 0; }
@@ -236,15 +235,15 @@
   color: var(--text-muted);
 }
 
-/* ── 반응형 ── */
-@media (max-width: 640px) {
-  .cm-root { padding: 40px 20px 60px; }
-  .cm-item { grid-template-columns: 32px 1fr; gap: 10px; padding: 16px 0; }
-  .cm-avatar { width: 32px; height: 32px; }
-  .cm-replies { padding-left: 14px; }
-  .cm-textarea { font-size: 14px; }
-  .cm-actions { gap: 12px; }
-  .cm-auth { padding: 14px 16px; }
+/* ── 반응형 (mobile-first) — 위 base 는 모바일, 아래는 sm 이상 ── */
+@media (min-width: 641px) {
+  .cm-root { padding: 56px 24px 80px; }
+  .cm-item { grid-template-columns: 40px 1fr; gap: 14px; padding: 20px 0; }
+  .cm-avatar { width: 40px; height: 40px; }
+  .cm-replies { padding-left: 20px; }
+  .cm-textarea { font-size: 15px; }
+  .cm-actions { gap: 14px; }
+  .cm-auth { padding: 16px 20px; }
 }
 
 /* ── 다크 모드 미세 조정 ── */

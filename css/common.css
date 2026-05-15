@@ -606,3 +606,82 @@ footer {
   font-size: 13px; line-height: 1.6; max-width: 360px;
 }
 .empty .btn { margin-top: var(--space-3); }
+
+
+/* ════════════════════════════════════════════════
+   접근성 — Skip to main content 링크
+   ──────────────────────────────────────────────
+   평소엔 화면 밖. Tab 으로 포커스 받으면 좌상단에 노출. */
+.skip-link {
+  position: absolute;
+  top: -60px; left: 12px;
+  z-index: 10000;
+  padding: 10px 16px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: top var(--duration-fast) var(--easing);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 12px;
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* ════════════════════════════════════════════════
+   글로벌 focus-visible — 키보드 사용자 가독성
+   ──────────────────────────────────────────────
+   마우스 클릭에는 link/button 모두 ring 안 보임 (UA 기본 동작).
+   Tab/화살표로 포커스 받았을 때만 ring 노출. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: 2px;
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+/* 카드는 자체 hover/focus 스타일이 더 큼 — 링 제거 */
+.film-card:focus-visible,
+.article-card:focus-visible,
+.market-card:focus-visible {
+  box-shadow: var(--ring);
+}
+
+/* ════════════════════════════════════════════════
+   Print stylesheet — 글 페이지 인쇄 최적화
+   ──────────────────────────────────────────────
+   매거진 사이트라 글 인쇄 수요 있음. 헤더/푸터/메뉴 숨기고 본문만. */
+@media print {
+  header, footer, .footer-partners, .mobile-nav, .nav-right,
+  .article-back, .share-bar, .article-nav, .related-section,
+  [data-comments], .skip-link, .ft-toast-host {
+    display: none !important;
+  }
+  body { background: #fff !important; color: #000 !important; font-size: 12pt; line-height: 1.5; }
+  article { max-width: 100% !important; }
+  .article-header { padding: 24pt 0 16pt !important; }
+  .article-title { font-size: 24pt !important; }
+  .article-subtitle { font-size: 14pt !important; }
+  .article-body { padding: 0 !important; max-width: none !important; }
+  .article-body p { font-size: 11pt !important; line-height: 1.55 !important; margin-bottom: 10pt !important; orphans: 3; widows: 3; }
+  .article-body h2 { font-size: 16pt !important; margin-top: 18pt !important; page-break-after: avoid; }
+  .article-body h3 { font-size: 13pt !important; margin-top: 14pt !important; page-break-after: avoid; }
+  .article-body img, .article-body figure { page-break-inside: avoid; max-width: 100% !important; height: auto !important; }
+  /* 링크 URL 인쇄 — 외부 링크만 (내부 링크는 노이즈) */
+  a[href^="http"]:not([href*="5ftmag.com"])::after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #555;
+  }
+}
