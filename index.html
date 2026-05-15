@@ -584,11 +584,35 @@
         const EDITORIAL_RATIO = 0.02;
         const editorialPool = allPhotos.filter(p => p.source === 'editorial');
         const readerPool    = allPhotos.filter(p => p.source !== 'editorial');
+        // 같은 작성자 사진이 한 번에 몰리지 않도록 작가별 1장씩 우선 뽑고,
+        // 자리가 남으면 나머지로 채움.
+        function diversifyByAuthor(pool, count) {
+          if (count <= 0) return [];
+          const byAuthor = new Map();
+          pool.forEach((p, i) => {
+            const raw = (p.author || '').trim().toLowerCase();
+            // 작성자 미상은 각자 다른 버킷으로 — 한 명으로 묶지 않기
+            const key = raw || `__anon_${i}`;
+            if (!byAuthor.has(key)) byAuthor.set(key, []);
+            byAuthor.get(key).push(p);
+          });
+          const primary = [];
+          const leftover = [];
+          for (const group of byAuthor.values()) {
+            const shuffled = shuffleSeeded(group);
+            primary.push(shuffled[0]);
+            if (shuffled.length > 1) leftover.push(...shuffled.slice(1));
+          }
+          const primaryShuffled = shuffleSeeded(primary);
+          if (primaryShuffled.length >= count) return primaryShuffled.slice(0, count);
+          // 작가 수보다 자리가 많으면 leftover 에서 보충
+          return [...primaryShuffled, ...shuffleSeeded(leftover)].slice(0, count);
+        }
         // 24 × 0.02 = 0.48 → 정수 부분(0) + 소수 부분 확률(0.48)로 0 또는 1장
         const expectedEditorial = PHOTO_COUNT * EDITORIAL_RATIO;
         const editorialN = Math.floor(expectedEditorial) + (rng() < (expectedEditorial % 1) ? 1 : 0);
         const editorialPick = shuffleSeeded(editorialPool).slice(0, Math.min(editorialN, editorialPool.length));
-        const readerPick    = shuffleSeeded(readerPool).slice(0, PHOTO_COUNT - editorialPick.length);
+        const readerPick    = diversifyByAuthor(readerPool, PHOTO_COUNT - editorialPick.length);
         const selected = shuffleSeeded([...editorialPick, ...readerPick]);
 
         if (selected.length === 0) {
