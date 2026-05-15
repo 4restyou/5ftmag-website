@@ -333,7 +333,10 @@
     },
     async list({ category = 'all', limit = 200 } = {}) {
       const c = client(); if (!c) return [];
-      let q = c.from('market_listings_public').select('*')
+      // 로그인 사용자는 authed 뷰로 — 카드에는 안 보이지만 모달 진입 시 추가 조회 불필요
+      const uid = await userId();
+      const table = uid ? 'market_listings_authed' : 'market_listings_public';
+      let q = c.from(table).select('*')
         .order('created_at', { ascending: false }).limit(limit);
       if (category && category !== 'all') q = q.eq('category', category);
       const { data, error } = await q;
@@ -342,7 +345,9 @@
     },
     async getOne(id) {
       const c = client(); if (!c) return null;
-      const { data } = await c.from('market_listings_public').select('*').eq('id', id).maybeSingle();
+      const uid = await userId();
+      const table = uid ? 'market_listings_authed' : 'market_listings_public';
+      const { data } = await c.from(table).select('*').eq('id', id).maybeSingle();
       return data || null;
     },
     async listMine() {

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260515-mobile-poc">
-  <link rel="stylesheet" href="./css/market.css?v=20260515-iconwhite">
+  <link rel="stylesheet" href="./css/market.css?v=20260516-sellerfields">
 </head>
 <body>
 
@@ -132,7 +132,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260515-likes"></script>
+<script src="./js/db-client.js?v=20260516-mktauthed"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
 <script src="./js/site-common.js?v=20260515-mobile-poc"></script>
 <script>
@@ -418,6 +418,8 @@ function renderDetail(r) {
 
   const author = r.display_name || '회원';
   const isMine = STATE.user && STATE.user.id === r.user_id;
+  const isAuthed = !!STATE.user;
+  const deliveryLabel = ({ courier: '택배', direct: '직거래', both: '택배·직거래' })[r.delivery_method] || r.delivery_method || '';
 
   $('mktDetailCard').innerHTML = `
     <button type="button" class="mkt-modal-close" data-action="close" aria-label="닫기">✕</button>
@@ -435,12 +437,19 @@ function renderDetail(r) {
       <div class="mkt-detail-meta">
         <span>${escapeHtml(categoryLabel(r.category))}</span>
         ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
+        ${deliveryLabel ? `<span>· ${escapeHtml(deliveryLabel)}</span>` : ''}
         <span>· ${fmtDate(r.created_at)}</span>
       </div>
       ${r.description ? `<div class="mkt-detail-desc">${nl2br(r.description)}</div>` : ''}
       <div class="mkt-detail-contact">
         <strong>판매자 연락처</strong>
-        ${nl2br(r.contact)}
+        ${isAuthed ? `
+          ${r.seller_name ? `<div>이름 · ${escapeHtml(r.seller_name)}</div>` : ''}
+          ${r.phone ? `<div>핸드폰 · ${escapeHtml(r.phone)}</div>` : ''}
+          ${r.contact ? `<div>기타 · ${nl2br(r.contact)}</div>` : ''}
+        ` : `
+          <div class="mkt-detail-contact-locked">로그인하면 판매자의 이름·핸드폰·연락처를 확인할 수 있어요.</div>
+        `}
       </div>
       <div class="mkt-detail-author">올린 사람 · ${escapeHtml(author)}</div>
       <div class="mkt-detail-actions">
@@ -595,14 +604,36 @@ function renderForm(existing) {
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">거래 지역 <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">(선택, 60자)</small></span>
-        <input type="text" name="location" maxlength="60" value="${escapeAttr(e.location || '')}" placeholder="예: 서울 마포 / 택배만" />
+        <span class="mkt-field-label">지역 <em>*</em></span>
+        <input type="text" name="location" maxlength="60" required value="${escapeAttr(e.location || '')}" placeholder="예: 서울 마포 / 경기 성남 / 전국 (택배)" />
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">판매자 연락처 <em>*</em></span>
-        <textarea name="contact" maxlength="100" required placeholder="전화번호, 카톡 ID, 인스타 DM 등 본인이 받을 수 있는 방법">${escapeHtml(e.contact || '')}</textarea>
-        <span class="mkt-field-hint">공개적으로 노출되니 본인이 감당 가능한 정보만 적어주세요.</span>
+        <span class="mkt-field-label">거래 방식 <em>*</em></span>
+        <select name="delivery_method" required>
+          <option value="" ${!e.delivery_method ? 'selected' : ''} disabled>선택해주세요</option>
+          <option value="courier" ${e.delivery_method === 'courier' ? 'selected' : ''}>택배</option>
+          <option value="direct"  ${e.delivery_method === 'direct'  ? 'selected' : ''}>직거래</option>
+          <option value="both"    ${e.delivery_method === 'both'    ? 'selected' : ''}>택배·직거래 둘 다</option>
+        </select>
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">이름 <em>*</em></span>
+        <input type="text" name="seller_name" maxlength="60" required value="${escapeAttr(e.seller_name || '')}" placeholder="실명 또는 통상 사용하는 이름" />
+        <span class="mkt-field-hint">구매자가 받을 사람을 확인할 수 있도록 적어주세요. (로그인한 사용자에게만 공개)</span>
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">핸드폰 번호 <em>*</em></span>
+        <input type="tel" name="phone" maxlength="20" required value="${escapeAttr(e.phone || '')}" placeholder="예: 010-1234-5678" pattern="[0-9\-\s]{9,20}" />
+        <span class="mkt-field-hint">로그인한 사용자에게만 공개됩니다.</span>
+      </label>
+
+      <label class="mkt-field">
+        <span class="mkt-field-label">기타 연락처 <em>*</em></span>
+        <textarea name="contact" maxlength="100" required placeholder="카톡 ID, 인스타 DM 등 — 핸드폰 외 추가로 받을 수 있는 방법">${escapeHtml(e.contact || '')}</textarea>
+        <span class="mkt-field-hint">로그인한 사용자에게만 공개됩니다.</span>
       </label>
 
       <label class="mkt-safety-check">
@@ -711,13 +742,20 @@ async function onSubmit(e) {
   try {
     if (!STATE.formPhotos.length) throw new Error('상품 상태를 볼 수 있는 사진을 1장 이상 올려주세요.');
     const fd = new FormData(form);
-    const title       = String(fd.get('title') || '').trim();
-    const price       = String(fd.get('price') || '').trim();
-    const category    = String(fd.get('category') || '').trim();
-    const description = String(fd.get('description') || '').trim() || null;
-    const location    = String(fd.get('location') || '').trim() || null;
-    const contact     = String(fd.get('contact') || '').trim();
-    if (!title || !price || !category || !contact) throw new Error('제목, 가격, 카테고리, 연락처는 반드시 입력해 주세요.');
+    const title           = String(fd.get('title') || '').trim();
+    const price           = String(fd.get('price') || '').trim();
+    const category        = String(fd.get('category') || '').trim();
+    const description     = String(fd.get('description') || '').trim() || null;
+    const location        = String(fd.get('location') || '').trim();
+    const delivery_method = String(fd.get('delivery_method') || '').trim();
+    const seller_name     = String(fd.get('seller_name') || '').trim();
+    const phone           = String(fd.get('phone') || '').trim();
+    const contact         = String(fd.get('contact') || '').trim();
+    if (!title || !price || !category || !location || !delivery_method || !seller_name || !phone || !contact) {
+      throw new Error('필수 항목(제목·가격·카테고리·지역·거래 방식·이름·핸드폰·기타 연락처)을 모두 입력해 주세요.');
+    }
+    if (!['courier','direct','both'].includes(delivery_method)) throw new Error('거래 방식을 다시 선택해 주세요.');
+    if (!/[0-9]{8,}/.test(phone.replace(/[^0-9]/g, ''))) throw new Error('핸드폰 번호 형식을 확인해 주세요. (숫자 8자리 이상)');
     if (fd.get('safety_agree') !== 'on') throw new Error('개인 간 거래 확인사항에 동의해야 매물을 올릴 수 있어요.');
 
     // 사진 업로드 — 신규 추가된 것만
@@ -744,7 +782,7 @@ async function onSubmit(e) {
       uploadedNew.push(path);
     }
 
-    const record = { title, price, category, description, location, contact, storage_paths: finalPaths };
+    const record = { title, price, category, description, location, delivery_method, seller_name, phone, contact, storage_paths: finalPaths };
 
     if (STATE.editId) {
       submit.textContent = '수정 저장 중…';
