@@ -606,7 +606,11 @@
   async function waitForApprovedFetcher(timeoutMs = 5000) {
     const step = 100;
     for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
-      if (typeof window.fetchApprovedSubmissions === 'function') {
+      if (
+        typeof window.fetchApprovedSubmissions === 'function' &&
+        window.MagDB &&
+        window.MagDB.isReady()
+      ) {
         return window.fetchApprovedSubmissions;
       }
       await new Promise(r => setTimeout(r, step));

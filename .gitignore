@@ -23,6 +23,10 @@ npm-debug.log*
 # Netlify
 .netlify/
 
+# Test output
+test-results/
+playwright-report/
+
 # Temp
 *.log
 .cache/

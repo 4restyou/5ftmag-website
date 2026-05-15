@@ -185,15 +185,39 @@ function uuid() {
     return v.toString(16);
   });
 }
+function withTimeout(promise, ms, label) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} 응답이 늦어지고 있습니다.`)), ms);
+    promise.then(
+      value => { clearTimeout(timer); resolve(value); },
+      error => { clearTimeout(timer); reject(error); }
+    );
+  });
+}
+function renderMarketLoadError(message) {
+  $('marketGrid').innerHTML = `
+    <div class="market-empty">
+      ${escapeHtml(message || '마켓 데이터를 불러오지 못했습니다.')}
+      <br />
+      <button type="button" class="market-retry-btn" data-action="retry-market">다시 불러오기</button>
+    </div>`;
+}
 
 // ═════════════════════════════════════════
 // 데이터 로드 + 렌더
 // ═════════════════════════════════════════
 async function loadList() {
   $('marketGrid').innerHTML = '<div class="market-empty">불러오는 중…</div>';
-  STATE.rows = await db().market.list({ limit: 500 });
-  renderFilterChips();
-  renderGrid();
+  try {
+    const rows = await withTimeout(db().market.list({ limit: 500 }), 9000, '마켓 목록');
+    STATE.rows = Array.isArray(rows) ? rows : [];
+    renderFilterChips();
+    renderGrid();
+  } catch (e) {
+    STATE.rows = [];
+    renderFilterChips();
+    renderMarketLoadError(`${e.message || '마켓 데이터를 불러오지 못했습니다.'} 네트워크 상태를 확인한 뒤 다시 시도해 주세요.`);
+  }
 }
 
 function renderFilterChips() {
@@ -756,6 +780,10 @@ $('marketSearch').addEventListener('input', (e) => {
   STATE.search = e.target.value;
   renderGrid();
 });
+$('marketGrid').addEventListener('click', (e) => {
+  if (!e.target.closest('[data-action="retry-market"]')) return;
+  loadList();
+});
 $('mktDetailModal').addEventListener('click', (e) => {
   if (e.target === $('mktDetailModal')) closeDetail();
 });
@@ -774,7 +802,7 @@ document.addEventListener('keydown', (e) => {
     await new Promise(r => setTimeout(r, 50));
   }
   if (!db() || !db().isReady()) {
-    $('marketGrid').innerHTML = '<div class="market-empty">마켓 데이터를 불러오지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.</div>';
+    renderMarketLoadError('마켓 연결을 준비하지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.');
     return;
   }
   const session = await db().auth.getSession();

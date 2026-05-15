@@ -260,6 +260,24 @@
   color: var(--text-muted);
   font-size: 14px;
 }
+.market-retry-btn {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--btn-radius);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  cursor: pointer;
+}
+.market-retry-btn:hover {
+  background: var(--bg-sub);
+}
 
 /* ── 상세 모달 (라이트박스 스타일) ── */
 .mkt-modal {

@@ -31,4 +31,4 @@ createServer((req, res) => {
   }
   res.writeHead(200, { 'Content-Type': MIME[extname(file).toLowerCase()] || 'application/octet-stream' });
   createReadStream(file).pipe(res);
-}).listen(PORT, () => console.log(`static-server on http://127.0.0.1:${PORT}`));
+}).listen(PORT, '127.0.0.1', () => console.log(`static-server on http://127.0.0.1:${PORT}`));

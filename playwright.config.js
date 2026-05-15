@@ -19,7 +19,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'chromium-mobile',  use: { ...devices['iPhone 14'] } },
+    { name: 'chromium-mobile',  use: { ...devices['iPhone 14'], browserName: 'chromium' } },
   ],
   webServer: {
     command: `node scripts/static-server.mjs ${PORT}`,

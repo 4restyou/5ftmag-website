@@ -64,14 +64,23 @@
 
   // films 객체에서 정규화된 alias → 필름 entry 매핑 빌드
   function buildAliasIndex(films) {
-    const map = new Map();
+    const buckets = new Map();
     for (const slug of Object.keys(films || {})) {
       const f = films[slug];
       const all = (f.aliases || []).concat([f.displayName, f.name]).filter(Boolean);
       for (const a of all) {
         const k = normalizeFilmName(a);
-        if (k && !map.has(k)) map.set(k, { slug, film: f });
+        if (!k) continue;
+        if (!buckets.has(k)) buckets.set(k, new Map());
+        buckets.get(k).set(slug, { slug, film: f });
       }
+    }
+    const map = new Map();
+    for (const [alias, entriesBySlug] of buckets) {
+      const entries = [...entriesBySlug.values()];
+      map.set(alias, entries.length === 1
+        ? entries[0]
+        : { ambiguous: true, entries });
     }
     return map;
   }
@@ -103,15 +112,16 @@
     const aliasIndex = buildAliasIndex(films);
 
     // 1) Exact match (alias 집합 내)
-    if (aliasIndex.has(q)) {
-      const entry = aliasIndex.get(q);
+    const exactEntry = aliasIndex.get(q);
+    if (exactEntry && !exactEntry.ambiguous) {
+      const entry = exactEntry;
       return { type: 'exact', film: entry.film, slug: entry.slug, canonical: entry.film.displayName || entry.film.name };
     }
 
     // 2) Fuzzy: 부분 포함(양방향) 우선, 그다음 Levenshtein
     const candidates = [];
     for (const [normAlias, entry] of aliasIndex) {
-      const f = entry.film;
+      if (entry.ambiguous) continue;
       // 너무 짧은 입력은 잘못된 매칭 위험 — 최소 길이 3 이상에서만 부분 매칭 인정
       if (q.length >= 3 && (normAlias.includes(q) || q.includes(normAlias))) {
         const score = Math.max(q.length, normAlias.length) - Math.min(q.length, normAlias.length);
@@ -801,7 +811,14 @@
 
   // 외부 노출: 승인된 제출 가져오기 (MagDB 위임 — 호환성 유지)
   window.fetchApprovedSubmissions = async function (limit = 1000) {
-    if (!db()) return [];
-    return db().submissions.listApproved(limit);
+    if (!db() || !db().isReady()) return [];
+    return withNetworkTimeout(
+      db().submissions.listApproved(limit),
+      9000,
+      '승인된 사진 목록 불러오기'
+    ).catch(err => {
+      console.warn('[reader-submissions] approved list:', err?.message || err);
+      return [];
+    });
   };
 })();
