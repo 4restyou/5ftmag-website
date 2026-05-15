@@ -744,9 +744,15 @@
   position: relative;
 }
 .films-section-head-library {
+  /* 텍스트 가독성은 720px 로 제한하되, 상단 구분선은 섹션 전체 폭으로 — title/sub 만 max-width */
+  max-width: none;
   margin-top: 88px;
   padding-top: 36px;
   border-top: 1px solid var(--border);
+}
+.films-section-head-library .films-section-title,
+.films-section-head-library .films-section-sub {
+  max-width: 720px;
 }
 .library-mine-link {
   position: absolute;
