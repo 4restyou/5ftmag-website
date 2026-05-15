@@ -997,6 +997,36 @@
     "canThumbnail": "img/films/ektachrome100-can.webp",
     "canThumbnailStatus": "set"
   },
+  "ektachromeE200": {
+    "slug": "ektachromeE200",
+    "tier": "library",
+    "brand": "KODAK",
+    "name": "Ektachrome E200",
+    "displayName": "Kodak Ektachrome E200",
+    "aliases": [
+      "E200",
+      "Ektachrome 200",
+      "Ektachrome E200",
+      "Ektachrome E200 Professional",
+      "Kodak E200",
+      "Kodak Ektachrome E200",
+      "Kodak Professional E200",
+      "엑타크롬 200",
+      "엑타크롬 E200",
+      "코닥 E200",
+      "코닥 엑타크롬 E200",
+      "ektachromee200",
+      "ektachrome200"
+    ],
+    "desc": "Kodak Professional 라인의 ISO 200 슬라이드 필름. 푸시 가공(+1 ~ +3 stop) 에 강해 저조도·스튜디오·인공광 환경에서 자주 쓰였고, 차분한 톤과 세밀한 입자감으로 사랑받았던 한 롤입니다. 2012년 단종.",
+    "iso": "200",
+    "type": "Slide (E-6)",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": "img/films/ektachromeE200-can.webp",
+    "canThumbnailStatus": "set"
+  },
   "ektar100": {
     "slug": "ektar100",
     "tier": "library",
