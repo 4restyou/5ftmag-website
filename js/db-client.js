@@ -333,22 +333,29 @@
     },
     async list({ category = 'all', limit = 200 } = {}) {
       const c = client(); if (!c) return [];
-      // 로그인 사용자는 authed 뷰로 — 카드에는 안 보이지만 모달 진입 시 추가 조회 불필요
-      const uid = await userId();
-      const table = uid ? 'market_listings_authed' : 'market_listings_public';
-      let q = c.from(table).select('*')
+      let q = c.from('market_listings_public').select('*')
         .order('created_at', { ascending: false }).limit(limit);
       if (category && category !== 'all') q = q.eq('category', category);
       const { data, error } = await q;
-      if (error) return [];
+      if (error) { console.warn('[market.list]', error.message); return []; }
       return data || [];
     },
     async getOne(id) {
       const c = client(); if (!c) return null;
+      const { data, error } = await c.from('market_listings_public').select('*').eq('id', id).maybeSingle();
+      if (error) console.warn('[market.getOne]', error.message);
+      if (!data) return null;
+      // 로그인 상태면 판매자 연락정보 RPC 로 보강
       const uid = await userId();
-      const table = uid ? 'market_listings_authed' : 'market_listings_public';
-      const { data } = await c.from(table).select('*').eq('id', id).maybeSingle();
-      return data || null;
+      if (uid) {
+        const { data: pii } = await c.rpc('market_listing_contact', { p_listing_id: id });
+        if (pii && pii.length) {
+          data.seller_name = pii[0].seller_name;
+          data.phone       = pii[0].phone;
+          data.contact     = pii[0].contact;
+        }
+      }
+      return data;
     },
     async listMine() {
       const c = client(); if (!c) return [];
