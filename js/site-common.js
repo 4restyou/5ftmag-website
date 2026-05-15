@@ -181,16 +181,18 @@
     loadAnalyticsOnce();
   }
 
-  // js/analytics.js (Plausible + Sentry bootstrapper) 한 번만 로드 — 28개 HTML 손 안 댐
-  let _analyticsLoaded = false;
+  // js/analytics.js (Plausible + Sentry bootstrapper) + js/icons.js 한 번만 로드
+  let _aux = false;
   function loadAnalyticsOnce() {
-    if (_analyticsLoaded) return;
-    _analyticsLoaded = true;
+    if (_aux) return;
+    _aux = true;
     const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
-    const s = document.createElement('script');
-    s.defer = true;
-    s.src = base + 'js/analytics.js?v=20260515-bootstrap';
-    document.head.appendChild(s);
+    [['analytics.js', '20260515-bootstrap'], ['icons.js', '20260515-icons']].forEach(([f, v]) => {
+      const s = document.createElement('script');
+      s.defer = true;
+      s.src = `${base}js/${f}?v=${v}`;
+      document.head.appendChild(s);
+    });
   }
 
   // ════════════════════════════════════════════════
@@ -233,10 +235,30 @@
   }
   window.showToast = showToast;
 
-  // notify(msg, type) — showToast 있으면 toast, 없으면 alert (전역 helper)
+  // 원본 alert 백업 — 아래 monkey-patch / notify 폴백에서 모두 참조
+  const _origAlert = window.alert.bind(window);
+
+  // notify(msg, type) — showToast 있으면 toast, 없으면 alert
   window.notify = function (msg, type) {
     if (typeof window.showToast === 'function') return window.showToast(msg, { type });
-    alert(String(msg ?? ''));
+    _origAlert(String(msg ?? ''));
+  };
+
+  // ════════════════════════════════════════════════
+  // alert() 자동 토스트화 (monkey-patch)
+  //   기존 코드의 alert('실패…') 들을 일괄 변환하지 않고도 토스트로 라우팅.
+  //   confirm/prompt 는 입력 받는 동기 동작이라 건드리지 않음.
+  // ════════════════════════════════════════════════
+  window.alert = function (msg) {
+    const text = String(msg ?? '');
+    // 알림 톤 추정 — 메시지 어조로 type 결정
+    let type = 'default';
+    if (/실패|오류|거부|에러|못했어요|중단|시간 초과|불가|잘못/.test(text))   type = 'danger';
+    else if (/접수|완료|저장|등록|로그인|승인|성공/.test(text))                type = 'info';
+    if (typeof window.showToast === 'function') {
+      return window.showToast(text, { type, duration: type === 'danger' ? 3500 : 2400 });
+    }
+    return _origAlert(text);
   };
 
   // ════════════════════════════════════════════════

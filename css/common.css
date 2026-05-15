@@ -503,3 +503,106 @@ footer {
 .ft-toast-danger  { background: var(--color-danger-text); color: #fff; }
 .ft-toast-success { background: var(--color-success-text); color: #fff; }
 .ft-toast-info    { background: var(--color-info-text); color: #fff; }
+
+
+/* ════════════════════════════════════════════════
+   버튼 컴포넌트 시스템 — .btn + variant + size
+   ──────────────────────────────────────────────
+   variant: primary / secondary / ghost / danger / link
+   size:    sm / md (default) / lg
+   사용 예:  <button class="btn btn-primary btn-md">…</button>
+   ════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font: inherit;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--easing),
+              color      var(--duration-fast) var(--easing),
+              border-color var(--duration-fast) var(--easing),
+              opacity    var(--duration-fast) var(--easing),
+              transform  var(--duration-fast) var(--easing);
+  white-space: nowrap;
+}
+.btn:disabled { opacity: 0.4; cursor: progress; pointer-events: none; }
+.btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+
+/* sizes */
+.btn-sm { font-size: 12px; padding: 6px 12px; }
+.btn-md { font-size: 13px; padding: 8px 16px; }
+.btn-lg { font-size: 15px; padding: 12px 22px; }
+
+/* variants */
+.btn-primary {
+  background: var(--text); color: var(--bg); border-color: var(--text);
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.85; }
+
+.btn-secondary {
+  background: var(--bg); color: var(--text); border-color: var(--border);
+}
+.btn-secondary:hover:not(:disabled) { border-color: var(--text); }
+
+.btn-ghost {
+  background: transparent; color: var(--text-muted); border-color: transparent;
+}
+.btn-ghost:hover:not(:disabled) { color: var(--text); background: var(--bg-sub); }
+
+.btn-danger {
+  background: var(--bg); color: var(--color-danger-text); border-color: var(--color-danger-border);
+}
+.btn-danger:hover:not(:disabled) { background: var(--color-danger-bg); }
+
+.btn-link {
+  background: none; border: none; padding: 0; color: var(--text-muted);
+  text-underline-offset: 3px; text-decoration: underline;
+}
+.btn-link:hover:not(:disabled) { color: var(--text); }
+
+
+/* ════════════════════════════════════════════════
+   빈 상태 (Empty State) 컴포넌트
+   ──────────────────────────────────────────────
+   <div class="empty">
+     <div class="empty-icon">…</div>
+     <p class="empty-title">제목</p>
+     <p class="empty-desc">설명</p>
+     <a class="btn btn-primary btn-md" href="…">CTA</a>
+   </div>
+   ════════════════════════════════════════════════ */
+.empty {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  color: var(--text-muted);
+  word-break: keep-all;
+}
+.empty-icon {
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-sub);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+.empty-icon svg { width: 28px; height: 28px; stroke-width: 1.5; }
+.empty-title {
+  margin: 0;
+  font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em;
+  color: var(--text);
+}
+.empty-desc {
+  margin: 0;
+  font-size: 13px; line-height: 1.6; max-width: 360px;
+}
+.empty .btn { margin-top: var(--space-3); }
