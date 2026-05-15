@@ -626,34 +626,28 @@
 
   function buildReaderRollState(rows) {
     const ordered = sortReaderSubmissionsOldestFirst(rows);
-    const completedCount = Math.floor(ordered.length / ROLL_LIMIT);
-    const remainder = ordered.length % ROLL_LIMIT;
+    const currentIndex = Math.max(0, Math.ceil(Math.max(ordered.length, 1) / ROLL_LIMIT) - 1);
     const rolls = [];
 
-    for (let i = 0; i < completedCount; i++) {
+    for (let i = 0; i <= currentIndex; i++) {
+      const rollRows = ordered.slice(i * ROLL_LIMIT, (i + 1) * ROLL_LIMIT);
       rolls.push({
         number: i + 1,
-        rows: ordered.slice(i * ROLL_LIMIT, (i + 1) * ROLL_LIMIT),
-        complete: true,
+        rows: rollRows,
+        complete: rollRows.length === ROLL_LIMIT,
+        current: i === currentIndex,
       });
     }
 
-    const currentNumber = completedCount + 1;
-    const currentRows = remainder
-      ? ordered.slice(completedCount * ROLL_LIMIT)
-      : [];
-    rolls.push({
-      number: currentNumber,
-      rows: currentRows,
-      complete: false,
-      current: true,
-    });
+    const currentRoll = rolls[currentIndex];
+    const pastRolls = rolls.filter(roll => !roll.current);
 
     return {
       total: ordered.length,
       rolls,
-      currentNumber,
-      currentRows,
+      pastRolls,
+      currentNumber: currentRoll.number,
+      currentRows: currentRoll.rows,
     };
   }
 
@@ -829,14 +823,11 @@
     const rollByNumber = (number) => rollState.rolls.find(roll => roll.number === number) || rollState.rolls[rollState.rolls.length - 1];
     const rollIntroText = (roll) => {
       const count = roll?.rows?.length || 0;
-      if (roll?.current && rollState.total >= ROLL_LIMIT && count === 0) {
-        return `이전 롤이 36컷으로 채워져 보관됐습니다. Roll ${roll.number}의 첫 자리를 채워보세요.`;
-      }
       if (roll?.current && rollState.total > ROLL_LIMIT) {
-        return `Roll ${roll.number}가 진행 중입니다. 이전 롤은 위 버튼에서 다시 볼 수 있어요.`;
+        return `Roll ${roll.number}가 진행 중입니다. 지난 롤은 따로 다시 볼 수 있어요.`;
       }
       if (!roll?.current) {
-        return `보관된 Roll ${roll.number}입니다. 36컷이 채워진 지난 롤을 다시 볼 수 있어요.`;
+        return `지난 롤 ${roll.number}입니다. 36컷으로 채워진 한 롤을 다시 보고 있어요.`;
       }
       if (isFeatured) {
         return count > 0
@@ -849,6 +840,7 @@
     };
     let activeRoll = rollState.currentNumber;
     let activePerson = 'all';
+    let archiveOpen = false;
     let rollRows = rollByNumber(activeRoll).rows;
     let visible = rollRows;
     const rollIntro = modalContent.querySelector('.reader-roll-intro');
@@ -881,15 +873,21 @@
     }
 
     function renderRollSwitcher() {
-      if (!rollSwitcher || rollState.rolls.length <= 1) return;
+      if (!rollSwitcher || rollState.pastRolls.length < 1) return;
+      const isViewingCurrent = activeRoll === rollState.currentNumber;
+      const pastRolls = rollState.pastRolls.slice().reverse();
       rollSwitcher.hidden = false;
-      rollSwitcher.innerHTML = rollState.rolls.slice().reverse().map((roll) => {
-        const label = roll.current ? `Roll ${roll.number} · 진행 중` : `Roll ${roll.number} · 보관`;
-        return `
-          <button type="button" class="reader-roll-chip${roll.number === activeRoll ? ' is-active' : ''}" data-roll-number="${roll.number}">
-            ${escapeAttr(label)} <span>${roll.rows.length}/${ROLL_LIMIT}</span>
-          </button>`;
-      }).join('');
+      rollSwitcher.innerHTML = `
+        <button type="button" class="reader-roll-toggle" data-roll-action="${isViewingCurrent ? 'toggle' : 'current'}">
+          ${isViewingCurrent ? `지난 롤 보기 <span>${pastRolls.length}</span>` : `현재 롤 보기 <span>${rollState.currentNumber}</span>`}
+        </button>
+        <div class="reader-roll-numbers" ${archiveOpen || !isViewingCurrent ? '' : 'hidden'}>
+          ${pastRolls.map((roll) => `
+            <button type="button" class="reader-roll-number${roll.number === activeRoll ? ' is-active' : ''}" data-roll-number="${roll.number}" aria-label="${roll.number}번 지난 롤 보기">
+              ${roll.number}
+            </button>
+          `).join('')}
+        </div>`;
     }
 
     function renderPersonFilter() {
@@ -932,6 +930,7 @@
       const nextRoll = rollByNumber(nextNumber);
       activeRoll = nextRoll.number;
       activePerson = 'all';
+      archiveOpen = activeRoll !== rollState.currentNumber ? true : archiveOpen;
       rollRows = nextRoll.rows;
       visible = rollRows;
       if (contributorView) contributorView.hidden = true;
@@ -1045,9 +1044,20 @@
     };
     if (rollSwitcher) {
       rollSwitcher.onclick = (e) => {
-        const chip = e.target.closest('.reader-roll-chip');
-        if (!chip) return;
-        const number = parseInt(chip.dataset.rollNumber, 10);
+        const action = e.target.closest('[data-roll-action]');
+        if (action) {
+          if (action.dataset.rollAction === 'toggle') {
+            archiveOpen = !archiveOpen;
+            renderRollSwitcher();
+          } else if (action.dataset.rollAction === 'current') {
+            archiveOpen = false;
+            setActiveRoll(rollState.currentNumber);
+          }
+          return;
+        }
+        const numberBtn = e.target.closest('.reader-roll-number');
+        if (!numberBtn) return;
+        const number = parseInt(numberBtn.dataset.rollNumber, 10);
         if (!Number.isNaN(number)) setActiveRoll(number);
       };
     }

@@ -890,14 +890,20 @@
 .reader-roll-switcher {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin: 0 0 14px;
 }
-.reader-roll-chip {
+.reader-roll-switcher [hidden] {
+  display: none;
+}
+.reader-roll-toggle,
+.reader-roll-number {
   appearance: none;
   -webkit-appearance: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   padding: 8px 11px;
   border: 1px solid rgba(255, 255, 255, 0.24);
@@ -911,16 +917,27 @@
   cursor: pointer;
   transition: border-color .15s, color .15s, background .15s;
 }
-.reader-roll-chip span {
+.reader-roll-toggle span {
   color: rgba(255, 255, 255, 0.48);
 }
-.reader-roll-chip:hover,
-.reader-roll-chip.is-active {
+.reader-roll-numbers {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.reader-roll-number {
+  min-width: 34px;
+  padding: 8px 10px;
+}
+.reader-roll-toggle:hover,
+.reader-roll-toggle.is-active,
+.reader-roll-number:hover,
+.reader-roll-number.is-active {
   border-color: rgba(255, 255, 255, 0.78);
   color: #fff;
   background: rgba(255, 255, 255, 0.13);
 }
-.reader-roll-chip.is-active span {
+.reader-roll-toggle.is-active span {
   color: rgba(255, 255, 255, 0.76);
 }
 .reader-person-filter {
