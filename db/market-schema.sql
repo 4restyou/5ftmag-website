@@ -43,12 +43,19 @@ CREATE TABLE IF NOT EXISTS public.market_reports (
   listing_id   UUID NOT NULL REFERENCES public.market_listings(id) ON DELETE CASCADE,
   reporter_id  UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   reason       TEXT NOT NULL CHECK (char_length(reason) BETWEEN 1 AND 300),
+  status       TEXT NOT NULL DEFAULT 'pending'
+                 CHECK (status IN ('pending', 'resolved', 'dismissed')),
+  resolved_at  TIMESTAMPTZ,
+  resolved_by  UUID REFERENCES auth.users(id),
+  resolver_note TEXT CHECK (resolver_note IS NULL OR char_length(resolver_note) <= 300),
   created_at   TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE (listing_id, reporter_id)  -- 한 사람당 한 매물 1회 신고
 );
 
 CREATE INDEX IF NOT EXISTS idx_market_reports_listing
   ON public.market_reports(listing_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_market_reports_status
+  ON public.market_reports(status, created_at DESC);
 
 -- ════════════════════════════════════════════════════════════
 -- 공개 뷰: hidden 제외 + 작성자 표시 정보
@@ -194,6 +201,15 @@ CREATE POLICY "market reports own read" ON public.market_reports
 DROP POLICY IF EXISTS "market reports editor read" ON public.market_reports;
 CREATE POLICY "market reports editor read" ON public.market_reports
   FOR SELECT TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE user_id = auth.uid() AND is_editor = TRUE
+  ));
+
+-- 편집부 UPDATE (status / resolved_* / resolver_note)
+DROP POLICY IF EXISTS "market reports editor update" ON public.market_reports;
+CREATE POLICY "market reports editor update" ON public.market_reports
+  FOR UPDATE TO authenticated
   USING (EXISTS (
     SELECT 1 FROM public.profiles
     WHERE user_id = auth.uid() AND is_editor = TRUE

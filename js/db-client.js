@@ -380,6 +380,64 @@
         listing_id: listingId, reporter_id: uid, reason: String(reason || '').trim(),
       });
     },
+
+    // ─── 편집부 전용 — RLS 가 권한 가드 ───
+    async adminGetListing(id) {
+      // base 테이블에서 직접 조회 — hidden 포함, RLS 가 편집부만 허용
+      const c = client(); if (!c) return null;
+      const { data } = await c.from('market_listings').select('*').eq('id', id).maybeSingle();
+      if (!data) return null;
+      // profiles 조인 (display_name 보강) — 간단히 별도 조회
+      const { data: prof } = await c.from('profiles_public').select('display_name')
+        .eq('user_id', data.user_id).maybeSingle();
+      return { ...data, display_name: prof?.display_name || null };
+    },
+    async adminReportCount(status = 'pending') {
+      const c = client(); if (!c) return 0;
+      const { count } = await c.from('market_reports')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', status);
+      return count || 0;
+    },
+    async adminListReports(status, from, to) {
+      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
+      let q = c.from('market_reports')
+        .select('id, listing_id, reporter_id, reason, status, resolved_at, resolved_by, resolver_note, created_at');
+      if (status) q = q.eq('status', status);
+      return q.order('created_at', { ascending: false }).range(from, to);
+    },
+    async adminPatchReport(id, patch) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      const merged = { ...patch };
+      if (patch.status && patch.status !== 'pending') {
+        merged.resolved_at = new Date().toISOString();
+        merged.resolved_by = uid;
+      } else if (patch.status === 'pending') {
+        merged.resolved_at = null;
+        merged.resolved_by = null;
+      }
+      return c.from('market_reports').update(merged).eq('id', id).select('id');
+    },
+    async adminHideListing(listingId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('market_listings').update({ status: 'hidden' }).eq('id', listingId).select('id');
+    },
+    async adminUnhideListing(listingId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('market_listings').update({ status: 'available' }).eq('id', listingId).select('id');
+    },
+    async adminDeleteListing(listingId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      // 매물 row 조회 → storage_paths 회수 → DB 삭제 → storage 삭제
+      const { data: row } = await c.from('market_listings').select('storage_paths').eq('id', listingId).maybeSingle();
+      const { data, error } = await c.from('market_listings').delete().eq('id', listingId).select('id');
+      if (error || !data?.length) return { error: error || { message: '삭제 거부됨 (편집부 권한 확인)' } };
+      if (row?.storage_paths?.length) {
+        try { await c.storage.from(MARKET_BUCKET).remove(row.storage_paths); } catch (_) {}
+      }
+      return { data };
+    },
   };
 
   // ─── 즐겨찾기 (본인용 · 공개 카운터 없음) ───

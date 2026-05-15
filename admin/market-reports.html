@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>매물 신고 검토 — 5ft.mag Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css?v=20260511-imgfix">
+  <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
+  <style>
+    body { background: var(--bg); color: var(--text); }
+
+    .admin-header { max-width: 1100px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .admin-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; transition: color .15s; }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-user { font-size: 13px; color: var(--text-muted); }
+    .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .admin-user button:hover { color: var(--text); }
+
+    .admin-subnav { display: flex; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; display: inline-flex; align-items: center; gap: 6px; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
+    .admin-subnav-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 6px; background: #e0245e; color: #fff; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0; border-radius: 999px; }
+
+    .admin-tabs { max-width: 1100px; margin: 0 auto; padding: 24px 24px 0; display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+    .admin-tab { padding: 10px 16px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 14px; font-weight: var(--fw-heading); color: var(--text-muted); cursor: pointer; letter-spacing: 0.02em; transition: color .15s, border-color .15s; }
+    .admin-tab:hover { color: var(--text); }
+    .admin-tab.active { color: var(--text); border-bottom-color: var(--text); }
+    .admin-tab .count { display: inline-block; background: var(--bg-sub); color: var(--text-muted); font-size: 11px; padding: 1px 7px; border-radius: var(--badge-radius); margin-left: 6px; font-weight: var(--fw-heading); }
+    .admin-tab.active .count { background: var(--text); color: var(--bg); }
+
+    .admin-list { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 16px; }
+
+    .rep-card { display: grid; grid-template-columns: 160px 1fr; gap: 18px; padding: 18px; background: var(--bg-sub); border-radius: 6px; align-items: start; }
+    .rep-thumb { aspect-ratio: 4 / 3; background: var(--bg); border-radius: 4px; overflow: hidden; position: relative; cursor: zoom-in; }
+    .rep-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .rep-thumb.is-missing { background: repeating-linear-gradient(135deg, var(--bg) 0 8px, var(--bg-sub) 8px 16px); cursor: default; }
+    .rep-thumb-status { position: absolute; top: 8px; left: 8px; background: var(--bg); color: var(--text); font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.08em; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; }
+    .rep-thumb-status.hidden { background: #fee2e2; color: #7f1d1d; }
+    .rep-thumb-status.sold   { background: #e5e7eb; color: #4b5563; }
+    .rep-thumb-status.deleted { background: #1f2937; color: #fff; }
+
+    .rep-meta { display: grid; gap: 8px; font-size: 14px; min-width: 0; }
+    .rep-row { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: baseline; line-height: 1.5; }
+    .rep-row .k { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+    .rep-row .v { color: var(--text); word-break: break-word; }
+    .rep-row .v a { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+    .rep-status { display: inline-block; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.1em; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; }
+    .rep-status.pending   { background: #fef3c7; color: #78350f; }
+    .rep-status.resolved  { background: #d1fae5; color: #064e3b; }
+    .rep-status.dismissed { background: #e5e7eb; color: #4b5563; }
+
+    .rep-actions { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+    .rep-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 7px 13px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text); transition: opacity .15s, border-color .15s, background .15s; }
+    .rep-btn:hover { border-color: var(--text); }
+    .rep-btn:disabled { opacity: 0.4; cursor: progress; }
+    .rep-btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .rep-btn-warn    { background: #fff; color: #7f1d1d; border-color: #fca5a5; }
+    .rep-btn-warn:hover { border-color: #ef4444; }
+    .rep-btn-danger  { background: #fff; color: #7f1d1d; border-color: #ef4444; }
+
+    .empty-state { text-align: center; padding: 80px 24px; color: var(--text-muted); font-size: 14px; }
+    .gate { max-width: 560px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; font-weight: var(--fw-heading); margin: 0 0 12px; }
+    .gate p { color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
+    .gate .gate-btn { background: var(--text); color: var(--bg); border: none; padding: 12px 24px; border-radius: 4px; font-size: 14px; font-weight: var(--fw-heading); cursor: pointer; }
+
+    .img-zoom { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; padding: 24px; }
+    .img-zoom.open { display: flex; }
+    .img-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    @media (max-width: 720px) {
+      .rep-card { grid-template-columns: 1fr; }
+      .rep-thumb { width: 100%; aspect-ratio: 4 / 3; }
+      .rep-row { grid-template-columns: 1fr; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-header">
+  <a href="../index.html" class="admin-back">← 5ft.mag</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">매물 신고 검토</h1>
+    <div class="admin-user" id="adminUser"></div>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <a href="submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="market-reports.html" class="admin-subnav-link is-current">매물 신고</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<div id="app" hidden>
+  <div class="admin-tabs">
+    <button type="button" class="admin-tab active" data-status="pending">대기 <span class="count" id="cnt-pending">·</span></button>
+    <button type="button" class="admin-tab" data-status="resolved">처리됨 <span class="count" id="cnt-resolved">·</span></button>
+    <button type="button" class="admin-tab" data-status="dismissed">기각 <span class="count" id="cnt-dismissed">·</span></button>
+  </div>
+  <div class="admin-list" id="list">
+    <div class="empty-state">불러오는 중…</div>
+  </div>
+</div>
+
+<div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/db-client.js?v=20260515-reports"></script>
+<script src="../js/site-common.js?v=20260515-scrap"></script>
+<script>
+'use strict';
+
+const STATE = {
+  user: null,
+  isEditor: false,
+  status: 'pending',
+  rows: [],
+  listingCache: new Map(),
+  counts: { pending: 0, resolved: 0, dismissed: 0 },
+};
+
+function $(id) { return document.getElementById(id); }
+function db() { return window.MagDB; }
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+async function checkAccess() {
+  if (!db() || !db().isReady()) {
+    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
+    return false;
+  }
+  const session = await db().auth.getSession();
+  if (!session) { showGate(); return false; }
+  STATE.user = session.user;
+
+  const profile = await db().profiles.getMine();
+  if (!profile?.is_editor) { showGate('접근 권한이 없어요.'); return false; }
+  STATE.isEditor = true;
+  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
+  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
+  return true;
+}
+
+function showGate(msg) {
+  $('gate').hidden = false;
+  $('app').hidden = true;
+  if (msg) {
+    $('gate').querySelector('p').textContent = msg;
+    $('gateLogin').style.display = 'none';
+  }
+  $('gateLogin').addEventListener('click', async () => {
+    await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
+  });
+}
+
+async function loadCounts() {
+  for (const status of ['pending', 'resolved', 'dismissed']) {
+    const n = await db().market.adminReportCount(status);
+    STATE.counts[status] = n;
+    const el = $(`cnt-${status}`);
+    if (el) el.textContent = n;
+  }
+}
+
+async function loadList() {
+  $('list').innerHTML = '<div class="empty-state">불러오는 중…</div>';
+  const { data, error } = await db().market.adminListReports(STATE.status, 0, 99);
+  if (error) {
+    $('list').innerHTML = `<div class="empty-state">불러오기 실패: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  STATE.rows = data || [];
+  if (STATE.rows.length === 0) {
+    const msg = STATE.status === 'pending' ? '대기 중인 신고가 없어요.'
+              : STATE.status === 'resolved' ? '처리한 신고가 없어요.'
+              : '기각한 신고가 없어요.';
+    $('list').innerHTML = `<div class="empty-state">${msg}</div>`;
+    return;
+  }
+  // 매물 정보 미리 fetch — 신고 row 에는 listing_id 만 있음
+  const listingIds = [...new Set(STATE.rows.map(r => r.listing_id))];
+  await Promise.all(listingIds.map(id => fetchListing(id)));
+  renderList();
+}
+
+async function fetchListing(id) {
+  if (STATE.listingCache.has(id)) return;
+  const row = await db().market.adminGetListing(id).catch(() => null);
+  STATE.listingCache.set(id, row);
+}
+
+function renderList() {
+  $('list').innerHTML = STATE.rows.map(renderCard).join('');
+  bindCardActions();
+}
+
+function renderCard(r) {
+  const listing = STATE.listingCache.get(r.listing_id);
+  const firstPath = listing?.storage_paths?.[0];
+  const thumbUrl = firstPath ? db().market.publicUrl(firstPath) : '';
+  const isDeleted = !listing;
+  const listingStatus = listing?.status || '';
+  const statusBadge = isDeleted
+    ? '<span class="rep-thumb-status deleted">DELETED</span>'
+    : (listingStatus === 'hidden' ? '<span class="rep-thumb-status hidden">HIDDEN</span>'
+       : listingStatus === 'sold' ? '<span class="rep-thumb-status sold">SOLD</span>'
+       : '');
+  const thumbHtml = isDeleted
+    ? `<div class="rep-thumb is-missing">${statusBadge}</div>`
+    : thumbUrl
+      ? `<div class="rep-thumb" data-zoom="${escapeAttr(thumbUrl)}"><img src="${escapeAttr(thumbUrl)}" alt="" />${statusBadge}</div>`
+      : `<div class="rep-thumb is-missing">${statusBadge}</div>`;
+
+  const title = listing?.title || '(삭제된 매물)';
+  const price = listing?.price || '';
+  const author = listing?.display_name || (listing?.user_id ? listing.user_id.slice(0,8) + '…' : '-');
+  const listingLink = listing ? `<a href="../market.html?id=${encodeURIComponent(r.listing_id)}" target="_blank" rel="noopener">매물 보기 ↗</a>` : '';
+
+  return `
+    <div class="rep-card" data-id="${escapeAttr(r.id)}" data-listing-id="${escapeAttr(r.listing_id)}">
+      ${thumbHtml}
+      <div class="rep-meta">
+        <div><span class="rep-status ${escapeAttr(r.status)}">${escapeHtml(r.status)}</span></div>
+        <div class="rep-row"><span class="k">매물</span><span class="v">${escapeHtml(title)}${price ? ` · ${escapeHtml(price)}` : ''} ${listingLink}</span></div>
+        <div class="rep-row"><span class="k">판매자</span><span class="v">${escapeHtml(author)}</span></div>
+        <div class="rep-row"><span class="k">신고 사유</span><span class="v">${escapeHtml(r.reason)}</span></div>
+        <div class="rep-row"><span class="k">신고자</span><span class="v">${escapeHtml(r.reporter_id?.slice(0,8) || '-')}…</span></div>
+        <div class="rep-row"><span class="k">접수</span><span class="v">${fmtDate(r.created_at)}</span></div>
+        ${r.resolved_at ? `<div class="rep-row"><span class="k">처리</span><span class="v">${fmtDate(r.resolved_at)}</span></div>` : ''}
+        ${r.resolver_note ? `<div class="rep-row"><span class="k">노트</span><span class="v">${escapeHtml(r.resolver_note)}</span></div>` : ''}
+        <div class="rep-actions">
+          ${renderActions(r, listing, isDeleted)}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderActions(r, listing, isDeleted) {
+  const parts = [];
+  if (r.status === 'pending') {
+    if (!isDeleted) {
+      if (listing?.status === 'hidden') {
+        parts.push('<button type="button" class="rep-btn" data-action="unhide">매물 복구</button>');
+      } else {
+        parts.push('<button type="button" class="rep-btn rep-btn-warn" data-action="hide">매물 숨김</button>');
+      }
+      parts.push('<button type="button" class="rep-btn rep-btn-danger" data-action="delete">매물 완전 삭제</button>');
+    }
+    parts.push('<button type="button" class="rep-btn rep-btn-primary" data-action="resolve">처리 완료</button>');
+    parts.push('<button type="button" class="rep-btn" data-action="dismiss">기각</button>');
+  } else {
+    parts.push('<button type="button" class="rep-btn" data-action="reopen">다시 대기로</button>');
+  }
+  return parts.join('');
+}
+
+function bindCardActions() {
+  document.querySelectorAll('.rep-card').forEach(card => {
+    const reportId = card.dataset.id;
+    const listingId = card.dataset.listingId;
+
+    card.querySelector('[data-zoom]')?.addEventListener('click', (e) => {
+      $('imgZoomTarget').src = e.currentTarget.dataset.zoom;
+      $('imgZoom').classList.add('open');
+    });
+
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const a = btn.dataset.action;
+        btn.disabled = true;
+        const prev = btn.textContent;
+        btn.textContent = '처리 중…';
+        let result;
+        try {
+          if (a === 'hide') {
+            result = await db().market.adminHideListing(listingId);
+            if (!result.error) STATE.listingCache.set(listingId, { ...STATE.listingCache.get(listingId), status: 'hidden' });
+          } else if (a === 'unhide') {
+            result = await db().market.adminUnhideListing(listingId);
+            if (!result.error) STATE.listingCache.set(listingId, { ...STATE.listingCache.get(listingId), status: 'available' });
+          } else if (a === 'delete') {
+            if (!confirm('매물을 완전히 삭제할까요? 사진 파일도 함께 삭제됩니다. 되돌릴 수 없습니다.')) {
+              btn.disabled = false; btn.textContent = prev; return;
+            }
+            result = await db().market.adminDeleteListing(listingId);
+            if (!result.error) STATE.listingCache.delete(listingId);
+          } else if (a === 'resolve') {
+            const note = prompt('처리 노트(선택, 300자):', '');
+            if (note === null) { btn.disabled = false; btn.textContent = prev; return; }
+            result = await db().market.adminPatchReport(reportId, { status: 'resolved', resolver_note: note || null });
+          } else if (a === 'dismiss') {
+            const note = prompt('기각 사유(선택, 300자):', '');
+            if (note === null) { btn.disabled = false; btn.textContent = prev; return; }
+            result = await db().market.adminPatchReport(reportId, { status: 'dismissed', resolver_note: note || null });
+          } else if (a === 'reopen') {
+            result = await db().market.adminPatchReport(reportId, { status: 'pending', resolver_note: null });
+          }
+        } catch (err) {
+          result = { error: err };
+        }
+        if (result?.error) {
+          alert('실패: ' + (result.error.message || '알 수 없는 오류'));
+          btn.disabled = false; btn.textContent = prev;
+          return;
+        }
+        await Promise.all([loadCounts(), loadList()]);
+      });
+    });
+  });
+}
+
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    STATE.status = tab.dataset.status;
+    loadList();
+  });
+});
+
+$('imgZoom').addEventListener('click', () => {
+  $('imgZoom').classList.remove('open');
+  $('imgZoomTarget').src = '';
+});
+
+(async function main() {
+  for (let i = 0; i < 50; i++) {
+    if (db() && db().isReady()) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  const ok = await checkAccess();
+  if (!ok) return;
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  await Promise.all([loadCounts(), loadList()]);
+})();
+</script>
+
+</body>
+</html>
