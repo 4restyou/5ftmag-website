@@ -133,6 +133,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260515-reports"></script>
+<script src="./js/image-processor.js?v=20260515-imgproc"></script>
 <script src="./js/site-common.js?v=20260515-scrap"></script>
 <script>
 'use strict';
@@ -616,14 +617,22 @@ function renderPhotoSlots() {
     el.addEventListener('change', async () => {
       const file = el.files?.[0];
       if (!file) return;
+      const slot = el.closest('.mkt-photo-slot');
+      const origLabel = slot?.firstChild?.nodeValue;
       try {
-        const { blob } = await resizeToJpeg(file);
+        if (slot) slot.firstChild.nodeValue = `변환 중… (${fmtBytes(file.size)}) `;
+        const { blob } = await resizeToJpeg(file, ({ stage, width: w, height: h }) => {
+          if (!slot) return;
+          if (stage === 'resize')      slot.firstChild.nodeValue = `크기 줄이는 중… (${w}×${h}) `;
+          else if (stage === 'encode') slot.firstChild.nodeValue = `인코딩 중… (${w}×${h}) `;
+        });
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('파일이 너무 큽니다 (5MB 이하).');
         const blobUrl = URL.createObjectURL(blob);
         STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl };
         renderPhotoSlots();
       } catch (err) {
-        alert(err.message || '이미지를 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.');
+        if (slot && origLabel) slot.firstChild.nodeValue = origLabel;
+        alert(err.message || '사진을 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.');
       }
     });
   });
@@ -638,33 +647,27 @@ function renderPhotoSlots() {
   });
 }
 
-// 이미지 리사이즈 (reader-submissions.js 와 동일 패턴 — 자체 구현으로 의존성 ↓)
-function loadImage(file) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
-    img.src = url;
+// 이미지 변환 — js/image-processor.js (Worker + HEIC 가드 + timeout) 위임
+function resizeToJpeg(file, onProgress) {
+  if (typeof window.processImageForUpload !== 'function') {
+    return Promise.reject(new Error('이미지 변환 모듈이 로드되지 않았어요. 새로고침 후 다시 시도해 주세요.'));
+  }
+  return window.processImageForUpload(file, {
+    maxLongSide: MAX_LONG_SIDE,
+    quality: JPEG_QUALITY,
+    onProgress: onProgress || (() => {}),
   });
 }
-async function resizeToJpeg(file) {
-  const img = await loadImage(file);
-  let { width: w, height: h } = img;
-  if (Math.max(w, h) > MAX_LONG_SIDE) {
-    if (w >= h) { h = Math.round(h * MAX_LONG_SIDE / w); w = MAX_LONG_SIDE; }
-    else        { w = Math.round(w * MAX_LONG_SIDE / h); h = MAX_LONG_SIDE; }
-  }
-  const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(img, 0, 0, w, h);
+function fmtBytes(n) {
+  if (!n && n !== 0) return '';
+  if (n < 1024) return `${n}B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)}KB`;
+  return `${(n / 1024 / 1024).toFixed(1)}MB`;
+}
+function withNetworkTimeout(promise, ms, label) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob(blob => {
-      if (!blob) return reject(new Error('이미지 변환 실패'));
-      resolve({ blob, width: w, height: h });
-    }, 'image/jpeg', JPEG_QUALITY);
+    const t = setTimeout(() => reject(new Error(`${label} 시간 초과 (${Math.round(ms/1000)}초). 네트워크 상태 확인 후 다시 시도해 주세요.`)), ms);
+    promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
   });
 }
 
@@ -694,9 +697,14 @@ async function onSubmit(e) {
     const uploadedNew = [];
     for (const p of STATE.formPhotos) {
       if (p.existingPath) { finalPaths.push(p.existingPath); continue; }
-      submit.textContent = `사진 업로드 중… (${uploadedNew.length + 1}/${STATE.formPhotos.filter(x => !x.existingPath).length})`;
+      const totalNew = STATE.formPhotos.filter(x => !x.existingPath).length;
+      submit.textContent = `사진 업로드 중… (${uploadedNew.length + 1}/${totalNew} · ${fmtBytes(p.blob?.size)})`;
       const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
-      const { error: upErr } = await db().market.uploadPhoto(path, p.blob);
+      const { error: upErr } = await withNetworkTimeout(
+        db().market.uploadPhoto(path, p.blob),
+        60000,
+        '사진 업로드'
+      ).catch(err => ({ error: { message: err.message } }));
       if (upErr) {
         // 실패 시 이번 세션에서 올린 것들 정리
         if (uploadedNew.length) await db().market.removePhotos(uploadedNew);

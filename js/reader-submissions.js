@@ -129,36 +129,36 @@
   window.findFilmMatch = findFilmMatch;
 
   // ════════════════════════════════════════════════════════════
-  // 캔버스 리사이즈 + JPEG 인코딩
+  // 사진 변환 — js/image-processor.js 의 Worker 경로 우선,
+  //   미지원 시 메인스레드 createImageBitmap, 그 다음 Image 태그 폴백.
+  //   HEIC 사전 거부 + 단계별 timeout 내장.
+  //   onProgress(stage, info) 콜백으로 UI 업데이트 가능.
   // ════════════════════════════════════════════════════════════
-  function loadImage(file) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-      img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
-      img.src = url;
+  function resizeToJpeg(file, onProgress) {
+    if (typeof window.processImageForUpload !== 'function') {
+      return Promise.reject(new Error('이미지 변환 모듈이 로드되지 않았어요. 새로고침 후 다시 시도해 주세요.'));
+    }
+    return window.processImageForUpload(file, {
+      maxLongSide: MAX_LONG_SIDE,
+      quality: JPEG_QUALITY,
+      onProgress: onProgress || (() => {}),
     });
   }
 
-  async function resizeToJpeg(file) {
-    const img = await loadImage(file);
-    let { width: w, height: h } = img;
-    if (Math.max(w, h) > MAX_LONG_SIDE) {
-      if (w >= h) { h = Math.round(h * MAX_LONG_SIDE / w); w = MAX_LONG_SIDE; }
-      else        { w = Math.round(w * MAX_LONG_SIDE / h); h = MAX_LONG_SIDE; }
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(img, 0, 0, w, h);
+  // 업로드/네트워크 호출에도 timeout — supabase storage 가 모바일 약한 네트워크에서 hang 하는 경우 대응
+  function withNetworkTimeout(promise, ms, label) {
     return new Promise((resolve, reject) => {
-      canvas.toBlob(blob => {
-        if (!blob) return reject(new Error('이미지 변환 실패'));
-        resolve({ blob, width: w, height: h });
-      }, 'image/jpeg', JPEG_QUALITY);
+      const t = setTimeout(() => reject(new Error(`${label} 시간 초과 (${Math.round(ms/1000)}초). 네트워크 상태 확인 후 다시 시도해 주세요.`)), ms);
+      promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
     });
+  }
+
+  // 사진 사이즈 라벨 ('3.2MB · 4032×3024' 같은 형식)
+  function fmtBytes(n) {
+    if (!n && n !== 0) return '';
+    if (n < 1024) return `${n}B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)}KB`;
+    return `${(n / 1024 / 1024).toFixed(1)}MB`;
   }
 
   // ════════════════════════════════════════════════════════════
@@ -676,15 +676,23 @@
           if (m?.type === 'exact') film = m.canonical;
         }
 
-        submitBtn.textContent = '사진 변환 중…';
-        const { blob } = await resizeToJpeg(file);
+        // 변환 — 단계별로 버튼 텍스트 갱신해 "멈춘 것처럼 보이는" 무음 hang 방지
+        submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
+        const { blob, width, height } = await resizeToJpeg(file, ({ stage, width: w, height: h }) => {
+          if (stage === 'resize')      submitBtn.textContent = `사진 크기 줄이는 중… (${w}×${h})`;
+          else if (stage === 'encode') submitBtn.textContent = `사진 인코딩 중… (${w}×${h})`;
+        });
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
 
         const user = await db().auth.getUser();
         if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
         const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
-        submitBtn.textContent = '업로드 중…';
-        const { error: upErr } = await db().submissions.uploadPhoto(path, blob);
+        submitBtn.textContent = `사진 업로드 중… (${fmtBytes(blob.size)})`;
+        const { error: upErr } = await withNetworkTimeout(
+          db().submissions.uploadPhoto(path, blob),
+          60000,
+          '사진 업로드'
+        ).catch(err => ({ error: { message: err.message } }));
         if (upErr) throw new Error('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (' + upErr.message + ')');
 
         const igNorm = instagram ? instagram.replace(/^@/, '') : '';
