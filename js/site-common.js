@@ -177,6 +177,44 @@
     linkArticleAuthor();
     setupAuthNav();
     setupArticleScrap();
+    injectFooterLegalLinks();
+    loadAnalyticsOnce();
+  }
+
+  // js/analytics.js (Plausible + Sentry bootstrapper) 한 번만 로드 — 28개 HTML 손 안 댐
+  let _analyticsLoaded = false;
+  function loadAnalyticsOnce() {
+    if (_analyticsLoaded) return;
+    _analyticsLoaded = true;
+    const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
+    const s = document.createElement('script');
+    s.defer = true;
+    s.src = base + 'js/analytics.js?v=20260515-bootstrap';
+    document.head.appendChild(s);
+  }
+
+  // ════════════════════════════════════════════════
+  // 법무 페이지 링크 — 모든 페이지 푸터에 동적 inject
+  //   기존 footer-links 4개 (Shop/IG/이메일/4rest) 다음 자리에
+  //   "이용약관 · 개인정보 · 저작권" 3개 추가
+  // ════════════════════════════════════════════════
+  function injectFooterLegalLinks() {
+    const links = document.querySelector('.footer-links');
+    if (!links) return;
+    if (links.querySelector('[data-legal]')) return; // 이미 inject 됨
+    const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
+    const entries = [
+      ['이용약관', base + 'legal/terms.html'],
+      ['개인정보', base + 'legal/privacy.html'],
+      ['저작권',  base + 'legal/copyright.html'],
+    ];
+    entries.forEach(([label, href]) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.textContent = label;
+      a.setAttribute('data-legal', '1');
+      links.appendChild(a);
+    });
   }
 
   // ════════════════════════════════════════════════
