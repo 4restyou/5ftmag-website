@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260515-mobile-poc">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260515-ctafix">
-  <link rel="stylesheet" href="./css/films.css?v=20260515-libraryline">
+  <link rel="stylesheet" href="./css/films.css?v=20260516-modalshare">
 </head>
 <body>
 
@@ -106,6 +106,15 @@
 
 <!-- ════════ MODAL ════════ -->
 <div class="modal-overlay" id="modalOverlay">
+  <button class="modal-share" id="modalShare" type="button" aria-label="이 필름 링크 공유" title="링크 공유">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="6" cy="12" r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="17" cy="6"  r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="17" cy="18" r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="8.3" y1="10.7" x2="14.7" y2="7.2" stroke-linecap="round"/>
+      <line x1="8.3" y1="13.3" x2="14.7" y2="16.8" stroke-linecap="round"/>
+    </svg>
+  </button>
   <button class="modal-close" id="modalClose" aria-label="닫기">✕</button>
   <div class="modal-content" id="modalContent">
     <!-- 자바스크립트로 동적 생성 -->
@@ -704,6 +713,13 @@
     if (!data) return;
     currentFilmKey = filmKey;
 
+    // URL 동기화 — 공유/북마크 가능하게
+    try {
+      const u = new URL(location.href);
+      u.searchParams.set('film', filmKey);
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    } catch (_) {}
+
     const isFeatured = data.tier === 'featured';
     const photographers = Array.isArray(data.photographers) ? data.photographers : [];
 
@@ -1147,6 +1163,46 @@
   function closeModal() {
     modalOverlay.classList.remove('open');
     document.body.classList.remove('modal-open');
+    currentFilmKey = null;
+    // URL 에서 film/contributor 제거
+    try {
+      const u = new URL(location.href);
+      let dirty = false;
+      if (u.searchParams.has('film'))        { u.searchParams.delete('film'); dirty = true; }
+      if (u.searchParams.has('contributor')) { u.searchParams.delete('contributor'); dirty = true; }
+      if (dirty) history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    } catch (_) {}
+  }
+
+  // 필름 모달 공유 — market 의 shareListing 과 같은 패턴
+  async function shareFilm(filmKey) {
+    const data = filmsData[filmKey];
+    const u = new URL(location.href);
+    u.searchParams.set('film', filmKey);
+    u.searchParams.delete('contributor');
+    const url = u.toString();
+    const filmName = data?.displayName || data?.name || filmKey;
+    const title = `${filmName} · 5ft.mag Films`;
+    const text  = `5ft.mag Films 에서 ${filmName} 보기`;
+    if (navigator.share) {
+      try { await navigator.share({ title, text, url }); return; } catch (_) { return; }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      if (typeof window.showToast === 'function') window.showToast('링크 복사 완료', { type: 'success' });
+    } catch (_) {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (_) {}
+      ta.remove();
+      if (typeof window.showToast === 'function') {
+        window.showToast(ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요', { type: ok ? 'success' : 'danger' });
+      }
+    }
   }
 
   // 필름 카드 클릭
@@ -1158,6 +1214,15 @@
 
   // 닫기 버튼
   modalClose.addEventListener('click', closeModal);
+
+  // 공유 버튼
+  const modalShare = document.getElementById('modalShare');
+  if (modalShare) {
+    modalShare.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentFilmKey) shareFilm(currentFilmKey);
+    });
+  }
 
   // 오버레이 빈 공간 클릭 시 닫기
   modalOverlay.addEventListener('click', (e) => {
