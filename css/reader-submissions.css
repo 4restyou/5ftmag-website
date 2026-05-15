@@ -21,6 +21,13 @@
 .rs-trigger:hover { opacity: 0.85; }
 .rs-trigger:active { transform: translateY(1px); }
 .rs-trigger svg { width: 14px; height: 14px; }
+/* CTA 클릭 → 모달 여는 사이 (8초 가드 안에서) 시각 피드백 — "죽은 버튼" 인식 차단 */
+.rs-trigger.is-loading,
+.film-cta-action.is-loading {
+  opacity: 0.6;
+  cursor: progress;
+  pointer-events: none;
+}
 
 /* 모달 */
 .rs-modal {

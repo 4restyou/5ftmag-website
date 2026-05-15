@@ -22,26 +22,33 @@
     formOutsideClickHandler = null;
   }
 
-  // 한 번 fetch한 테마는 페이지 로딩 동안 캐시
+  // ── fetch + timeout (8초) — 응답 안 오면 abort 해서 hang 방지 ──
+  function fetchWithTimeout(url, ms = 8000, init = {}) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    return fetch(url, { ...init, signal: ctrl.signal })
+      .finally(() => clearTimeout(timer));
+  }
+
+  // 한 번 fetch한 테마는 페이지 로딩 동안 캐시 — 실패 시 캐시 무효화해서 다음 호출에서 재시도
   let _themePromise = null;
   function getCurrentTheme() {
     if (_themePromise) return _themePromise;
-    // 현재 페이지가 stories/, admin/ 아래라면 상대 경로 보정
     const depth = (location.pathname.match(/\/(stories|admin)\//) ? '../' : './');
-    _themePromise = fetch(depth + THEME_PATH, { cache: 'no-cache' })
+    _themePromise = fetchWithTimeout(depth + THEME_PATH, 8000, { cache: 'no-cache' })
       .then(r => r.ok ? r.json() : null)
-      .catch(() => null);
+      .catch(() => { _themePromise = null; return null; });
     return _themePromise;
   }
 
-  // 필름 목록(autocomplete용) — 한 번만 fetch
+  // 필름 목록 — 실패 시 null 반환 + 캐시 무효화 (caller 에서 분기)
   let _filmsPromise = null;
   function getFilms() {
     if (_filmsPromise) return _filmsPromise;
     const depth = (location.pathname.match(/\/(stories|admin)\//) ? '../' : './');
-    _filmsPromise = fetch(depth + FILMS_PATH, { cache: 'no-cache' })
-      .then(r => r.ok ? r.json() : {})
-      .catch(() => ({}));
+    _filmsPromise = fetchWithTimeout(depth + FILMS_PATH, 8000, { cache: 'no-cache' })
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => { _filmsPromise = null; return null; });
     return _filmsPromise;
   }
 
@@ -458,26 +465,56 @@
     try { localStorage.removeItem(fallbackKey); } catch {}
   }
 
+  // 중첩 진입 방지 — 사용자가 짧은 시간에 CTA 를 여러 번 눌러도 한 번만 처리
+  let _openInFlight = false;
+  function setTriggerLoading(el, on) {
+    if (!el || !el.classList) return;
+    el.classList.toggle('is-loading', !!on);
+    if (on) el.setAttribute('aria-busy', 'true');
+    else    el.removeAttribute('aria-busy');
+  }
+
   async function handleOpen(triggerEl) {
-    if (!db() || !db().isReady()) {
-      alert('잠시 후 다시 시도해주세요.');
-      return;
+    if (_openInFlight) return;
+    _openInFlight = true;
+    setTriggerLoading(triggerEl, true);
+    try {
+      if (!db() || !db().isReady()) {
+        alert('잠시 후 다시 시도해주세요. (DB 연결 준비 중)');
+        return;
+      }
+      const prefillFilm = triggerEl?.dataset?.prefillFilm || '';
+      const session = await db().auth.getSession();
+      if (!session) {
+        if (prefillFilm) saveTransient(SS_PREFILL, LS_PREFILL, prefillFilm);
+        saveTransient(SS_PENDING, LS_PENDING, '1');
+        openModal(renderLoginPrompt());
+        return;
+      }
+      let savedPrefill = prefillFilm;
+      if (!savedPrefill) {
+        savedPrefill = readTransient(SS_PREFILL, LS_PREFILL);
+      }
+      // 8초 외부 timeout — 안쪽 fetchWithTimeout 이 우회되는 극단적 케이스 대비
+      const dataPromise = Promise.all([getCurrentTheme(), getFilms()]);
+      const guard = new Promise((_, reject) => setTimeout(() => reject(new Error('open-timeout')), 9000));
+      let theme = null, films = null;
+      try {
+        [theme, films] = await Promise.race([dataPromise, guard]);
+      } catch (_) {
+        alert('사진 폼을 여는 데 시간이 너무 걸려요. 새로고침 후 다시 시도해 주세요.');
+        return;
+      }
+      if (!films || !Object.keys(films).length) {
+        alert('필름 목록을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
+      openModal(renderSubmissionForm(theme, savedPrefill, films));
+      bindFormHandlers(films);
+    } finally {
+      _openInFlight = false;
+      setTriggerLoading(triggerEl, false);
     }
-    const prefillFilm = triggerEl?.dataset?.prefillFilm || '';
-    const session = await db().auth.getSession();
-    if (!session) {
-      if (prefillFilm) saveTransient(SS_PREFILL, LS_PREFILL, prefillFilm);
-      saveTransient(SS_PENDING, LS_PENDING, '1');
-      openModal(renderLoginPrompt());
-      return;
-    }
-    let savedPrefill = prefillFilm;
-    if (!savedPrefill) {
-      savedPrefill = readTransient(SS_PREFILL, LS_PREFILL);
-    }
-    const [theme, films] = await Promise.all([getCurrentTheme(), getFilms()]);
-    openModal(renderSubmissionForm(theme, savedPrefill, films));
-    bindFormHandlers(films);
   }
 
   async function handleLogin() {
