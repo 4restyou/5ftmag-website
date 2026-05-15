@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
-  <link rel="stylesheet" href="./css/stories.css?v=20260513-keepall">
+  <link rel="stylesheet" href="./css/stories.css?v=20260515-scrap">
 </head>
 <body>
 
@@ -169,6 +169,8 @@
   const _urlPage = parseInt(new URLSearchParams(location.search).get('page'), 10);
   let currentPage = (Number.isFinite(_urlPage) && _urlPage > 0) ? _urlPage : 1;
   let allStories = []; // 전체 글 데이터 캐시
+  // 본인이 스크랩한 글 id 집합 — DB 준비 후 비동기 로드
+  let articleFavIds = new Set();
 
   // XSS 가드: 동적 삽입 escape
   function escapeHtml(s) {
@@ -210,6 +212,15 @@
     // Vol.XX가 있으면 매거진 호 배지, 없으면 카테고리 라벨로 자동 폴백
     const badgeLabel = story.issue || story.categoryLabel || (story.category || '').toUpperCase();
     const issueBadge = badgeLabel ? `<span class="article-badge">${escapeHtml(badgeLabel)}</span>` : '';
+    const isFav = articleFavIds.has(story.id);
+    const favHtml = `
+      <span class="article-card-fav${isFav ? ' is-fav' : ''}" role="button" tabindex="0"
+            data-action="toggle-article-fav" data-article-id="${escapeAttr(story.id)}"
+            aria-pressed="${isFav}" aria-label="${isFav ? '스크랩 해제' : '스크랩'}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16l-6-4-6 4Z"/>
+        </svg>
+      </span>`;
 
     // 썸네일 없으면 타이포그래피 카드로
     const webpThumb = story.thumbnail ? story.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
@@ -228,6 +239,7 @@
     return `
       <a href="${escapeAttr(link)}" class="article-card" data-category="${escapeAttr(storyFilterKey(story))}" data-issue="${escapeAttr(story.issue || '')}">
         ${imgBlock}
+        ${favHtml}
         <span class="article-category">${escapeHtml(categoryLabel(story))}</span>
         <h2 class="article-title">${escapeHtml(story.title)}</h2>
         <p class="article-excerpt">${escapeHtml(story.excerpt)}</p>
@@ -325,11 +337,65 @@
         .filter(s => s.published !== false)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
       applyFilters();
+      // 스크랩 상태는 DB 준비 후 비동기로 — 카드 렌더 막지 않음
+      (async () => {
+        for (let i = 0; i < 60; i++) {
+          if (window.MagDB && window.MagDB.isReady()) break;
+          await new Promise(r => setTimeout(r, 50));
+        }
+        try {
+          const sess = await window.MagDB?.auth?.getSession?.();
+          if (sess) articleFavIds = await window.MagDB.favorites.idsForType('article');
+        } catch (_) {}
+        syncCardFavMarks();
+      })();
     })
     .catch(err => {
       console.error(err);
       grid.innerHTML = '<div class="empty-state">글 목록을 불러오지 못했습니다.<br /><small style="opacity:.6">네트워크 상태를 확인한 뒤 새로고침해 주세요. 로컬 파일을 직접 열었다면 <code>http://localhost</code> 환경에서 확인해야 합니다.</small></div>';
     });
+
+  function syncCardFavMarks() {
+    document.querySelectorAll('.article-card-fav').forEach(el => {
+      const id = el.dataset.articleId;
+      const on = articleFavIds.has(id);
+      el.classList.toggle('is-fav', on);
+      el.setAttribute('aria-pressed', String(on));
+      el.setAttribute('aria-label', on ? '스크랩 해제' : '스크랩');
+    });
+  }
+
+  // 카드 ♡ 클릭 위임 — 카드는 <a> 라 클릭 시 페이지 이동, ♡ 만 이동 막고 토글
+  grid.addEventListener('click', async (e) => {
+    const fav = e.target.closest('.article-card-fav');
+    if (!fav) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (fav.classList.contains('is-busy')) return;
+    const id = fav.dataset.articleId;
+    if (!id) return;
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      alert('잠시 후 다시 시도해주세요.');
+      return;
+    }
+    const sess = await window.MagDB.auth.getSession();
+    if (!sess) {
+      if (!confirm('스크랩은 로그인이 필요해요. Google로 로그인할까요?')) return;
+      window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+      return;
+    }
+    const wasFav = articleFavIds.has(id);
+    if (wasFav) articleFavIds.delete(id); else articleFavIds.add(id);
+    fav.classList.add('is-busy');
+    syncCardFavMarks();
+    const { error } = await window.MagDB.favorites.toggle('article', id, wasFav);
+    fav.classList.remove('is-busy');
+    if (error) {
+      if (wasFav) articleFavIds.add(id); else articleFavIds.delete(id);
+      syncCardFavMarks();
+      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+    }
+  });
 
   paginationBars.forEach(bar => {
     bar.addEventListener('click', (event) => {
@@ -382,6 +448,8 @@
     }
   });
 </script>
-<script src="./js/site-common.js?v=20260515-authnav"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./js/db-client.js?v=20260515-scrap"></script>
+<script src="./js/site-common.js?v=20260515-scrap"></script>
 </body>
 </html>

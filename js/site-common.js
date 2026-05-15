@@ -176,6 +176,7 @@
 
     linkArticleAuthor();
     setupAuthNav();
+    setupArticleScrap();
   }
 
   // ════════════════════════════════════════════════
@@ -286,6 +287,88 @@
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
     window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
   });
+
+  // ════════════════════════════════════════════════
+  // Article scrap — 글 페이지에 "스크랩" 토글 버튼 자동 inject
+  //   - 모든 stories/*.html 에 중복된 share-bar 마크업 그대로 두고
+  //     site-common.js 가 페이지 로드 후 share-bar 첫 자리에 버튼 삽입
+  //   - 글 식별자는 <section data-comments data-page-id="stories/<id>"> 에서 추출
+  // ════════════════════════════════════════════════
+  function bookmarkIconSvg() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16l-6-4-6 4Z"/></svg>';
+  }
+  async function setupArticleScrap() {
+    const cmt = document.querySelector('[data-comments][data-page-id]');
+    if (!cmt) return;
+    const pageId = cmt.dataset.pageId || '';
+    if (!pageId.startsWith('stories/')) return;
+    const articleId = pageId.replace(/^stories\//, '');
+    if (!articleId) return;
+    const shareBar = document.querySelector('.share-bar');
+    if (!shareBar) return;
+
+    // 버튼 inject — SHARE 라벨 바로 다음 자리
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'article-fav';
+    btn.dataset.articleId = articleId;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-label', '스크랩 추가');
+    btn.innerHTML = bookmarkIconSvg() + '<span class="article-fav-label">스크랩</span>';
+    const shareLabel = shareBar.querySelector('.share-label');
+    if (shareLabel && shareLabel.nextSibling) {
+      shareBar.insertBefore(btn, shareLabel.nextSibling);
+    } else {
+      shareBar.insertBefore(btn, shareBar.firstChild);
+    }
+
+    // 초기 상태 — db 준비 후 본인 즐겨찾기 확인
+    let isFav = false;
+    for (let i = 0; i < 60; i++) {
+      if (window.MagDB && window.MagDB.isReady()) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    if (window.MagDB && window.MagDB.isReady()) {
+      try {
+        const sess = await window.MagDB.auth.getSession();
+        if (sess) {
+          const ids = await window.MagDB.favorites.idsForType('article');
+          isFav = ids.has(articleId);
+        }
+      } catch (_) {}
+    }
+    setArticleFavState(btn, isFav);
+
+    btn.addEventListener('click', async () => {
+      if (btn.classList.contains('is-busy')) return;
+      if (!window.MagDB || !window.MagDB.isReady()) {
+        alert('잠시 후 다시 시도해주세요.');
+        return;
+      }
+      const sess = await window.MagDB.auth.getSession();
+      if (!sess) {
+        if (!confirm('스크랩은 로그인이 필요해요. Google로 로그인할까요?')) return;
+        window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+        return;
+      }
+      const wasFav = btn.classList.contains('is-fav');
+      setArticleFavState(btn, !wasFav);
+      btn.classList.add('is-busy');
+      const { error } = await window.MagDB.favorites.toggle('article', articleId, wasFav);
+      btn.classList.remove('is-busy');
+      if (error) {
+        setArticleFavState(btn, wasFav);
+        alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+      }
+    });
+  }
+  function setArticleFavState(btn, on) {
+    btn.classList.toggle('is-fav', on);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', on ? '스크랩 해제' : '스크랩 추가');
+    const label = btn.querySelector('.article-fav-label');
+    if (label) label.textContent = on ? '스크랩됨' : '스크랩';
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

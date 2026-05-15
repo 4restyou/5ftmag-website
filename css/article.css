@@ -380,6 +380,17 @@ body {
 .share-bar a:hover, .share-bar button:hover {
   border-color: var(--text);
 }
+/* 스크랩 토글 (글 끝 share-bar 안, site-common.js 가 inject) */
+.share-bar .article-fav { gap: 6px; }
+.share-bar .article-fav svg {
+  width: 16px; height: 16px;
+  stroke: var(--text);
+  transition: fill .15s, stroke .15s;
+}
+.share-bar .article-fav.is-fav svg {
+  fill: var(--text);
+}
+.share-bar .article-fav.is-busy { opacity: 0.55; pointer-events: none; }
 
 /* ── 다음/이전 글 ── */
 .article-nav {

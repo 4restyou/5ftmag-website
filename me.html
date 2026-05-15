@@ -135,6 +135,24 @@
     .me-fav-film-card .me-fav-unbtn { position: absolute; top: 10px; right: 10px; background: var(--bg); color: var(--text-muted); border: none; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: color .15s; }
     .me-fav-film-card .me-fav-unbtn:hover { color: #e0245e; }
 
+    /* ── 스크랩한 글 리스트 (가로 카드형) ── */
+    .me-fav-articles-list { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 18px; }
+    .me-fav-article { position: relative; }
+    .me-fav-article-link { display: grid; grid-template-columns: 160px 1fr; gap: 18px; padding: 16px; background: var(--bg-sub); border-radius: 6px; color: inherit; text-decoration: none; transition: background .15s; }
+    .me-fav-article-link:hover { background: var(--bg); box-shadow: 0 0 0 1px var(--border) inset; }
+    .me-fav-article-thumb { aspect-ratio: 4 / 3; overflow: hidden; border-radius: 4px; background: var(--bg); }
+    .me-fav-article-thumb.is-empty { background: repeating-linear-gradient(135deg, var(--bg) 0 8px, var(--bg-sub) 8px 16px); }
+    .me-fav-article-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .me-fav-article-meta { display: grid; gap: 6px; align-content: start; min-width: 0; }
+    .me-fav-article-cat { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); }
+    .me-fav-article-title { font-size: 17px; font-weight: var(--fw-heading); letter-spacing: -0.015em; margin: 0; line-height: 1.35; word-break: keep-all; }
+    .me-fav-article-excerpt { font-size: 13px; color: var(--text-muted); line-height: 1.55; margin: 2px 0 0; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .me-fav-article .me-fav-unbtn { position: absolute; top: 12px; right: 12px; background: var(--bg); color: var(--text-muted); border: none; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: color .15s; }
+    .me-fav-article .me-fav-unbtn:hover { color: #e0245e; }
+    @media (max-width: 640px) {
+      .me-fav-article-link { grid-template-columns: 110px 1fr; gap: 14px; padding: 12px; }
+    }
+
     @media (max-width: 720px) {
       .me-card { grid-template-columns: 1fr; }
       .me-card-img { width: 100%; aspect-ratio: 4/3; }
@@ -167,6 +185,7 @@
     <button type="button" class="me-pagetab" data-section="market">매물</button>
     <button type="button" class="me-pagetab" data-section="fav-photos">좋아한 사진</button>
     <button type="button" class="me-pagetab" data-section="fav-films">좋아한 필름</button>
+    <button type="button" class="me-pagetab" data-section="fav-articles">스크랩한 글</button>
   </div>
 
   <!-- ─── 사진 섹션 ─── -->
@@ -205,6 +224,13 @@
       <div class="me-empty">불러오는 중…</div>
     </div>
   </section>
+
+  <!-- ─── 스크랩한 글 섹션 ─── -->
+  <section id="section-fav-articles" hidden>
+    <div class="me-fav-articles-list" id="favArticlesList">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
 </div>
 
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
@@ -225,7 +251,9 @@ const STATE = {
   // favorites
   favPhotos: null,       // null = 미로딩, [] = 비어있음
   favFilms:  null,
+  favArticles: null,
   filmsData: null,       // films.json 캐시 (좋아한 필름 렌더용)
+  storiesData: null,     // stories.json 캐시 (스크랩한 글 렌더용)
 };
 
 const CAT_LABELS = { film:'필름', camera:'카메라', lens:'렌즈', accessory:'액세서리', etc:'기타' };
@@ -527,13 +555,15 @@ function bindMarketCardActions() {
 function switchSection(sec) {
   STATE.section = sec;
   document.querySelectorAll('.me-pagetab').forEach(t => t.classList.toggle('active', t.dataset.section === sec));
-  $('section-photos').hidden     = sec !== 'photos';
-  $('section-market').hidden     = sec !== 'market';
-  $('section-fav-photos').hidden = sec !== 'fav-photos';
-  $('section-fav-films').hidden  = sec !== 'fav-films';
+  $('section-photos').hidden       = sec !== 'photos';
+  $('section-market').hidden       = sec !== 'market';
+  $('section-fav-photos').hidden   = sec !== 'fav-photos';
+  $('section-fav-films').hidden    = sec !== 'fav-films';
+  $('section-fav-articles').hidden = sec !== 'fav-articles';
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
-  if (sec === 'fav-photos' && STATE.favPhotos === null) loadFavPhotos();
-  if (sec === 'fav-films'  && STATE.favFilms === null)  loadFavFilms();
+  if (sec === 'fav-photos'   && STATE.favPhotos   === null) loadFavPhotos();
+  if (sec === 'fav-films'    && STATE.favFilms    === null) loadFavFilms();
+  if (sec === 'fav-articles' && STATE.favArticles === null) loadFavArticles();
   // URL hash 동기화
   try { history.replaceState(null, '', '#' + sec); } catch (_) {}
 }
@@ -664,6 +694,72 @@ function renderFavFilms() {
   });
 }
 
+// ═════════════════════════════════════════
+// 스크랩한 글 (stories.json 중 본인이 🔖 한 것)
+// ═════════════════════════════════════════
+async function loadFavArticles() {
+  $('favArticlesList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  const favs = await db().favorites.list('article');
+  if (favs.length === 0) {
+    STATE.favArticles = [];
+    $('favArticlesList').innerHTML = `<div class="me-empty">아직 스크랩한 글이 없어요.<br /><a class="me-empty-cta" href="stories.html">Articles 둘러보기 →</a></div>`;
+    return;
+  }
+  if (!STATE.storiesData) {
+    try {
+      const res = await fetch('data/stories.json', { cache: 'no-cache' });
+      STATE.storiesData = await res.json();
+    } catch (_) {
+      STATE.storiesData = [];
+    }
+  }
+  const byId = new Map((STATE.storiesData || []).map(s => [s.id, s]));
+  STATE.favArticles = favs
+    .map(f => ({ id: f.target_id, story: byId.get(f.target_id) }))
+    .filter(x => x.story && x.story.published !== false);
+  renderFavArticles();
+}
+
+function renderFavArticles() {
+  const items = STATE.favArticles || [];
+  if (items.length === 0) {
+    $('favArticlesList').innerHTML = `<div class="me-empty">아직 스크랩한 글이 없어요.<br /><a class="me-empty-cta" href="stories.html">Articles 둘러보기 →</a></div>`;
+    return;
+  }
+  $('favArticlesList').innerHTML = items.map(({ id, story }) => {
+    const page = story.page || `stories/${id}.html`;
+    const thumb = story.thumbnail || '';
+    const thumbHtml = thumb
+      ? `<img src="${escapeAttr(thumb)}" alt="${escapeAttr(story.title)}" loading="lazy" />`
+      : '';
+    const cat = story.categoryLabel || story.category || '';
+    const issue = story.issue || '';
+    return `
+      <div class="me-fav-article" data-id="${escapeAttr(id)}">
+        <a href="${escapeAttr(page)}" class="me-fav-article-link">
+          <div class="me-fav-article-thumb${thumbHtml ? '' : ' is-empty'}">${thumbHtml}</div>
+          <div class="me-fav-article-meta">
+            <span class="me-fav-article-cat">${escapeHtml(cat.toString().toUpperCase())}${issue ? ` · ${escapeHtml(issue)}` : ''}</span>
+            <h3 class="me-fav-article-title">${escapeHtml(story.title)}</h3>
+            <p class="me-fav-article-excerpt">${escapeHtml(story.excerpt || '')}</p>
+          </div>
+        </a>
+        <button type="button" class="me-fav-unbtn" data-action="unfav-article" data-id="${escapeAttr(id)}" aria-label="스크랩 해제" title="스크랩 해제">♥</button>
+      </div>`;
+  }).join('');
+  $('favArticlesList').querySelectorAll('[data-action="unfav-article"]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const { error } = await db().favorites.remove('article', id);
+      if (error) { alert('해제 실패: ' + error.message); return; }
+      STATE.favArticles = STATE.favArticles.filter(x => x.id !== id);
+      renderFavArticles();
+    });
+  });
+}
+
 document.querySelectorAll('.me-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.me-tab').forEach(t => t.classList.remove('active'));
@@ -689,7 +785,7 @@ $('imgZoom').addEventListener('click', () => {
   $('app').hidden = false;
   await loadPhotos();
   // URL hash 로 초기 탭 결정
-  const validSections = ['photos', 'market', 'fav-photos', 'fav-films'];
+  const validSections = ['photos', 'market', 'fav-photos', 'fav-films', 'fav-articles'];
   const hashSection = (location.hash || '').replace(/^#/, '');
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);

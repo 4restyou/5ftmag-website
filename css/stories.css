@@ -168,8 +168,34 @@
 .article-card {
   display: block;
   transition: opacity .2s;
+  position: relative;
 }
 .article-card:hover { opacity: 0.78; }
+/* 스크랩 토글 (글 카드 우상단, 라인-only) */
+.article-card-fav {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 28px; height: 28px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  background: transparent;
+  cursor: pointer;
+  transition: transform .15s;
+  z-index: 2;
+}
+.article-card-fav:hover { transform: scale(1.12); }
+.article-card-fav:active { transform: scale(0.9); }
+.article-card-fav svg {
+  width: 20px; height: 20px;
+  stroke: #fff;
+  stroke-width: 1.6;
+  fill: none;
+  transition: fill .15s, stroke .15s;
+}
+.article-card-fav:hover svg { stroke: var(--text); stroke-width: 1.8; }
+.article-card-fav.is-fav svg { fill: var(--text); stroke: var(--text); }
+.article-card-fav.is-busy { opacity: 0.55; pointer-events: none; }
+[data-theme="dark"] .article-card-fav.is-fav svg { fill: #fff; stroke: #fff; }
 .article-img {
   width: 100%;
   aspect-ratio: 4 / 3;
