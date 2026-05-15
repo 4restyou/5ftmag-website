@@ -196,11 +196,10 @@
 .market-card-share:active { transform: scale(0.9); }
 .market-card-share svg {
   width: 20px; height: 20px;
-  stroke: #dcdddd;
+  stroke: #fff;
   stroke-width: 1.6;
   fill: none;
   transition: stroke .15s, stroke-width .15s;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
 }
 .market-card-share:hover svg { stroke: var(--text); stroke-width: 1.8; }
 .market-card-share.is-busy { opacity: 0.55; pointer-events: none; }
