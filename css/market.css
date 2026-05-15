@@ -196,7 +196,7 @@
 .market-card-share:active { transform: scale(0.9); }
 .market-card-share svg {
   width: 20px; height: 20px;
-  stroke: var(--text-muted);
+  stroke: #dcdddd;
   stroke-width: 1.6;
   fill: none;
   transition: stroke .15s, stroke-width .15s;
@@ -204,7 +204,6 @@
 }
 .market-card-share:hover svg { stroke: var(--text); stroke-width: 1.8; }
 .market-card-share.is-busy { opacity: 0.55; pointer-events: none; }
-[data-theme="dark"] .market-card-share svg { stroke: rgba(255, 255, 255, 0.55); }
 [data-theme="dark"] .market-card-share:hover svg { stroke: #fff; }
 
 /* 공유 토스트 */
