@@ -216,6 +216,31 @@
 .modal-close:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+/* 모달 공유 버튼 — 닫기 버튼 옆 */
+.modal-share {
+  position: fixed;
+  top: 20px; right: 80px;
+  z-index: 1010;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background .15s;
+}
+.modal-overlay.open .modal-share { display: flex; }
+.modal-share:hover { background: rgba(255, 255, 255, 0.2); }
+.modal-share svg {
+  width: 20px; height: 20px;
+  stroke: #fff;
+  stroke-width: 1.7;
+  fill: none;
+}
 .modal-content {
   max-width: 1280px;
   margin: 0 auto;
@@ -581,6 +606,7 @@
   .modal-content { padding: 64px 20px; }
   .modal-name { font-size: 28px; }
   .modal-close { top: 14px; right: 14px; width: 40px; height: 40px; }
+  .modal-share { top: 14px; right: 64px; width: 40px; height: 40px; }
 }
 
 /* ════════════════════════════
