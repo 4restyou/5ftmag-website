@@ -9,7 +9,7 @@
   <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/common.css?v=20260511-imgfix">
+  <link rel="stylesheet" href="css/common.css?v=20260515-tokens">
   <style>
     body { background: var(--bg); color: var(--text); }
 
@@ -620,7 +620,7 @@ function renderFavPhotos() {
         e.stopPropagation();
         const id = unbtn.dataset.id;
         const { error } = await db().favorites.remove('submission', id);
-        if (error) { alert('해제 실패: ' + error.message); return; }
+        if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
         STATE.favPhotos = STATE.favPhotos.filter(r => r.id !== id);
         renderFavPhotos();
         return;
@@ -687,7 +687,7 @@ function renderFavFilms() {
       e.stopPropagation();
       const slug = btn.dataset.slug;
       const { error } = await db().favorites.remove('film', slug);
-      if (error) { alert('해제 실패: ' + error.message); return; }
+      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
       STATE.favFilms = STATE.favFilms.filter(x => x.slug !== slug);
       renderFavFilms();
     });
@@ -753,7 +753,7 @@ function renderFavArticles() {
       e.stopPropagation();
       const id = btn.dataset.id;
       const { error } = await db().favorites.remove('article', id);
-      if (error) { alert('해제 실패: ' + error.message); return; }
+      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
       STATE.favArticles = STATE.favArticles.filter(x => x.id !== id);
       renderFavArticles();
     });

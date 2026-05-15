@@ -16,7 +16,7 @@
   <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
-  <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
+  <link rel="stylesheet" href="./css/common.css?v=20260515-tokens">
   <link rel="stylesheet" href="./css/market.css?v=20260515-iconwhite">
 </head>
 <body>
@@ -134,7 +134,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260515-likes"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
-<script src="./js/site-common.js?v=20260515-scrap"></script>
+<script src="./js/site-common.js?v=20260515-tokens"></script>
 <script>
 'use strict';
 
@@ -328,6 +328,12 @@ async function shareListing(id) {
   }
 }
 function showShareToast(msg) {
+  // 글로벌 토스트로 위임 — site-common.js 가 toast host 관리
+  if (typeof window.showToast === 'function') {
+    window.showToast(msg, { type: 'success' });
+    return;
+  }
+  // site-common.js 미로드 환경(테스트 등) 폴백
   const t = document.createElement('div');
   t.className = 'mkt-share-toast';
   t.textContent = msg;

@@ -37,6 +37,63 @@
   --badge-radius: 2px;
   --field-radius: 4px;
   --ctrl-border:  #c4c4c4;
+
+  /* ────── Semantic 컬러 (light) ──────
+     status·intent 표현용. 다크모드에서 [data-theme="dark"] 가 같은 토큰 재정의. */
+  --color-success-bg:   #d1fae5;
+  --color-success-text: #064e3b;
+  --color-warning-bg:   #fef3c7;
+  --color-warning-text: #78350f;
+  --color-danger-bg:    #fee2e2;
+  --color-danger-text:  #7f1d1d;
+  --color-danger-border:#fca5a5;
+  --color-info-bg:      #e0e7ff;
+  --color-info-text:    #3730a3;
+  --color-info-border:  #c7d2fe;
+  --color-neutral-bg:   #e5e7eb;
+  --color-neutral-text: #4b5563;
+
+  /* 좋아요/감정 강조 — 핑크 톤 */
+  --color-heart:        #e0245e;
+  --color-heart-soft:   #fce7f3;
+  --color-heart-text:   #9d174d;
+
+  /* ────── 간격 (8px grid) ────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ────── 반경 ────── */
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   8px;
+  --radius-xl:   12px;
+  --radius-full: 999px;
+
+  /* ────── 그림자 (elevation) ────── */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md:  0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lg:  0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-xl:  0 20px 60px rgba(0, 0, 0, 0.30);
+
+  /* ────── 포커스 링 (접근성) ────── */
+  --ring:       0 0 0 3px rgba(0, 0, 0, 0.18);
+  --ring-color: rgba(0, 0, 0, 0.18);
+
+  /* ────── 모션 ────── */
+  --duration-fast:  .15s;
+  --duration-base:  .2s;
+  --duration-slow:  .35s;
+  --easing:         cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* 다크 모드 */
@@ -46,4 +103,35 @@
   --text:         #f0f0f0;
   --text-muted:   rgba(240, 240, 240, 0.55);
   --border:       #282828;
+
+  /* semantic 컬러 — 다크 배경 위에서 가독성 + 톤 다운 */
+  --color-success-bg:   #064e3b;
+  --color-success-text: #d1fae5;
+  --color-warning-bg:   #3a2e0c;
+  --color-warning-text: #fef3c7;
+  --color-danger-bg:    #3f1212;
+  --color-danger-text:  #fecaca;
+  --color-danger-border:rgba(239, 68, 68, 0.45);
+  --color-info-bg:      #1e1b4b;
+  --color-info-text:    #a5b4fc;
+  --color-info-border:  rgba(165, 180, 252, 0.35);
+  --color-neutral-bg:   #2a2d33;
+  --color-neutral-text: #c7c9cf;
+
+  --color-heart:        #ff6b8a;
+  --color-heart-soft:   rgba(255, 107, 138, 0.18);
+  --color-heart-text:   #ffb1c1;
+
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.40);
+  --shadow-md:  0 1px 3px rgba(0, 0, 0, 0.50), 0 1px 2px rgba(0, 0, 0, 0.32);
+  --shadow-lg:  0 4px 12px rgba(0, 0, 0, 0.60);
+  --shadow-xl:  0 20px 60px rgba(0, 0, 0, 0.75);
+
+  --ring:       0 0 0 3px rgba(255, 255, 255, 0.22);
+  --ring-color: rgba(255, 255, 255, 0.22);
+}
+
+/* 사용자 모션 감소 선호 */
+@media (prefers-reduced-motion: reduce) {
+  :root { --duration-fast: 0s; --duration-base: 0s; --duration-slow: 0s; }
 }

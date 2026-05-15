@@ -194,6 +194,52 @@
   }
 
   // ════════════════════════════════════════════════
+  // Toast — alert() 대체. 단순 정보 노출 용도.
+  //   showToast('저장됐어요')                        — default
+  //   showToast('실패했어요', { type: 'danger' })     — 강조
+  //   showToast('처리 중…', { type: 'info', duration: 0 })  — 수동 dismiss 만
+  // 반환: dismiss() 함수
+  // ════════════════════════════════════════════════
+  let _toastHost = null;
+  function ensureToastHost() {
+    if (_toastHost && document.body.contains(_toastHost)) return _toastHost;
+    _toastHost = document.createElement('div');
+    _toastHost.className = 'ft-toast-host';
+    _toastHost.setAttribute('aria-live', 'polite');
+    _toastHost.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(_toastHost);
+    return _toastHost;
+  }
+  function showToast(msg, opts = {}) {
+    const { type = 'default', duration = 2200 } = opts;
+    const host = ensureToastHost();
+    const el = document.createElement('div');
+    el.className = `ft-toast ft-toast-${type}`;
+    el.textContent = String(msg ?? '');
+    el.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+    host.appendChild(el);
+    // 들어올 때 animation
+    requestAnimationFrame(() => el.classList.add('is-in'));
+    let dismissed = false;
+    const dismiss = () => {
+      if (dismissed) return; dismissed = true;
+      el.classList.remove('is-in');
+      el.classList.add('is-out');
+      setTimeout(() => el.remove(), 400);
+    };
+    if (duration > 0) setTimeout(dismiss, duration);
+    el.addEventListener('click', dismiss);
+    return dismiss;
+  }
+  window.showToast = showToast;
+
+  // notify(msg, type) — showToast 있으면 toast, 없으면 alert (전역 helper)
+  window.notify = function (msg, type) {
+    if (typeof window.showToast === 'function') return window.showToast(msg, { type });
+    alert(String(msg ?? ''));
+  };
+
+  // ════════════════════════════════════════════════
   // 법무 페이지 링크 — 모든 페이지 푸터에 동적 inject
   //   기존 footer-links 4개 (Shop/IG/이메일/4rest) 다음 자리에
   //   "이용약관 · 개인정보 · 저작권" 3개 추가
