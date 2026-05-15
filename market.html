@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260511-imgfix">
-  <link rel="stylesheet" href="./css/market.css?v=20260513-safety">
+  <link rel="stylesheet" href="./css/market.css?v=20260515-share">
 </head>
 <body>
 
@@ -240,7 +240,16 @@ function renderGrid() {
   }
   grid.innerHTML = rows.map(renderCard).join('');
   grid.querySelectorAll('.market-card').forEach(card => {
-    card.addEventListener('click', () => openDetail(card.dataset.id));
+    card.addEventListener('click', (e) => {
+      const share = e.target.closest('[data-action="share"]');
+      if (share) {
+        e.preventDefault();
+        e.stopPropagation();
+        shareListing(share.dataset.id);
+        return;
+      }
+      openDetail(card.dataset.id);
+    });
   });
 }
 
@@ -252,6 +261,17 @@ function renderCard(r) {
     <button type="button" class="market-card" data-id="${escapeAttr(r.id)}">
       <div class="market-card-img${soldClass}">
         <span class="market-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
+        <span class="market-card-share" role="button" tabindex="0"
+              data-action="share" data-id="${escapeAttr(r.id)}"
+              aria-label="이 매물 링크 공유" title="링크 공유">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="6" cy="12" r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="17" cy="6"  r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="17" cy="18" r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="8.3" y1="10.7" x2="14.7" y2="7.2" stroke-linecap="round"/>
+            <line x1="8.3" y1="13.3" x2="14.7" y2="16.8" stroke-linecap="round"/>
+          </svg>
+        </span>
         ${url ? `<img src="${escapeAttr(url)}" alt="${escapeAttr(r.title)}" loading="lazy" />` : ''}
       </div>
       <div class="market-card-body">
@@ -267,6 +287,55 @@ function renderCard(r) {
 }
 
 // ═════════════════════════════════════════
+// 매물 deep-link + 공유
+//   - 매물 상세 URL: /market.html?id=<uuid>
+//   - openDetail / closeDetail 에서 history.replaceState 로 URL 동기화
+//   - shareListing 은 navigator.share 우선, fallback 으로 클립보드 복사
+// ═════════════════════════════════════════
+function listingUrl(id) {
+  const base = `${location.origin}${location.pathname}`;
+  return `${base}?id=${encodeURIComponent(id)}`;
+}
+async function shareListing(id) {
+  const row = STATE.rows.find(r => r.id === id) || await db().market.getOne(id).catch(() => null);
+  const title = row?.title ? `${row.title} · 5ft.mag Market` : '5ft.mag Market 매물';
+  const text  = row ? `${row.title} — ${row.price}` : '5ft.mag 중고 장터에서 본 매물';
+  const url   = listingUrl(id);
+  // 1) navigator.share (모바일 네이티브 시트)
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url });
+      return;
+    } catch (_) { /* 사용자가 취소 → 무음 */ }
+    return;
+  }
+  // 2) 클립보드 fallback
+  try {
+    await navigator.clipboard.writeText(url);
+    showShareToast('링크 복사 완료');
+  } catch (_) {
+    // 3) execCommand fallback (구형 WebView)
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (_) {}
+    ta.remove();
+    showShareToast(ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요');
+  }
+}
+function showShareToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'mkt-share-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add('is-out'), 1400);
+  setTimeout(() => t.remove(), 1900);
+}
+
+// ═════════════════════════════════════════
 // 상세 모달
 // ═════════════════════════════════════════
 async function openDetail(id) {
@@ -277,12 +346,27 @@ async function openDetail(id) {
   renderDetail(row);
   $('mktDetailModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // URL 동기화 — 공유/북마크 가능하게
+  try {
+    const u = new URL(location.href);
+    u.searchParams.set('id', id);
+    u.searchParams.delete('edit');
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+  } catch (_) {}
 }
 
 function closeDetail() {
   $('mktDetailModal').classList.remove('open');
   document.body.style.overflow = '';
   STATE.detailId = null;
+  // URL 에서 id 제거
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.has('id')) {
+      u.searchParams.delete('id');
+      history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    }
+  } catch (_) {}
 }
 
 function renderDetail(r) {
@@ -329,6 +413,7 @@ function renderDetail(r) {
       </div>
       <div class="mkt-detail-author">올린 사람 · ${escapeHtml(author)}</div>
       <div class="mkt-detail-actions">
+        <button type="button" class="mkt-btn-link" data-action="share">링크 공유</button>
         ${isMine ? `
           <button type="button" class="mkt-btn-link" data-action="edit">수정</button>
           <button type="button" class="mkt-btn-link" data-action="cycle">상태 변경 (${escapeHtml(statusLabel(r.status))} →)</button>
@@ -347,6 +432,7 @@ function bindDetailHandlers(r) {
     el.addEventListener('click', async (e) => {
       const a = el.dataset.action;
       if (a === 'close') return closeDetail();
+      if (a === 'share') return shareListing(r.id);
       if (a === 'prev') {
         STATE.galleryIndex = (STATE.galleryIndex - 1 + r.storage_paths.length) % r.storage_paths.length;
         return renderDetail(r);
@@ -681,11 +767,17 @@ document.addEventListener('keydown', (e) => {
   STATE.user = session?.user || null;
   await loadList();
 
-  // URL 파라미터로 진입 — ?edit=id 면 본인 매물 수정 폼, #new 면 신규 폼
+  // URL 파라미터로 진입
+  //   ?id=<uuid>  → 해당 매물 상세 모달 자동 오픈 (공유 링크 deep-link)
+  //   ?edit=<id>  → 본인 매물 수정 폼
+  //   #new       → 신규 등록 폼
   try {
     const params = new URLSearchParams(location.search);
+    const detailId = params.get('id');
     const editId = params.get('edit');
-    if (editId) {
+    if (detailId) {
+      openDetail(detailId);
+    } else if (editId) {
       const row = await db().market.getOne(editId);
       if (row && row.user_id === STATE.user?.id) {
         openForm(row);
