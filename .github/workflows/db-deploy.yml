@@ -3,8 +3,9 @@ name: Supabase Migrations
 # main 머지 시 supabase/migrations/*.sql 변경이 있으면 자동 적용.
 # 필요한 시크릿 (GitHub Settings → Secrets → Actions):
 #   SUPABASE_ACCESS_TOKEN  — supabase CLI 로그인 토큰 (https://supabase.com/dashboard/account/tokens)
-#   SUPABASE_PROJECT_REF   — 프로젝트 ref (https://supabase.com/dashboard/project/_/settings/general)
 #   SUPABASE_DB_PASSWORD   — DB 비밀번호 (Settings → Database → Connection Password)
+#
+# 프로젝트 ref(pucpqsfwqouqohwsvmnd) 는 공개정보(사이트 JS 에 노출) 라 워크플로우에 직접 박음.
 
 on:
   push:
@@ -13,6 +14,9 @@ on:
       - 'supabase/migrations/**'
       - '.github/workflows/db-deploy.yml'
   workflow_dispatch:
+
+env:
+  SUPABASE_PROJECT_REF: pucpqsfwqouqohwsvmnd
 
 jobs:
   deploy:
@@ -27,7 +31,7 @@ jobs:
       - name: Link project
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Push migrations
         env:
