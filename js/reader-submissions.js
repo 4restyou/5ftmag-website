@@ -393,9 +393,10 @@
         ${meta.author && meta.film ? ' · ' : ''}
         ${meta.film ? `필름: <strong>${escapeHtml(meta.film)}</strong>` : ''}
       </p>
-      <div class="rs-actions" style="justify-content: center; gap: 12px;">
+      <div class="rs-actions" style="justify-content: center; gap: 12px; flex-wrap: wrap;">
         <a href="${meHref}" class="rs-btn-link">내 사진 보기 →</a>
-        <button type="button" class="rs-btn rs-btn-primary" data-action="rs-close">확인</button>
+        <button type="button" class="rs-btn-link" data-action="rs-close">닫기</button>
+        <button type="button" class="rs-btn rs-btn-primary" data-action="open-submission">+ 다음 사진 올리기</button>
       </div>`;
   }
 
