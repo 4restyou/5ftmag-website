@@ -58,6 +58,13 @@
     ['topcon',       '톱콘'],
     ['bessa',        '베사'],
     ['superheadz',   '슈퍼헤즈'],
+    ['agfa',         '아그파'],
+    ['minox',        '미녹스'],
+    ['graflex',      '그라플렉스'],
+    ['argus',        '아거스'],
+    ['meopta',       '메옵타'],
+    ['seagull',      '시걸', '해구'],
+    ['samsung',      'kenox', 'samsung kenox', '삼성'],
   ];
 
   // 브랜드명 없이도 자주 입력되는 모델들 → 브랜드 추정.
@@ -69,6 +76,7 @@
       models: [
         // M-mount (film only — 디지털 M 제외)
         'm6', 'm6ttl', 'm6classic', 'm7', 'mp', 'ma',
+        'm1leica', 'm4-2', 'm42leica', 'leicacl', 'miniii',
         // Barnack screw-mount
         'iiia', 'iiib', 'iiic', 'iiid', 'iiif', 'iiig',
         // R-series SLR
@@ -93,8 +101,10 @@
         'rebel', 'rebel2000', 'rebelti', 'rebelk2', 'rebelt2', 'rebelgii', 'rebelxs',
         // Rangefinder
         'canonet', 'canonetql17', 'canonetgiii', 'canonetgiiiql17', 'canonet28',
+        'canonp', 'canon7', 'canon7s', 'canon7sz',
+        'canonvt', 'canonvl', 'canonvi', 'canonl1', 'canonl2', 'canonl3',
         // Half-frame Demi
-        'demi', 'demiee', 'demiee17', 'demiee28',
+        'demi', 'demiee', 'demiee17', 'demiee28', 'dial35',
         // Compact
         '오토보이', 'autoboy', 'autoboy2', 'autoboy3', 'autoboyf', 'autoboyd5',
         'autoboyprisma', 'autoboyjuno', 'autoboyluna', 'autoboytele', 'autoboyzoom',
@@ -117,6 +127,8 @@
     {
       brand: 'nikon',
       models: [
+        // Pre-F Rangefinder (1948-1959)
+        'nikonsp', 'nikons2', 'nikons3', 'nikons4', 'nikonm',
         // F-series pro
         'f2', 'f3', 'f3hp', 'f3p', 'f3t', 'f4', 'f4s', 'f4e', 'f5', 'f6',
         // FM/FE/FA
@@ -152,6 +164,7 @@
         'mx', 'me', 'mesuper', 'mef', 'lx',
         'superprogram', 'supera', 'programa', 'programplus', 'p30', 'p50',
         'spotmatic', 'spotmaticf', 'spotmaticii', 'asahiflex',
+        'sfx', 'sfxn', 'istfilm', 'istmz', 'sfx2000',
         // MZ / ZX
         'mz3', 'mz5', 'mz5n', 'mz6', 'mz7', 'mz10', 'mz30', 'mz50', 'mz60', 'mzm', 'mzs',
         'zx3', 'zx5', 'zx5n', 'zx7', 'zx10', 'zx30', 'zx50', 'zxl', 'zxm',
@@ -219,7 +232,7 @@
         // Compact
         'himatic', 'himatic7', 'himatic7s', 'himatic9', 'himatic11', 'himatice', 'himaticf',
         'himaticg', 'himatics', 'himaticsd', 'himaticaf',
-        'tc1', 'cle', 'autocord',
+        'tc1', 'cle', 'autocord', 'minoltaflex', 'minolta35',
         'freedom', 'riva', 'rivamini', 'rivazoom70w', 'capios',
         'freedomescort', 'freedomzoom', 'freedomvista', 'rivapanorama',
         // 추가 P&S
@@ -248,7 +261,9 @@
       models: [
         // TLR
         'rolleiflex', 'rolleicord',
-        '3.5e', '3.5f', '2.8c', '2.8d', '2.8e', '2.8f', '2.8gx', '2.8fx',
+        'rolleiflexoriginal', 'rolleiflexautomat',
+        '3.5a', '3.5b', '3.5c', '3.5e', '3.5f',
+        '2.8a', '2.8c', '2.8d', '2.8e', '2.8f', '2.8gx', '2.8fx',
         'telerolleiflex', 'wideanglerolleiflex', 'babyrolleiflex',
         'rolleicordi', 'rolleicordii', 'rolleicordiii', 'rolleicordiv',
         'rolleicordv', 'rolleicordva', 'rolleicordvb',
@@ -262,28 +277,46 @@
         // SLR
         'sl35', 'sl35e', 'sl35m', 'sl350', 'sl2000f', 'sl3001', 'sl3003',
         // MF SLR
-        'sl66', 'sl66e', 'sl66se',
+        'sl66', 'sl66e', 'sl66se', 'slx',
         '6002', '6003', '6006', '6008',
+        // 35 RF
+        'rollei35rf',
       ],
     },
     {
       brand: 'voigtländer',
       models: [
         'bessal', 'bessat', 'bessar', 'bessar2', 'bessar2a', 'bessar2m', 'bessar2s',
-        'bessar2c', 'bessar3a', 'bessar3m', 'bessar4a', 'bessar4m',
+        'bessar2c', 'bessar3a', 'bessar3m', 'bessar4a', 'bessar4m', 'bessaiii',
         'vito', 'vitob', 'vitoc', 'vitoii', 'vitoiii', 'vitoautomatic',
         'vitomatic', 'vitomatici', 'vitomaticii', 'vitomaticiii', 'vitoret',
         'vitessa', 'vitessat',
         'prominent', 'prominentii',
         'bessamatic', 'bessamaticdeluxe', 'bessamaticcs', 'ultramatic',
         'perkeo', 'perkeoi', 'perkeoii', 'perkeoe',
+        // TLR
+        'brillant', 'voigtbrillant', 'superb',
+        // 폴딩 Bessa pre-war
+        'voigtbessa', 'voigtbessaii',
+      ],
+    },
+    {
+      brand: 'zeiss',
+      models: [
+        // RF/Folding
+        'ikonta', 'superikonta', 'nettar', 'contessa',
+        'contessamat', 'tenax', 'kolibri',
+        // SLR
+        'contaflex', 'contarex', 'icarex', 'icarexbm',
+        // TLR
+        'ikoflex',
       ],
     },
     {
       brand: 'hasselblad',
       models: [
         '1600f', '1000f',
-        '500c', '500cm', '500el', '500elm', '500elx', '553elx', '555eld',
+        '500c', '500cm', '500el', '500elm', '500el/m', '500elx', '553elx', '555eld',
         '501c', '501cm',
         '503cx', '503cxi', '503cw', '503cwd',
         '2000fc', '2000fcm', '2000fcw', '2003fcw',
@@ -300,6 +333,7 @@
         'm645', 'm645j', 'm6451000s', 'm645super', '645pro', '645protl', '645e',
         '645af', '645afd', '645afdii', '645afdiii',
         'mamiya6', 'mamiya7', '7iimamiya', '6mf',
+        'mamiyasix', 'mamiyapress', 'mamiyauniversalpress', 'mamiyauniversal',
         'mamiyaflex', 'c220', 'c220f', 'c330', 'c330f', 'c330s',
         'sxmamiya', 'xtl', 'nc1000', 'nc1000s',
         'ze2', 'zex', 'zmmamiya',
@@ -339,6 +373,8 @@
         // SLR
         'st605', 'st701', 'st705', 'st801', 'st901',
         'stx1', 'ax1', 'ax3', 'ax5', 'az1',
+        // Half-frame
+        'fujicahalf', 'fujicadrive',
       ],
     },
     {
@@ -346,6 +382,7 @@
       models: [
         'retina', 'retinai', 'retinaii', 'retinaiia', 'retinaiic', 'retinaiif',
         'retinaiii', 'retinaiiic', 'retinette', 'retinetteii', 'retinareflex',
+        'no1kodak', 'vestpocket', 'vestpocketkodak', 'kodaktourist', 'kodakektra',
         'instamatic', 'instamatic100', 'instamatic104', 'instamatic124',
         'instamatic174', 'instamatic304', 'instamatic414', 'instamaticx',
         'pocketinstamatic',
@@ -372,7 +409,9 @@
         'slr680', 'slr690', 'coolcam', 'jobpro', 'spiritlms',
         'pronto', 'prontob', 'prontosonarone',
         'landcamera', 'colorpack', 'colorpackii', 'colorpackiii', 'colorpackiv', 'colorpackv', '600se',
-        'highlander',
+        'highlander', 'model95',
+        'polaroid100', 'polaroid180', 'polaroid185', 'polaroid195', 'polaroid210', 'polaroid250',
+        'bigshot',
         'spectra', 'spectra2', 'spectraonyx', 'spectrapro',
         'image', 'imageelite', 'imagepro', 'imagespectra',
         'i1', 'i2', 'now', 'nowplus', 'nowgen2', 'flippolaroid',
@@ -402,7 +441,7 @@
         'lomoinstant', 'lomoinstantautomat', 'lomoinstantwide', 'lomoinstantsquare',
         'actionsampler', 'oktomat', 'supersampler', 'pop9',
         'colorsplash', 'colorsplashflash',
-        'horizon', 'horizont',
+        'horizon', 'horizont', 'horizon202', 'horizonkompakt', 'horizonperfekt',
       ],
     },
     {
@@ -449,12 +488,13 @@
       brand: 'zenit',
       models: [
         'zenit3', 'zenit3m', 'zenit4', 'zenit5', 'zenit6', 'zenit7',
+        'zenits', 'zenitc',
         'zenitb', 'zenite', 'zenitem', 'zenitet',
         'zenittl', 'zenitttl',
         'zenit10', 'zenit11', 'zenit12', 'zenit12sd', 'zenit12xp',
         'zenit122', 'zenit212k', 'zenit19',
         'zenit18', 'zenitautomat',
-        'zenithorizon',
+        'zenithorizon', 'zenit312m', 'zenit412',
       ],
     },
     {
@@ -499,6 +539,10 @@
         'samurai', 'samuraix3', 'samuraix4',
         // 추가 P&S (Kyocera-era)
         '230af', 'super230af', '270af', '300af', 'afj',
+        // RF/Compact rangefinder + 초기 SLR/J + TLR
+        'yashica35', 'yashicalynx', 'yashicaminister',
+        'yashicaj', 'yashicatlelectro', 'yashicafr', 'yashicafri',
+        'yashicaflex',
       ],
     },
     {
@@ -519,6 +563,7 @@
         'zup130', 'zup135super', 'zup140super',
         'zup150', 'zup150vp',
         'aiborg', 'genbakantoku', 'genbakantokudd',
+        'konicai', 'konicaii', 'konicaiii', 'konicarecorder',
       ],
     },
     {
@@ -539,6 +584,11 @@
         'shotmasterzoom', 'shotmasterzoomsuper',
         'shotmastertruzoom', 'rz900', 'myportzoom90',
         'shotmasterultrazoomsuper',
+        // 초기 RF + Singlex + XR-P + Auto Half
+        'ricoh500', 'ricoh500g', 'ricoh500gx',
+        'singlex', 'singlextls',
+        'xrp', 'xr-p',
+        'autohalf',
       ],
     },
     {
@@ -562,6 +612,72 @@
       models: [
         'goldenhalf', 'blackslimdevil', 'whiteslimangel', 'yellowpeace', 'blueribbon',
         'rainbow',
+      ],
+    },
+    {
+      brand: 'agfa',
+      models: [
+        'isolette', 'superisolette', 'karat', 'optima', 'silette', 'ambisilette',
+        'clack', 'click', 'clickii', 'agfaiso', 'agfamatic',
+        'rondinax', 'paramat', 'parator', 'optimasensor',
+      ],
+    },
+    {
+      brand: 'minox',
+      models: [
+        // Subminiature
+        'rigaminox', 'minoxa', 'minoxb', 'minoxc', 'minoxbl', 'minoxlx', 'minoxec',
+        // 35mm
+        'minox35el', 'minox35gl', 'minox35gt', 'minox35ml', 'minox35aurum',
+      ],
+    },
+    {
+      brand: 'graflex',
+      models: [
+        'speedgraphic', 'crowngraphic', 'centurygraphic', 'supergraphic',
+        'graflexslr', 'rbsuper', 'rbgraflex',
+      ],
+    },
+    {
+      brand: 'argus',
+      models: [
+        'argusa', 'argusc', 'argusc2', 'argusc3', 'argusc4', 'argusc44',
+        'matchmatic', 'argusmatchmatic',
+      ],
+    },
+    {
+      brand: 'meopta',
+      models: [
+        'flexareti', 'flexaretii', 'flexaretiii', 'flexaretiv', 'flexaretv',
+        'flexaretvi', 'flexaretvii', 'flexaret', 'mikroma', 'opema',
+      ],
+    },
+    {
+      brand: 'seagull',
+      models: [
+        'seagull4a', 'seagull4b', 'seagull4b1', 'seagull4bi',
+        'seagulldf', 'seagulldf1', 'seagulldf2',
+        'seagull203', 'seagull205',
+      ],
+    },
+    {
+      brand: 'samsung',
+      models: [
+        'kenox35', 'afslim', 'fino', 'samsungfino', 'samsungvega', 'slimzoom', 'ecx',
+        'finogofun', 'finogowide',
+      ],
+    },
+    {
+      brand: 'linhof',
+      models: [
+        'technika', 'supertechnika', 'mastertechnika',
+        'technorama617', 'technorama612', 'technorama612pc',
+      ],
+    },
+    {
+      brand: 'plaubel',
+      models: [
+        'makina', 'makinaii', 'makina67', 'makinaw67', 'plaubelmakina',
       ],
     },
   ];
