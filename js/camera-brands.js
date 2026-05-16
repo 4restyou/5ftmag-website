@@ -106,6 +106,12 @@
         'af35m', 'af35ml', 'af35mii',
         // APS film
         'eosix', 'eosixe', 'pronea600i', 'pronea6i', 'proneas',
+        // 추가 P&S
+        'photura', 'epoca', 'autoboyjet',
+        'sprint', 'af35j', 'autoboylite',
+        'autoboybf80', 'sureshot80tele', 'primabftwin',
+        // ELPH / IXUS / IXY (APS film)
+        'ixus', 'ixusii', 'ixusiii', 'elph', 'elph2', 'ixy320',
       ],
     },
     {
@@ -131,6 +137,11 @@
         'onetouch', 'litetouch', 'litetouchzoom', 'zoomtouch400', 'zoomtouch500',
         // Nikonos (underwater)
         'nikonos', 'nikonosii', 'nikonosiii', 'nikonosiv', 'nikonosiva', 'nikonosv', 'nikonosrs',
+        // 추가 P&S
+        'tw2', 'tw2d', 'tw20', 'teletouchdeluxe', 'teletouch300',
+        'twzoom', 'twzoom85', 'zoomtouch600',
+        'af400', 'af600', 'minitouch', 'litetouchaf',
+        'actiontouch', 'l35aw', 'l35awaf',
       ],
     },
     {
@@ -151,6 +162,12 @@
         'espio', 'espiomini', 'espio105wr', 'espio140', 'espio120', 'espio115', 'espio738',
         'pc35af', 'pc35afm', 'auto110', 'pino35', 'uc1',
         'pentax17',
+        // IQZoom P&S 라인
+        'iqzoom60', 'iqzoom70', 'iqzoom70xl', 'iqzoom80', 'iqzoom90',
+        'iqzoom105', 'iqzoom115', 'iqzoom140', 'iqzoom200',
+        'iqzoom928', 'iqzoom170sl',
+        'iqzoomezy', 'iqzoomezy80', 'iqzoomezyr', 'iqzoomezys',
+        'espio80', 'espio80v', 'espio90mc', 'iqzoom90mc',
       ],
     },
     {
@@ -172,6 +189,18 @@
         // Classic 35-series
         '35rc', '35sp', '35ed', '35dc', '35rd', '35lc',
         'infinity', 'infinitystylus',
+        // 추가 P&S
+        'tripaf', 'tripaf50',
+        'af1', 'af1twin', 'af10', 'af10twin', 'af10super',
+        'ecru', 'oproduct',
+        'is1', 'is2', 'is3', 'is10', 'is1000', 'is2000', 'is3000',
+        'is100', 'is200', 'is300', 'is500', 'is21', 'centurion',
+        'quickshooter', 'quickshooterzoom',
+        'infinityjr', 'infinitys',
+        'infinitysuperzoom3000', 'infinitysuperzoom330',
+        'superzoom70g', 'superzoom3000',
+        'stylusepiczoom80', 'styluszoom140',
+        'newpicaf200',
       ],
     },
     {
@@ -193,6 +222,10 @@
         'tc1', 'cle', 'autocord',
         'freedom', 'riva', 'rivamini', 'rivazoom70w', 'capios',
         'freedomescort', 'freedomzoom', 'freedomvista', 'rivapanorama',
+        // 추가 P&S
+        'afsv', 'talker', 'aftele', 'aftelesuper', 'afc', 'afs', 'afe',
+        'rivazoom90ex', 'rivazoom140ex', 'rivazoompico',
+        'freedomactionzoom', 'freedomautodatezoom',
       ],
     },
     {
@@ -206,6 +239,8 @@
         'contax645',
         // pre-war
         'iia', 'iiia',
+        // APS
+        'tix',
       ],
     },
     {
@@ -221,6 +256,9 @@
         'rollei35', 'rollei35t', 'rollei35s', 'rollei35te', 'rollei35se',
         'b35rollei', 'c35rollei',
         'rolleimat', 'rolleimataf', 'pregoaf', 'afm35',
+        // Prego 시리즈 + 후기 컴팩트
+        'prego90', 'prego125', 'prego140', 'pregozoom',
+        'a26', 'a110', 'xf35', 'sportsline35',
         // SLR
         'sl35', 'sl35e', 'sl35m', 'sl350', 'sl2000f', 'sl3001', 'sl3003',
         // MF SLR
@@ -459,6 +497,8 @@
         'mat', 'mat124', 'mat124g', 'mat124b',
         't2yashica', 't3yashica', 't4', 't4super', 't5', 't4zoom', 'tprozoom',
         'samurai', 'samuraix3', 'samuraix4',
+        // 추가 P&S (Kyocera-era)
+        '230af', 'super230af', '270af', '300af', 'afj',
       ],
     },
     {
@@ -471,6 +511,14 @@
         'bm310z', 'bm311z', 'bm411z', 'bm510z', 'bm610z',
         'autos', 'autos2', 'autos3',
         'c35', 'c35v', 'c35automatic', 'c35el', 'c35ef', 'c35fd',
+        // MR / Z-up / 기타 P&S
+        'mr70', 'mr70lx', 'mr640',
+        'zup28w', 'zup60', 'zup70', 'zup70vp', 'zup70super',
+        'zup80', 'zup80rclimited',
+        'zup110super', 'zup120vp',
+        'zup130', 'zup135super', 'zup140super',
+        'zup150', 'zup150vp',
+        'aiborg', 'genbakantoku', 'genbakantokudd',
       ],
     },
     {
@@ -484,6 +532,13 @@
         'ff1', 'ff9',
         'r1ricoh', 'r1s', 'r1e', 'r10ricoh',
         'mirai',
+        // 추가 P&S
+        'ff3af', 'ff3dap', 'ff3afsuper',
+        'ff7', 'ff7d', 'ff9s',
+        'shotmasterafsuper', 'onetakeafsuper',
+        'shotmasterzoom', 'shotmasterzoomsuper',
+        'shotmastertruzoom', 'rz900', 'myportzoom90',
+        'shotmasterultrazoomsuper',
       ],
     },
     {
