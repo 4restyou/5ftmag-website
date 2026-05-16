@@ -307,8 +307,8 @@ function render() {
     knownTbody.innerHTML = known.map(([key, info]) => {
       const src = info.brandSource === 'override' ? 'source-override' : 'source-static';
       const srcLabel = info.brandSource === 'override' ? '오버라이드' : '정적 사전';
-      const editable = info.brandSource === 'override';
-      const actions = editable
+      const isOverride = info.brandSource === 'override';
+      const actions = isOverride
         ? `<button type="button" class="row-btn" data-action="update-known">갱신</button>
            <button type="button" class="row-btn danger" data-action="remove-known">삭제</button>`
         : `<button type="button" class="row-btn" data-action="override-static">덮어쓰기</button>`;
@@ -322,7 +322,7 @@ function render() {
           <td><span class="${src}">${srcLabel}</span></td>
           <td class="cam-count">${info.count}</td>
           <td>
-            ${editable ? brandSelectHtml(info.brand) : ''}
+            ${brandSelectHtml(info.brand)}
             <div class="brand-input-wrap" style="margin-top:6px;">${actions}</div>
             <div class="row-status" data-role="status"></div>
           </td>
