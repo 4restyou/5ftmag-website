@@ -211,16 +211,19 @@ function allBrands() {
   return Array.from(set).sort((a, b) => a.localeCompare(b, 'en'));
 }
 
-function brandSelectHtml(currentBrand) {
+function brandSelectHtml(currentBrand, currentDisplay) {
   const brands = allBrands();
   const opts = brands.map(b => `<option value="${escapeAttr(b)}"${b === currentBrand ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('');
   return `
     <div class="brand-input-wrap">
       <select class="brand-select" data-role="brand-select">
-        <option value="">— 선택 —</option>
+        <option value="">— 브랜드 선택 —</option>
         ${opts}
       </select>
       <input class="brand-input" data-role="brand-input" placeholder="또는 새 브랜드 직접 입력" />
+    </div>
+    <div class="brand-input-wrap" style="margin-top:6px;">
+      <input class="brand-input" data-role="display-input" placeholder="카메라 표기 (예: Leica M6)" value="${escapeAttr(currentDisplay || '')}" style="min-width:200px; flex:1;" />
     </div>`;
 }
 
@@ -293,7 +296,7 @@ function render() {
           <div class="cam-key">${escapeHtml(key)}</div>
         </td>
         <td class="cam-count">${info.count}</td>
-        <td>${brandSelectHtml('')}</td>
+        <td>${brandSelectHtml('', info.display)}</td>
         <td>
           <button type="button" class="row-btn" data-action="save-unknown">저장</button>
           <div class="row-status" data-role="status"></div>
@@ -322,7 +325,7 @@ function render() {
           <td><span class="${src}">${srcLabel}</span></td>
           <td class="cam-count">${info.count}</td>
           <td>
-            ${brandSelectHtml(info.brand)}
+            ${brandSelectHtml(info.brand, info.display)}
             <div class="brand-input-wrap" style="margin-top:6px;">${actions}</div>
             <div class="row-status" data-role="status"></div>
           </td>
@@ -340,6 +343,10 @@ function readBrandFromRow(tr) {
   if (typed) return typed;
   if (select) return (select.value || '').trim();
   return '';
+}
+function readDisplayFromRow(tr) {
+  const el = tr.querySelector('[data-role="display-input"]');
+  return el ? (el.value || '').trim() : '';
 }
 
 function bindRowHandlers() {
@@ -368,10 +375,11 @@ function bindRowHandlers() {
 
         // save-unknown / update-known / override-static — 모두 upsert
         const brand = readBrandFromRow(tr);
+        const display = readDisplayFromRow(tr);
         if (!brand) { setStatus('브랜드를 선택하거나 입력해주세요.', false); return; }
         btn.disabled = true;
         setStatus('저장 중…', true);
-        const { error } = await db().cameraOverrides.upsert({ model_key: key, brand });
+        const { error } = await db().cameraOverrides.upsert({ model_key: key, brand, display: display || null });
         btn.disabled = false;
         if (error) { setStatus('저장 실패: ' + (error.message || '오류'), false); return; }
         setStatus('저장됨. 목록을 갱신합니다.', true);
