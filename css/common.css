@@ -133,6 +133,44 @@ header {
   /* 종 SVG 의 시각적 중심이 24-viewBox 안에서 위쪽으로 치우쳐 있어,
      달(테마) 아이콘과 수직 정렬을 맞추기 위해 1px 내림 */
   transform: translateY(1px);
+  transform-origin: 50% 25%;
+}
+@keyframes notif-bell-shake {
+  0%, 100%   { transform: translateY(1px) rotate(0); }
+  10%, 30%, 50% { transform: translateY(1px) rotate(-14deg); }
+  20%, 40%, 60% { transform: translateY(1px) rotate(14deg); }
+  70%        { transform: translateY(1px) rotate(0); }
+}
+.notif-bell:hover svg            { animation: notif-bell-shake .8s ease-in-out; }
+.notif-bell.has-unread svg       { animation: notif-bell-shake 2s ease-in-out infinite; }
+.notif-bell.has-unread:hover svg { animation: notif-bell-shake .8s ease-in-out; }
+
+/* ────────── 테마 토글 스핀-페이드 ────────── */
+@keyframes theme-spin-morph {
+  0%   { transform: rotate(0) scale(1);     opacity: 1; }
+  50%  { transform: rotate(180deg) scale(0.55); opacity: 0.35; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+#themeBtn.is-switching svg { animation: theme-spin-morph .46s ease-in-out; }
+
+/* ────────── 즐겨찾기 ♡ 토글 펄스 ────────── */
+@keyframes fav-pulse {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.35); }
+  60%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.film-fav.is-pulsing svg,
+.article-fav.is-pulsing svg,
+.lightbox-fav.is-pulsing svg,
+.photo-lb-fav.is-pulsing svg {
+  animation: fav-pulse .4s ease;
+}
+
+/* ────────── 공유 아이콘 hover — 노드 연결 모션 ────────── */
+@keyframes share-redraw {
+  0%   { stroke-dashoffset: 8; }
+  100% { stroke-dashoffset: 0; }
 }
 .notif-badge {
   position: absolute;

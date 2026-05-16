@@ -241,6 +241,8 @@
   stroke-width: 1.7;
   fill: none;
 }
+.modal-share svg line { stroke-dasharray: 8; stroke-dashoffset: 0; }
+.modal-share:hover svg line { animation: share-redraw .55s ease both; }
 .modal-content {
   max-width: 1280px;
   margin: 0 auto;

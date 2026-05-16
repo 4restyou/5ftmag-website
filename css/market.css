@@ -133,6 +133,13 @@
 }
 .market-new-btn:hover { opacity: 0.88; }
 .market-new-btn:active { transform: translateY(1px); }
+/* + 아이콘 hover 시 회전 */
+.market-new-btn svg { transition: transform .3s ease; }
+.market-new-btn:hover svg { animation: plus-spin .55s ease both; }
+@keyframes plus-spin {
+  0%   { transform: rotate(0); }
+  100% { transform: rotate(360deg); }
+}
 
 /* ── 카드 그리드 ── */
 .market-grid {
@@ -203,6 +210,8 @@
   transition: stroke .15s, stroke-width .15s;
 }
 .market-card-share:hover svg { stroke: var(--text); stroke-width: 1.8; }
+.market-card-share svg line { stroke-dasharray: 8; stroke-dashoffset: 0; }
+.market-card-share:hover svg line { animation: share-redraw .55s ease both; }
 .market-card-share.is-busy { opacity: 0.55; pointer-events: none; }
 [data-theme="dark"] .market-card-share:hover svg { stroke: #fff; }
 

@@ -140,14 +140,20 @@
     updateThemeButton(themeBtn);
     updateMenuButton(menuBtn, mobileNav);
 
-    // 테마 토글
+    // 테마 토글 (회전 + 페이드 모핑)
     if (themeBtn) {
       themeBtn.addEventListener('click', function () {
         const html = document.documentElement;
         const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
         html.dataset.theme = next;
         localStorage.setItem(THEME_KEY, next);
-        updateThemeButton(themeBtn);
+        // CSS keyframe animation 트리거
+        themeBtn.classList.remove('is-switching');
+        void themeBtn.offsetWidth;
+        themeBtn.classList.add('is-switching');
+        // 애니메이션 중간 (회전 50% 지점) 에서 svg 교체 → 모핑 느낌
+        setTimeout(() => updateThemeButton(themeBtn), 200);
+        setTimeout(() => themeBtn.classList.remove('is-switching'), 480);
       });
     }
 
@@ -178,6 +184,7 @@
     setupAuthNav();
     setupNotifications();
     setupArticleScrap();
+    setupFavoritePulse();
     injectFooterLegalLinks();
     injectSkipLink();
     setAriaCurrentOnNav();
@@ -498,12 +505,15 @@
 
     function updateBadge(n) {
       const badge = document.getElementById('notifBadge');
+      const bellBtn = document.getElementById('notifBell');
       if (!badge) return;
       if (n > 0) {
         badge.textContent = n > 99 ? '99+' : String(n);
         badge.hidden = false;
+        if (bellBtn) bellBtn.classList.add('has-unread');
       } else {
         badge.hidden = true;
+        if (bellBtn) bellBtn.classList.remove('has-unread');
       }
     }
     async function refreshBadge() {
@@ -593,6 +603,20 @@
   //     site-common.js 가 페이지 로드 후 share-bar 첫 자리에 버튼 삽입
   //   - 글 식별자는 <section data-comments data-page-id="stories/<id>"> 에서 추출
   // ════════════════════════════════════════════════
+  function setupFavoritePulse() {
+    if (document.documentElement.dataset.favPulseBound === '1') return;
+    document.documentElement.dataset.favPulseBound = '1';
+    document.addEventListener('click', (e) => {
+      const fav = e.target.closest('.film-fav, .article-fav, .lightbox-fav, .photo-lb-fav');
+      if (!fav) return;
+      fav.classList.remove('is-pulsing');
+      // reflow 강제 → 같은 클래스 재추가 시 애니메이션이 재시작되도록
+      void fav.offsetWidth;
+      fav.classList.add('is-pulsing');
+      setTimeout(() => fav.classList.remove('is-pulsing'), 420);
+    }, true); // capture phase — 다른 핸들러의 stopPropagation 영향 받지 않음
+  }
+
   function bookmarkIconSvg() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16l-6-4-6 4Z"/></svg>';
   }
