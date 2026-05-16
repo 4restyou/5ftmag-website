@@ -581,11 +581,16 @@
       if (error) { console.warn('[cameraOverrides.list]', error.message); return new Map(); }
       const map = new Map();
       for (const row of (data || [])) {
-        map.set(row.model_key, { brand: row.brand, display: row.display, note: row.note });
+        map.set(row.model_key, {
+          brand: row.brand,
+          display: row.display,
+          note: row.note,
+          alias_of: row.alias_of || null,
+        });
       }
       return map;
     },
-    async upsert({ model_key, brand, display, note }) {
+    async upsert({ model_key, brand, display, note, alias_of }) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const uid = await userId();
       if (!uid) return { error: { message: 'login required' } };
@@ -594,6 +599,7 @@
         brand: String(brand || '').trim(),
         display: display ? String(display).trim() : null,
         note: note ? String(note).trim() : null,
+        alias_of: alias_of ? String(alias_of).trim() : null,
         created_by: uid,
       });
     },

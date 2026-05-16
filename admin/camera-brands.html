@@ -183,7 +183,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260516-camov"></script>
+<script src="../js/db-client.js?v=20260516-camalias"></script>
 <script src="../js/camera-brands.js?v=20260516-hints"></script>
 <script src="../js/site-common.js?v=20260516-iconanim"></script>
 <script>
@@ -211,9 +211,15 @@ function allBrands() {
   return Array.from(set).sort((a, b) => a.localeCompare(b, 'en'));
 }
 
-function brandSelectHtml(currentBrand, currentDisplay) {
+function brandSelectHtml(currentBrand, currentDisplay, selfKey) {
   const brands = allBrands();
   const opts = brands.map(b => `<option value="${escapeAttr(b)}"${b === currentBrand ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('');
+  // 병합 대상 select — 자기 자신 제외, 다른 모든 모델 표시 (display · key)
+  const mergeOpts = [...STATE.cameraIndex.entries()]
+    .filter(([k]) => k !== selfKey)
+    .sort((a, b) => (b[1].count - a[1].count) || a[1].display.localeCompare(b[1].display))
+    .map(([k, info]) => `<option value="${escapeAttr(k)}">${escapeHtml(info.display)} · ${escapeHtml(k)}</option>`)
+    .join('');
   return `
     <div class="brand-input-wrap">
       <select class="brand-select" data-role="brand-select">
@@ -224,6 +230,12 @@ function brandSelectHtml(currentBrand, currentDisplay) {
     </div>
     <div class="brand-input-wrap" style="margin-top:6px;">
       <input class="brand-input" data-role="display-input" placeholder="카메라 표기 (예: Leica M6)" value="${escapeAttr(currentDisplay || '')}" style="min-width:200px; flex:1;" />
+    </div>
+    <div class="brand-input-wrap" style="margin-top:6px;">
+      <select class="brand-select" data-role="merge-select">
+        <option value="">— 다른 모델과 병합 안 함 —</option>
+        ${mergeOpts}
+      </select>
     </div>`;
 }
 
@@ -256,11 +268,23 @@ async function buildCameraIndex() {
     });
   }
 
-  // 오버라이드 적용
+  // 오버라이드 적용 — 별칭 병합 → 일반 brand/display
   STATE.overrides = await db().cameraOverrides.list();
+  for (const [aliasKey, o] of STATE.overrides) {
+    if (!o.alias_of) continue;
+    const alias = STATE.cameraIndex.get(aliasKey);
+    if (!alias) continue;
+    let canonical = STATE.cameraIndex.get(o.alias_of);
+    if (!canonical) {
+      canonical = { display: alias.display, brand: alias.brand, count: 0, brandSource: null };
+      STATE.cameraIndex.set(o.alias_of, canonical);
+    }
+    canonical.count += alias.count || 0;
+    STATE.cameraIndex.delete(aliasKey);
+  }
   for (const [key, info] of STATE.cameraIndex) {
     const o = STATE.overrides.get(key);
-    if (o) {
+    if (o && !o.alias_of) {
       info.brand = o.brand;
       if (o.display) info.display = o.display;
       info.brandSource = 'override';
@@ -296,7 +320,7 @@ function render() {
           <div class="cam-key">${escapeHtml(key)}</div>
         </td>
         <td class="cam-count">${info.count}</td>
-        <td>${brandSelectHtml('', info.display)}</td>
+        <td>${brandSelectHtml('', info.display, key)}</td>
         <td>
           <button type="button" class="row-btn" data-action="save-unknown">저장</button>
           <div class="row-status" data-role="status"></div>
@@ -325,7 +349,7 @@ function render() {
           <td><span class="${src}">${srcLabel}</span></td>
           <td class="cam-count">${info.count}</td>
           <td>
-            ${brandSelectHtml(info.brand, info.display)}
+            ${brandSelectHtml(info.brand, info.display, key)}
             <div class="brand-input-wrap" style="margin-top:6px;">${actions}</div>
             <div class="row-status" data-role="status"></div>
           </td>
@@ -346,6 +370,10 @@ function readBrandFromRow(tr) {
 }
 function readDisplayFromRow(tr) {
   const el = tr.querySelector('[data-role="display-input"]');
+  return el ? (el.value || '').trim() : '';
+}
+function readMergeFromRow(tr) {
+  const el = tr.querySelector('[data-role="merge-select"]');
   return el ? (el.value || '').trim() : '';
 }
 
@@ -376,10 +404,18 @@ function bindRowHandlers() {
         // save-unknown / update-known / override-static — 모두 upsert
         const brand = readBrandFromRow(tr);
         const display = readDisplayFromRow(tr);
-        if (!brand) { setStatus('브랜드를 선택하거나 입력해주세요.', false); return; }
+        const aliasOf = readMergeFromRow(tr);
+        // 병합 모드: 다른 모델로 합치는 경우 brand 는 불필요 (canonical 의 값 따라감)
+        if (!aliasOf && !brand) { setStatus('브랜드를 선택하거나 입력해주세요.', false); return; }
+        if (aliasOf === key) { setStatus('자기 자신과는 병합할 수 없어요.', false); return; }
         btn.disabled = true;
         setStatus('저장 중…', true);
-        const { error } = await db().cameraOverrides.upsert({ model_key: key, brand, display: display || null });
+        const { error } = await db().cameraOverrides.upsert({
+          model_key: key,
+          brand: aliasOf ? (brand || '__alias__') : brand,  // CHECK NOT NULL 회피용 placeholder — alias 일 때만
+          display: display || null,
+          alias_of: aliasOf || null,
+        });
         btn.disabled = false;
         if (error) { setStatus('저장 실패: ' + (error.message || '오류'), false); return; }
         setStatus('저장됨. 목록을 갱신합니다.', true);
