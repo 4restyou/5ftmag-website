@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>카메라 브랜드 관리 — 5ft.mag Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css?v=20260516-iconanim">
+  <style>
+    body { background: var(--bg); color: var(--text); }
+
+    .admin-header { max-width: 1100px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .admin-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; transition: color .15s; }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-user { font-size: 13px; color: var(--text-muted); }
+    .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .admin-user button:hover { color: var(--text); }
+
+    .admin-subnav { display: flex; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; display: inline-flex; align-items: center; gap: 6px; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
+
+    .gate { max-width: 480px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; margin-bottom: 12px; }
+    .gate p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .gate-btn { font: inherit; font-weight: var(--fw-heading); font-size: 14px; padding: 12px 24px; background: var(--text); color: var(--bg); border: none; border-radius: 4px; cursor: pointer; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .section { margin-bottom: 48px; }
+    .section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+    .section-head h2 { font-size: 20px; font-weight: var(--fw-heading); letter-spacing: -0.01em; }
+    .section-head .count { font-size: 13px; color: var(--text-muted); }
+    .section-help { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+
+    table.cam-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .cam-table th, .cam-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .cam-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .cam-display { font-weight: var(--fw-heading); font-size: 15px; }
+    .cam-key { font-size: 12px; color: var(--text-muted); font-family: ui-monospace, monospace; }
+    .cam-count { color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+    .cam-brand-tag { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; color: var(--text); }
+
+    .brand-input-wrap { display: flex; gap: 6px; align-items: center; }
+    .brand-select, .brand-input {
+      font: inherit; font-size: 13px; padding: 6px 10px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px;
+      min-width: 120px;
+    }
+    .brand-input { min-width: 100px; }
+    .row-btn {
+      font: inherit; font-size: 12px; font-weight: var(--fw-heading);
+      padding: 6px 12px; background: var(--text); color: var(--bg);
+      border: none; border-radius: 4px; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .row-btn:hover { opacity: 0.85; }
+    .row-btn:disabled { opacity: 0.4; cursor: progress; }
+    .row-btn.danger { background: none; color: var(--text-muted); border: 1px solid var(--border); }
+    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+
+    .source-static { color: var(--text-muted); font-size: 12px; }
+    .source-override { color: #064e3b; font-size: 12px; font-weight: var(--fw-heading); }
+    [data-theme="dark"] .source-override { color: #6ee7b7; }
+
+    .row-status { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .row-status.ok { color: #064e3b; }
+    .row-status.err { color: #b91c1c; }
+    [data-theme="dark"] .row-status.ok { color: #6ee7b7; }
+    [data-theme="dark"] .row-status.err { color: #fda4af; }
+
+    .empty { padding: 32px; text-align: center; color: var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .cam-table thead { display: none; }
+      .cam-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      .cam-table td { display: block; border: none; padding: 4px 0; }
+      .brand-input-wrap { flex-wrap: wrap; margin-top: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../market.html">Market</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../market.html">Market</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<div class="admin-header">
+  <a class="admin-back" href="../films.html">← Films 로 돌아가기</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">카메라 브랜드 관리</h1>
+    <span class="admin-user" id="adminUser">불러오는 중…</span>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <a href="submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="camera-brands.html" class="admin-subnav-link is-current">카메라 브랜드</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<main id="app" hidden>
+  <section class="section">
+    <div class="section-head">
+      <h2>미분류 모델</h2>
+      <span class="count" id="unknownCount">·</span>
+    </div>
+    <p class="section-help">
+      독자 사진의 카메라 입력에서 브랜드를 자동으로 못 잡은 모델들이에요.
+      각 행에서 브랜드를 골라 <strong>저장</strong> 을 누르면 Films 페이지 카메라 드롭다운에서 그 브랜드 그룹으로 이동합니다.
+      목록에 없는 브랜드는 입력칸에 직접 적으면 됩니다.
+    </p>
+    <table class="cam-table">
+      <thead>
+        <tr>
+          <th>모델 (model_key)</th>
+          <th>컷수</th>
+          <th>브랜드 지정</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="unknownTbody">
+        <tr><td colspan="4" class="empty">불러오는 중…</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>분류된 모델</h2>
+      <span class="count" id="knownCount">·</span>
+    </div>
+    <p class="section-help">
+      정적 사전(<code>js/camera-brands.js</code>) 또는 DB 오버라이드로 이미 브랜드가 지정된 모델들이에요.
+      <strong>오버라이드</strong> 표시된 행은 편집부가 사이트에서 추가한 매핑이라 수정/삭제 가능합니다.
+    </p>
+    <table class="cam-table">
+      <thead>
+        <tr>
+          <th>모델</th>
+          <th>현재 브랜드</th>
+          <th>출처</th>
+          <th>컷수</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="knownTbody">
+        <tr><td colspan="5" class="empty">불러오는 중…</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/db-client.js?v=20260516-camov"></script>
+<script src="../js/camera-brands.js?v=20260516-hints"></script>
+<script src="../js/site-common.js?v=20260516-iconanim"></script>
+<script>
+'use strict';
+
+const STATE = {
+  user: null,
+  isEditor: false,
+  cameraIndex: new Map(), // model_key → { display, brand, count, brandSource: 'static'|'override'|null }
+  overrides: new Map(),   // model_key → { brand, display }
+};
+
+function $(id) { return document.getElementById(id); }
+function db() { return window.MagDB; }
+function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s) { return escapeHtml(s); }
+
+// 브랜드 옵션 목록 — 정적 사전 + 오버라이드에 등장한 모든 brand
+function allBrands() {
+  const set = new Set();
+  for (const [canonical] of (window.CAMERA_BRANDS || [])) set.add(canonical);
+  for (const [, o] of STATE.overrides) if (o.brand) set.add(o.brand);
+  // cameraIndex 의 정적 brand 도 포함 (혹시 사전 외 브랜드가 잡혔다면)
+  for (const [, info] of STATE.cameraIndex) if (info.brand) set.add(info.brand);
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'en'));
+}
+
+function brandSelectHtml(currentBrand) {
+  const brands = allBrands();
+  const opts = brands.map(b => `<option value="${escapeAttr(b)}"${b === currentBrand ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('');
+  return `
+    <div class="brand-input-wrap">
+      <select class="brand-select" data-role="brand-select">
+        <option value="">— 선택 —</option>
+        ${opts}
+      </select>
+      <input class="brand-input" data-role="brand-input" placeholder="또는 새 브랜드 직접 입력" />
+    </div>`;
+}
+
+// ════════════════════════════════════════════
+// 카메라 인덱스 구축 — films.html 의 rebuildCameraIndex 와 동일 로직 단순화 버전
+// ════════════════════════════════════════════
+async function buildCameraIndex() {
+  const subs = await db().submissions.listApproved(2000);
+  // model_key → { originals: [], brand (static), count }
+  const buckets = new Map();
+  for (const s of subs) {
+    const cam = s.camera || '';
+    if (!cam.trim()) continue;
+    const n = window.normalizeCamera(cam);
+    if (!n.key) continue;
+    if (!buckets.has(n.key)) buckets.set(n.key, { originals: [], brand: n.brand, count: 0 });
+    const b = buckets.get(n.key);
+    b.originals.push(n.original);
+    b.count += 1;
+    if (!b.brand && n.brand) b.brand = n.brand;
+  }
+  const pickDisplay = window.pickCameraDisplay || ((arr) => arr[0] || '');
+  STATE.cameraIndex.clear();
+  for (const [key, b] of buckets) {
+    STATE.cameraIndex.set(key, {
+      display: pickDisplay(b.originals),
+      brand: b.brand || null,
+      count: b.count,
+      brandSource: b.brand ? 'static' : null,
+    });
+  }
+
+  // 오버라이드 적용
+  STATE.overrides = await db().cameraOverrides.list();
+  for (const [key, info] of STATE.cameraIndex) {
+    const o = STATE.overrides.get(key);
+    if (o) {
+      info.brand = o.brand;
+      if (o.display) info.display = o.display;
+      info.brandSource = 'override';
+    }
+  }
+}
+
+// ════════════════════════════════════════════
+// 렌더링
+// ════════════════════════════════════════════
+function render() {
+  const unknownTbody = $('unknownTbody');
+  const knownTbody   = $('knownTbody');
+  const unknown = [];
+  const known   = [];
+  for (const [key, info] of STATE.cameraIndex) {
+    if (info.brand) known.push([key, info]);
+    else            unknown.push([key, info]);
+  }
+  unknown.sort((a, b) => b[1].count - a[1].count);
+  known.sort((a, b) => b[1].count - a[1].count);
+
+  $('unknownCount').textContent = unknown.length ? `${unknown.length}개` : '없음';
+  $('knownCount').textContent   = known.length ? `${known.length}개`   : '없음';
+
+  if (unknown.length === 0) {
+    unknownTbody.innerHTML = `<tr><td colspan="4" class="empty">미분류 모델이 없어요. 모두 브랜드 매칭됨.</td></tr>`;
+  } else {
+    unknownTbody.innerHTML = unknown.map(([key, info]) => `
+      <tr data-key="${escapeAttr(key)}">
+        <td>
+          <div class="cam-display">${escapeHtml(info.display)}</div>
+          <div class="cam-key">${escapeHtml(key)}</div>
+        </td>
+        <td class="cam-count">${info.count}</td>
+        <td>${brandSelectHtml('')}</td>
+        <td>
+          <button type="button" class="row-btn" data-action="save-unknown">저장</button>
+          <div class="row-status" data-role="status"></div>
+        </td>
+      </tr>`).join('');
+  }
+
+  if (known.length === 0) {
+    knownTbody.innerHTML = `<tr><td colspan="5" class="empty">분류된 모델이 없어요.</td></tr>`;
+  } else {
+    knownTbody.innerHTML = known.map(([key, info]) => {
+      const src = info.brandSource === 'override' ? 'source-override' : 'source-static';
+      const srcLabel = info.brandSource === 'override' ? '오버라이드' : '정적 사전';
+      const editable = info.brandSource === 'override';
+      const actions = editable
+        ? `<button type="button" class="row-btn" data-action="update-known">갱신</button>
+           <button type="button" class="row-btn danger" data-action="remove-known">삭제</button>`
+        : `<button type="button" class="row-btn" data-action="override-static">덮어쓰기</button>`;
+      return `
+        <tr data-key="${escapeAttr(key)}" data-current-brand="${escapeAttr(info.brand)}" data-source="${escapeAttr(info.brandSource || '')}">
+          <td>
+            <div class="cam-display">${escapeHtml(info.display)}</div>
+            <div class="cam-key">${escapeHtml(key)}</div>
+          </td>
+          <td><span class="cam-brand-tag">${escapeHtml(info.brand)}</span></td>
+          <td><span class="${src}">${srcLabel}</span></td>
+          <td class="cam-count">${info.count}</td>
+          <td>
+            ${editable ? brandSelectHtml(info.brand) : ''}
+            <div class="brand-input-wrap" style="margin-top:6px;">${actions}</div>
+            <div class="row-status" data-role="status"></div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  bindRowHandlers();
+}
+
+function readBrandFromRow(tr) {
+  const select = tr.querySelector('[data-role="brand-select"]');
+  const input  = tr.querySelector('[data-role="brand-input"]');
+  const typed  = (input?.value || '').trim();
+  if (typed) return typed;
+  if (select) return (select.value || '').trim();
+  return '';
+}
+
+function bindRowHandlers() {
+  document.querySelectorAll('tr[data-key]').forEach(tr => {
+    tr.querySelectorAll('button[data-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const action = btn.dataset.action;
+        const key = tr.dataset.key;
+        const statusEl = tr.querySelector('[data-role="status"]');
+        const setStatus = (msg, ok) => {
+          if (!statusEl) return;
+          statusEl.textContent = msg;
+          statusEl.className = 'row-status ' + (ok ? 'ok' : 'err');
+        };
+
+        if (action === 'remove-known') {
+          if (!confirm('이 오버라이드를 삭제할까요? 정적 사전 값이 있으면 그 값으로 되돌아갑니다.')) return;
+          btn.disabled = true;
+          const { error } = await db().cameraOverrides.remove(key);
+          btn.disabled = false;
+          if (error) { setStatus('삭제 실패: ' + (error.message || '오류'), false); return; }
+          setStatus('삭제됨. 새로고침 후 반영됩니다.', true);
+          await reload();
+          return;
+        }
+
+        // save-unknown / update-known / override-static — 모두 upsert
+        const brand = readBrandFromRow(tr);
+        if (!brand) { setStatus('브랜드를 선택하거나 입력해주세요.', false); return; }
+        btn.disabled = true;
+        setStatus('저장 중…', true);
+        const { error } = await db().cameraOverrides.upsert({ model_key: key, brand });
+        btn.disabled = false;
+        if (error) { setStatus('저장 실패: ' + (error.message || '오류'), false); return; }
+        setStatus('저장됨. 목록을 갱신합니다.', true);
+        await reload();
+      });
+    });
+  });
+}
+
+async function reload() {
+  await buildCameraIndex();
+  render();
+}
+
+// ════════════════════════════════════════════
+// 권한 + 초기화
+// ════════════════════════════════════════════
+async function checkAccess() {
+  for (let i = 0; i < 50; i++) {
+    if (db() && db().isReady()) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  if (!db() || !db().isReady()) { showGate('서비스 준비 실패. 잠시 후 새로고침해주세요.'); return false; }
+  const session = await db().auth.getSession();
+  if (!session) { showGate(); return false; }
+  STATE.user = session.user;
+  const profile = await db().profiles.getMine();
+  if (!profile?.is_editor) { showGate('편집부 권한이 있는 계정으로 로그인해야 이 페이지를 볼 수 있어요.'); return false; }
+  STATE.isEditor = true;
+  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
+  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
+  return true;
+}
+function showGate(msg) {
+  $('gate').hidden = false;
+  if (msg) $('gate').querySelector('p').textContent = msg;
+}
+$('gateLogin').addEventListener('click', async () => {
+  await db().auth.signInWithGoogle(window.location.href);
+});
+
+(async function main() {
+  const ok = await checkAccess();
+  if (!ok) return;
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  await reload();
+})();
+</script>
+
+</body>
+</html>
