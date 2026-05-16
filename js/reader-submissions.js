@@ -378,7 +378,11 @@
 
         <label class="rs-field">
           <span class="rs-label">카메라 <small>(선택)</small></span>
-          <input type="text" name="camera" placeholder="예: Pentax 17" value="${escapeAttr(meta.camera || '')}" maxlength="60" />
+          <input type="text" name="camera" id="rs-camera-input" list="rs-camera-list"
+                 placeholder="목록에서 고르거나 직접 입력 (예: Leica M6)"
+                 value="${escapeAttr(meta.camera || '')}" maxlength="60" autocomplete="off" />
+          <datalist id="rs-camera-list"></datalist>
+          <div class="rs-camera-hint" id="rs-camera-hint" hidden></div>
         </label>
         <label class="rs-field">
           <span class="rs-label">한 줄 메모 <small>(선택, 200자)</small></span>
@@ -555,9 +559,136 @@
     handleOpen({ dataset: {} });
   }
 
+  // ════════════════════════════════════════════════════════════
+  // 카메라 옵션 — 승인된 제출 + DB 오버라이드로 카메라 목록 빌드.
+  //   - 정규화로 같은 모델 묶고 브랜드 alias 병합
+  //   - 브랜드 A-Z, 그 안에서 display A-Z 정렬
+  //   - 자유 입력은 그대로 받되 유사 모델은 힌트로 제안
+  // ════════════════════════════════════════════════════════════
+  let cachedCameraList = null;
+  async function buildCameraList() {
+    if (cachedCameraList) return cachedCameraList;
+    if (!window.normalizeCamera || !db()) return [];
+    let subs = [];
+    try { subs = await db().submissions.listApproved(2000); } catch (_) { return []; }
+
+    // 1) submissions 를 model_key 로 그룹화
+    const buckets = new Map();
+    for (const s of subs) {
+      const cam = s.camera || '';
+      if (!cam.trim()) continue;
+      const n = window.normalizeCamera(cam);
+      if (!n.key) continue;
+      if (!buckets.has(n.key)) buckets.set(n.key, { originals: [], brand: n.brand || null });
+      const b = buckets.get(n.key);
+      b.originals.push(n.original);
+      if (!b.brand && n.brand) b.brand = n.brand;
+    }
+
+    // 2) DB 오버라이드 적용 (alias 병합 + brand/display)
+    if (window.MagDB && window.MagDB.cameraOverrides) {
+      let overrides = null;
+      try { overrides = await window.MagDB.cameraOverrides.list(); } catch (_) {}
+      if (overrides && overrides.size) {
+        // alias 먼저
+        for (const [aliasKey, o] of overrides) {
+          if (!o.alias_of || !buckets.has(aliasKey)) continue;
+          if (!buckets.has(o.alias_of)) buckets.set(o.alias_of, { originals: [], brand: o.brand || null });
+          const target = buckets.get(o.alias_of);
+          target.originals = target.originals.concat(buckets.get(aliasKey).originals);
+          if (!target.brand && o.brand) target.brand = o.brand;
+          buckets.delete(aliasKey);
+        }
+        // brand/display
+        for (const [key, o] of overrides) {
+          if (o.alias_of) continue;
+          if (!buckets.has(key)) continue;
+          const b = buckets.get(key);
+          b.brand = o.brand || b.brand;
+          if (o.display) b.overrideDisplay = o.display;
+        }
+      }
+    }
+
+    const pickDisplay = window.pickCameraDisplay || ((arr) => arr[0] || '');
+    const list = [];
+    for (const [key, b] of buckets) {
+      const display = b.overrideDisplay || pickDisplay(b.originals);
+      if (!display) continue;
+      list.push({ key, display, brand: b.brand || '' });
+    }
+    // 브랜드 A-Z (빈 브랜드는 끝), 그 안에서 display A-Z
+    list.sort((a, b) => {
+      if (!a.brand && b.brand) return 1;
+      if (a.brand && !b.brand) return -1;
+      const bc = (a.brand || '').localeCompare(b.brand || '', 'en');
+      if (bc !== 0) return bc;
+      return a.display.localeCompare(b.display, 'en');
+    });
+    cachedCameraList = list;
+    return list;
+  }
+
+  // Levenshtein 거리 (작은 입력 대상 — 이미 위에 있는 함수 사용)
+  function similarCameras(query, list, max = 4) {
+    if (!query || query.length < 2) return [];
+    const q = query.toLowerCase();
+    const scored = [];
+    for (const c of list) {
+      const d = c.display.toLowerCase();
+      if (d === q) return []; // 정확히 일치 → 힌트 불필요
+      let score = -1;
+      if (d.includes(q) || q.includes(d)) score = Math.abs(d.length - q.length);
+      else {
+        const lev = levenshtein(q, d);
+        const threshold = Math.min(3, Math.max(1, Math.floor(Math.max(q.length, d.length) * 0.35)));
+        if (lev <= threshold) score = lev;
+      }
+      if (score >= 0) scored.push({ c, score });
+    }
+    scored.sort((a, b) => a.score - b.score);
+    return scored.slice(0, max).map(s => s.c);
+  }
+
+  async function populateCameraDatalist() {
+    const input    = document.getElementById('rs-camera-input');
+    const datalist = document.getElementById('rs-camera-list');
+    const hint     = document.getElementById('rs-camera-hint');
+    if (!input || !datalist) return;
+    const list = await buildCameraList();
+    datalist.innerHTML = list.map(c =>
+      `<option value="${escapeAttr(c.display)}">${escapeAttr(c.brand || '직접 입력')}</option>`
+    ).join('');
+
+    if (!hint) return;
+    let debounce = null;
+    input.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        const v = input.value.trim();
+        if (!v) { hint.hidden = true; return; }
+        const matches = similarCameras(v, list, 4);
+        if (!matches.length) { hint.hidden = true; return; }
+        hint.innerHTML = '<span class="rs-camera-hint-label">혹시 이 카메라?</span> '
+          + matches.map(m => `<button type="button" class="rs-cam-hint-btn" data-pick="${escapeAttr(m.display)}">${escapeHtml(m.display)}</button>`).join(' ');
+        hint.hidden = false;
+      }, 200);
+    });
+    hint.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pick]');
+      if (!btn) return;
+      input.value = btn.dataset.pick;
+      hint.hidden = true;
+      input.focus();
+    });
+  }
+
   function bindFormHandlers(films) {
     const form = document.getElementById('rs-form');
     if (!form) return;
+
+    // 카메라 입력 — datalist + 유사 모델 힌트
+    populateCameraDatalist();
 
     // 미리보기
     const fileInput = form.querySelector('input[name="photo"]');

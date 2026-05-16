@@ -235,6 +235,32 @@
   color: var(--text-dim);
   line-height: 1.5;
 }
+/* 카메라 입력 — 유사 모델 힌트 */
+.rs-camera-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.rs-camera-hint-label {
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.02em;
+  margin-right: 4px;
+}
+.rs-cam-hint-btn {
+  display: inline-block;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 9px;
+  margin: 2px 4px 2px 0;
+  background: var(--bg-sub);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.rs-cam-hint-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
 .rs-form input[type="text"],
 .rs-form input[type="file"],
 .rs-form textarea {
