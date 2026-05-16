@@ -573,6 +573,36 @@
     },
   };
 
+  // ─── 카메라 브랜드 오버라이드 (편집부가 사이트에서 직접 보강) ───
+  const cameraOverrides = {
+    async list() {
+      const c = client(); if (!c) return new Map();
+      const { data, error } = await c.from('camera_brand_overrides').select('*');
+      if (error) { console.warn('[cameraOverrides.list]', error.message); return new Map(); }
+      const map = new Map();
+      for (const row of (data || [])) {
+        map.set(row.model_key, { brand: row.brand, display: row.display, note: row.note });
+      }
+      return map;
+    },
+    async upsert({ model_key, brand, display, note }) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      return c.from('camera_brand_overrides').upsert({
+        model_key: String(model_key || '').trim(),
+        brand: String(brand || '').trim(),
+        display: display ? String(display).trim() : null,
+        note: note ? String(note).trim() : null,
+        created_by: uid,
+      });
+    },
+    async remove(modelKey) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('camera_brand_overrides').delete().eq('model_key', modelKey);
+    },
+  };
+
   // ─── Realtime ───
   const realtime = {
     subscribeComments(pageId, onChange) {
@@ -601,6 +631,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
-    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, realtime,
+    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, realtime,
   };
 })();

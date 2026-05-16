@@ -480,6 +480,22 @@
     }
   }
 
+  // DB 의 camera_brand_overrides 적용 — 정적 사전이 못 잡은 모델의 브랜드를
+  // 편집부가 admin 페이지에서 지정한 값으로 덮어씀.
+  async function applyCameraOverrides() {
+    if (!window.MagDB || !window.MagDB.isReady() || !window.MagDB.cameraOverrides) return;
+    let overrides = null;
+    try { overrides = await window.MagDB.cameraOverrides.list(); } catch (_) {}
+    if (!overrides || !overrides.size) return;
+    for (const [key, info] of cameraIndex) {
+      const o = overrides.get(key);
+      if (o) {
+        info.brand = o.brand;
+        if (o.display) info.display = o.display;
+      }
+    }
+  }
+
   function renderLibraryCameraSelect() {
     const select = document.getElementById('libraryCamera');
     if (!select) return;
@@ -684,6 +700,7 @@
 
     // 카메라 인덱스 + 드롭다운 빌드 — submissions 가 들어왔을 때 같이 처리
     rebuildCameraIndex(submissions, filmsData);
+    await applyCameraOverrides();
     renderLibraryCameraSelect();
     // 카메라 필터가 활성화돼 있을 수 있으므로 카드 가시성 재계산
     applyLibraryFilter();
@@ -1911,7 +1928,7 @@
 </script>
 <script src="./js/site-common.js?v=20260516-iconanim"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260516-debugnotif"></script>
+<script src="./js/db-client.js?v=20260516-camov"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
 <script src="./js/reader-submissions.js?v=20260515-ctafix"></script>
