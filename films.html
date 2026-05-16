@@ -97,6 +97,9 @@
       <select class="library-brand-select" id="libraryBrand" aria-label="브랜드로 필터">
         <option value="all">브랜드 전체</option>
       </select>
+      <select class="library-brand-select" id="libraryCamera" aria-label="카메라로 필터">
+        <option value="all">카메라 전체</option>
+      </select>
       <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
     </div>
   </div>
@@ -317,7 +320,12 @@
   };
   let currentFilter = 'all';
   let currentBrand  = 'all';
+  let currentCamera = 'all';   // 카메라 model key (브랜드 prefix 제거 후 정규화)
   let currentSearch = '';
+  // slug → Set<cameraKey>  — 어떤 필름 카드가 현재 카메라 필터에 매칭되는지 빠르게 조회
+  const cameraKeysByFilmSlug = new Map();
+  // cameraKey → { display, brand, count } — 드롭다운 옵션 빌드용
+  const cameraIndex = new Map();
   let approvedSubmissionsCache = null;
   let approvedSubmissionsPromise = null;
   // 본인이 즐겨찾기한 필름 slug / 사진 ID 집합 — 페이지 로드 후 한 번 fetch
@@ -385,11 +393,14 @@
     filmsGridLibrary.querySelectorAll('.film-card').forEach(card => {
       const cat = card.dataset.filterCategory;
       const brand = card.dataset.brand || '';
+      const slug = card.dataset.film || '';
       const tokens = card.dataset.search || '';
       const matchCat    = currentFilter === 'all' || cat === currentFilter;
       const matchBrand  = currentBrand === 'all' || brand === currentBrand;
+      const matchCamera = currentCamera === 'all' ||
+                          (cameraKeysByFilmSlug.get(slug) && cameraKeysByFilmSlug.get(slug).has(currentCamera));
       const matchSearch = !q || tokens.includes(q);
-      const show = matchCat && matchBrand && matchSearch;
+      const show = matchCat && matchBrand && matchCamera && matchSearch;
       card.hidden = !show;
       if (show) visible++;
     });
@@ -411,6 +422,99 @@
     if (!select.dataset.bound) {
       select.addEventListener('change', () => {
         currentBrand = select.value || 'all';
+        applyLibraryFilter();
+      });
+      select.dataset.bound = '1';
+    }
+  }
+
+  // 카메라 드롭다운 — reader_submissions 의 카메라 컬럼 집계
+  //   1) 모든 승인된 제출을 normalizeCamera 로 그룹화 (model key 기준)
+  //   2) 같은 model key 내에서 가장 자주 쓰인 원본 표기를 display 로 채택
+  //   3) brand 가 인식되면 '브랜드 — 모델' 형식으로 가독성 보강
+  //   4) 사전에 없는 브랜드는 optgroup 으로 분리 → 편집부가 사전에 추가하면 됨
+  function rebuildCameraIndex(submissions, filmsBySlug) {
+    cameraKeysByFilmSlug.clear();
+    cameraIndex.clear();
+    if (!Array.isArray(submissions) || !submissions.length) return;
+    const normalize = window.normalizeFilmName
+      || ((s) => String(s || '').toLowerCase().replace(/[\s\-_+()/.]+/g, ''));
+    // 미리 슬러그별 alias set 만들어두기 (반복 매칭 절약)
+    const slugAliases = new Map();
+    for (const slug of Object.keys(filmsBySlug || {})) {
+      const f = filmsBySlug[slug];
+      const aliases = (f.aliases || []).concat([f.displayName, f.name]).filter(Boolean);
+      slugAliases.set(slug, new Set(aliases.map(normalize)));
+    }
+    // model key → { originals: [], brand, slugSet }
+    const buckets = new Map();
+    for (const s of submissions) {
+      const cam = s.camera || '';
+      if (!cam.trim()) continue;
+      const n = (typeof window.normalizeCamera === 'function')
+        ? window.normalizeCamera(cam)
+        : { key: cam.toLowerCase().replace(/\s+/g, ''), brand: null, original: cam };
+      if (!n.key) continue;
+      if (!buckets.has(n.key)) buckets.set(n.key, { originals: [], brand: n.brand, slugSet: new Set() });
+      const b = buckets.get(n.key);
+      b.originals.push(n.original);
+      if (!b.brand && n.brand) b.brand = n.brand;
+      // 이 사진이 매핑되는 필름 slug 찾기 — 카드 노출 조건에 사용
+      const filmNorm = normalize(s.film);
+      for (const [slug, aliasSet] of slugAliases) {
+        if (aliasSet.has(filmNorm)) {
+          b.slugSet.add(slug);
+          if (!cameraKeysByFilmSlug.has(slug)) cameraKeysByFilmSlug.set(slug, new Set());
+          cameraKeysByFilmSlug.get(slug).add(n.key);
+        }
+      }
+    }
+    // display 결정 + 노출 카운트
+    const pickDisplay = window.pickCameraDisplay || ((arr) => arr[0] || '');
+    for (const [key, b] of buckets) {
+      cameraIndex.set(key, {
+        display: pickDisplay(b.originals),
+        brand: b.brand,
+        count: b.originals.length,
+      });
+    }
+  }
+
+  function renderLibraryCameraSelect() {
+    const select = document.getElementById('libraryCamera');
+    if (!select) return;
+    // 인식된 브랜드 → 그 브랜드의 카메라들; 미인식 → '기타' 그룹
+    const byBrand = new Map();
+    const unknowns = [];
+    for (const [key, info] of cameraIndex) {
+      if (info.brand) {
+        if (!byBrand.has(info.brand)) byBrand.set(info.brand, []);
+        byBrand.get(info.brand).push({ key, ...info });
+      } else {
+        unknowns.push({ key, ...info });
+      }
+    }
+    // 브랜드는 알파벳, 그 안에서는 카운트 내림차순 후 display 알파벳
+    const sortedBrands = Array.from(byBrand.keys()).sort((a, b) => a.localeCompare(b, 'en'));
+    const optionForCam = (c) => `<option value="${escapeAttr(c.key)}">${escapeAttr(c.display)} · ${c.count}</option>`;
+    let html = '<option value="all">카메라 전체</option>';
+    for (const brand of sortedBrands) {
+      const arr = byBrand.get(brand).sort((a, b) => (b.count - a.count) || a.display.localeCompare(b.display));
+      html += `<optgroup label="${escapeAttr(brand)}">${arr.map(optionForCam).join('')}</optgroup>`;
+    }
+    if (unknowns.length) {
+      unknowns.sort((a, b) => (b.count - a.count) || a.display.localeCompare(b.display));
+      html += `<optgroup label="기타 (브랜드 미확인)">${unknowns.map(optionForCam).join('')}</optgroup>`;
+    }
+    select.innerHTML = html;
+    // 현재 선택 유지. 사라진 옵션이면 all 로 리셋
+    if (currentCamera !== 'all' && !cameraIndex.has(currentCamera)) {
+      currentCamera = 'all';
+    }
+    select.value = currentCamera;
+    if (!select.dataset.bound) {
+      select.addEventListener('change', () => {
+        currentCamera = select.value || 'all';
         applyLibraryFilter();
       });
       select.dataset.bound = '1';
@@ -577,6 +681,12 @@
 
     const normalize = window.normalizeFilmName
       || ((s) => String(s || '').toLowerCase().replace(/[\s\-_+()/.]+/g, ''));
+
+    // 카메라 인덱스 + 드롭다운 빌드 — submissions 가 들어왔을 때 같이 처리
+    rebuildCameraIndex(submissions, filmsData);
+    renderLibraryCameraSelect();
+    // 카메라 필터가 활성화돼 있을 수 있으므로 카드 가시성 재계산
+    applyLibraryFilter();
 
     // 필름별 카운트 집계
     const countPerSlug = new Map();
@@ -848,7 +958,11 @@
     const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
     const aliasSet = new Set(aliases.map(normalize));
 
-    const matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
+    let matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
+    // 카메라 필터가 활성화돼 있으면 그 카메라로 찍힌 사진만 모달 안에서 노출
+    if (currentCamera !== 'all' && typeof window.normalizeCamera === 'function') {
+      matched = matched.filter(s => window.normalizeCamera(s.camera).key === currentCamera);
+    }
     const rollState = buildReaderRollState(matched);
 
     const grid = document.getElementById(`readerGrid-${filmKey}`);
@@ -1595,5 +1709,6 @@
 <script src="./js/comments.js?v=20260512-magdb"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
 <script src="./js/reader-submissions.js?v=20260515-ctafix"></script>
+<script src="./js/camera-brands.js?v=20260516-camera"></script>
 </body>
 </html>
