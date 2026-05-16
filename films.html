@@ -801,22 +801,11 @@
     const cameraRaw = params.get('camera');
     let filmKey = resolveFilmKey(params.get('film') || params.get('slug'));
 
-    // ?camera= 우선 처리 — 카메라 모달 열기
+    // ?camera= 우선 처리 — 카메라 모달 열기 (openCameraModal 가 자체적으로 매칭/대기 처리)
     if (cameraRaw) {
-      // cameraIndex 가 채워지길 잠시 대기 (updateReaderCounts 이후 ready)
-      for (let i = 0; i < 60; i++) {
-        if (cameraIndex.size > 0) break;
-        await new Promise(r => setTimeout(r, 100));
-      }
-      // 입력이 raw 이든 model key 이든 둘 다 허용
-      const norm = (typeof window.normalizeCamera === 'function')
-        ? window.normalizeCamera(cameraRaw)
-        : { key: cameraRaw };
-      const tryKeys = [cameraRaw, norm.key];
-      for (const k of tryKeys) {
-        if (cameraIndex.has(k)) { openCameraModal(k); return; }
-      }
-      // 매칭 안 되면 일반 흐름으로 폴백
+      const ok = await openCameraModal(cameraRaw);
+      if (ok) return;
+      // 매칭 실패시 그 아래 film/contributor 흐름으로 폴백
     }
 
     if (!filmKey && contributor) {
@@ -1311,12 +1300,53 @@
 
   // ════════════════════════════
   // 카메라 모달 — 같은 카메라로 찍힌 reader 사진을 필름별로 그룹화해 표시
+  //   입력: normalized model key (e.g. 'm6') 또는 raw 카메라 문자열 ('Leica M6')
+  //   - cameraIndex 가 비어있어도 approvedSubmissions 에서 직접 필터링해 동작
   // ════════════════════════════
-  async function openCameraModal(key) {
-    const info = cameraIndex.get(key);
-    if (!info) return;
+  async function openCameraModal(input) {
+    if (!input) return false;
+    const submissions = await getApprovedSubmissions();
+    if (!Array.isArray(submissions) || !submissions.length) {
+      console.warn('[openCameraModal] 승인된 제출이 없어 카메라 모달을 열 수 없음');
+      return false;
+    }
+    // 입력을 normalized key 로 변환
+    const norm = (typeof window.normalizeCamera === 'function')
+      ? window.normalizeCamera(input)
+      : { key: String(input).toLowerCase().replace(/\s+/g, ''), brand: null };
+    let key = norm.key;
+    if (!key) {
+      // 입력 자체가 cameraIndex 에 있는 key 일 수도 있음 (e.g. deep-link 가 이미 정규화된 값 전달)
+      key = cameraIndex.has(input) ? input : '';
+    }
+    if (!key) { console.warn('[openCameraModal] key 도출 실패:', input); return false; }
+
+    // submissions 에서 같은 key 의 사진들 직접 필터링 — cameraIndex 의존 X
+    const matched = submissions.filter(s => {
+      const cam = s.camera || '';
+      if (!cam) return false;
+      return window.normalizeCamera(cam).key === key;
+    });
+    if (!matched.length) {
+      console.warn('[openCameraModal] 매칭되는 사진 없음:', input, '→ key=', key);
+      return false;
+    }
+
     currentCameraKey = key;
     currentFilmKey = null;
+
+    // cameraIndex 에 메타 없으면 그 자리에서 즉석 생성
+    let info = cameraIndex.get(key);
+    if (!info) {
+      const pickDisplay = window.pickCameraDisplay || ((arr) => arr[0] || '');
+      const originals = matched.map(s => s.camera).filter(Boolean);
+      info = {
+        display: pickDisplay(originals) || norm.original || input,
+        brand: norm.brand,
+        count: matched.length,
+      };
+      cameraIndex.set(key, info);
+    }
 
     // URL 동기화
     try {
@@ -1327,12 +1357,6 @@
       history.replaceState(null, '', u.pathname + u.search + u.hash);
     } catch (_) {}
 
-    const submissions = await getApprovedSubmissions();
-    const matched = submissions.filter(s => {
-      const cam = s.camera || '';
-      return cam && window.normalizeCamera(cam).key === key;
-    });
-
     // 필름별 그룹화
     const byFilm = new Map();
     for (const s of matched) {
@@ -1342,7 +1366,7 @@
     }
     const sortedFilms = [...byFilm.entries()].sort((a, b) => b[1].length - a[1].length);
 
-    // 라이트박스용으로 평탄화된 사진 목록 (모달 내 순서대로)
+    // 라이트박스용 평탄화
     cameraModalPhotos = [];
     const sectionsHtml = sortedFilms.map(([filmName, rows]) => {
       const cellsHtml = rows.map((s) => {
@@ -1362,7 +1386,6 @@
             <div class="modal-photo-caption">${escapeHtml(s.submitterName || s.author || '익명')}</div>
           </div>`;
       }).join('');
-      // 필름명도 클릭 가능하게 — 필름 모달로 점프
       return `
         <section class="modal-camera-section">
           <h3 class="modal-camera-section-title">
@@ -1402,6 +1425,7 @@
 
     modalOverlay.classList.add('open');
     document.body.classList.add('modal-open');
+    return true;
   }
 
   let cameraModalPhotos = [];
