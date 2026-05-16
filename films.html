@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
-  <link rel="stylesheet" href="./css/reader-submissions.css?v=20260515-ctafix">
+  <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-camsel">
   <link rel="stylesheet" href="./css/films.css?v=20260516-iconanim">
 </head>
 <body>
@@ -548,11 +548,11 @@
     const optionForCam = (c) => `<option value="${escapeAttr(c.key)}">${escapeAttr(c.display)} · ${c.count}</option>`;
     let html = '<option value="all">카메라 전체</option>';
     for (const brand of sortedBrands) {
-      const arr = byBrand.get(brand).sort((a, b) => (b.count - a.count) || a.display.localeCompare(b.display));
+      const arr = byBrand.get(brand).sort((a, b) => a.display.localeCompare(b.display, 'en'));
       html += `<optgroup label="${escapeAttr(brand)}">${arr.map(optionForCam).join('')}</optgroup>`;
     }
     if (unknowns.length) {
-      unknowns.sort((a, b) => (b.count - a.count) || a.display.localeCompare(b.display));
+      unknowns.sort((a, b) => a.display.localeCompare(b.display, 'en'));
       html += `<optgroup label="기타 (브랜드 미확인)">${unknowns.map(optionForCam).join('')}</optgroup>`;
     }
     select.innerHTML = html;
@@ -1964,7 +1964,7 @@
 <script src="./js/db-client.js?v=20260516-camalias"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
-<script src="./js/reader-submissions.js?v=20260515-ctafix"></script>
+<script src="./js/reader-submissions.js?v=20260516-camsel"></script>
 <script src="./js/camera-brands.js?v=20260516-hints"></script>
 </body>
 </html>
