@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260516-bellicon">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260515-ctafix">
-  <link rel="stylesheet" href="./css/home.css?v=20260514-photo-fav">
+  <link rel="stylesheet" href="./css/home.css?v=20260516-lbjump">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -217,8 +217,8 @@
     <img id="photoLbImg" src="" alt="" />
     <div class="photo-lb-info">
       <span class="author" id="photoLbAuthor"></span>
-      <span class="film" id="photoLbFilm"></span>
-      <span class="camera" id="photoLbCamera"></span>
+      <a class="film photo-lb-jump" id="photoLbFilm" href="films.html"></a>
+      <a class="camera photo-lb-jump" id="photoLbCamera" href="films.html"></a>
       <span class="counter" id="photoLbCounter"></span>
       <span class="photo-lb-actions">
         <button type="button" class="photo-lb-fav" id="photoLbFav" aria-pressed="false" aria-label="즐겨찾기 추가" hidden>
@@ -873,8 +873,18 @@
 
     photoLbAuthor.textContent = p.author || '';
     photoLbFilm.textContent = p.filmName || '';
+    if (photoLbFilm) {
+      // 필름명 클릭 → films.html?film=<slug or name>
+      photoLbFilm.href = p.filmKey
+        ? `films.html?film=${encodeURIComponent(p.filmKey)}`
+        : (p.filmName ? `films.html?film=${encodeURIComponent(p.filmName)}` : 'films.html');
+      photoLbFilm.hidden = !p.filmName;
+    }
     if (photoLbCamera) {
       photoLbCamera.textContent = p.camera || '';
+      photoLbCamera.href = p.camera
+        ? `films.html?camera=${encodeURIComponent(p.camera)}`
+        : 'films.html';
       photoLbCamera.hidden = !p.camera;
     }
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;

@@ -414,6 +414,60 @@
 .lightbox-caption-camera {
   font-style: italic;
 }
+/* 캡션 안의 점프 버튼 — 텍스트 모양 유지하면서 hover 시 가독성 향상 */
+.lightbox-caption-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  text-decoration: underline dotted rgba(255, 255, 255, 0.3);
+  text-underline-offset: 3px;
+  transition: color .12s;
+}
+.lightbox-caption-link:hover {
+  color: #fff;
+  text-decoration-color: rgba(255, 255, 255, 0.7);
+}
+
+/* ─── 카메라 모달 ─── */
+.modal-camera-section { margin-bottom: 32px; }
+.modal-camera-section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin: 32px 0 16px;
+}
+.modal-camera-section-title span {
+  font-size: 12px;
+  font-weight: var(--fw-all);
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+}
+.modal-camera-film-jump {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline dotted rgba(255, 255, 255, 0.3);
+  text-underline-offset: 4px;
+  transition: color .12s;
+}
+.modal-camera-film-jump:hover { color: var(--accent); }
+.modal-empty {
+  padding: 60px 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
 .lightbox-loading {
   position: absolute;
   inset: 50% auto auto 50%;

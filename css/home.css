@@ -742,6 +742,12 @@ body.modal-open { overflow: hidden; }
   color: rgba(255, 255, 255, 0.55);
   font-size: 12px;
 }
+.photo-lb-info .photo-lb-jump {
+  text-decoration: underline dotted rgba(255, 255, 255, 0.3);
+  text-underline-offset: 3px;
+  transition: color .12s;
+}
+.photo-lb-info .photo-lb-jump:hover { color: #fff; }
 .photo-lb-info .camera {
   color: rgba(255, 255, 255, 0.45);
   font-size: 12px;
