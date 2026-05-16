@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-brandchip">
-  <link rel="stylesheet" href="./css/films.css?v=20260516-iconanim">
+  <link rel="stylesheet" href="./css/films.css?v=20260516-contact">
 </head>
 <body>
 
@@ -918,8 +918,9 @@
           <div class="modal-section-head">
             <span class="modal-section-tag">${escapeAttr(data.issue || 'ISSUE')} · EDITORIAL</span>
             <span class="modal-section-meta">사진가 ${escapeAttr(photographers.join(', '))}</span>
+            <button type="button" class="modal-view-toggle" data-view-toggle aria-label="컨택트 시트로 전환">컨택트 시트</button>
           </div>
-          <div class="modal-gallery">
+          <div class="modal-gallery" data-view="grid">
             ${photosHTML}
           </div>
         </div>`;
@@ -1882,6 +1883,18 @@
 
   // 그리드의 사진 클릭 시 라이트박스 열기 (이벤트 위임)
   modalContent.addEventListener('click', (e) => {
+    // 컨택트 시트 ↔ 그리드 토글
+    const toggleBtn = e.target.closest('[data-view-toggle]');
+    if (toggleBtn) {
+      const gallery = toggleBtn.closest('.modal-section')?.querySelector('.modal-gallery');
+      if (gallery) {
+        const next = gallery.dataset.view === 'contact' ? 'grid' : 'contact';
+        gallery.dataset.view = next;
+        toggleBtn.textContent = next === 'contact' ? '기본 그리드' : '컨택트 시트';
+        toggleBtn.setAttribute('aria-label', next === 'contact' ? '기본 그리드로 전환' : '컨택트 시트로 전환');
+      }
+      return;
+    }
     // 자리 채우기 클릭 시 films 모달을 먼저 닫고 reader-submissions 위젯에 위임
     // (모달 위 모달이 겹쳐 보이는 혼란을 방지)
     if (e.target.closest('.reader-submit-btn')) {
