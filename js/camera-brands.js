@@ -3,12 +3,16 @@
 // 사용자 자유 입력 카메라명("Leica M6", "라이카 M6", "M6" 등)을 동일 모델로
 // 묶기 위한 사전. 브랜드 prefix 를 제거한 뒤 model 키로 그룹화한다.
 //
-// 각 엔트리: [canonical, ...aliases]
-//   - canonical: 표기 통일에 사용 (영문 소문자)
-//   - aliases: 같은 브랜드를 가리키는 다양한 표기 (영문/한글, 약칭 등)
+// 처리 순서:
+//   1) 입력 정리 (trim · lowercase · 공백 단일화 · 괄호/점/슬래시 제거)
+//   2) 브랜드 + 공백 prefix 매칭  (예: "Leica M6")
+//   3) 브랜드 + 공백 없는 prefix 매칭 — 단 남은 부분에 숫자 포함  (예: "니콘D750")
+//   4) 브랜드 못 찾았으면 MODEL_BRAND_HINTS 로 모델→브랜드 추정 (예: "Lomomatic", "오토보이")
 //
-// 새 카메라가 들어오는데 사전에 없는 브랜드가 보이면 여기 추가하면 됨.
-// (films.html 의 카메라 드롭다운에 "기타" 그룹으로 모임)
+// 새 카메라 모델/브랜드가 들어오는데 사전에 없는 게 자주 보이면:
+//   - 브랜드 자체가 누락 → CAMERA_BRANDS 에 추가
+//   - 브랜드명 없이 모델만 적히는 게 자주 보임 → MODEL_BRAND_HINTS 에 추가
+// (films.html 의 카메라 드롭다운에 "기타 (브랜드 미확인)" 그룹으로 모임)
 (function () {
   'use strict';
 
@@ -49,7 +53,75 @@
     ['petri',        '페트리'],
     ['topcon',       '톱콘'],
     ['bessa',        '베사'],
-    ['pentax 67',    'pentax67'], // 의도적으로 모델까지 포함된 별칭 — 사용자가 "67" 만 적어도 매칭되도록은 X (model 그대로)
+  ];
+
+  // 브랜드명 없이도 자주 입력되는 모델들 → 브랜드 추정
+  // 형식: { brand, models: [normalized model 문자열들 (공백/하이픈 제거 후 비교)] }
+  // 입력 모델이 여기 모델로 시작하면 매칭 (예: "lomomatic110" → "lomomatic" 으로 시작 → lomography)
+  const MODEL_BRAND_HINTS = [
+    {
+      brand: 'lomography',
+      models: [
+        'lomomatic', 'lomoapparat',
+        'lca', 'lcwide', 'lc120',
+        'mca',  // 신규 Lomo MC-A
+        'diana', 'dianababy', 'dianamini', 'dianaf',
+        'fisheye', 'fisheye2',
+        'spinner', 'spinner360',
+        'konstruktor',
+        'belair',
+        'sprocketrocket',
+        'sardina',
+        'hydrochrome',
+      ],
+    },
+    {
+      brand: 'canon',
+      models: [
+        '오토보이', 'autoboy',
+        'sureshot',
+        'snappy',
+      ],
+    },
+    {
+      brand: 'nikon',
+      models: [
+        'nikonos',
+        'nikkormat',
+      ],
+    },
+    {
+      brand: 'olympus',
+      models: [
+        'mjuii', 'muii', 'mju2', 'mu2',
+        'penee', 'penft', 'penf', 'penep',
+        'stylusepic',
+      ],
+    },
+    {
+      brand: 'contax',
+      models: ['t2', 't3', 'g1', 'g2'],
+    },
+    {
+      brand: 'rollei',
+      models: ['rolleimatic', 'rollei35'],
+    },
+    {
+      brand: 'fujifilm',
+      models: ['klasse', 'natura', 'tiara', 'quicksnap', 'simpleace'],
+    },
+    {
+      brand: 'kodak',
+      models: ['ektar', 'instamatic', 'retina', 'h35'],
+    },
+    {
+      brand: 'minolta',
+      models: ['hi-matic', 'himatic', 'tc-1', 'tc1'],
+    },
+    {
+      brand: 'pentax',
+      models: ['espio', 'auto110', 'spotmatic', 'pentax17'],
+    },
   ];
 
   // 입력 → [trim, lowercase, 공백 단일화, 괄호/점/슬래시 제거]
@@ -62,8 +134,13 @@
       .trim();
   }
 
+  // 모델 키 정규화 (alias 비교용) — 공백/하이픈/언더스코어 모두 제거
+  function modelKey(s) {
+    return String(s ?? '').toLowerCase().replace(/[\s\-_]/g, '');
+  }
+
   // input → { key, brand, original }
-  //   - key: 브랜드 prefix 제거 후 공백 모두 제거한 model 식별자 (그룹 키)
+  //   - key: 브랜드 prefix 제거 후 공백/하이픈 제거한 model 식별자 (그룹 키)
   //   - brand: 인식된 canonical 브랜드명 (null 가능)
   //   - original: 원본 입력 그대로 (표기 후보용)
   function normalizeCamera(input) {
@@ -81,19 +158,48 @@
 
     let brand = null;
     let rest = trimmed;
+    let brandMatched = false;
     for (const [canonical, form] of flat) {
       if (rest === form) {
         // 브랜드만 입력된 경우 — model 없음
         return { key: '', brand: canonical, original };
       }
+      // 1) 공백 있는 prefix
       if (rest.startsWith(form + ' ')) {
         rest = rest.slice(form.length + 1).trim();
         brand = canonical;
+        brandMatched = true;
         break;
       }
+      // 2) 공백 없는 prefix — 남은 부분에 숫자 포함된 경우만 (모델 코드 식별)
+      //    "니콘D750", "leicaM6", "canonAE1" 같은 표기 흡수
+      //    "nikonos" 처럼 같은 단어가 이어지는 경우는 숫자 없어서 매칭 X (→ MODEL_BRAND_HINTS 에서 처리)
+      if (rest.startsWith(form) && rest.length > form.length) {
+        const after = rest.slice(form.length).trim();
+        if (after && /\d/.test(after)) {
+          rest = after;
+          brand = canonical;
+          brandMatched = true;
+          break;
+        }
+      }
     }
-    // model: 공백/하이픈/언더스코어 제거
-    const key = rest.replace(/[\s\-_]/g, '');
+
+    // 3) 브랜드 매칭 실패 → MODEL_BRAND_HINTS 로 모델로부터 브랜드 추정
+    if (!brandMatched) {
+      const mk = modelKey(rest);
+      outer: for (const hint of MODEL_BRAND_HINTS) {
+        for (const m of hint.models) {
+          const mNorm = modelKey(m);
+          if (mk === mNorm || mk.startsWith(mNorm)) {
+            brand = hint.brand;
+            break outer;
+          }
+        }
+      }
+    }
+
+    const key = modelKey(rest);
     return { key, brand, original };
   }
 
@@ -119,4 +225,5 @@
   window.normalizeCamera = normalizeCamera;
   window.pickCameraDisplay = pickDisplay;
   window.CAMERA_BRANDS = CAMERA_BRANDS;
+  window.MODEL_BRAND_HINTS = MODEL_BRAND_HINTS;
 })();
