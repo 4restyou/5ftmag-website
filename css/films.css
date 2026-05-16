@@ -301,6 +301,95 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 8px;
 }
+
+/* ════════════════════════════════════════════
+   컨택트 시트 모드 — 35mm 필름 비율 + perforation
+   data-view="contact" 일 때 그리드를 필름 스트립처럼 변환
+   ════════════════════════════════════════════ */
+.modal-view-toggle {
+  margin-left: auto;
+  font: inherit;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.85);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.modal-view-toggle:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
+}
+
+.modal-gallery[data-view="contact"] {
+  background: #0a0a0a;
+  gap: 0;
+  padding: 0;
+  border-radius: 4px;
+  grid-template-columns: repeat(6, 1fr);
+  counter-reset: frame;
+}
+@media (max-width: 900px) {
+  .modal-gallery[data-view="contact"] { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 600px) {
+  .modal-gallery[data-view="contact"] { grid-template-columns: repeat(3, 1fr); }
+}
+
+.modal-gallery[data-view="contact"] > * {
+  /* 각 사진을 감싸는 wrapper div — 필름 한 컷처럼 */
+  counter-increment: frame;
+  position: relative;
+  background: #0a0a0a;
+  padding: 16px 4px;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+/* 상단/하단 perforation 띠 */
+.modal-gallery[data-view="contact"] > *::before,
+.modal-gallery[data-view="contact"] > *::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 14px;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='14'><rect x='3' y='3' width='10' height='8' rx='1.4' fill='%23f5f5f0'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 16px 14px;
+}
+.modal-gallery[data-view="contact"] > *::before { top: 0; }
+.modal-gallery[data-view="contact"] > *::after  { bottom: 0; }
+
+/* 사진 — 3:2 비율 (35mm 비율 정확히) */
+.modal-gallery[data-view="contact"] .modal-photo {
+  aspect-ratio: 3 / 2;
+  background: #151515;
+  border-radius: 0;
+  /* 프레임 번호 — Fuji 필름 처럼 주황색 모노스페이스 */
+}
+.modal-gallery[data-view="contact"] .modal-photo::after {
+  content: counter(frame) "A  ▸ " counter(frame, decimal-leading-zero);
+  position: absolute;
+  bottom: -14px;
+  left: 6px;
+  font-family: ui-monospace, 'SF Mono', Menlo, 'Courier New', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ff8c00;
+  pointer-events: none;
+  text-shadow: 0 0 2px rgba(0,0,0,0.8);
+}
+
+/* 작가명 캡션은 컨택트 시트 모드에선 숨김 (필름엔 안 적혀있음) */
+.modal-gallery[data-view="contact"] .modal-photo-caption { display: none; }
+
 .modal-photo {
   aspect-ratio: 4 / 5;
   overflow: hidden;
