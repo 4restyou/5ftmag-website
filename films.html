@@ -482,18 +482,51 @@
 
   // DB 의 camera_brand_overrides 적용 — 정적 사전이 못 잡은 모델의 브랜드를
   // 편집부가 admin 페이지에서 지정한 값으로 덮어씀.
+  // alias_of 가 설정된 행은 그 모델을 다른 canonical 모델로 병합.
+  const cameraAliasMap = new Map(); // aliasKey → canonicalKey (필터/모달에서 참조)
   async function applyCameraOverrides() {
+    cameraAliasMap.clear();
     if (!window.MagDB || !window.MagDB.isReady() || !window.MagDB.cameraOverrides) return;
     let overrides = null;
     try { overrides = await window.MagDB.cameraOverrides.list(); } catch (_) {}
     if (!overrides || !overrides.size) return;
+
+    // 1) 별칭 매핑 먼저 수집
+    for (const [k, o] of overrides) {
+      if (o.alias_of) cameraAliasMap.set(k, o.alias_of);
+    }
+    // 2) cameraIndex 에서 alias 항목을 canonical 항목에 병합
+    for (const [aliasKey, canonicalKey] of cameraAliasMap) {
+      const alias = cameraIndex.get(aliasKey);
+      if (!alias) continue;
+      let canonical = cameraIndex.get(canonicalKey);
+      if (!canonical) {
+        // canonical 이 아직 cameraIndex 에 없는 경우 — alias 자료로 신규 entry 만들기
+        canonical = { display: alias.display, brand: alias.brand, count: 0 };
+        cameraIndex.set(canonicalKey, canonical);
+      }
+      canonical.count += alias.count || 0;
+      cameraIndex.delete(aliasKey);
+      // 카드별 필름 슬러그 집합도 alias → canonical 로 redirect
+      for (const [slug, keys] of cameraKeysByFilmSlug) {
+        if (keys.has(aliasKey)) {
+          keys.delete(aliasKey);
+          keys.add(canonicalKey);
+        }
+      }
+    }
+    // 3) 일반 brand/display 오버라이드 적용
     for (const [key, info] of cameraIndex) {
       const o = overrides.get(key);
-      if (o) {
+      if (o && !o.alias_of) {
         info.brand = o.brand;
         if (o.display) info.display = o.display;
       }
     }
+  }
+  // 외부에서 사용할 alias 해소 헬퍼
+  function resolveCanonicalCameraKey(key) {
+    return cameraAliasMap.get(key) || key;
   }
 
   function renderLibraryCameraSelect() {
@@ -986,7 +1019,7 @@
     let matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
     // 카메라 필터가 활성화돼 있으면 그 카메라로 찍힌 사진만 모달 안에서 노출
     if (currentCamera !== 'all' && typeof window.normalizeCamera === 'function') {
-      matched = matched.filter(s => window.normalizeCamera(s.camera).key === currentCamera);
+      matched = matched.filter(s => resolveCanonicalCameraKey(window.normalizeCamera(s.camera).key) === currentCamera);
     }
     const rollState = buildReaderRollState(matched);
 
@@ -1342,7 +1375,7 @@
     const matched = submissions.filter(s => {
       const cam = s.camera || '';
       if (!cam) return false;
-      return window.normalizeCamera(cam).key === key;
+      return resolveCanonicalCameraKey(window.normalizeCamera(cam).key) === key;
     });
     if (!matched.length) {
       console.warn('[openCameraModal] 매칭되는 사진 없음:', input, '→ key=', key);
@@ -1928,7 +1961,7 @@
 </script>
 <script src="./js/site-common.js?v=20260516-iconanim"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260516-camov"></script>
+<script src="./js/db-client.js?v=20260516-camalias"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
 <script src="./js/reader-submissions.js?v=20260515-ctafix"></script>
