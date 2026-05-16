@@ -560,11 +560,31 @@
   }
 
   // ════════════════════════════════════════════════════════════
-  // 카메라 옵션 — 승인된 제출 + DB 오버라이드로 카메라 목록 빌드.
+  // 카메라 옵션 — 승인된 제출 + DB 오버라이드 + MODEL_BRAND_HINTS 카탈로그.
   //   - 정규화로 같은 모델 묶고 브랜드 alias 병합
+  //   - 카탈로그 모델은 첫 제출 전이라도 자동완성에 표시
   //   - 브랜드 A-Z, 그 안에서 display A-Z 정렬
   //   - 자유 입력은 그대로 받되 유사 모델은 힌트로 제안
   // ════════════════════════════════════════════════════════════
+  function modelKeyHelper(s) {
+    return String(s ?? '').toLowerCase().replace(/[\s\-_]/g, '');
+  }
+  // 카메라 키를 보기 좋은 display 로 변환 — 카탈로그 default 표기용
+  //   key='m6'   → 'M6'
+  //   key='m6ttl'→ 'M6 TTL'  (숫자→문자 경계, 문자→숫자 경계에 공백)
+  //   brand='leica' → 'Leica M6 TTL'
+  function prettifyCameraKey(brand, key) {
+    if (!key) return '';
+    // 숫자/문자 경계에 공백 삽입
+    let s = String(key).replace(/([a-z])(\d)/gi, '$1 $2').replace(/(\d)([a-z])/gi, '$1 $2');
+    // 약어 (FM, EOS, OM, MD 등) 는 대문자 유지가 자연스러우니 전체 대문자화
+    s = s.toUpperCase();
+    // 일부 흔한 토큰은 mixed-case 보정
+    s = s.replace(/\bTTL\b/g, 'TTL').replace(/\bMD\b/g, 'MD');
+    const bl = brand ? (brand.charAt(0).toUpperCase() + brand.slice(1)) : '';
+    return bl ? `${bl} ${s}` : s;
+  }
+
   let cachedCameraList = null;
   async function buildCameraList() {
     if (cachedCameraList) return cachedCameraList;
@@ -617,6 +637,29 @@
       if (!display) continue;
       list.push({ key, display, brand: b.brand || '' });
     }
+
+    // 3) MODEL_BRAND_HINTS 카탈로그도 datalist 에 포함 — 첫 제출 전이라도
+    //    이미 알려진 모델들이 자동완성에 떠야 사용자가 선택 가능.
+    //    이미 submissions 에 있는 키는 건너뜀 (중복 방지).
+    if (Array.isArray(window.MODEL_BRAND_HINTS)) {
+      const seenKeys = new Set(list.map(c => c.key));
+      for (const hint of window.MODEL_BRAND_HINTS) {
+        const brandText = hint.brand || '';
+        for (const m of (hint.models || [])) {
+          // entry 는 string 또는 { key, display } 둘 다 지원
+          const k = typeof m === 'string' ? m : (m && m.key);
+          const explicit = typeof m === 'object' && m && m.display ? m.display : null;
+          if (!k) continue;
+          const mk = modelKeyHelper(k);
+          if (!mk || seenKeys.has(mk)) continue;
+          // display 자동 생성 — 명시값 없으면 brand+key 정형화
+          const display = explicit || prettifyCameraKey(brandText, k);
+          list.push({ key: mk, display, brand: brandText });
+          seenKeys.add(mk);
+        }
+      }
+    }
+
     // 브랜드 A-Z (빈 브랜드는 끝), 그 안에서 display A-Z
     list.sort((a, b) => {
       if (!a.brand && b.brand) return 1;
