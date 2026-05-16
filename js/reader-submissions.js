@@ -650,15 +650,32 @@
     return scored.slice(0, max).map(s => s.c);
   }
 
+  // 브랜드명 표시 — 카메라 사전의 canonical 소문자 → 대문자 시작
+  function brandLabel(b) {
+    if (!b) return '';
+    return b.charAt(0).toUpperCase() + b.slice(1);
+  }
+  // 브랜드 + 모델 형식 — 입력값/공유용
+  function formatCameraName(c) {
+    if (!c || !c.display) return '';
+    const bl = brandLabel(c.brand);
+    if (!bl) return c.display;
+    // display 가 이미 브랜드를 포함하면 그대로 (e.g. 'Leica M6')
+    if (c.display.toLowerCase().includes(c.brand.toLowerCase())) return c.display;
+    return `${bl} ${c.display}`;
+  }
+
   async function populateCameraDatalist() {
     const input    = document.getElementById('rs-camera-input');
     const datalist = document.getElementById('rs-camera-list');
     const hint     = document.getElementById('rs-camera-hint');
     if (!input || !datalist) return;
     const list = await buildCameraList();
-    datalist.innerHTML = list.map(c =>
-      `<option value="${escapeAttr(c.display)}">${escapeAttr(c.brand || '직접 입력')}</option>`
-    ).join('');
+    datalist.innerHTML = list.map(c => {
+      const formatted = formatCameraName(c);
+      const labelText = c.brand ? brandLabel(c.brand) : '직접 입력';
+      return `<option value="${escapeAttr(formatted)}">${escapeAttr(labelText)}</option>`;
+    }).join('');
 
     if (!hint) return;
     let debounce = null;
@@ -670,7 +687,13 @@
         const matches = similarCameras(v, list, 4);
         if (!matches.length) { hint.hidden = true; return; }
         hint.innerHTML = '<span class="rs-camera-hint-label">혹시 이 카메라?</span> '
-          + matches.map(m => `<button type="button" class="rs-cam-hint-btn" data-pick="${escapeAttr(m.display)}">${escapeHtml(m.display)}</button>`).join(' ');
+          + matches.map(m => {
+              const formatted = formatCameraName(m);
+              const labelHtml = m.brand
+                ? `<span class="rs-cam-hint-brand">${escapeHtml(brandLabel(m.brand))}</span> · ${escapeHtml(m.display)}`
+                : escapeHtml(m.display);
+              return `<button type="button" class="rs-cam-hint-btn" data-pick="${escapeAttr(formatted)}">${labelHtml}</button>`;
+            }).join(' ');
         hint.hidden = false;
       }, 200);
     });
