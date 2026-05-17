@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-brandchip">
-  <link rel="stylesheet" href="./css/films.css?v=20260517-filmstrip">
+  <link rel="stylesheet" href="./css/films.css?v=20260517-filmstrip2">
 </head>
 <body>
 
@@ -997,8 +997,23 @@
       });
     }
 
+    // 에디토리얼 사진: 세로/가로 orientation 클래스 부여
+    modalContent.querySelectorAll('.modal-photo img').forEach(classifyPhotoOrientation);
+
     // Reader's Roll: 승인된 제출을 lazy fetch 해서 빈 자리 채우기
     loadReaderRollForFilm(filmKey, options);
+  }
+
+  // 사진 로딩 후 세로형이면 부모(.modal-photo) 또는 본인(<img>)에 is-portrait 클래스 부여
+  function classifyPhotoOrientation(img) {
+    const apply = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      const portrait = img.naturalHeight > img.naturalWidth;
+      const target = img.closest('.modal-photo') || img;
+      target.classList.toggle('is-portrait', portrait);
+    };
+    if (img.complete && img.naturalWidth) apply();
+    else img.addEventListener('load', apply, { once: true });
   }
 
   // ════════════════════════════
@@ -1176,6 +1191,8 @@
             <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
             <span class="reader-slot-author" data-person-key="${escapeAttr(personKey)}">${escapeAttr(personLabelOf(sub))}</span>
           </button>`;
+        const img = slot.querySelector('img');
+        if (img) classifyPhotoOrientation(img);
       }
       if (counter) {
         counter.textContent = activePerson === 'all'

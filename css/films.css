@@ -329,8 +329,8 @@
 
 .modal-gallery[data-view="contact"] {
   background: #0a0a0a;
-  gap: 8px;
-  padding: 8px;
+  gap: 0;
+  padding: 0;
   border-radius: 4px;
   grid-template-columns: repeat(6, 1fr);
 }
@@ -352,15 +352,22 @@
 /* 사진은 SVG 내부 photo window 영역에만 배치 */
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
-  left: 4.74%;
-  top: 15.94%;
+  left: 50%;
+  top: 50.7%;
+  transform: translate(-50%, -50%);
   width: 90.53%;
   height: 69.57%;
   aspect-ratio: auto;
-  background: #151515;
+  background: #000;
   border-radius: 0;
   margin: 0;
   overflow: hidden;
+}
+/* 세로 사진 — 가로로 90° 회전해서 한 컷에 전체 표시 */
+.modal-gallery[data-view="contact"] .modal-photo.is-portrait {
+  width: 69.57%;
+  height: 90.53%;
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 .modal-gallery[data-view="contact"] .modal-photo img,
 .modal-gallery[data-view="contact"] .modal-photo picture {
@@ -369,7 +376,8 @@
   display: block;
 }
 .modal-gallery[data-view="contact"] .modal-photo img {
-  object-fit: cover;
+  object-fit: contain;
+  background: #000;
 }
 
 /* 작가명 캡션은 컨택트 시트 모드에선 숨김 (필름엔 안 적혀있음) */
@@ -1269,7 +1277,7 @@
 .reader-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
+  gap: 0;
 }
 /* 필름스트립 비율 = 380 : 345 (SVG viewBox) */
 .reader-slot {
@@ -1285,7 +1293,6 @@
 .reader-slot.is-empty {
   background: transparent;
   border: 1px dashed rgba(255, 255, 255, 0.14);
-  border-radius: 2px;
 }
 .reader-slot-frame {
   font-size: 11px;
@@ -1318,18 +1325,30 @@
 /* 사진은 SVG 내부의 photo window 영역에만 배치 */
 /* photo window (viewBox 기준): x 125.64–469.64, y 300.94–540.94 */
 /* → left 4.74% / top 15.94% / width 90.53% / height 69.57% */
+/* center 약 (50%, 50.7%) — translate 기준점으로 사용 */
 .reader-slot-link img {
   position: absolute;
-  left: 4.74%;
-  top: 15.94%;
+  left: 50%;
+  top: 50.7%;
   width: 90.53%;
   height: 69.57%;
-  object-fit: cover;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  background: #000;
   transition: transform .25s ease;
   display: block;
 }
+/* 세로 사진 — 가로로 90° 회전해서 한 컷에 전체가 들어가도록 */
+.reader-slot-link img.is-portrait {
+  width: 69.57%;
+  height: 90.53%;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
 .reader-slot-link:hover img {
-  transform: scale(1.03);
+  transform: translate(-50%, -50%) scale(1.03);
+}
+.reader-slot-link:hover img.is-portrait {
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
 }
 .reader-slot-author {
   position: absolute;
