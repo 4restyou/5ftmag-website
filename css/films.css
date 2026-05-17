@@ -329,11 +329,10 @@
 
 .modal-gallery[data-view="contact"] {
   background: #0a0a0a;
-  gap: 0;
-  padding: 0;
+  gap: 8px;
+  padding: 8px;
   border-radius: 4px;
   grid-template-columns: repeat(6, 1fr);
-  counter-reset: frame;
 }
 @media (max-width: 900px) {
   .modal-gallery[data-view="contact"] { grid-template-columns: repeat(4, 1fr); }
@@ -342,49 +341,35 @@
   .modal-gallery[data-view="contact"] { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* 각 사진을 감싸는 wrapper — 필름 한 컷 (필름스트립 SVG 사용) */
 .modal-gallery[data-view="contact"] > * {
-  /* 각 사진을 감싸는 wrapper div — 필름 한 컷처럼 */
-  counter-increment: frame;
   position: relative;
-  background: #0a0a0a;
-  padding: 16px 4px;
-  border-right: 1px solid rgba(255,255,255,0.04);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  aspect-ratio: 380 / 345;
+  background-image: url('../img/filmstrip-frame.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
-/* 상단/하단 perforation 띠 */
-.modal-gallery[data-view="contact"] > *::before,
-.modal-gallery[data-view="contact"] > *::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0;
-  height: 14px;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='14'><rect x='3' y='3' width='10' height='8' rx='1.4' fill='%23f5f5f0'/></svg>");
-  background-repeat: repeat-x;
-  background-size: 16px 14px;
-}
-.modal-gallery[data-view="contact"] > *::before { top: 0; }
-.modal-gallery[data-view="contact"] > *::after  { bottom: 0; }
-
-/* 사진 — 3:2 비율 (35mm 비율 정확히) */
+/* 사진은 SVG 내부 photo window 영역에만 배치 */
 .modal-gallery[data-view="contact"] .modal-photo {
-  aspect-ratio: 3 / 2;
+  position: absolute;
+  left: 4.74%;
+  top: 15.94%;
+  width: 90.53%;
+  height: 69.57%;
+  aspect-ratio: auto;
   background: #151515;
   border-radius: 0;
-  /* 프레임 번호 — Fuji 필름 처럼 주황색 모노스페이스 */
+  margin: 0;
+  overflow: hidden;
 }
-.modal-gallery[data-view="contact"] .modal-photo::after {
-  content: counter(frame) "A  ▸ " counter(frame, decimal-leading-zero);
-  position: absolute;
-  bottom: -14px;
-  left: 6px;
-  font-family: ui-monospace, 'SF Mono', Menlo, 'Courier New', monospace;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #ff8c00;
-  pointer-events: none;
-  text-shadow: 0 0 2px rgba(0,0,0,0.8);
+.modal-gallery[data-view="contact"] .modal-photo img,
+.modal-gallery[data-view="contact"] .modal-photo picture {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.modal-gallery[data-view="contact"] .modal-photo img {
+  object-fit: cover;
 }
 
 /* 작가명 캡션은 컨택트 시트 모드에선 숨김 (필름엔 안 적혀있음) */
@@ -1284,44 +1269,44 @@
 .reader-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
+/* 필름스트립 비율 = 380 : 345 (SVG viewBox) */
 .reader-slot {
   position: relative;
-  aspect-ratio: 4 / 5;
-  background: rgba(255, 255, 255, 0.08);
+  aspect-ratio: 380 / 345;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: opacity .15s, transform .15s;
 }
+/* 빈 칸 — 스트립 표시 없이 비어 있는 자리만 */
 .reader-slot.is-empty {
-  /* 필름 leader 느낌 — sprocket hole 점선 */
-  background:
-    radial-gradient(circle at 50% 12%, rgba(0, 0, 0, 0.9) 2.5px, transparent 3px),
-    radial-gradient(circle at 50% 88%, rgba(0, 0, 0, 0.9) 2.5px, transparent 3px),
-    rgba(255, 255, 255, 0.13);
-  background-size: 12px 100%, 12px 100%, auto;
-  background-position: 0 0, 0 0, 0 0;
-  background-repeat: repeat-x, repeat-x, no-repeat;
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
 }
 .reader-slot-frame {
   font-size: 11px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(255, 255, 255, 0.42);
   opacity: 1;
 }
+/* 채워진 칸 — 한 컷마다 필름스트립 1프레임 */
 .reader-slot.is-filled {
-  background: rgba(255, 255, 255, 0.08);
+  background-image: url('../img/filmstrip-frame.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
 }
 .reader-slot-link {
   display: block;
   width: 100%;
   height: 100%;
   position: relative;
-  overflow: hidden;
   /* button 기본 reset (a 와 button 모두 같은 룩으로 사용) */
   padding: 0;
   border: none;
@@ -1330,25 +1315,34 @@
   font: inherit;
   cursor: pointer;
 }
+/* 사진은 SVG 내부의 photo window 영역에만 배치 */
+/* photo window (viewBox 기준): x 125.64–469.64, y 300.94–540.94 */
+/* → left 4.74% / top 15.94% / width 90.53% / height 69.57% */
 .reader-slot-link img {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  left: 4.74%;
+  top: 15.94%;
+  width: 90.53%;
+  height: 69.57%;
   object-fit: cover;
   transition: transform .25s ease;
+  display: block;
 }
 .reader-slot-link:hover img {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 .reader-slot-author {
   position: absolute;
-  left: 0; right: 0; bottom: 0;
-  padding: 6px 8px;
+  left: 4.74%;
+  right: 4.74%;
+  bottom: 15.94%;
+  padding: 4px 6px;
   font-size: 10px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.04em;
   color: #fff;
-  background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   opacity: 0;
   transition: opacity .15s;
   cursor: pointer;
@@ -1395,6 +1389,39 @@
 .reader-mine-link:hover {
   color: #fff;
   border-bottom-color: #fff;
+}
+.reader-save-btn,
+.modal-view-save {
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  padding: 10px 18px;
+  background: transparent;
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s, opacity .15s;
+}
+.reader-save-btn:hover,
+.modal-view-save:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.5);
+  color: #fff;
+}
+.reader-save-btn:disabled,
+.modal-view-save:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.modal-view-save {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-left: 8px;
 }
 
 /* Reader's Roll 그리드 — 반응형 */

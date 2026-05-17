@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-brandchip">
-  <link rel="stylesheet" href="./css/films.css?v=20260516-contact">
+  <link rel="stylesheet" href="./css/films.css?v=20260517-filmstrip">
 </head>
 <body>
 
@@ -919,8 +919,9 @@
             <span class="modal-section-tag">${escapeAttr(data.issue || 'ISSUE')} · EDITORIAL</span>
             <span class="modal-section-meta">사진가 ${escapeAttr(photographers.join(', '))}</span>
             <button type="button" class="modal-view-toggle" data-view-toggle aria-label="컨택트 시트로 전환">컨택트 시트</button>
+            <button type="button" class="modal-view-save" data-save-roll="editorial" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
           </div>
-          <div class="modal-gallery" data-view="grid">
+          <div class="modal-gallery" data-view="grid" id="editorialGallery-${escapeAttr(filmKey)}">
             ${photosHTML}
           </div>
         </div>`;
@@ -956,6 +957,7 @@
           <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
             ${isFeatured ? '컷 채우기' : '첫 컷 채우기'}
           </button>
+          <button type="button" class="reader-save-btn" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden>이미지로 저장</button>
           <a href="me.html" class="reader-mine-link">내 사진 관리 →</a>
         </div>
       </div>`;
@@ -1180,6 +1182,9 @@
           ? `${rollRows.length} / ${ROLL_LIMIT} · Roll ${activeRoll}`
           : `${visible.length} / ${rollRows.length} · Roll ${activeRoll}`;
       }
+      // 이미지로 저장 버튼 — 사진 한 장 이상 있을 때만 노출
+      const saveBtn = modalContent.querySelector(`[data-save-roll="reader"][data-film-key="${filmKey}"]`);
+      if (saveBtn) saveBtn.hidden = visible.length === 0;
     }
 
     function renderContributorView(personKey) {
@@ -1886,13 +1891,25 @@
     // 컨택트 시트 ↔ 그리드 토글
     const toggleBtn = e.target.closest('[data-view-toggle]');
     if (toggleBtn) {
-      const gallery = toggleBtn.closest('.modal-section')?.querySelector('.modal-gallery');
+      const section = toggleBtn.closest('.modal-section');
+      const gallery = section?.querySelector('.modal-gallery');
       if (gallery) {
         const next = gallery.dataset.view === 'contact' ? 'grid' : 'contact';
         gallery.dataset.view = next;
         toggleBtn.textContent = next === 'contact' ? '기본 그리드' : '컨택트 시트';
         toggleBtn.setAttribute('aria-label', next === 'contact' ? '기본 그리드로 전환' : '컨택트 시트로 전환');
+        // 컨택트 시트 모드일 때만 저장 버튼 노출
+        const saveBtn = section?.querySelector('[data-save-roll="editorial"]');
+        if (saveBtn) saveBtn.hidden = next !== 'contact';
       }
+      return;
+    }
+    // 이미지로 저장 버튼
+    const saveBtn = e.target.closest('[data-save-roll]');
+    if (saveBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSaveRollImage(saveBtn);
       return;
     }
     // 자리 채우기 클릭 시 films 모달을 먼저 닫고 reader-submissions 위젯에 위임
@@ -1907,6 +1924,83 @@
     if (isNaN(idx)) return;
     showLightbox(idx, 'editorial');
   });
+
+  // ── 필름스트립 이미지로 저장 ──────────────────────
+  // html2canvas 를 lazy load 해서 그리드를 PNG 로 캡처.
+  // Supabase 스토리지 사진은 crossOrigin='anonymous' 로 재로딩 후 캡처해야 canvas 가 tainted 되지 않음.
+  let _html2canvasLoading = null;
+  function loadHtml2Canvas() {
+    if (window.html2canvas) return Promise.resolve(window.html2canvas);
+    if (_html2canvasLoading) return _html2canvasLoading;
+    _html2canvasLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+      s.async = true;
+      s.onload = () => resolve(window.html2canvas);
+      s.onerror = () => { _html2canvasLoading = null; reject(new Error('html2canvas load failed')); };
+      document.head.appendChild(s);
+    });
+    return _html2canvasLoading;
+  }
+  function reloadImageWithCors(img) {
+    return new Promise((resolve) => {
+      if (!img.src || img.crossOrigin === 'anonymous') return resolve();
+      // 같은 출처 이미지는 CORS 불필요 — canvas 가 tainted 되지 않음
+      try {
+        const u = new URL(img.src, location.href);
+        if (u.origin === location.origin) return resolve();
+      } catch (_) { return resolve(); }
+      const src = img.src;
+      const probe = new Image();
+      probe.crossOrigin = 'anonymous';
+      probe.onload = () => {
+        img.crossOrigin = 'anonymous';
+        img.src = src;
+        if (img.decode) img.decode().then(resolve, () => resolve());
+        else resolve();
+      };
+      probe.onerror = () => resolve(); // CORS 실패 — 그대로 진행 (해당 이미지만 검은 박스로 캡처됨)
+      probe.src = src;
+    });
+  }
+  async function handleSaveRollImage(btn) {
+    const kind = btn.dataset.saveRoll;
+    const filmKey = btn.dataset.filmKey;
+    const target = kind === 'reader'
+      ? document.getElementById(`readerGrid-${filmKey}`)
+      : document.getElementById(`editorialGallery-${filmKey}`);
+    if (!target) return;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중…';
+    try {
+      const h2c = await loadHtml2Canvas();
+      const imgs = [...target.querySelectorAll('img')];
+      await Promise.all(imgs.map(reloadImageWithCors));
+      const canvas = await h2c(target, {
+        useCORS: true,
+        backgroundColor: '#000',
+        scale: Math.min(2, window.devicePixelRatio || 1) * 1.5,
+        logging: false,
+      });
+      const filmName = (filmsData[filmKey]?.displayName || filmsData[filmKey]?.name || filmKey).toString();
+      const slug = filmName.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
+      const d = new Date();
+      const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `5ftmag-${kind === 'reader' ? 'readers-roll' : 'editorial'}-${slug}-${stamp}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error('[save-roll]', err);
+      alert('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
 
   // 라이트박스 컨트롤
   lightboxClose.addEventListener('click', closeLightbox);
