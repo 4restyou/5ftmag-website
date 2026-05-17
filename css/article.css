@@ -922,3 +922,38 @@ body {
   font-style: italic;
 }
 [data-theme="dark"] .toon-strip img { background: var(--bg-sub); }
+
+/* ─ 흰 배경 제품 사진 — 얇은 회색 라인 (Kodak rebrand 등) ─ */
+.article-hero.on-white img,
+.article-body figure.on-white img,
+.article-body figure.on-white > picture {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+.article-body figure.on-white {
+  margin: 40px 0;
+}
+.article-body figure.on-white > picture img {
+  border: none;
+  background: transparent;
+}
+.article-body figure.on-white.product-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.article-body figure.on-white.product-pair figcaption {
+  grid-column: 1 / -1;
+}
+.article-body figure.on-white.product-trio {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.article-body figure.on-white.product-trio figcaption {
+  grid-column: 1 / -1;
+}
+@media (max-width: 600px) {
+  .article-body figure.on-white.product-trio { grid-template-columns: 1fr; }
+  .article-body figure.on-white.product-pair { grid-template-columns: 1fr; }
+}
