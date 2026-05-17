@@ -1356,7 +1356,6 @@
 }
 /* 세로 사진 — 가로/세로 swap (69.57% × 92.1%) + 90° 회전 → 회전 후 visible 이 photo window 정확히 fit */
 .reader-slot-link img.is-portrait {
-  inset: auto;
   width: 69.57%;
   height: 92.1%;
   transform: translate(-50%, -50%) rotate(90deg);
