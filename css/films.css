@@ -342,32 +342,41 @@
   .modal-gallery[data-view="contact"] { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* 각 사진을 감싸는 wrapper — 필름 한 컷 (필름스트립 SVG 사용) */
+/* 각 사진을 감싸는 wrapper — 사진이 슬롯 전체를 cover, 필름스트립 SVG 는 overlay 마스크 */
 .modal-gallery[data-view="contact"] > * {
   position: relative;
   aspect-ratio: 380 / 345;
+  overflow: hidden;
+}
+.modal-gallery[data-view="contact"] > *::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-image: url('../img/filmstrip-frame.svg');
   background-size: 100% 100%;
   background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 2;
 }
-/* 사진 박스는 JS 가 사진 비율에 맞춰 width/height 를 지정. */
-/* fallback 으로 photo window 전체를 contain 으로 채움 */
+/* 사진은 wrapper 전체 cover — 스트립 SVG 의 photo window 가 가운데 영역만 보이게 마스크 */
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
-  left: 50%;
-  top: 50.7%;
-  transform: translate(-50%, -50%);
-  width: 92.1%;
-  height: 69.57%;
-  aspect-ratio: auto;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background: transparent;
   border-radius: 0;
   margin: 0;
   overflow: hidden;
+  z-index: 1;
 }
+/* 세로 사진 — IMG dims swap + 90° 회전 → 회전 후 visible = wrapper 정확히 fit */
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait {
-  width: 69.57%;
-  height: 92.1%;
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: 90.79%;
+  height: 110.14%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .modal-gallery[data-view="contact"] .modal-photo img,
@@ -1303,19 +1312,27 @@
   color: rgba(255, 255, 255, 0.42);
   opacity: 1;
 }
-/* 채워진 칸 — 한 컷마다 필름스트립 1프레임 */
+/* 채워진 칸 — 사진이 슬롯 전체를 cover, 필름스트립 SVG 는 위에 overlay 마스크 */
 .reader-slot.is-filled {
+  background: transparent;
+  border: none;
+}
+.reader-slot.is-filled::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-image: url('../img/filmstrip-frame.svg');
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
+  pointer-events: none;
+  z-index: 2;
 }
 .reader-slot-link {
   display: block;
   width: 100%;
   height: 100%;
   position: relative;
+  z-index: 1;
   /* button 기본 reset (a 와 button 모두 같은 룩으로 사용) */
   padding: 0;
   border: none;
@@ -1324,27 +1341,28 @@
   font: inherit;
   cursor: pointer;
 }
-/* 사진은 photo window 전체를 꽉 채움 (object-fit: cover — 비율 안 맞으면 살짝 잘림 OK) */
+/* 사진은 슬롯 전체를 cover — 스트립 SVG 의 투명 photo window 가 가운데 영역만 보이게 마스크 */
 .reader-slot-link img {
   position: absolute;
-  left: 50%;
-  top: 50.7%;
-  width: 92.1%;
-  height: 69.57%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  background: transparent;
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — 가로/세로 swap 후 90° 회전, 동일하게 cover */
+/* 세로 사진 — IMG dims 를 swap (90.79% × 110.14%) 한 뒤 90° 회전 →
+   회전 후 visible = 슬롯 정확히 fit. 포트레이트 박스 안에서 cover crop 이라 잘림 최소화. */
 .reader-slot-link img.is-portrait {
-  width: 69.57%;
-  height: 92.1%;
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: 90.79%;   /* slot_height / slot_width * 100 = 345/380 */
+  height: 110.14%; /* slot_width / slot_height * 100 = 380/345 */
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .reader-slot-link:hover img {
-  transform: translate(-50%, -50%) scale(1.03);
+  transform: scale(1.03);
 }
 .reader-slot-link:hover img.is-portrait {
   transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
@@ -1364,6 +1382,7 @@
   opacity: 0;
   transition: opacity .15s;
   cursor: pointer;
+  z-index: 3;
 }
 .reader-slot-link:hover .reader-slot-author {
   opacity: 1;
@@ -1383,9 +1402,11 @@
   border: 1px dashed rgba(255, 255, 255, 0.12);
 }
 .reader-grid[data-view="grid"] .reader-slot.is-filled {
-  background-image: none;
   background-color: rgba(255, 255, 255, 0.06);
   border: none;
+}
+.reader-grid[data-view="grid"] .reader-slot.is-filled::after {
+  display: none;
 }
 .reader-grid[data-view="grid"] .reader-slot-link img {
   position: absolute;
