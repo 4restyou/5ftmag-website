@@ -352,16 +352,19 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('../img/filmstrip-frame.svg?v=3');
+  background-image: url('../img/filmstrip-frame.svg?v=2');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
   z-index: 2;
 }
-/* 사진 viewport — 슬롯 전체 (SVG body 가 photo window 외 영역을 막힘 없이 덮음) */
+/* 사진 viewport — photo window 좌표에 overflow:hidden 으로 강제 클립 */
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
-  inset: 0;
+  left: 3.95%;
+  top: 15.94%;
+  width: 92.1%;
+  height: 69.57%;
   aspect-ratio: auto;
   background: transparent;
   border-radius: 0;
@@ -385,16 +388,16 @@
   background: transparent;
   display: block;
 }
-/* 세로 사진 — 슬롯 aspect 1.101 swap */
+/* 세로 사진 — wrapper aspect 1.458 에 맞춰 IMG dims swap 후 90° 회전 + scale(1.01) 안전 마진 */
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait picture,
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait img {
   top: 50%;
   left: 50%;
   right: auto;
   bottom: auto;
-  width: 90.79%;
-  height: 110.14%;
-  transform: translate(-50%, -50%) rotate(90deg);
+  width: 68.59%;
+  height: 145.83%;
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.01);
 }
 
 /* 작가명 캡션은 컨택트 시트 모드에선 숨김 (필름엔 안 적혀있음) */
@@ -1328,7 +1331,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('../img/filmstrip-frame.svg?v=3');
+  background-image: url('../img/filmstrip-frame.svg?v=2');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
@@ -1348,11 +1351,14 @@
   font: inherit;
   cursor: pointer;
 }
-/* 사진 viewport — 슬롯 전체. SVG body 가 photo window 외 영역을 막힘 없이 덮어서
-   사진은 photo window 위치에서만 보임. wrapper 의 overflow:hidden 은 안전 보호. */
+/* 사진 viewport — 정확히 photo window 좌표에 overflow:hidden 으로 강제 클립.
+   IMG 가 어떤 크기·transform 이든 이 박스 밖으로는 절대 안 보임. */
 .reader-slot-window {
   position: absolute;
-  inset: 0;
+  left: 3.95%;
+  top: 15.94%;
+  width: 92.1%;
+  height: 69.57%;
   overflow: hidden;
   display: block;
 }
@@ -1365,21 +1371,23 @@
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — 슬롯 aspect(1.101) 에 맞춰 swap, 회전 후 visible 이 슬롯 정확히 fit */
+/* 세로 사진 — wrapper 의 실제 aspect 는 1.458 (= 0.921/0.6957 × slot_aspect 1.101)
+   IMG dims swap (W=H_wrap_px, H=W_wrap_px) 로 회전 후 wrapper 정확히 fit.
+   scale(1.01) 은 subpixel 안전 마진. */
 .reader-slot-window img.is-portrait {
   top: 50%;
   left: 50%;
   right: auto;
   bottom: auto;
-  width: 90.79%;   /* 100/1.101 */
-  height: 110.14%; /* 1.101×100 */
-  transform: translate(-50%, -50%) rotate(90deg);
+  width: 68.59%;   /* 100/1.458 */
+  height: 145.83%; /* 1.458×100 */
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.01);
 }
 .reader-slot-link:hover .reader-slot-window img {
   transform: scale(1.03);
 }
 .reader-slot-link:hover .reader-slot-window img.is-portrait {
-  transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.04);
 }
 .reader-slot-author {
   position: absolute;
