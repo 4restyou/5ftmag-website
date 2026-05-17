@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-brandchip">
-  <link rel="stylesheet" href="./css/films.css?v=20260517-filmstrip9">
+  <link rel="stylesheet" href="./css/films.css?v=20260517-filmstrip10">
 </head>
 <body>
 
@@ -1192,7 +1192,9 @@
         slot.setAttribute('aria-label', `${personLabelOf(sub)}의 사진`);
         slot.innerHTML = `
           <button type="button" class="reader-slot-link" aria-label="${escapeAttr(personLabelOf(sub))}의 사진 크게 보기">
-            <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
+            <span class="reader-slot-window">
+              <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
+            </span>
             <span class="reader-slot-author" data-person-key="${escapeAttr(personKey)}">${escapeAttr(personLabelOf(sub))}</span>
           </button>`;
         const img = slot.querySelector('img');
