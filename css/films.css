@@ -361,10 +361,10 @@
 /* 사진 viewport — photo window 좌표에 overflow:hidden 으로 강제 클립 */
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
-  left: 3.95%;
-  top: 15.94%;
-  width: 92.1%;
-  height: 69.57%;
+  left: 0;
+  top: 14.5%;
+  width: 100%;
+  height: 72.46%;
   aspect-ratio: auto;
   background: transparent;
   border-radius: 0;
@@ -388,16 +388,16 @@
   background: transparent;
   display: block;
 }
-/* 세로 사진 — wrapper aspect 1.458 에 맞춰 IMG dims swap 후 90° 회전 + scale(1.01) 안전 마진 */
+/* 세로 사진 — wrapper aspect 1.520 에 맞춰 dim swap 후 90° 회전 */
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait picture,
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait img {
   top: 50%;
   left: 50%;
   right: auto;
   bottom: auto;
-  width: 68.59%;
-  height: 145.83%;
-  transform: translate(-50%, -50%) rotate(90deg) scale(1.01);
+  width: 65.79%;
+  height: 152.0%;
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 /* 작가명 캡션은 컨택트 시트 모드에선 숨김 (필름엔 안 적혀있음) */
@@ -1351,14 +1351,15 @@
   font: inherit;
   cursor: pointer;
 }
-/* 사진 viewport — 정확히 photo window 좌표에 overflow:hidden 으로 강제 클립.
-   IMG 가 어떤 크기·transform 이든 이 박스 밖으로는 절대 안 보임. */
+/* 사진 viewport — 수평은 슬롯 전체, 수직은 퍼포레이션 직전까지 확장.
+   사진이 photo window 보다 약간 크게 깔려서 body 가 가장자리 subpixel 갭을 덮음.
+   퍼포레이션 영역(y 5.8%–14.5%, y 86.96%–95.65%) 과 안 겹쳐서 비침도 없음. */
 .reader-slot-window {
   position: absolute;
-  left: 3.95%;
-  top: 15.94%;
-  width: 92.1%;
-  height: 69.57%;
+  left: 0;
+  top: 14.5%;
+  width: 100%;
+  height: 72.46%;
   overflow: hidden;
   display: block;
 }
@@ -1371,23 +1372,21 @@
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — wrapper 의 실제 aspect 는 1.458 (= 0.921/0.6957 × slot_aspect 1.101)
-   IMG dims swap (W=H_wrap_px, H=W_wrap_px) 로 회전 후 wrapper 정확히 fit.
-   scale(1.01) 은 subpixel 안전 마진. */
+/* 세로 사진 — wrapper aspect 1.520 (= 100/72.46 × 1.101) 에 맞춰 dim swap */
 .reader-slot-window img.is-portrait {
   top: 50%;
   left: 50%;
   right: auto;
   bottom: auto;
-  width: 68.59%;   /* 100/1.458 */
-  height: 145.83%; /* 1.458×100 */
-  transform: translate(-50%, -50%) rotate(90deg) scale(1.01);
+  width: 65.79%;   /* 100/1.520 */
+  height: 152.0%;  /* 1.520×100 */
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 .reader-slot-link:hover .reader-slot-window img {
   transform: scale(1.03);
 }
 .reader-slot-link:hover .reader-slot-window img.is-portrait {
-  transform: translate(-50%, -50%) rotate(90deg) scale(1.04);
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
 }
 .reader-slot-author {
   position: absolute;
