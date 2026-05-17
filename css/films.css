@@ -350,24 +350,22 @@
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
-/* 사진은 SVG photo window 와 정확히 동일 크기로 채워서 여백 없이 cover 크롭 */
+/* 사진 박스는 JS 가 사진 비율에 맞춰 width/height 를 지정. */
+/* fallback 으로 photo window 전체를 contain 으로 채움 */
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
   left: 50%;
   top: 50.7%;
   transform: translate(-50%, -50%);
-  width: 92.1%;
-  height: 69.57%;
+  width: var(--photo-box-w, 92.1%);
+  height: var(--photo-box-h, 69.57%);
   aspect-ratio: auto;
   background: transparent;
   border-radius: 0;
   margin: 0;
   overflow: hidden;
 }
-/* 세로 사진 — 가로로 90° 회전해서 한 컷에 cover (가로/세로 swap) */
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait {
-  width: 69.57%;
-  height: 92.1%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .modal-gallery[data-view="contact"] .modal-photo img,
@@ -377,7 +375,7 @@
   display: block;
 }
 .modal-gallery[data-view="contact"] .modal-photo img {
-  object-fit: cover;
+  object-fit: fill;
   background: transparent;
 }
 
@@ -1324,24 +1322,22 @@
   font: inherit;
   cursor: pointer;
 }
-/* 사진은 SVG photo window 와 정확히 동일 크기로 채워서 여백 없이 cover 크롭 */
-/* (SVG 기준 photo window: 92.1% × 69.57%, center ≈ 50%, 50.7%) */
+/* 사진 박스는 사진 비율에 맞춰 JS 가 동적으로 width/height 지정. */
+/* fallback 으로 photo window 전체를 contain 으로 채움 (JS 로드 전·실패 시) */
 .reader-slot-link img {
   position: absolute;
   left: 50%;
   top: 50.7%;
-  width: 92.1%;
-  height: 69.57%;
+  width: var(--photo-box-w, 92.1%);
+  height: var(--photo-box-h, 69.57%);
   transform: translate(-50%, -50%);
   object-fit: cover;
   background: transparent;
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — 가로로 90° 회전해서 한 컷에 cover (가로/세로 swap) */
+/* 세로 사진 — 90° 회전 (가로/세로 swap 은 JS 에서 처리) */
 .reader-slot-link img.is-portrait {
-  width: 69.57%;
-  height: 92.1%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .reader-slot-link:hover img {
@@ -1368,6 +1364,46 @@
 }
 .reader-slot-link:hover .reader-slot-author {
   opacity: 1;
+}
+
+/* ── Reader's Roll 기본 그리드(basic) 뷰 — 필름스트립 프레임 없이 깔끔한 사진 그리드 ── */
+.reader-grid[data-view="grid"] {
+  column-gap: 8px;
+  row-gap: 8px;
+}
+.reader-grid[data-view="grid"] .reader-slot {
+  aspect-ratio: 4 / 5;
+  border-radius: 2px;
+}
+.reader-grid[data-view="grid"] .reader-slot.is-empty {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.reader-grid[data-view="grid"] .reader-slot.is-filled {
+  background-image: none;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: none;
+}
+.reader-grid[data-view="grid"] .reader-slot-link img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  object-fit: cover;
+}
+.reader-grid[data-view="grid"] .reader-slot-link img.is-portrait {
+  transform: none;
+}
+.reader-grid[data-view="grid"] .reader-slot-link:hover img,
+.reader-grid[data-view="grid"] .reader-slot-link:hover img.is-portrait {
+  transform: scale(1.04);
+}
+.reader-grid[data-view="grid"] .reader-slot-author {
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .reader-roll-actions {
