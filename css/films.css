@@ -358,12 +358,11 @@
   pointer-events: none;
   z-index: 2;
 }
-/* 사진 박스는 photo window 영역 안에만 배치 */
+/* 사진 viewport — photo window 좌표에 overflow:hidden 으로 강제 클립 */
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
-  left: 50%;
-  top: 50.7%;
-  transform: translate(-50%, -50%);
+  left: 3.95%;
+  top: 15.94%;
   width: 92.1%;
   height: 69.57%;
   aspect-ratio: auto;
@@ -373,21 +372,31 @@
   overflow: hidden;
   z-index: 1;
 }
-/* 세로 사진 — 가로/세로 swap + 90° 회전 → 회전 후 visible = photo window 정확히 fit */
-.modal-gallery[data-view="contact"] .modal-photo.is-portrait {
-  width: 69.57%;
-  height: 92.1%;
-  transform: translate(-50%, -50%) rotate(90deg);
-}
-.modal-gallery[data-view="contact"] .modal-photo img,
 .modal-gallery[data-view="contact"] .modal-photo picture {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
 }
 .modal-gallery[data-view="contact"] .modal-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   background: transparent;
+  display: block;
+}
+/* 세로 사진 — IMG dims 를 swap 해서 90° 회전 후 wrapper 에 fit (잘림 최소) */
+.modal-gallery[data-view="contact"] .modal-photo.is-portrait picture,
+.modal-gallery[data-view="contact"] .modal-photo.is-portrait img {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: 75.54%;
+  height: 132.4%;
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 /* 작가명 캡션은 컨택트 시트 모드에선 숨김 (필름엔 안 적혀있음) */
@@ -1341,29 +1350,40 @@
   font: inherit;
   cursor: pointer;
 }
-/* 사진은 photo window 영역 안에만 배치 (퍼포레이션 구멍으로 사진이 비치지 않게 함) */
-/* SVG photo window: x 3.95%–96.05% (width 92.1%), y 15.94%–85.51% (height 69.57%) */
-.reader-slot-link img {
+/* 사진 viewport — 정확히 photo window 좌표에 overflow:hidden 으로 강제 클립.
+   IMG 가 어떤 크기·transform 이든 이 박스 밖으로는 절대 안 보임. */
+.reader-slot-window {
   position: absolute;
-  left: 50%;
-  top: 50.7%;
+  left: 3.95%;
+  top: 15.94%;
   width: 92.1%;
   height: 69.57%;
-  transform: translate(-50%, -50%);
+  overflow: hidden;
+  display: block;
+}
+.reader-slot-window img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — 가로/세로 swap (69.57% × 92.1%) + 90° 회전 → 회전 후 visible 이 photo window 정확히 fit */
-.reader-slot-link img.is-portrait {
-  width: 69.57%;
-  height: 92.1%;
+/* 세로 사진 — wrapper 가 landscape(1.324) 라서 portrait IMG dims (W=H_wrapper, H=W_wrapper)
+   로 swap 한 뒤 90° 회전 → 회전 후 visible 이 wrapper 정확히 fit */
+.reader-slot-window img.is-portrait {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: 75.54%;   /* H_wrapper / W_wrapper * 100 = 69.57/92.1 */
+  height: 132.4%;  /* W_wrapper / H_wrapper * 100 = 92.1/69.57 */
   transform: translate(-50%, -50%) rotate(90deg);
 }
-.reader-slot-link:hover img {
-  transform: translate(-50%, -50%) scale(1.03);
+.reader-slot-link:hover .reader-slot-window img {
+  transform: scale(1.03);
 }
-.reader-slot-link:hover img.is-portrait {
+.reader-slot-link:hover .reader-slot-window img.is-portrait {
   transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
 }
 .reader-slot-author {
@@ -1407,8 +1427,17 @@
 .reader-grid[data-view="grid"] .reader-slot.is-filled::after {
   display: none;
 }
-.reader-grid[data-view="grid"] .reader-slot-link img {
+.reader-grid[data-view="grid"] .reader-slot-window {
   position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.reader-grid[data-view="grid"] .reader-slot-window img,
+.reader-grid[data-view="grid"] .reader-slot-window img.is-portrait {
+  position: absolute;
+  inset: 0;
   left: 0;
   top: 0;
   width: 100%;
@@ -1416,11 +1445,8 @@
   transform: none;
   object-fit: cover;
 }
-.reader-grid[data-view="grid"] .reader-slot-link img.is-portrait {
-  transform: none;
-}
-.reader-grid[data-view="grid"] .reader-slot-link:hover img,
-.reader-grid[data-view="grid"] .reader-slot-link:hover img.is-portrait {
+.reader-grid[data-view="grid"] .reader-slot-link:hover .reader-slot-window img,
+.reader-grid[data-view="grid"] .reader-slot-link:hover .reader-slot-window img.is-portrait {
   transform: scale(1.04);
 }
 .reader-grid[data-view="grid"] .reader-slot-author {
