@@ -358,25 +358,25 @@
   pointer-events: none;
   z-index: 2;
 }
-/* 사진은 wrapper 전체 cover — 스트립 SVG 의 photo window 가 가운데 영역만 보이게 마스크 */
+/* 사진 박스는 photo window 영역 안에만 배치 */
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: 50%;
+  top: 50.7%;
+  transform: translate(-50%, -50%);
+  width: 92.1%;
+  height: 69.57%;
+  aspect-ratio: auto;
   background: transparent;
   border-radius: 0;
   margin: 0;
   overflow: hidden;
   z-index: 1;
 }
-/* 세로 사진 — IMG dims swap + 90° 회전 → 회전 후 visible = wrapper 정확히 fit */
+/* 세로 사진 — 가로/세로 swap + 90° 회전 → 회전 후 visible = photo window 정확히 fit */
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait {
-  inset: auto;
-  left: 50%;
-  top: 50%;
-  width: 90.79%;
-  height: 110.14%;
+  width: 69.57%;
+  height: 92.1%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .modal-gallery[data-view="contact"] .modal-photo img,
@@ -1341,28 +1341,28 @@
   font: inherit;
   cursor: pointer;
 }
-/* 사진은 슬롯 전체를 cover — 스트립 SVG 의 투명 photo window 가 가운데 영역만 보이게 마스크 */
+/* 사진은 photo window 영역 안에만 배치 (퍼포레이션 구멍으로 사진이 비치지 않게 함) */
+/* SVG photo window: x 3.95%–96.05% (width 92.1%), y 15.94%–85.51% (height 69.57%) */
 .reader-slot-link img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: 50%;
+  top: 50.7%;
+  width: 92.1%;
+  height: 69.57%;
+  transform: translate(-50%, -50%);
   object-fit: cover;
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — IMG dims 를 swap (90.79% × 110.14%) 한 뒤 90° 회전 →
-   회전 후 visible = 슬롯 정확히 fit. 포트레이트 박스 안에서 cover crop 이라 잘림 최소화. */
+/* 세로 사진 — 가로/세로 swap (69.57% × 92.1%) + 90° 회전 → 회전 후 visible 이 photo window 정확히 fit */
 .reader-slot-link img.is-portrait {
   inset: auto;
-  left: 50%;
-  top: 50%;
-  width: 90.79%;   /* slot_height / slot_width * 100 = 345/380 */
-  height: 110.14%; /* slot_width / slot_height * 100 = 380/345 */
+  width: 69.57%;
+  height: 92.1%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .reader-slot-link:hover img {
-  transform: scale(1.03);
+  transform: translate(-50%, -50%) scale(1.03);
 }
 .reader-slot-link:hover img.is-portrait {
   transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
