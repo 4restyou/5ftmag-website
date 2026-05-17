@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
-  <link rel="stylesheet" href="./css/stories.css?v=20260515-scrap">
+  <link rel="stylesheet" href="./css/stories.css?v=20260517-onwhite">
 </head>
 <body>
 
@@ -223,9 +223,11 @@
       </span>`;
 
     // 썸네일 없으면 타이포그래피 카드로
+    // thumbnailWhiteBg: true 면 카드에 흰 배경 보더 추가
     const webpThumb = story.thumbnail ? story.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
+    const whiteBgCls = story.thumbnailWhiteBg ? ' is-on-white' : '';
     const imgBlock = story.thumbnail
-      ? `<div class="article-img">
+      ? `<div class="article-img${whiteBgCls}">
            <img src="${escapeAttr(webpThumb)}" data-fallback="${escapeAttr(story.thumbnail)}" loading="lazy" alt="${escapeAttr(story.title)}"
                 onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />
            ${issueBadge}

@@ -330,3 +330,13 @@
   .articles-section { padding: 32px 20px; }
   .article-title { font-size: 19px; }
 }
+
+/* ─ 흰 배경 썸네일 카드 — 가장자리 정의용 얇은 회색 라인 (stories 페이지) ─ */
+.article-img.is-on-white {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .article-img.is-on-white {
+  background: #fafafa;
+  border: 1px solid var(--border);
+}

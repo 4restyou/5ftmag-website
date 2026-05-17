@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-brandchip">
-  <link rel="stylesheet" href="./css/home.css?v=20260516-lbjump">
+  <link rel="stylesheet" href="./css/home.css?v=20260517-softline">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -334,9 +334,11 @@
           const cardLabel = idx === 0 ? `LATEST · ${categoryLabel}` : categoryLabel;
 
           // 썸네일 없으면 노란 타이포그래피 카드, 있으면 사진
+          // thumbnailWhiteBg: true 면 흰 배경 보더 추가 (스토리 카드 가장자리 정의)
           const webpThumb = s.thumbnail ? s.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
+          const whiteBgCls = s.thumbnailWhiteBg ? ' is-on-white' : '';
           const imgBlock = s.thumbnail
-            ? `<div class="post-img">
+            ? `<div class="post-img${whiteBgCls}">
                  <span class="post-label">${escapeHtml(cardLabel)}</span>
                  <img src="${escapeAttr(webpThumb)}" data-fallback="${escapeAttr(s.thumbnail)}" loading="lazy" alt="${escapeAttr(s.title)}"
                       onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />

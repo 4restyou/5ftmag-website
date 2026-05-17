@@ -100,8 +100,11 @@
 
 .post-item {
   display: block;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   transition: opacity .15s;
+}
+[data-theme="dark"] .post-item {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 .post-item:last-child { border-bottom: none; }
 .post-item:hover { opacity: .75; }
@@ -1569,4 +1572,14 @@ body.modal-open { overflow: hidden; }
   .contact-cell:last-child { border-bottom: none; }
   .contact-cta-left, .contact-cta-right { padding: 36px 24px; }
   .cta-title { font-size: 26px; }
+}
+
+/* ─ 흰 배경 썸네일 카드 — 가장자리 정의용 얇은 회색 라인 (Kodak rebrand 등) ─ */
+.post-img.is-on-white {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .post-img.is-on-white {
+  background: #fafafa; /* 다크 모드에서도 흰 박스 그대로 (필름 박스 사진은 흰 배경 그대로 보여야 자연스러움) */
+  border: 1px solid var(--border);
 }
