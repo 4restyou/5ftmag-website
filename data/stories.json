@@ -1,5 +1,19 @@
 [
   {
+    "id": "kodak-rebrand",
+    "title": "새 이름으로 돌아온 코닥 필름들",
+    "category": "essay",
+    "categoryLabel": "FILM",
+    "author": "5ft.mag 편집부",
+    "date": "2026-05-17",
+    "issue": "",
+    "thumbnail": "img/stories/kodak-rebrand/kodak-ektacolor-film-pro-400-35mm.jpg",
+    "excerpt": "Portra 가 Ektacolor Pro 로, T-Max 가 Ektapan 으로 이름을 바꿔 다시 나왔다. 이름만 바뀐 게 아니라, 14년 만에 코닥이 자기 필름을 자기 손으로 팔게 된 신호다.",
+    "page": "stories/kodak-rebrand.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "spc-issue01",
     "title": "해소의 바다, 부산 — SPC 사진첩 ISSUE.01",
     "category": "review",
