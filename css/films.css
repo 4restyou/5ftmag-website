@@ -357,8 +357,8 @@
   left: 50%;
   top: 50.7%;
   transform: translate(-50%, -50%);
-  width: var(--photo-box-w, 92.1%);
-  height: var(--photo-box-h, 69.57%);
+  width: 92.1%;
+  height: 69.57%;
   aspect-ratio: auto;
   background: transparent;
   border-radius: 0;
@@ -366,6 +366,8 @@
   overflow: hidden;
 }
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait {
+  width: 69.57%;
+  height: 92.1%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .modal-gallery[data-view="contact"] .modal-photo img,
@@ -375,7 +377,7 @@
   display: block;
 }
 .modal-gallery[data-view="contact"] .modal-photo img {
-  object-fit: fill;
+  object-fit: cover;
   background: transparent;
 }
 
@@ -1322,22 +1324,23 @@
   font: inherit;
   cursor: pointer;
 }
-/* 사진 박스는 사진 비율에 맞춰 JS 가 동적으로 width/height 지정. */
-/* fallback 으로 photo window 전체를 contain 으로 채움 (JS 로드 전·실패 시) */
+/* 사진은 photo window 전체를 꽉 채움 (object-fit: cover — 비율 안 맞으면 살짝 잘림 OK) */
 .reader-slot-link img {
   position: absolute;
   left: 50%;
   top: 50.7%;
-  width: var(--photo-box-w, 92.1%);
-  height: var(--photo-box-h, 69.57%);
+  width: 92.1%;
+  height: 69.57%;
   transform: translate(-50%, -50%);
   object-fit: cover;
   background: transparent;
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — 90° 회전 (가로/세로 swap 은 JS 에서 처리) */
+/* 세로 사진 — 가로/세로 swap 후 90° 회전, 동일하게 cover */
 .reader-slot-link img.is-portrait {
+  width: 69.57%;
+  height: 92.1%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .reader-slot-link:hover img {

@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-brandchip">
-  <link rel="stylesheet" href="./css/films.css?v=20260517-filmstrip5">
+  <link rel="stylesheet" href="./css/films.css?v=20260517-filmstrip6">
 </head>
 <body>
 
@@ -998,46 +998,21 @@
       });
     }
 
-    // 에디토리얼 사진: 사진 비율에 맞춰 박스 크기 설정
-    modalContent.querySelectorAll('.modal-photo img').forEach(fitPhotoToWindow);
+    // 에디토리얼 사진: 세로/가로 orientation 클래스 부여
+    modalContent.querySelectorAll('.modal-photo img').forEach(classifyPhotoOrientation);
 
     // Reader's Roll: 승인된 제출을 lazy fetch 해서 빈 자리 채우기
     loadReaderRollForFilm(filmKey, options);
   }
 
-  // 컨택트 시트 photo window 안에 사진을 비율 맞춰 fit.
-  // 세로 사진은 90° 회전해서 가로로 표시 (가로/세로 swap).
-  // 박스 크기를 사진 비율에 맞춰 정하면 cover/contain 중 어느 쪽이든 잘림·여백 없이 fit.
-  const READER_WINDOW_W = 92.1;   // photo window width %
-  const READER_WINDOW_H = 69.57;  // photo window height %
-  function fitPhotoToWindow(img) {
+  // 사진 로딩 후 세로형이면 부모(.modal-photo) 또는 본인(<img>)에 is-portrait 클래스 부여.
+  // 세로 사진은 CSS 에서 90° 회전 + 가로/세로 swap 후 동일하게 photo window 를 cover.
+  function classifyPhotoOrientation(img) {
     const apply = () => {
       if (!img.naturalWidth || !img.naturalHeight) return;
       const portrait = img.naturalHeight > img.naturalWidth;
-      // 회전 후 시각 비율 — 세로 사진은 90° 돌렸을 때 가로/세로 swap
-      const effR = portrait
-        ? img.naturalHeight / img.naturalWidth
-        : img.naturalWidth / img.naturalHeight;
-      const winR = READER_WINDOW_W / READER_WINDOW_H; // ≈ 1.324
-      let visW, visH;
-      if (effR > winR) {
-        visW = READER_WINDOW_W;
-        visH = READER_WINDOW_W / effR;
-      } else {
-        visH = READER_WINDOW_H;
-        visW = READER_WINDOW_H * effR;
-      }
       const target = img.closest('.modal-photo') || img;
       target.classList.toggle('is-portrait', portrait);
-      // CSS 변수로 박스 크기 전달 — basic grid 뷰는 var() override 로 무시 가능
-      if (portrait) {
-        // rotate(90deg) 적용 시 visible 가로/세로가 swap 되므로 pre-rotation 값도 swap
-        target.style.setProperty('--photo-box-w', visH + '%');
-        target.style.setProperty('--photo-box-h', visW + '%');
-      } else {
-        target.style.setProperty('--photo-box-w', visW + '%');
-        target.style.setProperty('--photo-box-h', visH + '%');
-      }
     };
     if (img.complete && img.naturalWidth) apply();
     else img.addEventListener('load', apply, { once: true });
@@ -1219,7 +1194,7 @@
             <span class="reader-slot-author" data-person-key="${escapeAttr(personKey)}">${escapeAttr(personLabelOf(sub))}</span>
           </button>`;
         const img = slot.querySelector('img');
-        if (img) fitPhotoToWindow(img);
+        if (img) classifyPhotoOrientation(img);
       }
       if (counter) {
         counter.textContent = activePerson === 'all'
