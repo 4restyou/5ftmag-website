@@ -388,15 +388,16 @@
   background: transparent;
   display: block;
 }
-/* 세로 사진 — IMG dims 를 swap 해서 90° 회전 후 wrapper 에 fit (잘림 최소) */
+/* 세로 사진 — wrapper aspect 1.458 에 맞춰 IMG dims swap 후 90° 회전 + scale(1.01) 안전 마진 */
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait picture,
 .modal-gallery[data-view="contact"] .modal-photo.is-portrait img {
-  inset: auto;
-  left: 50%;
   top: 50%;
-  width: 75.54%;
-  height: 132.4%;
-  transform: translate(-50%, -50%) rotate(90deg);
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  width: 68.59%;
+  height: 145.83%;
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.01);
 }
 
 /* 작가명 캡션은 컨택트 시트 모드에선 숨김 (필름엔 안 적혀있음) */
@@ -1370,21 +1371,23 @@
   transition: transform .25s ease;
   display: block;
 }
-/* 세로 사진 — wrapper 가 landscape(1.324) 라서 portrait IMG dims (W=H_wrapper, H=W_wrapper)
-   로 swap 한 뒤 90° 회전 → 회전 후 visible 이 wrapper 정확히 fit */
+/* 세로 사진 — wrapper 의 실제 aspect 는 1.458 (= 0.921/0.6957 × slot_aspect 1.101)
+   IMG dims swap (W=H_wrap_px, H=W_wrap_px) 로 회전 후 wrapper 정확히 fit.
+   scale(1.01) 은 subpixel 안전 마진. */
 .reader-slot-window img.is-portrait {
-  inset: auto;
-  left: 50%;
   top: 50%;
-  width: 75.54%;   /* H_wrapper / W_wrapper * 100 = 69.57/92.1 */
-  height: 132.4%;  /* W_wrapper / H_wrapper * 100 = 92.1/69.57 */
-  transform: translate(-50%, -50%) rotate(90deg);
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  width: 68.59%;   /* 100/1.458 */
+  height: 145.83%; /* 1.458×100 */
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.01);
 }
 .reader-slot-link:hover .reader-slot-window img {
   transform: scale(1.03);
 }
 .reader-slot-link:hover .reader-slot-window img.is-portrait {
-  transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.04);
 }
 .reader-slot-author {
   position: absolute;
