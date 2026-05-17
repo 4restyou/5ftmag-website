@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260516-brandchip">
-  <link rel="stylesheet" href="./css/films.css?v=20260517-savebtn">
+  <link rel="stylesheet" href="./css/films.css?v=20260517-savejpg">
 </head>
 <body>
 
@@ -2002,7 +2002,7 @@
       await Promise.all(imgs.map(reloadImageWithCors));
       const canvas = await h2c(target, {
         useCORS: true,
-        backgroundColor: '#000',
+        backgroundColor: '#ffffff',
         scale: Math.min(2, window.devicePixelRatio || 1) * 1.5,
         logging: false,
       });
@@ -2011,8 +2011,8 @@
       const d = new Date();
       const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
       const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = `5ftmag-${kind === 'reader' ? 'readers-roll' : 'editorial'}-${slug}-${stamp}.png`;
+      a.href = canvas.toDataURL('image/jpeg', 0.92);
+      a.download = `5ftmag-${kind === 'reader' ? 'readers-roll' : 'editorial'}-${slug}-${stamp}.jpg`;
       document.body.appendChild(a);
       a.click();
       a.remove();
