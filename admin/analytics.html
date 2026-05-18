@@ -52,18 +52,20 @@
     .ops-refresh { font: inherit; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.03em; padding: 7px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; white-space: nowrap; transition: border-color .15s, opacity .15s; }
     .ops-refresh:hover { border-color: var(--text); }
     .ops-refresh[disabled] { cursor: wait; opacity: 0.55; }
-    .ops-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .ops-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
     .ops-item { display: block; min-height: 86px; padding: 14px; border-radius: 4px; background: var(--bg-sub); color: var(--text); text-decoration: none; }
     .ops-item .k { font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
     .ops-item .v { font-size: 24px; font-weight: var(--fw-heading); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
     .ops-item .sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
     .ops-item.is-alert .v,
     .ops-item.is-alert .sub { color: var(--text); }
-    .thumb-list { display: grid; gap: 8px; margin-top: 14px; }
-    .thumb-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; }
-    .thumb-name { font-weight: var(--fw-heading); }
-    .thumb-meta { color: var(--text-muted); font-size: 12px; text-align: right; }
-    .thumb-empty { color: var(--text-muted); font-size: 13px; padding-top: 8px; }
+    .ops-list { display: grid; gap: 8px; margin-top: 14px; }
+    .ops-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; }
+    .ops-row-main { min-width: 0; }
+    .ops-row-name { font-weight: var(--fw-heading); overflow-wrap: anywhere; }
+    .ops-row-sub { color: var(--text-muted); font-size: 12px; margin-top: 3px; overflow-wrap: anywhere; }
+    .ops-row-meta { color: var(--text-muted); font-size: 12px; text-align: right; white-space: nowrap; }
+    .ops-empty { color: var(--text-muted); font-size: 13px; padding-top: 8px; }
 
     .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .mini-stat { background: var(--bg); border-radius: 4px; padding: 14px 16px; }
@@ -181,6 +183,11 @@
         <div class="v" id="opsPendingReports">·</div>
         <div class="sub">매물 신고로 이동</div>
       </a>
+      <a class="ops-item" id="opsErrorItem" href="#clientErrorsPanel">
+        <div class="k">JS 오류</div>
+        <div class="v" id="opsClientErrors">·</div>
+        <div class="sub">최근 24시간</div>
+      </a>
       <div class="ops-item" id="opsHealthItem">
         <div class="k">상태</div>
         <div class="v" id="opsHealth">·</div>
@@ -194,8 +201,18 @@
       <h2 class="panel-title">필름 썸네일 대기</h2>
       <span class="panel-sub" id="thumbPendingCount">확인 중…</span>
     </div>
-    <div class="thumb-list" id="thumbPendingList">
-      <div class="thumb-empty">불러오는 중…</div>
+    <div class="ops-list" id="thumbPendingList">
+      <div class="ops-empty">불러오는 중…</div>
+    </div>
+  </section>
+
+  <section class="panel" id="clientErrorsPanel">
+    <div class="panel-head">
+      <h2 class="panel-title">최근 JS 오류</h2>
+      <span class="panel-sub" id="clientErrorCount">확인 중…</span>
+    </div>
+    <div class="ops-list" id="clientErrorList">
+      <div class="ops-empty">불러오는 중…</div>
     </div>
   </section>
 

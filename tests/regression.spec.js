@@ -370,6 +370,7 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
         uploadsTopCameras: async () => [],
         uploadsTopCamerasAll: async () => [],
         uploadsThemeRatio: async () => ({ theme_count: 1, general_count: 3, total: 4, theme_ratio: 0.25 }),
+        clientErrorsRecent: async () => [],
       },
       market: {
         adminReportCount: async () => window.__ops.pendingReports,
@@ -381,6 +382,7 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
   await expect(page.locator('#opsTotalUploads')).toHaveText('12');
   await expect(page.locator('#opsPendingUploads')).toHaveText('2');
   await expect(page.locator('#opsPendingReports')).toHaveText('1');
+  await expect(page.locator('#opsClientErrors')).toHaveText('0');
   await expect(page.locator('#opsHealth')).toHaveText('확인 필요');
 
   await page.evaluate(() => {

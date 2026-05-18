@@ -394,6 +394,55 @@ function renderOpsStatus(snapshot, opts = {}) {
   STATE.ops.previous = snapshot;
 }
 
+function fmtAgoShort(iso) {
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return '';
+  const sec = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+  if (sec < 60) return '방금 전';
+  if (sec < 3600) return `${Math.floor(sec / 60)}분 전`;
+  if (sec < 86400) return `${Math.floor(sec / 3600)}시간 전`;
+  return `${Math.floor(sec / 86400)}일 전`;
+}
+
+async function loadClientErrors() {
+  const countEl = $('clientErrorCount');
+  const listEl = $('clientErrorList');
+  const opsEl = $('opsClientErrors');
+  const cardEl = $('opsErrorItem');
+  if (!countEl || !listEl || !opsEl) return [];
+  try {
+    const rows = await db().analytics.clientErrorsRecent(24, 10);
+    const total = rows.reduce((sum, row) => sum + (Number(row.occurrences) || 0), 0);
+    opsEl.textContent = fmtNum(total);
+    cardEl?.classList.toggle('is-alert', total > 0);
+    countEl.textContent = total ? `${fmtNum(total)}건 · 최근 24시간` : '최근 24시간 오류 없음';
+    if (!rows.length) {
+      listEl.innerHTML = '<div class="ops-empty">최근 24시간 기록된 JS 오류가 없습니다.</div>';
+      return rows;
+    }
+    listEl.innerHTML = rows.map(row => {
+      const loc = [row.source, row.lineno ? `${row.lineno}:${row.colno || 0}` : ''].filter(Boolean).join(' ');
+      return `
+        <div class="ops-row">
+          <div class="ops-row-main">
+            <div class="ops-row-name">${escapeHtml(row.message || 'Unknown error')}</div>
+            <div class="ops-row-sub">${escapeHtml(row.path || '-')} ${loc ? `· ${escapeHtml(loc)}` : ''}</div>
+          </div>
+          <div class="ops-row-meta">${escapeHtml(fmtAgoShort(row.ts))}<br>${fmtNum(row.occurrences)}건</div>
+        </div>
+      `;
+    }).join('');
+    return rows;
+  } catch (err) {
+    console.warn('[clientErrors]', err?.message || err);
+    opsEl.textContent = '!';
+    cardEl?.classList.add('is-alert');
+    countEl.textContent = '확인 실패';
+    listEl.innerHTML = '<div class="ops-empty">최근 JS 오류를 불러오지 못했어요.</div>';
+    return [];
+  }
+}
+
 async function loadThumbnailDebt() {
   const countEl = $('thumbPendingCount');
   const listEl = $('thumbPendingList');
@@ -418,19 +467,19 @@ async function loadThumbnailDebt() {
     });
     countEl.textContent = pending.length ? `${fmtNum(pending.length)}개 대기` : '대기 없음';
     if (!pending.length) {
-      listEl.innerHTML = '<div class="thumb-empty">대기 중인 썸네일이 없습니다.</div>';
+      listEl.innerHTML = '<div class="ops-empty">대기 중인 썸네일이 없습니다.</div>';
       return;
     }
     listEl.innerHTML = pending.map(({ film, type }) => `
-      <div class="thumb-row">
-        <span class="thumb-name">${escapeHtml(film.displayName || film.name || film.slug)}</span>
-        <span class="thumb-meta">${escapeHtml(film.brand || '-')} · ${escapeHtml(type)}</span>
+      <div class="ops-row">
+        <span class="ops-row-name">${escapeHtml(film.displayName || film.name || film.slug)}</span>
+        <span class="ops-row-meta">${escapeHtml(film.brand || '-')} · ${escapeHtml(type)}</span>
       </div>
     `).join('');
   } catch (err) {
     console.warn('[thumbnailDebt]', err?.message || err);
     countEl.textContent = '확인 실패';
-    listEl.innerHTML = '<div class="thumb-empty">필름 썸네일 상태를 불러오지 못했어요.</div>';
+    listEl.innerHTML = '<div class="ops-empty">필름 썸네일 상태를 불러오지 못했어요.</div>';
   }
 }
 
@@ -447,6 +496,7 @@ async function refreshOpsStatus(opts = {}) {
     const snapshot = { uploads, pendingReports };
     renderOpsStatus(snapshot, { announce });
     renderUploadsSummary(uploads);
+    loadClientErrors();
   } catch (err) {
     console.warn('[ops.refresh]', err?.message || err);
     $('opsWatchLabel').textContent = '운영 알림을 새로 불러오지 못했어요. 잠시 뒤 다시 확인해주세요.';
@@ -681,7 +731,7 @@ document.addEventListener('visibilitychange', () => {
   if (!ok) return;
   $('gate').hidden = true;
   $('app').hidden = false;
-  await loadThumbnailDebt();
+  await Promise.all([loadThumbnailDebt(), loadClientErrors()]);
   await reload();
   startOpsWatch();
 })();
