@@ -1949,87 +1949,94 @@
   });
 
   // ── 필름스트립 이미지로 저장 ──────────────────────
-  // html2canvas 를 lazy load 해서 그리드를 PNG 로 캡처.
-  // Supabase 스토리지 사진은 crossOrigin='anonymous' 로 재로딩 후 캡처해야 canvas 가 tainted 되지 않음.
-  let _html2canvasLoading = null;
-  function loadHtml2Canvas() {
-    if (window.html2canvas) return Promise.resolve(window.html2canvas);
-    if (_html2canvasLoading) return _html2canvasLoading;
-    _html2canvasLoading = new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-      s.async = true;
-      s.onload = () => resolve(window.html2canvas);
-      s.onerror = () => { _html2canvasLoading = null; reject(new Error('html2canvas load failed')); };
-      document.head.appendChild(s);
-    });
-    return _html2canvasLoading;
-  }
-  function reloadImageWithCors(img) {
-    return new Promise((resolve) => {
-      if (!img.src || img.crossOrigin === 'anonymous') return resolve();
-      // 같은 출처 이미지는 CORS 불필요 — canvas 가 tainted 되지 않음
-      try {
-        const u = new URL(img.src, location.href);
-        if (u.origin === location.origin) return resolve();
-      } catch (_) { return resolve(); }
-      const src = img.src;
-      const probe = new Image();
-      probe.crossOrigin = 'anonymous';
-      probe.onload = () => {
-        img.crossOrigin = 'anonymous';
-        img.src = src;
-        if (img.decode) img.decode().then(resolve, () => resolve());
-        else resolve();
-      };
-      probe.onerror = () => resolve(); // CORS 실패 — 그대로 진행 (해당 이미지만 검은 박스로 캡처됨)
-      probe.src = src;
-    });
-  }
+  // DOM 캡처 대신 캔버스에 직접 그린다. CORS/오프스크린 캡처 실패로 저장 이미지가
+  // 검게 비는 문제를 줄이고, 컷 간격도 정수 픽셀로 제어한다.
 
-  function prepareRollExportTarget(target) {
-    const shell = document.createElement('div');
-    shell.setAttribute('aria-hidden', 'true');
-    shell.style.cssText = [
-      'position: fixed',
-      'left: -10000px',
-      'top: 0',
-      'z-index: -1',
-      'pointer-events: none',
-      'background: #050100',
-      'width: 2280px',
-      'overflow: hidden'
-    ].join(';');
-
-    const clone = target.cloneNode(true);
-    clone.id = `${target.id || 'roll'}-export`;
-    clone.classList.add('is-exporting-roll');
-    clone.dataset.view = 'contact';
-    clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-    shell.appendChild(clone);
-    document.body.appendChild(shell);
-    return { shell, clone };
-  }
-
-  function waitForImages(root) {
-    const imgs = [...root.querySelectorAll('img')];
-    return Promise.all(imgs.map(img => {
-      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-      if (img.decode) return img.decode().catch(() => {});
-      return new Promise(resolve => {
-        img.onload = resolve;
-        img.onerror = resolve;
-      });
-    }));
-  }
-
-  function loadCanvasImage(src) {
+  function loadCanvasImage(src, useCors = false) {
     return new Promise((resolve) => {
       const img = new Image();
+      if (useCors) img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
       img.onerror = () => resolve(null);
       img.src = src;
     });
+  }
+
+  function collectRollExportFrames(target, kind) {
+    if (kind === 'reader') {
+      return [...target.querySelectorAll('.reader-slot')].map(slot => {
+        const img = slot.querySelector('.reader-slot-window img');
+        if (!img || !slot.classList.contains('is-filled')) return null;
+        return {
+          src: img.currentSrc || img.src,
+          portrait: img.classList.contains('is-portrait'),
+        };
+      });
+    }
+    return [...target.children].map(cell => {
+      const photo = cell.querySelector('.modal-photo');
+      const img = cell.querySelector('.modal-photo img');
+      if (!img) return null;
+      return {
+        src: img.currentSrc || img.src,
+        portrait: img.classList.contains('is-portrait') || photo?.classList.contains('is-portrait'),
+      };
+    });
+  }
+
+  function drawImageCover(ctx, img, x, y, w, h) {
+    const scale = Math.max(w / img.width, h / img.height);
+    const sw = w / scale;
+    const sh = h / scale;
+    const sx = Math.max(0, (img.width - sw) / 2);
+    const sy = Math.max(0, (img.height - sh) / 2);
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  }
+
+  function drawPhotoWindow(ctx, img, x, y, w, h, portrait) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    if (portrait) {
+      ctx.translate(x + w / 2, y + h / 2);
+      ctx.rotate(Math.PI / 2);
+      drawImageCover(ctx, img, -h / 2, -w / 2, h, w);
+    } else {
+      drawImageCover(ctx, img, x, y, w, h);
+    }
+    ctx.restore();
+  }
+
+  async function renderRollStripCanvas(target, kind) {
+    const frames = collectRollExportFrames(target, kind);
+    const cols = 6;
+    const tileW = 380;
+    const tileH = 345;
+    const rows = Math.max(1, Math.ceil(frames.length / cols));
+    const scale = 1.5;
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * tileW * scale;
+    canvas.height = rows * tileH * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#050100';
+    ctx.fillRect(0, 0, cols * tileW, rows * tileH);
+
+    const frameImg = await loadCanvasImage('img/filmstrip-frame.svg?v=4');
+    const loaded = await Promise.all(frames.map(frame => frame?.src ? loadCanvasImage(frame.src, true) : Promise.resolve(null)));
+    frames.forEach((frame, idx) => {
+      const x = (idx % cols) * tileW;
+      const y = Math.floor(idx / cols) * tileH;
+      ctx.fillStyle = '#050100';
+      ctx.fillRect(x, y, tileW, tileH);
+      const img = loaded[idx];
+      if (img) {
+        drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
+      }
+      if (frameImg) ctx.drawImage(frameImg, x, y, tileW, tileH);
+    });
+    return canvas;
   }
 
   async function composeBrandedRollCanvas(stripCanvas, { filmName, kind }) {
@@ -2095,21 +2102,8 @@
     const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = '저장 중…';
-    let exportShell = null;
     try {
-      const h2c = await loadHtml2Canvas();
-      const exportTarget = prepareRollExportTarget(target);
-      exportShell = exportTarget.shell;
-      const captureTarget = exportTarget.clone;
-      const imgs = [...captureTarget.querySelectorAll('img')];
-      await Promise.all(imgs.map(reloadImageWithCors));
-      await waitForImages(captureTarget);
-      const stripCanvas = await h2c(captureTarget, {
-        useCORS: true,
-        backgroundColor: '#050100',
-        scale: 1.5,
-        logging: false,
-      });
+      const stripCanvas = await renderRollStripCanvas(target, kind);
       const filmName = (filmsData[filmKey]?.displayName || filmsData[filmKey]?.name || filmKey).toString();
       const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind });
       const slug = filmName.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
@@ -2125,7 +2119,6 @@
       console.error('[save-roll]', err);
       alert('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
-      if (exportShell) exportShell.remove();
       btn.disabled = false;
       btn.textContent = originalText;
     }
@@ -2200,7 +2193,7 @@
 <script src="./js/db-client.js?v=20260516-camalias"></script>
 <script src="./js/comments.js?v=20260512-magdb"></script>
 <script src="./js/image-processor.js?v=20260515-imgproc"></script>
-<script src="./js/reader-submissions.js?v=20260518-dropzone"></script>
+<script src="./js/reader-submissions.js?v=20260518-camerahint"></script>
 <script src="./js/camera-brands.js?v=20260516-crosscheck"></script>
 </body>
 </html>

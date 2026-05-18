@@ -1389,27 +1389,6 @@
   transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
 }
 
-/* 저장 전용 캡처본 — 화면 레이아웃과 분리해 슬롯을 정수 픽셀로 고정한다.
-   fractional grid 폭에서 생기는 얇은 캔버스 seam 을 제거하기 위한 용도. */
-.reader-grid.is-exporting-roll,
-.modal-gallery.is-exporting-roll[data-view="contact"] {
-  width: 2280px !important;
-  grid-template-columns: repeat(6, 380px) !important;
-  column-gap: 0 !important;
-  row-gap: 0 !important;
-  gap: 0 !important;
-  padding: 0 !important;
-  background: #050100 !important;
-  border-radius: 0 !important;
-}
-.reader-grid.is-exporting-roll .reader-slot,
-.modal-gallery.is-exporting-roll[data-view="contact"] > * {
-  width: 380px !important;
-  height: 345px !important;
-  aspect-ratio: auto !important;
-  margin: 0 !important;
-}
-
 .reader-slot-author {
   position: absolute;
   left: 4.74%;

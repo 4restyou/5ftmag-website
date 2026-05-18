@@ -2106,7 +2106,9 @@
     "type": "Black & White",
     "format": "35mm, 120, Sheet",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/fomapan200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "agfaapx100": {
     "slug": "agfaapx100",
@@ -3254,7 +3256,9 @@
     "type": "Color Negative",
     "format": "35mm",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/fujifilm100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fujifilm200": {
     "slug": "fujifilm200",

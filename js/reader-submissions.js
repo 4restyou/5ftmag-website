@@ -385,10 +385,9 @@
 
         <label class="rs-field">
           <span class="rs-label">카메라 <small>(선택)</small></span>
-          <input type="text" name="camera" id="rs-camera-input" list="rs-camera-list"
+          <input type="text" name="camera" id="rs-camera-input"
                  placeholder="목록에서 고르거나 직접 입력 (예: Leica M6)"
                  value="${escapeAttr(meta.camera || '')}" maxlength="60" autocomplete="off" />
-          <datalist id="rs-camera-list"></datalist>
           <div class="rs-recent-cameras" id="rs-recent-cameras" hidden></div>
           <div class="rs-camera-hint" id="rs-camera-hint" hidden></div>
         </label>
@@ -684,8 +683,8 @@
       list.push({ key, display, brand: b.brand || '' });
     }
 
-    // 3) MODEL_BRAND_HINTS 카탈로그도 datalist 에 포함 — 첫 제출 전이라도
-    //    이미 알려진 모델들이 자동완성에 떠야 사용자가 선택 가능.
+    // 3) MODEL_BRAND_HINTS 카탈로그도 힌트 후보에 포함 — 첫 제출 전이라도
+    //    이미 알려진 모델들이 제안에 떠야 사용자가 선택 가능.
     //    이미 submissions 에 있는 키는 건너뜀 (중복 방지).
     if (Array.isArray(window.MODEL_BRAND_HINTS)) {
       const seenKeys = new Set(list.map(c => c.key));
@@ -724,10 +723,16 @@
     const q = query.toLowerCase();
     const scored = [];
     for (const c of list) {
-      const d = c.display.toLowerCase();
-      if (d === q) return []; // 정확히 일치 → 힌트 불필요
+      const formatted = formatCameraName(c);
+      const d = formatted.toLowerCase();
+      const display = c.display.toLowerCase();
+      const brand = (c.brand || '').toLowerCase();
+      if (d === q || display === q) return []; // 정확히 일치 → 힌트 불필요
       let score = -1;
-      if (d.includes(q) || q.includes(d)) score = Math.abs(d.length - q.length);
+      if (d.startsWith(q)) score = 0;
+      else if (display.startsWith(q)) score = 1;
+      else if (brand && brand.startsWith(q)) score = 2;
+      else if (d.includes(q) || display.includes(q) || q.includes(d)) score = Math.abs(d.length - q.length) + 4;
       else {
         const lev = levenshtein(q, d);
         const threshold = Math.min(3, Math.max(1, Math.floor(Math.max(q.length, d.length) * 0.35)));
@@ -769,16 +774,10 @@
 
   async function populateCameraDatalist() {
     const input    = document.getElementById('rs-camera-input');
-    const datalist = document.getElementById('rs-camera-list');
     const recent   = document.getElementById('rs-recent-cameras');
     const hint     = document.getElementById('rs-camera-hint');
-    if (!input || !datalist) return;
+    if (!input) return;
     const list = await buildCameraList();
-    datalist.innerHTML = list.map(c => {
-      const formatted = formatCameraName(c);
-      const labelText = c.brand ? brandLabel(c.brand) : '직접 입력';
-      return `<option value="${escapeAttr(formatted)}">${escapeAttr(labelText)}</option>`;
-    }).join('');
 
     renderRecentCameraChips(recent, input);
     recent?.addEventListener('click', (e) => {
@@ -796,7 +795,7 @@
       debounce = setTimeout(() => {
         const v = input.value.trim();
         if (!v) { hint.hidden = true; return; }
-        const matches = similarCameras(v, list, 4);
+        const matches = similarCameras(v, list, 6);
         if (!matches.length) { hint.hidden = true; return; }
         hint.innerHTML = '<span class="rs-camera-hint-label">혹시 이 카메라?</span> '
           + matches.map(m => {
@@ -823,7 +822,7 @@
     const form = document.getElementById('rs-form');
     if (!form) return;
 
-    // 카메라 입력 — datalist + 유사 모델 힌트
+    // 카메라 입력 — 최근 사용 + 유사 모델 힌트
     populateCameraDatalist();
 
     // 사진 선택 / 드래그앤드롭 / 미리보기
