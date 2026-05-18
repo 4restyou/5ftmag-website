@@ -1242,9 +1242,20 @@
   border-color: rgba(255, 255, 255, 0.72);
   color: #fff;
 }
+.reader-contributor-sections {
+  display: grid;
+  gap: 28px;
+}
 .reader-contributor-group {
   display: grid;
   gap: 12px;
+}
+.reader-contributor-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 .reader-contributor-group h4 {
   margin: 0;
@@ -1256,6 +1267,59 @@
 .reader-contributor-group h4 span {
   margin-left: 6px;
   color: rgba(255, 255, 255, 0.46);
+}
+/* 작가 뷰의 필름별 저장 버튼 — Reader's Roll 저장 버튼과 같은 톤 */
+.reader-contributor-group-head .reader-save-btn {
+  padding: 8px 14px;
+  font-size: 11px;
+}
+
+/* 컨택트 시트 모드 — 모든 섹션의 grid 가 필름스트립 한 줄처럼 보이게 */
+.reader-contributor-sections[data-view="contact"] .reader-contributor-grid {
+  column-gap: 0;
+  row-gap: 14px;
+}
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo {
+  aspect-ratio: 380 / 345;
+  background: transparent;
+  border: none;
+  cursor: zoom-in;
+}
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('../img/filmstrip-frame.svg?v=4');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 2;
+}
+/* 사진은 photo window 영역만 노출 (퍼포레이션 비침 차단은 wrapper 없이 inset 으로) */
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo img {
+  position: absolute;
+  left: 0;
+  top: 14.5%;
+  width: 100%;
+  height: 72.46%;
+  object-fit: cover;
+}
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo img.is-portrait {
+  top: 50%;
+  left: 50%;
+  width: 90.79%;
+  height: 110.14%;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo:hover img {
+  transform: scale(1.03);
+}
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo:hover img.is-portrait {
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
+}
+/* 캡션은 컨택트 뷰에서 숨김 (filmstrip 룩 일관성) */
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo > span {
+  display: none;
 }
 .reader-contributor-grid {
   display: grid;

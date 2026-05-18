@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-exportbrand">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-contrib">
 </head>
 <body>
 
@@ -1249,13 +1249,18 @@
           </div>
           <div class="reader-contributor-actions">
             ${instagramUrl ? `<a href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener" class="reader-contributor-link">Instagram ↗</a>` : ''}
+            <button type="button" class="modal-view-toggle" data-contrib-view-toggle aria-label="컨택트 시트로 전환">컨택트 시트</button>
             <button type="button" class="reader-contributor-back">← ${escapeAttr(film.displayName || film.name)}로 돌아가기</button>
           </div>
         </div>
-        ${groups.map(([filmName, rows]) => `
-          <section class="reader-contributor-group">
-            <h4>${escapeAttr(filmName)} <span>${rows.length}컷</span></h4>
-            <div class="reader-contributor-grid">
+        <div class="reader-contributor-sections" data-view="grid">
+        ${groups.map(([filmName, rows], gIdx) => `
+          <section class="reader-contributor-group" data-film-name="${escapeAttr(filmName)}">
+            <div class="reader-contributor-group-head">
+              <h4>${escapeAttr(filmName)} <span>${rows.length}컷</span></h4>
+              <button type="button" class="reader-save-btn" data-save-contrib data-person-key="${escapeAttr(personKey)}" data-film-name="${escapeAttr(filmName)}">이미지로 저장</button>
+            </div>
+            <div class="reader-contributor-grid" id="contribGrid-${escapeAttr(personKey)}-${gIdx}">
               ${rows.map((sub, idx) => `
                 <button type="button" class="reader-contributor-photo" data-person-key="${escapeAttr(personKey)}" data-photo-index="${idx}" data-film-name="${escapeAttr(filmName)}" aria-label="${escapeAttr(filmName)} ${idx + 1}번째 사진 크게 보기">
                   <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
@@ -1264,7 +1269,10 @@
               `).join('')}
             </div>
           </section>
-        `).join('')}`;
+        `).join('')}
+        </div>`;
+      // 컨택트 시트 전환 시 portrait 자동 회전 위해 orientation 분류 실행
+      contributorView.querySelectorAll('.reader-contributor-photo img').forEach(classifyPhotoOrientation);
     }
 
     setActiveRoll(rollState.currentNumber);
@@ -1927,6 +1935,26 @@
       }
       return;
     }
+    // 작가 뷰 컨택트 시트 토글 — 모든 필름 섹션 한 번에 전환
+    const contribToggleBtn = e.target.closest('[data-contrib-view-toggle]');
+    if (contribToggleBtn) {
+      const sections = contributorView?.querySelector('.reader-contributor-sections');
+      if (sections) {
+        const next = sections.dataset.view === 'contact' ? 'grid' : 'contact';
+        sections.dataset.view = next;
+        contribToggleBtn.textContent = next === 'contact' ? '기본 그리드' : '컨택트 시트';
+        contribToggleBtn.setAttribute('aria-label', next === 'contact' ? '기본 그리드로 전환' : '컨택트 시트로 전환');
+      }
+      return;
+    }
+    // 작가 뷰 필름별 이미지 저장
+    const contribSaveBtn = e.target.closest('[data-save-contrib]');
+    if (contribSaveBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSaveContribFilmImage(contribSaveBtn);
+      return;
+    }
     // 이미지로 저장 버튼
     const saveBtn = e.target.closest('[data-save-roll]');
     if (saveBtn) {
@@ -1970,6 +1998,17 @@
         return {
           src: img.currentSrc || img.src,
           portrait: img.classList.contains('is-portrait'),
+        };
+      });
+    }
+    if (kind === 'contrib') {
+      // 작가 뷰의 한 필름 섹션 grid — .reader-contributor-photo 각각이 한 컷
+      return [...target.querySelectorAll('.reader-contributor-photo')].map(cell => {
+        const img = cell.querySelector('img');
+        if (!img) return null;
+        return {
+          src: img.currentSrc || img.src,
+          portrait: cell.classList.contains('is-portrait') || img.classList.contains('is-portrait'),
         };
       });
     }
@@ -2020,7 +2059,7 @@
     canvas.height = rows * tileH * scale;
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
-    ctx.fillStyle = '#050100';
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, cols * tileW, rows * tileH);
 
     const frameImg = await loadCanvasImage('img/filmstrip-frame.svg?v=4');
@@ -2028,7 +2067,7 @@
     frames.forEach((frame, idx) => {
       const x = (idx % cols) * tileW;
       const y = Math.floor(idx / cols) * tileH;
-      ctx.fillStyle = '#050100';
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(x, y, tileW, tileH);
       const img = loaded[idx];
       if (img) {
@@ -2090,6 +2129,38 @@
     ctx.stroke();
 
     return canvas;
+  }
+
+  // 작가 뷰의 한 필름 섹션을 필름스트립 JPG 로 저장
+  async function handleSaveContribFilmImage(btn) {
+    const personKey = btn.dataset.personKey;
+    const filmName = btn.dataset.filmName;
+    const section = btn.closest('.reader-contributor-group');
+    const target = section?.querySelector('.reader-contributor-grid');
+    if (!target) return;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중…';
+    try {
+      const stripCanvas = await renderRollStripCanvas(target, 'contrib');
+      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind: 'reader' });
+      const personSlug = (personKey || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
+      const filmSlug = (filmName || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
+      const d = new Date();
+      const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/jpeg', 0.92);
+      a.download = `5ftmag-${personSlug || 'contributor'}-${filmSlug || 'film'}-${stamp}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error('[save-contrib]', err);
+      alert('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 
   async function handleSaveRollImage(btn) {
