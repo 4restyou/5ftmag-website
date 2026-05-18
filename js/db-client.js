@@ -659,6 +659,42 @@
       if (error) { console.warn('[analytics.sessionStats]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
     },
+    async uploadsSummary() {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.rpc('admin_uploads_summary');
+      if (error) { console.warn('[analytics.uploadsSummary]', error.message); return null; }
+      return Array.isArray(data) ? (data[0] || null) : data;
+    },
+    async uploadsDaily(days = 30) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_uploads_daily', { p_days: days });
+      if (error) { console.warn('[analytics.uploadsDaily]', error.message); return []; }
+      return data || [];
+    },
+    async uploadsTopContributors(days = 30, limit = 10) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_uploads_top_contributors', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.uploadsTopContributors]', error.message); return []; }
+      return data || [];
+    },
+    async uploadsTopFilms(days = 30, limit = 10) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_uploads_top_films', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return []; }
+      return data || [];
+    },
+    async uploadsTopCameras(days = 30, limit = 10) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_uploads_top_cameras', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return []; }
+      return data || [];
+    },
+    async uploadsThemeRatio(days = 30) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.rpc('admin_uploads_theme_ratio', { p_days: days });
+      if (error) { console.warn('[analytics.uploadsThemeRatio]', error.message); return null; }
+      return Array.isArray(data) ? (data[0] || null) : data;
+    },
   };
 
   // ─── Realtime ───

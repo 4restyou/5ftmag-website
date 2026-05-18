@@ -48,6 +48,8 @@
     .mini-stat .sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
     @media (max-width: 720px) { .mini-stats { grid-template-columns: repeat(2, 1fr); } .mini-stat .v { font-size: 20px; } }
 
+    .section-divider { font-size: 17px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 48px 0 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
     .panel { background: var(--bg-sub); border-radius: 6px; padding: 24px; margin-bottom: 24px; }
     .panel-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .panel-title { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 0; }
@@ -225,10 +227,75 @@
     </table>
   </div>
 
+  <h2 class="section-divider">독자 사진 업로드</h2>
+
+  <div class="cards" id="upload-cards">
+    <div class="card"><div class="k">오늘</div><div class="v" id="up-today">·</div><div class="sub" id="up-status"></div></div>
+    <div class="card"><div class="k">최근 7일</div><div class="v" id="up-7d">·</div><div class="sub" id="up-7d-sub"></div></div>
+    <div class="card"><div class="k">최근 30일</div><div class="v" id="up-30d">·</div><div class="sub" id="up-30d-sub"></div></div>
+    <div class="card"><div class="k">전체 누적</div><div class="v" id="up-total">·</div><div class="sub" id="up-total-sub"></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">일별 업로드</h2>
+      <span class="panel-sub" id="uploadChartRangeLabel"></span>
+    </div>
+    <div class="chart-wrap">
+      <svg class="chart-svg" id="uploadChart" viewBox="0 0 800 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+      <div class="chart-tooltip" id="uploadChartTip"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">테마 응모 비율</h2>
+      <span class="panel-sub" id="themeRangeLabel"></span>
+    </div>
+    <div class="mini-stats" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="mini-stat"><div class="k">테마 응모</div><div class="v" id="tr-theme">·</div></div>
+      <div class="mini-stat"><div class="k">일반 응모</div><div class="v" id="tr-general">·</div></div>
+      <div class="mini-stat"><div class="k">테마 비중</div><div class="v" id="tr-ratio">·</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">상위 작가 <span class="panel-sub" style="margin-left:6px">TOP 10</span></h2>
+    <p class="panel-sub" id="topContribRangeLabel" style="margin-top:4px"></p>
+    <table class="stat-table">
+      <thead>
+        <tr><th>작가</th><th class="bar-cell"></th><th class="num">업로드</th><th class="num">승인</th></tr>
+      </thead>
+      <tbody id="topContributors"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">상위 필름 <span class="panel-sub" style="margin-left:6px">TOP 10</span></h2>
+    <p class="panel-sub" id="topFilmsRangeLabel" style="margin-top:4px"></p>
+    <table class="stat-table">
+      <thead>
+        <tr><th>필름</th><th class="bar-cell"></th><th class="num">업로드</th><th class="num">승인</th></tr>
+      </thead>
+      <tbody id="topFilms"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">상위 카메라 <span class="panel-sub" style="margin-left:6px">TOP 10</span></h2>
+    <p class="panel-sub" id="topCamerasRangeLabel" style="margin-top:4px"></p>
+    <table class="stat-table">
+      <thead>
+        <tr><th>카메라</th><th class="bar-cell"></th><th class="num">업로드</th><th class="num">승인</th></tr>
+      </thead>
+      <tbody id="topCameras"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260518-cleanup"></script>
+<script src="../js/db-client.js?v=20260518-uploads"></script>
 <script src="../js/site-common.js?v=20260518-cleanup"></script>
 <script>
 'use strict';
@@ -315,9 +382,9 @@ function diffLabel(today, yesterday) {
   return `${sign} ${Math.abs(pct)}%`;
 }
 
-function renderChart(rows) {
-  const svg = $('chart');
-  const tip = $('chartTip');
+function drawBarChart(svgId, tipId, rows, valueKey, tipFormatter) {
+  const svg = $(svgId);
+  const tip = $(tipId);
   svg.innerHTML = '';
   if (!rows.length) {
     svg.innerHTML = '<text x="400" y="110" text-anchor="middle" class="axis-label">데이터 없음</text>';
@@ -328,12 +395,10 @@ function renderChart(rows) {
   const innerW = W - PAD_L - PAD_R;
   const innerH = H - PAD_T - PAD_B;
   const n = rows.length;
-  const maxV = Math.max(1, ...rows.map(r => Number(r.views) || 0));
-  // 보기 좋은 max — 가장 가까운 25/50/100/250/500/... 단위로 올림
+  const maxV = Math.max(1, ...rows.map(r => Number(r[valueKey]) || 0));
   const niceMax = niceCeil(maxV);
   const barW = Math.max(1, innerW / n - 2);
 
-  // y 가이드 라인 (4 등분)
   const yLines = [0.25, 0.5, 0.75, 1.0];
   let g = '';
   yLines.forEach(p => {
@@ -343,16 +408,14 @@ function renderChart(rows) {
     g += `<text class="y-label" x="${PAD_L - 4}" y="${(y + 3).toFixed(1)}" text-anchor="end">${fmtNum(val)}</text>`;
   });
 
-  // 막대
   rows.forEach((r, i) => {
-    const v = Number(r.views) || 0;
+    const v = Number(r[valueKey]) || 0;
     const h = innerH * (v / niceMax);
     const x = PAD_L + (innerW / n) * i + 1;
     const y = PAD_T + innerH - h;
     g += `<rect class="bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" data-i="${i}" />`;
   });
 
-  // x 축 라벨 — 균일 간격 6개 정도
   const labelStride = Math.max(1, Math.ceil(n / 8));
   rows.forEach((r, i) => {
     if (i % labelStride !== 0 && i !== n - 1) return;
@@ -362,23 +425,32 @@ function renderChart(rows) {
 
   svg.innerHTML = g;
 
-  // 툴팁
   const wrap = svg.parentElement;
   const rect = () => svg.getBoundingClientRect();
   svg.querySelectorAll('rect.bar').forEach(bar => {
-    bar.addEventListener('mouseenter', (e) => {
+    bar.addEventListener('mouseenter', () => {
       const i = Number(bar.dataset.i);
       const r = rows[i];
       const bbox = rect();
       const x = Number(bar.getAttribute('x')) + Number(bar.getAttribute('width')) / 2;
       const y = Number(bar.getAttribute('y'));
-      tip.textContent = `${fmtDay(r.day)} · ${fmtNum(r.views)} 뷰 · ${fmtNum(r.sessions)} 세션`;
+      tip.textContent = tipFormatter(r);
       tip.style.left = (bbox.left - wrap.getBoundingClientRect().left + (x / 800) * bbox.width) + 'px';
       tip.style.top  = (bbox.top  - wrap.getBoundingClientRect().top  + (y / 220) * bbox.height) + 'px';
       tip.classList.add('show');
     });
     bar.addEventListener('mouseleave', () => tip.classList.remove('show'));
   });
+}
+
+function renderChart(rows) {
+  drawBarChart('chart', 'chartTip', rows, 'views',
+    r => `${fmtDay(r.day)} · ${fmtNum(r.views)} 뷰 · ${fmtNum(r.sessions)} 세션`);
+}
+
+function renderUploadChart(rows) {
+  drawBarChart('uploadChart', 'uploadChartTip', rows, 'uploads',
+    r => `${fmtDay(r.day)} · ${fmtNum(r.uploads)} 업로드 · 승인 ${fmtNum(r.approved)}`);
 }
 
 function niceCeil(n) {
@@ -545,6 +617,77 @@ function renderLanguages(rows) {
   }).join('');
 }
 
+function renderUploadsSummary(s) {
+  if (!s) {
+    ['up-today','up-7d','up-30d','up-total'].forEach(id => $(id).textContent = '0');
+    ['up-status','up-7d-sub','up-30d-sub','up-total-sub'].forEach(id => $(id).textContent = '');
+    return;
+  }
+  $('up-today').textContent = fmtNum(s.uploads_today);
+  $('up-status').textContent =
+    `대기 ${fmtNum(s.total_pending)} · 승인 ${fmtNum(s.total_approved)} · 반려 ${fmtNum(s.total_rejected)}`;
+  $('up-7d').textContent = fmtNum(s.uploads_last_7d);
+  $('up-7d-sub').textContent = `하루 평균 ${fmtNum(Math.round((Number(s.uploads_last_7d) || 0) / 7))}`;
+  $('up-30d').textContent = fmtNum(s.uploads_last_30d);
+  $('up-30d-sub').textContent = `활동 작가 ${fmtNum(s.active_contributors_30d)}명`;
+  $('up-total').textContent = fmtNum(s.total_uploads);
+  $('up-total-sub').textContent = `누적 작가 ${fmtNum(s.unique_contributors)}명`;
+}
+
+function renderThemeRatio(t) {
+  if (!t) {
+    ['tr-theme','tr-general','tr-ratio'].forEach(id => $(id).textContent = '0');
+    return;
+  }
+  $('tr-theme').textContent   = fmtNum(t.theme_count);
+  $('tr-general').textContent = fmtNum(t.general_count);
+  const ratio = Number(t.theme_ratio || 0);
+  $('tr-ratio').textContent = (ratio * 100).toFixed(1) + '%';
+}
+
+function renderTopContributors(rows) {
+  const tbody = $('topContributors');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.uploads) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.uploads) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    const name = String(r.contributor || '').trim();
+    const looksLikeHandle = name && !/\s/.test(name) && !/^익명$/.test(name);
+    const labelHtml = looksLikeHandle
+      ? `<a href="https://instagram.com/${escapeAttr(name)}" target="_blank" rel="noopener noreferrer">@${escapeHtml(name)}</a>`
+      : escapeHtml(name || '익명');
+    return `<tr>
+      <td class="path-cell">${labelHtml}</td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(r.uploads)}</td>
+      <td class="num">${fmtNum(r.approved)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTopByKey(tbodyId, rows, keyField) {
+  const tbody = $(tbodyId);
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.uploads) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.uploads) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    return `<tr>
+      <td>${escapeHtml(r[keyField] || '-')}</td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(r.uploads)}</td>
+      <td class="num">${fmtNum(r.approved)}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderSessionStats(s, dwell) {
   if (!s) {
     ['ss-sessions','ss-pages','ss-duration','ss-bounce'].forEach(id => $(id).textContent = '0');
@@ -620,8 +763,16 @@ async function reload() {
   $('langRangeLabel').textContent   = label;
   $('sessRangeLabel').textContent   = label;
   $('dwellRangeLabel').textContent  = label;
+  $('uploadChartRangeLabel').textContent = label;
+  $('themeRangeLabel').textContent       = label;
+  $('topContribRangeLabel').textContent  = label;
+  $('topFilmsRangeLabel').textContent    = label;
+  $('topCamerasRangeLabel').textContent  = label;
 
-  const [summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths] = await Promise.all([
+  const [
+    summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths,
+    upSummary, upDaily, upTopContrib, upTopFilms, upTopCameras, upThemeRatio,
+  ] = await Promise.all([
     db().analytics.summary(),
     db().analytics.daily(d),
     db().analytics.topPaths(d, 10),
@@ -631,6 +782,12 @@ async function reload() {
     db().analytics.sessionStats(d),
     db().analytics.dwellSummary(d),
     db().analytics.dwellByPath(d, 10),
+    db().analytics.uploadsSummary(),
+    db().analytics.uploadsDaily(d),
+    db().analytics.uploadsTopContributors(d, 10),
+    db().analytics.uploadsTopFilms(d, 10),
+    db().analytics.uploadsTopCameras(d, 10),
+    db().analytics.uploadsThemeRatio(d),
   ]);
 
   renderSummary(summary);
@@ -641,6 +798,13 @@ async function reload() {
   renderReferrers(refs);
   renderRegions(regs);
   renderLanguages(langs);
+
+  renderUploadsSummary(upSummary);
+  renderUploadChart(upDaily);
+  renderThemeRatio(upThemeRatio);
+  renderTopContributors(upTopContrib);
+  renderTopByKey('topFilms', upTopFilms, 'film');
+  renderTopByKey('topCameras', upTopCameras, 'camera');
 }
 
 document.querySelectorAll('.range-btn').forEach(btn => {
