@@ -3608,8 +3608,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fujineopan1600-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fujineopanss": {
     "slug": "fujineopanss",
@@ -3637,34 +3637,7 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
-  },
-  "fujineopanf": {
-    "slug": "fujineopanf",
-    "tier": "library",
-    "brand": "FUJIFILM",
-    "name": "Neopan F",
-    "displayName": "Fujifilm Neopan F",
-    "aliases": [
-      "Neopan F",
-      "Neopan-F",
-      "Fuji Neopan F",
-      "Fujifilm Neopan F",
-      "네오판 F",
-      "네오판F",
-      "후지 네오판 F",
-      "후지필름 네오판 F",
-      "fujineopanf",
-      "neopanf"
-    ],
-    "desc": "후지필름의 저감도 정밀 흑백 필름. ISO 32 의 매우 곱은 입자와 높은 해상력으로 large-format 작업과 복제 촬영에 선호되었습니다. 1980 년대 후반 즈음 카탈로그에서 빠짐.",
-    "iso": "32",
-    "type": "Black & White",
-    "format": "35mm",
-    "photographers": [],
-    "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fujineopanss-can.webp",
+    "canThumbnailStatus": "set"
   }
 }
