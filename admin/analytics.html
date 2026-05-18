@@ -73,7 +73,6 @@
     .stat-table .num { text-align: right; font-variant-numeric: tabular-nums; }
     .stat-table .path-cell a { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--border); }
     .stat-table .path-cell a:hover { border-bottom-color: var(--text); }
-    .stat-table .path-cell .path-sub { font-size: 11px; color: var(--text-muted); font-family: ui-monospace, monospace; margin-top: 2px; word-break: break-all; }
     .stat-table .bar-cell { width: 30%; }
     .stat-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
     .stat-bar > span { display: block; height: 100%; background: var(--text); }
@@ -143,7 +142,7 @@
 
   <div class="panel">
     <div class="panel-head">
-      <h2 class="panel-title">상위 페이지</h2>
+      <h2 class="panel-title">상위 페이지 <span class="panel-sub" style="margin-left:6px">TOP 10</span></h2>
       <span class="panel-sub" id="topRangeLabel"></span>
     </div>
     <table class="stat-table">
@@ -432,7 +431,7 @@ function renderTopPaths(rows) {
       grouped.set(clean, { path: clean, views, sessions, raw: r.path });
     }
   }
-  const merged = [...grouped.values()].sort((a, b) => b.views - a.views);
+  const merged = [...grouped.values()].sort((a, b) => b.views - a.views).slice(0, 10);
   const max = Math.max(1, ...merged.map(r => r.views));
   tbody.innerHTML = merged.map(r => {
     const pct = Math.max(2, Math.round((r.views / max) * 100));
@@ -440,11 +439,10 @@ function renderTopPaths(rows) {
     const linkable = !safePath.includes('/admin/');
     const label = prettyPathLabel(safePath);
     const labelHtml = linkable
-      ? `<a href="..${escapeAttr(safePath)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`
-      : escapeHtml(label);
-    const sub = label !== safePath ? `<div class="path-sub">${escapeHtml(safePath)}</div>` : '';
+      ? `<a href="..${escapeAttr(safePath)}" target="_blank" rel="noopener" title="${escapeAttr(safePath)}">${escapeHtml(label)}</a>`
+      : `<span title="${escapeAttr(safePath)}">${escapeHtml(label)}</span>`;
     return `<tr>
-      <td class="path-cell">${labelHtml}${sub}</td>
+      <td class="path-cell">${labelHtml}</td>
       <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
       <td class="num">${fmtNum(r.views)}</td>
       <td class="num">${fmtNum(r.sessions)}</td>
@@ -536,7 +534,7 @@ async function reload() {
   const [summary, daily, paths, refs, regs, langs] = await Promise.all([
     db().analytics.summary(),
     db().analytics.daily(d),
-    db().analytics.topPaths(d, 20),
+    db().analytics.topPaths(d, 10),
     db().analytics.referrers(d, 15),
     db().analytics.regions(d, 20),
     db().analytics.languages(d, 15),
