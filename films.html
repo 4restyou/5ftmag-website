@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-edportrait">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-spectwoline">
 </head>
 <body>
 
@@ -299,7 +299,7 @@
         </div>
         <span class="film-brand">${escapeAttr(film.brand)}</span>
         <h2 class="film-name">${escapeAttr(film.name)}</h2>
-        <p class="film-spec">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)} · ${escapeAttr(film.format)}</p>
+        <p class="film-spec"><span class="film-spec-main">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)}</span><span class="film-spec-format">${escapeAttr(film.format)}</span></p>
         ${ctaHtml}
       </button>`;
   }

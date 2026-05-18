@@ -153,6 +153,10 @@
   line-height: 1.55;
   margin-bottom: 12px;
 }
+/* 데스크탑: 한 줄에 ` · ` separator 로 연결 */
+.film-spec .film-spec-main,
+.film-spec .film-spec-format { display: inline; }
+.film-spec .film-spec-main + .film-spec-format::before { content: ' · '; }
 .film-cta {
   display: inline-flex;
   align-items: center;
@@ -1692,11 +1696,11 @@
     color: var(--text-muted);
     word-break: keep-all;
     overflow-wrap: anywhere;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
+  /* 모바일: 감도/필름종류 / 포맷 두 줄로 분리 */
+  .film-spec .film-spec-main,
+  .film-spec .film-spec-format { display: block; }
+  .film-spec .film-spec-main + .film-spec-format::before { content: none; }
   .film-count {
     right: 8px;
     bottom: 8px;
