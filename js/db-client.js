@@ -609,6 +609,34 @@
     },
   };
 
+  // ─── 통계 (편집부 전용 — 모든 RPC 내부에서 is_editor 검사) ───
+  const analytics = {
+    async summary() {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.rpc('admin_analytics_summary');
+      if (error) { console.warn('[analytics.summary]', error.message); return null; }
+      return Array.isArray(data) ? (data[0] || null) : data;
+    },
+    async daily(days = 30) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_analytics_daily', { p_days: days });
+      if (error) { console.warn('[analytics.daily]', error.message); return []; }
+      return data || [];
+    },
+    async topPaths(days = 7, limit = 20) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_analytics_top_paths', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.topPaths]', error.message); return []; }
+      return data || [];
+    },
+    async referrers(days = 7, limit = 20) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_analytics_referrers', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.referrers]', error.message); return []; }
+      return data || [];
+    },
+  };
+
   // ─── Realtime ───
   const realtime = {
     subscribeComments(pageId, onChange) {
@@ -637,6 +665,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
-    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, realtime,
+    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime,
   };
 })();

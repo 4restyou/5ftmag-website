@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>접속 통계 — 5ft.mag Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css?v=20260516-iconanim">
+  <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
+  <style>
+    body { background: var(--bg); color: var(--text); }
+
+    .admin-header { max-width: 1100px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .admin-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; transition: color .15s; }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-user { font-size: 13px; color: var(--text-muted); }
+    .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .admin-user button:hover { color: var(--text); }
+
+    .admin-subnav { display: flex; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; flex-wrap: wrap; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; display: inline-flex; align-items: center; gap: 6px; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
+
+    .admin-body { max-width: 1100px; margin: 0 auto; padding: 28px 24px 80px; }
+
+    .range-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .range-row .label { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .range-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 6px 14px; border-radius: 999px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text); transition: background .15s, border-color .15s, color .15s; }
+    .range-btn:hover { border-color: var(--text); }
+    .range-btn.is-current { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .card { background: var(--bg-sub); border-radius: 6px; padding: 20px; }
+    .card .k { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .card .v { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; }
+    .card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .panel { background: var(--bg-sub); border-radius: 6px; padding: 24px; margin-bottom: 24px; }
+    .panel-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+    .panel-title { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 0; }
+    .panel-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* SVG 차트 */
+    .chart-wrap { position: relative; }
+    .chart-svg { display: block; width: 100%; height: auto; max-height: 320px; }
+    .chart-svg .bar { fill: var(--text); transition: opacity .15s; }
+    .chart-svg .bar:hover { opacity: 0.6; }
+    .chart-svg .grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 4; }
+    .chart-svg .axis-label { fill: var(--text-muted); font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.04em; }
+    .chart-svg .y-label { fill: var(--text-muted); font-size: 10px; }
+    .chart-tooltip {
+      position: absolute; pointer-events: none;
+      background: var(--text); color: var(--bg);
+      font-size: 11px; font-weight: var(--fw-heading);
+      padding: 6px 10px; border-radius: 4px;
+      transform: translate(-50%, -130%);
+      white-space: nowrap; opacity: 0;
+      transition: opacity .12s; z-index: 2;
+    }
+    .chart-tooltip.show { opacity: 1; }
+
+    /* 표 */
+    .stat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .stat-table th { text-align: left; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); padding: 8px 8px 10px; border-bottom: 1px solid var(--border); }
+    .stat-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    .stat-table tr:last-child td { border-bottom: none; }
+    .stat-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .stat-table .path-cell a { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--border); }
+    .stat-table .path-cell a:hover { border-bottom-color: var(--text); }
+    .stat-table .bar-cell { width: 30%; }
+    .stat-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+    .stat-bar > span { display: block; height: 100%; background: var(--text); }
+
+    .empty-state { text-align: center; padding: 40px 24px; color: var(--text-muted); font-size: 13px; }
+    .gate { max-width: 560px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; font-weight: var(--fw-heading); margin: 0 0 12px; }
+    .gate p { color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
+    .gate .gate-btn { background: var(--text); color: var(--bg); border: none; padding: 12px 24px; border-radius: 4px; font-size: 14px; font-weight: var(--fw-heading); cursor: pointer; }
+
+    @media (max-width: 720px) {
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      .panel { padding: 18px; }
+      .card { padding: 16px; }
+      .card .v { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-header">
+  <a href="../index.html" class="admin-back">← 5ft.mag</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">접속 통계</h1>
+    <div class="admin-user" id="adminUser"></div>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <a href="submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
+    <a href="analytics.html" class="admin-subnav-link is-current">통계</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<div id="app" class="admin-body" hidden>
+
+  <div class="range-row">
+    <span class="label">기간</span>
+    <button type="button" class="range-btn" data-days="7">7일</button>
+    <button type="button" class="range-btn is-current" data-days="30">30일</button>
+    <button type="button" class="range-btn" data-days="90">90일</button>
+  </div>
+
+  <div class="cards" id="cards">
+    <div class="card"><div class="k">오늘</div><div class="v" id="cv-today">·</div><div class="sub" id="cs-today"></div></div>
+    <div class="card"><div class="k">최근 7일</div><div class="v" id="cv-7d">·</div><div class="sub" id="cs-7d"></div></div>
+    <div class="card"><div class="k">최근 30일</div><div class="v" id="cv-30d">·</div><div class="sub" id="cs-30d"></div></div>
+    <div class="card"><div class="k">전체 누적</div><div class="v" id="cv-total">·</div><div class="sub" id="cs-total"></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">일별 페이지뷰</h2>
+      <span class="panel-sub" id="chartRangeLabel"></span>
+    </div>
+    <div class="chart-wrap">
+      <svg class="chart-svg" id="chart" viewBox="0 0 800 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+      <div class="chart-tooltip" id="chartTip"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">상위 페이지</h2>
+      <span class="panel-sub" id="topRangeLabel"></span>
+    </div>
+    <table class="stat-table">
+      <thead>
+        <tr><th>경로</th><th class="bar-cell"></th><th class="num">조회</th><th class="num">세션</th></tr>
+      </thead>
+      <tbody id="topPaths"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">유입 도메인</h2>
+      <span class="panel-sub" id="refRangeLabel"></span>
+    </div>
+    <table class="stat-table">
+      <thead>
+        <tr><th>도메인</th><th class="bar-cell"></th><th class="num">조회</th></tr>
+      </thead>
+      <tbody id="referrers"><tr><td colspan="3" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/db-client.js?v=20260518-analytics"></script>
+<script src="../js/site-common.js?v=20260518-analytics"></script>
+<script>
+'use strict';
+
+const STATE = { user: null, isEditor: false, days: 30 };
+
+function $(id) { return document.getElementById(id); }
+function db() { return window.MagDB; }
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+function fmtNum(n) {
+  return Number(n || 0).toLocaleString('ko-KR');
+}
+function fmtDay(d) {
+  // d 가 'YYYY-MM-DD' 또는 Date
+  const date = (d instanceof Date) ? d : new Date(d + 'T00:00:00');
+  return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+}
+
+async function checkAccess() {
+  if (!db() || !db().isReady()) {
+    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
+    return false;
+  }
+  const session = await db().auth.getSession();
+  if (!session) { showGate(); return false; }
+  STATE.user = session.user;
+
+  const profile = await db().profiles.getMine();
+  if (!profile?.is_editor) { showGate('접근 권한이 없어요.'); return false; }
+  STATE.isEditor = true;
+  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
+  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
+  return true;
+}
+
+function showGate(msg) {
+  $('gate').hidden = false;
+  $('app').hidden = true;
+  if (msg) {
+    $('gate').querySelector('p').textContent = msg;
+    $('gateLogin').style.display = 'none';
+  }
+  $('gateLogin').addEventListener('click', async () => {
+    await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
+  });
+}
+
+function renderSummary(s) {
+  if (!s) {
+    ['cv-today','cv-7d','cv-30d','cv-total'].forEach(id => $(id).textContent = '0');
+    return;
+  }
+  $('cv-today').textContent = fmtNum(s.views_today);
+  $('cs-today').textContent = `어제 ${fmtNum(s.views_yesterday)} · ${diffLabel(s.views_today, s.views_yesterday)}`;
+  $('cv-7d').textContent    = fmtNum(s.views_last_7d);
+  $('cs-7d').textContent    = `하루 평균 ${fmtNum(Math.round((Number(s.views_last_7d) || 0) / 7))}`;
+  $('cv-30d').textContent   = fmtNum(s.views_last_30d);
+  $('cs-30d').textContent   = `방문 세션 ${fmtNum(s.sessions_last_30d)}`;
+  $('cv-total').textContent = fmtNum(s.total_views);
+  $('cs-total').textContent = `전체 세션 ${fmtNum(s.total_sessions)}`;
+}
+
+function diffLabel(today, yesterday) {
+  const t = Number(today) || 0, y = Number(yesterday) || 0;
+  if (y === 0) return t > 0 ? '신규 트래픽' : '기준 데이터 없음';
+  const pct = Math.round(((t - y) / y) * 100);
+  const sign = pct > 0 ? '▲' : (pct < 0 ? '▼' : '·');
+  return `${sign} ${Math.abs(pct)}%`;
+}
+
+function renderChart(rows) {
+  const svg = $('chart');
+  const tip = $('chartTip');
+  svg.innerHTML = '';
+  if (!rows.length) {
+    svg.innerHTML = '<text x="400" y="110" text-anchor="middle" class="axis-label">데이터 없음</text>';
+    return;
+  }
+  const W = 800, H = 220;
+  const PAD_L = 36, PAD_R = 8, PAD_T = 10, PAD_B = 22;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+  const n = rows.length;
+  const maxV = Math.max(1, ...rows.map(r => Number(r.views) || 0));
+  // 보기 좋은 max — 가장 가까운 25/50/100/250/500/... 단위로 올림
+  const niceMax = niceCeil(maxV);
+  const barW = Math.max(1, innerW / n - 2);
+
+  // y 가이드 라인 (4 등분)
+  const yLines = [0.25, 0.5, 0.75, 1.0];
+  let g = '';
+  yLines.forEach(p => {
+    const y = PAD_T + innerH * (1 - p);
+    const val = Math.round(niceMax * p);
+    g += `<line class="grid" x1="${PAD_L}" y1="${y.toFixed(1)}" x2="${W - PAD_R}" y2="${y.toFixed(1)}" />`;
+    g += `<text class="y-label" x="${PAD_L - 4}" y="${(y + 3).toFixed(1)}" text-anchor="end">${fmtNum(val)}</text>`;
+  });
+
+  // 막대
+  rows.forEach((r, i) => {
+    const v = Number(r.views) || 0;
+    const h = innerH * (v / niceMax);
+    const x = PAD_L + (innerW / n) * i + 1;
+    const y = PAD_T + innerH - h;
+    g += `<rect class="bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" data-i="${i}" />`;
+  });
+
+  // x 축 라벨 — 균일 간격 6개 정도
+  const labelStride = Math.max(1, Math.ceil(n / 8));
+  rows.forEach((r, i) => {
+    if (i % labelStride !== 0 && i !== n - 1) return;
+    const x = PAD_L + (innerW / n) * i + (innerW / n) / 2;
+    g += `<text class="axis-label" x="${x.toFixed(1)}" y="${(H - 6).toFixed(1)}" text-anchor="middle">${fmtDay(r.day)}</text>`;
+  });
+
+  svg.innerHTML = g;
+
+  // 툴팁
+  const wrap = svg.parentElement;
+  const rect = () => svg.getBoundingClientRect();
+  svg.querySelectorAll('rect.bar').forEach(bar => {
+    bar.addEventListener('mouseenter', (e) => {
+      const i = Number(bar.dataset.i);
+      const r = rows[i];
+      const bbox = rect();
+      const x = Number(bar.getAttribute('x')) + Number(bar.getAttribute('width')) / 2;
+      const y = Number(bar.getAttribute('y'));
+      tip.textContent = `${fmtDay(r.day)} · ${fmtNum(r.views)} 뷰 · ${fmtNum(r.sessions)} 세션`;
+      tip.style.left = (bbox.left - wrap.getBoundingClientRect().left + (x / 800) * bbox.width) + 'px';
+      tip.style.top  = (bbox.top  - wrap.getBoundingClientRect().top  + (y / 220) * bbox.height) + 'px';
+      tip.classList.add('show');
+    });
+    bar.addEventListener('mouseleave', () => tip.classList.remove('show'));
+  });
+}
+
+function niceCeil(n) {
+  if (n <= 1) return 1;
+  const exp = Math.pow(10, Math.floor(Math.log10(n)));
+  const f = n / exp;
+  let nice;
+  if (f <= 1) nice = 1;
+  else if (f <= 2) nice = 2;
+  else if (f <= 2.5) nice = 2.5;
+  else if (f <= 5) nice = 5;
+  else nice = 10;
+  return Math.ceil(nice * exp);
+}
+
+function renderTopPaths(rows) {
+  const tbody = $('topPaths');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.views) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.views) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    const path = String(r.path || '');
+    const safePath = path.startsWith('/') ? path : '/' + path;
+    const linkable = !safePath.includes('/admin/');
+    const pathHtml = linkable
+      ? `<a href="..${escapeAttr(safePath)}" target="_blank" rel="noopener">${escapeHtml(safePath)}</a>`
+      : escapeHtml(safePath);
+    return `<tr>
+      <td class="path-cell">${pathHtml}</td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(r.views)}</td>
+      <td class="num">${fmtNum(r.sessions)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderReferrers(rows) {
+  const tbody = $('referrers');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">유입 데이터 없음</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.views) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.views) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    const dom = String(r.referrer_domain || '(direct)');
+    const isExternal = dom !== '(direct)' && dom.includes('.');
+    const domHtml = isExternal
+      ? `<a href="https://${escapeAttr(dom)}" target="_blank" rel="noopener noreferrer">${escapeHtml(dom)}</a>`
+      : escapeHtml(dom);
+    return `<tr>
+      <td class="path-cell">${domHtml}</td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(r.views)}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function reload() {
+  const d = STATE.days;
+  const label = `최근 ${d}일`;
+  $('chartRangeLabel').textContent = label;
+  $('topRangeLabel').textContent   = label;
+  $('refRangeLabel').textContent   = label;
+
+  const [summary, daily, paths, refs] = await Promise.all([
+    db().analytics.summary(),
+    db().analytics.daily(d),
+    db().analytics.topPaths(d, 20),
+    db().analytics.referrers(d, 15),
+  ]);
+
+  renderSummary(summary);
+  renderChart(daily);
+  renderTopPaths(paths);
+  renderReferrers(refs);
+}
+
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('is-current'));
+    btn.classList.add('is-current');
+    STATE.days = Number(btn.dataset.days) || 30;
+    reload();
+  });
+});
+
+(async function main() {
+  for (let i = 0; i < 50; i++) {
+    if (db() && db().isReady()) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  const ok = await checkAccess();
+  if (!ok) return;
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  await reload();
+})();
+</script>
+
+</body>
+</html>
