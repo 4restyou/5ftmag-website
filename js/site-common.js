@@ -66,9 +66,34 @@
     return String(l).slice(0, 32);
   }
 
+  // utm_*, fb/google 광고 클릭 ID 등 트래킹 파라미터 제거 — 같은 페이지가 100가지 변종으로 흩어지는 걸 방지
+  const PV_TRACKING_KEYS = new Set([
+    'fbclid', 'gclid', 'gbraid', 'wbraid', 'msclkid', 'yclid', 'dclid', 'twclid',
+    'mc_eid', 'mc_cid', '_hsenc', '_hsmi', 'igshid', 'ref', 'ref_src', 'ref_url',
+    'ck_subscriber_id',
+  ]);
+  function pvCleanPath() {
+    const p = location.pathname;
+    if (!location.search) return p;
+    try {
+      const params = new URLSearchParams(location.search);
+      const kept = [];
+      for (const [k, v] of params) {
+        if (k.startsWith('utm_')) continue;
+        if (PV_TRACKING_KEYS.has(k.toLowerCase())) continue;
+        kept.push([k, v]);
+      }
+      if (!kept.length) return p;
+      const qs = kept.map(([k, v]) => v === '' ? encodeURIComponent(k) : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+      return p + '?' + qs;
+    } catch (_) {
+      return p;
+    }
+  }
+
   function recordPageView() {
     if (pvShouldSkip()) return;
-    const path = (location.pathname + location.search).slice(0, 500);
+    const path = pvCleanPath().slice(0, 500);
     const referrer = document.referrer
       ? (document.referrer.startsWith(location.origin) ? '' : document.referrer.slice(0, 1000))
       : '';

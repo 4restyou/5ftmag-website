@@ -73,6 +73,7 @@
     .stat-table .num { text-align: right; font-variant-numeric: tabular-nums; }
     .stat-table .path-cell a { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--border); }
     .stat-table .path-cell a:hover { border-bottom-color: var(--text); }
+    .stat-table .path-cell .path-sub { font-size: 11px; color: var(--text-muted); font-family: ui-monospace, monospace; margin-top: 2px; word-break: break-all; }
     .stat-table .bar-cell { width: 30%; }
     .stat-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
     .stat-bar > span { display: block; height: 100%; background: var(--text); }
@@ -196,7 +197,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260518-region"></script>
-<script src="../js/site-common.js?v=20260518-region"></script>
+<script src="../js/site-common.js?v=20260518-cleanpath"></script>
 <script>
 'use strict';
 
@@ -348,24 +349,102 @@ function niceCeil(n) {
   return Math.ceil(nice * exp);
 }
 
+// 페이지명 매핑 — 알려진 경로는 한글로 표시
+const PATH_TITLES = {
+  '/':                       '메인',
+  '/index.html':             '메인',
+  '/films.html':             '필름 데이터베이스',
+  '/films':                  '필름 데이터베이스',
+  '/stories.html':           '글 목록',
+  '/market.html':            '장터',
+  '/about.html':             '소개',
+  '/authors.html':           '글쓴이 모음',
+  '/me.html':                '내 페이지',
+  '/legal/privacy.html':     '개인정보처리방침',
+  '/legal/terms.html':       '이용약관',
+  '/legal/copyright.html':   '저작권',
+};
+
+const ANALYTICS_TRACKING_KEYS = new Set([
+  'fbclid','gclid','gbraid','wbraid','msclkid','yclid','dclid','twclid',
+  'mc_eid','mc_cid','_hsenc','_hsmi','igshid','ref','ref_src','ref_url',
+  'ck_subscriber_id',
+]);
+
+// utm_*, fbclid 등 트래킹 파라미터 잘라내고 메인 path 만 남김 (기존 데이터 정리용)
+function stripTracking(rawPath) {
+  let p = String(rawPath || '');
+  if (!p.startsWith('/')) p = '/' + p;
+  const q = p.indexOf('?');
+  if (q < 0) return p;
+  const base = p.slice(0, q);
+  try {
+    const params = new URLSearchParams(p.slice(q + 1));
+    const kept = [];
+    for (const [k, v] of params) {
+      if (k.startsWith('utm_')) continue;
+      if (ANALYTICS_TRACKING_KEYS.has(k.toLowerCase())) continue;
+      kept.push([k, v]);
+    }
+    if (!kept.length) return base;
+    return base + '?' + kept.map(([k, v]) => v === '' ? encodeURIComponent(k) : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+  } catch (_) {
+    return base;
+  }
+}
+
+function prettyPathLabel(rawPath) {
+  const clean = stripTracking(rawPath);
+  // 정확히 일치하면 매핑 사용
+  if (PATH_TITLES[clean]) return PATH_TITLES[clean];
+  // ?page= 같은 쿼리만 있는 경우
+  const q = clean.indexOf('?');
+  const base = q >= 0 ? clean.slice(0, q) : clean;
+  const query = q >= 0 ? clean.slice(q) : '';
+  if (PATH_TITLES[base]) return PATH_TITLES[base] + (query ? ` ${query}` : '');
+
+  // /stories/{slug}.html
+  let m = base.match(/^\/stories\/([^/]+?)\.html$/);
+  if (m) return `글: ${m[1]}`;
+  // /authors/{slug}.html
+  m = base.match(/^\/authors\/([^/]+?)\.html$/);
+  if (m) return `글쓴이: ${m[1]}`;
+  return clean;
+}
+
 function renderTopPaths(rows) {
   const tbody = $('topPaths');
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
     return;
   }
-  const max = Math.max(1, ...rows.map(r => Number(r.views) || 0));
-  tbody.innerHTML = rows.map(r => {
-    const v = Number(r.views) || 0;
-    const pct = Math.max(2, Math.round((v / max) * 100));
-    const path = String(r.path || '');
-    const safePath = path.startsWith('/') ? path : '/' + path;
+  // 트래킹 파라미터를 제거한 정규 경로 기준으로 다시 그룹핑 (기존 데이터에 utm 이 흩어져 들어가 있어서)
+  const grouped = new Map();
+  for (const r of rows) {
+    const clean = stripTracking(r.path);
+    const cur = grouped.get(clean);
+    const views    = Number(r.views) || 0;
+    const sessions = Number(r.sessions) || 0;
+    if (cur) {
+      cur.views += views;
+      cur.sessions += sessions;
+    } else {
+      grouped.set(clean, { path: clean, views, sessions, raw: r.path });
+    }
+  }
+  const merged = [...grouped.values()].sort((a, b) => b.views - a.views);
+  const max = Math.max(1, ...merged.map(r => r.views));
+  tbody.innerHTML = merged.map(r => {
+    const pct = Math.max(2, Math.round((r.views / max) * 100));
+    const safePath = r.path.startsWith('/') ? r.path : '/' + r.path;
     const linkable = !safePath.includes('/admin/');
-    const pathHtml = linkable
-      ? `<a href="..${escapeAttr(safePath)}" target="_blank" rel="noopener">${escapeHtml(safePath)}</a>`
-      : escapeHtml(safePath);
+    const label = prettyPathLabel(safePath);
+    const labelHtml = linkable
+      ? `<a href="..${escapeAttr(safePath)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`
+      : escapeHtml(label);
+    const sub = label !== safePath ? `<div class="path-sub">${escapeHtml(safePath)}</div>` : '';
     return `<tr>
-      <td class="path-cell">${pathHtml}</td>
+      <td class="path-cell">${labelHtml}${sub}</td>
       <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
       <td class="num">${fmtNum(r.views)}</td>
       <td class="num">${fmtNum(r.sessions)}</td>
