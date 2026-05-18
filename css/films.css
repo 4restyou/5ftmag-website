@@ -312,6 +312,9 @@
    ════════════════════════════════════════════ */
 .modal-view-toggle {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
   font: inherit;
   font-size: 11px;
   font-weight: var(--fw-heading);
@@ -1623,19 +1626,21 @@
   opacity: 0.5;
   cursor: wait;
 }
-/* 에디토리얼 헤더용 — 옆 .modal-view-toggle 과 같은 사이즈로 통일 */
+/* 헤더용 — 옆 .modal-view-toggle 과 같은 사이즈/높이로 통일 */
 .modal-view-save {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  line-height: 1;
   padding: 6px 12px;
+  gap: 6px;
   border-radius: 999px;
   border-color: rgba(255, 255, 255, 0.18);
   margin-left: 8px;
 }
 .modal-view-save::before {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
 }
 
 /* Reader's Roll 그리드 — 반응형 */
