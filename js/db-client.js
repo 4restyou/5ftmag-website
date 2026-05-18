@@ -635,6 +635,18 @@
       if (error) { console.warn('[analytics.referrers]', error.message); return []; }
       return data || [];
     },
+    async regions(days = 7, limit = 20) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_analytics_regions', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.regions]', error.message); return []; }
+      return data || [];
+    },
+    async languages(days = 7, limit = 20) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_analytics_languages', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.languages]', error.message); return []; }
+      return data || [];
+    },
   };
 
   // ─── Realtime ───

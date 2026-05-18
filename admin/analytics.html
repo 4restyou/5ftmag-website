@@ -166,11 +166,37 @@
     </table>
   </div>
 
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">접속 지역 <span class="panel-sub" style="margin-left:6px">timezone 기준</span></h2>
+      <span class="panel-sub" id="regRangeLabel"></span>
+    </div>
+    <table class="stat-table">
+      <thead>
+        <tr><th>지역</th><th class="bar-cell"></th><th class="num">조회</th><th class="num">세션</th></tr>
+      </thead>
+      <tbody id="regions"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">사용자 언어</h2>
+      <span class="panel-sub" id="langRangeLabel"></span>
+    </div>
+    <table class="stat-table">
+      <thead>
+        <tr><th>언어</th><th class="bar-cell"></th><th class="num">조회</th><th class="num">세션</th></tr>
+      </thead>
+      <tbody id="languages"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260518-analytics"></script>
-<script src="../js/site-common.js?v=20260518-analytics"></script>
+<script src="../js/db-client.js?v=20260518-region"></script>
+<script src="../js/site-common.js?v=20260518-region"></script>
 <script>
 'use strict';
 
@@ -347,6 +373,55 @@ function renderTopPaths(rows) {
   }).join('');
 }
 
+// timezone 값을 사람이 보기 좋게 — "Asia/Seoul" → "Seoul (Asia)"
+function fmtTz(tz) {
+  if (!tz || tz === '(unknown)') return '(미상)';
+  const slash = tz.indexOf('/');
+  if (slash < 0) return tz;
+  const region = tz.slice(0, slash);
+  const city = tz.slice(slash + 1).replace(/_/g, ' ');
+  return `${city} (${region})`;
+}
+
+function renderRegions(rows) {
+  const tbody = $('regions');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.views) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.views) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    return `<tr>
+      <td>${escapeHtml(fmtTz(r.tz))}</td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(r.views)}</td>
+      <td class="num">${fmtNum(r.sessions)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderLanguages(rows) {
+  const tbody = $('languages');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.views) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.views) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    const lang = r.lang === '(unknown)' ? '(미상)' : (r.lang || '(미상)');
+    return `<tr>
+      <td>${escapeHtml(lang)}</td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(r.views)}</td>
+      <td class="num">${fmtNum(r.sessions)}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderReferrers(rows) {
   const tbody = $('referrers');
   if (!rows.length) {
@@ -376,18 +451,24 @@ async function reload() {
   $('chartRangeLabel').textContent = label;
   $('topRangeLabel').textContent   = label;
   $('refRangeLabel').textContent   = label;
+  $('regRangeLabel').textContent   = label;
+  $('langRangeLabel').textContent  = label;
 
-  const [summary, daily, paths, refs] = await Promise.all([
+  const [summary, daily, paths, refs, regs, langs] = await Promise.all([
     db().analytics.summary(),
     db().analytics.daily(d),
     db().analytics.topPaths(d, 20),
     db().analytics.referrers(d, 15),
+    db().analytics.regions(d, 20),
+    db().analytics.languages(d, 15),
   ]);
 
   renderSummary(summary);
   renderChart(daily);
   renderTopPaths(paths);
   renderReferrers(refs);
+  renderRegions(regs);
+  renderLanguages(langs);
 }
 
 document.querySelectorAll('.range-btn').forEach(btn => {
