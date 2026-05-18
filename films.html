@@ -2031,14 +2031,15 @@
 
   function collectRollExportFrames(target, kind) {
     if (kind === 'reader') {
-      return [...target.querySelectorAll('.reader-slot')].map(slot => {
+      // 채워진 슬롯만 export — 빈 자리는 끌고 가지 않음 (10컷이면 10컷만 저장)
+      return [...target.querySelectorAll('.reader-slot.is-filled')].map(slot => {
         const img = slot.querySelector('.reader-slot-window img');
-        if (!img || !slot.classList.contains('is-filled')) return null;
+        if (!img) return null;
         return {
           src: img.currentSrc || img.src,
           portrait: img.classList.contains('is-portrait'),
         };
-      });
+      }).filter(Boolean);
     }
     if (kind === 'contrib') {
       // 작가 뷰의 한 필름 섹션 grid — .reader-contributor-photo 각각이 한 컷
