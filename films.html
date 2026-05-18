@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260517-photobleed">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-exportbrand">
 </head>
 <body>
 
@@ -1986,6 +1986,105 @@
       probe.src = src;
     });
   }
+
+  function prepareRollExportTarget(target) {
+    const shell = document.createElement('div');
+    shell.setAttribute('aria-hidden', 'true');
+    shell.style.cssText = [
+      'position: fixed',
+      'left: -10000px',
+      'top: 0',
+      'z-index: -1',
+      'pointer-events: none',
+      'background: #050100',
+      'width: 2280px',
+      'overflow: hidden'
+    ].join(';');
+
+    const clone = target.cloneNode(true);
+    clone.id = `${target.id || 'roll'}-export`;
+    clone.classList.add('is-exporting-roll');
+    clone.dataset.view = 'contact';
+    clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+    shell.appendChild(clone);
+    document.body.appendChild(shell);
+    return { shell, clone };
+  }
+
+  function waitForImages(root) {
+    const imgs = [...root.querySelectorAll('img')];
+    return Promise.all(imgs.map(img => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      if (img.decode) return img.decode().catch(() => {});
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    }));
+  }
+
+  function loadCanvasImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
+
+  async function composeBrandedRollCanvas(stripCanvas, { filmName, kind }) {
+    const width = stripCanvas.width;
+    const headerH = Math.max(148, Math.round(width * 0.075));
+    const footerH = Math.max(116, Math.round(width * 0.052));
+    const pad = Math.max(56, Math.round(width * 0.032));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = headerH + stripCanvas.height + footerH;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const logo = await loadCanvasImage('img/mainlogo.png');
+    const logoH = Math.min(70, Math.round(headerH * 0.42));
+    if (logo) {
+      const logoW = Math.round(logo.width * (logoH / logo.height));
+      ctx.drawImage(logo, pad, Math.round((headerH - logoH) / 2), logoW, logoH);
+    } else {
+      ctx.fillStyle = '#111111';
+      ctx.font = `800 ${Math.round(headerH * 0.3)}px Pretendard, Arial, sans-serif`;
+      ctx.fillText('5ft.mag', pad, Math.round(headerH * 0.58));
+    }
+
+    ctx.fillStyle = '#111111';
+    ctx.textAlign = 'right';
+    ctx.font = `800 ${Math.round(headerH * 0.2)}px Pretendard, Arial, sans-serif`;
+    ctx.fillText(kind === 'reader' ? "READER'S ROLL" : '5FT ISSUE', width - pad, Math.round(headerH * 0.42));
+    ctx.fillStyle = '#666666';
+    ctx.font = `600 ${Math.round(headerH * 0.15)}px Pretendard, Arial, sans-serif`;
+    ctx.fillText(filmName, width - pad, Math.round(headerH * 0.68));
+
+    ctx.drawImage(stripCanvas, 0, headerH);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, headerH + stripCanvas.height, width, footerH);
+    ctx.fillStyle = '#111111';
+    ctx.textAlign = 'center';
+    ctx.font = `700 ${Math.round(footerH * 0.28)}px Pretendard, Arial, sans-serif`;
+    ctx.fillText('www.5ftmag.com', Math.round(width / 2), headerH + stripCanvas.height + Math.round(footerH * 0.58));
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.14)';
+    ctx.lineWidth = Math.max(1, Math.round(width * 0.0008));
+    ctx.beginPath();
+    ctx.moveTo(0, headerH - ctx.lineWidth / 2);
+    ctx.lineTo(width, headerH - ctx.lineWidth / 2);
+    ctx.moveTo(0, headerH + stripCanvas.height + ctx.lineWidth / 2);
+    ctx.lineTo(width, headerH + stripCanvas.height + ctx.lineWidth / 2);
+    ctx.stroke();
+
+    return canvas;
+  }
+
   async function handleSaveRollImage(btn) {
     const kind = btn.dataset.saveRoll;
     const filmKey = btn.dataset.filmKey;
@@ -1996,17 +2095,23 @@
     const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = '저장 중…';
+    let exportShell = null;
     try {
       const h2c = await loadHtml2Canvas();
-      const imgs = [...target.querySelectorAll('img')];
+      const exportTarget = prepareRollExportTarget(target);
+      exportShell = exportTarget.shell;
+      const captureTarget = exportTarget.clone;
+      const imgs = [...captureTarget.querySelectorAll('img')];
       await Promise.all(imgs.map(reloadImageWithCors));
-      const canvas = await h2c(target, {
+      await waitForImages(captureTarget);
+      const stripCanvas = await h2c(captureTarget, {
         useCORS: true,
-        backgroundColor: '#ffffff',
-        scale: Math.min(2, window.devicePixelRatio || 1) * 1.5,
+        backgroundColor: '#050100',
+        scale: 1.5,
         logging: false,
       });
       const filmName = (filmsData[filmKey]?.displayName || filmsData[filmKey]?.name || filmKey).toString();
+      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind });
       const slug = filmName.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
       const d = new Date();
       const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
@@ -2020,6 +2125,7 @@
       console.error('[save-roll]', err);
       alert('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
+      if (exportShell) exportShell.remove();
       btn.disabled = false;
       btn.textContent = originalText;
     }
