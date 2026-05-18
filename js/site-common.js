@@ -10,6 +10,81 @@
   const THEME_KEY = '5ftTheme';
 
   // ════════════════════════════════════════════════
+  // 페이지뷰 로그 (Supabase 자가호스트 분석)
+  //   anon INSERT 만 허용된 page_views 테이블에 한 줄 기록.
+  //   집계는 admin/analytics.html 에서 SECURITY DEFINER RPC 로 열람.
+  // ════════════════════════════════════════════════
+  const PV_URL = 'https://pucpqsfwqouqohwsvmnd.supabase.co';
+  const PV_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1Y3Bxc2Z3cW91cW9od3N2bW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjYyMDUsImV4cCI6MjA5Mzc0MjIwNX0.adLzT0UrX3e1IbkQ70G6LeFWeKbuGaa0PTL6AmrSBD8';
+  const PV_SS_KEY = '5ft_pv_sid';
+  // 봇·크롤러 — 가벼운 UA 필터 (정밀하지 않아도 됨, 정확도는 집계 단에서 충분)
+  const PV_BOT_RE = /bot|crawler|spider|crawling|preview|fetch|monitor|googlebot|bingbot|yandex|baidu|duckduck|slurp|facebookexternal/i;
+
+  function pvSessionId() {
+    try {
+      let sid = sessionStorage.getItem(PV_SS_KEY);
+      if (!sid) {
+        sid = (crypto.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)));
+        sessionStorage.setItem(PV_SS_KEY, sid);
+      }
+      return sid;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function pvUaFamily(ua) {
+    if (!ua) return 'other';
+    if (/Edg\//i.test(ua))     return 'edge';
+    if (/OPR\/|Opera/i.test(ua)) return 'opera';
+    if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) return 'chrome';
+    if (/Firefox\//i.test(ua)) return 'firefox';
+    if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) return 'safari';
+    if (/MSIE|Trident/i.test(ua)) return 'ie';
+    return 'other';
+  }
+
+  function pvShouldSkip() {
+    // 개발 환경 / 봇 / 어드민 페이지는 집계 제외
+    const host = location.hostname;
+    if (!host || host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local')) return true;
+    if (location.protocol === 'file:') return true;
+    const ua = navigator.userAgent || '';
+    if (PV_BOT_RE.test(ua)) return true;
+    if (location.pathname.startsWith('/admin/') || location.pathname.includes('/admin/')) return true;
+    if (navigator.webdriver) return true;
+    return false;
+  }
+
+  function recordPageView() {
+    if (pvShouldSkip()) return;
+    const path = (location.pathname + location.search).slice(0, 500);
+    const referrer = document.referrer
+      ? (document.referrer.startsWith(location.origin) ? '' : document.referrer.slice(0, 1000))
+      : '';
+    const payload = {
+      path,
+      referrer: referrer || null,
+      ua_family: pvUaFamily(navigator.userAgent || ''),
+      session_id: pvSessionId(),
+    };
+    try {
+      fetch(PV_URL + '/rest/v1/page_views', {
+        method: 'POST',
+        mode: 'cors',
+        keepalive: true,
+        headers: {
+          apikey: PV_KEY,
+          Authorization: 'Bearer ' + PV_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(payload),
+      }).catch(function () { /* 익명 로그는 실패해도 무시 */ });
+    } catch (_) {}
+  }
+
+  // ════════════════════════════════════════════════
   // 테마 버튼 SVG 업데이트
   // ════════════════════════════════════════════════
   function updateThemeButton(btn) {
@@ -132,6 +207,9 @@
     if (!document.documentElement.dataset.theme) {
       document.documentElement.dataset.theme = localStorage.getItem(THEME_KEY) || 'light';
     }
+
+    // 페이지뷰 로깅 — 한 페이지당 한 번
+    recordPageView();
 
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');
