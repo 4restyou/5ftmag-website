@@ -707,6 +707,12 @@
       if (error) { console.warn('[analytics.uploadsThemeRatio]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
     },
+    async clientErrorsRecent(hours = 24, limit = 20) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_client_errors_recent', { p_hours: hours, p_limit: limit });
+      if (error) { console.warn('[analytics.clientErrorsRecent]', error.message); return []; }
+      return data || [];
+    },
   };
 
   // ─── Realtime ───

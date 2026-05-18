@@ -132,6 +132,73 @@
     startDwellTracker(path);
   }
 
+  // ─── 클라이언트 에러 로그 (Sentry 미연결 시 최소 운영 감지)
+  const ERROR_LOG_MAX_PER_PAGE = 5;
+  let errorLogCount = 0;
+  const ERROR_IGNORES = [
+    /ResizeObserver loop/i,
+    /Script error\\.?/i,
+    /NetworkError when attempting to fetch resource/i,
+  ];
+
+  function shouldSkipErrorLog(message) {
+    if (pvShouldSkip()) return true;
+    if (errorLogCount >= ERROR_LOG_MAX_PER_PAGE) return true;
+    const msg = String(message || '');
+    return ERROR_IGNORES.some(re => re.test(msg));
+  }
+
+  function recordClientError(payload) {
+    const message = String(payload?.message || 'Unknown client error').slice(0, 1000);
+    if (shouldSkipErrorLog(message)) return;
+    errorLogCount += 1;
+    const body = {
+      path: pvCleanPath().slice(0, 500),
+      message,
+      source: payload?.source ? String(payload.source).slice(0, 500) : null,
+      lineno: Number.isFinite(payload?.lineno) ? payload.lineno : null,
+      colno: Number.isFinite(payload?.colno) ? payload.colno : null,
+      stack: payload?.stack ? String(payload.stack).slice(0, 4000) : null,
+      ua_family: pvUaFamily(navigator.userAgent || ''),
+      session_id: pvSessionId(),
+    };
+    try {
+      fetch(PV_URL + '/rest/v1/client_error_logs', {
+        method: 'POST',
+        mode: 'cors',
+        keepalive: true,
+        headers: {
+          apikey: PV_KEY,
+          Authorization: 'Bearer ' + PV_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(body),
+      }).catch(function () {});
+    } catch (_) {}
+  }
+
+  window.addEventListener('error', function (event) {
+    recordClientError({
+      message: event.message || event.error?.message,
+      source: event.filename || '',
+      lineno: event.lineno,
+      colno: event.colno,
+      stack: event.error?.stack || '',
+    });
+  });
+
+  window.addEventListener('unhandledrejection', function (event) {
+    const reason = event.reason;
+    recordClientError({
+      message: reason?.message || String(reason || 'Unhandled promise rejection'),
+      source: 'unhandledrejection',
+      stack: reason?.stack || '',
+    });
+  });
+
+  window.reportClientError = recordClientError;
+
   // ─── 체류 시간 트래커 (page_dwells) ───
   // foreground 시간만 누적해서 페이지 떠날 때 1회 INSERT.
   function startDwellTracker(path) {
