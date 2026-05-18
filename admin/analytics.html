@@ -62,7 +62,7 @@
     .ops-list { display: grid; gap: 8px; margin-top: 14px; }
     .ops-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; }
     .ops-row-main { min-width: 0; }
-    .ops-row-name { font-weight: var(--fw-heading); overflow-wrap: anywhere; }
+    .ops-row-name { font-weight: var(--fw-heading); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .ops-row-sub { color: var(--text-muted); font-size: 12px; margin-top: 3px; overflow-wrap: anywhere; }
     .ops-row-meta { color: var(--text-muted); font-size: 12px; text-align: right; white-space: nowrap; }
     .ops-empty { color: var(--text-muted); font-size: 13px; padding-top: 8px; }
@@ -122,6 +122,8 @@
       .cards { grid-template-columns: repeat(2, 1fr); }
       .ops-head { flex-direction: column; }
       .ops-grid { grid-template-columns: repeat(2, 1fr); }
+      /* 5칸이 2열 폴백 시 마지막 한 칸이 외롭게 남아 균형이 깨짐 — 가로 폭으로 확장 */
+      .ops-grid > .ops-item:nth-child(5):last-child { grid-column: 1 / -1; }
       .panel { padding: 18px; }
       .card { padding: 16px; }
       .card .v { font-size: 24px; }
@@ -159,7 +161,7 @@
     <button type="button" class="range-btn" data-days="90">90일</button>
   </div>
 
-  <section class="ops-panel" aria-live="polite">
+  <section class="ops-panel">
     <div class="ops-head">
       <div>
         <h2 class="ops-title">운영 알림</h2>
@@ -170,27 +172,27 @@
     <div class="ops-grid">
       <div class="ops-item" id="opsUploadItem">
         <div class="k">누적 업로드</div>
-        <div class="v" id="opsTotalUploads">·</div>
+        <div class="v" id="opsTotalUploads" aria-live="polite">·</div>
         <div class="sub" id="opsTotalUploadsSub">확인 중…</div>
       </div>
       <a class="ops-item" id="opsPendingItem" href="submissions.html?status=pending">
         <div class="k">검토 대기</div>
-        <div class="v" id="opsPendingUploads">·</div>
+        <div class="v" id="opsPendingUploads" aria-live="polite">·</div>
         <div class="sub">투고 검토로 이동</div>
       </a>
       <a class="ops-item" id="opsReportItem" href="market-reports.html">
         <div class="k">신고 대기</div>
-        <div class="v" id="opsPendingReports">·</div>
+        <div class="v" id="opsPendingReports" aria-live="polite">·</div>
         <div class="sub">매물 신고로 이동</div>
       </a>
       <a class="ops-item" id="opsErrorItem" href="#clientErrorsPanel">
         <div class="k">JS 오류</div>
-        <div class="v" id="opsClientErrors">·</div>
+        <div class="v" id="opsClientErrors" aria-live="polite">·</div>
         <div class="sub">최근 24시간</div>
       </a>
       <div class="ops-item" id="opsHealthItem">
         <div class="k">상태</div>
-        <div class="v" id="opsHealth">·</div>
+        <div class="v" id="opsHealth" aria-live="polite">·</div>
         <div class="sub" id="opsLastChecked">마지막 확인 전</div>
       </div>
     </div>
@@ -390,8 +392,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260519-cleanup"></script>
-<script src="../js/site-common.js?v=20260518-cleanup"></script>
-<script src="../js/admin-analytics.js?v=20260519-extract"></script>
+<script src="../js/site-common.js?v=20260519-toast"></script>
+<script src="../js/admin-analytics-page.js?v=20260519-polish"></script>
 
 </body>
 </html>

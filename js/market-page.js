@@ -344,7 +344,7 @@ function bindDetailHandlers(r) {
       if (a === 'cycle') {
         el.disabled = true;
         const { next, error } = await db().market.cycleStatusMine(r.id, r.status);
-        if (error) { el.disabled = false; return window.notify?.('상태를 바꾸지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); }
+        if (error) { el.disabled = false; return window.notify?.('상태를 바꾸지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')', 'danger'); }
         r.status = next;
         await loadList();
         renderDetail(r);
@@ -355,18 +355,18 @@ function bindDetailHandlers(r) {
         if (!confirm('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.')) return;
         el.disabled = true;
         const { error } = await db().market.deleteMine(r.id);
-        if (error) { el.disabled = false; return window.notify?.('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + error.message + ')'); }
+        if (error) { el.disabled = false; return window.notify?.('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + error.message + ')', 'danger'); }
         if (r.storage_paths?.length) await db().market.removePhotos(r.storage_paths);
         closeDetail();
         return loadList();
       }
       if (a === 'report') {
-        if (!STATE.user) return window.notify?.('신고는 로그인 후에 가능해요. 로그인하면 보던 매물로 다시 돌아옵니다.');
+        if (!STATE.user) return window.notify?.('신고는 로그인 후에 가능해요. 로그인하면 보던 매물로 다시 돌아옵니다.', 'info');
         const reason = prompt('신고 사유를 적어주세요 (300자 이내):', '');
         if (!reason) return;
         const { error } = await db().market.report(r.id, reason);
-        if (error) return window.notify?.('신고를 접수하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')');
-        window.notify?.('신고가 접수되었습니다. 편집부에서 검토할게요.');
+        if (error) return window.notify?.('신고를 접수하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')', 'danger');
+        window.notify?.('신고가 접수되었습니다. 편집부에서 검토할게요.', 'info');
       }
     });
   });
@@ -545,7 +545,7 @@ function renderPhotoSlots() {
         renderPhotoSlots();
       } catch (err) {
         if (slot && origLabel) slot.firstChild.nodeValue = origLabel;
-        window.notify?.(err.message || '사진을 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.');
+        window.notify?.(err.message || '사진을 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.', 'danger');
       }
     });
   });
