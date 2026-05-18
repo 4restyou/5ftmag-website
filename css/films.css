@@ -370,14 +370,14 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('../img/filmstrip-frame.svg?v=5');
+  background-image: url('../img/filmstrip-frame.svg?v=6');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
   z-index: 2;
 }
 .modal-gallery[data-view="contact"] > *:nth-child(even)::after {
-  background-image: url('../img/filmstrip-frame-2.svg?v=5');
+  background-image: url('../img/filmstrip-frame-2.svg?v=6');
 }
 /* 사진 viewport — photo window 좌표에 overflow:hidden 으로 강제 클립 */
 .modal-gallery[data-view="contact"] .modal-photo {
@@ -1348,14 +1348,14 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('../img/filmstrip-frame.svg?v=5');
+  background-image: url('../img/filmstrip-frame.svg?v=6');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
   z-index: 2;
 }
 .reader-contributor-sections[data-view="contact"] .reader-contributor-photo:nth-child(even)::after {
-  background-image: url('../img/filmstrip-frame-2.svg?v=5');
+  background-image: url('../img/filmstrip-frame-2.svg?v=6');
 }
 /* 컨택트 모드에서는 wrapper 를 photo window 영역(top 14.5% / height 72.46%) 으로 inset
    → perforation 영역이 wrapper 밖이 되어 overflow:hidden 으로 자동 클립.
@@ -1467,14 +1467,14 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('../img/filmstrip-frame.svg?v=5');
+  background-image: url('../img/filmstrip-frame.svg?v=6');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
   z-index: 2;
 }
 .reader-slot.is-filled:nth-child(even)::after {
-  background-image: url('../img/filmstrip-frame-2.svg?v=5');
+  background-image: url('../img/filmstrip-frame-2.svg?v=6');
 }
 .reader-slot-link {
   display: block;
