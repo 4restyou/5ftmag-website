@@ -1608,13 +1608,14 @@
   opacity: 0.5;
   cursor: wait;
 }
-/* 에디토리얼 헤더용 — 컴팩트 pill */
+/* 에디토리얼 헤더용 — 옆 .modal-view-toggle 과 같은 사이즈로 통일 */
 .modal-view-save {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 7px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
+  border-color: rgba(255, 255, 255, 0.18);
   margin-left: 8px;
 }
 .modal-view-save::before {

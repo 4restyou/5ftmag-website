@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-contrib">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-contrib2">
 </head>
 <body>
 
@@ -1156,6 +1156,11 @@
       if (rollIntro) {
         rollIntro.textContent = rollIntroText(rollByNumber(activeRoll));
       }
+      // Reader's Roll 섹션 헤더 토글 복귀 (작가 뷰에서 빠져나옴)
+      const readerSection = grid.closest('.modal-section-reader');
+      const headToggle = readerSection?.querySelector('.modal-section-head [data-view-toggle]');
+      if (headToggle) headToggle.hidden = false;
+      // 저장 버튼은 renderReaderSlots 에서 visible.length 보고 다시 토글됨
       renderReaderSlots();
       renderPersonFilter();
       renderRollSwitcher();
@@ -1249,7 +1254,7 @@
           </div>
           <div class="reader-contributor-actions">
             ${instagramUrl ? `<a href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener" class="reader-contributor-link">Instagram ↗</a>` : ''}
-            <button type="button" class="modal-view-toggle" data-contrib-view-toggle aria-label="컨택트 시트로 전환">컨택트 시트</button>
+            <button type="button" class="reader-contributor-link" data-contrib-view-toggle aria-label="컨택트 시트로 전환">컨택트 시트</button>
             <button type="button" class="reader-contributor-back">← ${escapeAttr(film.displayName || film.name)}로 돌아가기</button>
           </div>
         </div>
@@ -1273,6 +1278,12 @@
         </div>`;
       // 컨택트 시트 전환 시 portrait 자동 회전 위해 orientation 분류 실행
       contributorView.querySelectorAll('.reader-contributor-photo img').forEach(classifyPhotoOrientation);
+      // Reader's Roll 섹션 헤더의 토글·저장 버튼은 작가 뷰 동안 숨김 (중복 방지)
+      const readerSection = contributorView.closest('.modal-section-reader');
+      const headToggle = readerSection?.querySelector('.modal-section-head [data-view-toggle]');
+      const rollSaveBtn = readerSection?.querySelector('[data-save-roll="reader"]');
+      if (headToggle) headToggle.hidden = true;
+      if (rollSaveBtn) rollSaveBtn.hidden = true;
     }
 
     setActiveRoll(rollState.currentNumber);
@@ -1938,7 +1949,8 @@
     // 작가 뷰 컨택트 시트 토글 — 모든 필름 섹션 한 번에 전환
     const contribToggleBtn = e.target.closest('[data-contrib-view-toggle]');
     if (contribToggleBtn) {
-      const sections = contributorView?.querySelector('.reader-contributor-sections');
+      const view = contribToggleBtn.closest('.reader-contributor-view');
+      const sections = view?.querySelector('.reader-contributor-sections');
       if (sections) {
         const next = sections.dataset.view === 'contact' ? 'grid' : 'contact';
         sections.dataset.view = next;
@@ -2052,21 +2064,26 @@
     const cols = 6;
     const tileW = 380;
     const tileH = 345;
+    const rowGap = 28; // 줄 사이 흰 여백 (DOM 14px 대비 export 가 보통 작아 보여서 약간 더 키움)
     const rows = Math.max(1, Math.ceil(frames.length / cols));
     const scale = 1.5;
+    const innerW = cols * tileW;
+    const innerH = rows * tileH + Math.max(0, rows - 1) * rowGap;
     const canvas = document.createElement('canvas');
-    canvas.width = cols * tileW * scale;
-    canvas.height = rows * tileH * scale;
+    canvas.width = innerW * scale;
+    canvas.height = innerH * scale;
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, cols * tileW, rows * tileH);
+    ctx.fillRect(0, 0, innerW, innerH);
 
     const frameImg = await loadCanvasImage('img/filmstrip-frame.svg?v=4');
     const loaded = await Promise.all(frames.map(frame => frame?.src ? loadCanvasImage(frame.src, true) : Promise.resolve(null)));
     frames.forEach((frame, idx) => {
-      const x = (idx % cols) * tileW;
-      const y = Math.floor(idx / cols) * tileH;
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const x = col * tileW;
+      const y = row * (tileH + rowGap);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(x, y, tileW, tileH);
       const img = loaded[idx];
