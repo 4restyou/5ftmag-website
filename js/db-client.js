@@ -683,10 +683,22 @@
       if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return []; }
       return data || [];
     },
+    async uploadsTopFilmsAll(limit = 10) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_uploads_top_films_all', { p_limit: limit });
+      if (error) { console.warn('[analytics.uploadsTopFilmsAll]', error.message); return []; }
+      return data || [];
+    },
     async uploadsTopCameras(days = 30, limit = 10) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_uploads_top_cameras', { p_days: days, p_limit: limit });
       if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return []; }
+      return data || [];
+    },
+    async uploadsTopCamerasAll(limit = 10) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_uploads_top_cameras_all', { p_limit: limit });
+      if (error) { console.warn('[analytics.uploadsTopCamerasAll]', error.message); return []; }
       return data || [];
     },
     async uploadsThemeRatio(days = 30) {
