@@ -11,6 +11,8 @@
   const JPEG_QUALITY = 0.85;
   const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
   const LS_KEY = '5ft_submission_meta';
+  const LS_RECENT_CAMERAS = '5ft_recent_cameras';
+  const RECENT_CAMERA_LIMIT = 6;
   const THEME_PATH = 'data/current-theme.json';
   const FILMS_PATH = 'data/films.json';
   const db = () => window.MagDB;
@@ -332,10 +334,15 @@
       <p class="rs-desc">한 컷을 보내주세요. 편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).</p>
       ${themeBlock}
       <form class="rs-form" id="rs-form">
-        <label class="rs-field">
+        <label class="rs-field rs-photo-field">
           <span class="rs-label">사진 <em>*</em></span>
-          <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required />
-          <span class="rs-hint">JPG / PNG / WebP. 자동으로 웹용 크기로 줄여 업로드합니다.</span>
+          <input class="rs-file-input" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required />
+          <span class="rs-dropzone" id="rs-dropzone" role="button" tabindex="0" aria-label="사진 파일 선택">
+            <span class="rs-dropzone-title">사진을 끌어오거나 클릭해서 선택</span>
+            <span class="rs-dropzone-meta">JPG / PNG / WebP · 1장</span>
+            <span class="rs-dropzone-file" id="rs-file-name">선택된 사진 없음</span>
+          </span>
+          <span class="rs-hint">자동으로 웹용 크기로 줄여 업로드합니다.</span>
           <div class="rs-preview" id="rs-preview"></div>
         </label>
         <label class="rs-field">
@@ -382,6 +389,7 @@
                  placeholder="목록에서 고르거나 직접 입력 (예: Leica M6)"
                  value="${escapeAttr(meta.camera || '')}" maxlength="60" autocomplete="off" />
           <datalist id="rs-camera-list"></datalist>
+          <div class="rs-recent-cameras" id="rs-recent-cameras" hidden></div>
           <div class="rs-camera-hint" id="rs-camera-hint" hidden></div>
         </label>
         <label class="rs-field">
@@ -441,6 +449,44 @@
   function showError(msg) {
     const el = document.getElementById('rs-error');
     if (el) el.textContent = msg;
+  }
+
+  function normalizeCameraLabel(s) {
+    return String(s ?? '').trim().replace(/\s+/g, ' ');
+  }
+
+  function readRecentCameras() {
+    try {
+      const rows = JSON.parse(localStorage.getItem(LS_RECENT_CAMERAS) || '[]');
+      if (!Array.isArray(rows)) return [];
+      if (!rows.length) {
+        try {
+          const meta = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+          if (meta.camera) rows.push(meta.camera);
+        } catch {}
+      }
+      const seen = new Set();
+      const out = [];
+      for (const row of rows) {
+        const label = normalizeCameraLabel(row);
+        const key = label.toLowerCase();
+        if (!label || seen.has(key)) continue;
+        seen.add(key);
+        out.push(label);
+        if (out.length >= RECENT_CAMERA_LIMIT) break;
+      }
+      return out;
+    } catch {
+      return [];
+    }
+  }
+
+  function saveRecentCamera(camera) {
+    const label = normalizeCameraLabel(camera);
+    if (!label) return;
+    const next = [label].concat(readRecentCameras().filter(c => c.toLowerCase() !== label.toLowerCase()))
+      .slice(0, RECENT_CAMERA_LIMIT);
+    try { localStorage.setItem(LS_RECENT_CAMERAS, JSON.stringify(next)); } catch {}
   }
 
   // OAuth 복귀 후 모달 상태 복원용 keys
@@ -708,9 +754,23 @@
     return `${bl} ${c.display}`;
   }
 
+  function renderRecentCameraChips(container, input) {
+    if (!container || !input) return;
+    const recent = readRecentCameras();
+    if (!recent.length) {
+      container.hidden = true;
+      container.innerHTML = '';
+      return;
+    }
+    container.innerHTML = '<span class="rs-recent-cameras-label">최근 사용</span>'
+      + recent.map(camera => `<button type="button" class="rs-recent-camera" data-camera="${escapeAttr(camera)}">${escapeHtml(camera)}</button>`).join('');
+    container.hidden = false;
+  }
+
   async function populateCameraDatalist() {
     const input    = document.getElementById('rs-camera-input');
     const datalist = document.getElementById('rs-camera-list');
+    const recent   = document.getElementById('rs-recent-cameras');
     const hint     = document.getElementById('rs-camera-hint');
     if (!input || !datalist) return;
     const list = await buildCameraList();
@@ -719,6 +779,15 @@
       const labelText = c.brand ? brandLabel(c.brand) : '직접 입력';
       return `<option value="${escapeAttr(formatted)}">${escapeAttr(labelText)}</option>`;
     }).join('');
+
+    renderRecentCameraChips(recent, input);
+    recent?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-camera]');
+      if (!btn) return;
+      input.value = btn.dataset.camera || '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+    });
 
     if (!hint) return;
     let debounce = null;
@@ -744,6 +813,7 @@
       const btn = e.target.closest('[data-pick]');
       if (!btn) return;
       input.value = btn.dataset.pick;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
       hint.hidden = true;
       input.focus();
     });
@@ -756,13 +826,19 @@
     // 카메라 입력 — datalist + 유사 모델 힌트
     populateCameraDatalist();
 
-    // 미리보기
+    // 사진 선택 / 드래그앤드롭 / 미리보기
     const fileInput = form.querySelector('input[name="photo"]');
-    fileInput?.addEventListener('change', () => {
-      const file = fileInput.files?.[0];
+    const dropzone = document.getElementById('rs-dropzone');
+    const fileName = document.getElementById('rs-file-name');
+    function renderPhotoPreview(file, note = '') {
       const preview = document.getElementById('rs-preview');
       if (!preview) return;
       preview.innerHTML = '';
+      if (fileName) {
+        fileName.textContent = file
+          ? `${file.name}${note ? ` · ${note}` : ''}`
+          : '선택된 사진 없음';
+      }
       if (file) {
         const url = URL.createObjectURL(file);
         const img = document.createElement('img');
@@ -770,6 +846,54 @@
         img.onload = () => URL.revokeObjectURL(url);
         preview.appendChild(img);
       }
+    }
+    function isAcceptedImage(file) {
+      if (!file) return false;
+      if (/^image\/(jpeg|png|webp)$/i.test(file.type || '')) return true;
+      return /\.(jpe?g|png|webp)$/i.test(file.name || '');
+    }
+    function setDroppedPhoto(files) {
+      const list = Array.from(files || []);
+      const file = list.find(isAcceptedImage);
+      if (!file) {
+        showError('JPG, PNG, WebP 이미지만 올릴 수 있어요.');
+        return;
+      }
+      if (typeof DataTransfer === 'undefined') {
+        showError('이 브라우저에서는 드래그앤드롭 파일 지정이 지원되지 않아요. 파일 선택 버튼을 사용해 주세요.');
+        return;
+      }
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+      renderPhotoPreview(file, list.length > 1 ? '첫 번째 사진만 선택됨' : '');
+      showError('');
+    }
+    fileInput?.addEventListener('change', () => {
+      renderPhotoPreview(fileInput.files?.[0] || null);
+    });
+    dropzone?.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      fileInput?.click();
+    });
+    ['dragenter', 'dragover'].forEach(type => {
+      dropzone?.addEventListener(type, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('is-dragover');
+      });
+    });
+    ['dragleave', 'dragend', 'drop'].forEach(type => {
+      dropzone?.addEventListener(type, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('is-dragover');
+      });
+    });
+    dropzone?.addEventListener('drop', (e) => {
+      setDroppedPhoto(e.dataTransfer?.files);
     });
 
     // 필름 picker — 카탈로그 모드 / 신청 모드
@@ -961,6 +1085,7 @@
         }
 
         // 4) 메타 기억
+        saveRecentCamera(camera);
         try {
           localStorage.setItem(LS_KEY, JSON.stringify({
             submitterName,

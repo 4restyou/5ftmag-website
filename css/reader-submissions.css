@@ -235,6 +235,40 @@
   color: var(--text-dim);
   line-height: 1.5;
 }
+.rs-recent-cameras {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.rs-recent-cameras[hidden] { display: none; }
+.rs-recent-cameras-label {
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.rs-recent-camera {
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  padding: 7px 9px;
+  background: var(--bg-sub);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.rs-recent-camera:hover,
+.rs-recent-camera:focus-visible {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  outline: none;
+}
 /* 카메라 입력 — 유사 모델 힌트 */
 .rs-camera-hint {
   margin-top: 6px;
@@ -295,6 +329,56 @@
 .rs-form input[type="file"] {
   cursor: pointer;
   padding: 8px;
+}
+.rs-photo-field { position: relative; }
+.rs-photo-field .rs-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.rs-dropzone {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 112px;
+  padding: 18px;
+  place-content: center;
+  text-align: center;
+  background: var(--bg-sub);
+  color: var(--text);
+  border: 1px dashed var(--border-strong, var(--border));
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .14s, border-color .14s, color .14s;
+}
+.rs-dropzone:hover,
+.rs-dropzone:focus-visible,
+.rs-dropzone.is-dragover {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  outline: none;
+}
+.rs-dropzone-title {
+  font-size: 14px;
+  font-weight: var(--fw-heading);
+  line-height: 1.35;
+}
+.rs-dropzone-meta,
+.rs-dropzone-file {
+  font-size: 12px;
+  line-height: 1.4;
+  color: inherit;
+  opacity: .72;
+}
+.rs-dropzone-file {
+  overflow-wrap: anywhere;
 }
 
 /* 미리보기 */
