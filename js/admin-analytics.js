@@ -722,6 +722,30 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+async function purgeClientErrors() {
+  const btn = $('clientErrorsPurgeBtn');
+  if (!btn) return;
+  if (!window.confirm('30일 이전 JS 오류 로그를 삭제할까요?')) return;
+  btn.disabled = true;
+  const prev = btn.textContent;
+  btn.textContent = '정리 중…';
+  try {
+    const res = await db().analytics.clientErrorsPurge(30);
+    if (res?.error) {
+      window.showToast?.('정리 실패: ' + (res.error.message || ''), { type: 'danger' });
+    } else {
+      const n = res?.deleted ?? 0;
+      window.showToast?.(n ? `오래된 로그 ${n}건을 정리했어요.` : '정리할 로그가 없었어요.');
+      await loadClientErrors();
+    }
+  } catch (err) {
+    window.showToast?.('정리 실패: ' + (err?.message || err), { type: 'danger' });
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prev;
+  }
+}
+
 (async function main() {
   for (let i = 0; i < 50; i++) {
     if (db() && db().isReady()) break;
@@ -731,6 +755,7 @@ document.addEventListener('visibilitychange', () => {
   if (!ok) return;
   $('gate').hidden = true;
   $('app').hidden = false;
+  $('clientErrorsPurgeBtn')?.addEventListener('click', purgeClientErrors);
   await Promise.all([loadThumbnailDebt(), loadClientErrors()]);
   await reload();
   startOpsWatch();
