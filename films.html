@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-mobilemore">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-stripalt">
 </head>
 <body>
 
@@ -2148,7 +2148,10 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, innerW, innerH);
 
-    const frameImg = await loadCanvasImage('img/filmstrip-frame.svg?v=4');
+    const [frameImgA, frameImgB] = await Promise.all([
+      loadCanvasImage('img/filmstrip-frame.svg?v=4'),
+      loadCanvasImage('img/filmstrip-frame-2.svg?v=4'),
+    ]);
     const loaded = await Promise.all(frames.map(frame => frame?.src ? loadCanvasImage(frame.src, true) : Promise.resolve(null)));
     frames.forEach((frame, idx) => {
       const col = idx % cols;
@@ -2161,6 +2164,7 @@
       if (img) {
         drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
       }
+      const frameImg = (idx % 2 === 0) ? frameImgA : frameImgB;
       if (frameImg) ctx.drawImage(frameImg, x, y, tileW, tileH);
     });
     return canvas;
