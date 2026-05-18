@@ -689,7 +689,7 @@
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
       return;
     }
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
@@ -937,7 +937,7 @@
     btn.addEventListener('click', async () => {
       if (btn.classList.contains('is-busy')) return;
       if (!window.MagDB || !window.MagDB.isReady()) {
-        window.notify?.('잠시 후 다시 시도해주세요.');
+        window.notify?.('잠시 후 다시 시도해주세요.', 'info');
         return;
       }
       const sess = await window.MagDB.auth.getSession();
@@ -953,7 +953,7 @@
       btn.classList.remove('is-busy');
       if (error) {
         setArticleFavState(btn, wasFav);
-        window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+        window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
       }
     });
   }

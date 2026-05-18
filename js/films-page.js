@@ -526,7 +526,7 @@
     const slug = el.dataset.filmSlug;
     if (!slug) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
@@ -546,7 +546,7 @@
       // 롤백
       if (wasFav) filmFavSlugs.add(slug); else filmFavSlugs.delete(slug);
       syncFilmFavMarks();
-      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
     }
   }
 
@@ -1689,7 +1689,7 @@
     const subId = lightboxFav.dataset.submissionId || '';
     if (!subId) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
@@ -1711,7 +1711,7 @@
       if (wasFav) photoFavIds.add(subId); else photoFavIds.delete(subId);
       lightboxFav.classList.toggle('is-fav', wasFav);
       lightboxFav.setAttribute('aria-pressed', String(wasFav));
-      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
     }
   }
   async function loadPhotoFavorites() {
@@ -2074,7 +2074,7 @@
       a.remove();
     } catch (err) {
       console.error('[save-contrib]', err);
-      window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
+      window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -2110,7 +2110,7 @@
       a.remove();
     } catch (err) {
       console.error('[save-roll]', err);
-      window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
+      window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
