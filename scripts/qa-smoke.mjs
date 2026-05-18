@@ -117,6 +117,25 @@ const siteCommonJs = readFileSync(join(ROOT, 'js/site-common.js'), 'utf8');
 check(siteCommonJs.includes('function pvReferrerDomain()'), 'site-common missing referrer minimization helper');
 check(!siteCommonJs.includes('document.referrer.slice'), 'site-common should not store full referrer URLs');
 
+// 7) Analytics DB access contract
+for (const file of [
+  'supabase/migrations/20260518000001_page_views.sql',
+  'supabase/migrations/20260518000002_page_views_locale.sql',
+  'supabase/migrations/20260518000003_page_dwells.sql',
+]) {
+  const sql = readFileSync(join(ROOT, file), 'utf8');
+  for (const match of sql.matchAll(/create or replace function public\.(admin_analytics_[a-z_]+)/g)) {
+    const start = match.index;
+    const next = sql.indexOf('create or replace function public.', start + 1);
+    const body = sql.slice(start, next < 0 ? sql.length : next);
+    check(/security definer/i.test(body), `${relative(ROOT, file)} ${match[1]} missing SECURITY DEFINER`);
+    check(/perform public\._analytics_assert_editor\(\)/i.test(body), `${relative(ROOT, file)} ${match[1]} missing editor guard`);
+  }
+}
+const retentionSql = readFileSync(join(ROOT, 'supabase/migrations/20260518000004_analytics_retention.sql'), 'utf8');
+check(/delete from public\.page_views/i.test(retentionSql), 'Analytics retention should purge page_views');
+check(/delete from public\.page_dwells/i.test(retentionSql), 'Analytics retention should purge page_dwells');
+
 if (failures.length) {
   console.error('\n  QA 실패:');
   for (const failure of failures) console.error(`  - ${failure}`);
