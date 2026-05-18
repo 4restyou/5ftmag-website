@@ -66,6 +66,16 @@
     return String(l).slice(0, 32);
   }
 
+  function pvReferrerDomain() {
+    if (!document.referrer || document.referrer.startsWith(location.origin)) return '';
+    try {
+      const u = new URL(document.referrer);
+      return u.hostname.replace(/^www\./i, '').toLowerCase().slice(0, 255);
+    } catch (_) {
+      return '';
+    }
+  }
+
   // utm_*, fb/google 광고 클릭 ID 등 트래킹 파라미터 제거 — 같은 페이지가 100가지 변종으로 흩어지는 걸 방지
   const PV_TRACKING_KEYS = new Set([
     'fbclid', 'gclid', 'gbraid', 'wbraid', 'msclkid', 'yclid', 'dclid', 'twclid',
@@ -94,9 +104,7 @@
   function recordPageView() {
     if (pvShouldSkip()) return;
     const path = pvCleanPath().slice(0, 500);
-    const referrer = document.referrer
-      ? (document.referrer.startsWith(location.origin) ? '' : document.referrer.slice(0, 1000))
-      : '';
+    const referrer = pvReferrerDomain();
     const payload = {
       path,
       referrer: referrer || null,

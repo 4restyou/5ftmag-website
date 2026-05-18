@@ -108,6 +108,15 @@ for (const author of authors) {
 }
 console.log(`  Author archives: ${authors.length}`);
 
+// 6) Privacy/analytics disclosure contract
+const privacyHtml = readFileSync(join(ROOT, 'legal/privacy.html'), 'utf8');
+for (const phrase of ['외부 유입 도메인', '시간대', '페이지 체류 시간', '방문 세션 구분']) {
+  check(privacyHtml.includes(phrase), `Privacy policy missing analytics disclosure phrase: ${phrase}`);
+}
+const siteCommonJs = readFileSync(join(ROOT, 'js/site-common.js'), 'utf8');
+check(siteCommonJs.includes('function pvReferrerDomain()'), 'site-common missing referrer minimization helper');
+check(!siteCommonJs.includes('document.referrer.slice'), 'site-common should not store full referrer URLs');
+
 if (failures.length) {
   console.error('\n  QA 실패:');
   for (const failure of failures) console.error(`  - ${failure}`);
