@@ -148,8 +148,21 @@
     return ERROR_IGNORES.some(re => re.test(msg));
   }
 
+  // 에러 페이로드에서 흘러올 수 있는 민감 정보 마스킹.
+  // stack 에는 인라인 핸들러 클로저의 사용자 입력이 묻어오는 경우가 있어,
+  // 송신 전에 한 번 걸러낸다.
+  function maskErrorPII(s) {
+    if (!s) return s;
+    return String(s)
+      .replace(/[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/g, '[email]')
+      .replace(/\b0\d{1,2}-?\d{3,4}-?\d{4}\b/g, '[phone]')
+      .replace(/\b(?:Bearer|bearer)\s+[A-Za-z0-9\-._~+/=]+/g, 'Bearer [token]')
+      .replace(/eyJ[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+/g, '[jwt]');
+  }
+
   function recordClientError(payload) {
-    const message = String(payload?.message || 'Unknown client error').slice(0, 1000);
+    const rawMessage = String(payload?.message || 'Unknown client error');
+    const message = maskErrorPII(rawMessage).slice(0, 1000);
     if (shouldSkipErrorLog(message)) return;
     errorLogCount += 1;
     const body = {
@@ -158,7 +171,7 @@
       source: payload?.source ? String(payload.source).slice(0, 500) : null,
       lineno: Number.isFinite(payload?.lineno) ? payload.lineno : null,
       colno: Number.isFinite(payload?.colno) ? payload.colno : null,
-      stack: payload?.stack ? String(payload.stack).slice(0, 4000) : null,
+      stack: payload?.stack ? maskErrorPII(String(payload.stack)).slice(0, 4000) : null,
       ua_family: pvUaFamily(navigator.userAgent || ''),
       session_id: pvSessionId(),
     };

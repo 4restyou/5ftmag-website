@@ -713,6 +713,12 @@
       if (error) { console.warn('[analytics.clientErrorsRecent]', error.message); return []; }
       return data || [];
     },
+    async clientErrorsPurge(keepDays = 30) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { data, error } = await c.rpc('admin_client_errors_purge', { p_keep_days: keepDays });
+      if (error) { console.warn('[analytics.clientErrorsPurge]', error.message); return { error }; }
+      return { deleted: Number(data) || 0 };
+    },
   };
 
   // ─── Realtime ───
