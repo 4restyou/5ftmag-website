@@ -136,6 +136,13 @@ const retentionSql = readFileSync(join(ROOT, 'supabase/migrations/20260518000004
 check(/delete from public\.page_views/i.test(retentionSql), 'Analytics retention should purge page_views');
 check(/delete from public\.page_dwells/i.test(retentionSql), 'Analytics retention should purge page_dwells');
 
+// 8) Cleanup contract
+check(!existsSync(join(ROOT, 'debug-notif.html')), 'Temporary debug-notif.html should not be deployed');
+const dbClientJs = readFileSync(join(ROOT, 'js/db-client.js'), 'utf8');
+check(!dbClientJs.includes('debug_notif_status'), 'db-client should not expose notification debug RPC');
+const cleanupSql = readFileSync(join(ROOT, 'supabase/migrations/20260518000005_remove_notification_debug_rpc.sql'), 'utf8');
+check(/drop function if exists public\.debug_notif_status\(\)/i.test(cleanupSql), 'Cleanup migration should remove debug_notif_status RPC');
+
 if (failures.length) {
   console.error('\n  QA 실패:');
   for (const failure of failures) console.error(`  - ${failure}`);

@@ -565,12 +565,6 @@
       if (!uid) return { error: { message: 'login required' } };
       return c.from('user_notifications').delete().eq('id', id).eq('user_id', uid);
     },
-    async debugStatus() {
-      const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('debug_notif_status');
-      if (error) { console.warn('[notif.debugStatus]', error.message); return { error }; }
-      return data;
-    },
   };
 
   // ─── 카메라 브랜드 오버라이드 (편집부가 사이트에서 직접 보강) ───
