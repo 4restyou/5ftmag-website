@@ -2082,6 +2082,32 @@
     "canThumbnail": "img/films/fomapan100-can.webp",
     "canThumbnailStatus": "set"
   },
+  "fomapan200": {
+    "slug": "fomapan200",
+    "tier": "library",
+    "brand": "FOMA",
+    "name": "Fomapan 200 Creative",
+    "displayName": "Foma Fomapan 200 Creative",
+    "aliases": [
+      "Fomapan 200",
+      "Fomapan200",
+      "Fomapan 200 Creative",
+      "Foma 200",
+      "Foma Fomapan 200",
+      "Foma Fomapan 200 Creative",
+      "포마판 200",
+      "포마판200",
+      "포마 200",
+      "포마판 200 크리에이티브",
+      "fomapan200"
+    ],
+    "desc": "체코 Foma의 ISO 200 흑백 네거티브. FOMAPAN 200 Creative는 팬크로매틱 필름으로, 고운 입자와 높은 해상력, 선명한 윤곽 표현을 목표로 만든 중감도 흑백 한 롤입니다.",
+    "iso": "200",
+    "type": "Black & White",
+    "format": "35mm, 120, Sheet",
+    "photographers": [],
+    "photos": []
+  },
   "agfaapx100": {
     "slug": "agfaapx100",
     "tier": "library",
