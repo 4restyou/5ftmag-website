@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-headerbtn2">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-headerbtn3">
 </head>
 <body>
 
@@ -920,8 +920,10 @@
           <div class="modal-section-head">
             <span class="modal-section-tag">${escapeAttr(data.issue || 'ISSUE')} · EDITORIAL</span>
             <span class="modal-section-meta">사진가 ${escapeAttr(photographers.join(', '))}</span>
-            <button type="button" class="modal-view-toggle" data-view-toggle aria-label="컨택트 시트로 전환">컨택트 시트</button>
-            <button type="button" class="modal-view-save" data-save-roll="editorial" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
+            <div class="modal-section-actions">
+              <button type="button" class="modal-view-toggle" data-view-toggle aria-label="컨택트 시트로 전환">컨택트 시트</button>
+              <button type="button" class="modal-view-save" data-save-roll="editorial" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
+            </div>
           </div>
           <div class="modal-gallery" data-view="grid" id="editorialGallery-${escapeAttr(filmKey)}">
             ${photosHTML}
@@ -943,8 +945,10 @@
         <div class="modal-section-head">
           <span class="modal-section-tag">READER'S ROLL</span>
           <span class="modal-section-meta" id="readerRollCounter-${filmKey}">0 / ${ROLL_LIMIT}</span>
-          <button type="button" class="modal-view-toggle" data-view-toggle aria-label="기본 그리드로 전환">기본 그리드</button>
-          <button type="button" class="modal-view-save" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
+          <div class="modal-section-actions">
+            <button type="button" class="modal-view-toggle" data-view-toggle aria-label="기본 그리드로 전환">기본 그리드</button>
+            <button type="button" class="modal-view-save" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
+          </div>
         </div>
         <p class="reader-roll-intro">
           ${isFeatured
