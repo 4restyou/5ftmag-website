@@ -547,14 +547,25 @@
           ${n.body ? `<div class="notif-item-body">${escapeHtml(n.body)}</div>` : ''}
           <div class="notif-item-time">${fmtAgo(n.created_at)}</div>
         </a>`).join('');
-      // 클릭 시 해당 알림 읽음 처리
+      // 알림을 누르면 사용자가 알림함을 확인한 것으로 보고 전체 읽음 처리 후 이동.
+      // 링크 이동이 먼저 일어나면 비동기 markRead 요청이 취소될 수 있어 여기서 순서를 보장한다.
       list.querySelectorAll('.notif-item').forEach(el => {
-        el.addEventListener('click', async () => {
-          const id = el.dataset.id;
-          if (id && el.classList.contains('is-unread')) {
-            await window.MagDB.notifications.markRead([id]);
-            el.classList.remove('is-unread');
-            refreshBadge();
+        el.addEventListener('click', async (e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
+          e.preventDefault();
+          const href = el.getAttribute('href') || '#';
+          if (document.querySelector('#notifList .notif-item.is-unread')) {
+            updateBadge(0);
+            document.querySelectorAll('#notifList .notif-item.is-unread').forEach(item => item.classList.remove('is-unread'));
+            const { error } = await window.MagDB.notifications.markAllRead();
+            if (error) {
+              refreshBadge();
+            }
+          }
+          if (href && href !== '#') {
+            window.location.href = href;
+          } else {
+            closePanel();
           }
         });
       });
