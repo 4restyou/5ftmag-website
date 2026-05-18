@@ -1242,6 +1242,34 @@
     "canThumbnail": "img/films/fomapan400-can.webp",
     "canThumbnailStatus": "set"
   },
+  "holga400": {
+    "slug": "holga400",
+    "tier": "library",
+    "brand": "HOLGA",
+    "name": "400",
+    "displayName": "Holga 400",
+    "aliases": [
+      "Holga 400",
+      "Holga400",
+      "Holga 400 Black and White",
+      "Holga B&W 400",
+      "Holga BW 400",
+      "Foma Holga 400",
+      "Foma Holga 400 Black and White",
+      "홀가 400",
+      "홀가400",
+      "홀가 흑백 400",
+      "holga400"
+    ],
+    "desc": "Holga 카메라와 잘 어울리도록 브랜딩된 ISO 400 팬크로매틱 흑백 네거티브. Foma가 공급한 필름으로 알려져 있으며, 거친 입자와 담백한 톤 덕분에 토이카메라의 느슨한 묘사와 잘 맞는 한 롤입니다.",
+    "iso": "400",
+    "type": "Black & White",
+    "format": "35mm, 120",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
+  },
   "vision250d": {
     "slug": "vision250d",
     "tier": "library",
