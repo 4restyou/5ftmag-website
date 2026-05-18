@@ -314,6 +314,7 @@
   margin-left: auto;
   display: inline-flex;
   align-items: center;
+  align-self: center;
   line-height: 1;
   font: inherit;
   font-size: 11px;
@@ -1637,6 +1638,7 @@
   border-radius: 999px;
   border-color: rgba(255, 255, 255, 0.18);
   margin-left: 8px;
+  align-self: center;
 }
 .modal-view-save::before {
   width: 11px;
