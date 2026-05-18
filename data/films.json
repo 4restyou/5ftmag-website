@@ -3203,6 +3203,30 @@
     "canThumbnail": "img/films/wolfennc500-can.webp",
     "canThumbnailStatus": "set"
   },
+  "fujifilm100": {
+    "slug": "fujifilm100",
+    "tier": "library",
+    "brand": "FUJIFILM",
+    "name": "Fujicolor 100",
+    "displayName": "Fujifilm 100",
+    "aliases": [
+      "Fujifilm 100",
+      "Fujicolor 100",
+      "Fuji 100",
+      "FujiColor 100",
+      "후지필름 100",
+      "후지컬러 100",
+      "후지 100",
+      "fujifilm100",
+      "fujicolor100"
+    ],
+    "desc": "후지의 ISO 100 데일리 컬러 네거티브. 밝은 낮과 여행 스냅에 잘 맞는 낮은 감도 필름으로, 비교적 맑고 차분한 색과 고운 입자감이 특징이에요. Fujifilm 200/400 과 함께 기본 컬러 라인으로 찾기 좋은 한 롤입니다.",
+    "iso": "100",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
+  },
   "fujifilm200": {
     "slug": "fujifilm200",
     "tier": "library",
