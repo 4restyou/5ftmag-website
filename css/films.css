@@ -310,18 +310,28 @@
    컨택트 시트 모드 — 35mm 필름 비율 + perforation
    data-view="contact" 일 때 그리드를 필름 스트립처럼 변환
    ════════════════════════════════════════════ */
-.modal-view-toggle {
+/* 헤더 우측 액션 묶음 — 두 알약 버튼을 일관된 간격으로 정렬 */
+.modal-section-actions {
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  align-self: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modal-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  box-sizing: border-box;
   line-height: 1;
   font: inherit;
   font-size: 11px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 6px 12px;
+  padding: 0 14px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.18);
   color: rgba(255,255,255,0.85);
@@ -1627,18 +1637,18 @@
   opacity: 0.5;
   cursor: wait;
 }
-/* 헤더용 — 옆 .modal-view-toggle 과 같은 사이즈/높이로 통일 */
+/* 헤더용 — 옆 .modal-view-toggle 과 정확히 같은 박스 사이즈로 통일 */
 .modal-view-save {
+  height: 28px;
+  box-sizing: border-box;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1;
-  padding: 6px 12px;
+  padding: 0 14px;
   gap: 6px;
   border-radius: 999px;
   border-color: rgba(255, 255, 255, 0.18);
-  margin-left: 8px;
-  align-self: center;
 }
 .modal-view-save::before {
   width: 11px;
