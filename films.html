@@ -944,6 +944,7 @@
           <span class="modal-section-tag">READER'S ROLL</span>
           <span class="modal-section-meta" id="readerRollCounter-${filmKey}">0 / ${ROLL_LIMIT}</span>
           <button type="button" class="modal-view-toggle" data-view-toggle aria-label="기본 그리드로 전환">기본 그리드</button>
+          <button type="button" class="modal-view-save" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
         </div>
         <p class="reader-roll-intro">
           ${isFeatured
@@ -960,7 +961,6 @@
           <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
             ${isFeatured ? '컷 채우기' : '첫 컷 채우기'}
           </button>
-          <button type="button" class="reader-save-btn" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden>이미지로 저장</button>
           <a href="me.html" class="reader-mine-link">내 사진 관리 →</a>
         </div>
       </div>`;
