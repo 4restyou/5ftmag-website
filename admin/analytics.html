@@ -417,8 +417,13 @@ function drawBarChart(svgId, tipId, rows, valueKey, tipFormatter) {
   });
 
   const labelStride = Math.max(1, Math.ceil(n / 8));
+  const lastI = n - 1;
   rows.forEach((r, i) => {
-    if (i % labelStride !== 0 && i !== n - 1) return;
+    const isStride = i % labelStride === 0;
+    const isLast = i === lastI;
+    if (!isStride && !isLast) return;
+    // stride 라벨이 마지막 라벨과 너무 가까우면 (한 stride 미만) skip — 겹침 방지
+    if (isStride && !isLast && lastI - i < labelStride) return;
     const x = PAD_L + (innerW / n) * i + (innerW / n) / 2;
     g += `<text class="axis-label" x="${x.toFixed(1)}" y="${(H - 6).toFixed(1)}" text-anchor="middle">${fmtDay(r.day)}</text>`;
   });
