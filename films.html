@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-contrib2">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-contribwin">
 </head>
 <body>
 
@@ -1268,8 +1268,10 @@
             <div class="reader-contributor-grid" id="contribGrid-${escapeAttr(personKey)}-${gIdx}">
               ${rows.map((sub, idx) => `
                 <button type="button" class="reader-contributor-photo" data-person-key="${escapeAttr(personKey)}" data-photo-index="${idx}" data-film-name="${escapeAttr(filmName)}" aria-label="${escapeAttr(filmName)} ${idx + 1}번째 사진 크게 보기">
-                  <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
-                  <span>${escapeAttr(sub.camera || sub.film || filmName)}</span>
+                  <span class="reader-contributor-photo-window">
+                    <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
+                  </span>
+                  <span class="reader-contributor-photo-caption">${escapeAttr(sub.camera || sub.film || filmName)}</span>
                 </button>
               `).join('')}
             </div>
