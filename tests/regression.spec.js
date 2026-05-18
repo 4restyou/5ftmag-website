@@ -176,3 +176,71 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
   await expect(page.locator('#rs-upload-status')).toContainText(/사진을 읽는 중|사진 크기 줄이는 중|사진을 압축하는 중|사진 업로드 중|제출 기록 저장 중/);
   await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
 });
+
+test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    const rows = Array.from({ length: 73 }, (_, i) => ({
+      id: `sub-${i + 1}`,
+      image: `data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==#${i}`,
+      storage_path: `test/${i}.jpg`,
+      author: i % 2 ? '@roll_user' : '@another_user',
+      submitterName: i % 2 ? 'roll_user' : 'another_user',
+      instagram: i % 2 ? '@roll_user' : '@another_user',
+      film: 'Kodak UltraMax 400',
+      camera: 'Leica M6',
+      caption: '',
+      created_at: new Date(2026, 0, i + 1).toISOString(),
+      createdAt: new Date(2026, 0, i + 1).toISOString(),
+      published: true,
+    }));
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        listApproved: async () => rows,
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/films.html');
+  await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await expect(page.locator('#readerRollCounter-ultramax')).toContainText('1 / 36 · 3롤', { timeout: 5000 });
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-numbers')).toBeHidden();
+
+  await page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle').click();
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-number')).toHaveText(['2', '1']);
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toHaveAttribute('aria-expanded', 'true');
+
+  await page.locator('#readerRollSwitcher-ultramax .reader-roll-number[data-roll-number="1"]').click();
+  await expect(page.locator('#readerRollCounter-ultramax')).toContainText('36 / 36 · 1롤');
+  await expect(page.locator('.reader-roll-intro')).toContainText('1번째 지난 롤');
+});

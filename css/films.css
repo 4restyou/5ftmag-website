@@ -1098,10 +1098,11 @@
 }
 .reader-roll-switcher {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
   margin: 0 0 14px;
+  max-width: 100%;
 }
 .reader-roll-switcher [hidden] {
   display: none;
@@ -1131,12 +1132,18 @@
 }
 .reader-roll-numbers {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  padding: 1px 0 4px;
 }
 .reader-roll-number {
   min-width: 34px;
   padding: 8px 10px;
+  flex: 0 0 auto;
 }
 .reader-roll-toggle:hover,
 .reader-roll-toggle.is-active,
