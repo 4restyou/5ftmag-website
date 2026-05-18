@@ -388,9 +388,10 @@
   background: transparent;
   display: block;
 }
-/* 세로 사진 — wrapper aspect 1.520 에 맞춰 dim swap 후 90° 회전 */
-.modal-gallery[data-view="contact"] .modal-photo.is-portrait picture,
-.modal-gallery[data-view="contact"] .modal-photo.is-portrait img {
+/* 세로 사진 — wrapper aspect 1.520 에 맞춰 dim swap 후 90° 회전.
+   direct child 만 회전 (picture 가 있으면 picture 만, 없으면 img 만 → 이중 회전 방지) */
+.modal-gallery[data-view="contact"] .modal-photo.is-portrait > picture,
+.modal-gallery[data-view="contact"] .modal-photo.is-portrait > img {
   top: 50%;
   left: 50%;
   right: auto;
