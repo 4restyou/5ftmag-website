@@ -451,6 +451,7 @@
 <script src="../js/db-client.js?v=20260518-uploads"></script>
 <script src="../js/image-processor.js?v=20260518-uploadstable"></script>
 <script src="../js/reader-submissions.js?v=20260518-uploadstable"></script>
+<script src="../js/site-common.js?v=20260518-cleanup"></script>
 <script>
 'use strict';
 
@@ -757,18 +758,18 @@ function bindCardActions() {
           if (!canonical) return;
           btn.disabled = true;
           const { error } = await db().review.patch(id, { film: canonical });
-          if (error) { alert('필름 표기를 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')'); btn.disabled = false; return; }
+          if (error) { window.notify?.('필름 표기를 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')'); btn.disabled = false; return; }
           await loadList();
         } else if (action === 'edit-film') {
           const current = btn.dataset.film || '';
           const v = prompt('필름 표기를 직접 수정합니다.\n(예: Kodak Portra 400)', current);
           if (v === null) return;
           const trimmed = String(v).trim();
-          if (!trimmed) { alert('필름 표기는 비워둘 수 없습니다. 정확한 필름명을 입력해 주세요.'); return; }
+          if (!trimmed) { window.notify?.('필름 표기는 비워둘 수 없습니다. 정확한 필름명을 입력해 주세요.'); return; }
           if (trimmed === current) return;
           btn.disabled = true;
           const { error } = await db().review.patch(id, { film: trimmed });
-          if (error) { alert('필름 표기를 수정하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')'); btn.disabled = false; return; }
+          if (error) { window.notify?.('필름 표기를 수정하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')'); btn.disabled = false; return; }
           await loadList();
         } else if (action === 'approve') {
           btn.disabled = true; btn.textContent = '처리 중…';
@@ -776,7 +777,7 @@ function bindCardActions() {
             status: 'approved', rejection_reason: null,
             reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id,
           });
-          if (error) { alert('승인 처리에 실패했어요. 권한과 네트워크 상태를 확인해 주세요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '승인'; return; }
+          if (error) { window.notify?.('승인 처리에 실패했어요. 권한과 네트워크 상태를 확인해 주세요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '승인'; return; }
           await Promise.all([loadCounts(), loadList()]);
         } else if (action === 'reject') {
           const reason = prompt('반려 사유를 입력하세요. 사용자가 내 정보에서 확인할 수 있습니다. (선택)', '');
@@ -786,13 +787,13 @@ function bindCardActions() {
             status: 'rejected', rejection_reason: reason || null,
             reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id,
           });
-          if (error) { alert('반려 처리에 실패했어요. 권한과 네트워크 상태를 확인해 주세요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '반려'; return; }
+          if (error) { window.notify?.('반려 처리에 실패했어요. 권한과 네트워크 상태를 확인해 주세요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '반려'; return; }
           await Promise.all([loadCounts(), loadList()]);
         } else if (action === 'delete') {
           if (!confirm('이 제출을 완전히 삭제할까요? 사진 파일과 DB 기록이 모두 지워져 복구할 수 없습니다.')) return;
           btn.disabled = true; btn.textContent = '삭제 중…';
           const { error: dbErr } = await db().review.remove(id);
-          if (dbErr) { alert('DB 기록을 삭제하지 못했어요. Storage 파일은 건드리지 않았습니다. (' + dbErr.message + ')'); btn.disabled = false; btn.textContent = '완전 삭제'; return; }
+          if (dbErr) { window.notify?.('DB 기록을 삭제하지 못했어요. Storage 파일은 건드리지 않았습니다. (' + dbErr.message + ')'); btn.disabled = false; btn.textContent = '완전 삭제'; return; }
           if (path) await db().submissions.removePhoto(path);
           await Promise.all([loadCounts(), loadList()]);
         }

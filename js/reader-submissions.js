@@ -546,7 +546,7 @@
     setTriggerLoading(triggerEl, true);
     try {
       if (!db() || !db().isReady()) {
-        alert('잠시 후 다시 시도해주세요. (DB 연결 준비 중)');
+        window.notify?.('잠시 후 다시 시도해주세요. (DB 연결 준비 중)');
         return;
       }
       const prefillFilm = triggerEl?.dataset?.prefillFilm || '';
@@ -568,11 +568,11 @@
       try {
         [theme, films] = await Promise.race([dataPromise, guard]);
       } catch (_) {
-        alert('사진 폼을 여는 데 시간이 너무 걸려요. 새로고침 후 다시 시도해 주세요.');
+        window.notify?.('사진 폼을 여는 데 시간이 너무 걸려요. 새로고침 후 다시 시도해 주세요.');
         return;
       }
       if (!films || !Object.keys(films).length) {
-        alert('필름 목록을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.');
+        window.notify?.('필름 목록을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.');
         return;
       }
       openModal(renderSubmissionForm(theme, savedPrefill, films));

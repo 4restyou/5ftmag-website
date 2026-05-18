@@ -558,7 +558,7 @@
     const subId = photoLbFav.dataset.submissionId || '';
     if (!subId) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      alert('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
@@ -578,7 +578,7 @@
       if (wasFav) photoFavIds.add(subId); else photoFavIds.delete(subId);
       photoLbFav.classList.toggle('is-fav', wasFav);
       photoLbFav.setAttribute('aria-pressed', String(wasFav));
-      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
     }
   }
   if (photoLbFav) photoLbFav.addEventListener('click', togglePhotoLbFav);

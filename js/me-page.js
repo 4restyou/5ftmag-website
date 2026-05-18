@@ -164,7 +164,7 @@ async function savePhotoEdits(card) {
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중…'; }
   const { error } = await db().submissions.updateMine(id, patch);
   if (error) {
-    alert('수정 내용을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')');
+    window.notify?.('수정 내용을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')');
     if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장'; }
     return;
   }
@@ -183,7 +183,7 @@ async function deletePhoto(card) {
   // RLS 가 silently 차단하면 error 없이 data: [] 로 돌아옴 — 반드시 명시 검사.
   // 검사 없이 storage 만 지우면 DB row 남아서 깨진 썸네일이 생김.
   if (error || !data?.length) {
-    alert('사진 제출을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다. 관리자에게 문의해 주세요.') + ')');
+    window.notify?.('사진 제출을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다. 관리자에게 문의해 주세요.') + ')');
     if (btn) { btn.disabled = false; btn.textContent = origLabel || '삭제'; }
     return;
   }
@@ -288,7 +288,7 @@ function bindMarketCardActions() {
         if (a === 'cycle') {
           btn.disabled = true;
           const { error } = await db().market.cycleStatusMine(id, status);
-          if (error) { alert('매물 상태를 변경하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); btn.disabled = false; return; }
+          if (error) { window.notify?.('매물 상태를 변경하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); btn.disabled = false; return; }
           await loadMarket();
         } else if (a === 'delete') {
           if (!confirm('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.')) return;
@@ -297,7 +297,7 @@ function bindMarketCardActions() {
           const { data, error } = await db().market.deleteMine(id);
           // RLS silent block 가드 — data 비면 storage 건드리지 않고 종료
           if (error || !data?.length) {
-            alert('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다.') + ')');
+            window.notify?.('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다.') + ')');
             btn.disabled = false; btn.textContent = '삭제';
             return;
           }

@@ -526,7 +526,7 @@
     const slug = el.dataset.filmSlug;
     if (!slug) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      alert('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
@@ -546,7 +546,7 @@
       // 롤백
       if (wasFav) filmFavSlugs.add(slug); else filmFavSlugs.delete(slug);
       syncFilmFavMarks();
-      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
     }
   }
 
@@ -1374,7 +1374,7 @@
     showLightbox(index, 'reader');
   }
 
-  function shareCameraModal(key) {
+  async function shareCameraModal(key) {
     const info = cameraIndex.get(key);
     if (!info) return;
     const u = new URL(location.href);
@@ -1388,10 +1388,8 @@
       navigator.share({ title, text, url }).catch(() => {});
       return;
     }
-    navigator.clipboard.writeText(url).then(
-      () => window.showToast && window.showToast('링크 복사 완료', { type: 'success' }),
-      () => window.showToast && window.showToast('복사 실패 — 주소창에서 직접 복사해주세요', { type: 'danger' })
-    );
+    const ok = await window.copyTextToClipboard?.(url);
+    window.notify?.(ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요', ok ? 'info' : 'danger');
   }
 
   // 필름 모달 공유 — market 의 shareListing 과 같은 패턴
@@ -1407,22 +1405,8 @@
     if (navigator.share) {
       try { await navigator.share({ title, text, url }); return; } catch (_) { return; }
     }
-    try {
-      await navigator.clipboard.writeText(url);
-      if (typeof window.showToast === 'function') window.showToast('링크 복사 완료', { type: 'success' });
-    } catch (_) {
-      const ta = document.createElement('textarea');
-      ta.value = url;
-      ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      let ok = false;
-      try { ok = document.execCommand('copy'); } catch (_) {}
-      ta.remove();
-      if (typeof window.showToast === 'function') {
-        window.showToast(ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요', { type: ok ? 'success' : 'danger' });
-      }
-    }
+    const ok = await window.copyTextToClipboard?.(url);
+    window.notify?.(ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요', ok ? 'info' : 'danger');
   }
 
   // 필름 카드 클릭
@@ -1705,7 +1689,7 @@
     const subId = lightboxFav.dataset.submissionId || '';
     if (!subId) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      alert('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
@@ -1727,7 +1711,7 @@
       if (wasFav) photoFavIds.add(subId); else photoFavIds.delete(subId);
       lightboxFav.classList.toggle('is-fav', wasFav);
       lightboxFav.setAttribute('aria-pressed', String(wasFav));
-      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
     }
   }
   async function loadPhotoFavorites() {
@@ -2090,7 +2074,7 @@
       a.remove();
     } catch (err) {
       console.error('[save-contrib]', err);
-      alert('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
+      window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -2126,7 +2110,7 @@
       a.remove();
     } catch (err) {
       console.error('[save-roll]', err);
-      alert('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
+      window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;

@@ -218,7 +218,7 @@
     const id = fav.dataset.articleId;
     if (!id) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      alert('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
@@ -236,7 +236,7 @@
     if (error) {
       if (wasFav) articleFavIds.add(id); else articleFavIds.delete(id);
       syncCardFavMarks();
-      alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
     }
   });
 

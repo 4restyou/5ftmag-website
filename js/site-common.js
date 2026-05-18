@@ -225,9 +225,9 @@
     }, 1600);
   }
 
-  function copyWithTextarea() {
+  function copyWithTextarea(text = window.location.href) {
     const ta = document.createElement('textarea');
-    ta.value = window.location.href;
+    ta.value = text;
     ta.style.position = 'fixed';
     ta.style.top = '0';
     ta.style.left = '0';
@@ -244,24 +244,23 @@
     return ok;
   }
 
-  function copyCurrentLink(btn) {
-    // execCommand is still the most reliable path for click-initiated copy
-    // across older WebViews; clipboard.writeText covers modern browsers.
-    if (copyWithTextarea()) {
-      setCopyButtonState(btn, '복사 완료');
-      return;
-    }
-
+  async function copyTextToClipboard(text) {
+    const value = String(text ?? '');
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(window.location.href).then(function () {
-        setCopyButtonState(btn, '복사 완료');
-      }).catch(function () {
-        setCopyButtonState(btn, '복사 실패');
-      });
-      return;
+      try {
+        await navigator.clipboard.writeText(value);
+        return true;
+      } catch (_) {}
     }
+    // execCommand fallback is kept for older in-app browsers/WebViews.
+    return copyWithTextarea(value);
+  }
+  window.copyTextToClipboard = copyTextToClipboard;
 
-    setCopyButtonState(btn, '복사 실패');
+  function copyCurrentLink(btn) {
+    copyTextToClipboard(window.location.href).then(function (ok) {
+      setCopyButtonState(btn, ok ? '복사 완료' : '복사 실패');
+    });
   }
   // 글로벌로도 노출 (기존 onclick="copyLink()" 호환)
   window.copyLink = copyCurrentLink;
@@ -455,9 +454,17 @@
   // 원본 alert 백업 — 아래 monkey-patch / notify 폴백에서 모두 참조
   const _origAlert = window.alert.bind(window);
 
+  function inferToastType(text, fallback = 'default') {
+    const s = String(text ?? '');
+    if (/실패|오류|거부|에러|못했어요|중단|시간 초과|불가|잘못|만료|삭제하지 못|저장하지 못|처리 실패|복사 실패/.test(s)) return 'danger';
+    if (/접수|완료|저장|등록|로그인|승인|성공|복사 완료|새 알림|들어왔어요/.test(s)) return 'info';
+    return fallback;
+  }
+
   // notify(msg, type) — showToast 있으면 toast, 없으면 alert
   window.notify = function (msg, type) {
-    if (typeof window.showToast === 'function') return window.showToast(msg, { type });
+    const inferred = type || inferToastType(msg);
+    if (typeof window.showToast === 'function') return window.showToast(msg, { type: inferred });
     _origAlert(String(msg ?? ''));
   };
 
@@ -469,9 +476,7 @@
   window.alert = function (msg) {
     const text = String(msg ?? '');
     // 알림 톤 추정 — 메시지 어조로 type 결정
-    let type = 'default';
-    if (/실패|오류|거부|에러|못했어요|중단|시간 초과|불가|잘못/.test(text))   type = 'danger';
-    else if (/접수|완료|저장|등록|로그인|승인|성공/.test(text))                type = 'info';
+    const type = inferToastType(text);
     if (typeof window.showToast === 'function') {
       return window.showToast(text, { type, duration: type === 'danger' ? 3500 : 2400 });
     }
@@ -604,7 +609,7 @@
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      alert('잠시 후 다시 시도해주세요.');
+      window.notify?.('잠시 후 다시 시도해주세요.');
       return;
     }
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
@@ -852,7 +857,7 @@
     btn.addEventListener('click', async () => {
       if (btn.classList.contains('is-busy')) return;
       if (!window.MagDB || !window.MagDB.isReady()) {
-        alert('잠시 후 다시 시도해주세요.');
+        window.notify?.('잠시 후 다시 시도해주세요.');
         return;
       }
       const sess = await window.MagDB.auth.getSession();
@@ -868,7 +873,7 @@
       btn.classList.remove('is-busy');
       if (error) {
         setArticleFavState(btn, wasFav);
-        alert('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
+        window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'));
       }
     });
   }

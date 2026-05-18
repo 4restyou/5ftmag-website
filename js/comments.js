@@ -56,26 +56,26 @@
     const { error } = await db().comments.insert({
       pageId: STATE.pageId, body, parentId,
     });
-    if (error) { alert('댓글을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')'); return false; }
+    if (error) { window.notify?.('댓글을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')'); return false; }
     return true;
   }
 
   async function updateComment(id, body) {
     const { error } = await db().comments.update(id, body);
-    if (error) { alert('댓글 수정을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); return false; }
+    if (error) { window.notify?.('댓글 수정을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')'); return false; }
     return true;
   }
 
   async function deleteComment(id) {
     if (!confirm('이 댓글을 삭제할까요? 삭제 후에는 본문을 다시 볼 수 없습니다.')) return false;
     const { error } = await db().comments.softDelete(id);
-    if (error) { alert('댓글을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + error.message + ')'); return false; }
+    if (error) { window.notify?.('댓글을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + error.message + ')'); return false; }
     return true;
   }
 
   async function toggleLike(commentId, alreadyLiked) {
     if (!STATE.user) {
-      alert('좋아요는 로그인 후에 누를 수 있어요. 로그인하면 이 글로 다시 돌아옵니다.');
+      window.notify?.('좋아요는 로그인 후에 누를 수 있어요. 로그인하면 이 글로 다시 돌아옵니다.');
       return;
     }
     if (alreadyLiked) await db().likes.remove(commentId);
@@ -281,9 +281,9 @@
   }
 
   async function loginWithGoogle() {
-    if (!db() || !db().isReady()) return alert('댓글 시스템을 불러오는 중이에요. 잠시 뒤 다시 시도해 주세요.');
+    if (!db() || !db().isReady()) return window.notify?.('댓글 시스템을 불러오는 중이에요. 잠시 뒤 다시 시도해 주세요.');
     const { error } = await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
-    if (error) alert('로그인을 시작하지 못했어요. 팝업 차단이나 네트워크 상태를 확인해 주세요. (' + error.message + ')');
+    if (error) window.notify?.('로그인을 시작하지 못했어요. 팝업 차단이나 네트워크 상태를 확인해 주세요. (' + error.message + ')');
   }
 
   async function logout() {
