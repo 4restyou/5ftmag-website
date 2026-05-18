@@ -45,6 +45,21 @@
     .card .v { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; }
     .card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
+    .ops-panel { border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 24px; background: var(--bg); }
+    .ops-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .ops-title { font-size: 14px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 0 0 4px; }
+    .ops-watch { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+    .ops-refresh { font: inherit; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.03em; padding: 7px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; white-space: nowrap; transition: border-color .15s, opacity .15s; }
+    .ops-refresh:hover { border-color: var(--text); }
+    .ops-refresh[disabled] { cursor: wait; opacity: 0.55; }
+    .ops-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .ops-item { display: block; min-height: 86px; padding: 14px; border-radius: 4px; background: var(--bg-sub); color: var(--text); text-decoration: none; }
+    .ops-item .k { font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .ops-item .v { font-size: 24px; font-weight: var(--fw-heading); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+    .ops-item .sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+    .ops-item.is-alert .v,
+    .ops-item.is-alert .sub { color: var(--text); }
+
     .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .mini-stat { background: var(--bg); border-radius: 4px; padding: 14px 16px; }
     .mini-stat .k { font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
@@ -98,6 +113,8 @@
 
     @media (max-width: 720px) {
       .cards { grid-template-columns: repeat(2, 1fr); }
+      .ops-head { flex-direction: column; }
+      .ops-grid { grid-template-columns: repeat(2, 1fr); }
       .panel { padding: 18px; }
       .card { padding: 16px; }
       .card .v { font-size: 24px; }
@@ -134,6 +151,38 @@
     <button type="button" class="range-btn is-current" data-days="30">30일</button>
     <button type="button" class="range-btn" data-days="90">90일</button>
   </div>
+
+  <section class="ops-panel" aria-live="polite">
+    <div class="ops-head">
+      <div>
+        <h2 class="ops-title">운영 알림</h2>
+        <p class="ops-watch" id="opsWatchLabel">페이지가 열려 있으면 1분마다 새 업로드와 신고 대기를 확인합니다.</p>
+      </div>
+      <button type="button" class="ops-refresh" id="opsRefresh">새로고침</button>
+    </div>
+    <div class="ops-grid">
+      <div class="ops-item" id="opsUploadItem">
+        <div class="k">누적 업로드</div>
+        <div class="v" id="opsTotalUploads">·</div>
+        <div class="sub" id="opsTotalUploadsSub">확인 중…</div>
+      </div>
+      <a class="ops-item" id="opsPendingItem" href="submissions.html?status=pending">
+        <div class="k">검토 대기</div>
+        <div class="v" id="opsPendingUploads">·</div>
+        <div class="sub">투고 검토로 이동</div>
+      </a>
+      <a class="ops-item" id="opsReportItem" href="market-reports.html">
+        <div class="k">신고 대기</div>
+        <div class="v" id="opsPendingReports">·</div>
+        <div class="sub">매물 신고로 이동</div>
+      </a>
+      <div class="ops-item" id="opsHealthItem">
+        <div class="k">상태</div>
+        <div class="v" id="opsHealth">·</div>
+        <div class="sub" id="opsLastChecked">마지막 확인 전</div>
+      </div>
+    </div>
+  </section>
 
   <div class="cards" id="cards">
     <div class="card"><div class="k">오늘</div><div class="v" id="cv-today">·</div><div class="sub" id="cs-today"></div></div>
@@ -312,7 +361,14 @@
 <script>
 'use strict';
 
-const STATE = { user: null, isEditor: false, days: 30, filmsMode: 'range', camerasMode: 'range' };
+const STATE = {
+  user: null,
+  isEditor: false,
+  days: 30,
+  filmsMode: 'range',
+  camerasMode: 'range',
+  ops: { previous: null, timer: null, loading: false },
+};
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
@@ -340,6 +396,10 @@ function fmtDay(d) {
   // d 가 'YYYY-MM-DD' 또는 Date
   const date = (d instanceof Date) ? d : new Date(d + 'T00:00:00');
   return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function fmtClock(date = new Date()) {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 async function checkAccess() {
@@ -651,6 +711,79 @@ function renderUploadsSummary(s) {
   $('up-total-sub').textContent = `누적 작가 ${fmtNum(s.unique_contributors)}명`;
 }
 
+async function getPendingReportCount() {
+  try {
+    if (!db()?.market?.adminReportCount) return 0;
+    return await db().market.adminReportCount('pending');
+  } catch (err) {
+    console.warn('[ops.pendingReports]', err?.message || err);
+    return 0;
+  }
+}
+
+function renderOpsStatus(snapshot, opts = {}) {
+  const { announce = true } = opts;
+  const prev = STATE.ops.previous;
+  const uploads = snapshot.uploads || {};
+  const totalUploads = Number(uploads.total_uploads) || 0;
+  const todayUploads = Number(uploads.uploads_today) || 0;
+  const pendingUploads = Number(uploads.total_pending) || 0;
+  const pendingReports = Number(snapshot.pendingReports) || 0;
+  const hasPending = pendingUploads > 0 || pendingReports > 0;
+
+  $('opsTotalUploads').textContent = fmtNum(totalUploads);
+  $('opsTotalUploadsSub').textContent = `오늘 ${fmtNum(todayUploads)}건`;
+  $('opsPendingUploads').textContent = fmtNum(pendingUploads);
+  $('opsPendingReports').textContent = fmtNum(pendingReports);
+  $('opsHealth').textContent = hasPending ? '확인 필요' : '정상';
+  $('opsLastChecked').textContent = `${fmtClock()} 확인`;
+  $('opsWatchLabel').textContent = '페이지가 열려 있으면 1분마다 새 업로드와 신고 대기를 확인합니다.';
+  $('opsPendingItem').classList.toggle('is-alert', pendingUploads > 0);
+  $('opsReportItem').classList.toggle('is-alert', pendingReports > 0);
+  $('opsHealthItem').classList.toggle('is-alert', hasPending);
+
+  if (announce && prev) {
+    const uploadDiff = totalUploads - (Number(prev.uploads?.total_uploads) || 0);
+    const pendingReportDiff = pendingReports - (Number(prev.pendingReports) || 0);
+    if (uploadDiff > 0) {
+      window.notify?.(`새 사진 업로드 ${fmtNum(uploadDiff)}건이 들어왔어요.`, 'info');
+    } else if (pendingReportDiff > 0) {
+      window.notify?.(`새 매물 신고 ${fmtNum(pendingReportDiff)}건이 들어왔어요.`, 'info');
+    }
+  }
+
+  STATE.ops.previous = snapshot;
+}
+
+async function refreshOpsStatus(opts = {}) {
+  const { announce = true } = opts;
+  if (STATE.ops.loading) return;
+  STATE.ops.loading = true;
+  $('opsRefresh').disabled = true;
+  try {
+    const [uploads, pendingReports] = await Promise.all([
+      db().analytics.uploadsSummary(),
+      getPendingReportCount(),
+    ]);
+    const snapshot = { uploads, pendingReports };
+    renderOpsStatus(snapshot, { announce });
+    renderUploadsSummary(uploads);
+  } catch (err) {
+    console.warn('[ops.refresh]', err?.message || err);
+    $('opsWatchLabel').textContent = '운영 알림을 새로 불러오지 못했어요. 잠시 뒤 다시 확인해주세요.';
+  } finally {
+    STATE.ops.loading = false;
+    $('opsRefresh').disabled = false;
+  }
+}
+
+function startOpsWatch() {
+  if (STATE.ops.timer) clearInterval(STATE.ops.timer);
+  STATE.ops.timer = setInterval(() => {
+    if (document.visibilityState === 'visible') refreshOpsStatus({ announce: true });
+  }, 60000);
+}
+
 function renderThemeRatio(t) {
   if (!t) {
     ['tr-theme','tr-general','tr-ratio'].forEach(id => $(id).textContent = '0');
@@ -791,7 +924,7 @@ async function reload() {
 
   const [
     summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths,
-    upSummary, upDaily, upTopContrib, upTopFilms, upTopCameras, upThemeRatio,
+    upSummary, upDaily, upTopContrib, upTopFilms, upTopCameras, upThemeRatio, pendingReports,
   ] = await Promise.all([
     db().analytics.summary(),
     db().analytics.daily(d),
@@ -808,6 +941,7 @@ async function reload() {
     topFilmsFn,
     topCamerasFn,
     db().analytics.uploadsThemeRatio(d),
+    getPendingReportCount(),
   ]);
 
   renderSummary(summary);
@@ -825,6 +959,7 @@ async function reload() {
   renderTopContributors(upTopContrib);
   renderTopByKey('topFilms', upTopFilms, 'film');
   renderTopByKey('topCameras', upTopCameras, 'camera');
+  renderOpsStatus({ uploads: upSummary, pendingReports }, { announce: !!STATE.ops.previous });
 }
 
 document.querySelectorAll('.range-btn').forEach(btn => {
@@ -850,6 +985,14 @@ document.querySelectorAll('.top-mode').forEach(group => {
   });
 });
 
+$('opsRefresh').addEventListener('click', () => refreshOpsStatus({ announce: true }));
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && STATE.isEditor) {
+    refreshOpsStatus({ announce: true });
+  }
+});
+
 (async function main() {
   for (let i = 0; i < 50; i++) {
     if (db() && db().isReady()) break;
@@ -860,6 +1003,7 @@ document.querySelectorAll('.top-mode').forEach(group => {
   $('gate').hidden = true;
   $('app').hidden = false;
   await reload();
+  startOpsWatch();
 })();
 </script>
 

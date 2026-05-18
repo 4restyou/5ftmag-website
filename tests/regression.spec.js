@@ -295,3 +295,104 @@ test('모바일 Films Library는 초기 노출을 줄이고 더 보기로 확장
   const searched = await page.locator('#filmsGridLibrary .film-card:visible').count();
   expect(searched).toBeGreaterThan(0);
 });
+
+test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('**/js/site-common.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.__ops = {
+      totalUploads: 12,
+      todayUploads: 1,
+      pendingUploads: 2,
+      pendingReports: 1,
+      notices: [],
+    };
+    window.notify = (msg, type) => window.__ops.notices.push({ msg, type });
+    const rows = Array.from({ length: 7 }, (_, i) => ({
+      day: `2026-05-${String(13 + i).padStart(2, '0')}`,
+      views: i + 1,
+      sessions: i + 1,
+      uploads: i === 6 ? window.__ops.todayUploads : 0,
+      approved: 0,
+    }));
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'editor-1', email: 'editor@5ftmag.com' } }),
+        signOut: async () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: true, display_name: '편집자' }),
+      },
+      analytics: {
+        summary: async () => ({
+          views_today: 10,
+          views_yesterday: 8,
+          views_last_7d: 70,
+          views_last_30d: 300,
+          sessions_last_30d: 120,
+          total_views: 1000,
+          total_sessions: 400,
+        }),
+        daily: async () => rows,
+        topPaths: async () => [],
+        referrers: async () => [],
+        regions: async () => [],
+        languages: async () => [],
+        sessionStats: async () => ({ sessions: 10, avg_pages: 1.5, avg_duration_ms: 30000, bounce_rate: 0.2 }),
+        dwellSummary: async () => ({ avg_ms: 25000, samples: 4 }),
+        dwellByPath: async () => [],
+        uploadsSummary: async () => ({
+          total_uploads: window.__ops.totalUploads,
+          total_approved: 8,
+          total_pending: window.__ops.pendingUploads,
+          total_rejected: 2,
+          uploads_today: window.__ops.todayUploads,
+          uploads_last_7d: 4,
+          uploads_last_30d: 12,
+          active_contributors_30d: 3,
+          unique_contributors: 5,
+        }),
+        uploadsDaily: async () => rows,
+        uploadsTopContributors: async () => [],
+        uploadsTopFilms: async () => [],
+        uploadsTopFilmsAll: async () => [],
+        uploadsTopCameras: async () => [],
+        uploadsTopCamerasAll: async () => [],
+        uploadsThemeRatio: async () => ({ theme_count: 1, general_count: 3, total: 4, theme_ratio: 0.25 }),
+      },
+      market: {
+        adminReportCount: async () => window.__ops.pendingReports,
+      },
+    };
+  });
+
+  await page.goto('/admin/analytics.html');
+  await expect(page.locator('#opsTotalUploads')).toHaveText('12');
+  await expect(page.locator('#opsPendingUploads')).toHaveText('2');
+  await expect(page.locator('#opsPendingReports')).toHaveText('1');
+  await expect(page.locator('#opsHealth')).toHaveText('확인 필요');
+
+  await page.evaluate(() => {
+    window.__ops.totalUploads += 2;
+    window.__ops.todayUploads += 2;
+    window.__ops.pendingUploads += 2;
+  });
+  await page.locator('#opsRefresh').click();
+  await page.waitForFunction(() => window.__ops.notices.length === 1);
+
+  const notice = await page.evaluate(() => window.__ops.notices[0]);
+  expect(notice).toEqual({ msg: '새 사진 업로드 2건이 들어왔어요.', type: 'info' });
+  await expect(page.locator('#opsTotalUploads')).toHaveText('14');
+  await expect(page.locator('#up-today')).toHaveText('3');
+});
