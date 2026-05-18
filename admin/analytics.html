@@ -59,6 +59,11 @@
     .ops-item .sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
     .ops-item.is-alert .v,
     .ops-item.is-alert .sub { color: var(--text); }
+    .thumb-list { display: grid; gap: 8px; margin-top: 14px; }
+    .thumb-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; }
+    .thumb-name { font-weight: var(--fw-heading); }
+    .thumb-meta { color: var(--text-muted); font-size: 12px; text-align: right; }
+    .thumb-empty { color: var(--text-muted); font-size: 13px; padding-top: 8px; }
 
     .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .mini-stat { background: var(--bg); border-radius: 4px; padding: 14px 16px; }
@@ -181,6 +186,16 @@
         <div class="v" id="opsHealth">·</div>
         <div class="sub" id="opsLastChecked">마지막 확인 전</div>
       </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">필름 썸네일 대기</h2>
+      <span class="panel-sub" id="thumbPendingCount">확인 중…</span>
+    </div>
+    <div class="thumb-list" id="thumbPendingList">
+      <div class="thumb-empty">불러오는 중…</div>
     </div>
   </section>
 

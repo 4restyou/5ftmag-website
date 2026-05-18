@@ -394,6 +394,46 @@ function renderOpsStatus(snapshot, opts = {}) {
   STATE.ops.previous = snapshot;
 }
 
+async function loadThumbnailDebt() {
+  const countEl = $('thumbPendingCount');
+  const listEl = $('thumbPendingList');
+  if (!countEl || !listEl) return;
+  try {
+    const res = await fetch('../data/films.json?v=20260519-holga400');
+    if (!res.ok) throw new Error('films.json load failed');
+    const films = await res.json();
+    const pending = Object.values(films || {}).flatMap(film => {
+      const rows = [];
+      if (film.canThumbnailStatus === 'pending') {
+        rows.push({ film, type: '캔 썸네일' });
+      }
+      if (film.boxThumbnailStatus === 'pending') {
+        rows.push({ film, type: '박스 썸네일' });
+      }
+      return rows;
+    }).sort((a, b) => {
+      const brand = String(a.film.brand || '').localeCompare(String(b.film.brand || ''), 'ko');
+      if (brand) return brand;
+      return String(a.film.displayName || a.film.name || '').localeCompare(String(b.film.displayName || b.film.name || ''), 'ko');
+    });
+    countEl.textContent = pending.length ? `${fmtNum(pending.length)}개 대기` : '대기 없음';
+    if (!pending.length) {
+      listEl.innerHTML = '<div class="thumb-empty">대기 중인 썸네일이 없습니다.</div>';
+      return;
+    }
+    listEl.innerHTML = pending.map(({ film, type }) => `
+      <div class="thumb-row">
+        <span class="thumb-name">${escapeHtml(film.displayName || film.name || film.slug)}</span>
+        <span class="thumb-meta">${escapeHtml(film.brand || '-')} · ${escapeHtml(type)}</span>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.warn('[thumbnailDebt]', err?.message || err);
+    countEl.textContent = '확인 실패';
+    listEl.innerHTML = '<div class="thumb-empty">필름 썸네일 상태를 불러오지 못했어요.</div>';
+  }
+}
+
 async function refreshOpsStatus(opts = {}) {
   const { announce = true } = opts;
   if (STATE.ops.loading) return;
@@ -641,6 +681,7 @@ document.addEventListener('visibilitychange', () => {
   if (!ok) return;
   $('gate').hidden = true;
   $('app').hidden = false;
+  await loadThumbnailDebt();
   await reload();
   startOpsWatch();
 })();
