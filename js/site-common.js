@@ -119,6 +119,59 @@
         body: JSON.stringify(payload),
       }).catch(function () { /* 익명 로그는 실패해도 무시 */ });
     } catch (_) {}
+
+    // 같은 페이지 진입 사이클 동안 한 번만 체류 시간 INSERT
+    startDwellTracker(path);
+  }
+
+  // ─── 체류 시간 트래커 (page_dwells) ───
+  // foreground 시간만 누적해서 페이지 떠날 때 1회 INSERT.
+  function startDwellTracker(path) {
+    let activeAt = (document.visibilityState === 'visible') ? performance.now() : null;
+    let accumulatedMs = 0;
+    let sent = false;
+    const sid = pvSessionId();
+
+    function flush() {
+      if (sent) return;
+      if (activeAt != null) {
+        accumulatedMs += performance.now() - activeAt;
+        activeAt = null;
+      }
+      const ms = Math.round(accumulatedMs);
+      // 1초 미만 / 4시간 초과는 의미 없는 표본
+      if (ms < 1000 || ms > 14400000) return;
+      sent = true;
+      try {
+        fetch(PV_URL + '/rest/v1/page_dwells', {
+          method: 'POST',
+          mode: 'cors',
+          keepalive: true,
+          headers: {
+            apikey: PV_KEY,
+            Authorization: 'Bearer ' + PV_KEY,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({ path, session_id: sid, dwell_ms: ms }),
+        }).catch(function () {});
+      } catch (_) {}
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === 'visible') {
+        if (activeAt == null && !sent) activeAt = performance.now();
+      } else if (activeAt != null) {
+        accumulatedMs += performance.now() - activeAt;
+        activeAt = null;
+        // 모바일은 hidden 후 종종 pagehide 가 안 와서 여기서 보냄
+        flush();
+      }
+    }
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', flush);
   }
 
   // ════════════════════════════════════════════════

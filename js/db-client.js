@@ -647,6 +647,24 @@
       if (error) { console.warn('[analytics.languages]', error.message); return []; }
       return data || [];
     },
+    async dwellSummary(days = 30) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.rpc('admin_analytics_dwell_summary', { p_days: days });
+      if (error) { console.warn('[analytics.dwellSummary]', error.message); return null; }
+      return Array.isArray(data) ? (data[0] || null) : data;
+    },
+    async dwellByPath(days = 7, limit = 10) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_analytics_dwell_by_path', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.dwellByPath]', error.message); return []; }
+      return data || [];
+    },
+    async sessionStats(days = 30) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.rpc('admin_analytics_session_stats', { p_days: days });
+      if (error) { console.warn('[analytics.sessionStats]', error.message); return null; }
+      return Array.isArray(data) ? (data[0] || null) : data;
+    },
   };
 
   // ─── Realtime ───

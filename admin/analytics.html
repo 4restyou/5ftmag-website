@@ -41,6 +41,13 @@
     .card .v { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; }
     .card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
+    .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .mini-stat { background: var(--bg); border-radius: 4px; padding: 14px 16px; }
+    .mini-stat .k { font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .mini-stat .v { font-size: 22px; font-weight: var(--fw-heading); letter-spacing: -0.01em; }
+    .mini-stat .sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    @media (max-width: 720px) { .mini-stats { grid-template-columns: repeat(2, 1fr); } .mini-stat .v { font-size: 20px; } }
+
     .panel { background: var(--bg-sub); border-radius: 6px; padding: 24px; margin-bottom: 24px; }
     .panel-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .panel-title { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 0; }
@@ -155,6 +162,32 @@
 
   <div class="panel">
     <div class="panel-head">
+      <h2 class="panel-title">세션 통계</h2>
+      <span class="panel-sub" id="sessRangeLabel"></span>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-stat"><div class="k">세션 수</div><div class="v" id="ss-sessions">·</div></div>
+      <div class="mini-stat"><div class="k">평균 페이지</div><div class="v" id="ss-pages">·</div></div>
+      <div class="mini-stat"><div class="k">평균 체류 시간</div><div class="v" id="ss-duration">·</div><div class="sub" id="ss-duration-sub"></div></div>
+      <div class="mini-stat"><div class="k">이탈률</div><div class="v" id="ss-bounce">·</div><div class="sub">한 페이지만 본 비율</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">페이지별 체류 시간 <span class="panel-sub" style="margin-left:6px">TOP 10 · 표본 3건 이상</span></h2>
+      <span class="panel-sub" id="dwellRangeLabel"></span>
+    </div>
+    <table class="stat-table">
+      <thead>
+        <tr><th>페이지</th><th class="bar-cell"></th><th class="num">평균</th><th class="num">표본</th></tr>
+      </thead>
+      <tbody id="dwellByPath"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
       <h2 class="panel-title">유입 도메인</h2>
       <span class="panel-sub" id="refRangeLabel"></span>
     </div>
@@ -195,8 +228,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260518-region"></script>
-<script src="../js/site-common.js?v=20260518-cleanpath"></script>
+<script src="../js/db-client.js?v=20260518-dwell"></script>
+<script src="../js/site-common.js?v=20260518-dwell"></script>
 <script>
 'use strict';
 
@@ -211,6 +244,19 @@ function escapeAttr(s) { return escapeHtml(s); }
 function fmtNum(n) {
   return Number(n || 0).toLocaleString('ko-KR');
 }
+function fmtDuration(ms) {
+  const n = Math.max(0, Math.round(Number(ms) || 0));
+  if (n < 1000) return n + 'ms';
+  const sec = Math.round(n / 1000);
+  if (sec < 60) return sec + '초';
+  const min = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (min < 60) return s ? `${min}분 ${s}초` : `${min}분`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m ? `${h}시간 ${m}분` : `${h}시간`;
+}
+
 function fmtDay(d) {
   // d 가 'YYYY-MM-DD' 또는 Date
   const date = (d instanceof Date) ? d : new Date(d + 'T00:00:00');
@@ -499,6 +545,48 @@ function renderLanguages(rows) {
   }).join('');
 }
 
+function renderSessionStats(s, dwell) {
+  if (!s) {
+    ['ss-sessions','ss-pages','ss-duration','ss-bounce'].forEach(id => $(id).textContent = '0');
+    return;
+  }
+  $('ss-sessions').textContent = fmtNum(s.sessions);
+  $('ss-pages').textContent    = Number(s.avg_pages || 0).toFixed(2);
+  $('ss-duration').textContent = fmtDuration(s.avg_duration_ms);
+  if (dwell && Number(dwell.samples) > 0) {
+    $('ss-duration-sub').textContent =
+      `페이지 평균 ${fmtDuration(dwell.avg_ms)} · 표본 ${fmtNum(dwell.samples)}`;
+  } else {
+    $('ss-duration-sub').textContent = '페이지 단위 데이터 수집 중';
+  }
+  const br = Number(s.bounce_rate || 0);
+  $('ss-bounce').textContent = (br * 100).toFixed(1) + '%';
+}
+
+function renderDwellByPath(rows) {
+  const tbody = $('dwellByPath');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 수집 중 (표본 3건 이상 모이면 표시)</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.avg_ms) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.avg_ms) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    const safePath = String(r.path || '').startsWith('/') ? r.path : '/' + r.path;
+    const label = prettyPathLabel(safePath);
+    const labelHtml = !safePath.includes('/admin/')
+      ? `<a href="..${escapeAttr(safePath)}" target="_blank" rel="noopener" title="${escapeAttr(safePath)}">${escapeHtml(label)}</a>`
+      : `<span title="${escapeAttr(safePath)}">${escapeHtml(label)}</span>`;
+    return `<tr>
+      <td class="path-cell">${labelHtml}</td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${escapeHtml(fmtDuration(r.avg_ms))}</td>
+      <td class="num">${fmtNum(r.samples)}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderReferrers(rows) {
   const tbody = $('referrers');
   if (!rows.length) {
@@ -525,24 +613,31 @@ function renderReferrers(rows) {
 async function reload() {
   const d = STATE.days;
   const label = `최근 ${d}일`;
-  $('chartRangeLabel').textContent = label;
-  $('topRangeLabel').textContent   = label;
-  $('refRangeLabel').textContent   = label;
-  $('regRangeLabel').textContent   = label;
-  $('langRangeLabel').textContent  = label;
+  $('chartRangeLabel').textContent  = label;
+  $('topRangeLabel').textContent    = label;
+  $('refRangeLabel').textContent    = label;
+  $('regRangeLabel').textContent    = label;
+  $('langRangeLabel').textContent   = label;
+  $('sessRangeLabel').textContent   = label;
+  $('dwellRangeLabel').textContent  = label;
 
-  const [summary, daily, paths, refs, regs, langs] = await Promise.all([
+  const [summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths] = await Promise.all([
     db().analytics.summary(),
     db().analytics.daily(d),
     db().analytics.topPaths(d, 10),
     db().analytics.referrers(d, 15),
     db().analytics.regions(d, 20),
     db().analytics.languages(d, 15),
+    db().analytics.sessionStats(d),
+    db().analytics.dwellSummary(d),
+    db().analytics.dwellByPath(d, 10),
   ]);
 
   renderSummary(summary);
   renderChart(daily);
   renderTopPaths(paths);
+  renderSessionStats(sess, dwellSum);
+  renderDwellByPath(dwellPaths);
   renderReferrers(refs);
   renderRegions(regs);
   renderLanguages(langs);
