@@ -1295,30 +1295,32 @@
   pointer-events: none;
   z-index: 2;
 }
-/* 사진은 photo window 영역만 노출 (퍼포레이션 비침 차단은 wrapper 없이 inset 으로) */
-.reader-contributor-sections[data-view="contact"] .reader-contributor-photo img {
-  position: absolute;
-  left: 0;
+/* 컨택트 모드에서는 wrapper 를 photo window 영역(top 14.5% / height 72.46%) 으로 inset
+   → perforation 영역이 wrapper 밖이 되어 overflow:hidden 으로 자동 클립.
+   Reader's Roll 의 .reader-slot-window 와 동일한 inset/aspect 1.520 으로 portrait 회전 swap. */
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo-window {
   top: 14.5%;
-  width: 100%;
+  bottom: auto;
   height: 72.46%;
-  object-fit: cover;
 }
-.reader-contributor-sections[data-view="contact"] .reader-contributor-photo img.is-portrait {
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo-window img.is-portrait {
+  position: absolute;
   top: 50%;
   left: 50%;
-  width: 90.79%;
-  height: 110.14%;
+  right: auto;
+  bottom: auto;
+  width: 65.79%;   /* 100 / 1.520 (wrapper aspect = 100/72.46 × slot 1.101 = 1.520) */
+  height: 152.0%;  /* 1.520 × 100 */
   transform: translate(-50%, -50%) rotate(90deg);
 }
-.reader-contributor-sections[data-view="contact"] .reader-contributor-photo:hover img {
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo:hover .reader-contributor-photo-window img {
   transform: scale(1.03);
 }
-.reader-contributor-sections[data-view="contact"] .reader-contributor-photo:hover img.is-portrait {
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo:hover .reader-contributor-photo-window img.is-portrait {
   transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
 }
 /* 캡션은 컨택트 뷰에서 숨김 (filmstrip 룩 일관성) */
-.reader-contributor-sections[data-view="contact"] .reader-contributor-photo > span {
+.reader-contributor-sections[data-view="contact"] .reader-contributor-photo-caption {
   display: none;
 }
 .reader-contributor-grid {
@@ -1337,6 +1339,13 @@
   background: rgba(255, 255, 255, 0.08);
   cursor: zoom-in;
 }
+/* 사진 viewport — 기본은 셀 전체, 컨택트 모드에서 photo window 로 inset 됨 */
+.reader-contributor-photo-window {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: block;
+}
 .reader-contributor-photo img {
   width: 100%;
   height: 100%;
@@ -1347,7 +1356,7 @@
 .reader-contributor-photo:hover img {
   transform: scale(1.04);
 }
-.reader-contributor-photo span {
+.reader-contributor-photo-caption {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   padding: 7px 8px;
@@ -1357,6 +1366,7 @@
   font-weight: var(--fw-heading);
   letter-spacing: 0.04em;
   text-align: left;
+  z-index: 3;
 }
 .reader-grid {
   display: grid;
