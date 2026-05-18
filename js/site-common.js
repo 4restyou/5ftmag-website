@@ -56,6 +56,16 @@
     return false;
   }
 
+  function pvTz() {
+    try { return (Intl.DateTimeFormat().resolvedOptions().timeZone || '').slice(0, 64); }
+    catch (_) { return ''; }
+  }
+
+  function pvLang() {
+    const l = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+    return String(l).slice(0, 32);
+  }
+
   function recordPageView() {
     if (pvShouldSkip()) return;
     const path = (location.pathname + location.search).slice(0, 500);
@@ -67,6 +77,8 @@
       referrer: referrer || null,
       ua_family: pvUaFamily(navigator.userAgent || ''),
       session_id: pvSessionId(),
+      tz: pvTz() || null,
+      lang: pvLang() || null,
     };
     try {
       fetch(PV_URL + '/rest/v1/page_views', {
