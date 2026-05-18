@@ -244,3 +244,35 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('36 / 36 · 1롤');
   await expect(page.locator('.reader-roll-intro')).toContainText('1번째 지난 롤');
 });
+
+test('Reader Roll 계산 모듈은 36컷 단위로 현재 롤을 나눈다', async ({ page }) => {
+  await page.goto('/films.html');
+  const result = await page.evaluate(() => {
+    const rows = Array.from({ length: 72 }, (_, i) => ({
+      id: `r-${String(72 - i).padStart(2, '0')}`,
+      createdAt: new Date(2026, 0, 72 - i).toISOString(),
+    }));
+    const exact = window.ReaderRoll.buildState(rows, 36);
+    const next = window.ReaderRoll.buildState(rows.concat({
+      id: 'r-73',
+      createdAt: new Date(2026, 0, 73).toISOString(),
+    }), 36);
+    return {
+      exactCurrent: exact.currentNumber,
+      exactCurrentRows: exact.currentRows.length,
+      exactPast: exact.pastRolls.length,
+      nextCurrent: next.currentNumber,
+      nextCurrentRows: next.currentRows.length,
+      firstSortedId: window.ReaderRoll.sortSubmissionsOldestFirst(rows)[0].id,
+    };
+  });
+
+  expect(result).toEqual({
+    exactCurrent: 2,
+    exactCurrentRows: 36,
+    exactPast: 1,
+    nextCurrent: 3,
+    nextCurrentRows: 1,
+    firstSortedId: 'r-01',
+  });
+});

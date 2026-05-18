@@ -189,6 +189,7 @@
   <span class="footer-copy">© 2024 5ft.mag</span>
 </footer>
 
+<script src="./js/reader-roll.js?v=20260518-rollmodule"></script>
 <script>
   // 테마/메뉴는 js/site-common.js 에서 처리됨
 
@@ -811,40 +812,8 @@
     return approvedSubmissionsPromise;
   }
 
-  function sortReaderSubmissionsOldestFirst(rows) {
-    return rows.slice().sort((a, b) => {
-      const at = Date.parse(a.createdAt || a.created_at || '') || 0;
-      const bt = Date.parse(b.createdAt || b.created_at || '') || 0;
-      if (at !== bt) return at - bt;
-      return String(a.id || '').localeCompare(String(b.id || ''));
-    });
-  }
-
   function buildReaderRollState(rows) {
-    const ordered = sortReaderSubmissionsOldestFirst(rows);
-    const currentIndex = Math.max(0, Math.ceil(Math.max(ordered.length, 1) / ROLL_LIMIT) - 1);
-    const rolls = [];
-
-    for (let i = 0; i <= currentIndex; i++) {
-      const rollRows = ordered.slice(i * ROLL_LIMIT, (i + 1) * ROLL_LIMIT);
-      rolls.push({
-        number: i + 1,
-        rows: rollRows,
-        complete: rollRows.length === ROLL_LIMIT,
-        current: i === currentIndex,
-      });
-    }
-
-    const currentRoll = rolls[currentIndex];
-    const pastRolls = rolls.filter(roll => !roll.current);
-
-    return {
-      total: ordered.length,
-      rolls,
-      pastRolls,
-      currentNumber: currentRoll.number,
-      currentRows: currentRoll.rows,
-    };
+    return window.ReaderRoll.buildState(rows, ROLL_LIMIT);
   }
 
   async function handleInitialDeepLink() {
