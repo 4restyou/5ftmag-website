@@ -2144,7 +2144,7 @@
     return canvas;
   }
 
-  async function composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors }) {
+  async function composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors, filmThumb }) {
     const width = stripCanvas.width;
     const headerH = Math.max(148, Math.round(width * 0.075));
     const footerH = Math.max(116, Math.round(width * 0.052));
@@ -2168,18 +2168,32 @@
       ctx.fillText('5ft.mag', pad, Math.round(headerH * 0.58));
     }
 
+    // 우측 가장자리에 필름 캐니스터 일러스트 (있을 때만)
+    let textRightX = width - pad;
+    if (filmThumb) {
+      const canImg = await loadCanvasImage(filmThumb);
+      if (canImg) {
+        const thumbH = Math.round(headerH * 0.88);
+        const thumbW = Math.round(canImg.width * (thumbH / canImg.height));
+        const thumbX = width - pad - thumbW;
+        const thumbY = Math.round((headerH - thumbH) / 2);
+        ctx.drawImage(canImg, thumbX, thumbY, thumbW, thumbH);
+        textRightX = thumbX - Math.max(20, Math.round(pad * 0.4));
+      }
+    }
+
     // 우측 상단: 필름명 크게 + 그 아래 작가 아이디 더 작게
     ctx.fillStyle = '#111111';
     ctx.textAlign = 'right';
     ctx.font = `800 ${Math.round(headerH * 0.26)}px Pretendard, Arial, sans-serif`;
-    ctx.fillText(filmName, width - pad, Math.round(headerH * 0.46));
+    ctx.fillText(filmName, textRightX, Math.round(headerH * 0.46));
     const authorLine = formatAuthorLine(authors);
     if (authorLine) {
       ctx.fillStyle = '#888888';
       ctx.font = `500 ${Math.round(headerH * 0.12)}px Pretendard, Arial, sans-serif`;
-      // 너무 길면 끝을 ellipsis 로 자름 (전체 폭 절반까지 허용)
-      const maxLineW = Math.round((width - pad * 2) * 0.55);
-      ctx.fillText(truncateText(ctx, authorLine, maxLineW), width - pad, Math.round(headerH * 0.72));
+      // 가용 폭 (캐니스터 왼쪽까지) 안에서 끝을 ellipsis 로 자름
+      const maxLineW = Math.max(80, textRightX - pad);
+      ctx.fillText(truncateText(ctx, authorLine, maxLineW), textRightX, Math.round(headerH * 0.72));
     }
 
     ctx.drawImage(stripCanvas, 0, headerH);
@@ -2203,6 +2217,20 @@
     return canvas;
   }
 
+  // displayName / name 으로 filmsData 안에서 일치 항목 찾아 캐니스터 썸네일 경로 반환
+  function findFilmThumbByName(filmName) {
+    if (!filmName) return null;
+    const target = String(filmName).toLowerCase();
+    for (const key of Object.keys(filmsData || {})) {
+      const f = filmsData[key];
+      const candidates = [f?.displayName, f?.name].filter(Boolean).map(s => s.toLowerCase());
+      if (candidates.includes(target)) {
+        return (f.canThumbnailStatus === 'set' && f.canThumbnail) ? f.canThumbnail : null;
+      }
+    }
+    return null;
+  }
+
   // 작가 뷰의 한 필름 섹션을 필름스트립 JPG 로 저장
   async function handleSaveContribFilmImage(btn) {
     const personKey = btn.dataset.personKey;
@@ -2217,7 +2245,8 @@
     try {
       const stripCanvas = await renderRollStripCanvas(target, 'contrib');
       const authors = collectAuthorsForExport(target, 'contrib', { authorLabel });
-      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind: 'reader', authors });
+      const filmThumb = findFilmThumbByName(filmName);
+      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind: 'reader', authors, filmThumb });
       const personSlug = (personKey || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
       const filmSlug = (filmName || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
       const d = new Date();
@@ -2249,10 +2278,12 @@
     btn.textContent = '저장 중…';
     try {
       const stripCanvas = await renderRollStripCanvas(target, kind);
-      const filmName = (filmsData[filmKey]?.displayName || filmsData[filmKey]?.name || filmKey).toString();
-      const photographers = Array.isArray(filmsData[filmKey]?.photographers) ? filmsData[filmKey].photographers : [];
+      const f = filmsData[filmKey] || {};
+      const filmName = (f.displayName || f.name || filmKey).toString();
+      const photographers = Array.isArray(f.photographers) ? f.photographers : [];
       const authors = collectAuthorsForExport(target, kind, { photographers });
-      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors });
+      const filmThumb = (f.canThumbnailStatus === 'set' && f.canThumbnail) ? f.canThumbnail : null;
+      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors, filmThumb });
       const slug = filmName.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
       const d = new Date();
       const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
