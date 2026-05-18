@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-stripalt">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-stripswap">
 </head>
 <body>
 
@@ -2149,8 +2149,8 @@
     ctx.fillRect(0, 0, innerW, innerH);
 
     const [frameImgA, frameImgB] = await Promise.all([
-      loadCanvasImage('img/filmstrip-frame.svg?v=4'),
-      loadCanvasImage('img/filmstrip-frame-2.svg?v=4'),
+      loadCanvasImage('img/filmstrip-frame.svg?v=5'),
+      loadCanvasImage('img/filmstrip-frame-2.svg?v=5'),
     ]);
     const loaded = await Promise.all(frames.map(frame => frame?.src ? loadCanvasImage(frame.src, true) : Promise.resolve(null)));
     frames.forEach((frame, idx) => {
