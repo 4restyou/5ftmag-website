@@ -67,7 +67,7 @@
     if (_worker) return _worker;
     // stories/, admin/ 하위에서도 호출될 수 있어 상대 경로 보정
     const isNested = /\/(stories|admin|authors)\//.test(location.pathname);
-    const url = (isNested ? '../' : './') + 'js/image-processor.worker.js?v=20260515-imgproc';
+    const url = (isNested ? '../' : './') + 'js/image-processor.worker.js?v=20260518-uploadstable';
     _worker = new Worker(url);
     return _worker;
   }
@@ -78,22 +78,40 @@
       try { w = workerInstance(); }
       catch (e) { return reject(new Error('Worker 초기화 실패: ' + e.message)); }
 
+      let settled = false;
+      let timer = null;
+      const totalTimeoutMs = opts.decodeTimeoutMs + opts.encodeTimeoutMs + 10000;
       const onMessage = (ev) => {
         cleanup();
+        if (settled) return;
+        settled = true;
         const { ok, blob, width, height, error } = ev.data || {};
         if (ok) resolve({ blob, width, height });
         else reject(new Error(error || 'Worker 변환 실패'));
       };
       const onError = (ev) => {
         cleanup();
+        if (settled) return;
+        settled = true;
+        try { w.terminate(); } catch (_) {}
+        _worker = null;
         reject(new Error('Worker 오류: ' + (ev.message || '알 수 없는')));
       };
       function cleanup() {
+        if (timer) clearTimeout(timer);
         w.removeEventListener('message', onMessage);
         w.removeEventListener('error', onError);
       }
       w.addEventListener('message', onMessage);
       w.addEventListener('error', onError);
+      timer = setTimeout(() => {
+        cleanup();
+        if (settled) return;
+        settled = true;
+        try { w.terminate(); } catch (_) {}
+        _worker = null;
+        reject(new Error('사진 변환 응답이 지연되어 중단했습니다. 변환기를 다시 준비했으니 사진을 더 작게 줄이거나 다시 시도해 주세요.'));
+      }, totalTimeoutMs);
       w.postMessage({
         file,
         maxLongSide: opts.maxLongSide,

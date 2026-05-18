@@ -403,6 +403,13 @@
           <button type="button" class="rs-btn-link" data-action="rs-close">취소</button>
           <button type="submit" class="rs-btn rs-btn-primary">검토 요청 보내기</button>
         </div>
+        <div class="rs-upload-status" id="rs-upload-status" aria-live="polite" hidden>
+          <span class="rs-upload-dot" aria-hidden="true"></span>
+          <span class="rs-upload-copy">
+            <strong id="rs-upload-title">업로드 준비 중</strong>
+            <small id="rs-upload-detail">창을 닫지 말고 잠시만 기다려 주세요.</small>
+          </span>
+        </div>
         <p class="rs-error" id="rs-error" aria-live="polite"></p>
       </form>`;
   }
@@ -829,6 +836,23 @@
     const fileInput = form.querySelector('input[name="photo"]');
     const dropzone = document.getElementById('rs-dropzone');
     const fileName = document.getElementById('rs-file-name');
+    const uploadStatus = document.getElementById('rs-upload-status');
+    const uploadTitle = document.getElementById('rs-upload-title');
+    const uploadDetail = document.getElementById('rs-upload-detail');
+    function setUploadStatus(state, title, detail = '') {
+      if (!uploadStatus) return;
+      uploadStatus.hidden = false;
+      uploadStatus.dataset.state = state || 'progress';
+      if (uploadTitle) uploadTitle.textContent = title || '';
+      if (uploadDetail) uploadDetail.textContent = detail || '';
+    }
+    function clearUploadStatus() {
+      if (!uploadStatus) return;
+      uploadStatus.hidden = true;
+      uploadStatus.dataset.state = '';
+      if (uploadTitle) uploadTitle.textContent = '';
+      if (uploadDetail) uploadDetail.textContent = '';
+    }
     function renderPhotoPreview(file, note = '') {
       const preview = document.getElementById('rs-preview');
       if (!preview) return;
@@ -871,6 +895,7 @@
     }
     fileInput?.addEventListener('change', () => {
       renderPhotoPreview(fileInput.files?.[0] || null);
+      clearUploadStatus();
     });
     dropzone?.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
@@ -1020,6 +1045,7 @@
       if (submitBtn?.disabled) return;
       submitBtn.disabled = true;
       submitBtn.textContent = '업로드 중…';
+      setUploadStatus('progress', '제출 준비 중', '사진과 입력 내용을 확인하고 있어요.');
 
       try {
         const fd = new FormData(form);
@@ -1046,16 +1072,27 @@
 
         // 변환 — 단계별로 버튼 텍스트 갱신해 "멈춘 것처럼 보이는" 무음 hang 방지
         submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
+        setUploadStatus('progress', '사진을 읽는 중', `${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`);
         const { blob, width, height } = await resizeToJpeg(file, ({ stage, width: w, height: h }) => {
-          if (stage === 'resize')      submitBtn.textContent = `사진 크기 줄이는 중… (${w}×${h})`;
-          else if (stage === 'encode') submitBtn.textContent = `사진 인코딩 중… (${w}×${h})`;
+          if (stage === 'decode') {
+            submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
+            setUploadStatus('progress', '사진을 읽는 중', '큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.');
+          } else if (stage === 'resize') {
+            submitBtn.textContent = `사진 크기 줄이는 중… (${w}×${h})`;
+            setUploadStatus('progress', '사진 크기 줄이는 중', `${w}×${h} 크기로 변환하고 있어요.`);
+          } else if (stage === 'encode') {
+            submitBtn.textContent = `사진 인코딩 중… (${w}×${h})`;
+            setUploadStatus('progress', '사진을 압축하는 중', '업로드 전에 용량을 줄이고 있어요.');
+          }
         });
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
 
-        const user = await db().auth.getUser();
+        setUploadStatus('progress', '로그인 상태 확인 중', '업로드 권한을 확인하고 있어요.');
+        const user = await withNetworkTimeout(db().auth.getUser(), 12000, '로그인 확인');
         if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
         const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
         submitBtn.textContent = `사진 업로드 중… (${fmtBytes(blob.size)})`;
+        setUploadStatus('progress', '사진 업로드 중', `${fmtBytes(blob.size)} 파일을 서버에 보내는 중입니다. 창을 닫지 마세요.`);
         const { error: upErr } = await withNetworkTimeout(
           db().submissions.uploadPhoto(path, blob),
           60000,
@@ -1077,9 +1114,16 @@
         };
         // submitter_name 컬럼이 없는 구버전 환경 대비: 값 있을 때만 키 포함
         if (submitterName) insertData.submitter_name = submitterName;
-        const { error: dbErr } = await db().submissions.create(insertData);
+        submitBtn.textContent = '제출 기록 저장 중…';
+        setUploadStatus('progress', '제출 기록 저장 중', '사진 정보와 필름 정보를 함께 저장하고 있어요.');
+        const { error: dbErr } = await withNetworkTimeout(
+          db().submissions.create(insertData),
+          25000,
+          '제출 기록 저장'
+        ).catch(err => ({ error: { message: err.message } }));
         if (dbErr) {
-          db().submissions.removePhoto(path);
+          setUploadStatus('progress', '업로드 정리 중', '기록 저장에 실패해 올라간 사진 파일을 정리하고 있어요.');
+          await db().submissions.removePhoto(path);
           throw new Error('사진은 올라갔지만 제출 기록 저장에 실패했어요. 잠시 뒤 다시 시도해 주세요. (' + dbErr.message + ')');
         }
 
@@ -1098,8 +1142,10 @@
         const displayAuthor = submitterName && igNorm
           ? `${submitterName} (@${igNorm})`
           : submitterName || (igNorm ? '@' + igNorm : '');
+        setUploadStatus('done', '제출 완료', 'Reader’s Roll 검토 큐에 들어갔어요.');
         openModal(renderSubmittedConfirm({ author: displayAuthor, film }));
       } catch (err) {
+        setUploadStatus('error', '제출이 중단됐어요', '입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.');
         showError(err.message || '제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.');
         submitBtn.disabled = false;
         submitBtn.textContent = '검토 요청 보내기';
