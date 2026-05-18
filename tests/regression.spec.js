@@ -276,3 +276,22 @@ test('Reader Roll 계산 모듈은 36컷 단위로 현재 롤을 나눈다', asy
     firstSortedId: 'r-01',
   });
 });
+
+test('모바일 Films Library는 초기 노출을 줄이고 더 보기로 확장한다', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1200 });
+  await page.goto('/films.html');
+  await page.waitForSelector('#filmsGridLibrary .film-card');
+
+  const initial = await page.locator('#filmsGridLibrary .film-card:visible').count();
+  expect(initial).toBeLessThanOrEqual(30);
+  await expect(page.locator('#libraryMoreWrap')).toBeVisible();
+
+  await page.locator('#libraryMoreBtn').click();
+  const expanded = await page.locator('#filmsGridLibrary .film-card:visible').count();
+  expect(expanded).toBeGreaterThan(initial);
+
+  await page.locator('#librarySearch').fill('kodak');
+  await expect(page.locator('#libraryMoreWrap')).toBeHidden();
+  const searched = await page.locator('#filmsGridLibrary .film-card:visible').count();
+  expect(searched).toBeGreaterThan(0);
+});

@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260518-headerbtn3">
+  <link rel="stylesheet" href="./css/films.css?v=20260518-mobilemore">
 </head>
 <body>
 
@@ -107,6 +107,9 @@
   </div>
   <p class="library-empty" id="libraryEmpty" hidden>일치하는 필름이 없습니다. 브랜드명, ISO, 필름명을 줄여서 다시 검색해 보세요.</p>
   <div class="films-grid" id="filmsGridLibrary" aria-label="라이브러리 필름"></div>
+  <div class="library-more-wrap" id="libraryMoreWrap" hidden>
+    <button type="button" class="library-more-btn" id="libraryMoreBtn">필름 더 보기</button>
+  </div>
 </div>
 
 <!-- ════════ MODAL ════════ -->
@@ -325,6 +328,9 @@
   let currentBrand  = 'all';
   let currentCamera = 'all';   // 카메라 model key (브랜드 prefix 제거 후 정규화)
   let currentSearch = '';
+  const MOBILE_LIBRARY_INITIAL = 30;
+  const MOBILE_LIBRARY_STEP = 30;
+  let libraryMobileVisible = MOBILE_LIBRARY_INITIAL;
   // slug → Set<cameraKey>  — 어떤 필름 카드가 현재 카메라 필터에 매칭되는지 빠르게 조회
   const cameraKeysByFilmSlug = new Map();
   // cameraKey → { display, brand, count } — 드롭다운 옵션 빌드용
@@ -341,6 +347,27 @@
 
   function isMobileFilms() {
     return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+  }
+
+  function hasActiveLibraryFilter() {
+    return currentFilter !== 'all' ||
+      currentBrand !== 'all' ||
+      currentCamera !== 'all' ||
+      currentSearch.trim() !== '';
+  }
+
+  function resetMobileLibraryLimit() {
+    libraryMobileVisible = MOBILE_LIBRARY_INITIAL;
+  }
+
+  function updateLibraryMoreButton(matchedCount) {
+    const wrap = document.getElementById('libraryMoreWrap');
+    const btn = document.getElementById('libraryMoreBtn');
+    if (!wrap || !btn) return;
+    const shouldPage = isMobileFilms() && !hasActiveLibraryFilter() && matchedCount > libraryMobileVisible;
+    wrap.hidden = !shouldPage;
+    if (!shouldPage) return;
+    btn.textContent = `필름 더 보기 (${matchedCount - libraryMobileVisible})`;
   }
 
   function normalizeContributorKey(s) {
@@ -380,6 +407,7 @@
     filterBar.querySelectorAll('.library-filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         currentFilter = chip.dataset.filter;
+        resetMobileLibraryLimit();
         applyLibraryFilter();
         filterBar.querySelectorAll('.library-filter-chip').forEach(c => {
           const active = c.dataset.filter === currentFilter;
@@ -392,6 +420,8 @@
 
   function applyLibraryFilter() {
     const q = currentSearch.trim().toLowerCase();
+    const mobileCapped = isMobileFilms() && !hasActiveLibraryFilter();
+    let matched = 0;
     let visible = 0;
     filmsGridLibrary.querySelectorAll('.film-card').forEach(card => {
       const cat = card.dataset.filterCategory;
@@ -403,12 +433,15 @@
       const matchCamera = currentCamera === 'all' ||
                           (cameraKeysByFilmSlug.get(slug) && cameraKeysByFilmSlug.get(slug).has(currentCamera));
       const matchSearch = !q || tokens.includes(q);
-      const show = matchCat && matchBrand && matchCamera && matchSearch;
+      const matches = matchCat && matchBrand && matchCamera && matchSearch;
+      if (matches) matched++;
+      const show = matches && (!mobileCapped || matched <= libraryMobileVisible);
       card.hidden = !show;
       if (show) visible++;
     });
     const emptyEl = document.getElementById('libraryEmpty');
-    if (emptyEl) emptyEl.hidden = visible !== 0;
+    if (emptyEl) emptyEl.hidden = matched !== 0;
+    updateLibraryMoreButton(matched);
   }
 
   // 브랜드 드롭다운 옵션 빌드 (라이브러리 그리드의 모든 카드 대상)
@@ -425,6 +458,7 @@
     if (!select.dataset.bound) {
       select.addEventListener('change', () => {
         currentBrand = select.value || 'all';
+        resetMobileLibraryLimit();
         applyLibraryFilter();
       });
       select.dataset.bound = '1';
@@ -567,6 +601,7 @@
     if (!select.dataset.bound) {
       select.addEventListener('change', () => {
         currentCamera = select.value || 'all';
+        resetMobileLibraryLimit();
         applyLibraryFilter();
       });
       select.dataset.bound = '1';
@@ -582,8 +617,18 @@
       clearTimeout(debounce);
       debounce = setTimeout(() => {
         currentSearch = input.value;
+        resetMobileLibraryLimit();
         applyLibraryFilter();
       }, 120);
+    });
+  })();
+
+  (function bindLibraryMore() {
+    const btn = document.getElementById('libraryMoreBtn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      libraryMobileVisible += MOBILE_LIBRARY_STEP;
+      applyLibraryFilter();
     });
   })();
 
