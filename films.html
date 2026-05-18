@@ -1193,8 +1193,10 @@
           continue;
         }
         const personKey = personKeyOf(sub);
+        const instaHandle = (sub.instagram || '').replace(/^@/, '');
         slot.className = 'reader-slot is-filled';
         slot.setAttribute('aria-label', `${personLabelOf(sub)}의 사진`);
+        if (instaHandle) slot.setAttribute('data-instagram', instaHandle);
         slot.innerHTML = `
           <button type="button" class="reader-slot-link" aria-label="${escapeAttr(personLabelOf(sub))}의 사진 크게 보기">
             <span class="reader-slot-window">
@@ -1245,6 +1247,7 @@
       if (counter) {
         counter.textContent = `${personEntries.length} photos · ${groups.length} films`;
       }
+      const authorLabel = (instagram || '').replace(/^@/, '') || label;
       contributorView.innerHTML = `
         <div class="reader-contributor-head">
           <div>
@@ -1263,7 +1266,7 @@
           <section class="reader-contributor-group" data-film-name="${escapeAttr(filmName)}">
             <div class="reader-contributor-group-head">
               <h4>${escapeAttr(filmName)} <span>${rows.length}컷</span></h4>
-              <button type="button" class="reader-save-btn" data-save-contrib data-person-key="${escapeAttr(personKey)}" data-film-name="${escapeAttr(filmName)}">이미지로 저장</button>
+              <button type="button" class="reader-save-btn" data-save-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">이미지로 저장</button>
             </div>
             <div class="reader-contributor-grid" id="contribGrid-${escapeAttr(personKey)}-${gIdx}">
               ${rows.map((sub, idx) => `
@@ -2061,6 +2064,50 @@
     ctx.restore();
   }
 
+  // 저장 헤더용 작가 라인: 인스타 핸들 우선, 중복 제거, '@' prefix
+  function collectAuthorsForExport(target, kind, ctx) {
+    const seen = new Set();
+    const list = [];
+    function push(raw) {
+      const v = (raw || '').toString().trim();
+      if (!v) return;
+      const key = v.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      list.push(v);
+    }
+    if (kind === 'reader') {
+      target.querySelectorAll('.reader-slot.is-filled').forEach(slot => {
+        const ig = slot.getAttribute('data-instagram');
+        if (ig) push(ig);
+        else push(slot.querySelector('.reader-slot-author')?.textContent || '');
+      });
+    } else if (kind === 'contrib') {
+      // ctx.authorLabel 한 명 (작가 뷰의 한 필름 섹션)
+      push(ctx?.authorLabel || '');
+    } else if (kind === 'editorial') {
+      (ctx?.photographers || []).forEach(push);
+    }
+    return list;
+  }
+
+  function formatAuthorLine(authors) {
+    if (!authors || !authors.length) return '';
+    return authors.map(a => /^@/.test(a) ? a : `@${a}`).join('  ');
+  }
+
+  function truncateText(ctx, text, maxWidth) {
+    if (!text || ctx.measureText(text).width <= maxWidth) return text;
+    const ell = '…';
+    let lo = 0, hi = text.length;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (ctx.measureText(text.slice(0, mid) + ell).width <= maxWidth) lo = mid;
+      else hi = mid - 1;
+    }
+    return text.slice(0, lo) + ell;
+  }
+
   async function renderRollStripCanvas(target, kind) {
     const frames = collectRollExportFrames(target, kind);
     const cols = 6;
@@ -2097,7 +2144,7 @@
     return canvas;
   }
 
-  async function composeBrandedRollCanvas(stripCanvas, { filmName, kind }) {
+  async function composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors }) {
     const width = stripCanvas.width;
     const headerH = Math.max(148, Math.round(width * 0.075));
     const footerH = Math.max(116, Math.round(width * 0.052));
@@ -2121,13 +2168,19 @@
       ctx.fillText('5ft.mag', pad, Math.round(headerH * 0.58));
     }
 
+    // 우측 상단: 필름명 크게 + 그 아래 작가 아이디 더 작게
     ctx.fillStyle = '#111111';
     ctx.textAlign = 'right';
-    ctx.font = `800 ${Math.round(headerH * 0.2)}px Pretendard, Arial, sans-serif`;
-    ctx.fillText(kind === 'reader' ? "READER'S ROLL" : '5FT ISSUE', width - pad, Math.round(headerH * 0.42));
-    ctx.fillStyle = '#666666';
-    ctx.font = `600 ${Math.round(headerH * 0.15)}px Pretendard, Arial, sans-serif`;
-    ctx.fillText(filmName, width - pad, Math.round(headerH * 0.68));
+    ctx.font = `800 ${Math.round(headerH * 0.26)}px Pretendard, Arial, sans-serif`;
+    ctx.fillText(filmName, width - pad, Math.round(headerH * 0.46));
+    const authorLine = formatAuthorLine(authors);
+    if (authorLine) {
+      ctx.fillStyle = '#888888';
+      ctx.font = `500 ${Math.round(headerH * 0.12)}px Pretendard, Arial, sans-serif`;
+      // 너무 길면 끝을 ellipsis 로 자름 (전체 폭 절반까지 허용)
+      const maxLineW = Math.round((width - pad * 2) * 0.55);
+      ctx.fillText(truncateText(ctx, authorLine, maxLineW), width - pad, Math.round(headerH * 0.72));
+    }
 
     ctx.drawImage(stripCanvas, 0, headerH);
 
@@ -2154,6 +2207,7 @@
   async function handleSaveContribFilmImage(btn) {
     const personKey = btn.dataset.personKey;
     const filmName = btn.dataset.filmName;
+    const authorLabel = btn.dataset.authorLabel || personKey;
     const section = btn.closest('.reader-contributor-group');
     const target = section?.querySelector('.reader-contributor-grid');
     if (!target) return;
@@ -2162,7 +2216,8 @@
     btn.textContent = '저장 중…';
     try {
       const stripCanvas = await renderRollStripCanvas(target, 'contrib');
-      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind: 'reader' });
+      const authors = collectAuthorsForExport(target, 'contrib', { authorLabel });
+      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind: 'reader', authors });
       const personSlug = (personKey || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
       const filmSlug = (filmName || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
       const d = new Date();
@@ -2195,7 +2250,9 @@
     try {
       const stripCanvas = await renderRollStripCanvas(target, kind);
       const filmName = (filmsData[filmKey]?.displayName || filmsData[filmKey]?.name || filmKey).toString();
-      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind });
+      const photographers = Array.isArray(filmsData[filmKey]?.photographers) ? filmsData[filmKey].photographers : [];
+      const authors = collectAuthorsForExport(target, kind, { photographers });
+      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors });
       const slug = filmName.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
       const d = new Date();
       const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
