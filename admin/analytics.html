@@ -34,6 +34,10 @@
     .range-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 6px 14px; border-radius: 999px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text); transition: background .15s, border-color .15s, color .15s; }
     .range-btn:hover { border-color: var(--text); }
     .range-btn.is-current { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .top-mode { display: inline-flex; gap: 4px; margin-top: 6px; }
+    .top-mode-btn { font: inherit; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.04em; padding: 3px 10px; border-radius: 999px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: background .15s, border-color .15s, color .15s; }
+    .top-mode-btn:hover { border-color: var(--text); color: var(--text); }
+    .top-mode-btn.is-current { background: var(--text); color: var(--bg); border-color: var(--text); }
 
     .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
     .card { background: var(--bg-sub); border-radius: 6px; padding: 20px; }
@@ -273,6 +277,10 @@
   <div class="panel">
     <h2 class="panel-title">상위 필름 <span class="panel-sub" style="margin-left:6px">TOP 10</span></h2>
     <p class="panel-sub" id="topFilmsRangeLabel" style="margin-top:4px"></p>
+    <div class="top-mode" data-target="films">
+      <button type="button" class="top-mode-btn is-current" data-mode="range">기간</button>
+      <button type="button" class="top-mode-btn" data-mode="all">전체 누적</button>
+    </div>
     <table class="stat-table">
       <thead>
         <tr><th>필름</th><th class="bar-cell"></th><th class="num">업로드</th><th class="num">승인</th></tr>
@@ -284,6 +292,10 @@
   <div class="panel">
     <h2 class="panel-title">상위 카메라 <span class="panel-sub" style="margin-left:6px">TOP 10</span></h2>
     <p class="panel-sub" id="topCamerasRangeLabel" style="margin-top:4px"></p>
+    <div class="top-mode" data-target="cameras">
+      <button type="button" class="top-mode-btn is-current" data-mode="range">기간</button>
+      <button type="button" class="top-mode-btn" data-mode="all">전체 누적</button>
+    </div>
     <table class="stat-table">
       <thead>
         <tr><th>카메라</th><th class="bar-cell"></th><th class="num">업로드</th><th class="num">승인</th></tr>
@@ -295,12 +307,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260518-uploads"></script>
+<script src="../js/db-client.js?v=20260518-topall"></script>
 <script src="../js/site-common.js?v=20260518-cleanup"></script>
 <script>
 'use strict';
 
-const STATE = { user: null, isEditor: false, days: 30 };
+const STATE = { user: null, isEditor: false, days: 30, filmsMode: 'range', camerasMode: 'range' };
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
@@ -771,8 +783,11 @@ async function reload() {
   $('uploadChartRangeLabel').textContent = label;
   $('themeRangeLabel').textContent       = label;
   $('topContribRangeLabel').textContent  = label;
-  $('topFilmsRangeLabel').textContent    = label;
-  $('topCamerasRangeLabel').textContent  = label;
+  $('topFilmsRangeLabel').textContent    = STATE.filmsMode   === 'all' ? '전체 누적' : label;
+  $('topCamerasRangeLabel').textContent  = STATE.camerasMode === 'all' ? '전체 누적' : label;
+
+  const topFilmsFn   = STATE.filmsMode   === 'all' ? db().analytics.uploadsTopFilmsAll(10)   : db().analytics.uploadsTopFilms(d, 10);
+  const topCamerasFn = STATE.camerasMode === 'all' ? db().analytics.uploadsTopCamerasAll(10) : db().analytics.uploadsTopCameras(d, 10);
 
   const [
     summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths,
@@ -790,8 +805,8 @@ async function reload() {
     db().analytics.uploadsSummary(),
     db().analytics.uploadsDaily(d),
     db().analytics.uploadsTopContributors(d, 10),
-    db().analytics.uploadsTopFilms(d, 10),
-    db().analytics.uploadsTopCameras(d, 10),
+    topFilmsFn,
+    topCamerasFn,
     db().analytics.uploadsThemeRatio(d),
   ]);
 
@@ -818,6 +833,20 @@ document.querySelectorAll('.range-btn').forEach(btn => {
     btn.classList.add('is-current');
     STATE.days = Number(btn.dataset.days) || 30;
     reload();
+  });
+});
+
+document.querySelectorAll('.top-mode').forEach(group => {
+  const target = group.dataset.target;
+  group.querySelectorAll('.top-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      group.querySelectorAll('.top-mode-btn').forEach(b => b.classList.remove('is-current'));
+      btn.classList.add('is-current');
+      const mode = btn.dataset.mode === 'all' ? 'all' : 'range';
+      if (target === 'films')   STATE.filmsMode   = mode;
+      if (target === 'cameras') STATE.camerasMode = mode;
+      reload();
+    });
   });
 });
 
