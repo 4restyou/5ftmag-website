@@ -116,6 +116,21 @@ body { background: var(--bg); color: var(--text); }
 .me-fav-film-card .me-fav-unbtn { position: absolute; top: 10px; right: 10px; background: var(--bg); color: var(--text-muted); border: none; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: color .15s; }
 .me-fav-film-card .me-fav-unbtn:hover { color: #e0245e; }
 
+/* 좋아한 작가 */
+.me-fav-contributors-grid { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.me-fav-contrib-card { position: relative; background: var(--bg-sub); border-radius: 6px; overflow: hidden; }
+.me-fav-contrib-card .me-fav-unbtn { position: absolute; top: 10px; right: 10px; z-index: 2; background: rgba(0,0,0,0.55); color: #fff; border: none; border-radius: 999px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.me-fav-contrib-card .me-fav-unbtn:hover { background: rgba(0,0,0,0.75); }
+.me-fav-contrib-thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; aspect-ratio: 3 / 1; background: var(--bg); }
+.me-fav-contrib-thumb { overflow: hidden; background: var(--bg); }
+.me-fav-contrib-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.me-fav-contrib-thumb.empty { background: var(--bg); }
+.me-fav-contrib-info { padding: 14px 16px 16px; }
+.me-fav-contrib-name { font-size: 17px; font-weight: var(--fw-heading); letter-spacing: -0.015em; margin: 0 0 4px; }
+.me-fav-contrib-meta { font-size: 12px; color: var(--text-muted); margin: 0 0 8px; }
+.me-fav-contrib-ig { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); text-decoration: none; transition: color .15s; }
+.me-fav-contrib-ig:hover { color: var(--text); }
+
 .me-fav-articles-list { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 18px; }
 .me-fav-article { position: relative; }
 .me-fav-article-link { display: grid; grid-template-columns: 160px 1fr; gap: 18px; padding: 16px; background: var(--bg-sub); border-radius: 6px; color: inherit; text-decoration: none; transition: background .15s; }
