@@ -1073,18 +1073,22 @@
         // 변환 — 단계별로 버튼 텍스트 갱신해 "멈춘 것처럼 보이는" 무음 hang 방지
         submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
         setUploadStatus('progress', '사진을 읽는 중', `${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`);
-        const { blob, width, height } = await resizeToJpeg(file, ({ stage, width: w, height: h }) => {
-          if (stage === 'decode') {
-            submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
-            setUploadStatus('progress', '사진을 읽는 중', '큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.');
-          } else if (stage === 'resize') {
-            submitBtn.textContent = `사진 크기 줄이는 중… (${w}×${h})`;
-            setUploadStatus('progress', '사진 크기 줄이는 중', `${w}×${h} 크기로 변환하고 있어요.`);
-          } else if (stage === 'encode') {
-            submitBtn.textContent = `사진 인코딩 중… (${w}×${h})`;
-            setUploadStatus('progress', '사진을 압축하는 중', '업로드 전에 용량을 줄이고 있어요.');
-          }
-        });
+        const { blob, width, height } = await withNetworkTimeout(
+          resizeToJpeg(file, ({ stage, width: w, height: h }) => {
+            if (stage === 'decode') {
+              submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
+              setUploadStatus('progress', '사진을 읽는 중', '큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.');
+            } else if (stage === 'resize') {
+              submitBtn.textContent = `사진 크기 줄이는 중… (${w}×${h})`;
+              setUploadStatus('progress', '사진 크기 줄이는 중', `${w}×${h} 크기로 변환하고 있어요.`);
+            } else if (stage === 'encode') {
+              submitBtn.textContent = `사진 인코딩 중… (${w}×${h})`;
+              setUploadStatus('progress', '사진을 압축하는 중', '업로드 전에 용량을 줄이고 있어요.');
+            }
+          }),
+          52000,
+          '사진 변환'
+        );
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
 
         setUploadStatus('progress', '로그인 상태 확인 중', '업로드 권한을 확인하고 있어요.');
@@ -1123,7 +1127,11 @@
         ).catch(err => ({ error: { message: err.message } }));
         if (dbErr) {
           setUploadStatus('progress', '업로드 정리 중', '기록 저장에 실패해 올라간 사진 파일을 정리하고 있어요.');
-          await db().submissions.removePhoto(path);
+          await withNetworkTimeout(
+            db().submissions.removePhoto(path),
+            12000,
+            '실패한 업로드 정리'
+          ).catch(err => console.warn('[reader-submissions] cleanup failed:', err?.message || err));
           throw new Error('사진은 올라갔지만 제출 기록 저장에 실패했어요. 잠시 뒤 다시 시도해 주세요. (' + dbErr.message + ')');
         }
 

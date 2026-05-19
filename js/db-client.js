@@ -604,6 +604,49 @@
   };
 
   // ─── 통계 (편집부 전용 — 모든 RPC 내부에서 is_editor 검사) ───
+  async function fallbackUploadsTop(field, { days = null, limit = 10 } = {}) {
+    const c = client(); if (!c) return [];
+    const col = field === 'camera' ? 'camera' : 'film';
+    const since = days ? new Date(Date.now() - Number(days) * 86400000).toISOString() : null;
+    let rows = [];
+
+    let q = c.from('reader_submissions')
+      .select(`${col}, status, created_at`)
+      .not(col, 'is', null)
+      .limit(5000);
+    if (since) q = q.gte('created_at', since);
+    const primary = await q;
+
+    if (primary.error) {
+      let publicQ = c.from('reader_submissions_approved')
+        .select(`${col}, created_at`)
+        .not(col, 'is', null)
+        .limit(5000);
+      if (since) publicQ = publicQ.gte('created_at', since);
+      const fallback = await publicQ;
+      if (fallback.error) {
+        console.warn(`[analytics.fallbackUploadsTop.${col}]`, fallback.error.message);
+        return [];
+      }
+      rows = (fallback.data || []).map(r => ({ ...r, status: 'approved' }));
+    } else {
+      rows = primary.data || [];
+    }
+
+    const grouped = new Map();
+    for (const row of rows) {
+      const key = String(row[col] || '').trim();
+      if (!key) continue;
+      const cur = grouped.get(key) || { [col]: key, uploads: 0, approved: 0 };
+      cur.uploads += 1;
+      if (row.status === 'approved') cur.approved += 1;
+      grouped.set(key, cur);
+    }
+    return [...grouped.values()]
+      .sort((a, b) => (b.uploads - a.uploads) || (b.approved - a.approved) || String(a[col]).localeCompare(String(b[col]), 'ko'))
+      .slice(0, limit);
+  }
+
   const analytics = {
     async summary() {
       const c = client(); if (!c) return null;
@@ -680,26 +723,26 @@
     async uploadsTopFilms(days = 30, limit = 10) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_uploads_top_films', { p_days: days, p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return []; }
-      return data || [];
+      if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return fallbackUploadsTop('film', { days, limit }); }
+      return data?.length ? data : fallbackUploadsTop('film', { days, limit });
     },
     async uploadsTopFilmsAll(limit = 10) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_uploads_top_films_all', { p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopFilmsAll]', error.message); return []; }
-      return data || [];
+      if (error) { console.warn('[analytics.uploadsTopFilmsAll]', error.message); return fallbackUploadsTop('film', { limit }); }
+      return data?.length ? data : fallbackUploadsTop('film', { limit });
     },
     async uploadsTopCameras(days = 30, limit = 10) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_uploads_top_cameras', { p_days: days, p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return []; }
-      return data || [];
+      if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return fallbackUploadsTop('camera', { days, limit }); }
+      return data?.length ? data : fallbackUploadsTop('camera', { days, limit });
     },
     async uploadsTopCamerasAll(limit = 10) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_uploads_top_cameras_all', { p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopCamerasAll]', error.message); return []; }
-      return data || [];
+      if (error) { console.warn('[analytics.uploadsTopCamerasAll]', error.message); return fallbackUploadsTop('camera', { limit }); }
+      return data?.length ? data : fallbackUploadsTop('camera', { limit });
     },
     async uploadsThemeRatio(days = 30) {
       const c = client(); if (!c) return null;

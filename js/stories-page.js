@@ -21,6 +21,16 @@
   }
   const escapeAttr = escapeHtml;
 
+  function thumbnailPicture(src, alt, loading = 'lazy') {
+    const cleanSrc = String(src || '');
+    const webpSrc = /\.(jpe?g|png)$/i.test(cleanSrc)
+      ? cleanSrc.replace(/\.(jpe?g|png)$/i, '.webp')
+      : '';
+    const img = `<img src="${escapeAttr(cleanSrc)}" loading="${escapeAttr(loading)}" alt="${escapeAttr(alt)}" />`;
+    if (!webpSrc) return img;
+    return `<picture><source srcset="${escapeAttr(webpSrc)}" type="image/webp">${img}</picture>`;
+  }
+
   // 날짜 포맷팅 (2024-11-15 → 2024.11.15)
   function formatDate(dateStr) {
     return dateStr.replace(/-/g, '.');
@@ -68,7 +78,7 @@
     const whiteBgCls = story.thumbnailWhiteBg ? ' is-on-white' : '';
     const imgBlock = story.thumbnail
       ? `<div class="article-img${whiteBgCls}">
-           <img src="${escapeAttr(story.thumbnail)}" loading="eager" alt="${escapeAttr(story.title)}" />
+           ${thumbnailPicture(story.thumbnail, story.title, 'eager')}
            ${issueBadge}
          </div>`
       : `<div class="article-img text-only">

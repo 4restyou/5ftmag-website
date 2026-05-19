@@ -117,11 +117,72 @@ test('홈과 Stories 카드 썸네일은 깨진 이미지 없이 로드된다', 
   await page.waitForSelector('#storyList img', { timeout: 8000 });
   const homeBroken = await page.locator('#storyList img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).length);
   expect(homeBroken).toBe(0);
+  const homePolicyGaps = await page.locator('#storyList .post-img img').evaluateAll(imgs => imgs.filter(img => {
+    const src = img.getAttribute('src') || '';
+    if (!/\.(jpe?g|png)$/i.test(src)) return false;
+    return !img.closest('picture')?.querySelector('source[type="image/webp"]');
+  }).length);
+  expect(homePolicyGaps).toBe(0);
 
   await page.goto('/stories.html');
   await page.waitForSelector('#articlesGrid img', { timeout: 8000 });
   const storiesBroken = await page.locator('#articlesGrid img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).length);
   expect(storiesBroken).toBe(0);
+  const storiesPolicyGaps = await page.locator('#articlesGrid .article-img img').evaluateAll(imgs => imgs.filter(img => {
+    const src = img.getAttribute('src') || '';
+    if (!/\.(jpe?g|png)$/i.test(src)) return false;
+    return !img.closest('picture')?.querySelector('source[type="image/webp"]');
+  }).length);
+  expect(storiesPolicyGaps).toBe(0);
+});
+
+test('개별 글 관련 카드 썸네일도 WebP 원본 fallback 정책을 따른다', async ({ page }) => {
+  await page.goto('/stories/17.html');
+  await page.waitForSelector('#relatedGrid img', { timeout: 8000 });
+  await page.locator('#relatedGrid').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => {
+    const imgs = Array.from(document.querySelectorAll('#relatedGrid img'));
+    return imgs.length > 0 && imgs.every(img => img.complete && img.naturalWidth > 0);
+  }, null, { timeout: 8000 });
+  const result = await page.locator('#relatedGrid img').evaluateAll(imgs => ({
+    broken: imgs.filter(img => !img.complete || img.naturalWidth === 0).length,
+    policyGaps: imgs.filter(img => {
+      const src = img.getAttribute('src') || '';
+      if (!/\.(jpe?g|png)$/i.test(src)) return false;
+      return !img.closest('picture')?.querySelector('source[type="image/webp"]');
+    }).length,
+  }));
+  expect(result.broken).toBe(0);
+  expect(result.policyGaps).toBe(0);
+});
+
+test('메인 Photo는 라이브 독자 사진 응답이 느려도 먼저 렌더된다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: `
+      window.MagDB = {
+        isReady: () => true,
+        auth: { getSession: async () => null, onChange: () => {} },
+        profiles: { getMine: async () => null },
+        notifications: { unreadCount: async () => 0, list: async () => [], markAllRead: async () => ({ error: null }) },
+        realtime: { subscribeNotifications: async () => null },
+        favorites: { idsForType: async () => new Set(), toggle: async () => ({ error: null }) },
+      };
+    `,
+  }));
+  await page.route('**/js/reader-submissions.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: `
+      window.fetchApprovedSubmissions = async () => new Promise(resolve => setTimeout(() => resolve([]), 10000));
+    `,
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.goto('/');
+  await expect(page.locator('#photoGrid .disc-cell').first()).toBeVisible({ timeout: 4200 });
+  await expect(page.locator('#photoGrid .disc-cell')).not.toHaveCount(0);
 });
 
 test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({ page }) => {
@@ -395,10 +456,10 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
         }),
         uploadsDaily: async () => rows,
         uploadsTopContributors: async () => [],
-        uploadsTopFilms: async () => [],
-        uploadsTopFilmsAll: async () => [],
-        uploadsTopCameras: async () => [],
-        uploadsTopCamerasAll: async () => [],
+        uploadsTopFilms: async () => [{ film: 'Kodak Portra 400', uploads: 3, approved: 2 }],
+        uploadsTopFilmsAll: async () => [{ film: 'Kodak Portra 400', uploads: 3, approved: 2 }],
+        uploadsTopCameras: async () => [{ camera: 'Leica M6', uploads: 2, approved: 2 }],
+        uploadsTopCamerasAll: async () => [{ camera: 'Leica M6', uploads: 2, approved: 2 }],
         uploadsThemeRatio: async () => ({ theme_count: 1, general_count: 3, total: 4, theme_ratio: 0.25 }),
         clientErrorsRecent: async () => [],
       },
@@ -414,6 +475,8 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
   await expect(page.locator('#opsPendingReports')).toHaveText('1');
   await expect(page.locator('#opsClientErrors')).toHaveText('0');
   await expect(page.locator('#opsHealth')).toHaveText('확인 필요');
+  await expect(page.locator('#topFilms')).toContainText('Kodak Portra 400');
+  await expect(page.locator('#topCameras')).toContainText('Leica M6');
 
   await page.evaluate(() => {
     window.__ops.totalUploads += 2;

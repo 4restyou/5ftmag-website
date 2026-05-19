@@ -10,6 +10,16 @@
   }
   const escapeAttr = escapeHtml;
 
+  function thumbnailPicture(src, alt, loading = 'lazy') {
+    const cleanSrc = String(src || '');
+    const webpSrc = /\.(jpe?g|png)$/i.test(cleanSrc)
+      ? cleanSrc.replace(/\.(jpe?g|png)$/i, '.webp')
+      : '';
+    const img = `<img src="${escapeAttr(cleanSrc)}" loading="${escapeAttr(loading)}" alt="${escapeAttr(alt)}" />`;
+    if (!webpSrc) return img;
+    return `<picture><source srcset="${escapeAttr(webpSrc)}" type="image/webp">${img}</picture>`;
+  }
+
   // ════════════════════════════
   // 메인의 Stories: JSON 로딩
   // (stories.html과 같은 데이터를 읽어서 메인에 표시)
@@ -65,7 +75,7 @@
           const imgBlock = s.thumbnail
             ? `<div class="post-img${whiteBgCls}">
                  <span class="post-label">${escapeHtml(cardLabel)}</span>
-                 <img src="${escapeAttr(s.thumbnail)}" loading="eager" alt="${escapeAttr(s.title)}" />
+                 ${thumbnailPicture(s.thumbnail, s.title, 'eager')}
                </div>`
             : `<div class="post-img text-only">
                  <span class="post-label">${escapeHtml(cardLabel)}</span>
@@ -205,9 +215,15 @@
   }
 
   if (photoGrid) {
+    function timeoutValue(ms, value = []) {
+      return new Promise(resolve => setTimeout(() => resolve(value), ms));
+    }
+
     // reader-submissions.js 가 body 끝에서 로드되어 fetchApprovedSubmissions 가
-    // 아직 정의되지 않았을 수 있음 → 최대 3초 폴링 후 사용 (없으면 빈 배열)
-    async function waitForSupabaseFetcher(timeoutMs = 3000) {
+    // 아직 정의되지 않았을 수 있음. 라이브 Reader 사진은 보강 데이터이므로
+    // 오래 기다려 메인 Photo 전체가 비어 보이지 않게 짧게만 기다린다.
+    async function waitForSupabaseFetcher(timeoutMs = isMobileHome() ? 1600 : 2500) {
+      const started = Date.now();
       const step = 100;
       for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
         if (
@@ -215,7 +231,11 @@
           window.MagDB &&
           window.MagDB.isReady()
         ) {
-          return window.fetchApprovedSubmissions(1000).catch(() => []);
+          const remaining = Math.max(300, timeoutMs - (Date.now() - started));
+          return Promise.race([
+            window.fetchApprovedSubmissions(1000).catch(() => []),
+            timeoutValue(remaining, []),
+          ]);
         }
         await new Promise(r => setTimeout(r, step));
       }
