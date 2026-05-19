@@ -3667,5 +3667,80 @@
     "photos": [],
     "canThumbnail": "img/films/fujineopanss-can.webp",
     "canThumbnailStatus": "set"
+  },
+  "vision3200t": {
+    "slug": "vision3200t",
+    "tier": "library",
+    "brand": "KODAK",
+    "name": "Vision3 200T",
+    "displayName": "Kodak Vision3 200T",
+    "aliases": [
+      "Vision3 200T",
+      "Vision 3 200T",
+      "Kodak Vision3 200T",
+      "Kodak 5213",
+      "5213",
+      "비전3 200T",
+      "비전 3 200T",
+      "코닥 비전3 200T",
+      "코닥 비전 3 200T",
+      "vision3200t"
+    ],
+    "desc": "할리우드 시네마 현장의 표준 텅스텐 200T. ECN-2 현상이 정공법이지만 remjet 제거 후 C-41 로도 활용 가능 — 밤 거리의 빛을 시네마톤으로 옮긴 한 롤. Cinestill 200T 가 이 필름의 C-41 재포장입니다.",
+    "iso": "200",
+    "type": "Tungsten",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
+  },
+  "gp3100": {
+    "slug": "gp3100",
+    "tier": "library",
+    "brand": "SHANGHAI",
+    "name": "GP3 100",
+    "displayName": "Shanghai GP3 100",
+    "aliases": [
+      "GP3 100",
+      "GP3-100",
+      "Shanghai GP3 100",
+      "Shanghai GP3",
+      "상하이 GP3 100",
+      "상하이 GP3",
+      "상하이GP3100",
+      "gp3100"
+    ],
+    "desc": "중국 상하이 필름의 가장 오랜 B&W 한 롤. 거친 입자와 단단한 콘트라스트가 도시 풍경·다큐멘터리에 자주 호명되며, 단종과 재출시를 거듭한 중국 흑백의 클래식입니다.",
+    "iso": "100",
+    "type": "Black & White",
+    "format": "35mm, 120",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
+  },
+  "gp3400": {
+    "slug": "gp3400",
+    "tier": "library",
+    "brand": "SHANGHAI",
+    "name": "GP3 400",
+    "displayName": "Shanghai GP3 400",
+    "aliases": [
+      "GP3 400",
+      "GP3-400",
+      "Shanghai GP3 400",
+      "상하이 GP3 400",
+      "상하이GP3400",
+      "gp3400"
+    ],
+    "desc": "GP3 시리즈의 고감도 형제. ISO 400 의 거친 입자가 야간·실내 reportage 에 자주 쓰이고, push 도 너그러운 편입니다.",
+    "iso": "400",
+    "type": "Black & White",
+    "format": "35mm, 120",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   }
 }
