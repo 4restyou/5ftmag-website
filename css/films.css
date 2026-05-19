@@ -454,7 +454,8 @@
   justify-content: center;
   flex-direction: column;
   gap: 20px;
-  padding: 76px 40px 112px;
+  /* 좌우 80px — prev/next 화살표(left/right 24 + width 44 = 68) 자리를 사진 밖에 확보 */
+  padding: 76px 80px 112px;
 }
 .lightbox.open { display: flex; }
 .lightbox-img-wrap {
