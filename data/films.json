@@ -1267,8 +1267,8 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/holga400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "vision250d": {
     "slug": "vision250d",

@@ -551,7 +551,7 @@
     }
   }
 
-  fetch('data/films.json?v=20260519-holga400')
+  fetch('data/films.json?v=20260519-holga400thumb')
     .then(res => res.json())
     .then(data => {
       filmsData = data;
@@ -1869,235 +1869,6 @@
     showLightbox(idx, 'editorial');
   });
 
-  // ── 필름스트립 이미지로 저장 ──────────────────────
-  // DOM 캡처 대신 캔버스에 직접 그린다. CORS/오프스크린 캡처 실패로 저장 이미지가
-  // 검게 비는 문제를 줄이고, 컷 간격도 정수 픽셀로 제어한다.
-
-  function loadCanvasImage(src, useCors = false) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      if (useCors) img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = src;
-    });
-  }
-
-  function collectRollExportFrames(target, kind) {
-    if (kind === 'reader') {
-      // 채워진 슬롯만 export — 빈 자리는 끌고 가지 않음 (10컷이면 10컷만 저장)
-      return [...target.querySelectorAll('.reader-slot.is-filled')].map(slot => {
-        const img = slot.querySelector('.reader-slot-window img');
-        if (!img) return null;
-        return {
-          src: img.currentSrc || img.src,
-          portrait: img.classList.contains('is-portrait'),
-        };
-      }).filter(Boolean);
-    }
-    if (kind === 'contrib') {
-      // 작가 뷰의 한 필름 섹션 grid — .reader-contributor-photo 각각이 한 컷
-      return [...target.querySelectorAll('.reader-contributor-photo')].map(cell => {
-        const img = cell.querySelector('img');
-        if (!img) return null;
-        return {
-          src: img.currentSrc || img.src,
-          portrait: cell.classList.contains('is-portrait') || img.classList.contains('is-portrait'),
-        };
-      });
-    }
-    return [...target.children].map(cell => {
-      const photo = cell.querySelector('.modal-photo');
-      const img = cell.querySelector('.modal-photo img');
-      if (!img) return null;
-      return {
-        src: img.currentSrc || img.src,
-        portrait: img.classList.contains('is-portrait') || photo?.classList.contains('is-portrait'),
-      };
-    });
-  }
-
-  function drawImageCover(ctx, img, x, y, w, h) {
-    const scale = Math.max(w / img.width, h / img.height);
-    const sw = w / scale;
-    const sh = h / scale;
-    const sx = Math.max(0, (img.width - sw) / 2);
-    const sy = Math.max(0, (img.height - sh) / 2);
-    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
-  }
-
-  function drawPhotoWindow(ctx, img, x, y, w, h, portrait) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.clip();
-    if (portrait) {
-      ctx.translate(x + w / 2, y + h / 2);
-      ctx.rotate(Math.PI / 2);
-      drawImageCover(ctx, img, -h / 2, -w / 2, h, w);
-    } else {
-      drawImageCover(ctx, img, x, y, w, h);
-    }
-    ctx.restore();
-  }
-
-  // 저장 헤더용 작가 라인: 인스타 핸들 우선, 중복 제거, '@' prefix
-  function collectAuthorsForExport(target, kind, ctx) {
-    const seen = new Set();
-    const list = [];
-    function push(raw) {
-      const v = (raw || '').toString().trim();
-      if (!v) return;
-      const key = v.toLowerCase();
-      if (seen.has(key)) return;
-      seen.add(key);
-      list.push(v);
-    }
-    if (kind === 'reader') {
-      target.querySelectorAll('.reader-slot.is-filled').forEach(slot => {
-        const ig = slot.getAttribute('data-instagram');
-        if (ig) push(ig);
-        else push(slot.querySelector('.reader-slot-author')?.textContent || '');
-      });
-    } else if (kind === 'contrib') {
-      // ctx.authorLabel 한 명 (작가 뷰의 한 필름 섹션)
-      push(ctx?.authorLabel || '');
-    } else if (kind === 'editorial') {
-      (ctx?.photographers || []).forEach(push);
-    }
-    return list;
-  }
-
-  function formatAuthorLine(authors) {
-    if (!authors || !authors.length) return '';
-    return authors.map(a => /^@/.test(a) ? a : `@${a}`).join('  ');
-  }
-
-  function truncateText(ctx, text, maxWidth) {
-    if (!text || ctx.measureText(text).width <= maxWidth) return text;
-    const ell = '…';
-    let lo = 0, hi = text.length;
-    while (lo < hi) {
-      const mid = (lo + hi + 1) >> 1;
-      if (ctx.measureText(text.slice(0, mid) + ell).width <= maxWidth) lo = mid;
-      else hi = mid - 1;
-    }
-    return text.slice(0, lo) + ell;
-  }
-
-  async function renderRollStripCanvas(target, kind) {
-    const frames = collectRollExportFrames(target, kind);
-    const cols = 6;
-    const tileW = 380;
-    const tileH = 345;
-    const rowGap = 28; // 줄 사이 흰 여백 (DOM 14px 대비 export 가 보통 작아 보여서 약간 더 키움)
-    const rows = Math.max(1, Math.ceil(frames.length / cols));
-    const scale = 1.5;
-    const innerW = cols * tileW;
-    const innerH = rows * tileH + Math.max(0, rows - 1) * rowGap;
-    const canvas = document.createElement('canvas');
-    canvas.width = innerW * scale;
-    canvas.height = innerH * scale;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(scale, scale);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, innerW, innerH);
-
-    const [frameImgA, frameImgB] = await Promise.all([
-      loadCanvasImage('img/filmstrip-frame.svg?v=6'),
-      loadCanvasImage('img/filmstrip-frame-2.svg?v=6'),
-    ]);
-    const loaded = await Promise.all(frames.map(frame => frame?.src ? loadCanvasImage(frame.src, true) : Promise.resolve(null)));
-    frames.forEach((frame, idx) => {
-      const col = idx % cols;
-      const row = Math.floor(idx / cols);
-      const x = col * tileW;
-      const y = row * (tileH + rowGap);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(x, y, tileW, tileH);
-      const img = loaded[idx];
-      if (img) {
-        drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
-      }
-      const frameImg = (idx % 2 === 0) ? frameImgA : frameImgB;
-      if (frameImg) ctx.drawImage(frameImg, x, y, tileW, tileH);
-    });
-    return canvas;
-  }
-
-  async function composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors, filmThumb }) {
-    const width = stripCanvas.width;
-    const headerH = Math.max(148, Math.round(width * 0.075));
-    const footerH = Math.max(116, Math.round(width * 0.052));
-    const pad = Math.max(56, Math.round(width * 0.032));
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = headerH + stripCanvas.height + footerH;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const logo = await loadCanvasImage('img/logo-5ft-b.svg?v=20260518-exportlogo');
-    const logoH = Math.min(70, Math.round(headerH * 0.42));
-    if (logo) {
-      const logoW = Math.round(logo.width * (logoH / logo.height));
-      ctx.drawImage(logo, pad, Math.round((headerH - logoH) / 2), logoW, logoH);
-    } else {
-      ctx.fillStyle = '#111111';
-      ctx.font = `800 ${Math.round(headerH * 0.3)}px Pretendard, Arial, sans-serif`;
-      ctx.fillText('5ft.mag', pad, Math.round(headerH * 0.58));
-    }
-
-    // 우측 가장자리에 필름 캐니스터 일러스트 (있을 때만)
-    let textRightX = width - pad;
-    if (filmThumb) {
-      const canImg = await loadCanvasImage(filmThumb);
-      if (canImg) {
-        const thumbH = Math.round(headerH * 0.88);
-        const thumbW = Math.round(canImg.width * (thumbH / canImg.height));
-        const thumbX = width - pad - thumbW;
-        const thumbY = Math.round((headerH - thumbH) / 2);
-        ctx.drawImage(canImg, thumbX, thumbY, thumbW, thumbH);
-        textRightX = thumbX - Math.max(20, Math.round(pad * 0.4));
-      }
-    }
-
-    // 우측 상단: 필름명 크게 + 그 아래 작가 아이디 더 작게
-    ctx.fillStyle = '#111111';
-    ctx.textAlign = 'right';
-    ctx.font = `800 ${Math.round(headerH * 0.26)}px Pretendard, Arial, sans-serif`;
-    ctx.fillText(filmName, textRightX, Math.round(headerH * 0.46));
-    const authorLine = formatAuthorLine(authors);
-    if (authorLine) {
-      ctx.fillStyle = '#888888';
-      ctx.font = `500 ${Math.round(headerH * 0.12)}px Pretendard, Arial, sans-serif`;
-      // 가용 폭 (캐니스터 왼쪽까지) 안에서 끝을 ellipsis 로 자름
-      const maxLineW = Math.max(80, textRightX - pad);
-      ctx.fillText(truncateText(ctx, authorLine, maxLineW), textRightX, Math.round(headerH * 0.72));
-    }
-
-    ctx.drawImage(stripCanvas, 0, headerH);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, headerH + stripCanvas.height, width, footerH);
-    ctx.fillStyle = '#111111';
-    ctx.textAlign = 'center';
-    ctx.font = `700 ${Math.round(footerH * 0.28)}px Pretendard, Arial, sans-serif`;
-    ctx.fillText('www.5ftmag.com', Math.round(width / 2), headerH + stripCanvas.height + Math.round(footerH * 0.58));
-
-    ctx.strokeStyle = 'rgba(0,0,0,0.14)';
-    ctx.lineWidth = Math.max(1, Math.round(width * 0.0008));
-    ctx.beginPath();
-    ctx.moveTo(0, headerH - ctx.lineWidth / 2);
-    ctx.lineTo(width, headerH - ctx.lineWidth / 2);
-    ctx.moveTo(0, headerH + stripCanvas.height + ctx.lineWidth / 2);
-    ctx.lineTo(width, headerH + stripCanvas.height + ctx.lineWidth / 2);
-    ctx.stroke();
-
-    return canvas;
-  }
-
   // displayName / name 으로 filmsData 안에서 일치 항목 찾아 캐니스터 썸네일 경로 반환
   function findFilmThumbByName(filmName) {
     if (!filmName) return null;
@@ -2124,20 +1895,15 @@
     btn.disabled = true;
     btn.textContent = '저장 중…';
     try {
-      const stripCanvas = await renderRollStripCanvas(target, 'contrib');
-      const authors = collectAuthorsForExport(target, 'contrib', { authorLabel });
+      const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, 'contrib');
+      const authors = window.FilmsRollExport.collectAuthorsForExport(target, 'contrib', { authorLabel });
       const filmThumb = findFilmThumbByName(filmName);
-      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind: 'reader', authors, filmThumb });
-      const personSlug = (personKey || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
-      const filmSlug = (filmName || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
+      const canvas = await window.FilmsRollExport.composeBrandedRollCanvas(stripCanvas, { filmName, authors, filmThumb });
+      const personSlug = window.FilmsRollExport.slugifyExportName(personKey);
+      const filmSlug = window.FilmsRollExport.slugifyExportName(filmName);
       const d = new Date();
       const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/jpeg', 0.92);
-      a.download = `5ftmag-${personSlug || 'contributor'}-${filmSlug || 'film'}-${stamp}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      window.FilmsRollExport.downloadCanvas(canvas, `5ftmag-${personSlug || 'contributor'}-${filmSlug || 'film'}-${stamp}.jpg`);
     } catch (err) {
       console.error('[save-contrib]', err);
       window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');
@@ -2158,22 +1924,17 @@
     btn.disabled = true;
     btn.textContent = '저장 중…';
     try {
-      const stripCanvas = await renderRollStripCanvas(target, kind);
+      const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, kind);
       const f = filmsData[filmKey] || {};
       const filmName = (f.displayName || f.name || filmKey).toString();
       const photographers = Array.isArray(f.photographers) ? f.photographers : [];
-      const authors = collectAuthorsForExport(target, kind, { photographers });
+      const authors = window.FilmsRollExport.collectAuthorsForExport(target, kind, { photographers });
       const filmThumb = (f.canThumbnailStatus === 'set' && f.canThumbnail) ? f.canThumbnail : null;
-      const canvas = await composeBrandedRollCanvas(stripCanvas, { filmName, kind, authors, filmThumb });
-      const slug = filmName.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
+      const canvas = await window.FilmsRollExport.composeBrandedRollCanvas(stripCanvas, { filmName, authors, filmThumb });
+      const slug = window.FilmsRollExport.slugifyExportName(filmName);
       const d = new Date();
       const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/jpeg', 0.92);
-      a.download = `5ftmag-${kind === 'reader' ? 'readers-roll' : 'editorial'}-${slug}-${stamp}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      window.FilmsRollExport.downloadCanvas(canvas, `5ftmag-${kind === 'reader' ? 'readers-roll' : 'editorial'}-${slug}-${stamp}.jpg`);
     } catch (err) {
       console.error('[save-roll]', err);
       window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');

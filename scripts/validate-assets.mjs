@@ -3,6 +3,7 @@
  * 5ft.mag 자산 검증
  * - HTML 파일의 로컬 src/href 참조 → 실제 파일 존재 여부
  * - JSON 데이터 파일의 내부 page/link/image/thumbnail/photo 참조 → 실제 파일 존재 여부
+ * - CSS 중괄호 균형 검사
  * - 병합 충돌 마커와 오래된 stories/12 이미지명 회귀 여부
  * - 누락 발견 시 exit 1 (빌드 실패)
  *
@@ -54,6 +55,37 @@ function checkRef(file, ref, baseDir, label = ref) {
   refCount++;
   if (!existsSync(target)) {
     broken.push({ file, ref: label, expected: relative(ROOT, target) });
+  }
+}
+
+function stripCssNoise(text) {
+  return text
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/"(?:\\.|[^"\\])*"/g, '""')
+    .replace(/'(?:\\.|[^'\\])*'/g, "''");
+}
+
+function checkCssBraces(file, text) {
+  const clean = stripCssNoise(text);
+  let depth = 0;
+  let line = 1;
+  const stack = [];
+  for (const ch of clean) {
+    if (ch === '\n') line++;
+    if (ch === '{') {
+      depth++;
+      stack.push(line);
+    } else if (ch === '}') {
+      depth--;
+      stack.pop();
+      if (depth < 0) {
+        broken.push({ file, ref: `CSS extra closing brace at line ${line}`, expected: 'balanced CSS blocks' });
+        return;
+      }
+    }
+  }
+  if (depth > 0) {
+    broken.push({ file, ref: `CSS missing closing brace opened near line ${stack.at(-1) || '?'}`, expected: 'balanced CSS blocks' });
   }
 }
 
@@ -140,8 +172,14 @@ if (existsSync(imgDir)) {
 }
 if (webpMissing.length) warnings.push(`${webpMissing.length} WebP pair(s) missing`);
 
+// 5) CSS 기본 구조 검사
+const cssFiles = walk(join(ROOT, 'css'), /\.css$/).filter(p => !relative(ROOT, p).startsWith('node_modules/'));
+for (const css of cssFiles) {
+  checkCssBraces(relative(ROOT, css), readFileSync(css, 'utf8'));
+}
+
 // 결과 출력
-console.log(`\n자산 검증: ${htmlFiles.length} HTML / ${dataFiles.length} JSON 검사`);
+console.log(`\n자산 검증: ${htmlFiles.length} HTML / ${dataFiles.length} JSON / ${cssFiles.length} CSS 검사`);
 console.log(`  총 참조 ${refCount}개`);
 
 if (broken.length) {
