@@ -636,6 +636,13 @@
   color: rgba(255, 255, 255, 0.46);
   letter-spacing: 0.12em;
 }
+.lightbox-swipe-hint {
+  display: none;
+  flex: 0 0 auto;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
 .lightbox-thumbs {
   position: absolute;
   left: 50%;
@@ -742,10 +749,11 @@
   .lightbox.is-zoomed img { transform: scale(1.28); }
   .lightbox-toolbar { top: 16px; left: 16px; }
   .lightbox-close { top: 16px; right: 16px; width: 40px; height: 40px; }
-  /* viewport 50% 가 아닌 사진 박스 중심에 맞춰 끌어올림 — 상단 padding(72) +
-     하단 padding(92) + thumbnails(~74) 차감해서 박스 중심은 50%보다 약 50px 위 */
-  .lightbox-prev  { left: 12px;  width: 40px; height: 40px; top: calc(50% - 50px); }
-  .lightbox-next  { right: 12px; width: 40px; height: 40px; top: calc(50% - 50px); }
+  /* 모바일에서는 prev/next 화살표를 숨기고 스와이프로 이동 — 사진 위 overlay 가
+     좁은 폭에서 피사체를 가리는 문제 해소. swipe 핸들러는 films-page.js 에 있음 */
+  .lightbox-prev,
+  .lightbox-next { display: none; }
+  .lightbox-swipe-hint { display: inline-flex; }
   .lightbox-caption-row {
     flex-direction: column;
     gap: 6px;
