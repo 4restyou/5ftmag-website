@@ -144,13 +144,26 @@
     /window\.webkit\.messageHandlers/i,
     /__gCrWeb/i,
     /KAKAO\b/,
+    // 안드로이드 IAB (Instagram 등) — "Java object is gone" 패턴으로 lifecycle 종료
+    /Java object is gone/i,
+    /Error invoking [A-Za-z]+:/i,
+  ];
+  // source URL 기반 무시 — extension 또는 native bridge 의 inject 스크립트
+  const ERROR_IGNORE_SOURCES = [
+    /^iabjs:\/\//i,                  // Instagram / Facebook in-app browser JS
+    /chrome-extension:\/\//i,
+    /moz-extension:\/\//i,
+    /safari-extension:\/\//i,
   ];
 
-  function shouldSkipErrorLog(message) {
+  function shouldSkipErrorLog(message, source) {
     if (pvShouldSkip()) return true;
     if (errorLogCount >= ERROR_LOG_MAX_PER_PAGE) return true;
     const msg = String(message || '');
-    return ERROR_IGNORES.some(re => re.test(msg));
+    if (ERROR_IGNORES.some(re => re.test(msg))) return true;
+    const src = String(source || '');
+    if (src && ERROR_IGNORE_SOURCES.some(re => re.test(src))) return true;
+    return false;
   }
 
   // 에러 페이로드에서 흘러올 수 있는 민감 정보 마스킹.
@@ -168,7 +181,7 @@
   function recordClientError(payload) {
     const rawMessage = String(payload?.message || 'Unknown client error');
     const message = maskErrorPII(rawMessage).slice(0, 1000);
-    if (shouldSkipErrorLog(message)) return;
+    if (shouldSkipErrorLog(message, payload?.source)) return;
     errorLogCount += 1;
     const body = {
       path: pvCleanPath().slice(0, 500),
