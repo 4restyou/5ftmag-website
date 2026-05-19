@@ -261,86 +261,13 @@ async function buildNews() {
 }
 
 // ════════ Films ════════
+// 2026-05: films 카탈로그는 Supabase 의 public.films 테이블로 이전됨.
+// 관리자 페이지(/admin/films) 에서 직접 추가·수정·삭제.
+// 빌드 시 data/films.json 생성은 scripts/build-films.mjs (Supabase → JSON) 에서 처리.
+// Notion Films DB 동기화는 더 이상 수행하지 않음.
 
 async function buildFilms() {
-  if (!FILMS_DB_ID) {
-    console.log('— Films DB ID 미설정. 시드 JSON 유지.');
-    return;
-  }
-  console.log('\n🎞 Films 빌드 중…');
-
-  const seed = await readJSON(path.join(ROOT, 'data/films.json')) || {};
-  const pages = await queryAllPages(notion, FILMS_DB_ID);
-  console.log(`  노션에서 ${pages.length}개 필름 발견`);
-
-  const films = {};
-  for (const page of pages) {
-    const props = page.properties;
-    const slug = getRichText(props['Slug']) || getTitle(props['Slug']);
-    if (!slug) {
-      console.warn(`  ⚠ Slug 없는 필름 스킵: ${page.id}`);
-      continue;
-    }
-    const brand = getRichText(props['Brand']) || getSelect(props['Brand']) || '';
-    const name = getTitle(props['Name']) || getRichText(props['Name']) || slug;
-    const desc = getRichText(props['Desc']) || getRichText(props['Description']) || '';
-    const iso = String(getNumber(props['ISO']) || getRichText(props['ISO']) || '');
-    const type = getRichText(props['Type']) || getSelect(props['Type']) || '';
-    const format = getRichText(props['Format']) || getSelect(props['Format']) || '35mm';
-    const issue = getSelect(props['Issue']) || getRichText(props['Issue']) || '';
-    const photographers = getMultiSelect(props['Photographers']);
-
-    let thumbnail = '';
-    const thumbUrl = page.cover
-      ? (page.cover.type === 'external' ? page.cover.external.url : page.cover.file.url)
-      : getFirstFile(props['Thumbnail']);
-    if (thumbUrl) {
-      const ext = getImageExt(thumbUrl);
-      const dest = path.join(ROOT, 'img/films', `${slug}-thumb${ext}`);
-      try {
-        if (!DRY_RUN) await downloadImage(thumbUrl, dest);
-        thumbnail = `img/films/${slug}-thumb${ext}`;
-      } catch (err) {
-        console.warn(`  ⚠ 썸네일 다운로드 실패 (${slug}):`, err.message);
-      }
-    }
-
-    // 사진들 — Photos 속성 (files) 또는 본문의 image 블록
-    const photos = [];
-    const photoFiles = getFiles(props['Photos']);
-    if (photoFiles.length) {
-      let i = 0;
-      for (const url of photoFiles) {
-        i++;
-        const ext = getImageExt(url);
-        const fileName = `${slug}-${String(i).padStart(2, '0')}${ext}`;
-        const dest = path.join(ROOT, 'img/films', slug, fileName);
-        try {
-          if (!DRY_RUN) await downloadImage(url, dest);
-          photos.push({ src: `img/films/${slug}/${fileName}`, author: '' });
-        } catch (err) {
-          console.warn(`  ⚠ 사진 다운로드 실패 (${slug}-${i}):`, err.message);
-        }
-      }
-    }
-
-    films[slug] = {
-      brand,
-      name,
-      desc,
-      iso,
-      type,
-      format,
-      issue,
-      thumbnail,
-      photographers,
-      photos,
-    };
-  }
-
-  // 시드의 필름 항목 보존 (노션에 없는 것)
-  const merged = { ...seed, ...films };
-  await writeJSON(path.join(ROOT, 'data/films.json'), merged);
+  console.log('— Films: Supabase 단일 source. Notion 빌드 스킵.');
 }
 
 // ════════ Readers ════════
