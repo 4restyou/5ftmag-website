@@ -136,17 +136,33 @@
     drawSprocketRow(ctx, x, y, w, h, topY);
     drawSprocketRow(ctx, x, y, w, h, bottomY);
 
+    // variant 0: 5FT MAG / 4rest (위) + 아래 화살표 (filmstrip-frame.svg 패턴)
+    // variant 1: Film Social Club / Street Photo Club (아래) + 위 화살표 (filmstrip-frame-2.svg 패턴)
     ctx.save();
-    ctx.fillStyle = 'rgba(227, 166, 86, 0.74)';
+    ctx.fillStyle = 'rgba(227, 166, 86, 0.82)';
     ctx.textBaseline = 'top';
-    ctx.font = `800 ${Math.max(8, Math.round(h * 0.025))}px Arial, sans-serif`;
-    ctx.fillText('5FT MAG', x + w * 0.16, y + h * 0.012);
-    ctx.textAlign = 'right';
-    ctx.fillText('4rest', x + w * 0.85, y + h * 0.012);
+    const labelFontPx = Math.max(11, Math.round(h * 0.04));
+    const arrowFontPx = Math.max(12, Math.round(h * 0.045));
 
-    ctx.textAlign = 'center';
-    ctx.font = `900 ${Math.max(8, Math.round(h * 0.03))}px Arial, sans-serif`;
-    ctx.fillText(variant ? '→' : '➜', x + w * 0.5, y + h * 0.945);
+    if (variant === 0) {
+      ctx.font = `800 ${labelFontPx}px Arial, sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText('5FT MAG', x + w * 0.16, y + h * 0.008);
+      ctx.textAlign = 'right';
+      ctx.fillText('4rest', x + w * 0.85, y + h * 0.008);
+      ctx.textAlign = 'center';
+      ctx.font = `900 ${arrowFontPx}px Arial, sans-serif`;
+      ctx.fillText('➜', x + w * 0.5, y + h * 0.94);
+    } else {
+      ctx.textAlign = 'center';
+      ctx.font = `900 ${arrowFontPx}px Arial, sans-serif`;
+      ctx.fillText('➜', x + w * 0.5, y + h * 0.008);
+      ctx.font = `800 ${labelFontPx}px Arial, sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText('Film Social Club', x + w * 0.12, y + h * 0.94);
+      ctx.textAlign = 'right';
+      ctx.fillText('Street Photo Club', x + w * 0.88, y + h * 0.94);
+    }
 
     ctx.strokeStyle = 'rgba(255,255,255,0.22)';
     ctx.lineWidth = 1;
