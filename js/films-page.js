@@ -141,9 +141,10 @@
   const cameraIndex = new Map();
   let approvedSubmissionsCache = null;
   let approvedSubmissionsPromise = null;
-  // 본인이 즐겨찾기한 필름 slug / 사진 ID 집합 — 페이지 로드 후 한 번 fetch
+  // 본인이 즐겨찾기한 필름 slug / 사진 ID / 작가 키 집합 — 페이지 로드 후 한 번 fetch
   let filmFavSlugs = new Set();
   let photoFavIds  = new Set();
+  let contributorFavKeys = new Set();
 
   function normalizeFilmLabel(s) {
     return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
@@ -563,7 +564,7 @@
           if (window.MagDB && window.MagDB.isReady()) break;
           await new Promise(r => setTimeout(r, 50));
         }
-        await Promise.all([loadFilmFavorites(), loadPhotoFavorites()]);
+        await Promise.all([loadFilmFavorites(), loadPhotoFavorites(), loadContributorFavorites()]);
         syncFilmFavMarks();
       })();
     })
@@ -1074,11 +1075,25 @@
         counter.textContent = `${personEntries.length} photos · ${groups.length} films`;
       }
       const authorLabel = (instagram || '').replace(/^@/, '') || label;
+      const isContribFav = contributorFavKeys.has(personKey);
       contributorView.innerHTML = `
         <div class="reader-contributor-head">
           <div>
             <span class="reader-contributor-kicker">CONTRIBUTOR</span>
-            <h3>${escapeAttr(label)}</h3>
+            <div class="reader-contributor-name-row">
+              <h3>${escapeAttr(label)}</h3>
+              <button type="button"
+                class="reader-contributor-fav${isContribFav ? ' is-fav' : ''}"
+                data-contributor-key="${escapeAttr(personKey)}"
+                aria-pressed="${isContribFav ? 'true' : 'false'}"
+                aria-label="${isContribFav ? '작가 즐겨찾기 해제' : '작가 즐겨찾기 추가'}"
+                title="작가 즐겨찾기">
+                <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
+                  <path stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
+                </svg>
+              </button>
+            </div>
             <p>${personEntries.length}컷 · ${groups.length}개 필름</p>
           </div>
           <div class="reader-contributor-actions">
@@ -1168,6 +1183,13 @@
     }
     if (contributorView) {
       contributorView.onclick = (e) => {
+        const fav = e.target.closest('.reader-contributor-fav');
+        if (fav) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleContributorFav(fav);
+          return;
+        }
         const back = e.target.closest('.reader-contributor-back');
         if (back) {
           setActivePerson(activePerson);
@@ -1723,6 +1745,50 @@
     } catch (_) {
       photoFavIds = new Set();
     }
+  }
+  async function loadContributorFavorites() {
+    if (!window.MagDB || !window.MagDB.isReady()) return;
+    try {
+      const sess = await window.MagDB.auth.getSession();
+      if (!sess) { contributorFavKeys = new Set(); return; }
+      contributorFavKeys = await window.MagDB.favorites.idsForType('contributor');
+    } catch (_) {
+      contributorFavKeys = new Set();
+    }
+  }
+
+  async function toggleContributorFav(btn) {
+    if (!btn) return;
+    if (btn.classList.contains('is-busy')) return;
+    const key = btn.dataset.contributorKey;
+    if (!key) return;
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
+      return;
+    }
+    const sess = await window.MagDB.auth.getSession();
+    if (!sess) {
+      if (!confirm('작가 즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return;
+      window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+      return;
+    }
+    const wasFav = contributorFavKeys.has(key);
+    if (wasFav) contributorFavKeys.delete(key); else contributorFavKeys.add(key);
+    setContributorFavState(btn, !wasFav);
+    btn.classList.add('is-busy');
+    const { error } = await window.MagDB.favorites.toggle('contributor', key, wasFav);
+    btn.classList.remove('is-busy');
+    if (error) {
+      if (wasFav) contributorFavKeys.add(key); else contributorFavKeys.delete(key);
+      setContributorFavState(btn, wasFav);
+      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
+    }
+  }
+
+  function setContributorFavState(btn, on) {
+    btn.classList.toggle('is-fav', on);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', on ? '작가 즐겨찾기 해제' : '작가 즐겨찾기 추가');
   }
 
   function toggleZoom() {
