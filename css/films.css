@@ -718,8 +718,10 @@
   letter-spacing: 0.04em;
 }
 .lightbox-close { top: 24px; right: 24px; }
-.lightbox-prev  { left: 24px;  top: 50%; transform: translateY(-50%); }
-.lightbox-next  { right: 24px; top: 50%; transform: translateY(-50%); }
+/* viewport 가 아닌 사진 박스 중심에 맞춤 — top padding 76 + bottom 112 +
+   thumbs(~70) 차감해 박스 중심은 50%보다 약 62px 위. 모바일 룰에서 -50px 별도 처리. */
+.lightbox-prev  { left: 24px;  top: calc(50% - 62px); transform: translateY(-50%); }
+.lightbox-next  { right: 24px; top: calc(50% - 62px); transform: translateY(-50%); }
 
 @media (min-width: 641px) and (max-width: 1100px) {
   .modal-content {
