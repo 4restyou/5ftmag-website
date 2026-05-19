@@ -789,9 +789,58 @@
     },
   };
 
+  // ─── 필름 카탈로그 (films 테이블) ───
+  // public 은 SELECT, editor 만 INSERT/UPDATE/DELETE
+  // JSONB 필드(aliases / photographers / photos) 는 JS 객체 그대로.
+  const films = {
+    async list() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('films')
+        .select('*')
+        .order('brand', { ascending: true })
+        .order('name', { ascending: true });
+      if (error) { console.warn('[films.list]', error.message); return []; }
+      return data || [];
+    },
+    async get(slug) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.from('films')
+        .select('*').eq('slug', slug).maybeSingle();
+      if (error) { console.warn('[films.get]', error.message); return null; }
+      return data || null;
+    },
+    async upsert(record) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const payload = {
+        slug:                  record.slug,
+        tier:                  record.tier || 'library',
+        brand:                 record.brand || '',
+        name:                  record.name || '',
+        display_name:          record.display_name || record.displayName || null,
+        aliases:               record.aliases || [],
+        description:           record.description ?? record.desc ?? null,
+        iso:                   record.iso || null,
+        type:                  record.type || null,
+        format:                record.format || null,
+        issue:                 record.issue || null,
+        photographers:         record.photographers || [],
+        photos:                record.photos || [],
+        box_thumbnail:         record.box_thumbnail || record.boxThumbnail || null,
+        box_thumbnail_status:  record.box_thumbnail_status || record.boxThumbnailStatus || 'pending',
+        can_thumbnail:         record.can_thumbnail || record.canThumbnail || null,
+        can_thumbnail_status:  record.can_thumbnail_status || record.canThumbnailStatus || 'pending',
+      };
+      return c.from('films').upsert(payload, { onConflict: 'slug' });
+    },
+    async remove(slug) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('films').delete().eq('slug', slug);
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
-    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime,
+    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films,
   };
 })();

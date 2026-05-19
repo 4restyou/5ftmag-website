@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>필름 카탈로그 관리 — 5ft.mag Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/common.css?v=20260516-iconanim">
+  <script src="../js/theme-init.js"></script>
+  <style>
+    body { background: var(--bg); color: var(--text); }
+
+    .admin-header { max-width: 1100px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .admin-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; transition: color .15s; }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-user { font-size: 13px; color: var(--text-muted); }
+    .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .admin-user button:hover { color: var(--text); }
+
+    .admin-subnav { display: flex; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; flex-wrap: wrap; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; display: inline-flex; align-items: center; gap: 6px; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
+
+    .gate { max-width: 480px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; margin-bottom: 12px; }
+    .gate p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .gate-btn { font: inherit; font-weight: var(--fw-heading); font-size: 14px; padding: 12px 24px; background: var(--text); color: var(--bg); border: none; border-radius: 4px; cursor: pointer; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .toolbar .filter { font: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); min-width: 220px; }
+    .toolbar .count { color: var(--text-muted); font-size: 13px; }
+    .toolbar .primary-btn { margin-left: auto; font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; border: none; background: var(--text); color: var(--bg); cursor: pointer; }
+    .toolbar .primary-btn:hover { opacity: 0.85; }
+
+    table.films-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .films-table th, .films-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .films-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .films-table .col-display { font-weight: var(--fw-heading); }
+    .films-table .col-slug { font-size: 12px; color: var(--text-muted); font-family: ui-monospace, monospace; }
+    .films-table .col-meta { font-size: 12px; color: var(--text-muted); }
+    .films-table .col-actions { text-align: right; white-space: nowrap; }
+    .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; }
+    .badge.featured { background: var(--text); color: var(--bg); }
+    .row-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: border-color .15s; margin-left: 6px; }
+    .row-btn:hover { border-color: var(--text); }
+    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+
+    .empty { padding: 32px; text-align: center; color: var(--text-muted); }
+
+    /* 폼 모달 */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-start; justify-content: center; z-index: 1000; padding: 40px 16px; overflow-y: auto; }
+    .modal.open { display: flex; }
+    .modal-box { background: var(--bg); border-radius: 6px; max-width: 720px; width: 100%; padding: 24px; }
+    .modal-box h2 { margin: 0 0 16px; font-size: 18px; font-weight: var(--fw-heading); }
+    .form-row { display: grid; grid-template-columns: 120px 1fr; gap: 8px 14px; align-items: start; margin-bottom: 12px; }
+    .form-row label { font-size: 13px; color: var(--text-muted); padding-top: 6px; }
+    .form-row input, .form-row textarea, .form-row select {
+      font: inherit; font-size: 14px; padding: 8px 10px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px;
+      width: 100%;
+    }
+    .form-row textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+    .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    .form-actions .cancel { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .form-actions .save { background: var(--text); color: var(--bg); border: none; }
+    .form-actions .save:disabled { opacity: 0.55; cursor: progress; }
+
+    @media (max-width: 700px) {
+      .films-table thead { display: none; }
+      .films-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      .films-table td { display: block; border: none; padding: 4px 0; }
+      .films-table .col-actions { text-align: left; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../market.html">Market</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../market.html">Market</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<div class="admin-header">
+  <a class="admin-back" href="../films.html">← Films 로 돌아가기</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">필름 카탈로그 관리</h1>
+    <span class="admin-user" id="adminUser">불러오는 중…</span>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <a href="submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
+    <a href="films.html" class="admin-subnav-link is-current">필름 카탈로그</a>
+    <a href="analytics.html" class="admin-subnav-link">통계</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<main id="app" hidden>
+  <div class="toolbar">
+    <input type="search" class="filter" id="filter" placeholder="브랜드·이름·slug 로 필터" autocomplete="off" />
+    <span class="count" id="count">·</span>
+    <button type="button" class="primary-btn" id="newBtn">+ 새 필름</button>
+  </div>
+
+  <table class="films-table">
+    <thead>
+      <tr>
+        <th>필름</th>
+        <th>스펙</th>
+        <th>tier</th>
+        <th>사진</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+      <tr><td colspan="5" class="empty">불러오는 중…</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<!-- 폼 모달 -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-box">
+    <h2 id="modalTitle">새 필름</h2>
+    <form id="filmForm">
+      <input type="hidden" name="originalSlug" id="originalSlug" value="" />
+      <div class="form-row">
+        <label for="f-slug">slug *</label>
+        <div>
+          <input type="text" id="f-slug" name="slug" required pattern="[a-z0-9-]+" />
+          <div class="hint">소문자 · 숫자 · 하이픈만. 한 번 정하면 URL 에 그대로 노출되니 신중히.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="f-brand">brand *</label>
+        <input type="text" id="f-brand" name="brand" required placeholder="KODAK" />
+      </div>
+      <div class="form-row">
+        <label for="f-name">name *</label>
+        <input type="text" id="f-name" name="name" required placeholder="Portra 400" />
+      </div>
+      <div class="form-row">
+        <label for="f-displayName">displayName</label>
+        <input type="text" id="f-displayName" name="displayName" placeholder="Kodak Portra 400 (생략 시 brand + name)" />
+      </div>
+      <div class="form-row">
+        <label for="f-iso">ISO</label>
+        <input type="text" id="f-iso" name="iso" placeholder="400" />
+      </div>
+      <div class="form-row">
+        <label for="f-type">type</label>
+        <input type="text" id="f-type" name="type" placeholder="Color Negative / Black & White / Tungsten / Slide" />
+      </div>
+      <div class="form-row">
+        <label for="f-format">format</label>
+        <input type="text" id="f-format" name="format" placeholder="35mm, 120" />
+      </div>
+      <div class="form-row">
+        <label for="f-tier">tier</label>
+        <select id="f-tier" name="tier">
+          <option value="library">library (라이브러리)</option>
+          <option value="featured">featured (5ft Issue 게재)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="f-issue">issue</label>
+        <input type="text" id="f-issue" name="issue" placeholder="Vol.02 (featured 일 때)" />
+      </div>
+      <div class="form-row">
+        <label for="f-aliases">aliases</label>
+        <div>
+          <textarea id="f-aliases" name="aliases" placeholder="콤마 또는 줄바꿈으로 구분 — Portra 400, 포트라 400, 포트라400 ..."></textarea>
+          <div class="hint">검색 매칭용. 한·영·약칭 모두 포함하면 좋습니다.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="f-desc">소개글</label>
+        <textarea id="f-desc" name="description" placeholder="5ft.mag 톤으로 한두 문장."></textarea>
+      </div>
+      <div class="form-row">
+        <label for="f-canThumbnail">캐니스터 썸네일</label>
+        <div>
+          <input type="text" id="f-canThumbnail" name="canThumbnail" placeholder="img/films/portra400-can.webp (없으면 비워두면 pending)" />
+          <div class="hint">파일 경로만 입력. 비우면 라이브러리 카드에 PENDING 으로 표시.</div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="cancel" id="cancelBtn">취소</button>
+        <button type="submit" class="save" id="saveBtn">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/db-client.js?v=20260519-add3films"></script>
+<script src="../js/site-common.js?v=20260519-iabignore"></script>
+<script src="../js/admin-films-page.js?v=20260519-filmscrud"></script>
+
+</body>
+</html>
