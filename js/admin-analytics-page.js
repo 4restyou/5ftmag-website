@@ -459,10 +459,12 @@ async function loadThumbnailDebt() {
     }
     const pending = Object.values(films || {}).flatMap(film => {
       const rows = [];
+      // 캔 썸네일은 모든 필름 카드(라이브러리 + featured) 에 노출.
       if (film.canThumbnailStatus === 'pending') {
         rows.push({ film, type: '캔 썸네일' });
       }
-      if (film.boxThumbnailStatus === 'pending') {
+      // 박스 썸네일은 5ft Issue (featured) 모달에서만 사용 — featured 만 카운트.
+      if (film.tier === 'featured' && film.boxThumbnailStatus === 'pending') {
         rows.push({ film, type: '박스 썸네일' });
       }
       return rows;
