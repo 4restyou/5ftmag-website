@@ -739,8 +739,10 @@
   .lightbox.is-zoomed img { transform: scale(1.28); }
   .lightbox-toolbar { top: 16px; left: 16px; }
   .lightbox-close { top: 16px; right: 16px; width: 40px; height: 40px; }
-  .lightbox-prev  { left: 12px;  width: 40px; height: 40px; }
-  .lightbox-next  { right: 12px; width: 40px; height: 40px; }
+  /* viewport 50% 가 아닌 사진 박스 중심에 맞춰 끌어올림 — 상단 padding(72) +
+     하단 padding(92) + thumbnails(~74) 차감해서 박스 중심은 50%보다 약 50px 위 */
+  .lightbox-prev  { left: 12px;  width: 40px; height: 40px; top: calc(50% - 50px); }
+  .lightbox-next  { right: 12px; width: 40px; height: 40px; top: calc(50% - 50px); }
   .lightbox-caption-row {
     flex-direction: column;
     gap: 6px;
