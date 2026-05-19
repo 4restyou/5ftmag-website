@@ -5,6 +5,66 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[[redirects]]
+  from = "/films"
+  to = "/films.html"
+  status = 200
+
+[[redirects]]
+  from = "/film/:slug"
+  to = "/films.html?film=:slug"
+  status = 200
+
+[[redirects]]
+  from = "/camera/:camera"
+  to = "/films.html?camera=:camera"
+  status = 200
+
+[[redirects]]
+  from = "/contributor/:contributor"
+  to = "/films.html?contributor=:contributor"
+  status = 200
+
+[[redirects]]
+  from = "/market"
+  to = "/market.html"
+  status = 200
+
+[[redirects]]
+  from = "/market/:id"
+  to = "/market.html?id=:id"
+  status = 200
+
+[[redirects]]
+  from = "/stories"
+  to = "/stories.html"
+  status = 200
+
+[[redirects]]
+  from = "/stories/:slug"
+  to = "/stories/:slug.html"
+  status = 200
+
+[[redirects]]
+  from = "/authors"
+  to = "/authors.html"
+  status = 200
+
+[[redirects]]
+  from = "/authors/:slug"
+  to = "/authors/:slug.html"
+  status = 200
+
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/me"
+  to = "/me.html"
+  status = 200
+
 # 기본 보안 헤더 — 정적 사이트 + Supabase 댓글/투고 폼 기준
 # NOTE: script-src 의 'unsafe-inline' 은 기사 JSON-LD와 일부 레거시 페이지 스크립트가 남아 있어
 #       당장 제거하기 어려움. 실행성 공통 스크립트는 점진적으로 js/ 외부 파일로 이동 중.

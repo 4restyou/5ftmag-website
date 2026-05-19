@@ -509,7 +509,7 @@ function renderFavContributors() {
     }).join('');
     const filmsCount = new Set(photos.map(p => p.film || '').filter(Boolean)).size;
     const meta = `${photos.length}컷${filmsCount ? ` · ${filmsCount}개 필름` : ''}`;
-    const collectionHref = `films.html?contributor=${encodeURIComponent(key)}`;
+    const collectionHref = `contributor/${encodeURIComponent(key)}`;
     const igLine = instagram
       ? `<a class="me-fav-contrib-ig" href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener">Instagram ↗</a>`
       : '';

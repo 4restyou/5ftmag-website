@@ -180,8 +180,7 @@ function renderCard(r) {
 //   - shareListing 은 navigator.share 우선, fallback 으로 클립보드 복사
 // ═════════════════════════════════════════
 function listingUrl(id) {
-  const base = `${location.origin}${location.pathname}`;
-  return `${base}?id=${encodeURIComponent(id)}`;
+  return `${location.origin}/market/${encodeURIComponent(id)}`;
 }
 async function shareListing(id) {
   const row = STATE.rows.find(r => r.id === id) || await db().market.getOne(id).catch(() => null);
@@ -231,10 +230,7 @@ async function openDetail(id) {
   document.body.style.overflow = 'hidden';
   // URL 동기화 — 공유/북마크 가능하게
   try {
-    const u = new URL(location.href);
-    u.searchParams.set('id', id);
-    u.searchParams.delete('edit');
-    history.replaceState(null, '', u.pathname + u.search + u.hash);
+    history.replaceState(null, '', `/market/${encodeURIComponent(id)}`);
   } catch (_) {}
 }
 
@@ -247,7 +243,9 @@ function closeDetail() {
     const u = new URL(location.href);
     if (u.searchParams.has('id')) {
       u.searchParams.delete('id');
-      history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+      history.replaceState(null, '', '/market');
+    } else if (/^\/market\/[^/]+/.test(u.pathname)) {
+      history.replaceState(null, '', '/market');
     }
   } catch (_) {}
 }
@@ -705,7 +703,9 @@ document.addEventListener('keydown', (e) => {
   //   #new       → 신규 등록 폼
   try {
     const params = new URLSearchParams(location.search);
-    const detailId = params.get('id');
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const routeDetailId = pathParts[0] === 'market' && pathParts[1] ? decodeURIComponent(pathParts[1]) : '';
+    const detailId = params.get('id') || routeDetailId;
     const editId = params.get('edit');
     if (detailId) {
       openDetail(detailId);

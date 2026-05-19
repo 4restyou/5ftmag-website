@@ -666,11 +666,35 @@
     return window.ReaderRoll.buildState(rows, ROLL_LIMIT);
   }
 
+  function routeParam(kind) {
+    try {
+      const parts = location.pathname.split('/').filter(Boolean);
+      if (parts.length >= 2 && parts[0] === kind) return decodeURIComponent(parts.slice(1).join('/'));
+    } catch (_) {}
+    return '';
+  }
+
+  function filmsBasePath() {
+    return '/films';
+  }
+
+  function prettyFilmPath(filmKey) {
+    return `/film/${encodeURIComponent(filmKey)}`;
+  }
+
+  function prettyCameraPath(key) {
+    return `/camera/${encodeURIComponent(key)}`;
+  }
+
+  function prettyContributorPath(key) {
+    return `/contributor/${encodeURIComponent(key)}`;
+  }
+
   async function handleInitialDeepLink() {
     const params = new URLSearchParams(window.location.search);
-    const contributor = normalizeContributorKey(params.get('contributor'));
-    const cameraRaw = params.get('camera');
-    let filmKey = resolveFilmKey(params.get('film') || params.get('slug'));
+    const contributor = normalizeContributorKey(params.get('contributor') || routeParam('contributor'));
+    const cameraRaw = params.get('camera') || routeParam('camera');
+    let filmKey = resolveFilmKey(params.get('film') || params.get('slug') || routeParam('film'));
 
     // ?camera= 우선 처리 — 카메라 모달 열기 (openCameraModal 가 자체적으로 매칭/대기 처리)
     if (cameraRaw) {
@@ -704,9 +728,8 @@
 
     // URL 동기화 — 공유/북마크 가능하게
     try {
-      const u = new URL(location.href);
-      u.searchParams.set('film', filmKey);
-      history.replaceState(null, '', u.pathname + u.search + u.hash);
+      const contributor = normalizeContributorKey(options.contributor);
+      history.replaceState(null, '', contributor ? prettyContributorPath(contributor) : prettyFilmPath(filmKey));
     } catch (_) {}
 
     const isFeatured = data.tier === 'featured';
@@ -1074,6 +1097,7 @@
       if (counter) {
         counter.textContent = `${personEntries.length} photos · ${groups.length} films`;
       }
+      try { history.replaceState(null, '', prettyContributorPath(personKey)); } catch (_) {}
       const authorLabel = (instagram || '').replace(/^@/, '') || label;
       const isContribFav = contributorFavKeys.has(personKey);
       contributorView.innerHTML = `
@@ -1245,7 +1269,9 @@
       if (u.searchParams.has('film'))        { u.searchParams.delete('film'); dirty = true; }
       if (u.searchParams.has('camera'))      { u.searchParams.delete('camera'); dirty = true; }
       if (u.searchParams.has('contributor')) { u.searchParams.delete('contributor'); dirty = true; }
-      if (dirty) history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+      if (dirty || /^\/(?:film|camera|contributor)\//.test(u.pathname)) {
+        history.replaceState(null, '', filmsBasePath());
+      }
     } catch (_) {}
   }
 
@@ -1301,11 +1327,7 @@
 
     // URL 동기화
     try {
-      const u = new URL(location.href);
-      u.searchParams.set('camera', key);
-      u.searchParams.delete('film');
-      u.searchParams.delete('contributor');
-      history.replaceState(null, '', u.pathname + u.search + u.hash);
+      history.replaceState(null, '', prettyCameraPath(key));
     } catch (_) {}
 
     // 필름별 그룹화
@@ -1399,11 +1421,7 @@
   async function shareCameraModal(key) {
     const info = cameraIndex.get(key);
     if (!info) return;
-    const u = new URL(location.href);
-    u.searchParams.set('camera', key);
-    u.searchParams.delete('film');
-    u.searchParams.delete('contributor');
-    const url = u.toString();
+    const url = `${location.origin}${prettyCameraPath(key)}`;
     const title = `${info.display} · 5ft.mag Films`;
     const text  = `5ft.mag 에서 ${info.display} 으로 찍은 사진 보기`;
     if (navigator.share) {
@@ -1417,10 +1435,7 @@
   // 필름 모달 공유 — market 의 shareListing 과 같은 패턴
   async function shareFilm(filmKey) {
     const data = filmsData[filmKey];
-    const u = new URL(location.href);
-    u.searchParams.set('film', filmKey);
-    u.searchParams.delete('contributor');
-    const url = u.toString();
+    const url = `${location.origin}${prettyFilmPath(filmKey)}`;
     const filmName = data?.displayName || data?.name || filmKey;
     const title = `${filmName} · 5ft.mag Films`;
     const text  = `5ft.mag Films 에서 ${filmName} 보기`;

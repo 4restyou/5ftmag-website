@@ -355,8 +355,37 @@
   }
   window.copyTextToClipboard = copyTextToClipboard;
 
+  function prettyShareUrl(input = window.location.href) {
+    let url;
+    try { url = new URL(input, window.location.origin); }
+    catch (_) { return String(input || ''); }
+    if (url.origin !== window.location.origin) return url.toString();
+
+    const cleanPath = url.pathname.replace(/\/index\.html$/i, '/');
+    const film = url.searchParams.get('film') || url.searchParams.get('slug');
+    const camera = url.searchParams.get('camera');
+    const contributor = url.searchParams.get('contributor');
+    const marketId = url.searchParams.get('id');
+
+    if (/\/films\.html$/i.test(cleanPath)) {
+      if (camera) return `${url.origin}/camera/${encodeURIComponent(camera)}`;
+      if (contributor) return `${url.origin}/contributor/${encodeURIComponent(contributor)}`;
+      if (film) return `${url.origin}/film/${encodeURIComponent(film)}`;
+      return `${url.origin}/films`;
+    }
+    if (/\/market\.html$/i.test(cleanPath)) {
+      if (marketId) return `${url.origin}/market/${encodeURIComponent(marketId)}`;
+      return `${url.origin}/market`;
+    }
+
+    const withoutHtml = cleanPath.replace(/\.html$/i, '');
+    const query = url.searchParams.toString();
+    return url.origin + withoutHtml + (query ? `?${query}` : '') + url.hash;
+  }
+  window.prettyShareUrl = prettyShareUrl;
+
   function copyCurrentLink(btn) {
-    copyTextToClipboard(window.location.href).then(function (ok) {
+    copyTextToClipboard(prettyShareUrl(window.location.href)).then(function (ok) {
       setCopyButtonState(btn, ok ? '복사 완료' : '복사 실패');
     });
   }
