@@ -551,26 +551,33 @@
     }
   }
 
-  fetch('data/films.json?v=20260519-add3films')
-    .then(res => res.json())
-    .then(data => {
+  // 필름 카탈로그 — Supabase 직접 fetch (admin/films 변경 즉시 반영).
+  // DB 가 일시 down 일 때 정적 data/films.json 으로 fallback.
+  (async () => {
+    try {
+      for (let i = 0; i < 60; i++) {
+        if (window.MagDB && window.MagDB.isReady()) break;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      let data = null;
+      if (window.MagDB && window.MagDB.isReady()) {
+        const obj = await window.MagDB.films.listAsObject();
+        if (obj && Object.keys(obj).length) data = obj;
+      }
+      if (!data) {
+        const res = await fetch('data/films.json');
+        data = await res.json();
+      }
       filmsData = data;
       renderFilmsGrid();
-      updateReaderCounts(); // 비동기 — Supabase 승인 제출 수 집계 후 카드 카운트 갱신
+      updateReaderCounts();
       handleInitialDeepLink();
-      // DB 준비된 뒤 즐겨찾기 마킹 — 비동기, 카드 렌더 막지 않음
-      (async () => {
-        for (let i = 0; i < 60; i++) {
-          if (window.MagDB && window.MagDB.isReady()) break;
-          await new Promise(r => setTimeout(r, 50));
-        }
-        await Promise.all([loadFilmFavorites(), loadPhotoFavorites(), loadContributorFavorites()]);
-        syncFilmFavMarks();
-      })();
-    })
-    .catch(err => {
+      await Promise.all([loadFilmFavorites(), loadPhotoFavorites(), loadContributorFavorites()]);
+      syncFilmFavMarks();
+    } catch (err) {
       console.error('Films 데이터 로딩 실패:', err);
-    });
+    }
+  })();
 
   // ════════════════════════════
   // Library 카드들의 "X / 36" 카운트를 현재 진행 중인 롤 기준으로 업데이트

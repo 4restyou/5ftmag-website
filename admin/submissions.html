@@ -450,7 +450,7 @@
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260519-analyticsfallback"></script>
+<script src="../js/db-client.js?v=20260519-filmsdb"></script>
 <script src="../js/image-processor.js?v=20260518-uploadstable"></script>
 <script src="../js/reader-submissions.js?v=20260519-toast"></script>
 <script src="../js/site-common.js?v=20260519-prettyurl"></script>
@@ -842,6 +842,11 @@ $('imgZoom').addEventListener('click', () => {
 
 async function loadFilms() {
   try {
+    // Supabase 우선 (admin/films 변경 즉시 반영), fallback 정적 JSON
+    if (window.MagDB && window.MagDB.isReady()) {
+      STATE.films = await window.MagDB.films.listAsObject();
+      if (STATE.films && Object.keys(STATE.films).length) return;
+    }
     const r = await fetch('../data/films.json', { cache: 'no-cache' });
     if (!r.ok) return;
     STATE.films = await r.json();

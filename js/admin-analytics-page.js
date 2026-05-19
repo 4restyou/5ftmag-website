@@ -448,9 +448,15 @@ async function loadThumbnailDebt() {
   const listEl = $('thumbPendingList');
   if (!countEl || !listEl) return;
   try {
-    const res = await fetch('../data/films.json?v=20260519-add3films');
-    if (!res.ok) throw new Error('films.json load failed');
-    const films = await res.json();
+    let films = null;
+    if (window.MagDB && window.MagDB.isReady()) {
+      films = await window.MagDB.films.listAsObject();
+    }
+    if (!films || Object.keys(films).length === 0) {
+      const res = await fetch('../data/films.json');
+      if (!res.ok) throw new Error('films load failed');
+      films = await res.json();
+    }
     const pending = Object.values(films || {}).flatMap(film => {
       const rows = [];
       if (film.canThumbnailStatus === 'pending') {
