@@ -527,18 +527,24 @@ body.modal-open { overflow: hidden; }
   color: var(--text-muted);
 }
 
-/* ── 협력사 카드 (가로 3개, 로고 표시) ── */
+/* ── 협력사 카드 (가로 5개, 로고 표시) ── */
 .partners-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   border-bottom: 1px solid var(--border);
 }
 @media (max-width: 900px) {
   .partners-strip { grid-template-columns: 1fr 1fr; }
-  .partner-card:nth-child(2) { border-right: none; }
-  .partner-card:nth-child(1), .partner-card:nth-child(2) {
+  .partner-card:nth-child(2),
+  .partner-card:nth-child(4) { border-right: none; }
+  .partner-card:nth-child(1),
+  .partner-card:nth-child(2),
+  .partner-card:nth-child(3),
+  .partner-card:nth-child(4) {
     border-bottom: 1px solid var(--border);
   }
+  /* 홀수개(5번째)가 외롭게 남는 행은 가로 한 줄로 확장해 라인 일관 */
+  .partner-card:nth-child(5):last-child { grid-column: 1 / -1; }
 }
 .partner-card {
   display: flex;
