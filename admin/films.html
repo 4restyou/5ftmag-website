@@ -138,6 +138,10 @@
     <span class="count" id="count">·</span>
     <button type="button" class="primary-btn" id="newBtn">+ 새 필름</button>
   </div>
+  <p class="section-help" style="font-size:12px; color:var(--text-muted); margin: 0 0 18px; line-height:1.6;">
+    여기서 추가·수정·삭제한 내용은 <strong>다음 사이트 빌드</strong>부터 반영됩니다.
+    바로 적용하려면 Netlify 대시보드의 "Trigger deploy" 버튼을 눌러주세요 — 빌드 시점에 Supabase 의 films 테이블을 data/films.json 으로 동기화합니다.
+  </p>
 
   <table class="films-table">
     <thead>
