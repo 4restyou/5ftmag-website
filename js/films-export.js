@@ -136,17 +136,33 @@
     drawSprocketRow(ctx, x, y, w, h, topY);
     drawSprocketRow(ctx, x, y, w, h, bottomY);
 
+    // variant 0: 5FT MAG / 4rest (위) + 아래 화살표 (filmstrip-frame.svg 패턴)
+    // variant 1: Film Social Club / Street Photo Club (아래) + 위 화살표 (filmstrip-frame-2.svg 패턴)
     ctx.save();
-    ctx.fillStyle = 'rgba(227, 166, 86, 0.74)';
+    ctx.fillStyle = 'rgba(227, 166, 86, 0.82)';
     ctx.textBaseline = 'top';
-    ctx.font = `800 ${Math.max(8, Math.round(h * 0.025))}px Arial, sans-serif`;
-    ctx.fillText('5FT MAG', x + w * 0.16, y + h * 0.012);
-    ctx.textAlign = 'right';
-    ctx.fillText('4rest', x + w * 0.85, y + h * 0.012);
+    const labelFontPx = Math.max(11, Math.round(h * 0.04));
+    const arrowFontPx = Math.max(12, Math.round(h * 0.045));
 
-    ctx.textAlign = 'center';
-    ctx.font = `900 ${Math.max(8, Math.round(h * 0.03))}px Arial, sans-serif`;
-    ctx.fillText(variant ? '→' : '➜', x + w * 0.5, y + h * 0.945);
+    if (variant === 0) {
+      ctx.font = `800 ${labelFontPx}px Arial, sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText('5FT MAG', x + w * 0.16, y + h * 0.008);
+      ctx.textAlign = 'right';
+      ctx.fillText('4rest', x + w * 0.85, y + h * 0.008);
+      ctx.textAlign = 'center';
+      ctx.font = `900 ${arrowFontPx}px Arial, sans-serif`;
+      ctx.fillText('➜', x + w * 0.5, y + h * 0.94);
+    } else {
+      ctx.textAlign = 'center';
+      ctx.font = `900 ${arrowFontPx}px Arial, sans-serif`;
+      ctx.fillText('➜', x + w * 0.5, y + h * 0.008);
+      ctx.font = `800 ${labelFontPx}px Arial, sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText('Film Social Club', x + w * 0.12, y + h * 0.94);
+      ctx.textAlign = 'right';
+      ctx.fillText('Street Photo Club', x + w * 0.88, y + h * 0.94);
+    }
 
     ctx.strokeStyle = 'rgba(255,255,255,0.22)';
     ctx.lineWidth = 1;
@@ -225,7 +241,7 @@
     const cols = 6;
     const tileW = 380;
     const tileH = 345;
-    const rowGap = 0;
+    const rowGap = 28;  // 행 사이 흰 띠 — 컷 그룹이 시각적으로 분리되도록
     const rows = Math.max(1, Math.ceil(frames.length / cols));
     const scale = 1.5;
     const innerW = cols * tileW;
@@ -238,6 +254,13 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, innerW, innerH);
 
+    // 필름스트립 SVG 두 종을 캔버스에 overlay 로 그려 perforation·라벨 일관 유지.
+    // SVG 로드 실패 시 canvas 직접 그리기로 폴백 (모바일에서 SVG fetch 실패 케이스 대비).
+    const [frameImgA, frameImgB] = await Promise.all([
+      loadCanvasImage('img/filmstrip-frame.svg?v=6'),
+      loadCanvasImage('img/filmstrip-frame-2.svg?v=6'),
+    ]);
+
     const loaded = await Promise.all(frames.map(frame => (
       frame?.src ? loadCanvasImage(frame.src, true) : Promise.resolve(null)
     )));
@@ -246,12 +269,22 @@
       const row = Math.floor(idx / cols);
       const x = col * tileW;
       const y = row * (tileH + rowGap);
-      drawFilmFrameBase(ctx, x, y, tileW, tileH);
+      // 흰 배경(필름 베이스 SVG 가 검정으로 외형을 그리고, 그 안쪽 photo window 영역은 흰색)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, y, tileW, tileH);
       const img = loaded[idx];
       if (img) {
         drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
       }
-      drawFilmFrameOverlay(ctx, x, y, tileW, tileH, idx % 2);
+      const frameImg = (idx % 2 === 0) ? frameImgA : frameImgB;
+      if (frameImg) {
+        ctx.drawImage(frameImg, x, y, tileW, tileH);
+      } else {
+        // SVG 로드 실패 시에만 canvas 직접 그리기 — 라벨·sprocket overlay
+        drawFilmFrameBase(ctx, x, y, tileW, tileH);
+        if (img) drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
+        drawFilmFrameOverlay(ctx, x, y, tileW, tileH, idx % 2);
+      }
     });
     return canvas;
   }
