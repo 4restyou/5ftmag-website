@@ -448,7 +448,7 @@ async function loadThumbnailDebt() {
   const listEl = $('thumbPendingList');
   if (!countEl || !listEl) return;
   try {
-    const res = await fetch('../data/films.json?v=20260519-holga400');
+    const res = await fetch('../data/films.json?v=20260519-add3films');
     if (!res.ok) throw new Error('films.json load failed');
     const films = await res.json();
     const pending = Object.values(films || {}).flatMap(film => {
