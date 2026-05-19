@@ -12,6 +12,7 @@ const STATE = {
   favPhotos: null,       // null = 미로딩, [] = 비어있음
   favFilms:  null,
   favArticles: null,
+  favContributors: null,
   filmsData: null,       // films.json 캐시 (좋아한 필름 렌더용)
   storiesData: null,     // stories.json 캐시 (스크랩한 글 렌더용)
 };
@@ -315,15 +316,17 @@ function bindMarketCardActions() {
 function switchSection(sec) {
   STATE.section = sec;
   document.querySelectorAll('.me-pagetab').forEach(t => t.classList.toggle('active', t.dataset.section === sec));
-  $('section-photos').hidden       = sec !== 'photos';
-  $('section-market').hidden       = sec !== 'market';
-  $('section-fav-photos').hidden   = sec !== 'fav-photos';
-  $('section-fav-films').hidden    = sec !== 'fav-films';
-  $('section-fav-articles').hidden = sec !== 'fav-articles';
+  $('section-photos').hidden           = sec !== 'photos';
+  $('section-market').hidden           = sec !== 'market';
+  $('section-fav-photos').hidden       = sec !== 'fav-photos';
+  $('section-fav-films').hidden        = sec !== 'fav-films';
+  $('section-fav-contributors').hidden = sec !== 'fav-contributors';
+  $('section-fav-articles').hidden     = sec !== 'fav-articles';
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
-  if (sec === 'fav-photos'   && STATE.favPhotos   === null) loadFavPhotos();
-  if (sec === 'fav-films'    && STATE.favFilms    === null) loadFavFilms();
-  if (sec === 'fav-articles' && STATE.favArticles === null) loadFavArticles();
+  if (sec === 'fav-photos'        && STATE.favPhotos        === null) loadFavPhotos();
+  if (sec === 'fav-films'         && STATE.favFilms         === null) loadFavFilms();
+  if (sec === 'fav-contributors'  && STATE.favContributors  === null) loadFavContributors();
+  if (sec === 'fav-articles'      && STATE.favArticles      === null) loadFavArticles();
   // URL hash 동기화
   try { history.replaceState(null, '', '#' + sec); } catch (_) {}
 }
@@ -455,6 +458,83 @@ function renderFavFilms() {
 }
 
 // ═════════════════════════════════════════
+// 좋아한 작가 (Reader's Roll contributor 별 ♡)
+// ═════════════════════════════════════════
+function normalizeContributorKey(s) {
+  return String(s ?? '').trim().replace(/^@/, '').toLowerCase();
+}
+
+async function loadFavContributors() {
+  $('favContributorsGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  const favs = await db().favorites.list('contributor');
+  if (favs.length === 0) {
+    STATE.favContributors = [];
+    $('favContributorsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 작가가 없어요.<br /><a class="me-empty-cta" href="films.html">필름별 작가 보러 가기 →</a></div>`;
+    return;
+  }
+  // 모든 승인된 사진을 한 번 fetch 해서 키별 그룹
+  let submissions = [];
+  try { submissions = await db().submissions.listApproved(2000); }
+  catch (_) { submissions = []; }
+  const byKey = new Map();
+  submissions.forEach(sub => {
+    const key = normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
+    if (!key) return;
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key).push(sub);
+  });
+  STATE.favContributors = favs
+    .map(f => ({ key: f.target_id, photos: byKey.get(f.target_id) || [] }))
+    .map(({ key, photos }) => {
+      const first = photos[0];
+      const label = first ? (first.submitterName || first.author || first.instagram || key) : key;
+      const instagram = first?.instagram || '';
+      const instagramUrl = first?.instagramUrl
+        || (instagram ? `https://instagram.com/${String(instagram).replace(/^@/, '')}` : '');
+      return { key, label, instagram, instagramUrl, photos };
+    });
+  renderFavContributors();
+}
+
+function renderFavContributors() {
+  const items = STATE.favContributors || [];
+  if (items.length === 0) {
+    $('favContributorsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 작가가 없어요.<br /><a class="me-empty-cta" href="films.html">필름별 작가 보러 가기 →</a></div>`;
+    return;
+  }
+  $('favContributorsGrid').innerHTML = items.map(({ key, label, instagram, instagramUrl, photos }) => {
+    const thumbs = photos.slice(0, 3).map(p => {
+      const src = p.image || p.thumbnail || '';
+      return src ? `<div class="me-fav-contrib-thumb"><img src="${escapeAttr(src)}" alt="" loading="lazy" /></div>` : '';
+    }).join('');
+    const filmsCount = new Set(photos.map(p => p.film || '').filter(Boolean)).size;
+    const meta = `${photos.length}컷${filmsCount ? ` · ${filmsCount}개 필름` : ''}`;
+    const igLine = instagram ? `<a class="me-fav-contrib-ig" href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener">Instagram ↗</a>` : '';
+    return `
+      <div class="me-fav-contrib-card" data-key="${escapeAttr(key)}">
+        <button type="button" class="me-fav-unbtn" data-action="unfav-contributor" data-key="${escapeAttr(key)}" aria-label="작가 즐겨찾기 해제" title="작가 즐겨찾기 해제">♥</button>
+        <div class="me-fav-contrib-thumbs">${thumbs || '<div class="me-fav-contrib-thumb empty"></div>'}</div>
+        <div class="me-fav-contrib-info">
+          <h3 class="me-fav-contrib-name">${escapeHtml(label)}</h3>
+          <p class="me-fav-contrib-meta">${escapeHtml(meta)}</p>
+          ${igLine}
+        </div>
+      </div>`;
+  }).join('');
+  $('favContributorsGrid').querySelectorAll('[data-action="unfav-contributor"]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const key = btn.dataset.key;
+      const { error } = await db().favorites.remove('contributor', key);
+      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
+      STATE.favContributors = STATE.favContributors.filter(x => x.key !== key);
+      renderFavContributors();
+    });
+  });
+}
+
+// ═════════════════════════════════════════
 // 스크랩한 글 (stories.json 중 본인이 🔖 한 것)
 // ═════════════════════════════════════════
 async function loadFavArticles() {
@@ -545,7 +625,7 @@ $('imgZoom').addEventListener('click', () => {
   $('app').hidden = false;
   await loadPhotos();
   // URL hash 로 초기 탭 결정
-  const validSections = ['photos', 'market', 'fav-photos', 'fav-films', 'fav-articles'];
+  const validSections = ['photos', 'market', 'fav-photos', 'fav-films', 'fav-contributors', 'fav-articles'];
   const hashSection = (location.hash || '').replace(/^#/, '');
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);
