@@ -4019,5 +4019,55 @@
     "photos": [],
     "canThumbnail": null,
     "canThumbnailStatus": "pending"
+  },
+  "reflxlab250d": {
+    "slug": "reflxlab250d",
+    "tier": "library",
+    "brand": "REFLX LAB",
+    "name": "250D",
+    "displayName": "Reflx Lab 250D",
+    "aliases": [
+      "Reflx Lab 250D",
+      "Reflx 250D",
+      "Reflxlab 250D",
+      "Vision3 5207 remjet",
+      "Kodak 5207 250D",
+      "5207 250D",
+      "리플렉스랩 250D",
+      "reflxlab250d"
+    ],
+    "desc": "Vision3 5207 의 remjet 만 벗기고 네이티브 ISO 250 그대로 재포장한 한 롤. 푸시 안 한 만큼 입자가 가지런하고 명부가 살아 자연광 인물·일상에 어울리는 데일라이트 라인입니다. C-41.",
+    "iso": "250",
+    "type": "Color Negative",
+    "format": "35mm, 120",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
+  },
+  "reflxlab50d": {
+    "slug": "reflxlab50d",
+    "tier": "library",
+    "brand": "REFLX LAB",
+    "name": "50D",
+    "displayName": "Reflx Lab 50D",
+    "aliases": [
+      "Reflx Lab 50D",
+      "Reflx 50D",
+      "Reflxlab 50D",
+      "Vision3 5203 remjet",
+      "Kodak 5203 50D",
+      "5203 50D",
+      "리플렉스랩 50D",
+      "reflxlab50d"
+    ],
+    "desc": "Kodak Vision3 5203(50D) 의 remjet 을 벗긴 저감도 라인. 거의 입자가 보이지 않는 미세 입자에 채도 높은 톤으로 햇볕이 강한 한낮·풍경에 자주 호명되는 한 롤입니다. C-41.",
+    "iso": "50",
+    "type": "Color Negative",
+    "format": "35mm, 120",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": null,
+    "canThumbnailStatus": "pending"
   }
 }

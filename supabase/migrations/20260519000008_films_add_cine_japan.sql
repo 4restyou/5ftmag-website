@@ -160,3 +160,43 @@ INSERT INTO public.films (
   'pending'
 ) ON CONFLICT (slug) DO NOTHING;
 
+
+INSERT INTO public.films (
+  slug, tier, brand, name, display_name, aliases, description, iso, type, format,
+  photographers, photos, can_thumbnail, can_thumbnail_status
+) VALUES (
+  'reflxlab250d',
+  'library',
+  'REFLX LAB',
+  '250D',
+  'Reflx Lab 250D',
+  '["Reflx Lab 250D","Reflx 250D","Reflxlab 250D","Vision3 5207 remjet","Kodak 5207 250D","5207 250D","리플렉스랩 250D","reflxlab250d"]'::jsonb,
+  'Vision3 5207 의 remjet 만 벗기고 네이티브 ISO 250 그대로 재포장한 한 롤. 푸시 안 한 만큼 입자가 가지런하고 명부가 살아 자연광 인물·일상에 어울리는 데일라이트 라인입니다. C-41.',
+  '250',
+  'Color Negative',
+  '35mm, 120',
+  '[]'::jsonb,
+  '[]'::jsonb,
+  NULL,
+  'pending'
+) ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO public.films (
+  slug, tier, brand, name, display_name, aliases, description, iso, type, format,
+  photographers, photos, can_thumbnail, can_thumbnail_status
+) VALUES (
+  'reflxlab50d',
+  'library',
+  'REFLX LAB',
+  '50D',
+  'Reflx Lab 50D',
+  '["Reflx Lab 50D","Reflx 50D","Reflxlab 50D","Vision3 5203 remjet","Kodak 5203 50D","5203 50D","리플렉스랩 50D","reflxlab50d"]'::jsonb,
+  'Kodak Vision3 5203(50D) 의 remjet 을 벗긴 저감도 라인. 거의 입자가 보이지 않는 미세 입자에 채도 높은 톤으로 햇볕이 강한 한낮·풍경에 자주 호명되는 한 롤입니다. C-41.',
+  '50',
+  'Color Negative',
+  '35mm, 120',
+  '[]'::jsonb,
+  '[]'::jsonb,
+  NULL,
+  'pending'
+) ON CONFLICT (slug) DO NOTHING;
