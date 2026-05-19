@@ -242,9 +242,24 @@
       return [];
     }
 
-    // 통합 풀: editorial(films.json) + 독자 승인 제출(readers.json + Supabase)
+    // films 카탈로그: Supabase 우선, 실패 시 정적 fallback
+    async function fetchFilms() {
+      try {
+        for (let i = 0; i < 60; i++) {
+          if (window.MagDB && window.MagDB.isReady()) break;
+          await new Promise(r => setTimeout(r, 50));
+        }
+        if (window.MagDB && window.MagDB.isReady()) {
+          const obj = await window.MagDB.films.listAsObject();
+          if (obj && Object.keys(obj).length) return obj;
+        }
+      } catch (_) {}
+      return fetch('data/films.json').then(r => r.json()).catch(() => ({}));
+    }
+
+    // 통합 풀: editorial(films DB) + 독자 승인 제출(readers.json + Supabase)
     Promise.all([
-      fetch('data/films.json').then(r => r.json()).catch(() => ({})),
+      fetchFilms(),
       fetch('data/readers.json').then(r => r.json()).catch(() => []),
       waitForSupabaseFetcher()
     ])

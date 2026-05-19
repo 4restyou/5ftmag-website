@@ -429,8 +429,14 @@ async function loadFavFilms() {
   }
   if (!STATE.filmsData) {
     try {
-      const res = await fetch('data/films.json', { cache: 'no-cache' });
-      STATE.filmsData = await res.json();
+      // Supabase 우선 (admin/films 변경 즉시 반영), fallback 정적 JSON
+      if (db() && db().isReady()) {
+        STATE.filmsData = await db().films.listAsObject();
+      }
+      if (!STATE.filmsData || Object.keys(STATE.filmsData).length === 0) {
+        const res = await fetch('data/films.json', { cache: 'no-cache' });
+        STATE.filmsData = await res.json();
+      }
     } catch (_) {
       STATE.filmsData = {};
     }

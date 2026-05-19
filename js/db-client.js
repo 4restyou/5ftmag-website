@@ -802,6 +802,36 @@
       if (error) { console.warn('[films.list]', error.message); return []; }
       return data || [];
     },
+    // 기존 films.json 형태 (key=slug 인 object) 로 변환해서 반환.
+    // films-page.js 등 기존 코드가 그대로 사용 가능.
+    async listAsObject() {
+      const rows = await this.list();
+      const out = {};
+      for (const r of rows) {
+        if (!r.slug) continue;
+        const entry = {
+          slug: r.slug,
+          tier: r.tier || 'library',
+          brand: r.brand || '',
+          name: r.name || '',
+          displayName: r.display_name || `${r.brand || ''} ${r.name || ''}`.trim(),
+          aliases: Array.isArray(r.aliases) ? r.aliases : [],
+          desc: r.description || '',
+          iso: r.iso || '',
+          type: r.type || '',
+          format: r.format || '',
+          photographers: Array.isArray(r.photographers) ? r.photographers : [],
+          photos: Array.isArray(r.photos) ? r.photos : [],
+        };
+        if (r.issue)                entry.issue = r.issue;
+        if (r.box_thumbnail)        entry.boxThumbnail = r.box_thumbnail;
+        if (r.box_thumbnail_status) entry.boxThumbnailStatus = r.box_thumbnail_status;
+        if (r.can_thumbnail)        entry.canThumbnail = r.can_thumbnail;
+        if (r.can_thumbnail_status) entry.canThumbnailStatus = r.can_thumbnail_status;
+        out[r.slug] = entry;
+      }
+      return out;
+    },
     async get(slug) {
       const c = client(); if (!c) return null;
       const { data, error } = await c.from('films')
