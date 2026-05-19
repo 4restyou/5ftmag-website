@@ -100,6 +100,7 @@ function renderPhotoList() {
     return;
   }
   $('list').innerHTML = rows.map(renderPhotoCard).join('');
+  bindCardImageFallbacks($('list'));
   bindPhotoCardActions();
 }
 
@@ -110,7 +111,7 @@ function renderPhotoCard(r) {
   return `
     <div class="me-card" data-id="${r.id}">
       <div class="me-card-img" data-zoom="${escapeAttr(url)}">
-        <img src="${escapeAttr(url)}" alt="" loading="lazy" onerror="this.closest('.me-card-img').classList.add('is-missing'); this.remove();" />
+        <img src="${escapeAttr(url)}" alt="" loading="lazy" />
       </div>
       <div class="me-card-meta">
         <div>
@@ -219,6 +220,23 @@ function bindPhotoCardActions() {
   });
 }
 
+function markCardImageMissing(img) {
+  const holder = img.closest('.me-card-img');
+  if (!holder) return;
+  holder.classList.add('is-missing');
+  holder.removeAttribute('data-zoom');
+  img.remove();
+}
+
+function bindCardImageFallbacks(scope = document) {
+  scope.querySelectorAll('.me-card-img img').forEach(img => {
+    if (img.dataset.missingFallbackBound === '1') return;
+    img.dataset.missingFallbackBound = '1';
+    img.addEventListener('error', () => markCardImageMissing(img), { once: true });
+    if (img.complete && img.naturalWidth === 0) markCardImageMissing(img);
+  });
+}
+
 // ═════════════════════════════════════════
 // 매물 섹션
 // ═════════════════════════════════════════
@@ -239,6 +257,7 @@ function renderMarketList() {
     return;
   }
   $('marketList').innerHTML = rows.map(renderMarketCard).join('');
+  bindCardImageFallbacks($('marketList'));
   bindMarketCardActions();
 }
 

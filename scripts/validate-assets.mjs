@@ -4,7 +4,7 @@
  * - HTML 파일의 로컬 src/href 참조 → 실제 파일 존재 여부
  * - JSON 데이터 파일의 내부 page/link/image/thumbnail/photo 참조 → 실제 파일 존재 여부
  * - CSS 중괄호 균형 검사
- * - 병합 충돌 마커와 오래된 stories/12 이미지명 회귀 여부
+ * - 병합 충돌 마커, inline onerror, 오래된 stories/12 이미지명 회귀 여부
  * - 누락 발견 시 exit 1 (빌드 실패)
  *
  * 사용:
@@ -98,6 +98,11 @@ const htmlFiles = walk(ROOT, /\.html$/).filter(p => {
       && !rel.startsWith('node_modules/')
       && !rel.startsWith('scripts/templates/');
 });
+const jsFiles = walk(ROOT, /\.js$/).filter(p => {
+  const rel = relative(ROOT, p);
+  return !rel.startsWith('.claude/')
+      && !rel.startsWith('node_modules/');
+});
 
 for (const html of htmlFiles) {
   const text = readFileSync(html, 'utf8');
@@ -109,6 +114,18 @@ for (const html of htmlFiles) {
     const ref = m[1];
     if (!isLocalRef(ref)) continue;
     checkRef(relative(ROOT, html), ref, dirname(html));
+  }
+}
+
+// Inline image error handlers are fragile under CSP and hard to test. Use JS event listeners instead.
+for (const file of [...htmlFiles, ...jsFiles]) {
+  const text = readFileSync(file, 'utf8');
+  if (/\sonerror\s*=\s*["']/i.test(text)) {
+    broken.push({
+      file: relative(ROOT, file),
+      ref: 'inline image onerror handler',
+      expected: 'use addEventListener("error", ...) or <picture> fallback',
+    });
   }
 }
 
