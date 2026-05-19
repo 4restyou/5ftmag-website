@@ -65,12 +65,10 @@
 
     // 썸네일 없으면 타이포그래피 카드로
     // thumbnailWhiteBg: true 면 카드에 흰 배경 보더 추가
-    const webpThumb = story.thumbnail ? story.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
     const whiteBgCls = story.thumbnailWhiteBg ? ' is-on-white' : '';
     const imgBlock = story.thumbnail
       ? `<div class="article-img${whiteBgCls}">
-           <img src="${escapeAttr(webpThumb)}" data-fallback="${escapeAttr(story.thumbnail)}" loading="lazy" alt="${escapeAttr(story.title)}"
-                onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />
+           <img src="${escapeAttr(story.thumbnail)}" loading="eager" alt="${escapeAttr(story.title)}" />
            ${issueBadge}
          </div>`
       : `<div class="article-img text-only">

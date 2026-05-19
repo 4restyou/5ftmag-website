@@ -61,13 +61,11 @@
 
           // 썸네일 없으면 노란 타이포그래피 카드, 있으면 사진
           // thumbnailWhiteBg: true 면 흰 배경 보더 추가 (스토리 카드 가장자리 정의)
-          const webpThumb = s.thumbnail ? s.thumbnail.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
           const whiteBgCls = s.thumbnailWhiteBg ? ' is-on-white' : '';
           const imgBlock = s.thumbnail
             ? `<div class="post-img${whiteBgCls}">
                  <span class="post-label">${escapeHtml(cardLabel)}</span>
-                 <img src="${escapeAttr(webpThumb)}" data-fallback="${escapeAttr(s.thumbnail)}" loading="lazy" alt="${escapeAttr(s.title)}"
-                      onerror="if(this.src!==location.origin+'/'+this.dataset.fallback){this.onerror=null;this.src=this.dataset.fallback}" />
+                 <img src="${escapeAttr(s.thumbnail)}" loading="eager" alt="${escapeAttr(s.title)}" />
                </div>`
             : `<div class="post-img text-only">
                  <span class="post-label">${escapeHtml(cardLabel)}</span>
