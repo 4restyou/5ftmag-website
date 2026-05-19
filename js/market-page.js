@@ -23,6 +23,13 @@ const STATE = {
 const MAX_LONG_SIDE = 2000;
 const JPEG_QUALITY = 0.85;
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const MARKET_TIMEOUTS = Object.assign({
+  imageProcess: 52000,
+  auth: 12000,
+  upload: 60000,
+  write: 25000,
+  cleanup: 12000,
+}, window.__MARKET_TIMEOUTS || {});
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
@@ -532,11 +539,15 @@ function renderPhotoSlots() {
       const origLabel = slot?.firstChild?.nodeValue;
       try {
         if (slot) slot.firstChild.nodeValue = `변환 중… (${fmtBytes(file.size)}) `;
-        const { blob } = await resizeToJpeg(file, ({ stage, width: w, height: h }) => {
-          if (!slot) return;
-          if (stage === 'resize')      slot.firstChild.nodeValue = `크기 줄이는 중… (${w}×${h}) `;
-          else if (stage === 'encode') slot.firstChild.nodeValue = `인코딩 중… (${w}×${h}) `;
-        });
+        const { blob } = await withNetworkTimeout(
+          resizeToJpeg(file, ({ stage, width: w, height: h }) => {
+            if (!slot) return;
+            if (stage === 'resize')      slot.firstChild.nodeValue = `크기 줄이는 중… (${w}×${h}) `;
+            else if (stage === 'encode') slot.firstChild.nodeValue = `인코딩 중… (${w}×${h}) `;
+          }),
+          MARKET_TIMEOUTS.imageProcess,
+          '사진 변환'
+        );
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('파일이 너무 큽니다 (5MB 이하).');
         const blobUrl = URL.createObjectURL(blob);
         STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl };
@@ -609,7 +620,7 @@ async function onSubmit(e) {
     if (fd.get('safety_agree') !== 'on') throw new Error('개인 간 거래 확인사항에 동의해야 매물을 올릴 수 있어요.');
 
     // 사진 업로드 — 신규 추가된 것만
-    const user = await db().auth.getUser();
+    const user = await withNetworkTimeout(db().auth.getUser(), MARKET_TIMEOUTS.auth, '로그인 확인');
     if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 저장해 주세요.');
     const finalPaths = [];
     const uploadedNew = [];
@@ -620,12 +631,14 @@ async function onSubmit(e) {
       const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
       const { error: upErr } = await withNetworkTimeout(
         db().market.uploadPhoto(path, p.blob),
-        60000,
+        MARKET_TIMEOUTS.upload,
         '사진 업로드'
       ).catch(err => ({ error: { message: err.message } }));
       if (upErr) {
         // 실패 시 이번 세션에서 올린 것들 정리
-        if (uploadedNew.length) await db().market.removePhotos(uploadedNew);
+        if (uploadedNew.length) {
+          await withNetworkTimeout(db().market.removePhotos(uploadedNew), MARKET_TIMEOUTS.cleanup, '업로드 파일 정리').catch(() => null);
+        }
         throw new Error('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (' + upErr.message + ')');
       }
       finalPaths.push(path);
@@ -639,14 +652,16 @@ async function onSubmit(e) {
       // 수정: 제거된 사진 (formPhotos 에서 빠진 existingPath) 들 storage 정리
       const existing = STATE.rows.find(r => r.id === STATE.editId);
       const droppedPaths = (existing?.storage_paths || []).filter(p => !finalPaths.includes(p));
-      const { error } = await db().market.updateMine(STATE.editId, record);
+      const { error } = await withNetworkTimeout(db().market.updateMine(STATE.editId, record), MARKET_TIMEOUTS.write, '수정 저장');
       if (error) throw new Error('수정 내용을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (' + error.message + ')');
-      if (droppedPaths.length) await db().market.removePhotos(droppedPaths);
+      if (droppedPaths.length) await withNetworkTimeout(db().market.removePhotos(droppedPaths), MARKET_TIMEOUTS.cleanup, '삭제 사진 정리').catch(() => null);
     } else {
       submit.textContent = '매물 등록 중…';
-      const { error } = await db().market.create(record);
+      const { error } = await withNetworkTimeout(db().market.create(record), MARKET_TIMEOUTS.write, '매물 등록');
       if (error) {
-        if (uploadedNew.length) await db().market.removePhotos(uploadedNew);
+        if (uploadedNew.length) {
+          await withNetworkTimeout(db().market.removePhotos(uploadedNew), MARKET_TIMEOUTS.cleanup, '업로드 파일 정리').catch(() => null);
+        }
         throw new Error('매물을 등록하지 못했어요. 입력 내용과 네트워크를 확인해 주세요. (' + error.message + ')');
       }
     }

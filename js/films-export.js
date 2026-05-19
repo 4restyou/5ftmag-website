@@ -3,13 +3,37 @@
   // DOM 캡처 대신 캔버스에 직접 그려 CORS/오프스크린 캡처 실패로 저장 이미지가
   // 검게 비는 문제를 줄이고, 컷 사이 간격도 정수 픽셀로 제어한다.
 
+  function resolveCanvasSrc(src) {
+    if (!src) return '';
+    if (/^(data:|blob:|https?:|\/\/)/i.test(src)) return src;
+    try {
+      return new URL(src, document.baseURI || window.location.href).href;
+    } catch (_) {
+      return src;
+    }
+  }
+
   function loadCanvasImage(src, useCors = false) {
     return new Promise((resolve) => {
+      const resolvedSrc = resolveCanvasSrc(src);
+      if (!resolvedSrc) {
+        resolve(null);
+        return;
+      }
       const img = new Image();
       if (useCors) img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
+      try {
+        img.decoding = 'async';
+        img.loading = 'eager';
+      } catch (_) {}
+      img.onload = async () => {
+        try {
+          if (typeof img.decode === 'function') await img.decode();
+        } catch (_) {}
+        resolve(img.naturalWidth && img.naturalHeight ? img : null);
+      };
       img.onerror = () => resolve(null);
-      img.src = src;
+      img.src = resolvedSrc;
     });
   }
 
@@ -66,6 +90,91 @@
     } else {
       drawImageCover(ctx, img, x, y, w, h);
     }
+    ctx.restore();
+  }
+
+  function roundedRect(ctx, x, y, w, h, r) {
+    const radius = Math.min(r, w / 2, h / 2);
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(x, y, w, h, radius);
+      return;
+    }
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+  }
+
+  function drawSprocketRow(ctx, x, y, w, h, rowY) {
+    const count = 8;
+    const holeW = w * 0.065;
+    const holeH = h * 0.072;
+    const startX = x + w * 0.085;
+    const gap = (w * 0.83 - holeW) / (count - 1);
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < count; i += 1) {
+      const hx = startX + i * gap;
+      ctx.beginPath();
+      roundedRect(ctx, hx, rowY, holeW, holeH, h * 0.014);
+      ctx.fill();
+    }
+  }
+
+  function drawFilmFrameBase(ctx, x, y, w, h) {
+    ctx.fillStyle = '#080301';
+    ctx.fillRect(x, y, w, h);
+  }
+
+  function drawFilmFrameOverlay(ctx, x, y, w, h, variant = 0) {
+    const topY = y + h * 0.048;
+    const bottomY = y + h * 0.882;
+    drawSprocketRow(ctx, x, y, w, h, topY);
+    drawSprocketRow(ctx, x, y, w, h, bottomY);
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(227, 166, 86, 0.74)';
+    ctx.textBaseline = 'top';
+    ctx.font = `800 ${Math.max(8, Math.round(h * 0.025))}px Arial, sans-serif`;
+    ctx.fillText('5FT MAG', x + w * 0.16, y + h * 0.012);
+    ctx.textAlign = 'right';
+    ctx.fillText('4rest', x + w * 0.85, y + h * 0.012);
+
+    ctx.textAlign = 'center';
+    ctx.font = `900 ${Math.max(8, Math.round(h * 0.03))}px Arial, sans-serif`;
+    ctx.fillText(variant ? '→' : '➜', x + w * 0.5, y + h * 0.945);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.restore();
+  }
+
+  function drawFilmThumbFallback(ctx, filmName, x, y, w, h) {
+    ctx.save();
+    ctx.fillStyle = '#ffdf24';
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = Math.max(3, Math.round(h * 0.04));
+    ctx.beginPath();
+    roundedRect(ctx, x, y + h * 0.12, w, h * 0.76, h * 0.05);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#111111';
+    ctx.fillRect(x + w * 0.42, y + h * 0.14, w * 0.18, h * 0.72);
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `900 ${Math.round(h * 0.16)}px Arial, sans-serif`;
+    ctx.fillText('FILM', x + w * 0.51, y + h * 0.5);
+
+    ctx.fillStyle = '#111111';
+    ctx.font = `800 ${Math.round(h * 0.08)}px Pretendard, Arial, sans-serif`;
+    ctx.fillText(truncateText(ctx, filmName || '5ft.mag', w * 0.86), x + w * 0.5, y + h * 0.94);
     ctx.restore();
   }
 
@@ -129,10 +238,6 @@
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, innerW, innerH);
 
-    const [frameImgA, frameImgB] = await Promise.all([
-      loadCanvasImage('img/filmstrip-frame.svg?v=6'),
-      loadCanvasImage('img/filmstrip-frame-2.svg?v=6'),
-    ]);
     const loaded = await Promise.all(frames.map(frame => (
       frame?.src ? loadCanvasImage(frame.src, true) : Promise.resolve(null)
     )));
@@ -141,14 +246,12 @@
       const row = Math.floor(idx / cols);
       const x = col * tileW;
       const y = row * (tileH + rowGap);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(x, y, tileW, tileH);
+      drawFilmFrameBase(ctx, x, y, tileW, tileH);
       const img = loaded[idx];
       if (img) {
         drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
       }
-      const frameImg = (idx % 2 === 0) ? frameImgA : frameImgB;
-      if (frameImg) ctx.drawImage(frameImg, x, y, tileW, tileH);
+      drawFilmFrameOverlay(ctx, x, y, tileW, tileH, idx % 2);
     });
     return canvas;
   }
@@ -180,14 +283,18 @@
     let textRightX = width - pad;
     if (filmThumb) {
       const canImg = await loadCanvasImage(filmThumb);
+      const thumbH = Math.round(headerH * 0.88);
+      const thumbW = canImg
+        ? Math.round(canImg.width * (thumbH / canImg.height))
+        : Math.round(thumbH * 1.28);
+      const thumbX = width - pad - thumbW;
+      const thumbY = Math.round((headerH - thumbH) / 2);
       if (canImg) {
-        const thumbH = Math.round(headerH * 0.88);
-        const thumbW = Math.round(canImg.width * (thumbH / canImg.height));
-        const thumbX = width - pad - thumbW;
-        const thumbY = Math.round((headerH - thumbH) / 2);
         ctx.drawImage(canImg, thumbX, thumbY, thumbW, thumbH);
-        textRightX = thumbX - Math.max(20, Math.round(pad * 0.4));
+      } else {
+        drawFilmThumbFallback(ctx, filmName, thumbX, thumbY, thumbW, thumbH);
       }
+      textRightX = thumbX - Math.max(20, Math.round(pad * 0.4));
     }
 
     ctx.fillStyle = '#111111';
