@@ -274,7 +274,7 @@
       ctx.fillRect(x, y, tileW, tileH);
       const img = loaded[idx];
       if (img) {
-        drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
+        drawPhotoWindow(ctx, img, x, y + tileH * 0.1571, tileW, tileH * 0.6857, !!frame.portrait);
       }
       const frameImg = (idx % 2 === 0) ? frameImgA : frameImgB;
       if (frameImg) {
@@ -282,7 +282,7 @@
       } else {
         // SVG 로드 실패 시에만 canvas 직접 그리기 — 라벨·sprocket overlay
         drawFilmFrameBase(ctx, x, y, tileW, tileH);
-        if (img) drawPhotoWindow(ctx, img, x, y + tileH * 0.145, tileW, tileH * 0.7246, !!frame.portrait);
+        if (img) drawPhotoWindow(ctx, img, x, y + tileH * 0.1571, tileW, tileH * 0.6857, !!frame.portrait);
         drawFilmFrameOverlay(ctx, x, y, tileW, tileH, idx % 2);
       }
     });
