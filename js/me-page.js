@@ -509,16 +509,22 @@ function renderFavContributors() {
     }).join('');
     const filmsCount = new Set(photos.map(p => p.film || '').filter(Boolean)).size;
     const meta = `${photos.length}컷${filmsCount ? ` · ${filmsCount}개 필름` : ''}`;
-    const igLine = instagram ? `<a class="me-fav-contrib-ig" href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener">Instagram ↗</a>` : '';
+    const collectionHref = `films.html?contributor=${encodeURIComponent(key)}`;
+    const igLine = instagram
+      ? `<a class="me-fav-contrib-ig" href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener">Instagram ↗</a>`
+      : '';
     return `
       <div class="me-fav-contrib-card" data-key="${escapeAttr(key)}">
         <button type="button" class="me-fav-unbtn" data-action="unfav-contributor" data-key="${escapeAttr(key)}" aria-label="작가 즐겨찾기 해제" title="작가 즐겨찾기 해제">♥</button>
-        <div class="me-fav-contrib-thumbs">${thumbs || '<div class="me-fav-contrib-thumb empty"></div>'}</div>
-        <div class="me-fav-contrib-info">
-          <h3 class="me-fav-contrib-name">${escapeHtml(label)}</h3>
-          <p class="me-fav-contrib-meta">${escapeHtml(meta)}</p>
-          ${igLine}
-        </div>
+        <a class="me-fav-contrib-main" href="${escapeAttr(collectionHref)}" aria-label="${escapeAttr(label)} 사진 모아 보기">
+          <div class="me-fav-contrib-thumbs">${thumbs || '<div class="me-fav-contrib-thumb empty"></div>'}</div>
+          <div class="me-fav-contrib-info">
+            <h3 class="me-fav-contrib-name">${escapeHtml(label)}</h3>
+            <p class="me-fav-contrib-meta">${escapeHtml(meta)}</p>
+            <span class="me-fav-contrib-cta">사진 모아 보기 →</span>
+          </div>
+        </a>
+        ${igLine ? `<div class="me-fav-contrib-footer">${igLine}</div>` : ''}
       </div>`;
   }).join('');
   $('favContributorsGrid').querySelectorAll('[data-action="unfav-contributor"]').forEach(btn => {
