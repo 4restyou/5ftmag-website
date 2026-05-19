@@ -3692,8 +3692,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/vision3200t-can.webp",
+    "canThumbnailStatus": "set"
   },
   "gp3100": {
     "slug": "gp3100",
@@ -3717,8 +3717,8 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/gp3100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "gp3400": {
     "slug": "gp3400",
@@ -3740,7 +3740,7 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/gp3400-can.webp",
+    "canThumbnailStatus": "set"
   }
 }
