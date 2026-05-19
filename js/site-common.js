@@ -137,8 +137,13 @@
   let errorLogCount = 0;
   const ERROR_IGNORES = [
     /ResizeObserver loop/i,
-    /Script error\\.?/i,
+    /^Script error\.?$/i,
     /NetworkError when attempting to fetch resource/i,
+    // 인앱 브라우저(인스타·카카오·네이버 등)가 페이지에 inject 한 native bridge.
+    // 호스트 스크립트의 문제가 아니라 inject 코드가 부재 환경에서 throw 하는 케이스.
+    /window\.webkit\.messageHandlers/i,
+    /__gCrWeb/i,
+    /KAKAO\b/,
   ];
 
   function shouldSkipErrorLog(message) {
