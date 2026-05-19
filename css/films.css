@@ -383,9 +383,9 @@
 .modal-gallery[data-view="contact"] .modal-photo {
   position: absolute;
   left: 0;
-  top: 14.5%;
+  top: 15.71%;
   width: 100%;
-  height: 72.46%;
+  height: 68.57%;
   aspect-ratio: auto;
   background: transparent;
   border-radius: 0;
@@ -417,8 +417,8 @@
   left: 50%;
   right: auto;
   bottom: auto;
-  width: 65.79%;
-  height: 152.0%;
+  width: 63.13%;
+  height: 158.4%;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
@@ -1400,9 +1400,9 @@
    → perforation 영역이 wrapper 밖이 되어 overflow:hidden 으로 자동 클립.
    Reader's Roll 의 .reader-slot-window 와 동일한 inset/aspect 1.520 으로 portrait 회전 swap. */
 .reader-contributor-sections[data-view="contact"] .reader-contributor-photo-window {
-  top: 14.5%;
+  top: 15.71%;
   bottom: auto;
-  height: 72.46%;
+  height: 68.57%;
 }
 .reader-contributor-sections[data-view="contact"] .reader-contributor-photo-window img.is-portrait {
   position: absolute;
@@ -1410,8 +1410,8 @@
   left: 50%;
   right: auto;
   bottom: auto;
-  width: 65.79%;   /* 100 / 1.520 (wrapper aspect = 100/72.46 × slot 1.101 = 1.520) */
-  height: 152.0%;  /* 1.520 × 100 */
+  width: 63.13%;   /* 100 / 1.520 (wrapper aspect = 100/72.46 × slot 1.101 = 1.520) */
+  height: 158.4%;  /* 1.520 × 100 */
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .reader-contributor-sections[data-view="contact"] .reader-contributor-photo:hover .reader-contributor-photo-window img {
@@ -1535,9 +1535,9 @@
 .reader-slot-window {
   position: absolute;
   left: 0;
-  top: 14.5%;
+  top: 15.71%;
   width: 100%;
-  height: 72.46%;
+  height: 68.57%;
   overflow: hidden;
   display: block;
 }
@@ -1556,8 +1556,8 @@
   left: 50%;
   right: auto;
   bottom: auto;
-  width: 65.79%;   /* 100/1.520 */
-  height: 152.0%;  /* 1.520×100 */
+  width: 63.13%;   /* 100/1.520 */
+  height: 158.4%;  /* 1.520×100 */
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .reader-slot-link:hover .reader-slot-window img {
