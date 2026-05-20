@@ -596,6 +596,22 @@
     });
   }
 
+  // 좋아요 토글 시 라이브러리 카드를 fav-우선으로 재배치.
+  // 안정정렬이라 fav 동률·non-fav 동률 카드끼리는 현재 DOM 순서(모바일 셔플/데스크탑 알파벳)를 보존.
+  // innerHTML 재생성 대신 appendChild 로 옮기기만 해서 깜빡임·핸들러 재바인딩 없음.
+  function resortLibraryFavFirst() {
+    if (!filmsGridLibrary) return;
+    const cards = Array.from(filmsGridLibrary.children);
+    cards.sort((a, b) => {
+      const fa = filmFavSlugs.has(a.dataset.film) ? 0 : 1;
+      const fb = filmFavSlugs.has(b.dataset.film) ? 0 : 1;
+      return fa - fb;
+    });
+    const frag = document.createDocumentFragment();
+    cards.forEach(c => frag.appendChild(c));
+    filmsGridLibrary.appendChild(frag);
+  }
+
   // ════════════════════════════
   // 즐겨찾기 — 필름
   // ════════════════════════════
@@ -637,12 +653,14 @@
     if (wasFav) filmFavSlugs.delete(slug); else filmFavSlugs.add(slug);
     el.classList.add('is-busy');
     syncFilmFavMarks();
+    resortLibraryFavFirst();
     const { error } = await window.MagDB.favorites.toggle('film', slug, wasFav);
     el.classList.remove('is-busy');
     if (error) {
       // 롤백
       if (wasFav) filmFavSlugs.add(slug); else filmFavSlugs.delete(slug);
       syncFilmFavMarks();
+      resortLibraryFavFirst();
       window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
     }
   }
@@ -673,8 +691,8 @@
       updateReaderCounts();
       handleInitialDeepLink();
       await Promise.all([loadFilmFavorites(), loadPhotoFavorites(), loadContributorFavorites()]);
-      // 좋아요 한 필름이 있으면 라이브러리 그리드를 다시 그려 맨 앞으로 정렬
-      if (filmFavSlugs.size > 0) renderFilmsGrid();
+      // 좋아요 한 필름이 있으면 라이브러리 카드를 fav-우선으로 재배치
+      if (filmFavSlugs.size > 0) resortLibraryFavFirst();
       syncFilmFavMarks();
     } catch (err) {
       console.error('Films 데이터 로딩 실패:', err);
