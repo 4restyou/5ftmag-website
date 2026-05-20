@@ -17,103 +17,7 @@
     filterCategoryOf,
     isMobileFilms,
   } = window.FilmsUtils;
-
-  function renderFilmCard(slug, film, context = 'library-grid') {
-    const isLibrary = film.tier === 'library';
-    const isFeatured = film.tier === 'featured';
-    // 컨텍스트:
-    //  - 'featured-grid' : 위 5ft Issue 영역. 매거진 editorial 강조. 필름 박스 썸네일 사용.
-    //  - 'library-grid'  : 아래 Library 영역. 구독자 Reader's Roll 강조. 필름 캔 썸네일 사용.
-    //  같은 필름이 두 곳에 등장할 때 카드 표현(썸네일·카운트·CTA)을 컨텍스트별로 분기.
-    const isEditorialView = context === 'featured-grid' && isFeatured;
-    const thumbField = isEditorialView ? 'boxThumbnail' : 'canThumbnail';
-    const statusField = isEditorialView ? 'boxThumbnailStatus' : 'canThumbnailStatus';
-    const thumbPath = film[thumbField];
-    const hasThumb = film[statusField] === 'set' && thumbPath;
-
-    // Vol 호수에 게재된 필름만 뱃지 노출 — 100개 넘는 Library 에서는 굳이 표시 안 함
-    let badgeHtml = '';
-    if (isFeatured && film.issue) {
-      badgeHtml = `<span class="film-issue-tag">${escapeAttr(film.issue)}</span>`;
-    }
-
-    let imgHtml = '';
-    if (hasThumb) {
-      const webp = thumbPath.replace(/\.(png|jpe?g)$/i, '.webp');
-      imgHtml = `
-        <picture>
-          <source srcset="${escapeAttr(webp)}" type="image/webp">
-          <img src="${escapeAttr(thumbPath)}" alt="${escapeAttr(film.displayName || film.name)}" />
-        </picture>`;
-    } else {
-      // 썸네일 대기 중 — 캐니스터 실루엣 플레이스홀더
-      imgHtml = `
-        <div class="film-thumb-pending" role="img" aria-label="${escapeAttr(film.displayName || film.name)} 썸네일 준비 중">
-          <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-            <rect x="14" y="8" width="36" height="44" rx="3" />
-            <rect x="22" y="16" width="20" height="22" rx="1.5" class="film-thumb-pending-label" />
-            <circle cx="32" cy="46" r="2.5" />
-            <rect x="20" y="4" width="24" height="6" rx="1.2" />
-          </svg>
-          <span class="film-thumb-pending-brand">${escapeAttr(film.brand)}</span>
-          <span class="film-thumb-pending-status">THUMBNAIL PENDING</span>
-        </div>`;
-    }
-
-    let countLabel;
-    let cta;
-    if (isEditorialView) {
-      // 5ft Issue 위치: editorial 36 강조
-      const photoCount = film.photos?.length || 0;
-      countLabel = `${photoCount} photos`;
-      cta = '사진 보기 →';
-    } else {
-      // Library 위치: 구독자 Reader's Roll 강조 (featured 필름도 동일 표현)
-      const readerCount = 0; // Supabase에서 동적으로 채워질 자리. 현재는 0.
-      countLabel = `${readerCount} / ${ROLL_LIMIT}`;
-      cta = readerCount === 0 ? '첫 컷 채우기 →' : '컷 채우기 →';
-    }
-    const tierClass = isLibrary ? ' film-card-library' : '';
-
-    // 검색용 토큰: 브랜드 · displayName · name · iso · type · aliases · slug
-    const searchTokens = [
-      film.brand, film.displayName, film.name, film.iso, film.type,
-      ...(film.aliases || []), slug
-    ].filter(Boolean).join(' ').toLowerCase();
-
-    // Library 그리드 컨텍스트의 CTA('컷 채우기')는 클릭 시 모달 거치지 않고
-    // 바로 업로드 모달로 — reader-submissions.js 글로벌 위임이 처리.
-    // 카드 본체 클릭은 그대로 모달(뷰어). 사진 보기는 비로그인 OK.
-    const ctaIsUpload = context === 'library-grid';
-    const ctaHtml = ctaIsUpload
-      ? `<span class="film-cta film-cta-action" role="button" tabindex="0" data-action="open-submission" data-prefill-film="${escapeAttr(film.displayName || film.name)}">${cta}</span>`
-      : `<span class="film-cta">${cta}</span>`;
-
-    const isFav = filmFavSlugs.has(slug);
-    const favHtml = `
-      <span class="film-fav${isFav ? ' is-fav' : ''}" role="button" tabindex="0"
-            data-action="toggle-film-fav" data-film-slug="${escapeAttr(slug)}"
-            aria-pressed="${isFav}" aria-label="${isFav ? '즐겨찾기 해제' : '즐겨찾기 추가'}">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
-        </svg>
-      </span>`;
-
-    return `
-      <button class="film-card${tierClass}" data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-brand="${escapeAttr(film.brand || '')}" data-search="${escapeAttr(searchTokens)}">
-        <div class="film-img">
-          ${badgeHtml}
-          ${favHtml}
-          ${imgHtml}
-          <span class="film-count">${countLabel}</span>
-        </div>
-        <span class="film-brand">${escapeAttr(film.brand)}</span>
-        <h2 class="film-name">${escapeAttr(film.name)}</h2>
-        <p class="film-spec"><span class="film-spec-main">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)}</span><span class="film-spec-format">${escapeAttr(film.format)}</span></p>
-        ${ctaHtml}
-      </button>`;
-  }
+  const { renderFilmCard } = window.FilmsCards;
 
   const FILTER_LABELS = {
     all: '전체',
@@ -591,8 +495,9 @@
     // 좋아요 해제 시 카드를 이 자리로 돌려보내기 위해 원본 순서 저장
     libraryOriginalOrder = libraryAll.map(([slug]) => slug);
 
-    filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f, 'featured-grid')).join('');
-    filmsGridLibrary.innerHTML  = libraryAll.map(([slug, f]) => renderFilmCard(slug, f, 'library-grid')).join('');
+    const cardOptions = { filmFavSlugs, rollLimit: ROLL_LIMIT };
+    filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f, 'featured-grid', cardOptions)).join('');
+    filmsGridLibrary.innerHTML  = libraryAll.map(([slug, f]) => renderFilmCard(slug, f, 'library-grid', cardOptions)).join('');
 
     renderLibraryFilterChips(libraryAll);
     renderLibraryBrandSelect(libraryAll);
