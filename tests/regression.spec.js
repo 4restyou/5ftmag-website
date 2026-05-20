@@ -820,6 +820,12 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
           path: '/films.html',
           ts: new Date().toISOString(),
           occurrences: 2,
+        }, {
+          message: '[market-upload:write] 매물 등록 시간 초과 (25초)',
+          source: 'market-page:write',
+          path: '/market.html',
+          ts: new Date().toISOString(),
+          occurrences: 1,
         }],
       },
       market: {
@@ -832,10 +838,13 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
   await expect(page.locator('#opsTotalUploads')).toHaveText('12');
   await expect(page.locator('#opsPendingUploads')).toHaveText('2');
   await expect(page.locator('#opsPendingReports')).toHaveText('1');
-  await expect(page.locator('#opsClientErrors')).toHaveText('2');
-  await expect(page.locator('#opsClientErrorsSub')).toHaveText('업로드 실패 2건');
-  await expect(page.locator('#clientErrorCount')).toContainText('업로드 실패 2건');
-  await expect(page.locator('#clientErrorList')).toContainText('업로드 실패 · storage');
+  await expect(page.locator('#opsClientErrors')).toHaveText('3');
+  await expect(page.locator('#opsClientErrorsSub')).toHaveText('Reader 업로드 · 사진 업로드 2건 외');
+  await expect(page.locator('#clientErrorCount')).toContainText('업로드 실패 3건');
+  await expect(page.locator('#clientErrorStageSummary')).toContainText('Reader 업로드 · 사진 업로드 2건');
+  await expect(page.locator('#clientErrorStageSummary')).toContainText('Market 업로드 · 기록 저장 1건');
+  await expect(page.locator('#clientErrorList')).toContainText('Reader 업로드 · 사진 업로드');
+  await expect(page.locator('#clientErrorList')).toContainText('Market 업로드 · 기록 저장');
   await expect(page.locator('#clientErrorList')).toContainText('사진 업로드가 완료되지 않았어요.');
   await expect(page.locator('#opsHealth')).toHaveText('확인 필요');
   await expect(page.locator('#topFilms')).toContainText('Kodak Portra 400');

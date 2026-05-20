@@ -68,6 +68,9 @@
     .ops-row-meta { color: var(--text-muted); font-size: 12px; text-align: right; white-space: nowrap; }
     .ops-badge { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; margin-right: 6px; border-radius: var(--badge-radius); background: var(--bg-sub); color: var(--text-muted); font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; }
     .ops-badge.is-danger { background: var(--text); color: var(--bg); }
+    .ops-stage-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .ops-stage-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 4px; background: var(--bg-sub); color: var(--text); font-size: 12px; font-weight: var(--fw-heading); }
+    .ops-stage-chip .count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
     .ops-empty { color: var(--text-muted); font-size: 13px; padding-top: 8px; }
 
     .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
@@ -218,6 +221,7 @@
       <span class="panel-sub" id="clientErrorCount">확인 중…</span>
       <button type="button" class="top-mode-btn" id="clientErrorsPurgeBtn" style="margin-left:auto" title="30일 이전 로그 삭제">30일 이전 정리</button>
     </div>
+    <div class="ops-stage-summary" id="clientErrorStageSummary" hidden></div>
     <div class="ops-list" id="clientErrorList">
       <div class="ops-empty">불러오는 중…</div>
     </div>
@@ -397,7 +401,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260520-filmshide"></script>
 <script src="../js/site-common.js?v=20260520-imgfallback"></script>
-<script src="../js/admin-analytics-page.js?v=20260520-uploadops"></script>
+<script src="../js/admin-analytics-page.js?v=20260520-opssummary"></script>
 
 </body>
 </html>

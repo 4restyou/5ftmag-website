@@ -406,20 +406,51 @@ function fmtAgoShort(iso) {
 
 function clientErrorMeta(row) {
   const message = String(row?.message || '');
-  const uploadMatch = message.match(/^\[reader-upload:([a-z0-9_-]+)\]/i);
+  const uploadMatch = message.match(/^\[(reader|market)-upload:([a-z0-9_-]+)\]/i);
   if (!uploadMatch) return { kind: 'js', stage: '', label: 'JS 오류', displayMessage: message };
-  const stage = uploadMatch[1] || 'unknown';
+  const area = uploadMatch[1] || 'reader';
+  const stage = uploadMatch[2] || 'unknown';
+  const areaLabel = area === 'market' ? 'Market 업로드' : 'Reader 업로드';
+  const stageLabel = ({
+    auth: '로그인 확인',
+    storage: '사진 업로드',
+    database: '제출 저장',
+    write: '기록 저장',
+    cleanup: '업로드 정리',
+    decode: '사진 읽기',
+    resize: '크기 조정',
+    encode: '압축',
+    'image-process': '사진 변환',
+    unknown: '알 수 없음',
+  })[stage] || stage;
   return {
     kind: 'upload',
+    area,
     stage,
-    label: `업로드 실패 · ${stage}`,
-    displayMessage: message.replace(/^\[reader-upload:[^\]]+\]\s*/i, ''),
+    stageLabel,
+    summaryLabel: `${areaLabel} · ${stageLabel}`,
+    label: `${areaLabel} · ${stageLabel}`,
+    displayMessage: message.replace(/^\[(reader|market)-upload:[^\]]+\]\s*/i, ''),
   };
+}
+
+function clientUploadSummaries(rows) {
+  const map = new Map();
+  rows.forEach(row => {
+    const meta = clientErrorMeta(row);
+    if (meta.kind !== 'upload') return;
+    const key = `${meta.area}:${meta.stage}`;
+    const current = map.get(key) || { label: meta.summaryLabel, count: 0 };
+    current.count += Number(row.occurrences) || 0;
+    map.set(key, current);
+  });
+  return [...map.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'ko'));
 }
 
 async function loadClientErrors() {
   const countEl = $('clientErrorCount');
   const listEl = $('clientErrorList');
+  const summaryEl = $('clientErrorStageSummary');
   const opsEl = $('opsClientErrors');
   const opsSubEl = $('opsClientErrorsSub');
   const cardEl = $('opsErrorItem');
@@ -427,16 +458,25 @@ async function loadClientErrors() {
   try {
     const rows = await db().analytics.clientErrorsRecent(24, 10);
     const total = rows.reduce((sum, row) => sum + (Number(row.occurrences) || 0), 0);
-    const uploadTotal = rows.reduce((sum, row) => {
-      if (clientErrorMeta(row).kind !== 'upload') return sum;
-      return sum + (Number(row.occurrences) || 0);
-    }, 0);
+    const uploadSummaries = clientUploadSummaries(rows);
+    const uploadTotal = uploadSummaries.reduce((sum, row) => sum + row.count, 0);
     opsEl.textContent = fmtNum(total);
-    if (opsSubEl) opsSubEl.textContent = uploadTotal ? `업로드 실패 ${fmtNum(uploadTotal)}건` : '최근 24시간';
+    if (opsSubEl) {
+      const top = uploadSummaries[0];
+      opsSubEl.textContent = top
+        ? `${top.label} ${fmtNum(top.count)}건${uploadSummaries.length > 1 ? ' 외' : ''}`
+        : '최근 24시간';
+    }
     cardEl?.classList.toggle('is-alert', total > 0);
     countEl.textContent = total
       ? `${fmtNum(total)}건 · 최근 24시간${uploadTotal ? ` · 업로드 실패 ${fmtNum(uploadTotal)}건` : ''}`
       : '최근 24시간 오류 없음';
+    if (summaryEl) {
+      summaryEl.hidden = !uploadSummaries.length;
+      summaryEl.innerHTML = uploadSummaries.map(item => `
+        <span class="ops-stage-chip">${escapeHtml(item.label)} <span class="count">${fmtNum(item.count)}건</span></span>
+      `).join('');
+    }
     if (!rows.length) {
       listEl.innerHTML = '<div class="ops-empty">최근 24시간 기록된 JS 오류가 없습니다.</div>';
       return rows;
@@ -461,6 +501,10 @@ async function loadClientErrors() {
     console.warn('[clientErrors]', err?.message || err);
     opsEl.textContent = '!';
     if (opsSubEl) opsSubEl.textContent = '확인 실패';
+    if (summaryEl) {
+      summaryEl.hidden = true;
+      summaryEl.innerHTML = '';
+    }
     cardEl?.classList.add('is-alert');
     countEl.textContent = '확인 실패';
     listEl.innerHTML = '<div class="ops-empty">최근 JS 오류를 불러오지 못했어요.</div>';
