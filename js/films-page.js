@@ -410,26 +410,33 @@
     const panel = root.querySelector('.ms-dropdown-panel');
     if (!btn || !label || !panel) return;
 
+    // 재호출시 최신 options/getSelected/onChange/labelPrefix 가 click handler 에서 보이도록
+    // 클로저 대신 root 에 저장한다. listener 는 한 번만 wiring.
+    root._ms = { labelPrefix, options, getSelected, onChange };
+
     function refreshLabel() {
-      const sel = getSelected();
+      const ctx = root._ms;
+      const sel = ctx.getSelected();
       if (sel.size === 0) {
-        label.textContent = `${labelPrefix} 전체`;
+        label.textContent = `${ctx.labelPrefix} 전체`;
       } else if (sel.size === 1) {
         const v = [...sel][0];
-        const opt = options.find(o => o.value === v);
+        const opt = (ctx.options || []).find(o => o.value === v);
         label.textContent = (opt && opt.label) || v;
       } else {
-        label.innerHTML = `${escapeHtml(labelPrefix)} <span class="ms-count">${sel.size}</span>`;
+        label.innerHTML = `${escapeHtml(ctx.labelPrefix)} <span class="ms-count">${sel.size}</span>`;
       }
     }
 
     function renderPanel() {
-      const sel = getSelected();
+      const ctx = root._ms;
+      const opts = ctx.options || [];
+      const sel = ctx.getSelected();
       const clearBtn = `<div class="ms-dropdown-panel-head">
         <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${sel.size}개 선택</span>
         <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>전체 해제</button>
       </div>`;
-      const rows = options.map(o => {
+      const rows = opts.map(o => {
         if (o.groupLabel) {
           return `<div class="ms-dropdown-empty" style="padding:8px 14px 4px;font-weight:var(--fw-heading);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">${escapeHtml(o.groupLabel)}</div>`;
         }
@@ -443,17 +450,18 @@
       panel.innerHTML = clearBtn + (rows || `<div class="ms-dropdown-empty">옵션 없음</div>`);
       panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.addEventListener('change', (e) => {
+          const ctx2 = root._ms;
           const v = cb.dataset.value;
-          const next = new Set(getSelected());
+          const next = new Set(ctx2.getSelected());
           if (cb.checked) next.add(v); else next.delete(v);
-          onChange(next);
+          ctx2.onChange(next);
           refreshLabel();
         });
       });
       const clearBtnEl = panel.querySelector('[data-action="ms-clear"]');
       if (clearBtnEl) clearBtnEl.addEventListener('click', (e) => {
         e.stopPropagation();
-        onChange(new Set());
+        root._ms.onChange(new Set());
         renderPanel();
         refreshLabel();
       });
@@ -521,11 +529,14 @@
     });
   })();
 
-  // Library 정렬: 브랜드 알파벳 → 같은 브랜드 안에서는 displayName 알파벳
-  // (Featured는 매거진 발행 순서가 의미 있으므로 정렬하지 않음)
+  // Library 정렬: 좋아요한 필름 먼저 → 브랜드 알파벳 → displayName 알파벳
+  // (Featured 는 매거진 발행 순서가 의미 있으므로 정렬하지 않음)
   function sortLibrary(entries) {
     return entries.slice().sort((a, b) => {
       const fa = a[1], fb = b[1];
+      const favA = filmFavSlugs.has(a[0]) ? 0 : 1;
+      const favB = filmFavSlugs.has(b[0]) ? 0 : 1;
+      if (favA !== favB) return favA - favB;
       const bc = (fa.brand || '').localeCompare(fb.brand || '', 'en');
       if (bc !== 0) return bc;
       const na = fa.displayName || fa.name || '';
@@ -661,6 +672,8 @@
       updateReaderCounts();
       handleInitialDeepLink();
       await Promise.all([loadFilmFavorites(), loadPhotoFavorites(), loadContributorFavorites()]);
+      // 좋아요 한 필름이 있으면 라이브러리 그리드를 다시 그려 맨 앞으로 정렬
+      if (filmFavSlugs.size > 0) renderFilmsGrid();
       syncFilmFavMarks();
     } catch (err) {
       console.error('Films 데이터 로딩 실패:', err);
