@@ -460,6 +460,11 @@
           if (cb.checked) next.add(v); else next.delete(v);
           ctx2.onChange(next);
           refreshLabel();
+          // panel 헤더의 카운트·전체 해제 버튼 disabled 상태 즉시 갱신
+          const headLabel = panel.querySelector('.ms-dropdown-clear-label');
+          const clearEl = panel.querySelector('[data-action="ms-clear"]');
+          if (headLabel) headLabel.textContent = `${next.size}개 선택`;
+          if (clearEl) clearEl.disabled = next.size === 0;
         });
       });
       const clearBtnEl = panel.querySelector('[data-action="ms-clear"]');
