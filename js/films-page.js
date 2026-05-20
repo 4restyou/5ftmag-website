@@ -560,9 +560,13 @@
         await new Promise(r => setTimeout(r, 50));
       }
       let data = null;
-      if (window.MagDB && window.MagDB.isReady()) {
-        const obj = await window.MagDB.films.listAsObject();
-        if (obj && Object.keys(obj).length) data = obj;
+      if (window.MagDB && window.MagDB.isReady() && window.MagDB.films?.listAsObject) {
+        try {
+          const obj = await window.MagDB.films.listAsObject();
+          if (obj && Object.keys(obj).length) data = obj;
+        } catch (err) {
+          console.warn('[films] DB catalog fallback:', err?.message || err);
+        }
       }
       if (!data) {
         const res = await fetch('data/films.json');

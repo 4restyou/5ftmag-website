@@ -526,7 +526,7 @@ function renderPhotoSlots() {
       slots.push(`
         <label class="mkt-photo-slot" data-i="${i}">
           + 추가
-          <input type="file" accept="image/jpeg,image/png,image/webp" data-i="${i}" />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" data-i="${i}" />
         </label>`);
     }
   }

@@ -42,6 +42,27 @@ test('films 카드 클릭으로 모달 오픈', async ({ page }) => {
   await expect(page.locator('.modal-overlay.open, #modalOverlay.open')).toBeVisible({ timeout: 4000 });
 });
 
+test('짧은 필름 공유 링크에서도 모바일 asset과 이미지가 깨지지 않는다', async ({ page }) => {
+  const failed = [];
+  page.on('requestfailed', req => failed.push(req.url()));
+  page.on('response', res => {
+    if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/film/superia400', { waitUntil: 'networkidle' });
+  await expect(page.locator('body')).toContainText('Library');
+  await expect(page.locator('#filmsGridLibrary .film-card').first()).toBeVisible({ timeout: 8000 });
+  const result = await page.evaluate(() => ({
+    fontFamily: getComputedStyle(document.body).fontFamily,
+    brokenImages: [...document.images]
+      .filter(img => (img.currentSrc || img.src) && !img.closest('.lightbox') && (!img.complete || img.naturalWidth === 0))
+      .map(img => img.currentSrc || img.src),
+  }));
+  expect(result.fontFamily).toContain('Pretendard');
+  expect(result.brokenImages).toEqual([]);
+  expect(failed.filter(url => !/supabase|cdn\.jsdelivr/i.test(url))).toEqual([]);
+});
+
 test('legal 푸터 링크가 동적으로 inject 되는지', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => document.querySelector('.footer-links a[data-legal]'));

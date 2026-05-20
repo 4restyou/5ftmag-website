@@ -336,7 +336,7 @@
       <form class="rs-form" id="rs-form">
         <label class="rs-field rs-photo-field">
           <span class="rs-label">사진 <em>*</em></span>
-          <input class="rs-file-input" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required />
+          <input class="rs-file-input" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" required />
           <span class="rs-dropzone" id="rs-dropzone" role="button" tabindex="0" aria-label="사진 파일 선택">
             <span class="rs-dropzone-title">사진을 끌어오거나 클릭해서 선택</span>
             <span class="rs-dropzone-meta">JPG / PNG / WebP · 1장</span>
@@ -872,8 +872,8 @@
     }
     function isAcceptedImage(file) {
       if (!file) return false;
-      if (/^image\/(jpeg|png|webp)$/i.test(file.type || '')) return true;
-      return /\.(jpe?g|png|webp)$/i.test(file.name || '');
+      if (/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type || '')) return true;
+      return /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name || '');
     }
     function setDroppedPhoto(files) {
       const list = Array.from(files || []);
@@ -1051,7 +1051,7 @@
         const fd = new FormData(form);
         const file = fd.get('photo');
         if (!file || !file.size) throw new Error('올릴 사진을 1장 선택해 주세요.');
-        if (!file.type.startsWith('image/')) throw new Error('JPG, PNG, WebP 같은 이미지 파일만 올릴 수 있어요.');
+        if (!isAcceptedImage(file)) throw new Error('JPG, PNG, WebP, HEIC 같은 이미지 파일만 올릴 수 있어요.');
 
         const submitterName = String(fd.get('submitter_name') || '').trim();
         const instagram = String(fd.get('instagram') || '').trim();

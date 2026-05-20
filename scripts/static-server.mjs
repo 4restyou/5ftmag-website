@@ -23,6 +23,23 @@ const MIME = {
 createServer((req, res) => {
   const url = new URL(req.url || '/', `http://127.0.0.1:${PORT}`);
   let p = decodeURIComponent(url.pathname);
+  p = p.replace(/^\/(film|camera|contributor|market)\/(css|js|img|data)\//, '/$2/');
+  p = p.replace(/^\/(film|camera|contributor|market)\/pretendard\.css$/, '/pretendard.css');
+  if (/^\/film\/[^/]+$/.test(p) || /^\/camera\/[^/]+$/.test(p) || /^\/contributor\/[^/]+$/.test(p)) {
+    p = '/films.html';
+  } else if (/^\/market\/[^/]+$/.test(p)) {
+    p = '/market.html';
+  } else if (p === '/films') {
+    p = '/films.html';
+  } else if (p === '/stories') {
+    p = '/stories.html';
+  } else if (p === '/market') {
+    p = '/market.html';
+  } else if (p === '/about') {
+    p = '/about.html';
+  } else if (p === '/me') {
+    p = '/me.html';
+  }
   if (p === '/' || p.endsWith('/')) p = (p + 'index.html').replace('//', '/');
   const file = resolve(join(ROOT, p));
   if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) {

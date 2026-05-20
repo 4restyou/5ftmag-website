@@ -38,13 +38,16 @@
     return typeof createImageBitmap === 'function';
   }
 
-  // HEIC/HEIF 사전 거부 — iPhone 카메라 기본 포맷, 대부분 브라우저 디코드 불가
-  function rejectIfHeic(file) {
+  // HEIC/HEIF — iPhone 카메라 기본 포맷. 일부 모바일 브라우저는 네이티브 디코드가 가능하므로
+  // 사전 거부하지 않고 먼저 변환을 시도한 뒤, 실패할 때만 안내한다.
+  function isHeic(file) {
     const name = (file && file.name) ? String(file.name).toLowerCase() : '';
     const type = (file && file.type) ? String(file.type).toLowerCase() : '';
-    if (type.includes('heic') || type.includes('heif') || /\.(heic|heif)$/.test(name)) {
-      throw new Error('HEIC/HEIF 형식은 이 브라우저에서 변환할 수 없어요. 사진을 JPG 로 저장한 뒤 다시 올려 주세요. (아이폰: 설정 → 카메라 → 포맷 → 호환성 우선)');
-    }
+    return type.includes('heic') || type.includes('heif') || /\.(heic|heif)$/i.test(name);
+  }
+
+  function heicHelpMessage() {
+    return '이 브라우저에서는 HEIC/HEIF 사진을 읽지 못했어요. 사진 앱에서 JPG로 공유하거나, 아이폰 설정 → 카메라 → 포맷 → 호환성 우선으로 바꾼 뒤 다시 시도해 주세요.';
   }
 
   function withTimeout(promise, ms, stage) {
@@ -184,7 +187,7 @@
     const onProgress = typeof opts.onProgress === 'function' ? opts.onProgress : () => {};
 
     onProgress({ stage: 'guard', name: file?.name, size: file?.size });
-    rejectIfHeic(file);
+    const heicLike = isHeic(file);
 
     // 1) Worker 경로 우선
     if (canUseWorker()) {
@@ -200,9 +203,14 @@
     }
 
     // 2) 메인스레드 경로
-    const result = await processInMain(file, opts, onProgress);
-    onProgress({ stage: 'done', width: result.width, height: result.height, bytes: result.blob.size });
-    return result;
+    try {
+      const result = await processInMain(file, opts, onProgress);
+      onProgress({ stage: 'done', width: result.width, height: result.height, bytes: result.blob.size });
+      return result;
+    } catch (e) {
+      if (heicLike) throw new Error(heicHelpMessage());
+      throw e;
+    }
   }
 
   window.processImageForUpload = processImageForUpload;

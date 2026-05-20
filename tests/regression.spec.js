@@ -384,8 +384,7 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
   await expect(page.locator('#rs-form')).toBeVisible({ timeout: 5000 });
 
   await page.locator('input[name="photo"]').setInputFiles({
-    name: 'sample.png',
-    mimeType: 'image/png',
+    name: 'sample.jpg',
     buffer: Buffer.from(
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
       'base64'
