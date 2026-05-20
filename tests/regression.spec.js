@@ -444,6 +444,90 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
   await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
 });
 
+test('사진 업로드 실패는 실패 단계를 운영 오류 로그로 남긴다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('**/js/image-processor.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.processImageForUpload = async (_file, opts = {}) => {
+      opts.onProgress?.({ stage: 'decode' });
+      opts.onProgress?.({ stage: 'resize', width: 1200, height: 800 });
+      opts.onProgress?.({ stage: 'encode', width: 1200, height: 800 });
+      return { blob: new Blob(['ok'], { type: 'image/jpeg' }), width: 1200, height: 800 };
+    };
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        getUser: async () => ({ id: 'user-1' }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        uploadPhoto: async () => ({ error: { message: 'storage down' } }),
+        create: async () => ({ error: null }),
+        removePhoto: async () => {},
+        listApproved: async () => [],
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/');
+  await page.evaluate(() => {
+    window.__reportedClientErrors = [];
+    window.reportClientError = payload => window.__reportedClientErrors.push(payload);
+  });
+  await page.locator('.rs-trigger').first().click();
+  await expect(page.locator('#rs-form')).toBeVisible({ timeout: 5000 });
+
+  await page.locator('input[name="photo"]').setInputFiles({
+    name: 'sample.jpg',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
+      'base64'
+    ),
+  });
+  await page.locator('input[name="submitter_name"]').fill('테스트');
+  await page.locator('#rs-film-trigger').click();
+  await page.locator('.rs-film-option').first().click();
+  await page.locator('input[name="consent"]').check();
+  await page.locator('#rs-form button[type="submit"]').click();
+
+  await expect(page.locator('#rs-upload-status')).toContainText('제출이 중단됐어요', { timeout: 5000 });
+  const reports = await page.evaluate(() => window.__reportedClientErrors);
+  expect(reports).toHaveLength(1);
+  expect(reports[0].message).toContain('[reader-upload:storage]');
+  expect(reports[0].source).toBe('reader-submissions:storage');
+  expect(reports[0].stack).toContain('input_bytes=');
+  expect(reports[0].stack).toContain('upload_bytes=');
+});
+
 test('로그인 복귀 후 사진 업로드 폼을 자동으로 다시 연다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',

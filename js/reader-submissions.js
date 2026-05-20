@@ -32,6 +32,27 @@
       .finally(() => clearTimeout(timer));
   }
 
+  function reportUploadFailure(stage, err, meta = {}) {
+    const safeStage = String(stage || 'unknown').replace(/[^a-z0-9_-]/gi, '').slice(0, 40) || 'unknown';
+    const message = err?.message || String(err || '알 수 없는 업로드 오류');
+    const details = [
+      err?.stack || '',
+      `stage=${safeStage}`,
+      `online=${navigator.onLine ? '1' : '0'}`,
+      `input_bytes=${Number(meta.inputBytes || 0)}`,
+      `upload_bytes=${Number(meta.uploadBytes || 0)}`,
+    ].filter(Boolean).join('\n');
+    if (typeof window.reportClientError === 'function') {
+      window.reportClientError({
+        message: `[reader-upload:${safeStage}] ${message}`,
+        source: `reader-submissions:${safeStage}`,
+        stack: details,
+      });
+      return;
+    }
+    console.warn('[reader-submissions] upload failure', safeStage, message);
+  }
+
   // 한 번 fetch한 테마는 페이지 로딩 동안 캐시 — 실패 시 캐시 무효화해서 다음 호출에서 재시도
   let _themePromise = null;
   function getCurrentTheme() {
@@ -1077,12 +1098,19 @@
       submitBtn.textContent = '업로드 중…';
       setUploadStatus('progress', '제출 준비 중', '사진과 입력 내용을 확인하고 있어요.');
       startSlowUploadHints();
+      let uploadStage = 'validate';
+      const uploadMeta = { inputBytes: 0, uploadBytes: 0 };
+      const markProgress = (stage, title, detail) => {
+        uploadStage = stage;
+        setUploadStatus('progress', title, detail);
+      };
 
       try {
         const fd = new FormData(form);
         const file = fd.get('photo');
         if (!file || !file.size) throw new Error('올릴 사진을 1장 선택해 주세요.');
         if (!isAcceptedImage(file)) throw new Error('JPG, PNG, WebP, HEIC 같은 이미지 파일만 올릴 수 있어요.');
+        uploadMeta.inputBytes = file.size;
 
         const submitterName = String(fd.get('submitter_name') || '').trim();
         const instagram = String(fd.get('instagram') || '').trim();
@@ -1103,18 +1131,18 @@
 
         // 변환 — 단계별로 버튼 텍스트 갱신해 "멈춘 것처럼 보이는" 무음 hang 방지
         submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
-        setUploadStatus('progress', '사진을 읽는 중', `${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`);
+        markProgress('decode', '사진을 읽는 중', `${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`);
         const { blob, width, height } = await withNetworkTimeout(
           resizeToJpeg(file, ({ stage, width: w, height: h }) => {
             if (stage === 'decode') {
               submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
-              setUploadStatus('progress', '사진을 읽는 중', '큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.');
+              markProgress('decode', '사진을 읽는 중', '큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.');
             } else if (stage === 'resize') {
               submitBtn.textContent = `사진 크기 줄이는 중… (${w}×${h})`;
-              setUploadStatus('progress', '사진 크기 줄이는 중', `${w}×${h} 크기로 변환하고 있어요.`);
+              markProgress('resize', '사진 크기 줄이는 중', `${w}×${h} 크기로 변환하고 있어요.`);
             } else if (stage === 'encode') {
               submitBtn.textContent = `사진 인코딩 중… (${w}×${h})`;
-              setUploadStatus('progress', '사진을 압축하는 중', '업로드 전에 용량을 줄이고 있어요.');
+              markProgress('encode', '사진을 압축하는 중', '업로드 전에 용량을 줄이고 있어요.');
             }
           }),
           52000,
@@ -1122,12 +1150,13 @@
         );
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
 
-        setUploadStatus('progress', '로그인 상태 확인 중', '업로드 권한을 확인하고 있어요.');
+        markProgress('auth', '로그인 상태 확인 중', '업로드 권한을 확인하고 있어요.');
         const user = await withNetworkTimeout(db().auth.getUser(), 12000, '로그인 확인');
         if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
         const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
         submitBtn.textContent = `사진 업로드 중… (${fmtBytes(blob.size)})`;
-        setUploadStatus('progress', '사진 업로드 중', `${fmtBytes(blob.size)} 파일을 서버에 보내는 중입니다. 창을 닫지 마세요.`);
+        uploadMeta.uploadBytes = blob.size;
+        markProgress('storage', '사진 업로드 중', `${fmtBytes(blob.size)} 파일을 서버에 보내는 중입니다. 창을 닫지 마세요.`);
         const { error: upErr } = await withNetworkTimeout(
           db().submissions.uploadPhoto(path, blob),
           60000,
@@ -1150,14 +1179,14 @@
         // submitter_name 컬럼이 없는 구버전 환경 대비: 값 있을 때만 키 포함
         if (submitterName) insertData.submitter_name = submitterName;
         submitBtn.textContent = '제출 기록 저장 중…';
-        setUploadStatus('progress', '제출 기록 저장 중', '사진 정보와 필름 정보를 함께 저장하고 있어요.');
+        markProgress('database', '제출 기록 저장 중', '사진 정보와 필름 정보를 함께 저장하고 있어요.');
         const { error: dbErr } = await withNetworkTimeout(
           db().submissions.create(insertData),
           25000,
           '제출 기록 저장'
         ).catch(err => ({ error: { message: err.message } }));
         if (dbErr) {
-          setUploadStatus('progress', '업로드 정리 중', '기록 저장에 실패해 올라간 사진 파일을 정리하고 있어요.');
+          markProgress('cleanup', '업로드 정리 중', '기록 저장에 실패해 올라간 사진 파일을 정리하고 있어요.');
           await withNetworkTimeout(
             db().submissions.removePhoto(path),
             12000,
@@ -1184,6 +1213,7 @@
         setUploadStatus('done', '제출 완료', 'Reader’s Roll 검토 큐에 들어갔어요.');
         openModal(renderSubmittedConfirm({ author: displayAuthor, film }));
       } catch (err) {
+        if (uploadStage !== 'validate') reportUploadFailure(uploadStage, err, uploadMeta);
         setUploadStatus('error', '제출이 중단됐어요', '입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.');
         showError(err.message || '제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.');
         submitBtn.disabled = false;
