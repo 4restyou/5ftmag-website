@@ -651,11 +651,38 @@
     }
     return name;
   }
+  // Supabase JS v2 가 localStorage 의 'sb-<ref>-auth-token' 에 세션을 저장.
+  // db-client 의 session() 폴링(최대 3.6초)을 기다리지 않고 즉시 로그인 여부를 추정.
+  function hasLocalSupabaseSession() {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+          const raw = localStorage.getItem(k);
+          if (raw && raw !== 'null' && raw.length > 10) return true;
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+  function readEditorCache() {
+    try { return localStorage.getItem('5ft-is-editor') === '1'; } catch (_) { return false; }
+  }
+  function writeEditorCache(on) {
+    try { on ? localStorage.setItem('5ft-is-editor', '1') : localStorage.removeItem('5ft-is-editor'); } catch (_) {}
+  }
+
   async function setupAuthNav() {
     const mainNav = document.querySelector('.main-nav');
     const mobileNav = document.getElementById('mobileNav');
     if (!mainNav && !mobileNav) return;
-    // db-client 준비 대기 (최대 3초)
+
+    // 1) 즉시 렌더: localStorage 의 Supabase 토큰 존재 여부로 0ms 에 추정
+    const guessLoggedIn = hasLocalSupabaseSession();
+    const guessEditor   = guessLoggedIn && readEditorCache();
+    renderAuthNav({ mainNav, mobileNav, loggedIn: guessLoggedIn, isEditor: guessEditor });
+
+    // 2) db-client 준비 대기 (최대 3초)
     for (let i = 0; i < 60; i++) {
       if (window.MagDB && window.MagDB.isReady()) break;
       await new Promise(r => setTimeout(r, 50));
@@ -671,7 +698,11 @@
         }
       } catch (_) { /* silent — 익명/오프라인 모두 OK */ }
     }
-    renderAuthNav({ mainNav, mobileNav, loggedIn: !!session, isEditor });
+    writeEditorCache(!!session && isEditor);
+    // 3) 추정값과 실제값이 다르면 보정
+    if (!!session !== guessLoggedIn || isEditor !== guessEditor) {
+      renderAuthNav({ mainNav, mobileNav, loggedIn: !!session, isEditor });
+    }
     if (window.MagDB && window.MagDB.auth && typeof window.MagDB.auth.onChange === 'function' && !document.documentElement.dataset.authNavBound) {
       document.documentElement.dataset.authNavBound = '1';
       window.MagDB.auth.onChange(async (_event, nextSession) => {
@@ -682,6 +713,7 @@
             nextIsEditor = !!(profile && profile.is_editor);
           } catch (_) { /* keep anonymous fallback */ }
         }
+        writeEditorCache(!!nextSession && nextIsEditor);
         renderAuthNav({ mainNav, mobileNav, loggedIn: !!nextSession, isEditor: nextIsEditor });
       });
     }
@@ -697,6 +729,7 @@
     } else {
       if (isEditor) items.push({ label: '관리', href: adminHref });
       items.push({ label: '내 정보', href: meHref });
+      items.push({ label: '로그아웃', action: 'auth-logout' });
     }
     // 메인 nav (Shop 다음에 끼움 — Shop 은 .ext 클래스로 식별)
     if (mainNav) {
@@ -741,6 +774,23 @@
     }
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
     window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+  });
+  // 로그아웃 액션 위임 — onChange 가 헤더 재렌더를 처리
+  document.addEventListener('click', async (e) => {
+    const t = e.target.closest('[data-action="auth-logout"]');
+    if (!t) return;
+    e.preventDefault();
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
+      return;
+    }
+    try {
+      await window.MagDB.auth.signOut();
+      writeEditorCache(false);
+      window.notify?.('로그아웃 되었습니다.', 'info');
+    } catch (err) {
+      window.notify?.('로그아웃 실패: ' + (err?.message || '잠시 후 다시 시도'), 'danger');
+    }
   });
 
   // ════════════════════════════════════════════════
