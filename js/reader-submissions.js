@@ -244,6 +244,10 @@
     clearFormOutsideClickHandler();
     if (wrap) wrap.classList.remove('open');
     document.body.style.overflow = '';
+    // 안전망: 모달이 닫혔으면 직전 흐름은 어떻든 끝났다고 보고 in-flight 플래그 reset.
+    // 어떤 await 가 hang 되어 finally 미도달인 케이스에서 다음 CTA 가 영원히
+    // 무시되는 걸 막는다.
+    if (typeof clearOpenInFlight === 'function') clearOpenInFlight();
   }
 
   // ════════════════════════════════════════════════════════════
@@ -552,8 +556,15 @@
     try { localStorage.removeItem(fallbackKey); } catch {}
   }
 
-  // 중첩 진입 방지 — 사용자가 짧은 시간에 CTA 를 여러 번 눌러도 한 번만 처리
+  // 중첩 진입 방지 — 사용자가 짧은 시간에 CTA 를 여러 번 눌러도 한 번만 처리.
+  // 어떤 사유로 finally 가 미도달일 경우 다음 호출이 영원히 무시되는 걸 막기 위해
+  // 진입 시점을 기록하고 10초 넘은 in-flight 는 stale 로 간주해 재진입을 허용한다.
   let _openInFlight = false;
+  let _openInFlightAt = 0;
+  function clearOpenInFlight() {
+    _openInFlight = false;
+    _openInFlightAt = 0;
+  }
   function setTriggerLoading(el, on) {
     if (!el || !el.classList) return;
     el.classList.toggle('is-loading', !!on);
@@ -562,8 +573,13 @@
   }
 
   async function handleOpen(triggerEl) {
-    if (_openInFlight) return;
+    if (_openInFlight) {
+      // 10초 이상 in-flight 면 어디선가 cleanup 누락된 stale 로 간주, 재진입 허용.
+      if (Date.now() - _openInFlightAt < 10000) return;
+      clearOpenInFlight();
+    }
     _openInFlight = true;
+    _openInFlightAt = Date.now();
     setTriggerLoading(triggerEl, true);
     try {
       if (!db() || !db().isReady()) {
@@ -599,7 +615,7 @@
       openModal(renderSubmissionForm(theme, savedPrefill, films));
       bindFormHandlers(films);
     } finally {
-      _openInFlight = false;
+      clearOpenInFlight();
       setTriggerLoading(triggerEl, false);
     }
   }
