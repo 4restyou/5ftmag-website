@@ -123,6 +123,7 @@
   stroke-width: 1.6;
   fill: none;
   transition: fill .15s, stroke .15s;
+  pointer-events: none;
 }
 .film-fav:hover svg { stroke: var(--text); stroke-width: 1.8; }
 .film-fav.is-fav svg {
@@ -1909,10 +1910,11 @@
     font-size: 10px;
   }
   .film-fav {
-    top: 7px;
-    right: 7px;
-    width: 24px;
-    height: 24px;
+    /* 터치 영역 확장 (Apple HIG 44pt 권장). 시각적 위치는 svg 가 중앙에 작게 보이도록. */
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
   }
   .film-fav svg {
     width: 19px;
