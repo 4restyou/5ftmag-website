@@ -4065,8 +4065,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fndiro200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fndiro400": {
     "slug": "fndiro400",
