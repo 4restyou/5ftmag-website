@@ -63,6 +63,27 @@ function withTimeout(promise, ms, label) {
     );
   });
 }
+function reportMarketUploadFailure(stage, err, meta = {}) {
+  const safeStage = String(stage || 'unknown').replace(/[^a-z0-9_-]/gi, '').slice(0, 40) || 'unknown';
+  const message = err?.message || String(err || '알 수 없는 마켓 업로드 오류');
+  const details = [
+    err?.stack || '',
+    `stage=${safeStage}`,
+    `online=${navigator.onLine ? '1' : '0'}`,
+    `input_bytes=${Number(meta.inputBytes || 0)}`,
+    `upload_bytes=${Number(meta.uploadBytes || 0)}`,
+    `photo_count=${Number(meta.photoCount || 0)}`,
+  ].filter(Boolean).join('\n');
+  if (typeof window.reportClientError === 'function') {
+    window.reportClientError({
+      message: `[market-upload:${safeStage}] ${message}`,
+      source: `market-page:${safeStage}`,
+      stack: details,
+    });
+    return;
+  }
+  console.warn('[market-page] upload failure', safeStage, message);
+}
 function renderMarketLoadError(message) {
   $('marketGrid').innerHTML = `
     <div class="market-empty">
@@ -550,9 +571,13 @@ function renderPhotoSlots() {
         );
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('파일이 너무 큽니다 (5MB 이하).');
         const blobUrl = URL.createObjectURL(blob);
-        STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl };
+        STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl, originalBytes: file.size };
         renderPhotoSlots();
       } catch (err) {
+        reportMarketUploadFailure('image-process', err, {
+          inputBytes: file.size,
+          photoCount: STATE.formPhotos.length,
+        });
         if (slot && origLabel) slot.firstChild.nodeValue = origLabel;
         window.notify?.(err.message || '사진을 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.', 'danger');
       }
@@ -600,6 +625,12 @@ async function onSubmit(e) {
   const form = e.target;
   const submit = $('mktFormSubmit');
   submit.disabled = true; submit.textContent = '내용 확인 중…';
+  let uploadStage = 'validate';
+  const uploadMeta = {
+    inputBytes: STATE.formPhotos.reduce((sum, p) => sum + (Number(p?.originalBytes) || Number(p?.blob?.size) || 0), 0),
+    uploadBytes: 0,
+    photoCount: STATE.formPhotos.length,
+  };
   try {
     if (!STATE.formPhotos.length) throw new Error('상품 상태를 볼 수 있는 사진을 1장 이상 올려주세요.');
     const fd = new FormData(form);
@@ -620,6 +651,7 @@ async function onSubmit(e) {
     if (fd.get('safety_agree') !== 'on') throw new Error('개인 간 거래 확인사항에 동의해야 매물을 올릴 수 있어요.');
 
     // 사진 업로드 — 신규 추가된 것만
+    uploadStage = 'auth';
     const user = await withNetworkTimeout(db().auth.getUser(), MARKET_TIMEOUTS.auth, '로그인 확인');
     if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 저장해 주세요.');
     const finalPaths = [];
@@ -628,6 +660,8 @@ async function onSubmit(e) {
       if (p.existingPath) { finalPaths.push(p.existingPath); continue; }
       const totalNew = STATE.formPhotos.filter(x => !x.existingPath).length;
       submit.textContent = `사진 업로드 중… (${uploadedNew.length + 1}/${totalNew} · ${fmtBytes(p.blob?.size)})`;
+      uploadStage = 'storage';
+      uploadMeta.uploadBytes = p.blob?.size || 0;
       const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
       const { error: upErr } = await withNetworkTimeout(
         db().market.uploadPhoto(path, p.blob),
@@ -649,6 +683,7 @@ async function onSubmit(e) {
 
     if (STATE.editId) {
       submit.textContent = '수정 저장 중…';
+      uploadStage = 'write';
       // 수정: 제거된 사진 (formPhotos 에서 빠진 existingPath) 들 storage 정리
       const existing = STATE.rows.find(r => r.id === STATE.editId);
       const droppedPaths = (existing?.storage_paths || []).filter(p => !finalPaths.includes(p));
@@ -657,6 +692,7 @@ async function onSubmit(e) {
       if (droppedPaths.length) await withNetworkTimeout(db().market.removePhotos(droppedPaths), MARKET_TIMEOUTS.cleanup, '삭제 사진 정리').catch(() => null);
     } else {
       submit.textContent = '매물 등록 중…';
+      uploadStage = 'write';
       const { error } = await withNetworkTimeout(db().market.create(record), MARKET_TIMEOUTS.write, '매물 등록');
       if (error) {
         if (uploadedNew.length) {
@@ -669,6 +705,7 @@ async function onSubmit(e) {
     closeForm();
     await loadList();
   } catch (e) {
+    if (uploadStage !== 'validate') reportMarketUploadFailure(uploadStage, e, uploadMeta);
     err.textContent = e.message || '저장을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.';
     submit.disabled = false;
     submit.textContent = STATE.editId ? '저장' : '올리기';

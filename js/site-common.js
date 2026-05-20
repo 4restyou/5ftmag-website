@@ -230,6 +230,20 @@
 
   window.reportClientError = recordClientError;
 
+  // 일부 인앱 브라우저는 <picture> 의 WebP source 요청이 실패했을 때
+  // img fallback 으로 자연스럽게 내려가지 않는 경우가 있어, 원본 src 로 한 번 더 복구한다.
+  document.addEventListener('error', function (event) {
+    const img = event.target;
+    if (!(img instanceof HTMLImageElement)) return;
+    if (img.dataset.fallbackTried === '1') return;
+    const picture = img.closest('picture');
+    const fallbackSrc = img.getAttribute('src');
+    if (!picture || !fallbackSrc) return;
+    img.dataset.fallbackTried = '1';
+    picture.querySelectorAll('source').forEach(source => source.remove());
+    img.src = fallbackSrc;
+  }, true);
+
   // ─── 체류 시간 트래커 (page_dwells) ───
   // foreground 시간만 누적해서 페이지 떠날 때 1회 INSERT.
   function startDwellTracker(path) {
