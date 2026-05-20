@@ -1167,7 +1167,11 @@
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
 
         markProgress('auth', '로그인 상태 확인 중', '업로드 권한을 확인하고 있어요.');
-        const user = await withNetworkTimeout(db().auth.getUser(), 12000, '로그인 확인');
+        // 직전엔 getUser() 로 서버 검증을 했는데 Supabase auth 엔드포인트가 가끔
+        // 느려져 12초 timeout 으로 매번 업로드가 끊겼다. user.id 만 필요하고
+        // 실제 권한은 RLS 가 백엔드에서 확인하므로 로컬 세션을 본다.
+        const session = await withNetworkTimeout(db().auth.getSession(), 8000, '로그인 확인');
+        const user = session?.user;
         if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
         const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
         submitBtn.textContent = `사진 업로드 중… (${fmtBytes(blob.size)})`;
