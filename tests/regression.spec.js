@@ -55,6 +55,49 @@ test('알림 항목 클릭 시 전체 읽음 처리', async ({ page }) => {
   await expect(page.locator('#notifBadge')).toBeHidden();
 });
 
+test('알림 링크는 내부 경로만 href 로 렌더링한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      notifications: {
+        unreadCount: async () => 1,
+        list: async () => [
+          { id: 'n1', title: '안전하지 않은 링크', body: 'href 가 실행 URL 이면 안 됩니다.', link: 'javascript:alert(1)', created_at: new Date().toISOString(), read_at: null },
+          { id: 'n2', title: '정상 링크', body: '내부 경로는 유지됩니다.', link: '/me.html#photos', created_at: new Date().toISOString(), read_at: null },
+        ],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+    };
+  });
+
+  await page.goto('/');
+  await page.locator('#notifBell').click();
+  await expect(page.locator('#notifList .notif-item').first()).toHaveAttribute('href', '#');
+  await expect(page.locator('#notifList .notif-item').nth(1)).toHaveAttribute('href', '/me.html#photos');
+});
+
 test('필름스트립 저장 캔버스 상단 로고가 흰 배경에서 보인다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(async () => {

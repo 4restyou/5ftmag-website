@@ -840,6 +840,8 @@
   function bindFormHandlers(films) {
     const form = document.getElementById('rs-form');
     if (!form) return;
+    let submitting = false;
+    let slowUploadTimers = [];
 
     // 카메라 입력 — 최근 사용 + 유사 모델 힌트
     populateCameraDatalist();
@@ -864,6 +866,21 @@
       uploadStatus.dataset.state = '';
       if (uploadTitle) uploadTitle.textContent = '';
       if (uploadDetail) uploadDetail.textContent = '';
+    }
+    function startSlowUploadHints() {
+      slowUploadTimers.forEach(clearTimeout);
+      slowUploadTimers = [
+        setTimeout(() => {
+          setUploadStatus('progress', '아직 처리 중입니다', '모바일 네트워크나 큰 사진은 시간이 더 걸릴 수 있어요. 같은 버튼을 다시 누르지 않아도 됩니다.');
+        }, 18000),
+        setTimeout(() => {
+          setUploadStatus('progress', '서버 응답을 기다리는 중', '1분 안에 완료되지 않으면 자동으로 중단되고 다시 시도할 수 있게 복구됩니다.');
+        }, 38000),
+      ];
+    }
+    function clearSlowUploadHints() {
+      slowUploadTimers.forEach(clearTimeout);
+      slowUploadTimers = [];
     }
     function renderPhotoPreview(file, note = '') {
       const preview = document.getElementById('rs-preview');
@@ -1054,10 +1071,12 @@
       e.preventDefault();
       showError('');
       const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn?.disabled) return;
+      if (submitting || submitBtn?.disabled) return;
+      submitting = true;
       submitBtn.disabled = true;
       submitBtn.textContent = '업로드 중…';
       setUploadStatus('progress', '제출 준비 중', '사진과 입력 내용을 확인하고 있어요.');
+      startSlowUploadHints();
 
       try {
         const fd = new FormData(form);
@@ -1169,6 +1188,9 @@
         showError(err.message || '제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.');
         submitBtn.disabled = false;
         submitBtn.textContent = '검토 요청 보내기';
+      } finally {
+        submitting = false;
+        clearSlowUploadHints();
       }
     });
   }

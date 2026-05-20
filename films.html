@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/films.css?v=20260520-favtouch">
+  <link rel="stylesheet" href="./css/films.css?v=20260520-mobileux">
 </head>
 <body>
 
@@ -96,7 +96,8 @@
       </svg>
       <input type="search" class="library-search" id="librarySearch" placeholder="필름 이름·브랜드·ISO로 검색" autocomplete="off" />
     </label>
-    <div class="library-controls-right">
+    <button type="button" class="btn btn-secondary btn-md library-advanced-toggle" id="libraryAdvancedToggle" aria-expanded="false" aria-controls="libraryAdvancedFilters">필터</button>
+    <div class="library-controls-right" id="libraryAdvancedFilters">
       <div class="ms-dropdown" id="libraryBrandMS" data-key="brand">
         <button type="button" class="ms-dropdown-btn" aria-haspopup="true" aria-expanded="false">
           <span class="ms-dropdown-label">브랜드 전체</span>
@@ -117,7 +118,7 @@
   <p class="library-empty" id="libraryEmpty" hidden>일치하는 필름이 없습니다. 브랜드명, ISO, 필름명을 줄여서 다시 검색해 보세요.</p>
   <div class="films-grid" id="filmsGridLibrary" aria-label="라이브러리 필름"></div>
   <div class="library-more-wrap" id="libraryMoreWrap" hidden>
-    <button type="button" class="library-more-btn" id="libraryMoreBtn">필름 더 보기</button>
+    <button type="button" class="btn btn-secondary btn-md library-more-btn" id="libraryMoreBtn">필름 더 보기</button>
   </div>
 </div>
 
@@ -207,14 +208,15 @@
 </footer>
 
 <script src="./js/reader-roll.js?v=20260518-rollmodule"></script>
-<script src="./js/site-common.js?v=20260520-fastauth"></script>
+<script src="./js/site-common.js?v=20260520-secnav"></script>
 <script src="./js/films-export.js?v=20260519-photoalign"></script>
-<script src="./js/films-page.js?v=20260520-msclear"></script>
+<script src="./js/films-utils.js?v=20260520-modules"></script>
+<script src="./js/films-page.js?v=20260520-modules"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260520-filmshide"></script>
 <script src="./js/comments.js?v=20260519-toast"></script>
 <script src="./js/image-processor.js?v=20260520-mobileupload"></script>
-<script src="./js/reader-submissions.js?v=20260520-authrestore"></script>
+<script src="./js/reader-submissions.js?v=20260520-uploadguard"></script>
 <script src="./js/camera-brands.js?v=20260516-crosscheck"></script>
 </body>
 </html>

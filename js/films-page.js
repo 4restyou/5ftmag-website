@@ -9,12 +9,14 @@
   const filmsGridFeatured = document.getElementById('filmsGridFeatured');
   const filmsGridLibrary  = document.getElementById('filmsGridLibrary');
 
-  function escapeAttr(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => (
-      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
-    ));
-  }
-  const escapeHtml = escapeAttr;
+  const {
+    escapeAttr,
+    escapeHtml,
+    normalizeFilmLabel,
+    normalizeContributorKey,
+    filterCategoryOf,
+    isMobileFilms,
+  } = window.FilmsUtils;
 
   function renderFilmCard(slug, film, context = 'library-grid') {
     const isLibrary = film.tier === 'library';
@@ -113,15 +115,6 @@
       </button>`;
   }
 
-  // 필름 type → 필터 카테고리 매핑
-  function filterCategoryOf(film) {
-    const t = (film.type || '').toLowerCase();
-    if (t.includes('color negative')) return 'color';
-    if (t.includes('black') || t.includes('white')) return 'bw';
-    if (t.includes('slide') || t.includes('e-6') || t.includes('reversal')) return 'slide';
-    if (t.includes('tungsten') || t.includes('daylight') || t.includes('cinema')) return 'cinema';
-    return 'other';
-  }
   const FILTER_LABELS = {
     all: '전체',
     color: 'Color',
@@ -151,19 +144,28 @@
   // 데스크탑은 sortLibrary 알파벳 순, 모바일은 첫 렌더 때 결정된 셔플 순서
   let libraryOriginalOrder = [];
 
-  function normalizeFilmLabel(s) {
-    return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
-  }
-
-  function isMobileFilms() {
-    return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-  }
-
   function hasActiveLibraryFilter() {
     return currentFilter !== 'all' ||
       currentBrands.size > 0 ||
       currentCameras.size > 0 ||
       currentSearch.trim() !== '';
+  }
+
+  function activeAdvancedFilterCount() {
+    return (currentFilter !== 'all' ? 1 : 0) + currentBrands.size + currentCameras.size;
+  }
+
+  function updateAdvancedFilterToggle() {
+    const btn = document.getElementById('libraryAdvancedToggle');
+    const panel = document.getElementById('libraryAdvancedFilters');
+    if (!btn || !panel) return;
+    const count = activeAdvancedFilterCount();
+    btn.textContent = count > 0 ? `필터 ${count}` : '필터';
+    btn.classList.toggle('has-active', count > 0);
+    if (count > 0 && isMobileFilms()) {
+      panel.classList.add('is-open');
+      btn.setAttribute('aria-expanded', 'true');
+    }
   }
 
   function resetMobileLibraryLimit() {
@@ -178,10 +180,6 @@
     wrap.hidden = !shouldPage;
     if (!shouldPage) return;
     btn.textContent = `필름 더 보기 (${matchedCount - libraryMobileVisible})`;
-  }
-
-  function normalizeContributorKey(s) {
-    return String(s ?? '').trim().replace(/^@/, '').toLowerCase();
   }
 
   function resolveFilmKey(input) {
@@ -253,6 +251,7 @@
     const emptyEl = document.getElementById('libraryEmpty');
     if (emptyEl) emptyEl.hidden = matched !== 0;
     updateLibraryMoreButton(matched);
+    updateAdvancedFilterToggle();
   }
 
   // 브랜드 dropdown 옵션 빌드 — 다중 선택 체크박스
@@ -526,6 +525,17 @@
         resetMobileLibraryLimit();
         applyLibraryFilter();
       }, 120);
+    });
+  })();
+
+  (function bindLibraryAdvancedToggle() {
+    const btn = document.getElementById('libraryAdvancedToggle');
+    const panel = document.getElementById('libraryAdvancedFilters');
+    if (!btn || !panel) return;
+    btn.addEventListener('click', () => {
+      const open = !panel.classList.contains('is-open');
+      panel.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', String(open));
     });
   })();
 

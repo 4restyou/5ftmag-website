@@ -889,6 +889,17 @@
     function escapeHtml(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
+    function safeInternalHref(value) {
+      const raw = String(value || '').trim();
+      if (!raw || raw === '#') return '#';
+      try {
+        const url = new URL(raw, window.location.origin);
+        if (url.origin !== window.location.origin) return '#';
+        return `${url.pathname}${url.search}${url.hash}` || '#';
+      } catch (_) {
+        return '#';
+      }
+    }
     async function openPanel() {
       panel.hidden = false;
       bell.setAttribute('aria-expanded', 'true');
@@ -900,7 +911,7 @@
         return;
       }
       list.innerHTML = rows.map(n => `
-        <a class="notif-item${n.read_at ? '' : ' is-unread'}" href="${escapeHtml(n.link || '#')}" data-id="${escapeHtml(n.id)}">
+        <a class="notif-item${n.read_at ? '' : ' is-unread'}" href="${escapeHtml(safeInternalHref(n.link))}" data-id="${escapeHtml(n.id)}">
           <div class="notif-item-title">${escapeHtml(n.title)}</div>
           ${n.body ? `<div class="notif-item-body">${escapeHtml(n.body)}</div>` : ''}
           <div class="notif-item-time">${fmtAgo(n.created_at)}</div>
