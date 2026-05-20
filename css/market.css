@@ -519,6 +519,51 @@
 .mkt-btn:disabled { opacity: 0.45; cursor: progress; }
 .mkt-btn-primary { background: var(--text); color: var(--bg); }
 .mkt-btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+.mkt-upload-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-sub);
+  color: var(--text);
+}
+.mkt-upload-status[hidden] { display: none; }
+.mkt-upload-status strong {
+  display: block;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+}
+.mkt-upload-status small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.mkt-upload-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(255, 230, 0, 0.45);
+  animation: mktPulse 1.4s ease-in-out infinite;
+}
+.mkt-upload-status[data-state="done"] .mkt-upload-dot {
+  background: #16a34a;
+  animation: none;
+}
+.mkt-upload-status[data-state="error"] .mkt-upload-dot {
+  background: #b91c1c;
+  animation: none;
+}
+@keyframes mktPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 230, 0, 0.45); opacity: 1; }
+  50% { box-shadow: 0 0 0 6px rgba(255, 230, 0, 0); opacity: 0.72; }
+}
 .mkt-form-error { color: #b91c1c; font-size: 13px; min-height: 16px; }
 
 /* ── 로그인 게이트 ── */
