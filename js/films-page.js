@@ -129,8 +129,9 @@
     cinema: 'Cinema',
   };
   let currentFilter = 'all';
-  let currentBrand  = 'all';
-  let currentCamera = 'all';   // 카메라 model key (브랜드 prefix 제거 후 정규화)
+  // 다중 선택: 비어 있으면 "전체" 로 간주, 값 있으면 OR 매칭
+  let currentBrands  = new Set();
+  let currentCameras = new Set();   // 카메라 model key (브랜드 prefix 제거 후 정규화)
   let currentSearch = '';
   const MOBILE_LIBRARY_INITIAL = 30;
   const MOBILE_LIBRARY_STEP = 30;
@@ -156,8 +157,8 @@
 
   function hasActiveLibraryFilter() {
     return currentFilter !== 'all' ||
-      currentBrand !== 'all' ||
-      currentCamera !== 'all' ||
+      currentBrands.size > 0 ||
+      currentCameras.size > 0 ||
       currentSearch.trim() !== '';
   }
 
@@ -234,9 +235,10 @@
       const slug = card.dataset.film || '';
       const tokens = card.dataset.search || '';
       const matchCat    = currentFilter === 'all' || cat === currentFilter;
-      const matchBrand  = currentBrand === 'all' || brand === currentBrand;
-      const matchCamera = currentCamera === 'all' ||
-                          (cameraKeysByFilmSlug.get(slug) && cameraKeysByFilmSlug.get(slug).has(currentCamera));
+      const matchBrand  = currentBrands.size === 0 || currentBrands.has(brand);
+      const cameraKeysForFilm = cameraKeysByFilmSlug.get(slug);
+      const matchCamera = currentCameras.size === 0 ||
+                          (cameraKeysForFilm && [...currentCameras].some(k => cameraKeysForFilm.has(k)));
       const matchSearch = !q || tokens.includes(q);
       const matches = matchCat && matchBrand && matchCamera && matchSearch;
       if (matches) matched++;
@@ -249,25 +251,18 @@
     updateLibraryMoreButton(matched);
   }
 
-  // 브랜드 드롭다운 옵션 빌드 (라이브러리 그리드의 모든 카드 대상)
+  // 브랜드 dropdown 옵션 빌드 — 다중 선택 체크박스
   function renderLibraryBrandSelect(libraryFilms) {
-    const select = document.getElementById('libraryBrand');
-    if (!select) return;
+    const root = document.getElementById('libraryBrandMS');
+    if (!root) return;
     const brands = new Set();
     for (const [, f] of libraryFilms) if (f.brand) brands.add(f.brand);
     const sorted = Array.from(brands).sort((a, b) => a.localeCompare(b, 'en'));
-    // 첫 옵션 보존 ('브랜드 전체') 후 기존 동적 옵션 정리
-    select.innerHTML = '<option value="all">브랜드 전체</option>'
-      + sorted.map(b => `<option value="${escapeAttr(b)}">${escapeAttr(b)}</option>`).join('');
-    select.value = currentBrand;
-    if (!select.dataset.bound) {
-      select.addEventListener('change', () => {
-        currentBrand = select.value || 'all';
-        resetMobileLibraryLimit();
-        applyLibraryFilter();
-      });
-      select.dataset.bound = '1';
-    }
+    // 존재하지 않는 brand 가 currentBrands 에 있으면 정리
+    for (const b of [...currentBrands]) if (!brands.has(b)) currentBrands.delete(b);
+    buildMultiselect(root, '브랜드', sorted.map(b => ({ value: b, label: b })),
+      () => currentBrands,
+      (set) => { currentBrands = set; resetMobileLibraryLimit(); applyLibraryFilter(); });
   }
 
   // 카메라 드롭다운 — reader_submissions 의 카메라 컬럼 집계
@@ -372,9 +367,9 @@
   }
 
   function renderLibraryCameraSelect() {
-    const select = document.getElementById('libraryCamera');
-    if (!select) return;
-    // 인식된 브랜드 → 그 브랜드의 카메라들; 미인식 → '기타' 그룹
+    const root = document.getElementById('libraryCameraMS');
+    if (!root) return;
+    // 브랜드 별 그룹화 + 미인식 카메라 — 알파벳 정렬
     const byBrand = new Map();
     const unknowns = [];
     for (const [key, info] of cameraIndex) {
@@ -385,32 +380,121 @@
         unknowns.push({ key, ...info });
       }
     }
-    // 브랜드는 알파벳, 그 안에서는 카운트 내림차순 후 display 알파벳
     const sortedBrands = Array.from(byBrand.keys()).sort((a, b) => a.localeCompare(b, 'en'));
-    const optionForCam = (c) => `<option value="${escapeAttr(c.key)}">${escapeAttr(c.display)} · ${c.count}</option>`;
-    let html = '<option value="all">카메라 전체</option>';
+    // 옵션 평면화 — 브랜드 헤더 텍스트는 dropdown panel 내부에서 처리 (group separator)
+    const options = [];
     for (const brand of sortedBrands) {
       const arr = byBrand.get(brand).sort((a, b) => a.display.localeCompare(b.display, 'en'));
-      html += `<optgroup label="${escapeAttr(brand)}">${arr.map(optionForCam).join('')}</optgroup>`;
+      options.push({ groupLabel: brand });
+      for (const c of arr) options.push({ value: c.key, label: c.display, meta: String(c.count) });
     }
     if (unknowns.length) {
       unknowns.sort((a, b) => a.display.localeCompare(b.display, 'en'));
-      html += `<optgroup label="기타 (브랜드 미확인)">${unknowns.map(optionForCam).join('')}</optgroup>`;
+      options.push({ groupLabel: '기타 (브랜드 미확인)' });
+      for (const c of unknowns) options.push({ value: c.key, label: c.display, meta: String(c.count) });
     }
-    select.innerHTML = html;
-    // 현재 선택 유지. 사라진 옵션이면 all 로 리셋
-    if (currentCamera !== 'all' && !cameraIndex.has(currentCamera)) {
-      currentCamera = 'all';
+    // 사라진 카메라는 제거
+    for (const k of [...currentCameras]) if (!cameraIndex.has(k)) currentCameras.delete(k);
+    buildMultiselect(root, '카메라', options,
+      () => currentCameras,
+      (set) => { currentCameras = set; resetMobileLibraryLimit(); applyLibraryFilter(); });
+  }
+
+  // 공통 다중 선택 dropdown 빌더
+  //   options: [{ value, label, meta? } | { groupLabel }]
+  //   getSelected: () => Set<string>
+  //   onChange: (Set<string>) => void
+  function buildMultiselect(root, labelPrefix, options, getSelected, onChange) {
+    const btn   = root.querySelector('.ms-dropdown-btn');
+    const label = root.querySelector('.ms-dropdown-label');
+    const panel = root.querySelector('.ms-dropdown-panel');
+    if (!btn || !label || !panel) return;
+
+    function refreshLabel() {
+      const sel = getSelected();
+      if (sel.size === 0) {
+        label.textContent = `${labelPrefix} 전체`;
+      } else if (sel.size === 1) {
+        const v = [...sel][0];
+        const opt = options.find(o => o.value === v);
+        label.textContent = (opt && opt.label) || v;
+      } else {
+        label.innerHTML = `${escapeHtml(labelPrefix)} <span class="ms-count">${sel.size}</span>`;
+      }
     }
-    select.value = currentCamera;
-    if (!select.dataset.bound) {
-      select.addEventListener('change', () => {
-        currentCamera = select.value || 'all';
-        resetMobileLibraryLimit();
-        applyLibraryFilter();
+
+    function renderPanel() {
+      const sel = getSelected();
+      const clearBtn = `<div class="ms-dropdown-panel-head">
+        <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${sel.size}개 선택</span>
+        <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>전체 해제</button>
+      </div>`;
+      const rows = options.map(o => {
+        if (o.groupLabel) {
+          return `<div class="ms-dropdown-empty" style="padding:8px 14px 4px;font-weight:var(--fw-heading);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">${escapeHtml(o.groupLabel)}</div>`;
+        }
+        const checked = sel.has(o.value);
+        return `<label class="ms-dropdown-option">
+          <input type="checkbox" data-value="${escapeAttr(o.value)}" ${checked ? 'checked' : ''} />
+          <span class="ms-opt-text">${escapeHtml(o.label)}</span>
+          ${o.meta ? `<span class="ms-opt-meta">${escapeHtml(o.meta)}</span>` : ''}
+        </label>`;
+      }).join('');
+      panel.innerHTML = clearBtn + (rows || `<div class="ms-dropdown-empty">옵션 없음</div>`);
+      panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const v = cb.dataset.value;
+          const next = new Set(getSelected());
+          if (cb.checked) next.add(v); else next.delete(v);
+          onChange(next);
+          refreshLabel();
+        });
       });
-      select.dataset.bound = '1';
+      const clearBtnEl = panel.querySelector('[data-action="ms-clear"]');
+      if (clearBtnEl) clearBtnEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onChange(new Set());
+        renderPanel();
+        refreshLabel();
+      });
     }
+
+    // 첫 wiring 한 번만
+    if (!root.dataset.bound) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = !root.classList.contains('is-open');
+        // 다른 dropdown 닫기
+        document.querySelectorAll('.ms-dropdown.is-open').forEach(el => {
+          if (el !== root) {
+            el.classList.remove('is-open');
+            el.querySelector('.ms-dropdown-btn')?.setAttribute('aria-expanded', 'false');
+            const p = el.querySelector('.ms-dropdown-panel'); if (p) p.hidden = true;
+          }
+        });
+        root.classList.toggle('is-open', open);
+        btn.setAttribute('aria-expanded', String(open));
+        panel.hidden = !open;
+        if (open) renderPanel();
+      });
+      document.addEventListener('click', (e) => {
+        if (!root.contains(e.target) && root.classList.contains('is-open')) {
+          root.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+          panel.hidden = true;
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && root.classList.contains('is-open')) {
+          root.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+          panel.hidden = true;
+        }
+      });
+      root.dataset.bound = '1';
+    }
+    refreshLabel();
+    if (!panel.hidden) renderPanel();
   }
 
   // 검색 입력 핸들러 (페이지 로드 직후 한 번 wiring)
@@ -897,8 +981,8 @@
 
     let matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
     // 카메라 필터가 활성화돼 있으면 그 카메라로 찍힌 사진만 모달 안에서 노출
-    if (currentCamera !== 'all' && typeof window.normalizeCamera === 'function') {
-      matched = matched.filter(s => resolveCanonicalCameraKey(window.normalizeCamera(s.camera).key) === currentCamera);
+    if (currentCameras.size > 0 && typeof window.normalizeCamera === 'function') {
+      matched = matched.filter(s => currentCameras.has(resolveCanonicalCameraKey(window.normalizeCamera(s.camera).key)));
     }
     const rollState = buildReaderRollState(matched);
 
