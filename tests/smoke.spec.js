@@ -63,6 +63,59 @@ test('짧은 필름 공유 링크에서도 모바일 asset과 이미지가 깨�
   expect(failed.filter(url => !/supabase|cdn\.jsdelivr/i.test(url))).toEqual([]);
 });
 
+test('카톡 인앱형 짧은 공유 링크들이 모바일에서 asset을 잃지 않는다', async ({ page }) => {
+  const paths = [
+    { path: '/film/superia400', must: 'Library', imageScope: '#filmsGridLibrary' },
+    { path: '/camera/Leica%20M6', must: 'Library', imageScope: '#filmsGridLibrary' },
+    { path: '/contributor/__botong', must: 'Library', imageScope: '#filmsGridLibrary' },
+    { path: '/market/test-listing-id', must: '중고 장터', imageScope: 'body' },
+    { path: '/stories/film-flea-market-s6', must: '필름카메라 플리마켓', imageScope: 'article' },
+    { path: '/authors/5ftmag', must: '5ft.mag 편집부', imageScope: 'body' },
+  ];
+
+  for (const target of paths) {
+    const failed = [];
+    page.removeAllListeners('requestfailed');
+    page.removeAllListeners('response');
+    page.on('requestfailed', req => failed.push(req.url()));
+    page.on('response', res => {
+      if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+    });
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(target.path, { waitUntil: 'networkidle' });
+    await expect(page.locator('body'), `${target.path} text`).toContainText(target.must);
+
+    const result = await page.locator(target.imageScope).evaluate(scope => ({
+      fontFamily: getComputedStyle(document.body).fontFamily,
+      brokenImages: [...scope.querySelectorAll('img')]
+        .filter(img => (img.currentSrc || img.src) && !img.closest('.lightbox') && (!img.complete || img.naturalWidth === 0))
+        .map(img => img.currentSrc || img.src),
+    }));
+    expect(result.fontFamily, `${target.path} font`).toContain('Pretendard');
+    expect(result.brokenImages, `${target.path} broken images`).toEqual([]);
+    expect(failed.filter(url => !/supabase|cdn\.jsdelivr|favicon/i.test(url)), `${target.path} failed requests`).toEqual([]);
+  }
+});
+
+test('중첩 짧은 경로의 asset fallback redirect가 동작한다', async ({ request }) => {
+  const assets = [
+    '/film/img/symbol-b.svg',
+    '/camera/css/common.css',
+    '/contributor/js/site-common.js',
+    '/market/pretendard.css',
+    '/stories/img/symbol-b.svg',
+    '/stories/css/article.css',
+    '/authors/js/site-common.js',
+    '/legal/img/favicon/icon.svg',
+  ];
+
+  for (const path of assets) {
+    const res = await request.get(path);
+    expect(res.status(), path).toBeLessThan(400);
+  }
+});
+
 test('legal 푸터 링크가 동적으로 inject 되는지', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => document.querySelector('.footer-links a[data-legal]'));

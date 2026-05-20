@@ -143,6 +143,31 @@
   status = 200
 
 [[redirects]]
+  from = "/stories/css/:splat"
+  to = "/css/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/stories/js/:splat"
+  to = "/js/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/stories/img/:splat"
+  to = "/img/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/stories/data/:splat"
+  to = "/data/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/stories/pretendard.css"
+  to = "/pretendard.css"
+  status = 200
+
+[[redirects]]
   from = "/stories/:slug"
   to = "/stories/:slug.html"
   status = 200
@@ -153,8 +178,58 @@
   status = 200
 
 [[redirects]]
+  from = "/authors/css/:splat"
+  to = "/css/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/authors/js/:splat"
+  to = "/js/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/authors/img/:splat"
+  to = "/img/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/authors/data/:splat"
+  to = "/data/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/authors/pretendard.css"
+  to = "/pretendard.css"
+  status = 200
+
+[[redirects]]
   from = "/authors/:slug"
   to = "/authors/:slug.html"
+  status = 200
+
+[[redirects]]
+  from = "/legal/css/:splat"
+  to = "/css/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/legal/js/:splat"
+  to = "/js/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/legal/img/:splat"
+  to = "/img/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/legal/data/:splat"
+  to = "/data/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/legal/pretendard.css"
+  to = "/pretendard.css"
   status = 200
 
 [[redirects]]

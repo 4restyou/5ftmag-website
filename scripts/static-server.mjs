@@ -23,12 +23,16 @@ const MIME = {
 createServer((req, res) => {
   const url = new URL(req.url || '/', `http://127.0.0.1:${PORT}`);
   let p = decodeURIComponent(url.pathname);
-  p = p.replace(/^\/(film|camera|contributor|market)\/(css|js|img|data)\//, '/$2/');
-  p = p.replace(/^\/(film|camera|contributor|market)\/pretendard\.css$/, '/pretendard.css');
+  p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/(css|js|img|data)\//, '/$2/');
+  p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/pretendard\.css$/, '/pretendard.css');
   if (/^\/film\/[^/]+$/.test(p) || /^\/camera\/[^/]+$/.test(p) || /^\/contributor\/[^/]+$/.test(p)) {
     p = '/films.html';
   } else if (/^\/market\/[^/]+$/.test(p)) {
     p = '/market.html';
+  } else if (/^\/stories\/[^/.]+$/.test(p)) {
+    p = `${p}.html`;
+  } else if (/^\/authors\/[^/.]+$/.test(p)) {
+    p = `${p}.html`;
   } else if (p === '/films') {
     p = '/films.html';
   } else if (p === '/stories') {
