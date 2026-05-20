@@ -48,7 +48,7 @@ $('gateLogin').addEventListener('click', async () => {
 // 목록 로드 + 렌더
 // ═════════════════════════════════════════
 async function reload() {
-  STATE.films = await db().films.list();
+  STATE.films = await db().films.listAll();
   render();
 }
 
@@ -74,10 +74,12 @@ function render() {
     const display = f.display_name || `${f.brand} ${f.name}`;
     const spec = [f.iso ? `ISO ${f.iso}` : '', f.type, f.format].filter(Boolean).join(' · ');
     const photoCount = Array.isArray(f.photos) ? f.photos.length : 0;
+    const hidden = !!f.is_hidden;
+    const hideLabel = hidden ? '복원' : '숨김';
     return `
-      <tr>
+      <tr${hidden ? ' style="opacity:.55"' : ''}>
         <td>
-          <div class="col-display">${escapeHtml(display)}</div>
+          <div class="col-display">${escapeHtml(display)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
           <div class="col-slug">${escapeHtml(f.slug)}</div>
         </td>
         <td class="col-meta">${escapeHtml(spec)}</td>
@@ -85,11 +87,16 @@ function render() {
         <td class="col-meta">${photoCount}</td>
         <td class="col-actions">
           <button type="button" class="row-btn" data-edit="${escapeAttr(f.slug)}">수정</button>
+          <button type="button" class="row-btn" data-toggle-hidden="${escapeAttr(f.slug)}" data-current-hidden="${hidden}">${hideLabel}</button>
           <button type="button" class="row-btn danger" data-delete="${escapeAttr(f.slug)}">삭제</button>
         </td>
       </tr>
     `;
   }).join('');
+
+  $('tbody').querySelectorAll('[data-toggle-hidden]').forEach(btn => {
+    btn.addEventListener('click', () => toggleHidden(btn.dataset.toggleHidden, btn.dataset.currentHidden === 'true'));
+  });
 
   $('tbody').querySelectorAll('[data-edit]').forEach(btn => {
     btn.addEventListener('click', () => openForm(btn.dataset.edit));
@@ -213,6 +220,21 @@ async function deleteFilm(slug) {
   }
   window.notify?.(`"${label}" 을 삭제했어요.`, 'info');
   STATE.films = STATE.films.filter(x => x.slug !== slug);
+  render();
+}
+
+async function toggleHidden(slug, currentlyHidden) {
+  if (!slug) return;
+  const f = STATE.films.find(x => x.slug === slug);
+  const label = f ? (f.display_name || `${f.brand} ${f.name}`) : slug;
+  const next = !currentlyHidden;
+  const { error } = await db().films.setHidden(slug, next);
+  if (error) {
+    window.notify?.((next ? '숨김' : '복원') + ' 실패: ' + (error.message || ''), 'danger');
+    return;
+  }
+  if (f) f.is_hidden = next;
+  window.notify?.(`"${label}" 을 ${next ? '숨김' : '복원'} 처리했어요. 다음 빌드부터 사이트에 반영됩니다.`, 'info');
   render();
 }
 

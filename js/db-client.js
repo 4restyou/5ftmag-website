@@ -813,11 +813,23 @@
   const films = {
     async list() {
       const c = client(); if (!c) return [];
+      // 공개 카탈로그용 — is_hidden = true 는 제외
+      const { data, error } = await c.from('films')
+        .select('*')
+        .eq('is_hidden', false)
+        .order('brand', { ascending: true })
+        .order('name', { ascending: true });
+      if (error) { console.warn('[films.list]', error.message); return []; }
+      return data || [];
+    },
+    // admin 용 — 숨김 포함 전체. listAsObject 와 같이 키 변환 안 함.
+    async listAll() {
+      const c = client(); if (!c) return [];
       const { data, error } = await c.from('films')
         .select('*')
         .order('brand', { ascending: true })
         .order('name', { ascending: true });
-      if (error) { console.warn('[films.list]', error.message); return []; }
+      if (error) { console.warn('[films.listAll]', error.message); return []; }
       return data || [];
     },
     // 기존 films.json 형태 (key=slug 인 object) 로 변환해서 반환.
@@ -877,8 +889,14 @@
         box_thumbnail_status:  record.box_thumbnail_status || record.boxThumbnailStatus || 'pending',
         can_thumbnail:         record.can_thumbnail || record.canThumbnail || null,
         can_thumbnail_status:  record.can_thumbnail_status || record.canThumbnailStatus || 'pending',
+        is_hidden:             typeof record.is_hidden === 'boolean' ? record.is_hidden
+                                : (typeof record.isHidden === 'boolean' ? record.isHidden : false),
       };
       return c.from('films').upsert(payload, { onConflict: 'slug' });
+    },
+    async setHidden(slug, hidden) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('films').update({ is_hidden: !!hidden }).eq('slug', slug);
     },
     async remove(slug) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };

@@ -3767,8 +3767,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/retoglow400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "retoaqua400": {
     "slug": "retoaqua400",
@@ -3793,8 +3793,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/retoaqua400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "retoprism400": {
     "slug": "retoprism400",
@@ -3819,8 +3819,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/retoprism400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "reflxlab800t": {
     "slug": "reflxlab800t",
@@ -3846,8 +3846,8 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/reflxlab800t-can.webp",
+    "canThumbnailStatus": "set"
   },
   "reflxlab400d": {
     "slug": "reflxlab400d",
@@ -3871,8 +3871,8 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/reflxlab400d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "reflxlab320d": {
     "slug": "reflxlab320d",
@@ -3895,8 +3895,8 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/reflxlab320d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "wolfennc400": {
     "slug": "wolfennc400",
@@ -3920,8 +3920,8 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/wolfennc400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "zombie400": {
     "slug": "zombie400",
@@ -3946,8 +3946,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/zombie400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "yashicacolor400": {
     "slug": "yashicacolor400",
@@ -3969,8 +3969,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/yashicacolor400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "yashicabw400": {
     "slug": "yashicabw400",
@@ -3993,8 +3993,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/yashicabw400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "yashicagolden80s": {
     "slug": "yashicagolden80s",
@@ -4017,8 +4017,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/yashicagolden80s-can.webp",
+    "canThumbnailStatus": "set"
   },
   "reflxlab250d": {
     "slug": "reflxlab250d",
@@ -4042,33 +4042,8 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
-  },
-  "reflxlab50d": {
-    "slug": "reflxlab50d",
-    "tier": "library",
-    "brand": "REFLX LAB",
-    "name": "50D",
-    "displayName": "Reflx Lab 50D",
-    "aliases": [
-      "Reflx Lab 50D",
-      "Reflx 50D",
-      "Reflxlab 50D",
-      "Vision3 5203 remjet",
-      "Kodak 5203 50D",
-      "5203 50D",
-      "리플렉스랩 50D",
-      "reflxlab50d"
-    ],
-    "desc": "Kodak Vision3 5203(50D) 의 remjet 을 벗긴 저감도 라인. 거의 입자가 보이지 않는 미세 입자에 채도 높은 톤으로 햇볕이 강한 한낮·풍경에 자주 호명되는 한 롤입니다. C-41.",
-    "iso": "50",
-    "type": "Daylight",
-    "format": "35mm, 120",
-    "photographers": [],
-    "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/reflxlab250d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fndiro200": {
     "slug": "fndiro200",
@@ -4113,8 +4088,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fndiro400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fndkiro400": {
     "slug": "fndkiro400",
@@ -4136,8 +4111,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fndkiro400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fndsora200": {
     "slug": "fndsora200",
@@ -4160,8 +4135,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fndsora200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fndumi800": {
     "slug": "fndumi800",
@@ -4184,8 +4159,8 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fndumi800-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fndkumo250d": {
     "slug": "fndkumo250d",
@@ -4210,7 +4185,7 @@
     "format": "35mm",
     "photographers": [],
     "photos": [],
-    "canThumbnail": null,
-    "canThumbnailStatus": "pending"
+    "canThumbnail": "img/films/fndkumo250d-can.webp",
+    "canThumbnailStatus": "set"
   }
 }
