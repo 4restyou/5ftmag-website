@@ -917,7 +917,12 @@
   margin: 0;
   min-width: 0;
 }
-.library-brand-select {
+/* 라이브러리 다중 선택 dropdown — 브랜드 / 카메라 */
+.ms-dropdown {
+  position: relative;
+  font: inherit;
+}
+.ms-dropdown-btn {
   appearance: none;
   -webkit-appearance: none;
   font: inherit;
@@ -931,21 +936,115 @@
   padding: 8px 32px 8px 14px;
   cursor: pointer;
   transition: border-color .15s, color .15s;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  position: relative;
 }
-.library-brand-select:hover,
-.library-brand-select:focus-visible {
+.ms-dropdown-btn:hover,
+.ms-dropdown-btn:focus-visible {
   border-color: var(--text);
   outline: none;
 }
+.ms-dropdown-btn svg {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: transform .15s;
+}
+.ms-dropdown.is-open .ms-dropdown-btn svg { transform: translateY(-50%) rotate(180deg); }
+.ms-dropdown-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-dropdown-label .ms-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 10px;
+  border-radius: 999px;
+  font-weight: var(--fw-heading);
+}
+.ms-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  max-width: 320px;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--btn-radius);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+  padding: 6px 0;
+}
+[data-theme="dark"] .ms-dropdown-panel {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+.ms-dropdown-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.ms-dropdown-clear {
+  appearance: none; -webkit-appearance: none;
+  font: inherit; font-size: 11px; font-weight: var(--fw-heading);
+  letter-spacing: 0.06em;
+  color: var(--text-muted); background: none; border: none; padding: 4px 0;
+  cursor: pointer;
+}
+.ms-dropdown-clear:hover { color: var(--text); }
+.ms-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.ms-dropdown-option:hover { background: var(--bg-sub); }
+.ms-dropdown-option input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: background .15s, border-color .15s;
+}
+.ms-dropdown-option input[type="checkbox"]:checked {
+  background: var(--text);
+  border-color: var(--text);
+}
+.ms-dropdown-option input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px; top: 0px;
+  width: 4px; height: 8px;
+  border: solid var(--bg);
+  border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+}
+.ms-dropdown-option .ms-opt-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-dropdown-option .ms-opt-meta { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.ms-dropdown-empty { padding: 12px 14px; color: var(--text-muted); font-size: 12px; }
 @media (max-width: 640px) {
   .library-controls { flex-direction: column; align-items: stretch; gap: 12px; }
-  .library-controls-right { justify-content: flex-start; gap: 12px; }
+  .library-controls-right { justify-content: flex-start; gap: 12px; flex-wrap: wrap; }
   .library-search-label { max-width: none; }
-  .library-brand-select { width: 100%; }
+  .ms-dropdown { width: 100%; }
+  .ms-dropdown-btn { width: 100%; }
+  .ms-dropdown-panel { width: 100%; max-width: none; }
 }
 .library-filter-chip {
   display: inline-flex;
