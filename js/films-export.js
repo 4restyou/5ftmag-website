@@ -241,7 +241,7 @@
     const cols = 6;
     const tileW = 380;
     const tileH = 345;
-    const rowGap = 28;  // 행 사이 흰 띠 — 컷 그룹이 시각적으로 분리되도록
+    const rowGap = 0;  // 저장 이미지는 실제 필름 컨택트시트처럼 행 사이가 붙어 보여야 한다.
     const rows = Math.max(1, Math.ceil(frames.length / cols));
     const scale = 1.5;
     const innerW = cols * tileW;

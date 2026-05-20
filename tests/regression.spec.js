@@ -190,6 +190,46 @@ test('필름스트립 저장 캔버스는 모바일에서도 프레임과 필름
   expect(result.nonWhite).toBeGreaterThan(1000);
 });
 
+test('필름스트립 저장 캔버스는 행 사이 흰 간격 없이 붙어서 그린다', async ({ page }) => {
+  await page.goto('/films.html');
+  const result = await page.evaluate(async () => {
+    const photoCanvas = document.createElement('canvas');
+    photoCanvas.width = 160;
+    photoCanvas.height = 110;
+    const photoCtx = photoCanvas.getContext('2d');
+    photoCtx.fillStyle = '#2457d6';
+    photoCtx.fillRect(0, 0, photoCanvas.width, photoCanvas.height);
+
+    const src = photoCanvas.toDataURL('image/png');
+    const target = document.createElement('div');
+    target.innerHTML = Array.from({ length: 7 }, (_, idx) => `
+      <div class="reader-slot is-filled" data-instagram="@test_user_${idx}">
+        <div class="reader-slot-window">
+          <img src="${src}" alt="" />
+        </div>
+      </div>`).join('');
+    document.body.appendChild(target);
+
+    const strip = await renderRollStripCanvas(target, 'reader');
+    const ctx = strip.getContext('2d');
+    const seamY = Math.round(345 * 1.5) + 8;
+    const sample = ctx.getImageData(0, seamY, 48, 24).data;
+    let darkPixels = 0;
+    let whitePixels = 0;
+    for (let i = 0; i < sample.length; i += 4) {
+      const avg = (sample[i] + sample[i + 1] + sample[i + 2]) / 3;
+      if (avg < 45) darkPixels += 1;
+      if (avg > 245) whitePixels += 1;
+    }
+    target.remove();
+    return { height: strip.height, darkPixels, whitePixels };
+  });
+
+  expect(result.height).toBe(1035);
+  expect(result.darkPixels).toBeGreaterThan(700);
+  expect(result.whitePixels).toBeLessThan(120);
+});
+
 test('공유 링크는 파일 확장자와 query 대신 짧은 경로를 사용한다', async ({ page }) => {
   await page.goto('/');
   const urls = await page.evaluate(() => ({
