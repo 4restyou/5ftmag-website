@@ -147,6 +147,9 @@
   let filmFavSlugs = new Set();
   let photoFavIds  = new Set();
   let contributorFavKeys = new Set();
+  // 라이브러리 카드의 "원본" 정렬 순서 (좋아요 해제 시 복귀용)
+  // 데스크탑은 sortLibrary 알파벳 순, 모바일은 첫 렌더 때 결정된 셔플 순서
+  let libraryOriginalOrder = [];
 
   function normalizeFilmLabel(s) {
     return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
@@ -570,6 +573,8 @@
     //  단, Library 컨텍스트로 렌더되므로 같은 필름이라도 "0 / 36 · 자리 채우기" 표현
     const sortedLibrary = sortLibrary(entries);
     const libraryAll = isMobileFilms() ? shuffleLibrary(sortedLibrary) : sortedLibrary;
+    // 좋아요 해제 시 카드를 이 자리로 돌려보내기 위해 원본 순서 저장
+    libraryOriginalOrder = libraryAll.map(([slug]) => slug);
 
     filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f, 'featured-grid')).join('');
     filmsGridLibrary.innerHTML  = libraryAll.map(([slug, f]) => renderFilmCard(slug, f, 'library-grid')).join('');
@@ -596,20 +601,52 @@
     });
   }
 
-  // 좋아요 토글 시 라이브러리 카드를 fav-우선으로 재배치.
-  // 안정정렬이라 fav 동률·non-fav 동률 카드끼리는 현재 DOM 순서(모바일 셔플/데스크탑 알파벳)를 보존.
-  // innerHTML 재생성 대신 appendChild 로 옮기기만 해서 깜빡임·핸들러 재바인딩 없음.
+  // 좋아요 토글 시 라이브러리 카드를 fav-우선으로 재배치 + FLIP 애니메이션.
+  // libraryOriginalOrder(데스크탑 알파벳 / 모바일 첫 렌더 셔플) 를 기준으로 fav 만 앞으로
+  // 끌어올리고, fav 해제 시에는 원래 자리로 복귀.
   function resortLibraryFavFirst() {
-    if (!filmsGridLibrary) return;
+    if (!filmsGridLibrary || libraryOriginalOrder.length === 0) return;
     const cards = Array.from(filmsGridLibrary.children);
-    cards.sort((a, b) => {
-      const fa = filmFavSlugs.has(a.dataset.film) ? 0 : 1;
-      const fb = filmFavSlugs.has(b.dataset.film) ? 0 : 1;
+    if (cards.length === 0) return;
+
+    // FIRST: 이동 전 위치 기록
+    const firstRects = new Map();
+    cards.forEach(c => firstRects.set(c, c.getBoundingClientRect()));
+
+    // 원본 순서를 fav 우선으로 재정렬
+    const order = libraryOriginalOrder.slice().sort((a, b) => {
+      const fa = filmFavSlugs.has(a) ? 0 : 1;
+      const fb = filmFavSlugs.has(b) ? 0 : 1;
       return fa - fb;
     });
+    const map = new Map(cards.map(c => [c.dataset.film, c]));
     const frag = document.createDocumentFragment();
-    cards.forEach(c => frag.appendChild(c));
+    order.forEach(slug => {
+      const el = map.get(slug);
+      if (el) frag.appendChild(el);
+    });
     filmsGridLibrary.appendChild(frag);
+
+    // LAST + INVERT + PLAY: 이동한 카드만 transform 으로 보정 → transition 해제
+    cards.forEach(c => {
+      const first = firstRects.get(c);
+      const last = c.getBoundingClientRect();
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      c.style.transition = 'none';
+      c.style.transform = `translate(${dx}px, ${dy}px)`;
+      requestAnimationFrame(() => {
+        c.style.transition = 'transform 360ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+        c.style.transform = '';
+      });
+      const cleanup = () => {
+        c.style.transition = '';
+        c.style.transform = '';
+        c.removeEventListener('transitionend', cleanup);
+      };
+      c.addEventListener('transitionend', cleanup);
+    });
   }
 
   // ════════════════════════════

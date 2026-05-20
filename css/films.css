@@ -126,12 +126,12 @@
 }
 .film-fav:hover svg { stroke: var(--text); stroke-width: 1.8; }
 .film-fav.is-fav svg {
-  fill: #e0245e;
-  stroke: #e0245e;
+  fill: #c01a4f;
+  stroke: #c01a4f;
 }
 .film-fav.is-busy { opacity: 0.55; pointer-events: none; }
 [data-theme="dark"] .film-fav:hover svg { stroke: #fff; }
-[data-theme="dark"] .film-fav.is-fav svg { fill: #ff6b8a; stroke: #ff6b8a; }
+[data-theme="dark"] .film-fav.is-fav svg { fill: #ff4d72; stroke: #ff4d72; }
 .film-brand {
   font-size: var(--fs-meta);
   font-weight: var(--fw-heading);
