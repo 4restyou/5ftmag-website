@@ -48,9 +48,11 @@ function rowToJson(r) {
 }
 
 async function main() {
-  // Supabase REST — public SELECT 라 anon 키로 충분
+  // Supabase REST — public SELECT 라 anon 키로 충분.
+  // is_hidden=true 는 정적 카탈로그에서 제외 (admin 에서만 보이게).
   const url = new URL('/rest/v1/films', SUPABASE_URL);
   url.searchParams.set('select', '*');
+  url.searchParams.set('is_hidden', 'eq.false');
   url.searchParams.set('order', 'brand.asc,name.asc');
 
   let rows;
