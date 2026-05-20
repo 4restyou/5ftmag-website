@@ -66,6 +66,8 @@
     .ops-row-name { font-weight: var(--fw-heading); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .ops-row-sub { color: var(--text-muted); font-size: 12px; margin-top: 3px; overflow-wrap: anywhere; }
     .ops-row-meta { color: var(--text-muted); font-size: 12px; text-align: right; white-space: nowrap; }
+    .ops-badge { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; margin-right: 6px; border-radius: var(--badge-radius); background: var(--bg-sub); color: var(--text-muted); font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; }
+    .ops-badge.is-danger { background: var(--text); color: var(--bg); }
     .ops-empty { color: var(--text-muted); font-size: 13px; padding-top: 8px; }
 
     .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
@@ -190,7 +192,7 @@
       <a class="ops-item" id="opsErrorItem" href="/admin/analytics.html#clientErrorsPanel">
         <div class="k">JS 오류</div>
         <div class="v" id="opsClientErrors" aria-live="polite">·</div>
-        <div class="sub">최근 24시간</div>
+        <div class="sub" id="opsClientErrorsSub">최근 24시간</div>
       </a>
       <div class="ops-item" id="opsHealthItem">
         <div class="k">상태</div>
@@ -395,7 +397,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260520-filmshide"></script>
 <script src="../js/site-common.js?v=20260520-secnav"></script>
-<script src="../js/admin-analytics-page.js?v=20260519-thumbdebt"></script>
+<script src="../js/admin-analytics-page.js?v=20260520-uploadops"></script>
 
 </body>
 </html>

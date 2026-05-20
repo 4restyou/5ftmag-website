@@ -778,7 +778,13 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
         uploadsTopCameras: async () => [{ camera: 'Leica M6', uploads: 2, approved: 2 }],
         uploadsTopCamerasAll: async () => [{ camera: 'Leica M6', uploads: 2, approved: 2 }],
         uploadsThemeRatio: async () => ({ theme_count: 1, general_count: 3, total: 4, theme_ratio: 0.25 }),
-        clientErrorsRecent: async () => [],
+        clientErrorsRecent: async () => [{
+          message: '[reader-upload:storage] 사진 업로드가 완료되지 않았어요. (storage down)',
+          source: 'reader-submissions:storage',
+          path: '/films.html',
+          ts: new Date().toISOString(),
+          occurrences: 2,
+        }],
       },
       market: {
         adminReportCount: async () => window.__ops.pendingReports,
@@ -790,7 +796,11 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
   await expect(page.locator('#opsTotalUploads')).toHaveText('12');
   await expect(page.locator('#opsPendingUploads')).toHaveText('2');
   await expect(page.locator('#opsPendingReports')).toHaveText('1');
-  await expect(page.locator('#opsClientErrors')).toHaveText('0');
+  await expect(page.locator('#opsClientErrors')).toHaveText('2');
+  await expect(page.locator('#opsClientErrorsSub')).toHaveText('업로드 실패 2건');
+  await expect(page.locator('#clientErrorCount')).toContainText('업로드 실패 2건');
+  await expect(page.locator('#clientErrorList')).toContainText('업로드 실패 · storage');
+  await expect(page.locator('#clientErrorList')).toContainText('사진 업로드가 완료되지 않았어요.');
   await expect(page.locator('#opsHealth')).toHaveText('확인 필요');
   await expect(page.locator('#topFilms')).toContainText('Kodak Portra 400');
   await expect(page.locator('#topCameras')).toContainText('Leica M6');

@@ -404,28 +404,52 @@ function fmtAgoShort(iso) {
   return `${Math.floor(sec / 86400)}일 전`;
 }
 
+function clientErrorMeta(row) {
+  const message = String(row?.message || '');
+  const uploadMatch = message.match(/^\[reader-upload:([a-z0-9_-]+)\]/i);
+  if (!uploadMatch) return { kind: 'js', stage: '', label: 'JS 오류', displayMessage: message };
+  const stage = uploadMatch[1] || 'unknown';
+  return {
+    kind: 'upload',
+    stage,
+    label: `업로드 실패 · ${stage}`,
+    displayMessage: message.replace(/^\[reader-upload:[^\]]+\]\s*/i, ''),
+  };
+}
+
 async function loadClientErrors() {
   const countEl = $('clientErrorCount');
   const listEl = $('clientErrorList');
   const opsEl = $('opsClientErrors');
+  const opsSubEl = $('opsClientErrorsSub');
   const cardEl = $('opsErrorItem');
   if (!countEl || !listEl || !opsEl) return [];
   try {
     const rows = await db().analytics.clientErrorsRecent(24, 10);
     const total = rows.reduce((sum, row) => sum + (Number(row.occurrences) || 0), 0);
+    const uploadTotal = rows.reduce((sum, row) => {
+      if (clientErrorMeta(row).kind !== 'upload') return sum;
+      return sum + (Number(row.occurrences) || 0);
+    }, 0);
     opsEl.textContent = fmtNum(total);
+    if (opsSubEl) opsSubEl.textContent = uploadTotal ? `업로드 실패 ${fmtNum(uploadTotal)}건` : '최근 24시간';
     cardEl?.classList.toggle('is-alert', total > 0);
-    countEl.textContent = total ? `${fmtNum(total)}건 · 최근 24시간` : '최근 24시간 오류 없음';
+    countEl.textContent = total
+      ? `${fmtNum(total)}건 · 최근 24시간${uploadTotal ? ` · 업로드 실패 ${fmtNum(uploadTotal)}건` : ''}`
+      : '최근 24시간 오류 없음';
     if (!rows.length) {
       listEl.innerHTML = '<div class="ops-empty">최근 24시간 기록된 JS 오류가 없습니다.</div>';
       return rows;
     }
     listEl.innerHTML = rows.map(row => {
+      const meta = clientErrorMeta(row);
       const loc = [row.source, row.lineno ? `${row.lineno}:${row.colno || 0}` : ''].filter(Boolean).join(' ');
       return `
         <div class="ops-row">
           <div class="ops-row-main">
-            <div class="ops-row-name">${escapeHtml(row.message || 'Unknown error')}</div>
+            <div class="ops-row-name">
+              <span class="ops-badge ${meta.kind === 'upload' ? 'is-danger' : ''}">${escapeHtml(meta.label)}</span>${escapeHtml(meta.displayMessage || 'Unknown error')}
+            </div>
             <div class="ops-row-sub">${escapeHtml(row.path || '-')} ${loc ? `· ${escapeHtml(loc)}` : ''}</div>
           </div>
           <div class="ops-row-meta">${escapeHtml(fmtAgoShort(row.ts))}<br>${fmtNum(row.occurrences)}건</div>
@@ -436,6 +460,7 @@ async function loadClientErrors() {
   } catch (err) {
     console.warn('[clientErrors]', err?.message || err);
     opsEl.textContent = '!';
+    if (opsSubEl) opsSubEl.textContent = '확인 실패';
     cardEl?.classList.add('is-alert');
     countEl.textContent = '확인 실패';
     listEl.innerHTML = '<div class="ops-empty">최근 JS 오류를 불러오지 못했어요.</div>';
