@@ -338,10 +338,10 @@
           return a;
         }
 
-        // 데스크톱은 24장, 모바일은 12장. 모바일에서는 Photo 섹션의 길이를 줄인다.
+        // 데스크톱은 24장, 모바일은 10장. 모바일에서는 Photo 섹션의 길이를 줄인다.
         // editorial(5ft.mag 작가) 사진은 풀이 커도 노출 비율을 2% 로 제한 — 메인 Photo 는
         // 독자 사진 중심으로 보이게. 나머지 자리는 reader 풀에서 채움.
-        const PHOTO_COUNT = isMobileHome() ? 12 : 24;
+        const PHOTO_COUNT = isMobileHome() ? 10 : 24;
         const EDITORIAL_RATIO = 0.02;
         const editorialPool = allPhotos.filter(p => p.source === 'editorial');
         const readerPool    = allPhotos.filter(p => p.source !== 'editorial');
