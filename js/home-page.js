@@ -669,7 +669,7 @@
 
   function closePhotoLightbox() {
     photoLightbox.classList.remove('open');
-    photoLbImg.src = '';
+    photoLbImg.removeAttribute('src');
   }
 
   if (photoLbClose) photoLbClose.addEventListener('click', closePhotoLightbox);
