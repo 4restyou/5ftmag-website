@@ -401,6 +401,63 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
   await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
 });
 
+test('로그인 복귀 후 사진 업로드 폼을 자동으로 다시 연다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    const payload = JSON.stringify({ value: '1', ts: Date.now() });
+    sessionStorage.setItem('5ft_pending_submission_open', payload);
+    localStorage.setItem('5ft_pending_submission_open_fallback', payload);
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        getUser: async () => ({ id: 'user-1' }),
+        onChange: cb => {
+          setTimeout(() => cb('SIGNED_IN', { user: { id: 'user-1' } }), 20);
+          return { unsubscribe() {} };
+        },
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        listApproved: async () => [],
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/films.html');
+  await expect(page.locator('#rs-form')).toBeVisible({ timeout: 6000 });
+  await expect(page.locator('#rs-modal-title')).toHaveText('사진 올리기');
+  const pending = await page.evaluate(() => ({
+    session: sessionStorage.getItem('5ft_pending_submission_open'),
+    local: localStorage.getItem('5ft_pending_submission_open_fallback'),
+  }));
+  expect(pending).toEqual({ session: null, local: null });
+});
+
 test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',

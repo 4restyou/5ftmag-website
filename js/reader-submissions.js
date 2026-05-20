@@ -589,6 +589,8 @@
   }
 
   async function autoReopenIfPending() {
+    if (document.documentElement.dataset.rsAutoReopenBound === '1') return;
+    document.documentElement.dataset.rsAutoReopenBound = '1';
     const pending = readTransient(SS_PENDING, LS_PENDING, { remove: false }) === '1';
     if (!pending) return;
 
@@ -598,17 +600,27 @@
     }
     if (!db() || !db().isReady()) return;
 
+    let opened = false;
+    async function reopen() {
+      if (opened) return;
+      opened = true;
+      clearTransient(SS_PENDING, LS_PENDING);
+      await handleOpen({ dataset: {} });
+    }
+
+    if (typeof db().auth.onChange === 'function') {
+      db().auth.onChange((_event, session) => {
+        if (session?.user) reopen();
+      });
+    }
+
     let session = null;
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 80; i++) {
       session = await db().auth.getSession();
-      if (session) break;
-      await new Promise(r => setTimeout(r, 100));
+      if (session?.user) break;
+      await new Promise(r => setTimeout(r, 150));
     }
-    if (!session) {
-      return;
-    }
-    clearTransient(SS_PENDING, LS_PENDING);
-    handleOpen({ dataset: {} });
+    if (session?.user) reopen();
   }
 
   // ════════════════════════════════════════════════════════════

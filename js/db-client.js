@@ -51,14 +51,14 @@
     return origin;
   }
 
-  function readLoginOrigin() {
+  function readLoginOrigin({ remove = true } = {}) {
     const now = Date.now();
     const maxAge = 10 * 60 * 1000;
     const read = (storage, key) => {
       try {
         const raw = storage.getItem(key);
         if (!raw) return null;
-        storage.removeItem(key);
+        if (remove) storage.removeItem(key);
         const parsed = JSON.parse(raw);
         if (!parsed?.url || now - Number(parsed.ts || 0) > maxAge) return null;
         return normalizeReturnUrl(parsed.url);
@@ -71,20 +71,38 @@
     return fromSession || fromLocal;
   }
 
+  function clearLoginOrigin() {
+    try { sessionStorage.removeItem(SS_LOGIN_ORIGIN); } catch (_) {}
+    try { localStorage.removeItem(LS_LOGIN_ORIGIN); } catch (_) {}
+  }
+
   // 신규 로그인 콜백을 어디서(예: Supabase Site URL fallback 으로 메인) 받든
   // 사용자가 로그인 시작한 페이지로 자동 복귀.
   function installOriginRestore() {
     if (_originRestoreInstalled || !_client) return;
     _originRestoreInstalled = true;
-    _client.auth.onAuthStateChange((event) => {
-      if (event !== 'SIGNED_IN') return;
-      const origin = readLoginOrigin();
+    async function restoreIfNeeded(event) {
+      if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return;
+      const origin = readLoginOrigin({ remove: false });
       if (!origin) return;
       const here = window.location.href.split('#')[0];
       if (origin && origin !== here) {
         window.location.replace(origin);
+        return;
       }
+      clearLoginOrigin();
+    }
+    _client.auth.onAuthStateChange((event) => {
+      restoreIfNeeded(event);
     });
+    setTimeout(async () => {
+      const origin = readLoginOrigin({ remove: false });
+      if (!origin) return;
+      try {
+        const { data } = await _client.auth.getSession();
+        if (data?.session) restoreIfNeeded('SIGNED_IN');
+      } catch (_) {}
+    }, 250);
   }
   client();
 
@@ -92,10 +110,10 @@
 
   async function session() {
     const c = client(); if (!c) return null;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 24; i++) {
       const { data } = await c.auth.getSession();
       if (data.session) return data.session;
-      if (i < 4) await wait(120);
+      if (i < 23) await wait(150);
     }
     return null;
   }
