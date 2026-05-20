@@ -78,6 +78,14 @@
 
     .empty { padding: 32px; text-align: center; color: var(--text-muted); }
 
+    .cam-search { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .cam-search input { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+    .cam-search input:focus { outline: none; border-color: var(--text); }
+    .cam-search-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+    .cam-group-row td { background: var(--bg-sub); font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .cam-group-row .cam-group-count { float: right; font-weight: 400; letter-spacing: 0; text-transform: none; }
+
     @media (max-width: 600px) {
       .cam-table thead { display: none; }
       .cam-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
@@ -134,6 +142,11 @@
 </div>
 
 <main id="app" hidden>
+  <div class="cam-search">
+    <input id="cameraSearch" type="search" placeholder="브랜드 · 모델명 · model_key 로 검색" autocomplete="off" />
+    <div class="cam-search-hint">대소문자 무관. 분류된 모델은 브랜드 ABC 순으로 묶여 표시됩니다.</div>
+  </div>
+
   <section class="section">
     <div class="section-head">
       <h2>미분류 모델</h2>
@@ -197,6 +210,7 @@ const STATE = {
   isEditor: false,
   cameraIndex: new Map(), // model_key → { display, brand, count, brandSource: 'static'|'override'|null }
   overrides: new Map(),   // model_key → { brand, display }
+  query: '',              // 검색어 (브랜드 · 모델 · key 부분 매칭)
 };
 
 function $(id) { return document.getElementById(id); }
@@ -298,23 +312,48 @@ async function buildCameraIndex() {
 // ════════════════════════════════════════════
 // 렌더링
 // ════════════════════════════════════════════
+function matchesQuery(info, key) {
+  const q = STATE.query.trim().toLowerCase();
+  if (!q) return true;
+  const hay = `${info.display || ''} ${key || ''} ${info.brand || ''}`.toLowerCase();
+  return hay.includes(q);
+}
+
+function cmpName(a, b) {
+  return String(a || '').localeCompare(String(b || ''), 'en', { sensitivity: 'base' });
+}
+
 function render() {
   const unknownTbody = $('unknownTbody');
   const knownTbody   = $('knownTbody');
-  const unknown = [];
-  const known   = [];
+  const unknownAll = [];
+  const knownAll   = [];
   for (const [key, info] of STATE.cameraIndex) {
-    if (info.brand) known.push([key, info]);
-    else            unknown.push([key, info]);
+    if (info.brand) knownAll.push([key, info]);
+    else            unknownAll.push([key, info]);
   }
-  unknown.sort((a, b) => b[1].count - a[1].count);
-  known.sort((a, b) => b[1].count - a[1].count);
+  const unknown = unknownAll.filter(([k, info]) => matchesQuery(info, k));
+  const known   = knownAll.filter(([k, info]) => matchesQuery(info, k));
+  // 미분류: 모델명 ABC
+  unknown.sort((a, b) => cmpName(a[1].display, b[1].display));
+  // 분류: 브랜드 ABC → 같은 브랜드 안에서 모델명 ABC
+  known.sort((a, b) => {
+    const byBrand = cmpName(a[1].brand, b[1].brand);
+    if (byBrand !== 0) return byBrand;
+    return cmpName(a[1].display, b[1].display);
+  });
 
-  $('unknownCount').textContent = unknown.length ? `${unknown.length}개` : '없음';
-  $('knownCount').textContent   = known.length ? `${known.length}개`   : '없음';
+  const totalU = unknownAll.length;
+  const totalK = knownAll.length;
+  $('unknownCount').textContent = STATE.query
+    ? `${unknown.length}개 / 전체 ${totalU}개`
+    : (totalU ? `${totalU}개` : '없음');
+  $('knownCount').textContent = STATE.query
+    ? `${known.length}개 / 전체 ${totalK}개`
+    : (totalK ? `${totalK}개` : '없음');
 
   if (unknown.length === 0) {
-    unknownTbody.innerHTML = `<tr><td colspan="4" class="empty">미분류 모델이 없어요. 모두 브랜드 매칭됨.</td></tr>`;
+    unknownTbody.innerHTML = `<tr><td colspan="4" class="empty">${STATE.query ? '검색 조건에 맞는 미분류 모델이 없어요.' : '미분류 모델이 없어요. 모두 브랜드 매칭됨.'}</td></tr>`;
   } else {
     unknownTbody.innerHTML = unknown.map(([key, info]) => `
       <tr data-key="${escapeAttr(key)}">
@@ -332,9 +371,20 @@ function render() {
   }
 
   if (known.length === 0) {
-    knownTbody.innerHTML = `<tr><td colspan="5" class="empty">분류된 모델이 없어요.</td></tr>`;
+    knownTbody.innerHTML = `<tr><td colspan="5" class="empty">${STATE.query ? '검색 조건에 맞는 분류된 모델이 없어요.' : '분류된 모델이 없어요.'}</td></tr>`;
   } else {
-    knownTbody.innerHTML = known.map(([key, info]) => {
+    // 브랜드별 카운트 (그룹 헤더 표시용)
+    const brandCounts = new Map();
+    for (const [, info] of known) {
+      brandCounts.set(info.brand, (brandCounts.get(info.brand) || 0) + 1);
+    }
+    let currentBrand = null;
+    const rows = [];
+    for (const [key, info] of known) {
+      if (info.brand !== currentBrand) {
+        currentBrand = info.brand;
+        rows.push(`<tr class="cam-group-row"><td colspan="5">${escapeHtml(currentBrand)}<span class="cam-group-count">${brandCounts.get(currentBrand)}종</span></td></tr>`);
+      }
       const src = info.brandSource === 'override' ? 'source-override' : 'source-static';
       const srcLabel = info.brandSource === 'override' ? '오버라이드' : '정적 사전';
       const isOverride = info.brandSource === 'override';
@@ -342,7 +392,7 @@ function render() {
         ? `<button type="button" class="row-btn" data-action="update-known">갱신</button>
            <button type="button" class="row-btn danger" data-action="remove-known">삭제</button>`
         : `<button type="button" class="row-btn" data-action="override-static">덮어쓰기</button>`;
-      return `
+      rows.push(`
         <tr data-key="${escapeAttr(key)}" data-current-brand="${escapeAttr(info.brand)}" data-source="${escapeAttr(info.brandSource || '')}">
           <td>
             <div class="cam-display">${escapeHtml(info.display)}</div>
@@ -356,8 +406,9 @@ function render() {
             <div class="brand-input-wrap" style="margin-top:6px;">${actions}</div>
             <div class="row-status" data-role="status"></div>
           </td>
-        </tr>`;
-    }).join('');
+        </tr>`);
+    }
+    knownTbody.innerHTML = rows.join('');
   }
 
   bindRowHandlers();
@@ -458,6 +509,17 @@ function showGate(msg) {
 }
 $('gateLogin').addEventListener('click', async () => {
   await db().auth.signInWithGoogle(window.location.href);
+});
+
+// 검색 input — 타이핑마다 STATE.query 갱신 + 재렌더 (input focus 는 유지)
+let searchDebounce = null;
+$('cameraSearch').addEventListener('input', (e) => {
+  const v = e.target.value;
+  if (searchDebounce) clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => {
+    STATE.query = v;
+    render();
+  }, 80);
 });
 
 (async function main() {
