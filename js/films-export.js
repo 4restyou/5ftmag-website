@@ -6,6 +6,13 @@
   function resolveCanvasSrc(src) {
     if (!src) return '';
     if (/^(data:|blob:|https?:|\/\/)/i.test(src)) return src;
+    if (/^(img|data)\//i.test(src) || /^pretendard\.css$/i.test(src)) {
+      try {
+        return new URL(src.replace(/^\.?\//, ''), window.location.origin + '/').href;
+      } catch (_) {
+        return '/' + src.replace(/^\.?\//, '');
+      }
+    }
     try {
       return new URL(src, document.baseURI || window.location.href).href;
     } catch (_) {

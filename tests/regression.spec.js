@@ -190,6 +190,55 @@ test('필름스트립 저장 캔버스는 모바일에서도 프레임과 필름
   expect(result.nonWhite).toBeGreaterThan(1000);
 });
 
+test('짧은 필름 링크에서도 저장 캔버스 asset을 루트에서 불러온다', async ({ page }) => {
+  await page.goto('/film/superia400');
+  const result = await page.evaluate(async () => {
+    const target = document.createElement('div');
+    target.innerHTML = Array.from({ length: 2 }, (_, idx) => {
+      const photoCanvas = document.createElement('canvas');
+      photoCanvas.width = 160;
+      photoCanvas.height = 110;
+      const photoCtx = photoCanvas.getContext('2d');
+      photoCtx.fillStyle = idx ? '#f4d13d' : '#2367e8';
+      photoCtx.fillRect(0, 0, photoCanvas.width, photoCanvas.height);
+      return `
+        <div class="reader-slot is-filled" data-instagram="@short_route_${idx}">
+          <div class="reader-slot-window">
+            <img src="${photoCanvas.toDataURL('image/png')}" alt="" />
+          </div>
+        </div>`;
+    }).join('');
+    document.body.appendChild(target);
+
+    const strip = await renderRollStripCanvas(target, 'reader');
+    const canvas = await composeBrandedRollCanvas(strip, {
+      filmName: 'Fujifilm Superia X-TRA 400',
+      authors: ['@short_route'],
+      filmThumb: 'img/films/superia400-can.webp',
+    });
+    const ctx = canvas.getContext('2d');
+    const frameSample = ctx.getImageData(10, 160, 560, 220).data;
+    const thumbSample = ctx.getImageData(canvas.width - 360, 15, 300, 120).data;
+    let darkFrame = 0;
+    let coloredThumb = 0;
+    for (let i = 0; i < frameSample.length; i += 4) {
+      const avg = (frameSample[i] + frameSample[i + 1] + frameSample[i + 2]) / 3;
+      if (avg < 35) darkFrame += 1;
+    }
+    for (let i = 0; i < thumbSample.length; i += 4) {
+      const r = thumbSample[i];
+      const g = thumbSample[i + 1];
+      const b = thumbSample[i + 2];
+      if (Math.max(r, g, b) - Math.min(r, g, b) > 35 && (r < 245 || g < 245 || b < 245)) coloredThumb += 1;
+    }
+    target.remove();
+    return { darkFrame, coloredThumb };
+  });
+
+  expect(result.darkFrame).toBeGreaterThan(20000);
+  expect(result.coloredThumb).toBeGreaterThan(1200);
+});
+
 test('필름스트립 저장 캔버스는 행 사이 흰 간격 없이 붙어서 그린다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(async () => {
