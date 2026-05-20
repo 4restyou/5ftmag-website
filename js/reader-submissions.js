@@ -193,6 +193,35 @@
     });
   }
 
+  // Supabase JS v2 가 localStorage 의 'sb-<ref>-auth-token' 에 세션 JSON 을 둠.
+  // access_token 은 JWT — payload 의 sub(user.id) 와 exp 를 sync 로 추출해서
+  // Supabase 클라이언트 호출 자체를 우회. auth 엔드포인트 hang(8-12초) 누적의
+  // 진짜 원인을 호출 회피로 푼다. 만료/없으면 null → 호출 fallback.
+  function readLocalJwtUser() {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith('sb-') || !k.endsWith('-auth-token')) continue;
+        const raw = localStorage.getItem(k);
+        if (!raw || raw === 'null') continue;
+        const parsed = JSON.parse(raw);
+        const token = parsed?.access_token;
+        if (!token || typeof token !== 'string') continue;
+        const parts = token.split('.');
+        if (parts.length < 2) continue;
+        const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const pad = '='.repeat((4 - b64.length % 4) % 4);
+        const payload = JSON.parse(atob(b64 + pad));
+        const exp = Number(payload.exp || 0);
+        // 만료 30초 전부터는 안전상 fallback 으로 refresh 유도
+        if (!exp || Date.now() / 1000 > exp - 30) continue;
+        const id = payload.sub || parsed?.user?.id;
+        if (id) return { id };
+      }
+    } catch (_) { /* parse 실패는 fallback 으로 처리 */ }
+    return null;
+  }
+
   // 사진 사이즈 라벨 ('3.2MB · 4032×3024' 같은 형식)
   function fmtBytes(n) {
     if (!n && n !== 0) return '';
@@ -1167,11 +1196,15 @@
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
 
         markProgress('auth', '로그인 상태 확인 중', '업로드 권한을 확인하고 있어요.');
-        // 직전엔 getUser() 로 서버 검증을 했는데 Supabase auth 엔드포인트가 가끔
-        // 느려져 12초 timeout 으로 매번 업로드가 끊겼다. user.id 만 필요하고
-        // 실제 권한은 RLS 가 백엔드에서 확인하므로 로컬 세션을 본다.
-        const session = await withNetworkTimeout(db().auth.getSession(), 8000, '로그인 확인');
-        const user = session?.user;
+        // 1) localStorage 의 JWT 를 sync 로 파싱 — Supabase 클라이언트 호출 없이
+        //    user.id 와 exp 추출. 만료 안 됐으면 즉시 진행.
+        // 2) 토큰이 없거나 만료됐으면 db.auth.getSession() 으로 refresh 시도.
+        //    실제 권한 검증은 RLS 가 백엔드에서 다시 확인하므로 사전 검증은 생략.
+        let user = readLocalJwtUser();
+        if (!user) {
+          const session = await withNetworkTimeout(db().auth.getSession(), 6000, '로그인 확인');
+          user = session?.user;
+        }
         if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
         const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
         submitBtn.textContent = `사진 업로드 중… (${fmtBytes(blob.size)})`;
