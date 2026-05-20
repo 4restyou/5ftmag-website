@@ -14,6 +14,7 @@
       {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
     ));
   }
+  const escapeHtml = escapeAttr;
 
   function renderFilmCard(slug, film, context = 'library-grid') {
     const isLibrary = film.tier === 'library';
