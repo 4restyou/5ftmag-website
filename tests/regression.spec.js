@@ -732,6 +732,7 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
     body: '',
   }));
   await page.addInitScript(() => {
+    window.__listApprovedLimits = [];
     const rows = Array.from({ length: 73 }, (_, i) => ({
       id: `sub-${i + 1}`,
       image: `data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==#${i}`,
@@ -756,7 +757,10 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
         getMine: async () => ({ is_editor: false }),
       },
       submissions: {
-        listApproved: async () => rows,
+        listApproved: async (limit) => {
+          window.__listApprovedLimits.push(limit);
+          return rows;
+        },
       },
       notifications: {
         unreadCount: async () => 0,
@@ -778,6 +782,7 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
 
   await page.goto('/films.html');
   await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await expect.poll(async () => page.evaluate(() => Math.max(...window.__listApprovedLimits)), { timeout: 5000 }).toBeGreaterThanOrEqual(3000);
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('1 / 36 · 3롤', { timeout: 5000 });
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-numbers')).toBeHidden();
 

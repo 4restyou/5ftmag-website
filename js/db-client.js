@@ -220,12 +220,23 @@
 
   // ─── 독자 사진 (공개 read view + 본인 INSERT + Storage 업로드) ───
   const submissions = {
-    async listApproved(limit = 1000) {
+    async listApproved(limit = 3000) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.from('reader_submissions_approved')
-        .select('*').order('created_at', { ascending: false }).limit(limit);
-      if (error) return [];
-      return (data || []).map(r => {
+      const pageSize = 1000;
+      const max = Math.max(1, Number(limit) || pageSize);
+      const rows = [];
+      for (let from = 0; from < max; from += pageSize) {
+        const to = Math.min(from + pageSize, max) - 1;
+        const { data, error } = await c.from('reader_submissions_approved')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(from, to);
+        if (error) return rows;
+        const page = data || [];
+        rows.push(...page);
+        if (page.length < (to - from + 1)) break;
+      }
+      return rows.map(r => {
         const sname = r.submitter_name || '';
         const ig    = r.instagram || '';
         const author = sname && ig ? `${sname} (${ig})` : (sname || ig);
