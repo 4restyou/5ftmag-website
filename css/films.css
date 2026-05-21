@@ -764,6 +764,10 @@
   .lightbox.is-zoomed img { transform: scale(1.28); }
   .lightbox-toolbar { top: 16px; left: 16px; }
   .lightbox-close { top: 16px; right: 16px; width: 40px; height: 40px; }
+  /* iOS Safari 는 일반 DOM 의 Fullscreen API 미지원 → 모바일에선 숨김 */
+  .lightbox-fullscreen { display: none; }
+  /* 손가락 터치 영역 확장 (Apple HIG 44pt 권장). svg 는 그대로 작게 */
+  .lightbox-fav { width: 44px; height: 44px; }
   /* 모바일에서는 prev/next 화살표를 숨기고 스와이프로 이동 — 사진 위 overlay 가
      좁은 폭에서 피사체를 가리는 문제 해소. swipe 핸들러는 films-page.js 에 있음 */
   .lightbox-prev,
