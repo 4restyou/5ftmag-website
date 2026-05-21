@@ -479,6 +479,39 @@ body.modal-open { overflow: hidden; }
   color: var(--text-muted);
 }
 
+/* Photo 그리드 위 모드 토글 — 랜덤 / 최근 */
+.photo-mode-toggle {
+  display: inline-flex;
+  gap: 0;
+  padding: 16px 32px 0;
+  margin-top: 4px;
+}
+.photo-mode-btn {
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-right: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.photo-mode-btn:last-child { border-right: 1px solid var(--border); }
+.photo-mode-btn:hover { color: var(--text); }
+.photo-mode-btn.is-active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.photo-mode-btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
 /* ── 소식(News) 카드 ── */
 .news-list {
   display: flex;
