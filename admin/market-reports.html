@@ -9,7 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/common.css?v=20260522-utilityicons">
+  <link rel="stylesheet" href="../css/common.css?v=20260522-sharedheader">
   <script src="../js/theme-init.js"></script>
   <style>
     body { background: var(--bg); color: var(--text); }
@@ -84,6 +84,30 @@
   </style>
 </head>
 <body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../market.html">Market</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../market.html">Market</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
 
 <div class="admin-header">
   <a href="../index.html" class="admin-back">← 5ft.mag</a>

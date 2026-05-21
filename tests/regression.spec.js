@@ -207,6 +207,23 @@ test('데스크톱 헤더 유틸 아이콘은 같은 크기로 맞춘다', async
   ]);
 });
 
+test('내 정보와 관리 화면은 공통 헤더를 사용한다', async ({ page }) => {
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+
+  await page.goto('/me.html');
+  await expect(page.locator('header .site-logo')).toBeVisible();
+  await expect(page.locator('.me-back')).toBeHidden();
+  await expect(page.locator('.me-user')).toBeHidden();
+
+  await page.goto('/admin/submissions.html');
+  await expect(page.locator('header .site-logo')).toBeVisible();
+  await expect(page.locator('.admin-back')).toBeHidden();
+  await expect(page.locator('.admin-user')).toBeHidden();
+});
+
 test('필름스트립 저장 캔버스 상단 로고가 흰 배경에서 보인다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(async () => {
