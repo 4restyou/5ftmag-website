@@ -659,6 +659,34 @@ function withNetworkTimeout(promise, ms, label) {
   });
 }
 
+// Supabase JS v2 가 localStorage 의 'sb-<ref>-auth-token' 에 세션 JSON 을 둠.
+// access_token JWT 의 sub(user.id) 와 exp 를 sync 로 추출해서 Supabase 호출 자체를
+// 우회. auth 엔드포인트 hang(12초 timeout) 누적의 진짜 원인을 호출 회피로 푼다.
+// reader-submissions 의 readLocalJwtUser() 와 동일 패턴.
+function readLocalJwtUser() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith('sb-') || !k.endsWith('-auth-token')) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw || raw === 'null') continue;
+      const parsed = JSON.parse(raw);
+      const token = parsed?.access_token;
+      if (!token || typeof token !== 'string') continue;
+      const parts = token.split('.');
+      if (parts.length < 2) continue;
+      const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const pad = '='.repeat((4 - b64.length % 4) % 4);
+      const payload = JSON.parse(atob(b64 + pad));
+      const exp = Number(payload.exp || 0);
+      if (!exp || Date.now() / 1000 > exp - 30) continue;
+      const id = payload.sub || parsed?.user?.id;
+      if (id) return { id };
+    }
+  } catch (_) { /* parse 실패는 fallback */ }
+  return null;
+}
+
 async function onSubmit(e) {
   e.preventDefault();
   const err = $('mktFormError');
@@ -695,8 +723,14 @@ async function onSubmit(e) {
     // 사진 업로드 — 신규 추가된 것만
     uploadStage = 'auth';
     setMarketUploadStatus('progress', '로그인 상태 확인 중', '매물 등록 권한을 확인하고 있어요.');
-    const session = await withNetworkTimeout(db().auth.getSession(), MARKET_TIMEOUTS.auth, '로그인 확인');
-    const user = session?.user;
+    // 1) localStorage JWT 를 sync 로 파싱해서 Supabase 호출 없이 user.id 확보.
+    // 2) 토큰이 없거나 만료됐을 때만 db.auth.getSession() 으로 fallback.
+    //    실제 권한은 RLS 가 백엔드에서 확인하므로 사전 검증 우회는 안전.
+    let user = readLocalJwtUser();
+    if (!user) {
+      const session = await withNetworkTimeout(db().auth.getSession(), MARKET_TIMEOUTS.auth, '로그인 확인');
+      user = session?.user || null;
+    }
     if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 저장해 주세요.');
     const finalPaths = [];
     const uploadedNew = [];
