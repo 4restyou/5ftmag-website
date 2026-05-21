@@ -631,6 +631,20 @@
   font-weight: var(--fw-heading);
   margin-right: 8px;
 }
+.lightbox-note-wrap {
+  display: block;
+  margin-top: 8px;
+}
+.lightbox-note {
+  display: inline-block;
+  max-width: min(620px, calc(100vw - 72px));
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: var(--ls-default);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
 .lightbox-counter {
   flex: 0 0 auto;
   font-size: 12px;

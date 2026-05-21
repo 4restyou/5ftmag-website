@@ -7,8 +7,10 @@
 (function () {
   'use strict';
 
-  const MAX_LONG_SIDE = 1800;
-  const JPEG_QUALITY = 0.8;
+  const MAX_LONG_SIDE = 1600;
+  const JPEG_QUALITY = 0.76;
+  const FALLBACK_LONG_SIDE = 1200;
+  const FALLBACK_JPEG_QUALITY = 0.68;
   const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
   const LS_KEY = '5ft_submission_meta';
   const LS_RECENT_CAMERAS = '5ft_recent_cameras';
@@ -174,13 +176,13 @@
   //   HEIC 사전 거부 + 단계별 timeout 내장.
   //   onProgress(stage, info) 콜백으로 UI 업데이트 가능.
   // ════════════════════════════════════════════════════════════
-  function resizeToJpeg(file, onProgress) {
+  function resizeToJpeg(file, onProgress, options = {}) {
     if (typeof window.processImageForUpload !== 'function') {
       return Promise.reject(new Error('이미지 변환 모듈이 로드되지 않았어요. 새로고침 후 다시 시도해 주세요.'));
     }
     return window.processImageForUpload(file, {
-      maxLongSide: MAX_LONG_SIDE,
-      quality: JPEG_QUALITY,
+      maxLongSide: options.maxLongSide || MAX_LONG_SIDE,
+      quality: options.quality || JPEG_QUALITY,
       onProgress: onProgress || (() => {}),
     });
   }
@@ -191,6 +193,16 @@
       const t = setTimeout(() => reject(new Error(`${label} 시간 초과 (${Math.round(ms/1000)}초). 네트워크 상태 확인 후 다시 시도해 주세요.`)), ms);
       promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
     });
+  }
+
+  function readerUploadTimeoutMs(kind = 'primary') {
+    const override = Number(window.__readerUploadTimeoutMs || 0);
+    if (override > 0) return override;
+    return kind === 'fallback' ? 90000 : 45000;
+  }
+
+  function isTimeoutErrorMessage(message) {
+    return /시간 초과|timeout|timed out/i.test(String(message || ''));
   }
 
   // Supabase JS v2 가 localStorage 의 'sb-<ref>-auth-token' 에 세션 JSON 을 둠.
@@ -1206,15 +1218,44 @@
           user = session?.user;
         }
         if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
-        const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
+        const initialPath = `${user.id}/${Date.now()}-${uuid()}.jpg`;
+        let path = initialPath;
+        let activeBlob = blob;
         submitBtn.textContent = `사진 업로드 중… (${fmtBytes(blob.size)})`;
         uploadMeta.uploadBytes = blob.size;
         markProgress('storage', '사진 업로드 중', `${fmtBytes(blob.size)} 파일을 서버에 보내는 중입니다. 창을 닫지 마세요.`);
-        const { error: upErr } = await withNetworkTimeout(
-          db().submissions.uploadPhoto(path, blob),
-          90000,
+        let { error: upErr } = await withNetworkTimeout(
+          db().submissions.uploadPhoto(path, activeBlob),
+          readerUploadTimeoutMs('primary'),
           '사진 업로드'
         ).catch(err => ({ error: { message: err.message } }));
+        if (upErr && isTimeoutErrorMessage(upErr.message)) {
+          submitBtn.textContent = '느린 네트워크용으로 다시 준비 중…';
+          markProgress('storage', '저용량 사진으로 재시도 중', '업로드가 지연되어 더 가벼운 이미지로 다시 보내고 있어요.');
+          const fallback = await withNetworkTimeout(
+            resizeToJpeg(file, ({ stage, width: w, height: h }) => {
+              if (stage === 'resize') {
+                submitBtn.textContent = `저용량 사진 준비 중… (${w}×${h})`;
+                markProgress('storage', '저용량 사진 준비 중', `${w}×${h} 크기로 다시 변환하고 있어요.`);
+              } else if (stage === 'encode') {
+                submitBtn.textContent = `저용량 사진 압축 중… (${w}×${h})`;
+                markProgress('storage', '저용량 사진 압축 중', '모바일 네트워크에서 통과하기 쉽게 용량을 낮추고 있어요.');
+              }
+            }, { maxLongSide: FALLBACK_LONG_SIDE, quality: FALLBACK_JPEG_QUALITY }),
+            52000,
+            '저용량 사진 변환'
+          );
+          activeBlob = fallback.blob;
+          path = `${user.id}/${Date.now()}-${uuid()}-lite.jpg`;
+          uploadMeta.uploadBytes = activeBlob.size;
+          submitBtn.textContent = `저용량 사진 업로드 중… (${fmtBytes(activeBlob.size)})`;
+          markProgress('storage', '저용량 사진 업로드 중', `${fmtBytes(activeBlob.size)} 파일로 다시 업로드하고 있어요.`);
+          ({ error: upErr } = await withNetworkTimeout(
+            db().submissions.uploadPhoto(path, activeBlob),
+            readerUploadTimeoutMs('fallback'),
+            '저용량 사진 업로드'
+          ).catch(err => ({ error: { message: err.message } })));
+        }
         if (upErr) throw new Error('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (' + upErr.message + ')');
 
         const igNorm = instagram ? instagram.replace(/^@/, '') : '';
@@ -1246,6 +1287,13 @@
             '실패한 업로드 정리'
           ).catch(err => console.warn('[reader-submissions] cleanup failed:', err?.message || err));
           throw new Error('사진은 올라갔지만 제출 기록 저장에 실패했어요. 잠시 뒤 다시 시도해 주세요. (' + dbErr.message + ')');
+        }
+        if (path !== initialPath) {
+          withNetworkTimeout(
+            db().submissions.removePhoto(initialPath),
+            8000,
+            '중복 업로드 정리'
+          ).catch(() => {});
         }
 
         // 4) 메타 기억

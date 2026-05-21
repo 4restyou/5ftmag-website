@@ -1739,7 +1739,11 @@
       if (photo.camera) {
         parts.push(`<button type="button" class="lightbox-caption-camera lightbox-caption-link" data-jump-camera="${escapeLightboxText(photo.camera)}">${escapeLightboxText(photo.camera)}</button>`);
       }
-      captionHtml = parts.join(' · ');
+      const metaHtml = parts.join(' · ');
+      const noteHtml = photo.caption
+        ? `<span class="lightbox-note">${escapeLightboxText(photo.caption)}</span>`
+        : '';
+      captionHtml = noteHtml ? `${metaHtml}<span class="lightbox-note-wrap">${noteHtml}</span>` : metaHtml;
     } else {
       const film = filmsData[currentFilmKey] || {};
       captionHtml = `<strong>${escapeLightboxText(photo.author || '')}</strong> ${escapeLightboxText(film.brand || '')} ${escapeLightboxText(film.name || '')}`;

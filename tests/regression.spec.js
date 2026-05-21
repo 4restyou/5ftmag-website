@@ -581,6 +581,107 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
   await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
 });
 
+test('사진 업로드가 지연되면 저용량 이미지로 자동 재시도한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('**/js/image-processor.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.__readerUploadTimeoutMs = 25;
+    window.__processImageOptions = [];
+    window.__uploadPaths = [];
+    window.__createdSubmission = null;
+    window.processImageForUpload = async (_file, opts = {}) => {
+      window.__processImageOptions.push({ maxLongSide: opts.maxLongSide, quality: opts.quality });
+      opts.onProgress?.({ stage: 'resize', width: opts.maxLongSide, height: Math.round(opts.maxLongSide * 0.66) });
+      opts.onProgress?.({ stage: 'encode', width: opts.maxLongSide, height: Math.round(opts.maxLongSide * 0.66) });
+      return {
+        blob: new Blob([`ok-${opts.maxLongSide}`], { type: 'image/jpeg' }),
+        width: opts.maxLongSide,
+        height: Math.round(opts.maxLongSide * 0.66),
+      };
+    };
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        getUser: async () => ({ id: 'user-1' }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        uploadPhoto: async (path) => {
+          window.__uploadPaths.push(path);
+          if (window.__uploadPaths.length === 1) return { error: { message: '사진 업로드 시간 초과 (45초).' } };
+          return { error: null };
+        },
+        create: async (record) => {
+          window.__createdSubmission = record;
+          return { error: null };
+        },
+        removePhoto: async () => {},
+        listApproved: async () => [],
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/');
+  await page.locator('.rs-trigger').first().click();
+  await expect(page.locator('#rs-form')).toBeVisible({ timeout: 5000 });
+
+  await page.locator('input[name="photo"]').setInputFiles({
+    name: 'sample.jpg',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
+      'base64'
+    ),
+  });
+  await page.locator('input[name="submitter_name"]').fill('테스트');
+  await page.locator('#rs-film-trigger').click();
+  await page.locator('.rs-film-option').first().click();
+  await page.locator('input[name="consent"]').check();
+  await page.locator('#rs-form button[type="submit"]').click();
+
+  await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
+  const result = await page.evaluate(() => ({
+    processOptions: window.__processImageOptions,
+    uploadPaths: window.__uploadPaths,
+    storagePath: window.__createdSubmission?.storage_path,
+  }));
+  expect(result.processOptions).toEqual([
+    { maxLongSide: 1600, quality: 0.76 },
+    { maxLongSide: 1200, quality: 0.68 },
+  ]);
+  expect(result.uploadPaths).toHaveLength(2);
+  expect(result.storagePath).toBe(result.uploadPaths[1]);
+  expect(result.storagePath).toContain('-lite.jpg');
+});
+
 test('사진 업로드 실패는 실패 단계를 운영 오류 로그로 남긴다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',
@@ -742,7 +843,7 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
       instagram: i % 2 ? '@roll_user' : '@another_user',
       film: 'Kodak UltraMax 400',
       camera: 'Leica M6',
-      caption: '',
+      caption: '테스트 메모가 뷰어에 보여야 합니다.',
       created_at: new Date(2026, 0, i + 1).toISOString(),
       createdAt: new Date(2026, 0, i + 1).toISOString(),
       published: true,
@@ -787,6 +888,9 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-label')).toHaveText('ROLL ARCHIVE');
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toContainText('지난 롤 보기');
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('1 / 36 · 3롤', { timeout: 5000 });
+  await page.locator('#readerGrid-ultramax .reader-slot.is-filled').first().click();
+  await expect(page.locator('#lightbox.open .lightbox-note')).toContainText('테스트 메모가 뷰어에 보여야 합니다.');
+  await page.locator('#lightboxClose').click();
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-numbers')).toBeHidden();
 
   await page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle').click();
