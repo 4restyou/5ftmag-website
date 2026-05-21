@@ -692,6 +692,19 @@ body.modal-open { overflow: hidden; }
   font-size: 12px;
   font-style: italic;
 }
+/* 사진 올릴 때 작성한 메모 — author/film/camera 다음 줄에 별도 단락 */
+.photo-lb-info .note {
+  display: block;
+  margin: 8px auto 4px;
+  max-width: 640px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.photo-lb-info .note[hidden] { display: none; }
 .photo-lb-info .counter {
   color: rgba(255, 255, 255, 0.55);
   font-size: 12px;
