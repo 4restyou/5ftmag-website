@@ -67,6 +67,7 @@
       submission.author,
       instagram,
       instagramBare,
+      submission.camera,
     ].filter(Boolean).join(' ');
   }
 

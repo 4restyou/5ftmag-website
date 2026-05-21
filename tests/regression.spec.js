@@ -855,7 +855,7 @@ test('모바일 Films Library는 초기 노출을 줄이고 더 보기로 확장
   expect(searched).toBeGreaterThan(0);
 });
 
-test('Films Library 검색은 독자 사진 작가명과 SNS도 찾는다', async ({ page }) => {
+test('Films Library 검색은 독자 사진 작가명, SNS, 카메라도 찾는다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
@@ -926,6 +926,11 @@ test('Films Library 검색은 독자 사진 작가명과 SNS도 찾는다', asyn
 
   await page.locator('#librarySearch').fill('검색 작가');
   await expect(page.locator('#filmsGridLibrary .film-card[data-film="ultramax"]')).toBeVisible();
+
+  await page.locator('#librarySearch').fill('Leica M6');
+  await expect.poll(async () => page.locator('#filmsGridLibrary .film-card:visible').evaluateAll(nodes => (
+    nodes.map(node => node.dataset.film)
+  ))).toEqual(['ultramax']);
 });
 
 test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다', async ({ page }) => {
