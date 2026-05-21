@@ -135,12 +135,6 @@ header {
   line-height: 1;
 }
 
-.main-nav .nav-account-btn svg,
-.main-nav a.nav-auth-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
 .nav-account-menu {
   position: absolute;
   top: calc(100% - 6px);
@@ -463,10 +457,18 @@ button.disc-cell {
 
 /* 5ft.mag visual refinement layer */
 .icon-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 1.8;
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.7;
   display: block;
+}
+
+.nav-account-btn svg,
+.notif-bell svg,
+#themeBtn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.7;
 }
 
 .pagination-bar.is-hidden {

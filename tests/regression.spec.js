@@ -150,6 +150,63 @@ test('데스크톱 헤더는 계정 메뉴 안에 내 정보와 로그아웃을 
   await expect(page.locator('.nav-account-menu')).toContainText('로그아웃');
 });
 
+test('데스크톱 헤더 유틸 아이콘은 같은 크기로 맞춘다', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), '모바일은 햄버거 메뉴 레이아웃을 사용한다.');
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+    };
+  });
+
+  await page.goto('/');
+  await expect(page.locator('.nav-account-btn svg')).toBeVisible({ timeout: 5000 });
+  const sizes = await page.evaluate(() => {
+    const selectors = ['.nav-account-btn svg', '#notifBell svg', '#themeBtn svg'];
+    return selectors.map(selector => {
+      const svg = document.querySelector(selector);
+      const rect = svg.getBoundingClientRect();
+      const style = getComputedStyle(svg);
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        stroke: style.strokeWidth,
+      };
+    });
+  });
+  expect(sizes).toEqual([
+    { width: 20, height: 20, stroke: '1.7px' },
+    { width: 20, height: 20, stroke: '1.7px' },
+    { width: 20, height: 20, stroke: '1.7px' },
+  ]);
+});
+
 test('필름스트립 저장 캔버스 상단 로고가 흰 배경에서 보인다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(async () => {
