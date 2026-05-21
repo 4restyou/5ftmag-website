@@ -489,6 +489,80 @@ test('메인 Photo는 라이브 독자 사진 응답이 느려도 먼저 렌더�
   await expect(page.locator('#photoGrid .disc-cell')).not.toHaveCount(0);
 });
 
+test('메인 Photo 최근 모드는 최근 200장 안에서 작가를 분산한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: `
+      window.MagDB = {
+        isReady: () => true,
+        auth: { getSession: async () => null, onChange: () => {} },
+        profiles: { getMine: async () => null },
+        films: { listAsObject: async () => ({}) },
+        notifications: { unreadCount: async () => 0, list: async () => [], markAllRead: async () => ({ error: null }) },
+        realtime: { subscribeNotifications: async () => null },
+        favorites: { idsForType: async () => new Set(), toggle: async () => ({ error: null }) },
+      };
+    `,
+  }));
+  await page.route('**/js/reader-submissions.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: `
+      const pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+      const now = Date.now();
+      const rows = [];
+      for (let i = 0; i < 50; i++) {
+        rows.push({
+          id: 'sub-bulk-' + i,
+          image: pixel,
+          author: '@bulk_uploader',
+          film: 'Fujifilm 200',
+          createdAt: new Date(now - i * 1000).toISOString(),
+        });
+      }
+      for (let i = 0; i < 150; i++) {
+        rows.push({
+          id: 'sub-diverse-' + i,
+          image: pixel,
+          author: '@reader_' + i,
+          film: 'Fujifilm 200',
+          createdAt: new Date(now - (50 + i) * 1000).toISOString(),
+        });
+      }
+      for (let i = 0; i < 30; i++) {
+        rows.push({
+          id: 'sub-old-' + i,
+          image: pixel,
+          author: '@old_' + i,
+          film: 'Fujifilm 200',
+          createdAt: new Date(now - (1000 + i) * 1000).toISOString(),
+        });
+      }
+      window.fetchApprovedSubmissions = async () => rows;
+    `,
+  }));
+  await page.route('**/data/readers.json', route => route.fulfill({
+    contentType: 'application/json',
+    body: '[]',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    localStorage.setItem('5ft_home_photo_mode', 'recent');
+  });
+
+  await page.goto('/');
+  await expect(page.locator('#photoGrid .disc-cell').first()).toBeVisible({ timeout: 8000 });
+
+  const authors = await page.locator('#photoGrid .disc-author').evaluateAll(nodes => nodes.map(node => node.textContent?.trim()));
+  const uniqueAuthors = new Set(authors);
+  const bulkCount = authors.filter(author => author === '@bulk_uploader').length;
+  expect(authors.length).toBeGreaterThanOrEqual(10);
+  expect(uniqueAuthors.size).toBe(authors.length);
+  expect(bulkCount).toBeLessThanOrEqual(1);
+});
+
 test('모바일 홈은 Articles와 Photo 노출을 짧게 유지한다', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 1200 });
   await page.goto('/');

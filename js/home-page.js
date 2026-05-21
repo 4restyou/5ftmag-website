@@ -344,6 +344,7 @@
         // 독자 사진 중심으로 보이게. 나머지 자리는 reader 풀에서 채움.
         const PHOTO_COUNT = isMobileHome() ? 10 : 24;
         const EDITORIAL_RATIO = 0.02;
+        const RECENT_POOL_LIMIT = 200;
         const editorialPool = allPhotos.filter(p => p.source === 'editorial');
         const readerPool    = allPhotos.filter(p => p.source !== 'editorial');
         // 같은 작성자 사진이 한 번에 몰리지 않도록 작가별 1장씩 우선 뽑고,
@@ -373,15 +374,15 @@
 
         // 모드별 selected 계산.
         //   - random: editorial 2% + reader 98%, 마지막에 한 번 더 shuffle
-        //   - recent: editorial 제외(타임스탬프 없음). 최근 PHOTO_COUNT*2 장
-        //     서브풀로 좁힌 뒤 그 안에서 작가 다양성 + 셔플 — "최근 컷들"
-        //     이라는 의미는 유지하면서 새로고침마다 노출 구성·순서가 변함.
+        //   - recent: editorial 제외(타임스탬프 없음). 최근 200장 서브풀에서
+        //     작가 다양성 + 셔플 — "최근 컷들"이라는 의미는 유지하면서
+        //     한 사람이 많이 올린 날에도 메인이 한 작가로만 채워지지 않게 함.
         function computeSelected(mode) {
           if (mode === 'recent') {
             const ts = (p) => Date.parse(p.createdAt || '') || 0;
             const recentPool = [...readerPool]
               .sort((a, b) => ts(b) - ts(a))
-              .slice(0, PHOTO_COUNT * 2);
+              .slice(0, RECENT_POOL_LIMIT);
             return diversifyByAuthor(recentPool, PHOTO_COUNT);
           }
           const expectedEditorial = PHOTO_COUNT * EDITORIAL_RATIO;
