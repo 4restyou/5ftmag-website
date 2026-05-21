@@ -75,8 +75,20 @@
       brand: 'leica',
       models: [
         // M-mount (film only — 디지털 M 제외)
-        'm6', 'm6ttl', 'm6classic', 'm7', 'mp', 'ma',
-        'm1leica', 'm4-2', 'm42leica', 'leicacl', 'miniii',
+        { key: 'm1', display: 'Leica M1' },
+        { key: 'm2', display: 'Leica M2' },
+        { key: 'm3', display: 'Leica M3' },
+        { key: 'm4', display: 'Leica M4' },
+        { key: 'm4-2', display: 'Leica M4-2' },
+        { key: 'm4p', display: 'Leica M4-P' },
+        { key: 'm5', display: 'Leica M5' },
+        { key: 'm6', display: 'Leica M6' },
+        { key: 'm6ttl', display: 'Leica M6 TTL' },
+        { key: 'm6classic', display: 'Leica M6 Classic' },
+        { key: 'm7', display: 'Leica M7' },
+        { key: 'mp', display: 'Leica MP' },
+        { key: 'ma', display: 'Leica M-A' },
+        'leicacl', 'miniii',
         // Barnack screw-mount
         'iiia', 'iiib', 'iiic', 'iiid', 'iiif', 'iiig',
         // R-series SLR
@@ -697,6 +709,12 @@
     return String(s ?? '').toLowerCase().replace(/[\s\-_]/g, '');
   }
 
+  function hintModelKey(entry) {
+    if (typeof entry === 'string') return modelKey(entry);
+    if (!entry) return '';
+    return modelKey(entry.key || entry.display || '');
+  }
+
   // input → { key, brand, original }
   function normalizeCamera(input) {
     const original = String(input ?? '');
@@ -743,7 +761,7 @@
       const mk = modelKey(rest);
       outer: for (const hint of MODEL_BRAND_HINTS) {
         for (const m of hint.models) {
-          const mNorm = modelKey(m);
+          const mNorm = hintModelKey(m);
           if (!mNorm) continue;
           const isExact = (mk === mNorm);
           const isPrefix = (mNorm.length >= 3 && mk.startsWith(mNorm));

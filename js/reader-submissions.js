@@ -833,15 +833,23 @@
   function similarCameras(query, list, max = 4) {
     if (!query || query.length < 2) return [];
     const q = query.toLowerCase();
+    const qKey = modelKeyHelper(q);
     const scored = [];
     for (const c of list) {
       const formatted = formatCameraName(c);
       const d = formatted.toLowerCase();
       const display = c.display.toLowerCase();
       const brand = (c.brand || '').toLowerCase();
-      if (d === q || display === q) return []; // 정확히 일치 → 힌트 불필요
+      const key = modelKeyHelper(c.key || '');
+      const displayKey = modelKeyHelper(display);
+      const formattedKey = modelKeyHelper(d);
       let score = -1;
-      if (d.startsWith(q)) score = 0;
+      if (d === q || display === q || key === qKey || displayKey === qKey || formattedKey === qKey) score = 0;
+      else if (key.startsWith(qKey)) score = 0;
+      else if (displayKey.startsWith(qKey)) score = 0;
+      else if (formattedKey.startsWith(qKey)) score = 0;
+      else if (key.includes(qKey) || displayKey.includes(qKey) || formattedKey.includes(qKey)) score = 1;
+      else if (d.startsWith(q)) score = 0;
       else if (display.startsWith(q)) score = 1;
       else if (brand && brand.startsWith(q)) score = 2;
       else if (d.includes(q) || display.includes(q) || q.includes(d)) score = Math.abs(d.length - q.length) + 4;

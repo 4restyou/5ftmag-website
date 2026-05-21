@@ -587,6 +587,61 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
   await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
 });
 
+test('카메라 입력 힌트는 브랜드+모델과 짧은 모델명 모두 찾는다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        getUser: async () => ({ id: 'user-1' }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        listApproved: async () => [],
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/');
+  await page.locator('.rs-trigger').first().click();
+  await expect(page.locator('#rs-form')).toBeVisible({ timeout: 5000 });
+
+  await page.locator('#rs-camera-input').fill('M3');
+  await expect(page.locator('#rs-camera-hint [data-pick="Leica M3"]')).toBeVisible({ timeout: 5000 });
+
+  await page.locator('#rs-camera-input').fill('LEICA M3');
+  await expect(page.locator('#rs-camera-hint [data-pick="Leica M3"]')).toBeVisible({ timeout: 5000 });
+
+  await page.locator('#rs-camera-input').fill('Leica');
+  await expect(page.locator('#rs-camera-hint')).toContainText('Leica M3', { timeout: 5000 });
+});
+
 test('사진 업로드가 지연되면 저용량 이미지로 자동 재시도한다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',
