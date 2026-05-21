@@ -71,6 +71,14 @@
     ].filter(Boolean).join(' ');
   }
 
+  function contributorKeyOfSubmission(submission = {}) {
+    return normalizeContributorKey(submission.instagram || submission.submitterName || submission.author || '');
+  }
+
+  function contributorLabelOfSubmission(submission = {}) {
+    return submission.submitterName || submission.author || submission.instagram || '이름 없음';
+  }
+
   function activeAdvancedFilterCount() {
     return (currentFilter !== 'all' ? 1 : 0) + currentBrands.size + currentCameras.size;
   }
@@ -812,7 +820,7 @@
 
     if (!filmKey && contributor) {
       const submissions = await getApprovedSubmissions();
-      const personKeyOf = (sub) => normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
+      const personKeyOf = contributorKeyOfSubmission;
       const first = submissions.find(sub => personKeyOf(sub) === contributor);
       if (first) {
         const match = typeof window.findFilmMatch === 'function'
@@ -1006,8 +1014,8 @@
     const submitBtn = modalContent.querySelector('.reader-submit-btn');
     if (!grid) return;
 
-    const personKeyOf = (sub) => normalizeContributorKey(sub.instagram || sub.submitterName || sub.author || '');
-    const personLabelOf = (sub) => sub.submitterName || sub.author || sub.instagram || '이름 없음';
+    const personKeyOf = contributorKeyOfSubmission;
+    const personLabelOf = contributorLabelOfSubmission;
     const rollByNumber = (number) => rollState.rolls.find(roll => roll.number === number) || rollState.rolls[rollState.rolls.length - 1];
     const rollIntroText = (roll) => {
       const count = roll?.rows?.length || 0;
@@ -1355,10 +1363,12 @@
     currentReaderPhotos = matched.map(m => ({
       src: m.image,
       author: m.author || '',
+      instagram: m.instagram || '',
       film: m.film || '',
       camera: m.camera || '',
       caption: m.caption || '',
       instagramUrl: m.instagramUrl || '',
+      contributorKey: contributorKeyOfSubmission(m),
       submissionId: typeof m.id === 'string' ? m.id.replace(/^sub-/, '') : '',
       _source: 'reader',
     }));
@@ -1459,6 +1469,8 @@
           instagramUrl: s.instagramUrl || '',
           film: s.film || filmName,
           camera: s.camera || info.display,
+          caption: s.caption || '',
+          contributorKey: contributorKeyOfSubmission(s),
           submissionId: typeof s.id === 'string' ? s.id.replace(/^sub-/, '') : (s.submissionId || ''),
         });
         return `
@@ -1512,7 +1524,7 @@
   let cameraModalPhotos = [];
   function showLightboxFromCameraModal(index) {
     // 라이트박스에 reader 모드로 진입
-    lightboxPhotos = cameraModalPhotos.map(p => ({
+    currentReaderPhotos = cameraModalPhotos.map(p => ({
       src: p.src,
       webp: p.src,
       author: p.author,
@@ -1520,6 +1532,8 @@
       instagramUrl: p.instagramUrl,
       film: p.film,
       camera: p.camera,
+      caption: p.caption || '',
+      contributorKey: p.contributorKey || normalizeContributorKey(p.instagram || p.author || ''),
       submissionId: p.submissionId,
       _source: 'reader',
     }));
@@ -1679,6 +1693,28 @@
     });
   }
 
+  async function openContributorFromLightbox(rawKey) {
+    const key = normalizeContributorKey(rawKey);
+    if (!key) return;
+
+    let targetFilmKey = currentFilmKey;
+    if (!targetFilmKey) {
+      const submissions = await getApprovedSubmissions();
+      const first = submissions.find(sub => contributorKeyOfSubmission(sub) === key);
+      if (first) {
+        const match = typeof window.findFilmMatch === 'function'
+          ? window.findFilmMatch(first.film, filmsData)
+          : null;
+        targetFilmKey = match?.slug || resolveFilmKey(first.film);
+      }
+    }
+
+    closeLightbox();
+    if (targetFilmKey) {
+      openModal(targetFilmKey, { contributor: key });
+    }
+  }
+
   function trapLightboxFocus(event) {
     const focusable = Array.from(lightbox.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])'))
       .filter((el) => !el.disabled && el.offsetParent !== null);
@@ -1732,7 +1768,12 @@
     let captionHtml;
     if (currentLightboxMode === 'reader') {
       const parts = [];
-      if (photo.author) parts.push(`<strong>${escapeLightboxText(photo.author)}</strong>`);
+      const contributorKey = photo.contributorKey || normalizeContributorKey(photo.instagram || photo.author || '');
+      if (photo.author && contributorKey) {
+        parts.push(`<button type="button" class="lightbox-caption-author lightbox-caption-link" data-jump-contributor="${escapeLightboxText(contributorKey)}">${escapeLightboxText(photo.author)}</button>`);
+      } else if (photo.author) {
+        parts.push(`<strong>${escapeLightboxText(photo.author)}</strong>`);
+      }
       if (photo.film) {
         parts.push(`<button type="button" class="lightbox-caption-film lightbox-caption-link" data-jump-film="${escapeLightboxText(photo.film)}">${escapeLightboxText(photo.film)}</button>`);
       }
@@ -1749,7 +1790,13 @@
       captionHtml = `<strong>${escapeLightboxText(photo.author || '')}</strong> ${escapeLightboxText(film.brand || '')} ${escapeLightboxText(film.name || '')}`;
     }
     lightboxCap.innerHTML = captionHtml;
-    // 필름/카메라 점프 핸들러 — 라이트박스 닫고 해당 모달로
+    // 작가/필름/카메라 점프 핸들러 — 라이트박스 닫고 해당 모달로
+    lightboxCap.querySelectorAll('[data-jump-contributor]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openContributorFromLightbox(btn.dataset.jumpContributor);
+      });
+    });
     lightboxCap.querySelectorAll('[data-jump-film]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2078,7 +2125,11 @@
   lightboxImg.addEventListener('click', toggleZoom);
   if (lightboxZoom) lightboxZoom.addEventListener('click', toggleZoom);
   if (lightboxFullscreen) lightboxFullscreen.addEventListener('click', toggleFullscreen);
-  if (lightboxFav) lightboxFav.addEventListener('click', togglePhotoFav);
+  if (lightboxFav) lightboxFav.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    togglePhotoFav();
+  });
   lightboxThumbs.addEventListener('click', (e) => {
     const thumb = e.target.closest('.lightbox-thumb');
     if (!thumb) return;

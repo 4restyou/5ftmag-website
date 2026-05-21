@@ -1190,6 +1190,95 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toContainText('현재 롤로 돌아가기');
 });
 
+test('Reader 라이트박스에서 사진 좋아요와 작가 모아보기가 동작한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.__favToggles = [];
+    const rows = [
+      {
+        id: 'sub-like-1',
+        image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==#like1',
+        author: '테스트 작가',
+        submitterName: '테스트 작가',
+        instagram: '@lightbox_author',
+        film: 'Kodak UltraMax 400',
+        camera: 'Leica M6',
+        caption: '작가 링크 테스트',
+        created_at: new Date(2026, 0, 1).toISOString(),
+        createdAt: new Date(2026, 0, 1).toISOString(),
+        published: true,
+      },
+      {
+        id: 'sub-like-2',
+        image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==#like2',
+        author: '테스트 작가',
+        submitterName: '테스트 작가',
+        instagram: '@lightbox_author',
+        film: 'Cinestill 800T',
+        camera: 'Leica M6',
+        caption: '',
+        created_at: new Date(2026, 0, 2).toISOString(),
+        createdAt: new Date(2026, 0, 2).toISOString(),
+        published: true,
+      },
+    ];
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        listApproved: async () => rows,
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async (targetType, targetId, wasFav) => {
+          window.__favToggles.push({ targetType, targetId, wasFav });
+          return { error: null };
+        },
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/films.html');
+  await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await page.locator('#readerGrid-ultramax .reader-slot.is-filled').first().click();
+
+  const fav = page.locator('#lightbox.open #lightboxFav');
+  await expect(fav).toBeVisible();
+  await fav.click();
+  await expect(fav).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(async () => page.evaluate(() => window.__favToggles)).toEqual([
+    { targetType: 'submission', targetId: 'like-1', wasFav: false },
+  ]);
+
+  await page.locator('#lightbox.open [data-jump-contributor="lightbox_author"]').click();
+  await expect(page.locator('#readerContributorView-ultramax')).toBeVisible();
+  await expect(page.locator('#readerContributorView-ultramax')).toContainText('2컷 · 2개 필름');
+});
+
 test('Reader Roll 계산 모듈은 36컷 단위로 현재 롤을 나눈다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(() => {
