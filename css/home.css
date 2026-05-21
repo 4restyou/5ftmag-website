@@ -478,34 +478,51 @@ body.modal-open { overflow: hidden; }
   text-transform: uppercase;
   color: var(--text-muted);
 }
+/* Photo 섹션: 좌측 [Photo + 카피], 우측 segmented 토글 */
+.sub-section-head--with-toggle {
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 14px;
+  column-gap: 16px;
+}
+.sub-section-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.sub-section-head .label--copy {
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
 
-/* Photo 그리드 위 모드 토글 — 랜덤 / 최근 */
+/* Photo 그리드 위 모드 토글 — 랜덤 / 최근 (segmented pill) */
 .photo-mode-toggle {
   display: inline-flex;
-  gap: 0;
-  padding: 16px 32px 0;
-  margin-top: 4px;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg-sub);
+  border-radius: 999px;
+  flex-shrink: 0;
 }
 .photo-mode-btn {
   font: inherit;
   font-size: 12px;
   font-weight: var(--fw-heading);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
   background: transparent;
-  border: 1px solid var(--border);
-  border-right: none;
-  padding: 8px 16px;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 16px;
   cursor: pointer;
-  transition: color .15s, background .15s;
+  transition: color .15s, background .15s, box-shadow .15s;
 }
-.photo-mode-btn:last-child { border-right: 1px solid var(--border); }
 .photo-mode-btn:hover { color: var(--text); }
 .photo-mode-btn.is-active {
   background: var(--text);
   color: var(--bg);
-  border-color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 .photo-mode-btn:focus-visible {
   outline: 2px solid var(--text);
@@ -1447,6 +1464,9 @@ body.modal-open { overflow: hidden; }
   /* 데스크톱용으로 키운 패딩을 모바일에선 정상 사이즈로 */
   .panel-header { padding: 36px 20px 28px; }
   .sub-section-head { padding: 28px 20px 16px; }
+  .sub-section-head--with-toggle { row-gap: 10px; column-gap: 12px; }
+  .photo-mode-toggle { padding: 2px; gap: 1px; }
+  .photo-mode-btn { font-size: 11px; padding: 5px 12px; letter-spacing: 0.04em; }
   .post-img-wrap { padding: 16px 16px 0; }
   .post-text { padding: 16px 16px 24px; }
   .next-issue-block { padding: 28px 20px; }

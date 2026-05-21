@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/home.css?v=20260521-lbnote">
+  <link rel="stylesheet" href="./css/home.css?v=20260521-phototoggle2">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -130,13 +130,15 @@
     <!-- ── Photo 갤러리 (통합) ──
          editorial(films.json) + 독자 승인 제출(Supabase) 혼합 랜덤 노출.
          클릭 시 라이트박스로 작가/필름 + IG 또는 필름 페이지 링크 -->
-    <div class="sub-section-head">
-      <h3>Photo</h3>
-      <span class="label">필름이 담은 모든 순간 · 독자들의 한 컷</span>
-    </div>
-    <div class="photo-mode-toggle" id="photoModeToggle" role="tablist" aria-label="사진 보기 방식">
-      <button type="button" class="photo-mode-btn is-active" data-mode="random" role="tab" aria-selected="true">랜덤</button>
-      <button type="button" class="photo-mode-btn" data-mode="recent" role="tab" aria-selected="false">최근</button>
+    <div class="sub-section-head sub-section-head--with-toggle">
+      <div class="sub-section-head-text">
+        <h3>Photo</h3>
+        <span class="label label--copy">필름이 담은 모든 순간 · 독자들의 한 컷</span>
+      </div>
+      <div class="photo-mode-toggle" id="photoModeToggle" role="tablist" aria-label="사진 보기 방식">
+        <button type="button" class="photo-mode-btn is-active" data-mode="random" role="tab" aria-selected="true">랜덤</button>
+        <button type="button" class="photo-mode-btn" data-mode="recent" role="tab" aria-selected="false">최근</button>
+      </div>
     </div>
     <div class="discover-grid" id="photoGrid">
       <!-- 자바스크립트가 자동 생성 -->
