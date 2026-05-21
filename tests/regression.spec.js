@@ -537,6 +537,12 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
           await new Promise(r => setTimeout(r, 50));
           return { error: null };
         },
+        uploadPhotoResumable: async (_path, blob, opts = {}) => {
+          opts.onProgress?.(0, blob.size);
+          await new Promise(r => setTimeout(r, 20));
+          opts.onProgress?.(blob.size, blob.size);
+          return { error: null };
+        },
         create: async () => ({ error: null }),
         removePhoto: async () => {},
         listApproved: async () => [],
@@ -623,6 +629,11 @@ test('사진 업로드가 지연되면 저용량 이미지로 자동 재시도�
         uploadPhoto: async (path) => {
           window.__uploadPaths.push(path);
           if (window.__uploadPaths.length === 1) return { error: { message: '사진 업로드 시간 초과 (45초).' } };
+          return { error: null };
+        },
+        uploadPhotoResumable: async (path) => {
+          window.__uploadPaths.push(path);
+          if (window.__uploadPaths.length === 1) return { error: { message: '사진 업로드 시간 초과 (180초).' } };
           return { error: null };
         },
         create: async (record) => {
@@ -714,6 +725,7 @@ test('사진 업로드 실패는 실패 단계를 운영 오류 로그로 남긴
       },
       submissions: {
         uploadPhoto: async () => ({ error: { message: 'storage down' } }),
+        uploadPhotoResumable: async () => ({ error: { message: 'storage down' } }),
         create: async () => ({ error: null }),
         removePhoto: async () => {},
         listApproved: async () => [],
