@@ -116,6 +116,21 @@ header {
   font-weight: var(--fw-heading);
 }
 
+.main-nav a.nav-auth-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: var(--header-h);
+  padding: 0 8px;
+  line-height: 1;
+}
+
+.main-nav a.nav-auth-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
 .main-nav .ext::after {
   content: ' ↗';
   font-size: 13px;

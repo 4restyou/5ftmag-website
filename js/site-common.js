@@ -652,8 +652,8 @@
   // Auth nav — 로그인 상태/편집부 여부에 따라 헤더에 항목 inject
   //   기본 헤더 마크업은 28개 페이지에 중복돼 있어서 DOM 변경은 여기서만 함.
   //   - 비로그인: "로그인"
-  //   - 로그인  : "내 정보"
-  //   - 편집부  : "관리" + "내 정보"
+  //   - 로그인  : 데스크톱은 계정 아이콘, 모바일은 "내 정보"
+  //   - 편집부  : "관리" + 계정 아이콘/내 정보
   //   - Shop ↗ 다음 자리에 노출 (메인 nav + 모바일 nav 모두)
   // ════════════════════════════════════════════════
   function isStoryPath() { return /\/stories\//.test(location.pathname); }
@@ -745,9 +745,13 @@
       items.push({ label: '내 정보', href: meHref });
       items.push({ label: '로그아웃', action: 'auth-logout' });
     }
+    function accountIconSvg() {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>';
+    }
     // 메인 nav (Shop 다음에 끼움 — Shop 은 .ext 클래스로 식별)
     if (mainNav) {
       const shopLi = mainNav.querySelector('.ext')?.parentElement || null;
+      let insertAfter = shopLi;
       items.forEach(it => {
         const li = document.createElement('li');
         li.setAttribute('data-nav-auth', '1');
@@ -757,9 +761,19 @@
           a.href = '#';
           a.dataset.action = it.action;
         }
-        a.textContent = it.label;
+        if (it.label === '내 정보') {
+          a.className = 'nav-auth-icon';
+          a.setAttribute('aria-label', '내 정보');
+          a.title = '내 정보';
+          a.innerHTML = accountIconSvg();
+        } else {
+          a.textContent = it.label;
+        }
         li.appendChild(a);
-        if (shopLi && shopLi.nextSibling) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
+        if (insertAfter && insertAfter.parentNode === mainNav) {
+          insertAfter.parentNode.insertBefore(li, insertAfter.nextSibling);
+          insertAfter = li;
+        }
         else mainNav.appendChild(li);
       });
     }

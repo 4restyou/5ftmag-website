@@ -98,6 +98,48 @@ test('알림 링크는 내부 경로만 href 로 렌더링한다', async ({ page
   await expect(page.locator('#notifList .notif-item').nth(1)).toHaveAttribute('href', '/me.html#photos');
 });
 
+test('데스크톱 헤더의 내 정보는 계정 아이콘으로 렌더링한다', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), '모바일은 햄버거 메뉴 안에서 텍스트를 유지한다.');
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: true }),
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+    };
+  });
+
+  await page.goto('/');
+  const accountLink = page.locator('.main-nav a.nav-auth-icon[aria-label="내 정보"]');
+  await expect(accountLink).toBeVisible({ timeout: 5000 });
+  await expect(accountLink.locator('svg')).toBeVisible();
+  await expect(page.locator('.main-nav').getByText('내 정보')).toHaveCount(0);
+});
+
 test('필름스트립 저장 캔버스 상단 로고가 흰 배경에서 보인다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(async () => {
