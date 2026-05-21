@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/tokens.css">
   <link rel="stylesheet" href="./css/common.css?v=20260516-iconanim">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
-  <link rel="stylesheet" href="./css/home.css?v=20260519-partner5">
+  <link rel="stylesheet" href="./css/home.css?v=20260520-photomode">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -133,6 +133,10 @@
     <div class="sub-section-head">
       <h3>Photo</h3>
       <span class="label">필름이 담은 모든 순간 · 독자들의 한 컷</span>
+    </div>
+    <div class="photo-mode-toggle" id="photoModeToggle" role="tablist" aria-label="사진 보기 방식">
+      <button type="button" class="photo-mode-btn is-active" data-mode="random" role="tab" aria-selected="true">랜덤</button>
+      <button type="button" class="photo-mode-btn" data-mode="recent" role="tab" aria-selected="false">최근</button>
     </div>
     <div class="discover-grid" id="photoGrid">
       <!-- 자바스크립트가 자동 생성 -->
@@ -281,7 +285,7 @@
 
 
 <script src="./js/site-common.js?v=20260520-imgfallback"></script>
-<script src="./js/home-page.js?v=20260520-mobilephoto10"></script>
+<script src="./js/home-page.js?v=20260520-photomode"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260520-filmshide"></script>
 <script src="./js/image-processor.js?v=20260520-mobileupload"></script>

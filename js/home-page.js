@@ -314,6 +314,7 @@
               instagram: r.instagram || '',
               instagramUrl: r.instagramUrl || '',
               submissionId: typeof r.id === 'string' ? r.id.replace(/^sub-/, '') : '',
+              createdAt: r.createdAt || '',
             });
           });
 
@@ -346,9 +347,12 @@
         const editorialPool = allPhotos.filter(p => p.source === 'editorial');
         const readerPool    = allPhotos.filter(p => p.source !== 'editorial');
         // 같은 작성자 사진이 한 번에 몰리지 않도록 작가별 1장씩 우선 뽑고,
-        // 자리가 남으면 나머지로 채움.
-        function diversifyByAuthor(pool, count) {
+        // 자리가 남으면 나머지로 채움. mode:
+        //   - 'random': 그룹 안/사이를 모두 shuffle (새로고침마다 다른 조합)
+        //   - 'recent': 그룹 안/사이를 createdAt 내림차순 (최근 업로드 순)
+        function diversifyByAuthor(pool, count, mode) {
           if (count <= 0) return [];
+          const ts = (p) => Date.parse(p.createdAt || '') || 0;
           const byAuthor = new Map();
           pool.forEach((p, i) => {
             const raw = (p.author || '').trim().toLowerCase();
@@ -360,58 +364,118 @@
           const primary = [];
           const leftover = [];
           for (const group of byAuthor.values()) {
-            const shuffled = shuffleSeeded(group);
-            primary.push(shuffled[0]);
-            if (shuffled.length > 1) leftover.push(...shuffled.slice(1));
+            const ordered = mode === 'recent'
+              ? [...group].sort((a, b) => ts(b) - ts(a))
+              : shuffleSeeded(group);
+            primary.push(ordered[0]);
+            if (ordered.length > 1) leftover.push(...ordered.slice(1));
           }
-          const primaryShuffled = shuffleSeeded(primary);
-          if (primaryShuffled.length >= count) return primaryShuffled.slice(0, count);
-          // 작가 수보다 자리가 많으면 leftover 에서 보충
-          return [...primaryShuffled, ...shuffleSeeded(leftover)].slice(0, count);
-        }
-        // 24 × 0.02 = 0.48 → 정수 부분(0) + 소수 부분 확률(0.48)로 0 또는 1장
-        const expectedEditorial = PHOTO_COUNT * EDITORIAL_RATIO;
-        const editorialN = Math.floor(expectedEditorial) + (rng() < (expectedEditorial % 1) ? 1 : 0);
-        const editorialPick = shuffleSeeded(editorialPool).slice(0, Math.min(editorialN, editorialPool.length));
-        const readerPick    = diversifyByAuthor(readerPool, PHOTO_COUNT - editorialPick.length);
-        const selected = shuffleSeeded([...editorialPick, ...readerPick]);
-
-        if (selected.length === 0) {
-          photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">아직 공개된 독자 사진이 없습니다. 첫 컷이 승인되면 이곳에 표시됩니다.</div>';
-          return;
+          const primaryOrdered = mode === 'recent'
+            ? primary.sort((a, b) => ts(b) - ts(a))
+            : shuffleSeeded(primary);
+          const leftoverOrdered = mode === 'recent'
+            ? leftover.sort((a, b) => ts(b) - ts(a))
+            : shuffleSeeded(leftover);
+          if (primaryOrdered.length >= count) return primaryOrdered.slice(0, count);
+          return [...primaryOrdered, ...leftoverOrdered].slice(0, count);
         }
 
-        photoGrid.innerHTML = selected.map((photo, idx) => {
-          const imgSrc = photo.src || `https://picsum.photos/seed/${photo.seed || idx}/600/600`;
-          const webpSrc = (photo.source === 'editorial' && photo.src)
-            ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp')
-            : null;
-          const author = photo.author || '';
-          const filmName = photo.filmName || '';
-          const pictureBlock = webpSrc
-            ? `<picture>
-                 <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
-                 <img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />
-               </picture>`
-            : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />`;
-          return `
-            <button type="button" class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
-              ${pictureBlock}
-              <span class="disc-info">
-                <span class="disc-author">${escapeHtml(author)}</span>
-                <span class="disc-film">${escapeHtml(filmName)}</span>
-              </span>
-            </button>
-          `;
-        }).join('');
+        // 모드별 selected 계산.
+        //   - random: editorial 2% + reader 98%, 마지막에 한 번 더 shuffle
+        //   - recent: editorial 제외(타임스탬프 없음). reader 만 최근순.
+        function computeSelected(mode) {
+          if (mode === 'recent') {
+            return diversifyByAuthor(readerPool, PHOTO_COUNT, 'recent');
+          }
+          const expectedEditorial = PHOTO_COUNT * EDITORIAL_RATIO;
+          const editorialN = Math.floor(expectedEditorial) + (rng() < (expectedEditorial % 1) ? 1 : 0);
+          const editorialPick = shuffleSeeded(editorialPool).slice(0, Math.min(editorialN, editorialPool.length));
+          const readerPick    = diversifyByAuthor(readerPool, PHOTO_COUNT - editorialPick.length, 'random');
+          return shuffleSeeded([...editorialPick, ...readerPick]);
+        }
 
-        photoGrid.querySelectorAll('.disc-cell').forEach(cell => {
-          cell.addEventListener('click', (e) => {
-            e.preventDefault();
-            const idx = parseInt(cell.dataset.photoIndex, 10);
-            openPhotoLightbox(selected, idx);
+        // 초기 모드: localStorage 우선, 없으면 random
+        const MODE_KEY = '5ft_home_photo_mode';
+        let photoMode = 'random';
+        try {
+          const saved = localStorage.getItem(MODE_KEY);
+          if (saved === 'recent' || saved === 'random') photoMode = saved;
+        } catch (_) {}
+
+        const modeBar = document.getElementById('photoModeToggle');
+        if (modeBar) {
+          modeBar.querySelectorAll('[data-mode]').forEach(btn => {
+            const active = btn.dataset.mode === photoMode;
+            btn.classList.toggle('is-active', active);
+            btn.setAttribute('aria-selected', active ? 'true' : 'false');
+            btn.addEventListener('click', () => {
+              const next = btn.dataset.mode;
+              if (next !== 'random' && next !== 'recent') return;
+              if (next === photoMode) return;
+              photoMode = next;
+              try { localStorage.setItem(MODE_KEY, photoMode); } catch (_) {}
+              modeBar.querySelectorAll('[data-mode]').forEach(b => {
+                const on = b.dataset.mode === photoMode;
+                b.classList.toggle('is-active', on);
+                b.setAttribute('aria-selected', on ? 'true' : 'false');
+              });
+              renderSelectedPhotos();
+            });
           });
-        });
+        }
+
+        let selected;
+        function renderSelectedPhotos() {
+          selected = computeSelected(photoMode);
+          renderPhotoGrid(selected);
+        }
+
+        function renderPhotoGrid(list) {
+          if (list.length === 0) {
+            photoGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">${photoMode === 'recent' ? '아직 승인된 독자 사진이 없습니다. 곧 채워질 거예요.' : '아직 공개된 독자 사진이 없습니다. 첫 컷이 승인되면 이곳에 표시됩니다.'}</div>`;
+            return;
+          }
+          photoGrid.innerHTML = renderPhotoCellsHtml(list);
+          attachPhotoCellHandlers();
+        }
+
+        function renderPhotoCellsHtml(list) {
+          return list.map((photo, idx) => {
+            const imgSrc = photo.src || `https://picsum.photos/seed/${photo.seed || idx}/600/600`;
+            const webpSrc = (photo.source === 'editorial' && photo.src)
+              ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp')
+              : null;
+            const author = photo.author || '';
+            const filmName = photo.filmName || '';
+            const pictureBlock = webpSrc
+              ? `<picture>
+                   <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
+                   <img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />
+                 </picture>`
+              : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />`;
+            return `
+              <button type="button" class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
+                ${pictureBlock}
+                <span class="disc-info">
+                  <span class="disc-author">${escapeHtml(author)}</span>
+                  <span class="disc-film">${escapeHtml(filmName)}</span>
+                </span>
+              </button>
+            `;
+          }).join('');
+        }
+
+        function attachPhotoCellHandlers() {
+          photoGrid.querySelectorAll('.disc-cell').forEach(cell => {
+            cell.addEventListener('click', (e) => {
+              e.preventDefault();
+              const idx = parseInt(cell.dataset.photoIndex, 10);
+              openPhotoLightbox(selected, idx);
+            });
+          });
+        }
+
+        renderSelectedPhotos();
       })
       .catch(err => {
         console.error('Photo 그리드 로딩 실패:', err);
