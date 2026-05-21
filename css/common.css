@@ -576,7 +576,7 @@ footer {
 }
 
 .footer-links a {
-  font-size: var(--fs-body);
+  font-size: 12px;
   font-weight: var(--fw-all);
   letter-spacing: var(--ls-default);
   color: var(--text-muted);

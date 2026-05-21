@@ -224,6 +224,21 @@ test('내 정보와 관리 화면은 공통 헤더를 사용한다', async ({ pa
   await expect(page.locator('.admin-user')).toBeHidden();
 });
 
+test('푸터 링크는 카피라이트와 같은 크기이고 관리 링크를 노출하지 않는다', async ({ page }) => {
+  await page.goto('/');
+  const sizes = await page.evaluate(() => {
+    const link = document.querySelector('.footer-links a');
+    const copy = document.querySelector('.footer-copy');
+    return {
+      link: getComputedStyle(link).fontSize,
+      copy: getComputedStyle(copy).fontSize,
+      adminLinks: document.querySelectorAll('footer .footer-admin, footer a[href*="admin/submissions"]').length,
+    };
+  });
+  expect(sizes.link).toBe(sizes.copy);
+  expect(sizes.adminLinks).toBe(0);
+});
+
 test('필름스트립 저장 캔버스 상단 로고가 흰 배경에서 보인다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(async () => {
