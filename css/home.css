@@ -1464,6 +1464,9 @@ body.modal-open { overflow: hidden; }
   /* 데스크톱용으로 키운 패딩을 모바일에선 정상 사이즈로 */
   .panel-header { padding: 36px 20px 28px; }
   .sub-section-head { padding: 28px 20px 16px; }
+  .sub-section-head--with-toggle { row-gap: 10px; column-gap: 12px; }
+  .photo-mode-toggle { padding: 2px; gap: 1px; }
+  .photo-mode-btn { font-size: 11px; padding: 5px 12px; letter-spacing: 0.04em; }
   .post-img-wrap { padding: 16px 16px 0; }
   .post-text { padding: 16px 16px 24px; }
   .next-issue-block { padding: 28px 20px; }
