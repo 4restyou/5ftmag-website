@@ -652,8 +652,8 @@
   // Auth nav — 로그인 상태/편집부 여부에 따라 헤더에 항목 inject
   //   기본 헤더 마크업은 28개 페이지에 중복돼 있어서 DOM 변경은 여기서만 함.
   //   - 비로그인: "로그인"
-  //   - 로그인  : 데스크톱은 계정 아이콘, 모바일은 "내 정보"
-  //   - 편집부  : "관리" + 계정 아이콘/내 정보
+  //   - 로그인  : 데스크톱은 계정 메뉴, 모바일은 "내 정보" + "로그아웃"
+  //   - 편집부  : 데스크톱 계정 메뉴/모바일 메뉴 안에 "관리" 추가
   //   - Shop ↗ 다음 자리에 노출 (메인 nav + 모바일 nav 모두)
   // ════════════════════════════════════════════════
   function isStoryPath() { return /\/stories\//.test(location.pathname); }
@@ -746,36 +746,44 @@
       items.push({ label: '로그아웃', action: 'auth-logout' });
     }
     function accountIconSvg() {
-      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>';
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     }
     // 메인 nav (Shop 다음에 끼움 — Shop 은 .ext 클래스로 식별)
     if (mainNav) {
       const shopLi = mainNav.querySelector('.ext')?.parentElement || null;
-      let insertAfter = shopLi;
-      items.forEach(it => {
+      if (!loggedIn) {
         const li = document.createElement('li');
         li.setAttribute('data-nav-auth', '1');
         const a = document.createElement('a');
-        if (it.href) a.href = it.href;
-        else {
-          a.href = '#';
-          a.dataset.action = it.action;
-        }
-        if (it.label === '내 정보') {
-          a.className = 'nav-auth-icon';
-          a.setAttribute('aria-label', '내 정보');
-          a.title = '내 정보';
-          a.innerHTML = accountIconSvg();
-        } else {
-          a.textContent = it.label;
-        }
+        a.href = '#';
+        a.dataset.action = 'auth-login';
+        a.textContent = '로그인';
         li.appendChild(a);
-        if (insertAfter && insertAfter.parentNode === mainNav) {
-          insertAfter.parentNode.insertBefore(li, insertAfter.nextSibling);
-          insertAfter = li;
-        }
+        if (shopLi && shopLi.parentNode === mainNav) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
         else mainNav.appendChild(li);
-      });
+      } else {
+        const li = document.createElement('li');
+        li.setAttribute('data-nav-auth', '1');
+        li.className = 'nav-account';
+        const menuItems = [
+          { label: '내 정보', href: meHref },
+          ...(isEditor ? [{ label: '관리', href: adminHref }] : []),
+          { label: '로그아웃', action: 'auth-logout' },
+        ];
+        li.innerHTML = `
+          <button type="button" class="icon-btn nav-account-btn" data-action="nav-account-toggle" aria-label="계정 메뉴 열기" aria-expanded="false">
+            ${accountIconSvg()}
+          </button>
+          <div class="nav-account-menu" role="menu" hidden>
+            ${menuItems.map(it => it.href
+              ? `<a href="${it.href}" role="menuitem">${it.label}</a>`
+              : `<button type="button" data-action="${it.action}" role="menuitem">${it.label}</button>`
+            ).join('')}
+          </div>
+        `;
+        if (shopLi && shopLi.parentNode === mainNav) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
+        else mainNav.appendChild(li);
+      }
     }
     // 모바일 nav (Shop 링크 뒤에 끼움)
     if (mobileNav) {
@@ -791,6 +799,33 @@
       });
     }
   }
+  function closeAccountMenus(except) {
+    document.querySelectorAll('.nav-account').forEach(root => {
+      if (except && root === except) return;
+      const btn = root.querySelector('.nav-account-btn');
+      const menu = root.querySelector('.nav-account-menu');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+      if (menu) menu.hidden = true;
+    });
+  }
+  document.addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-action="nav-account-toggle"]');
+    if (toggle) {
+      e.preventDefault();
+      const root = toggle.closest('.nav-account');
+      const menu = root?.querySelector('.nav-account-menu');
+      if (!root || !menu) return;
+      const open = menu.hidden;
+      closeAccountMenus(root);
+      menu.hidden = !open;
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      return;
+    }
+    if (!e.target.closest('.nav-account')) closeAccountMenus();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAccountMenus();
+  });
   // 로그인 액션 위임
   document.addEventListener('click', async (e) => {
     const t = e.target.closest('[data-action="auth-login"]');

@@ -116,19 +116,74 @@ header {
   font-weight: var(--fw-heading);
 }
 
+.main-nav .nav-account {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--header-h);
+  margin-left: 4px;
+}
+
+.main-nav .nav-account-btn,
 .main-nav a.nav-auth-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 40px;
-  height: var(--header-h);
-  padding: 0 8px;
+  height: 40px;
+  padding: 0;
   line-height: 1;
 }
 
+.main-nav .nav-account-btn svg,
 .main-nav a.nav-auth-icon svg {
-  width: 23px;
-  height: 23px;
+  width: 24px;
+  height: 24px;
+}
+
+.nav-account-menu {
+  position: absolute;
+  top: calc(100% - 6px);
+  right: 0;
+  min-width: 132px;
+  padding: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.12);
+  z-index: 1100;
+}
+
+.nav-account-menu[hidden] {
+  display: none;
+}
+
+.nav-account-menu a,
+.nav-account-menu button {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: var(--fw-all);
+  line-height: 1.2;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.nav-account-menu a:hover,
+.nav-account-menu button:hover {
+  background: var(--bg-sub);
+  opacity: 1;
+}
+
+[data-theme="dark"] .nav-account-menu {
+  box-shadow: 0 12px 34px rgba(0,0,0,0.46);
 }
 
 .main-nav .ext::after {
