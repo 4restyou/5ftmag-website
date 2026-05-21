@@ -1047,8 +1047,9 @@
       const expanded = archiveOpen || !isViewingCurrent;
       rollSwitcher.hidden = false;
       rollSwitcher.innerHTML = `
+        <span class="reader-roll-label">ROLL ARCHIVE</span>
         <button type="button" class="reader-roll-toggle${expanded ? ' is-active' : ''}" data-roll-action="${isViewingCurrent ? 'toggle' : 'current'}" aria-expanded="${expanded ? 'true' : 'false'}">
-          ${isViewingCurrent ? `지난 롤 보기 <span>${pastRolls.length}</span>` : `현재 롤 <span>${rollState.currentNumber}</span>`}
+          ${isViewingCurrent ? `지난 롤 보기 <span>${pastRolls.length}</span>` : `현재 롤로 돌아가기 <span>${rollState.currentNumber}</span>`}
         </button>
         <div class="reader-roll-numbers" ${expanded ? '' : 'hidden'} aria-label="지난 롤 번호">
           ${pastRolls.map((roll) => `

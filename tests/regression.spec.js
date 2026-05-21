@@ -784,16 +784,24 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
   await page.locator('.film-card[data-film="ultramax"]').first().click();
   await expect.poll(async () => page.evaluate(() => window.__listApprovedLimits.length), { timeout: 5000 }).toBeGreaterThan(0);
   await expect(page.evaluate(() => window.__listApprovedLimits[0])).resolves.toBeNull();
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-label')).toHaveText('ROLL ARCHIVE');
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toContainText('지난 롤 보기');
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('1 / 36 · 3롤', { timeout: 5000 });
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-numbers')).toBeHidden();
 
   await page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle').click();
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-number')).toHaveText(['2', '1']);
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toContainText('지난 롤 보기');
+  const controlHeights = await page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle, #readerRollSwitcher-ultramax .reader-roll-number').evaluateAll(nodes => (
+    nodes.map(node => Math.round(node.getBoundingClientRect().height))
+  ));
+  expect(new Set(controlHeights).size).toBe(1);
 
   await page.locator('#readerRollSwitcher-ultramax .reader-roll-number[data-roll-number="1"]').click();
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('36 / 36 · 1롤');
   await expect(page.locator('.reader-roll-intro')).toContainText('1번째 지난 롤');
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toContainText('현재 롤로 돌아가기');
 });
 
 test('Reader Roll 계산 모듈은 36컷 단위로 현재 롤을 나눈다', async ({ page }) => {
