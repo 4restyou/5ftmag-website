@@ -55,6 +55,21 @@
       currentSearch.trim() !== '';
   }
 
+  function normalizeLibrarySearch(value) {
+    return String(value || '').toLowerCase().replace(/@/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function readerSearchTokensForSubmission(submission) {
+    const instagram = String(submission.instagram || '').trim();
+    const instagramBare = instagram.replace(/^@+/, '');
+    return [
+      submission.submitterName,
+      submission.author,
+      instagram,
+      instagramBare,
+    ].filter(Boolean).join(' ');
+  }
+
   function activeAdvancedFilterCount() {
     return (currentFilter !== 'all' ? 1 : 0) + currentBrands.size + currentCameras.size;
   }
@@ -131,7 +146,7 @@
   }
 
   function applyLibraryFilter() {
-    const q = currentSearch.trim().toLowerCase();
+    const q = normalizeLibrarySearch(currentSearch);
     const mobileCapped = isMobileFilms() && !hasActiveLibraryFilter();
     let matched = 0;
     let visible = 0;
@@ -139,7 +154,7 @@
       const cat = card.dataset.filterCategory;
       const brand = card.dataset.brand || '';
       const slug = card.dataset.film || '';
-      const tokens = card.dataset.search || '';
+      const tokens = normalizeLibrarySearch(`${card.dataset.search || ''} ${card.dataset.readerSearch || ''}`);
       const matchCat    = currentFilter === 'all' || cat === currentFilter;
       const matchBrand  = currentBrands.size === 0 || currentBrands.has(brand);
       const cameraKeysForFilm = cameraKeysByFilmSlug.get(slug);
@@ -675,8 +690,9 @@
     // 카메라 필터가 활성화돼 있을 수 있으므로 카드 가시성 재계산
     applyLibraryFilter();
 
-    // 필름별 카운트 집계
+    // 필름별 카운트 + 독자 작가/SNS 검색 토큰 집계
     const countPerSlug = new Map();
+    const readerSearchPerSlug = new Map();
     for (const slug of Object.keys(filmsData)) {
       const film = filmsData[slug];
       const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
@@ -684,13 +700,17 @@
       const matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
       if (matched.length > 0) {
         countPerSlug.set(slug, buildReaderRollState(matched).currentRows.length);
+        readerSearchPerSlug.set(slug, normalizeLibrarySearch(matched.map(readerSearchTokensForSubmission).join(' ')));
       }
     }
-    if (!countPerSlug.size) return;
 
     // Library 그리드 카드만 갱신 (5ft Issue의 editorial 카운트는 그대로)
     const libraryGrid = document.getElementById('filmsGridLibrary');
     if (!libraryGrid) return;
+
+    libraryGrid.querySelectorAll('.film-card').forEach(card => {
+      card.dataset.readerSearch = readerSearchPerSlug.get(card.dataset.film || '') || '';
+    });
 
     for (const [slug, count] of countPerSlug) {
       const card = libraryGrid.querySelector(`.film-card[data-film="${slug}"]`);
@@ -700,6 +720,8 @@
       if (countEl) countEl.textContent = `${count} / ${ROLL_LIMIT}`;
       if (ctaEl) ctaEl.textContent = '컷 채우기 →';
     }
+
+    applyLibraryFilter();
   }
 
   // ════════════════════════════

@@ -7,8 +7,8 @@
 (function () {
   'use strict';
 
-  const MAX_LONG_SIDE = 2000;
-  const JPEG_QUALITY = 0.85;
+  const MAX_LONG_SIDE = 1800;
+  const JPEG_QUALITY = 0.8;
   const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
   const LS_KEY = '5ft_submission_meta';
   const LS_RECENT_CAMERAS = '5ft_recent_cameras';
@@ -1212,7 +1212,7 @@
         markProgress('storage', '사진 업로드 중', `${fmtBytes(blob.size)} 파일을 서버에 보내는 중입니다. 창을 닫지 마세요.`);
         const { error: upErr } = await withNetworkTimeout(
           db().submissions.uploadPhoto(path, blob),
-          60000,
+          90000,
           '사진 업로드'
         ).catch(err => ({ error: { message: err.message } }));
         if (upErr) throw new Error('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (' + upErr.message + ')');

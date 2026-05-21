@@ -855,6 +855,79 @@ test('모바일 Films Library는 초기 노출을 줄이고 더 보기로 확장
   expect(searched).toBeGreaterThan(0);
 });
 
+test('Films Library 검색은 독자 사진 작가명과 SNS도 찾는다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.__listApprovedLimits = [];
+    const rows = [{
+      id: 'sub-search-1',
+      image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',
+      storage_path: 'test/search.jpg',
+      author: '검색 작가',
+      submitterName: '검색 작가',
+      instagram: '@roll_searcher',
+      film: 'Kodak UltraMax 400',
+      camera: 'Leica M6',
+      caption: '',
+      created_at: new Date(2026, 0, 1).toISOString(),
+      createdAt: new Date(2026, 0, 1).toISOString(),
+      published: true,
+    }];
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        listApproved: async (limit) => {
+          window.__listApprovedLimits.push(limit);
+          return rows;
+        },
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/films.html');
+  await expect.poll(async () => page.evaluate(() => (
+    document.querySelector('#filmsGridLibrary .film-card[data-film="ultramax"]')?.dataset.readerSearch || ''
+  )), { timeout: 6000 }).toContain('roll_searcher');
+
+  await page.locator('#librarySearch').fill('@roll_searcher');
+  await expect(page.locator('#filmsGridLibrary .film-card[data-film="ultramax"]')).toBeVisible();
+  await expect.poll(async () => page.locator('#filmsGridLibrary .film-card:visible').evaluateAll(nodes => (
+    nodes.map(node => node.dataset.film)
+  ))).toEqual(['ultramax']);
+
+  await page.locator('#librarySearch').fill('검색 작가');
+  await expect(page.locator('#filmsGridLibrary .film-card[data-film="ultramax"]')).toBeVisible();
+});
+
 test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',
