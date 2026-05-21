@@ -220,10 +220,12 @@
 
   // ─── 독자 사진 (공개 read view + 본인 INSERT + Storage 업로드) ───
   const submissions = {
-    async listApproved(limit = 3000) {
+    async listApproved(limit = null) {
       const c = client(); if (!c) return [];
       const pageSize = 1000;
-      const max = Math.max(1, Number(limit) || pageSize);
+      const numericLimit = Number(limit);
+      const hasLimit = Number.isFinite(numericLimit) && numericLimit > 0;
+      const max = hasLimit ? Math.floor(numericLimit) : Number.POSITIVE_INFINITY;
       const rows = [];
       for (let from = 0; from < max; from += pageSize) {
         const to = Math.min(from + pageSize, max) - 1;

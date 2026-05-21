@@ -1302,11 +1302,11 @@
   }
 
   // 외부 노출: 승인된 제출 가져오기 (MagDB 위임 — 호환성 유지)
-  window.fetchApprovedSubmissions = async function (limit = 3000) {
+  window.fetchApprovedSubmissions = async function (limit = null) {
     if (!db() || !db().isReady()) return [];
     return withNetworkTimeout(
       db().submissions.listApproved(limit),
-      9000,
+      30000,
       '승인된 사진 목록 불러오기'
     ).catch(err => {
       console.warn('[reader-submissions] approved list:', err?.message || err);

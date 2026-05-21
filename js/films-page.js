@@ -732,7 +732,7 @@
       const fetcher = await waitForApprovedFetcher();
       if (!fetcher) return approvedSubmissionsCache || [];
       try {
-        const rows = await fetcher(3000);
+        const rows = await fetcher();
         approvedSubmissionsCache = Array.isArray(rows) ? rows : [];
         return approvedSubmissionsCache;
       } catch (e) {

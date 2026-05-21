@@ -782,7 +782,8 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
 
   await page.goto('/films.html');
   await page.locator('.film-card[data-film="ultramax"]').first().click();
-  await expect.poll(async () => page.evaluate(() => Math.max(...window.__listApprovedLimits)), { timeout: 5000 }).toBeGreaterThanOrEqual(3000);
+  await expect.poll(async () => page.evaluate(() => window.__listApprovedLimits.length), { timeout: 5000 }).toBeGreaterThan(0);
+  await expect(page.evaluate(() => window.__listApprovedLimits[0])).resolves.toBeNull();
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('1 / 36 · 3롤', { timeout: 5000 });
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-numbers')).toBeHidden();
 
