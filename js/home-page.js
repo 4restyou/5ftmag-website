@@ -594,6 +594,7 @@
   const photoLbAuthor  = document.getElementById('photoLbAuthor');
   const photoLbFilm    = document.getElementById('photoLbFilm');
   const photoLbCamera  = document.getElementById('photoLbCamera');
+  const photoLbNote    = document.getElementById('photoLbNote');
   const photoLbCounter = document.getElementById('photoLbCounter');
   const photoLbLink    = document.getElementById('photoLbFilmLink');
   const photoLbContributorLink = document.getElementById('photoLbContributorLink');
@@ -711,6 +712,11 @@
         ? `films.html?camera=${encodeURIComponent(p.camera)}`
         : 'films.html';
       photoLbCamera.hidden = !p.camera;
+    }
+    if (photoLbNote) {
+      const note = (p.caption || '').trim();
+      photoLbNote.textContent = note;
+      photoLbNote.hidden = !note;
     }
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;
     syncPhotoLbFav();
