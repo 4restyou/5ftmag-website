@@ -59,7 +59,10 @@
       }).filter(Boolean);
     }
     if (kind === 'contrib') {
-      return [...target.querySelectorAll('.reader-contributor-photo')].map(cell => {
+      const selector = options.onlySelected
+        ? '.reader-contributor-photo.is-selected'
+        : '.reader-contributor-photo';
+      return [...target.querySelectorAll(selector)].map(cell => {
         const img = cell.querySelector('img');
         if (!img) return null;
         return {

@@ -1411,14 +1411,25 @@
           <section class="reader-contributor-group" data-film-name="${escapeAttr(filmName)}">
             <div class="reader-contributor-group-head">
               <h4>${escapeAttr(filmName)} <span>${rows.length}컷</span></h4>
-              <button type="button" class="reader-save-btn" data-save-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">이미지로 저장</button>
+              <div class="reader-contributor-save-actions">
+                <div class="reader-save-menu" data-contrib-save-menu>
+                  <button type="button" class="reader-save-btn" data-save-menu-toggle="contrib" data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}" aria-expanded="false" aria-label="작가별 이미지 저장 방식 선택">이미지로 저장</button>
+                  <div class="reader-save-menu-popover" data-save-menu-popover hidden>
+                    <button type="button" class="reader-save-menu-item" data-save-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">전체 저장</button>
+                    <button type="button" class="reader-save-menu-item" data-select-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">사진 골라 저장</button>
+                  </div>
+                </div>
+                <button type="button" class="reader-save-btn reader-contrib-selected-save" data-save-selected-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}" hidden disabled>선택한 0장 저장</button>
+                <button type="button" class="modal-view-cancel" data-cancel-contrib-select hidden>취소</button>
+              </div>
             </div>
             <div class="reader-contributor-grid" id="contribGrid-${escapeAttr(personKey)}-${gIdx}">
               ${rows.map((sub, idx) => `
-                <button type="button" class="reader-contributor-photo" data-person-key="${escapeAttr(personKey)}" data-photo-index="${idx}" data-film-name="${escapeAttr(filmName)}" aria-label="${escapeAttr(filmName)} ${idx + 1}번째 사진 크게 보기">
+                <button type="button" class="reader-contributor-photo" data-person-key="${escapeAttr(personKey)}" data-photo-index="${idx}" data-film-name="${escapeAttr(filmName)}" aria-label="${escapeAttr(filmName)} ${idx + 1}번째 사진 크게 보기" aria-pressed="false">
                   <span class="reader-contributor-photo-window">
                     <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
                   </span>
+                  <span class="reader-contributor-photo-check" aria-hidden="true"></span>
                   <span class="reader-contributor-photo-caption">${escapeAttr(sub.camera || sub.film || filmName)}</span>
                 </button>
               `).join('')}
@@ -1517,6 +1528,13 @@
         }
         const photo = e.target.closest('.reader-contributor-photo');
         if (!photo) return;
+        const groupEl = photo.closest('.reader-contributor-group');
+        if (groupEl?.classList.contains('is-selecting')) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleContributorPhotoSelection(photo);
+          return;
+        }
         const key = photo.dataset.personKey;
         const all = fallbackSubmissions
           ? fallbackSubmissions.filter(sub => personKeyOf(sub) === key).slice(0, 120)
@@ -2208,13 +2226,36 @@
     if (saveMenuToggle) {
       e.preventDefault();
       e.stopPropagation();
-      const menu = saveMenuToggle.closest('[data-reader-save-menu]');
+      const menu = saveMenuToggle.closest('[data-reader-save-menu], [data-contrib-save-menu]');
       const popover = menu?.querySelector('[data-save-menu-popover]');
       if (popover) {
         const nextOpen = popover.hidden;
         popover.hidden = !nextOpen;
         saveMenuToggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
       }
+      return;
+    }
+    // 작가별 보기: 한 필름 섹션 안에서 원하는 사진만 골라 저장
+    const selectContribBtn = e.target.closest('[data-select-contrib]');
+    if (selectContribBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const group = selectContribBtn.closest('.reader-contributor-group');
+      setContributorSelectionMode(group, true);
+      return;
+    }
+    const selectedContribSaveBtn = e.target.closest('[data-save-selected-contrib]');
+    if (selectedContribSaveBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSaveSelectedContribImage(selectedContribSaveBtn);
+      return;
+    }
+    const cancelContribBtn = e.target.closest('[data-cancel-contrib-select]');
+    if (cancelContribBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      setContributorSelectionMode(cancelContribBtn.closest('.reader-contributor-group'), false);
       return;
     }
     // Reader's Roll 선택 저장 모드 시작
@@ -2253,7 +2294,7 @@
       e.preventDefault();
       e.stopPropagation();
       const popover = saveBtn.closest('[data-save-menu-popover]');
-      const menuToggle = saveBtn.closest('[data-reader-save-menu]')?.querySelector('[data-save-menu-toggle]');
+      const menuToggle = saveBtn.closest('[data-reader-save-menu], [data-contrib-save-menu]')?.querySelector('[data-save-menu-toggle]');
       if (popover) popover.hidden = true;
       if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
       handleSaveRollImage(saveBtn);
@@ -2286,6 +2327,48 @@
     return null;
   }
 
+  function updateContributorSelectionControls(group) {
+    if (!group) return;
+    const selectedCount = group.querySelectorAll('.reader-contributor-photo.is-selected').length;
+    const saveMenu = group.querySelector('[data-contrib-save-menu]');
+    const popover = group.querySelector('[data-save-menu-popover]');
+    const menuToggle = group.querySelector('[data-save-menu-toggle="contrib"]');
+    const selectedSave = group.querySelector('[data-save-selected-contrib]');
+    const cancel = group.querySelector('[data-cancel-contrib-select]');
+    const selecting = group.classList.contains('is-selecting');
+    if (saveMenu) saveMenu.hidden = selecting;
+    if (popover) popover.hidden = true;
+    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+    if (selectedSave) {
+      selectedSave.hidden = !selecting;
+      selectedSave.disabled = selectedCount < 1;
+      selectedSave.textContent = `선택한 ${selectedCount}장 저장`;
+    }
+    if (cancel) cancel.hidden = !selecting;
+  }
+
+  function setContributorSelectionMode(group, next) {
+    if (!group) return;
+    group.classList.toggle('is-selecting', !!next);
+    group.querySelectorAll('.reader-contributor-photo').forEach(photo => {
+      photo.classList.remove('is-selected');
+      photo.setAttribute('aria-pressed', 'false');
+      const check = photo.querySelector('.reader-contributor-photo-check');
+      if (check) check.textContent = '';
+    });
+    updateContributorSelectionControls(group);
+  }
+
+  function toggleContributorPhotoSelection(photo) {
+    if (!photo) return;
+    const selected = !photo.classList.contains('is-selected');
+    photo.classList.toggle('is-selected', selected);
+    photo.setAttribute('aria-pressed', String(selected));
+    const check = photo.querySelector('.reader-contributor-photo-check');
+    if (check) check.textContent = selected ? '✓' : '';
+    updateContributorSelectionControls(photo.closest('.reader-contributor-group'));
+  }
+
   // 작가 뷰의 한 필름 섹션을 필름스트립 JPG 로 저장
   async function handleSaveContribFilmImage(btn) {
     const personKey = btn.dataset.personKey;
@@ -2310,6 +2393,41 @@
     } catch (err) {
       console.error('[save-contrib]', err);
       window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  async function handleSaveSelectedContribImage(btn) {
+    const personKey = btn.dataset.personKey;
+    const filmName = btn.dataset.filmName;
+    const authorLabel = btn.dataset.authorLabel || personKey;
+    const section = btn.closest('.reader-contributor-group');
+    const target = section?.querySelector('.reader-contributor-grid');
+    if (!target) return;
+    const selectedCount = target.querySelectorAll('.reader-contributor-photo.is-selected').length;
+    if (selectedCount < 1) {
+      window.notify?.('저장할 사진을 먼저 선택해 주세요.', 'danger');
+      return;
+    }
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중…';
+    try {
+      const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, 'contrib', { onlySelected: true });
+      const authors = window.FilmsRollExport.collectAuthorsForExport(target, 'contrib', { authorLabel });
+      const filmThumb = findFilmThumbByName(filmName);
+      const canvas = await window.FilmsRollExport.composeBrandedRollCanvas(stripCanvas, { filmName, authors, filmThumb });
+      const personSlug = window.FilmsRollExport.slugifyExportName(personKey);
+      const filmSlug = window.FilmsRollExport.slugifyExportName(filmName);
+      const d = new Date();
+      const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+      window.FilmsRollExport.downloadCanvas(canvas, `5ftmag-${personSlug || 'contributor'}-${filmSlug || 'film'}-selected-${stamp}.jpg`);
+      setContributorSelectionMode(section, false);
+    } catch (err) {
+      console.error('[save-selected-contrib]', err);
+      window.notify?.('선택 이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
