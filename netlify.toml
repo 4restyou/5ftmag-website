@@ -242,6 +242,22 @@
   to = "/me.html"
   status = 200
 
+# Supabase Storage 의 public 버킷 이미지 프록시.
+# 같은 사진을 100명이 봐도 Netlify edge 캐시가 답해 Supabase egress 가 폭증하지
+# 않게 한다. /i/reader/<path> → reader-submissions, /i/market/<path> →
+# market-listings. 캐시 헤더는 아래 [[headers]] for = "/i/*" 에서 강제.
+[[redirects]]
+  from = "/i/reader/*"
+  to = "https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/public/reader-submissions/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/i/market/*"
+  to = "https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/public/market-listings/:splat"
+  status = 200
+  force = true
+
 # 기본 보안 헤더 — 정적 사이트 + Supabase 댓글/투고 폼 기준
 # NOTE: script-src 의 'unsafe-inline' 은 기사 JSON-LD와 일부 레거시 페이지 스크립트가 남아 있어
 #       당장 제거하기 어려움. 실행성 공통 스크립트는 점진적으로 js/ 외부 파일로 이동 중.
@@ -278,3 +294,12 @@
   for = "/data/*"
   [headers.values]
     Cache-Control = "public, max-age=300, must-revalidate"
+
+# Supabase Storage 프록시 응답 — 사진 파일은 path 자체가 unique (user_id + uuid)
+# 라 immutable. Netlify edge 가 1년 캐싱, 브라우저도 1년. 두 번째 viewer 부터
+# Supabase 까지 안 가고 Netlify edge 에서 끝.
+[[headers]]
+  for = "/i/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Netlify-CDN-Cache-Control = "public, s-maxage=31536000, immutable"

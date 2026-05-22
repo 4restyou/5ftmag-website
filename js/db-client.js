@@ -224,7 +224,7 @@
     const author = sname && ig ? `${sname} (${ig})` : (sname || ig);
     return {
       id: 'sub-' + r.id,
-      image: `${URL_}/storage/v1/object/public/${BUCKET}/${r.storage_path}`,
+      image: `/i/reader/${r.storage_path}`,
       author,
       submitterName: sname,
       instagram: ig,
@@ -366,7 +366,7 @@
       try { await c.storage.from(BUCKET).remove([path]); } catch (_) {}
     },
     publicUrl(path) {
-      return `${URL_}/storage/v1/object/public/${BUCKET}/${path}`;
+      return `/i/reader/${path}`;
     },
     async listMine() {
       const c = client(); if (!c) return [];
@@ -451,9 +451,9 @@
 
   // ─── Market (중고 장터) ───
   const market = {
-    storageBaseUrl: `${URL_}/storage/v1/object/public/${MARKET_BUCKET}/`,
+    storageBaseUrl: `/i/market/`,
     publicUrl(path) {
-      return `${URL_}/storage/v1/object/public/${MARKET_BUCKET}/${path}`;
+      return `/i/market/${path}`;
     },
     async list({ category = 'all', limit = 200 } = {}) {
       const c = client(); if (!c) return [];
@@ -1012,7 +1012,7 @@
 
   window.MagDB = {
     isReady() { return !!_client; },
-    storageBaseUrl: `${URL_}/storage/v1/object/public/${BUCKET}/`,
+    storageBaseUrl: `/i/reader/`,
     auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films,
   };
 })();
