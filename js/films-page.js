@@ -1317,6 +1317,7 @@
         const personKey = personKeyOf(sub);
         const exportKey = exportKeyOf(sub);
         const isSelected = selectedExportKeys.has(exportKey);
+        const selectionNumber = isSelected ? Array.from(selectedExportKeys).indexOf(exportKey) + 1 : '';
         const instaHandle = (sub.instagram || '').replace(/^@/, '');
         slot.className = `reader-slot is-filled${selectionMode ? ' is-selecting' : ''}${isSelected ? ' is-selected' : ''}`;
         slot.dataset.exportKey = exportKey;
@@ -1327,7 +1328,7 @@
             <span class="reader-slot-window">
               <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
             </span>
-            <span class="reader-slot-check" aria-hidden="true">${isSelected ? String(i + 1) : ''}</span>
+            <span class="reader-slot-check" aria-hidden="true">${selectionNumber}</span>
             <span class="reader-slot-author" data-person-key="${escapeAttr(personKey)}">${escapeAttr(personLabelOf(sub))}</span>
           </button>`;
         const img = slot.querySelector('img');
@@ -2352,6 +2353,7 @@
     group.classList.toggle('is-selecting', !!next);
     group.querySelectorAll('.reader-contributor-photo').forEach(photo => {
       photo.classList.remove('is-selected');
+      delete photo.dataset.selectedOrder;
       photo.setAttribute('aria-pressed', 'false');
       const check = photo.querySelector('.reader-contributor-photo-check');
       if (check) check.textContent = '';
@@ -2359,17 +2361,34 @@
     updateContributorSelectionControls(group);
   }
 
+  function renumberContributorSelection(group) {
+    if (!group) return;
+    const selectedPhotos = [...group.querySelectorAll('.reader-contributor-photo.is-selected')]
+      .sort((a, b) => Number(a.dataset.selectedOrder || 0) - Number(b.dataset.selectedOrder || 0));
+    selectedPhotos.forEach((item, idx) => {
+      item.dataset.selectedOrder = String(idx + 1);
+      const check = item.querySelector('.reader-contributor-photo-check');
+      if (check) check.textContent = String(idx + 1);
+    });
+  }
+
   function toggleContributorPhotoSelection(photo) {
     if (!photo) return;
+    const group = photo.closest('.reader-contributor-group');
     const selected = !photo.classList.contains('is-selected');
     photo.classList.toggle('is-selected', selected);
     photo.setAttribute('aria-pressed', String(selected));
-    const check = photo.querySelector('.reader-contributor-photo-check');
-    if (check) {
-      const index = Number(photo.dataset.photoIndex);
-      check.textContent = selected && Number.isFinite(index) ? String(index + 1) : '';
+    if (selected) {
+      const maxOrder = Math.max(0, ...[...(group?.querySelectorAll('.reader-contributor-photo.is-selected') || [])]
+        .map(item => Number(item.dataset.selectedOrder) || 0));
+      photo.dataset.selectedOrder = String(maxOrder + 1);
+    } else {
+      delete photo.dataset.selectedOrder;
     }
-    updateContributorSelectionControls(photo.closest('.reader-contributor-group'));
+    const check = photo.querySelector('.reader-contributor-photo-check');
+    if (check && !selected) check.textContent = '';
+    renumberContributorSelection(group);
+    updateContributorSelectionControls(group);
   }
 
   // 작가 뷰의 한 필름 섹션을 필름스트립 JPG 로 저장
