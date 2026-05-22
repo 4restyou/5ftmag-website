@@ -254,7 +254,7 @@
     const cols = 6;
     const tileW = 380;
     const tileH = 345;
-    const rowGap = 0;  // 저장 이미지는 실제 필름 컨택트시트처럼 행 사이가 붙어 보여야 한다.
+    const rowGap = 28; // 컷은 한 줄 안에서 붙이고, 줄이 바뀌는 필름 스트립 사이에는 흰 여백을 둔다.
     const rows = Math.max(1, Math.ceil(frames.length / cols));
     const scale = 1.5;
     const innerW = cols * tileW;
