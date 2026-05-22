@@ -1755,7 +1755,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 5;
+  z-index: 6;
   width: 28px;
   height: 28px;
   display: none;
@@ -1830,7 +1830,6 @@
   width: 100%;
   height: 100%;
   position: relative;
-  z-index: 1;
   /* button 기본 reset (a 와 button 모두 같은 룩으로 사용) */
   padding: 0;
   border: none;
@@ -1915,7 +1914,7 @@
   font-size: 12px;
   font-weight: 900;
   line-height: 1;
-  z-index: 5;
+  z-index: 6;
   pointer-events: none;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 }

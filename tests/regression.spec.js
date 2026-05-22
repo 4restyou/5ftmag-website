@@ -1471,6 +1471,8 @@ test('Reader Roll 선택 저장은 고른 사진만 저장 대상으로 보낸�
   await page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(2).click();
   await expect(page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(0).locator('.reader-slot-check')).toHaveText('1');
   await expect(page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(2).locator('.reader-slot-check')).toHaveText('2');
+  await expect(page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(0).locator('.reader-slot-link')).toHaveCSS('z-index', 'auto');
+  await expect(page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(0).locator('.reader-slot-check')).toHaveCSS('z-index', '6');
   const selectedSave = page.locator('[data-save-selected-roll="reader"][data-film-key="ultramax"]');
   await expect(selectedSave).toHaveText('선택한 2장 저장');
   await expect(selectedSave).toBeEnabled();
