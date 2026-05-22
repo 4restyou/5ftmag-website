@@ -1762,18 +1762,22 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: var(--accent);
-  color: #111;
+  background: rgba(0, 0, 0, 0.78);
+  color: rgba(255, 255, 255, 0.86);
   font-size: 13px;
   font-weight: 900;
   line-height: 1;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 }
 .reader-contributor-group.is-selecting .reader-contributor-photo-check {
   display: inline-flex;
-  background: rgba(255, 255, 255, 0.88);
 }
 .reader-contributor-photo.is-selected .reader-contributor-photo-check {
   background: var(--accent);
+  border-color: var(--accent);
+  color: #111;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 .reader-grid {
   display: grid;
@@ -1905,7 +1909,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.78);
-  color: var(--accent);
+  color: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(255, 255, 255, 0.36);
   border-radius: 50%;
   font-size: 12px;
@@ -1913,9 +1917,16 @@
   line-height: 1;
   z-index: 5;
   pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 }
 .reader-grid.is-selecting .reader-slot-check {
   display: inline-flex;
+}
+.reader-grid.is-selecting .reader-slot.is-selected .reader-slot-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #111;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 .reader-grid.is-selecting .reader-slot:not(.is-selected) .reader-slot-check::before {
   content: '';
