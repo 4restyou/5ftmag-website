@@ -904,8 +904,13 @@
           <span class="modal-section-meta" id="readerRollCounter-${filmKey}">0 / ${ROLL_LIMIT}</span>
           <div class="modal-section-actions">
             <button type="button" class="modal-view-toggle" data-view-toggle aria-label="기본 그리드로 전환">기본 그리드</button>
-            <button type="button" class="modal-view-save" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
-            <button type="button" class="modal-view-save" data-select-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="원하는 사진만 골라 저장">선택 저장</button>
+            <div class="reader-save-menu" data-reader-save-menu hidden>
+              <button type="button" class="modal-view-save" data-save-menu-toggle="reader" data-film-key="${escapeAttr(filmKey)}" aria-expanded="false" aria-label="이미지 저장 방식 선택">이미지로 저장</button>
+              <div class="reader-save-menu-popover" data-save-menu-popover hidden>
+                <button type="button" class="reader-save-menu-item" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}">전체 롤 저장</button>
+                <button type="button" class="reader-save-menu-item" data-select-roll="reader" data-film-key="${escapeAttr(filmKey)}">사진 골라 저장</button>
+              </div>
+            </div>
             <button type="button" class="modal-view-save reader-selected-save" data-save-selected-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden disabled aria-label="선택한 사진만 이미지로 저장">선택한 0장 저장</button>
             <button type="button" class="modal-view-cancel" data-select-cancel="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="사진 선택 취소">취소</button>
           </div>
@@ -1066,6 +1071,9 @@
     function readerSelectionControls() {
       const section = grid.closest('.modal-section-reader');
       return {
+        saveMenu: section?.querySelector('[data-reader-save-menu]'),
+        saveMenuToggle: section?.querySelector(`[data-save-menu-toggle="reader"][data-film-key="${filmKey}"]`),
+        saveMenuPopover: section?.querySelector('[data-save-menu-popover]'),
         fullSave: section?.querySelector(`[data-save-roll="reader"][data-film-key="${filmKey}"]`),
         selectStart: section?.querySelector(`[data-select-roll="reader"][data-film-key="${filmKey}"]`),
         selectedSave: section?.querySelector(`[data-save-selected-roll="reader"][data-film-key="${filmKey}"]`),
@@ -1074,11 +1082,12 @@
     }
 
     function updateReaderSelectionControls() {
-      const { fullSave, selectStart, selectedSave, cancel } = readerSelectionControls();
+      const { saveMenu, saveMenuToggle, saveMenuPopover, selectedSave, cancel } = readerSelectionControls();
       const hasPhotos = visible.length > 0;
       const selectedCount = selectedExportKeys.size;
-      if (fullSave) fullSave.hidden = !hasPhotos || selectionMode;
-      if (selectStart) selectStart.hidden = !hasPhotos || selectionMode;
+      if (saveMenu) saveMenu.hidden = !hasPhotos || selectionMode;
+      if ((!hasPhotos || selectionMode) && saveMenuPopover) saveMenuPopover.hidden = true;
+      if ((!hasPhotos || selectionMode) && saveMenuToggle) saveMenuToggle.setAttribute('aria-expanded', 'false');
       if (selectedSave) {
         selectedSave.hidden = !selectionMode;
         selectedSave.disabled = selectedCount < 1;
@@ -1088,9 +1097,16 @@
       grid.classList.toggle('is-selecting', selectionMode);
     }
 
+    function closeReaderSaveMenu() {
+      const { saveMenuToggle, saveMenuPopover } = readerSelectionControls();
+      if (saveMenuPopover) saveMenuPopover.hidden = true;
+      if (saveMenuToggle) saveMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+
     function setReaderSelectionMode(next) {
       selectionMode = !!next;
       selectedExportKeys.clear();
+      closeReaderSaveMenu();
       renderReaderSlots();
       updateReaderSelectionControls();
     }
@@ -2099,6 +2115,19 @@
       handleSaveContribFilmImage(contribSaveBtn);
       return;
     }
+    const saveMenuToggle = e.target.closest('[data-save-menu-toggle]');
+    if (saveMenuToggle) {
+      e.preventDefault();
+      e.stopPropagation();
+      const menu = saveMenuToggle.closest('[data-reader-save-menu]');
+      const popover = menu?.querySelector('[data-save-menu-popover]');
+      if (popover) {
+        const nextOpen = popover.hidden;
+        popover.hidden = !nextOpen;
+        saveMenuToggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+      }
+      return;
+    }
     // Reader's Roll 선택 저장 모드 시작
     const selectRollBtn = e.target.closest('[data-select-roll]');
     if (selectRollBtn) {
@@ -2134,6 +2163,10 @@
     if (saveBtn) {
       e.preventDefault();
       e.stopPropagation();
+      const popover = saveBtn.closest('[data-save-menu-popover]');
+      const menuToggle = saveBtn.closest('[data-reader-save-menu]')?.querySelector('[data-save-menu-toggle]');
+      if (popover) popover.hidden = true;
+      if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
       handleSaveRollImage(saveBtn);
       return;
     }

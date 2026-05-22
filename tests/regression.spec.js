@@ -1353,6 +1353,8 @@ test('Reader Roll 선택 저장은 고른 사진만 저장 대상으로 보낸�
     };
   });
 
+  await page.locator('[data-save-menu-toggle="reader"][data-film-key="ultramax"]').click();
+  await expect(page.locator('[data-save-menu-popover]')).toBeVisible();
   await page.locator('[data-select-roll="reader"][data-film-key="ultramax"]').click();
   await expect(page.locator('#readerGrid-ultramax')).toHaveClass(/is-selecting/);
   await page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(0).click();
