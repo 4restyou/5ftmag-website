@@ -905,6 +905,9 @@
           <div class="modal-section-actions">
             <button type="button" class="modal-view-toggle" data-view-toggle aria-label="기본 그리드로 전환">기본 그리드</button>
             <button type="button" class="modal-view-save" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="필름스트립 이미지로 저장">이미지로 저장</button>
+            <button type="button" class="modal-view-save" data-select-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="원하는 사진만 골라 저장">선택 저장</button>
+            <button type="button" class="modal-view-save reader-selected-save" data-save-selected-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden disabled aria-label="선택한 사진만 이미지로 저장">선택한 0장 저장</button>
+            <button type="button" class="modal-view-cancel" data-select-cancel="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="사진 선택 취소">취소</button>
           </div>
         </div>
         <p class="reader-roll-intro">
@@ -1042,6 +1045,8 @@
     let archiveOpen = false;
     let rollRows = rollByNumber(activeRoll).rows;
     let visible = rollRows;
+    let selectionMode = false;
+    const selectedExportKeys = new Set();
     const rollIntro = modalContent.querySelector('.reader-roll-intro');
     if (submitBtn) submitBtn.textContent = rollState.total > 0 ? '컷 채우기' : (isFeatured ? '컷 채우기' : '첫 컷 채우기');
 
@@ -1055,6 +1060,49 @@
     const submissionsForPerson = (personKey) => submissions
       .filter(sub => personKeyOf(sub) === personKey)
       .slice(0, 120);
+
+    const exportKeyOf = (sub) => String(sub?.id || sub?.storage_path || sub?.image || `${personKeyOf(sub)}-${sub?.created_at || sub?.createdAt || ''}`);
+
+    function readerSelectionControls() {
+      const section = grid.closest('.modal-section-reader');
+      return {
+        fullSave: section?.querySelector(`[data-save-roll="reader"][data-film-key="${filmKey}"]`),
+        selectStart: section?.querySelector(`[data-select-roll="reader"][data-film-key="${filmKey}"]`),
+        selectedSave: section?.querySelector(`[data-save-selected-roll="reader"][data-film-key="${filmKey}"]`),
+        cancel: section?.querySelector(`[data-select-cancel="reader"][data-film-key="${filmKey}"]`),
+      };
+    }
+
+    function updateReaderSelectionControls() {
+      const { fullSave, selectStart, selectedSave, cancel } = readerSelectionControls();
+      const hasPhotos = visible.length > 0;
+      const selectedCount = selectedExportKeys.size;
+      if (fullSave) fullSave.hidden = !hasPhotos || selectionMode;
+      if (selectStart) selectStart.hidden = !hasPhotos || selectionMode;
+      if (selectedSave) {
+        selectedSave.hidden = !selectionMode;
+        selectedSave.disabled = selectedCount < 1;
+        selectedSave.textContent = `선택한 ${selectedCount}장 저장`;
+      }
+      if (cancel) cancel.hidden = !selectionMode;
+      grid.classList.toggle('is-selecting', selectionMode);
+    }
+
+    function setReaderSelectionMode(next) {
+      selectionMode = !!next;
+      selectedExportKeys.clear();
+      renderReaderSlots();
+      updateReaderSelectionControls();
+    }
+
+    function toggleReaderSelection(sub) {
+      const key = exportKeyOf(sub);
+      if (!key) return;
+      if (selectedExportKeys.has(key)) selectedExportKeys.delete(key);
+      else selectedExportKeys.add(key);
+      renderReaderSlots();
+      updateReaderSelectionControls();
+    }
 
     function authorsForRoll(rows) {
       const authorBuckets = new Map();
@@ -1113,6 +1161,8 @@
     }
 
     function setActivePerson(nextKey) {
+      selectionMode = false;
+      selectedExportKeys.clear();
       activePerson = nextKey || 'all';
       visible = activePerson === 'all'
         ? rollRows
@@ -1134,6 +1184,8 @@
 
     function setActiveRoll(nextNumber) {
       const nextRoll = rollByNumber(nextNumber);
+      selectionMode = false;
+      selectedExportKeys.clear();
       activeRoll = nextRoll.number;
       activePerson = 'all';
       archiveOpen = activeRoll !== rollState.currentNumber ? true : archiveOpen;
@@ -1154,20 +1206,25 @@
         const sub = visible[i];
         if (!sub) {
           slot.className = 'reader-slot is-empty';
+          delete slot.dataset.exportKey;
           slot.setAttribute('aria-label', `프레임 ${i + 1} — 비어 있음`);
           slot.innerHTML = `<span class="reader-slot-frame">${String(i + 1).padStart(2, '0')}</span>`;
           continue;
         }
         const personKey = personKeyOf(sub);
+        const exportKey = exportKeyOf(sub);
+        const isSelected = selectedExportKeys.has(exportKey);
         const instaHandle = (sub.instagram || '').replace(/^@/, '');
-        slot.className = 'reader-slot is-filled';
+        slot.className = `reader-slot is-filled${selectionMode ? ' is-selecting' : ''}${isSelected ? ' is-selected' : ''}`;
+        slot.dataset.exportKey = exportKey;
         slot.setAttribute('aria-label', `${personLabelOf(sub)}의 사진`);
         if (instaHandle) slot.setAttribute('data-instagram', instaHandle);
         slot.innerHTML = `
-          <button type="button" class="reader-slot-link" aria-label="${escapeAttr(personLabelOf(sub))}의 사진 크게 보기">
+          <button type="button" class="reader-slot-link" aria-label="${escapeAttr(selectionMode ? `${personLabelOf(sub)}의 사진 선택` : `${personLabelOf(sub)}의 사진 크게 보기`)}" aria-pressed="${selectionMode ? String(isSelected) : 'false'}">
             <span class="reader-slot-window">
               <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
             </span>
+            <span class="reader-slot-check" aria-hidden="true">${isSelected ? '✓' : ''}</span>
             <span class="reader-slot-author" data-person-key="${escapeAttr(personKey)}">${escapeAttr(personLabelOf(sub))}</span>
           </button>`;
         const img = slot.querySelector('img');
@@ -1181,6 +1238,7 @@
       // 이미지로 저장 버튼 — 사진 한 장 이상 있을 때만 노출
       const saveBtn = modalContent.querySelector(`[data-save-roll="reader"][data-film-key="${filmKey}"]`);
       if (saveBtn) saveBtn.hidden = visible.length === 0;
+      updateReaderSelectionControls();
     }
 
     function renderContributorView(personKey) {
@@ -1205,6 +1263,9 @@
       });
 
       grid.hidden = true;
+      selectionMode = false;
+      selectedExportKeys.clear();
+      updateReaderSelectionControls();
       if (personFilter) personFilter.hidden = true;
       contributorView.hidden = false;
       if (rollIntro) {
@@ -1277,6 +1338,16 @@
     // 채워진 슬롯 클릭 → reader 라이트박스 (인스타로 바로 점프 X)
     grid.onclick = (e) => {
       const author = e.target.closest('.reader-slot-author[data-person-key]');
+      if (selectionMode) {
+        const slot = e.target.closest('.reader-slot.is-filled');
+        if (!slot) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const idx = parseInt(slot.dataset.slotIndex, 10);
+        if (Number.isNaN(idx) || idx >= visible.length) return;
+        toggleReaderSelection(visible[idx]);
+        return;
+      }
       if (author) {
         e.preventDefault();
         e.stopPropagation();
@@ -1289,6 +1360,12 @@
       if (Number.isNaN(idx) || idx >= visible.length) return;
       openFilmReaderLightbox(visible, idx);
     };
+    grid.addEventListener('reader-select-start', () => {
+      setReaderSelectionMode(true);
+    });
+    grid.addEventListener('reader-select-cancel', () => {
+      setReaderSelectionMode(false);
+    });
     if (rollSwitcher) {
       rollSwitcher.onclick = (e) => {
         const action = e.target.closest('[data-roll-action]');
@@ -2022,6 +2099,36 @@
       handleSaveContribFilmImage(contribSaveBtn);
       return;
     }
+    // Reader's Roll 선택 저장 모드 시작
+    const selectRollBtn = e.target.closest('[data-select-roll]');
+    if (selectRollBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const filmKey = selectRollBtn.dataset.filmKey;
+      const grid = document.getElementById(`readerGrid-${filmKey}`);
+      if (grid) {
+        grid.dispatchEvent(new CustomEvent('reader-select-start', { bubbles: false }));
+      }
+      return;
+    }
+    const selectedSaveBtn = e.target.closest('[data-save-selected-roll]');
+    if (selectedSaveBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSaveSelectedRollImage(selectedSaveBtn);
+      return;
+    }
+    const selectCancelBtn = e.target.closest('[data-select-cancel]');
+    if (selectCancelBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const filmKey = selectCancelBtn.dataset.filmKey;
+      const grid = document.getElementById(`readerGrid-${filmKey}`);
+      if (grid) {
+        grid.dispatchEvent(new CustomEvent('reader-select-cancel', { bubbles: false }));
+      }
+      return;
+    }
     // 이미지로 저장 버튼
     const saveBtn = e.target.closest('[data-save-roll]');
     if (saveBtn) {
@@ -2112,6 +2219,42 @@
     } catch (err) {
       console.error('[save-roll]', err);
       window.notify?.('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  async function handleSaveSelectedRollImage(btn) {
+    const kind = btn.dataset.saveSelectedRoll;
+    const filmKey = btn.dataset.filmKey;
+    const target = kind === 'reader'
+      ? document.getElementById(`readerGrid-${filmKey}`)
+      : null;
+    if (!target) return;
+    const selectedCount = target.querySelectorAll('.reader-slot.is-filled.is-selected').length;
+    if (selectedCount < 1) {
+      window.notify?.('저장할 사진을 먼저 선택해 주세요.', 'danger');
+      return;
+    }
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중…';
+    try {
+      const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, kind, { onlySelected: true });
+      const f = filmsData[filmKey] || {};
+      const filmName = (f.displayName || f.name || filmKey).toString();
+      const authors = window.FilmsRollExport.collectAuthorsForExport(target, kind, { onlySelected: true });
+      const filmThumb = (f.canThumbnailStatus === 'set' && f.canThumbnail) ? f.canThumbnail : null;
+      const canvas = await window.FilmsRollExport.composeBrandedRollCanvas(stripCanvas, { filmName, authors, filmThumb });
+      const slug = window.FilmsRollExport.slugifyExportName(filmName);
+      const d = new Date();
+      const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+      window.FilmsRollExport.downloadCanvas(canvas, `5ftmag-readers-roll-selected-${slug}-${stamp}.jpg`);
+      target.dispatchEvent(new CustomEvent('reader-select-cancel', { bubbles: false }));
+    } catch (err) {
+      console.error('[save-selected-roll]', err);
+      window.notify?.('선택 이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'danger');
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;

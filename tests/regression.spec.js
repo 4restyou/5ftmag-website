@@ -1279,6 +1279,96 @@ test('Reader 라이트박스에서 사진 좋아요와 작가 모아보기가 �
   await expect(page.locator('#readerContributorView-ultramax')).toContainText('2컷 · 2개 필름');
 });
 
+test('Reader Roll 선택 저장은 고른 사진만 저장 대상으로 보낸다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    const rows = Array.from({ length: 4 }, (_, i) => ({
+      id: `select-${i + 1}`,
+      image: `data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==#select${i + 1}`,
+      author: i % 2 ? '@select_b' : '@select_a',
+      submitterName: i % 2 ? 'select_b' : 'select_a',
+      instagram: i % 2 ? '@select_b' : '@select_a',
+      film: 'Kodak UltraMax 400',
+      camera: 'Leica M6',
+      created_at: new Date(2026, 0, i + 1).toISOString(),
+      createdAt: new Date(2026, 0, i + 1).toISOString(),
+      published: true,
+    }));
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        listApproved: async () => rows,
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/films.html');
+  await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await expect(page.locator('#readerGrid-ultramax .reader-slot.is-filled')).toHaveCount(4);
+  await page.evaluate(() => {
+    window.__selectedSave = null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 12;
+    canvas.height = 12;
+    window.FilmsRollExport.renderRollStripCanvas = async (target, kind, options) => {
+      window.__selectedSave = {
+        kind,
+        onlySelected: !!options?.onlySelected,
+        count: target.querySelectorAll('.reader-slot.is-filled.is-selected').length,
+      };
+      return canvas;
+    };
+    window.FilmsRollExport.composeBrandedRollCanvas = async () => canvas;
+    window.FilmsRollExport.downloadCanvas = (_canvas, filename) => {
+      window.__selectedSave.filename = filename;
+    };
+  });
+
+  await page.locator('[data-select-roll="reader"][data-film-key="ultramax"]').click();
+  await expect(page.locator('#readerGrid-ultramax')).toHaveClass(/is-selecting/);
+  await page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(0).click();
+  await page.locator('#readerGrid-ultramax .reader-slot.is-filled').nth(2).click();
+  const selectedSave = page.locator('[data-save-selected-roll="reader"][data-film-key="ultramax"]');
+  await expect(selectedSave).toHaveText('선택한 2장 저장');
+  await expect(selectedSave).toBeEnabled();
+  await selectedSave.click();
+  await expect.poll(async () => page.evaluate(() => window.__selectedSave)).toMatchObject({
+    kind: 'reader',
+    onlySelected: true,
+    count: 2,
+  });
+  await expect(page.locator('#readerGrid-ultramax')).not.toHaveClass(/is-selecting/);
+});
+
 test('Reader Roll 계산 모듈은 36컷 단위로 현재 롤을 나눈다', async ({ page }) => {
   await page.goto('/films.html');
   const result = await page.evaluate(() => {

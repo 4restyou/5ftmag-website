@@ -44,9 +44,12 @@
     });
   }
 
-  function collectRollExportFrames(target, kind) {
+  function collectRollExportFrames(target, kind, options = {}) {
     if (kind === 'reader') {
-      return [...target.querySelectorAll('.reader-slot.is-filled')].map(slot => {
+      const selector = options.onlySelected
+        ? '.reader-slot.is-filled.is-selected'
+        : '.reader-slot.is-filled';
+      return [...target.querySelectorAll(selector)].map(slot => {
         const img = slot.querySelector('.reader-slot-window img');
         if (!img) return null;
         return {
@@ -201,7 +204,7 @@
     ctx.restore();
   }
 
-  function collectAuthorsForExport(target, kind, ctx) {
+  function collectAuthorsForExport(target, kind, ctx = {}) {
     const seen = new Set();
     const list = [];
     function push(raw) {
@@ -213,7 +216,10 @@
       list.push(v);
     }
     if (kind === 'reader') {
-      target.querySelectorAll('.reader-slot.is-filled').forEach(slot => {
+      const selector = ctx.onlySelected
+        ? '.reader-slot.is-filled.is-selected'
+        : '.reader-slot.is-filled';
+      target.querySelectorAll(selector).forEach(slot => {
         const ig = slot.getAttribute('data-instagram');
         if (ig) push(ig);
         else push(slot.querySelector('.reader-slot-author')?.textContent || '');
@@ -243,8 +249,8 @@
     return text.slice(0, lo) + ell;
   }
 
-  async function renderRollStripCanvas(target, kind) {
-    const frames = collectRollExportFrames(target, kind);
+  async function renderRollStripCanvas(target, kind, options = {}) {
+    const frames = collectRollExportFrames(target, kind, options);
     const cols = 6;
     const tileW = 380;
     const tileH = 345;

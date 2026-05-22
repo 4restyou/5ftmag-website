@@ -345,6 +345,31 @@
   border-color: rgba(255,255,255,0.35);
   color: #fff;
 }
+.modal-view-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  box-sizing: border-box;
+  line-height: 1;
+  font: inherit;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.72);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.modal-view-cancel:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.38);
+  color: #fff;
+}
 
 .modal-gallery[data-view="contact"] {
   background: transparent;
@@ -1733,6 +1758,58 @@
 }
 .reader-slot-link:hover .reader-slot-window img.is-portrait {
   transform: translate(-50%, -50%) rotate(90deg) scale(1.03);
+}
+.reader-grid.is-selecting .reader-slot.is-filled {
+  cursor: pointer;
+}
+.reader-grid.is-selecting .reader-slot.is-filled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.38);
+  z-index: 4;
+  pointer-events: none;
+}
+.reader-grid.is-selecting .reader-slot.is-selected::before {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.65);
+}
+.reader-grid.is-selecting .reader-slot-window img,
+.reader-grid.is-selecting .reader-slot-link:hover .reader-slot-window img {
+  transform: none;
+}
+.reader-grid.is-selecting .reader-slot-window img.is-portrait,
+.reader-grid.is-selecting .reader-slot-link:hover .reader-slot-window img.is-portrait {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.reader-slot-check {
+  position: absolute;
+  top: 12%;
+  right: 6%;
+  width: 28px;
+  height: 28px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  color: var(--accent);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: var(--fw-heading);
+  line-height: 1;
+  z-index: 5;
+  pointer-events: none;
+}
+.reader-grid.is-selecting .reader-slot-check {
+  display: inline-flex;
+}
+.reader-grid.is-selecting .reader-slot:not(.is-selected) .reader-slot-check::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.74);
 }
 
 .reader-slot-author {
