@@ -539,6 +539,10 @@ button.disc-cell {
   display: block;
 }
 
+[data-theme="dark"] img[src$="logo-kimhyuna.svg"].logo-dark {
+  filter: invert(1);
+}
+
 footer {
   border-top: 1px solid var(--border);
   padding: 28px 24px;
