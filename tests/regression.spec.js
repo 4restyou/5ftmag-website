@@ -1531,3 +1531,151 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
   await expect(page.locator('#opsTotalUploads')).toHaveText('14');
   await expect(page.locator('#up-today')).toHaveText('3');
 });
+
+test('관리 필름 카탈로그는 Reader 승인 사진 장수를 필름별로 표시한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'editor-1', email: 'editor@5ftmag.com' } }),
+        signOut: async () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: true, display_name: '편집자' }),
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      films: {
+        listAll: async () => [
+          {
+            slug: 'fujineopan1600',
+            brand: 'Fujifilm',
+            name: 'Neopan 1600 Super Presto',
+            display_name: 'Fujifilm Neopan 1600 Super Presto',
+            tier: 'library',
+            aliases: ['Fuji Neopan 1600'],
+          },
+          {
+            slug: 'fujineopan400',
+            brand: 'Fujifilm',
+            name: 'Neopan 400 Presto',
+            display_name: 'Fujifilm Neopan 400 Presto',
+            tier: 'library',
+            aliases: [],
+          },
+        ],
+      },
+      submissions: {
+        listApproved: async () => [
+          { film: 'Fuji Neopan 1600' },
+          { film: 'Fujifilm Neopan 1600 Super Presto' },
+          { film: 'Fujifilm Neopan 400 Presto' },
+        ],
+      },
+    };
+  });
+
+  await page.goto('/admin/films.html');
+  await expect(page.locator('#app')).toBeVisible();
+  const rows = await page.locator('#tbody tr').evaluateAll(nodes => nodes.map(row => ({
+    title: row.querySelector('.col-display')?.textContent || '',
+    count: row.children[3]?.textContent?.trim() || '',
+  })));
+  expect(rows.find(row => row.title.includes('Neopan 1600'))?.count).toBe('2');
+  expect(rows.find(row => row.title.includes('Neopan 400'))?.count).toBe('1');
+});
+
+test('관리 통계 상위 카메라는 띄어쓰기와 별칭 차이를 병합한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    const rows = Array.from({ length: 4 }, (_, i) => ({
+      day: `2026-05-${String(17 + i).padStart(2, '0')}`,
+      views: 0,
+      sessions: 0,
+      uploads: 0,
+      approved: 0,
+    }));
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'editor-1', email: 'editor@5ftmag.com' } }),
+        signOut: async () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: true, display_name: '편집자' }),
+      },
+      analytics: {
+        summary: async () => null,
+        daily: async () => rows,
+        topPaths: async () => [],
+        referrers: async () => [],
+        regions: async () => [],
+        languages: async () => [],
+        sessionStats: async () => null,
+        dwellSummary: async () => null,
+        dwellByPath: async () => [],
+        uploadsSummary: async () => ({ total_uploads: 0, total_pending: 0, uploads_today: 0 }),
+        uploadsDaily: async () => rows,
+        uploadsTopContributors: async () => [],
+        uploadsTopFilms: async () => [],
+        uploadsTopFilmsAll: async () => [],
+        uploadsTopCameras: async () => [
+          { camera: 'Pentax17', uploads: 46, approved: 46 },
+          { camera: 'Pentax 17', uploads: 33, approved: 33 },
+          { camera: 'Leica M6', uploads: 10, approved: 10 },
+        ],
+        uploadsTopCamerasAll: async () => [],
+        uploadsThemeRatio: async () => null,
+        clientErrorsRecent: async () => [],
+      },
+      market: {
+        adminReportCount: async () => 0,
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+    };
+  });
+
+  await page.goto('/admin/analytics.html');
+  await expect(page.locator('#topCameras')).toContainText('Pentax 17');
+  await expect(page.locator('#topCameras')).toContainText('79');
+  await expect(page.locator('#topCameras')).not.toContainText('Pentax17');
+});

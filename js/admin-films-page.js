@@ -4,6 +4,7 @@ const STATE = {
   user: null,
   isEditor: false,
   films: [],
+  readerCounts: new Map(),
   filter: '',
   editingSlug: null,
 };
@@ -48,8 +49,46 @@ $('gateLogin').addEventListener('click', async () => {
 // 목록 로드 + 렌더
 // ═════════════════════════════════════════
 async function reload() {
-  STATE.films = await db().films.listAll();
+  const [films, submissions] = await Promise.all([
+    db().films.listAll(),
+    db().submissions.listApproved(null),
+  ]);
+  STATE.films = Array.isArray(films) ? films : [];
+  STATE.readerCounts = buildReaderCountsByFilm(STATE.films, submissions || []);
   render();
+}
+
+function normalizeFilmLabel(value) {
+  return String(value ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
+}
+
+function filmAliases(film) {
+  return [
+    ...(Array.isArray(film.aliases) ? film.aliases : []),
+    film.display_name,
+    film.displayName,
+    film.name,
+    `${film.brand || ''} ${film.name || ''}`.trim(),
+  ].filter(Boolean);
+}
+
+function buildReaderCountsByFilm(films, submissions) {
+  const aliasToSlug = new Map();
+  for (const film of films || []) {
+    if (!film?.slug) continue;
+    for (const alias of filmAliases(film)) {
+      const key = normalizeFilmLabel(alias);
+      if (key && !aliasToSlug.has(key)) aliasToSlug.set(key, film.slug);
+    }
+  }
+
+  const counts = new Map();
+  for (const row of submissions || []) {
+    const slug = aliasToSlug.get(normalizeFilmLabel(row.film));
+    if (!slug) continue;
+    counts.set(slug, (counts.get(slug) || 0) + 1);
+  }
+  return counts;
 }
 
 function applyFilter(films, q) {
@@ -73,7 +112,7 @@ function render() {
   $('tbody').innerHTML = filtered.map(f => {
     const display = f.display_name || `${f.brand} ${f.name}`;
     const spec = [f.iso ? `ISO ${f.iso}` : '', f.type, f.format].filter(Boolean).join(' · ');
-    const photoCount = Array.isArray(f.photos) ? f.photos.length : 0;
+    const readerCount = STATE.readerCounts.get(f.slug) || 0;
     const hidden = !!f.is_hidden;
     const hideLabel = hidden ? '복원' : '숨김';
     return `
@@ -84,7 +123,7 @@ function render() {
         </td>
         <td class="col-meta">${escapeHtml(spec)}</td>
         <td><span class="badge ${f.tier === 'featured' ? 'featured' : ''}">${escapeHtml(f.tier || 'library')}</span></td>
-        <td class="col-meta">${photoCount}</td>
+        <td class="col-meta">${readerCount}</td>
         <td class="col-actions">
           <button type="button" class="row-btn" data-edit="${escapeAttr(f.slug)}">수정</button>
           <button type="button" class="row-btn" data-toggle-hidden="${escapeAttr(f.slug)}" data-current-hidden="${hidden}">${hideLabel}</button>

@@ -6,6 +6,8 @@ const STATE = {
   days: 30,
   filmsMode: 'range',
   camerasMode: 'range',
+  cameraAliasMap: new Map(),
+  cameraDisplayOverrides: new Map(),
   ops: { previous: null, timer: null, loading: false },
 };
 
@@ -39,6 +41,83 @@ function fmtDay(d) {
 
 function fmtClock(date = new Date()) {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+async function loadCameraOverrides() {
+  STATE.cameraAliasMap = new Map();
+  STATE.cameraDisplayOverrides = new Map();
+  if (!db()?.cameraOverrides) return;
+  try {
+    const overrides = await db().cameraOverrides.list();
+    for (const [key, row] of overrides || []) {
+      if (row.alias_of) STATE.cameraAliasMap.set(key, row.alias_of);
+      if (row.display) STATE.cameraDisplayOverrides.set(key, row.display);
+    }
+  } catch (_) {}
+}
+
+function normalizeCameraForStats(label) {
+  if (typeof window.normalizeCamera === 'function') {
+    const n = window.normalizeCamera(label);
+    return {
+      key: n.key || String(label || '').toLowerCase().replace(/[\s\-_]/g, ''),
+      brand: n.brand || '',
+      original: n.original || label || '',
+    };
+  }
+  return {
+    key: String(label || '').toLowerCase().replace(/[\s\-_]/g, ''),
+    brand: '',
+    original: label || '',
+  };
+}
+
+function canonicalCameraKey(label) {
+  const key = normalizeCameraForStats(label).key;
+  return STATE.cameraAliasMap.get(key) || key;
+}
+
+function pickCameraDisplayForStats(originals, canonicalKey) {
+  const override = STATE.cameraDisplayOverrides.get(canonicalKey);
+  if (override) return override;
+  const normalized = originals.map(label => normalizeCameraForStats(label)).filter(n => n.key);
+  const brand = normalized.find(n => n.brand)?.brand;
+  if (brand && /^[a-z0-9]+$/i.test(canonicalKey) && /^\d+[a-z]?$/i.test(canonicalKey)) {
+    return `${formatCameraBrand(brand)} ${canonicalKey.toUpperCase()}`;
+  }
+  const pickDisplay = window.pickCameraDisplay || ((arr) => arr[0] || '');
+  return pickDisplay(originals) || originals[0] || '-';
+}
+
+function formatCameraBrand(brand) {
+  return String(brand || '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(part => part ? part[0].toUpperCase() + part.slice(1) : '')
+    .join(' ');
+}
+
+function mergeTopCameraRows(rows) {
+  const grouped = new Map();
+  for (const row of rows || []) {
+    const label = String(row.camera || '').trim();
+    const key = canonicalCameraKey(label);
+    if (!key) continue;
+    const current = grouped.get(key) || { camera: '', uploads: 0, approved: 0, originals: [] };
+    current.uploads += Number(row.uploads) || 0;
+    current.approved += Number(row.approved) || 0;
+    if (label) current.originals.push(label);
+    grouped.set(key, current);
+  }
+  return [...grouped.entries()].map(([key, row]) => ({
+    camera: pickCameraDisplayForStats(row.originals, key),
+    uploads: row.uploads,
+    approved: row.approved,
+  })).sort((a, b) => (
+    (Number(b.uploads) || 0) - (Number(a.uploads) || 0)
+    || (Number(b.approved) || 0) - (Number(a.approved) || 0)
+    || String(a.camera).localeCompare(String(b.camera), 'ko')
+  )).slice(0, 10);
 }
 
 async function checkAccess() {
@@ -627,6 +706,7 @@ function renderTopContributors(rows) {
 
 function renderTopByKey(tbodyId, rows, keyField) {
   const tbody = $(tbodyId);
+  if (keyField === 'camera') rows = mergeTopCameraRows(rows);
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
     return;
@@ -726,7 +806,7 @@ async function reload() {
   $('topCamerasRangeLabel').textContent  = STATE.camerasMode === 'all' ? '전체 누적' : label;
 
   const topFilmsFn   = STATE.filmsMode   === 'all' ? db().analytics.uploadsTopFilmsAll(10)   : db().analytics.uploadsTopFilms(d, 10);
-  const topCamerasFn = STATE.camerasMode === 'all' ? db().analytics.uploadsTopCamerasAll(10) : db().analytics.uploadsTopCameras(d, 10);
+  const topCamerasFn = STATE.camerasMode === 'all' ? db().analytics.uploadsTopCamerasAll(200) : db().analytics.uploadsTopCameras(d, 200);
 
   const [
     summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths,
@@ -749,6 +829,8 @@ async function reload() {
     db().analytics.uploadsThemeRatio(d),
     getPendingReportCount(),
   ]);
+
+  await loadCameraOverrides();
 
   renderSummary(summary);
   renderChart(daily);
