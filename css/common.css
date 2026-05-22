@@ -539,7 +539,7 @@ button.disc-cell {
   display: block;
 }
 
-[data-theme="dark"] img[src$="logo-kimhyuna.svg"].logo-dark {
+[data-theme="dark"] img[src$="logo-kimhyuna-lockup.svg"].logo-dark {
   filter: invert(1);
 }
 
