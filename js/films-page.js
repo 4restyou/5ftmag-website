@@ -1327,7 +1327,7 @@
             <span class="reader-slot-window">
               <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
             </span>
-            <span class="reader-slot-check" aria-hidden="true">${isSelected ? '✓' : ''}</span>
+            <span class="reader-slot-check" aria-hidden="true">${isSelected ? String(i + 1) : ''}</span>
             <span class="reader-slot-author" data-person-key="${escapeAttr(personKey)}">${escapeAttr(personLabelOf(sub))}</span>
           </button>`;
         const img = slot.querySelector('img');
@@ -2365,7 +2365,10 @@
     photo.classList.toggle('is-selected', selected);
     photo.setAttribute('aria-pressed', String(selected));
     const check = photo.querySelector('.reader-contributor-photo-check');
-    if (check) check.textContent = selected ? '✓' : '';
+    if (check) {
+      const index = Number(photo.dataset.photoIndex);
+      check.textContent = selected && Number.isFinite(index) ? String(index + 1) : '';
+    }
     updateContributorSelectionControls(photo.closest('.reader-contributor-group'));
   }
 
