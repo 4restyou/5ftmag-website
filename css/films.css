@@ -1342,6 +1342,24 @@
   max-width: 560px;
   margin: -10px 0 22px;
 }
+.reader-roll-controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 18px;
+}
+.reader-roll-control-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.reader-roll-view-actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
 .reader-roll-switcher {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1355,6 +1373,9 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.055);
   box-shadow: 0 14px 42px rgba(0, 0, 0, 0.18);
+}
+.reader-roll-controls .reader-roll-switcher {
+  margin: 0;
 }
 .reader-roll-label {
   display: inline-flex;
@@ -1439,6 +1460,9 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: 0 0 18px;
+}
+.reader-roll-controls .reader-person-filter {
+  margin: 0;
 }
 .reader-person-chip {
   appearance: none;
@@ -2034,6 +2058,13 @@
   .reader-contributor-grid { grid-template-columns: repeat(4, 1fr); }
   .reader-contributor-head { align-items: flex-start; flex-direction: column; }
   .reader-contributor-actions { justify-content: flex-start; }
+  .reader-roll-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .reader-roll-view-actions {
+    justify-content: flex-start;
+  }
   .films-section-head-library { margin-top: 64px; }
 }
 @media (max-width: 640px) {

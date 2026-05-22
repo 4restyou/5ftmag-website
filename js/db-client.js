@@ -218,6 +218,34 @@
     },
   };
 
+  function mapApprovedSubmission(r) {
+    const sname = r.submitter_name || '';
+    const ig    = r.instagram || '';
+    const author = sname && ig ? `${sname} (${ig})` : (sname || ig);
+    return {
+      id: 'sub-' + r.id,
+      image: `${URL_}/storage/v1/object/public/${BUCKET}/${r.storage_path}`,
+      author,
+      submitterName: sname,
+      instagram: ig,
+      instagramUrl: ig ? `https://instagram.com/${ig.replace(/^@/, '')}` : '',
+      film: r.film,
+      camera: r.camera,
+      caption: r.caption,
+      createdAt: r.created_at,
+      created_at: r.created_at,
+      published: true,
+      _source: 'submission',
+    };
+  }
+
+  function cleanFilmNames(filmNames) {
+    return Array.from(new Set((Array.isArray(filmNames) ? filmNames : [filmNames])
+      .map(name => String(name || '').trim())
+      .filter(Boolean)))
+      .slice(0, 40);
+  }
+
   // ─── 독자 사진 (공개 read view + 본인 INSERT + Storage 업로드) ───
   const submissions = {
     async listApproved(limit = null) {
@@ -238,25 +266,32 @@
         rows.push(...page);
         if (page.length < (to - from + 1)) break;
       }
-      return rows.map(r => {
-        const sname = r.submitter_name || '';
-        const ig    = r.instagram || '';
-        const author = sname && ig ? `${sname} (${ig})` : (sname || ig);
-        return {
-          id: 'sub-' + r.id,
-          image: `${URL_}/storage/v1/object/public/${BUCKET}/${r.storage_path}`,
-          author,
-          submitterName: sname,
-          instagram: ig,
-          instagramUrl: ig ? `https://instagram.com/${ig.replace(/^@/, '')}` : '',
-          film: r.film,
-          camera: r.camera,
-          caption: r.caption,
-          createdAt: r.created_at,
-          published: true,
-          _source: 'submission',
-        };
-      });
+      return rows.map(mapApprovedSubmission);
+    },
+    async countApprovedByFilms(filmNames) {
+      const c = client(); if (!c) return 0;
+      const names = cleanFilmNames(filmNames);
+      if (!names.length) return 0;
+      const { count, error } = await c.from('reader_submissions_approved')
+        .select('id', { count: 'exact', head: true })
+        .in('film', names);
+      if (error) return 0;
+      return Number(count) || 0;
+    },
+    async listApprovedByFilms(filmNames, opts = {}) {
+      const c = client(); if (!c) return [];
+      const names = cleanFilmNames(filmNames);
+      if (!names.length) return [];
+      const from = Math.max(0, Math.floor(Number(opts.from) || 0));
+      const to = Math.max(from, Math.floor(Number(opts.to) || from));
+      const ascending = opts.ascending !== false;
+      const { data, error } = await c.from('reader_submissions_approved')
+        .select('*')
+        .in('film', names)
+        .order('created_at', { ascending })
+        .range(from, to);
+      if (error) return [];
+      return (data || []).map(mapApprovedSubmission);
     },
     async create(record) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };

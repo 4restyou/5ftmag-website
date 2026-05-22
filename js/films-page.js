@@ -916,7 +916,18 @@
         <div class="modal-section-head">
           <span class="modal-section-tag">READER'S ROLL</span>
           <span class="modal-section-meta" id="readerRollCounter-${filmKey}">0 / ${ROLL_LIMIT}</span>
-          <div class="modal-section-actions">
+        </div>
+        <p class="reader-roll-intro">
+          ${isFeatured
+            ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.'
+            : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.'}
+        </p>
+        <div class="reader-roll-controls">
+          <div class="reader-roll-control-main">
+            <div class="reader-roll-switcher" id="readerRollSwitcher-${filmKey}" hidden></div>
+            <div class="reader-person-filter" id="readerPersonFilter-${filmKey}" hidden></div>
+          </div>
+          <div class="modal-section-actions reader-roll-view-actions">
             <button type="button" class="modal-view-toggle" data-view-toggle aria-label="기본 그리드로 전환">기본 그리드</button>
             <div class="reader-save-menu" data-reader-save-menu hidden>
               <button type="button" class="modal-view-save" data-save-menu-toggle="reader" data-film-key="${escapeAttr(filmKey)}" aria-expanded="false" aria-label="이미지 저장 방식 선택">이미지로 저장</button>
@@ -929,13 +940,6 @@
             <button type="button" class="modal-view-cancel" data-select-cancel="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="사진 선택 취소">취소</button>
           </div>
         </div>
-        <p class="reader-roll-intro">
-          ${isFeatured
-            ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.'
-            : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.'}
-        </p>
-        <div class="reader-roll-switcher" id="readerRollSwitcher-${filmKey}" hidden></div>
-        <div class="reader-person-filter" id="readerPersonFilter-${filmKey}" hidden></div>
         <div class="reader-grid" data-view="contact" id="readerGrid-${filmKey}">
           ${slotsHTML}
         </div>
@@ -1011,22 +1015,9 @@
     if (!film) return;
     const isFeatured = film.tier === 'featured';
 
-    const submissions = await getApprovedSubmissions();
-    if (!submissions.length) return;
-
-    // 필름 alias 매칭 — reader-submissions.js의 공유 정규화 함수 사용
-    // (없으면 안전한 폴백: 공백/하이픈/언더스코어/괄호 제거 + 소문자)
+    const rawAliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
     const normalize = window.normalizeFilmName
       || ((s) => String(s || '').toLowerCase().replace(/[\s\-_+()/.]+/g, ''));
-    const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
-    const aliasSet = new Set(aliases.map(normalize));
-
-    let matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
-    // 카메라 필터가 활성화돼 있으면 그 카메라로 찍힌 사진만 모달 안에서 노출
-    if (currentCameras.size > 0 && typeof window.normalizeCamera === 'function') {
-      matched = matched.filter(s => currentCameras.has(resolveCanonicalCameraKey(window.normalizeCamera(s.camera).key)));
-    }
-    const rollState = buildReaderRollState(matched);
 
     const grid = document.getElementById(`readerGrid-${filmKey}`);
     const counter = document.getElementById(`readerRollCounter-${filmKey}`);
@@ -1036,15 +1027,73 @@
     const submitBtn = modalContent.querySelector('.reader-submit-btn');
     if (!grid) return;
 
+    async function waitForRollRangeApi(timeoutMs = 2500) {
+      if (currentCameras.size > 0) return null;
+      const step = 100;
+      for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
+        const api = window.MagDB?.submissions;
+        if (
+          window.MagDB?.isReady?.() &&
+          typeof api?.countApprovedByFilms === 'function' &&
+          typeof api?.listApprovedByFilms === 'function'
+        ) {
+          return api;
+        }
+        await new Promise(r => setTimeout(r, step));
+      }
+      return null;
+    }
+
+    const rangeApi = await waitForRollRangeApi();
+    const aliasSet = new Set(rawAliases.map(normalize));
+    let fallbackSubmissions = null;
+    let fallbackRollState = null;
+    let rollTotal = 0;
+    let currentNumber = 1;
+    const rollRowsCache = new Map();
+
+    if (rangeApi) {
+      rollTotal = await rangeApi.countApprovedByFilms(rawAliases);
+      currentNumber = Math.max(1, Math.ceil(Math.max(rollTotal, 1) / ROLL_LIMIT));
+    } else {
+      const submissions = await getApprovedSubmissions();
+      fallbackSubmissions = Array.isArray(submissions) ? submissions : [];
+      let matched = fallbackSubmissions.filter(s => aliasSet.has(normalize(s.film)));
+      if (currentCameras.size > 0 && typeof window.normalizeCamera === 'function') {
+        matched = matched.filter(s => currentCameras.has(resolveCanonicalCameraKey(window.normalizeCamera(s.camera).key)));
+      }
+      fallbackRollState = buildReaderRollState(matched);
+      rollTotal = fallbackRollState.total;
+      currentNumber = fallbackRollState.currentNumber;
+      fallbackRollState.rolls.forEach(roll => rollRowsCache.set(roll.number, roll.rows));
+    }
+
     const personKeyOf = contributorKeyOfSubmission;
     const personLabelOf = contributorLabelOfSubmission;
-    const rollByNumber = (number) => rollState.rolls.find(roll => roll.number === number) || rollState.rolls[rollState.rolls.length - 1];
+    const rollMeta = (number) => ({
+      number: Math.max(1, Math.min(Number(number) || currentNumber, currentNumber)),
+      current: Math.max(1, Math.min(Number(number) || currentNumber, currentNumber)) === currentNumber,
+      rows: rollRowsCache.get(Math.max(1, Math.min(Number(number) || currentNumber, currentNumber))) || [],
+    });
+    async function rollRowsByNumber(number) {
+      const safeNumber = Math.max(1, Math.min(Number(number) || currentNumber, currentNumber));
+      if (rollRowsCache.has(safeNumber)) return rollRowsCache.get(safeNumber);
+      if (!rangeApi) return [];
+      const from = (safeNumber - 1) * ROLL_LIMIT;
+      const rows = await rangeApi.listApprovedByFilms(rawAliases, {
+        from,
+        to: from + ROLL_LIMIT - 1,
+        ascending: true,
+      });
+      rollRowsCache.set(safeNumber, Array.isArray(rows) ? rows : []);
+      return rollRowsCache.get(safeNumber);
+    }
     const rollIntroText = (roll) => {
       const count = roll?.rows?.length || 0;
       if (roll?.current && count === ROLL_LIMIT) {
         return `${roll.number}번째 롤이 36컷으로 채워졌습니다. 다음 첫 컷이 올라오면 새 롤이 시작됩니다.`;
       }
-      if (roll?.current && rollState.total > ROLL_LIMIT) {
+      if (roll?.current && rollTotal > ROLL_LIMIT) {
         return `${roll.number}번째 롤이 진행 중입니다. 지난 롤은 따로 다시 볼 수 있어요.`;
       }
       if (!roll?.current) {
@@ -1059,15 +1108,16 @@
         ? `${count}컷이 먼저 채워졌습니다. 남은 빈 자리를 독자들의 사진으로 함께 채워가요.`
         : '아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.';
     };
-    let activeRoll = rollState.currentNumber;
+    let activeRoll = currentNumber;
     let activePerson = 'all';
     let archiveOpen = false;
-    let rollRows = rollByNumber(activeRoll).rows;
+    let rollRows = rollRowsCache.get(activeRoll) || [];
     let visible = rollRows;
     let selectionMode = false;
+    let rollLoadToken = 0;
     const selectedExportKeys = new Set();
     const rollIntro = modalContent.querySelector('.reader-roll-intro');
-    if (submitBtn) submitBtn.textContent = rollState.total > 0 ? '컷 채우기' : (isFeatured ? '컷 채우기' : '첫 컷 채우기');
+    if (submitBtn) submitBtn.textContent = rollTotal > 0 ? '컷 채우기' : (isFeatured ? '컷 채우기' : '첫 컷 채우기');
 
     const filmLabelOf = (filmName) => {
       const match = typeof window.findFilmMatch === 'function'
@@ -1076,9 +1126,16 @@
       return match?.canonical || filmName || 'Unknown Film';
     };
 
-    const submissionsForPerson = (personKey) => submissions
-      .filter(sub => personKeyOf(sub) === personKey)
-      .slice(0, 120);
+    let contributorSubmissionsPromise = null;
+    async function submissionsForPerson(personKey) {
+      if (!fallbackSubmissions) {
+        if (!contributorSubmissionsPromise) contributorSubmissionsPromise = getApprovedSubmissions();
+        fallbackSubmissions = await contributorSubmissionsPromise;
+      }
+      return (fallbackSubmissions || [])
+        .filter(sub => personKeyOf(sub) === personKey)
+        .slice(0, 120);
+    }
 
     const exportKeyOf = (sub) => String(sub?.id || sub?.storage_path || sub?.image || `${personKeyOf(sub)}-${sub?.created_at || sub?.createdAt || ''}`);
 
@@ -1150,20 +1207,25 @@
     }
 
     function renderRollSwitcher() {
-      if (!rollSwitcher || rollState.pastRolls.length < 1) return;
-      const isViewingCurrent = activeRoll === rollState.currentNumber;
-      const pastRolls = rollState.pastRolls.slice().reverse();
+      if (!rollSwitcher) return;
+      if (currentNumber < 2) {
+        rollSwitcher.hidden = true;
+        rollSwitcher.innerHTML = '';
+        return;
+      }
+      const isViewingCurrent = activeRoll === currentNumber;
+      const pastNumbers = Array.from({ length: currentNumber - 1 }, (_, i) => currentNumber - 1 - i);
       const expanded = archiveOpen || !isViewingCurrent;
       rollSwitcher.hidden = false;
       rollSwitcher.innerHTML = `
         <span class="reader-roll-label">ROLL ARCHIVE</span>
         <button type="button" class="reader-roll-toggle${expanded ? ' is-active' : ''}" data-roll-action="${isViewingCurrent ? 'toggle' : 'current'}" aria-expanded="${expanded ? 'true' : 'false'}">
-          ${isViewingCurrent ? `지난 롤 보기 <span>${pastRolls.length}</span>` : `현재 롤로 돌아가기 <span>${rollState.currentNumber}</span>`}
+          ${isViewingCurrent ? `지난 롤 보기 <span>${pastNumbers.length}</span>` : `현재 롤로 돌아가기 <span>${currentNumber}</span>`}
         </button>
         <div class="reader-roll-numbers" ${expanded ? '' : 'hidden'} aria-label="지난 롤 번호">
-          ${pastRolls.map((roll) => `
-            <button type="button" class="reader-roll-number${roll.number === activeRoll ? ' is-active' : ''}" data-roll-number="${roll.number}" aria-label="${roll.number}번째 지난 롤 보기">
-              ${roll.number}
+          ${pastNumbers.map((number) => `
+            <button type="button" class="reader-roll-number${number === activeRoll ? ' is-active' : ''}" data-roll-number="${number}" aria-label="${number}번째 지난 롤 보기">
+              ${number}
             </button>
           `).join('')}
         </div>`;
@@ -1200,11 +1262,11 @@
       if (contributorView) contributorView.hidden = true;
       grid.hidden = false;
       if (rollIntro) {
-        rollIntro.textContent = rollIntroText(rollByNumber(activeRoll));
+        rollIntro.textContent = rollIntroText({ ...rollMeta(activeRoll), rows: rollRows });
       }
       // Reader's Roll 섹션 헤더 토글 복귀 (작가 뷰에서 빠져나옴)
       const readerSection = grid.closest('.modal-section-reader');
-      const headToggle = readerSection?.querySelector('.modal-section-head [data-view-toggle]');
+      const headToggle = readerSection?.querySelector('[data-view-toggle]');
       if (headToggle) headToggle.hidden = false;
       // 저장 버튼은 renderReaderSlots 에서 visible.length 보고 다시 토글됨
       renderReaderSlots();
@@ -1212,21 +1274,32 @@
       renderRollSwitcher();
     }
 
-    function setActiveRoll(nextNumber) {
-      const nextRoll = rollByNumber(nextNumber);
+    async function setActiveRoll(nextNumber) {
+      const safeNumber = Math.max(1, Math.min(Number(nextNumber) || currentNumber, currentNumber));
+      const token = ++rollLoadToken;
+      grid.setAttribute('aria-busy', 'true');
+      grid.classList.add('is-loading');
+      const nextRows = await rollRowsByNumber(safeNumber);
+      if (token !== rollLoadToken) return;
       selectionMode = false;
       selectedExportKeys.clear();
-      activeRoll = nextRoll.number;
+      activeRoll = safeNumber;
       activePerson = 'all';
-      archiveOpen = activeRoll !== rollState.currentNumber ? true : archiveOpen;
-      rollRows = nextRoll.rows;
+      archiveOpen = activeRoll !== currentNumber ? true : archiveOpen;
+      rollRows = nextRows;
       visible = rollRows;
       if (contributorView) contributorView.hidden = true;
       grid.hidden = false;
-      if (rollIntro) rollIntro.textContent = rollIntroText(nextRoll);
+      if (rollIntro) rollIntro.textContent = rollIntroText({ number: activeRoll, rows: rollRows, current: activeRoll === currentNumber });
       renderReaderSlots();
       renderRollSwitcher();
       renderPersonFilter();
+      grid.classList.remove('is-loading');
+      grid.setAttribute('aria-busy', 'false');
+      if (rangeApi) {
+        const next = activeRoll > 1 ? activeRoll - 1 : activeRoll + 1;
+        if (next >= 1 && next <= currentNumber) rollRowsByNumber(next).catch(() => {});
+      }
     }
 
     function renderReaderSlots() {
@@ -1271,9 +1344,9 @@
       updateReaderSelectionControls();
     }
 
-    function renderContributorView(personKey) {
+    async function renderContributorView(personKey) {
       if (!contributorView) return;
-      const personEntries = submissionsForPerson(personKey);
+      const personEntries = await submissionsForPerson(personKey);
       if (!personEntries.length) return;
       const first = personEntries[0];
       const label = personLabelOf(first);
@@ -1357,13 +1430,13 @@
       contributorView.querySelectorAll('.reader-contributor-photo img').forEach(classifyPhotoOrientation);
       // Reader's Roll 섹션 헤더의 토글·저장 버튼은 작가 뷰 동안 숨김 (중복 방지)
       const readerSection = contributorView.closest('.modal-section-reader');
-      const headToggle = readerSection?.querySelector('.modal-section-head [data-view-toggle]');
-      const rollSaveBtn = readerSection?.querySelector('[data-save-roll="reader"]');
+      const headToggle = readerSection?.querySelector('[data-view-toggle]');
+      const rollSaveMenu = readerSelectionControls().saveMenu;
       if (headToggle) headToggle.hidden = true;
-      if (rollSaveBtn) rollSaveBtn.hidden = true;
+      if (rollSaveMenu) rollSaveMenu.hidden = true;
     }
 
-    setActiveRoll(rollState.currentNumber);
+    await setActiveRoll(currentNumber);
 
     // 채워진 슬롯 클릭 → reader 라이트박스 (인스타로 바로 점프 X)
     grid.onclick = (e) => {
@@ -1405,14 +1478,14 @@
             renderRollSwitcher();
           } else if (action.dataset.rollAction === 'current') {
             archiveOpen = false;
-            setActiveRoll(rollState.currentNumber);
+            setActiveRoll(currentNumber).catch(err => console.warn('롤 전환 실패:', err));
           }
           return;
         }
         const numberBtn = e.target.closest('.reader-roll-number');
         if (!numberBtn) return;
         const number = parseInt(numberBtn.dataset.rollNumber, 10);
-        if (!Number.isNaN(number)) setActiveRoll(number);
+        if (!Number.isNaN(number)) setActiveRoll(number).catch(err => console.warn('롤 전환 실패:', err));
       };
     }
     if (personFilter) {
@@ -1420,7 +1493,7 @@
         const allFilms = e.target.closest('.reader-person-all');
         if (allFilms) {
           const chip = allFilms.closest('.reader-person-chip');
-          if (chip) renderContributorView(chip.dataset.personKey);
+          if (chip) renderContributorView(chip.dataset.personKey).catch(err => console.warn('작가 모아보기 실패:', err));
           return;
         }
         const chip = e.target.closest('.reader-person-chip');
@@ -1445,7 +1518,9 @@
         const photo = e.target.closest('.reader-contributor-photo');
         if (!photo) return;
         const key = photo.dataset.personKey;
-        const all = submissionsForPerson(key);
+        const all = fallbackSubmissions
+          ? fallbackSubmissions.filter(sub => personKeyOf(sub) === key).slice(0, 120)
+          : [];
         const filmName = photo.dataset.filmName;
         const group = all.filter(sub => filmLabelOf(sub.film) === filmName);
         const idx = parseInt(photo.dataset.photoIndex, 10);
@@ -1456,7 +1531,7 @@
 
     const requestedContributor = normalizeContributorKey(options.contributor);
     if (requestedContributor) {
-      renderContributorView(requestedContributor);
+      renderContributorView(requestedContributor).catch(err => console.warn('작가 모아보기 실패:', err));
     }
   }
 
