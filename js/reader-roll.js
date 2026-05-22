@@ -45,9 +45,22 @@
     };
   }
 
+  function formatCardLabel(state, limit = DEFAULT_ROLL_LIMIT) {
+    const rollLimit = Number.isFinite(Number(limit)) && Number(limit) > 0
+      ? Math.floor(Number(limit))
+      : DEFAULT_ROLL_LIMIT;
+    const currentNumber = Math.max(1, Number(state?.currentNumber) || 1);
+    const currentCount = Array.isArray(state?.currentRows)
+      ? state.currentRows.length
+      : Math.max(0, Number(state?.currentCount) || 0);
+    const progress = `${currentCount} / ${rollLimit}`;
+    return currentNumber > 1 ? `Roll ${currentNumber} · ${progress}` : progress;
+  }
+
   window.ReaderRoll = {
     DEFAULT_ROLL_LIMIT,
     sortSubmissionsOldestFirst,
     buildState,
+    formatCardLabel,
   };
 })();

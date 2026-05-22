@@ -1387,8 +1387,10 @@ test('Reader Roll 계산 모듈은 36컷 단위로 현재 롤을 나눈다', asy
       exactCurrent: exact.currentNumber,
       exactCurrentRows: exact.currentRows.length,
       exactPast: exact.pastRolls.length,
+      exactLabel: window.ReaderRoll.formatCardLabel(exact, 36),
       nextCurrent: next.currentNumber,
       nextCurrentRows: next.currentRows.length,
+      nextLabel: window.ReaderRoll.formatCardLabel(next, 36),
       firstSortedId: window.ReaderRoll.sortSubmissionsOldestFirst(rows)[0].id,
     };
   });
@@ -1397,10 +1399,73 @@ test('Reader Roll 계산 모듈은 36컷 단위로 현재 롤을 나눈다', asy
     exactCurrent: 2,
     exactCurrentRows: 36,
     exactPast: 1,
+    exactLabel: 'Roll 2 · 36 / 36',
     nextCurrent: 3,
     nextCurrentRows: 1,
+    nextLabel: 'Roll 3 · 1 / 36',
     firstSortedId: 'r-01',
   });
+});
+
+test('Films Library 카드는 여러 롤이 쌓인 필름을 Roll N 진행률로 표시한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    const rows = Array.from({ length: 44 }, (_, i) => ({
+      id: `roll-card-${i + 1}`,
+      image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',
+      storage_path: `test/roll-card-${i + 1}.jpg`,
+      author: '@roll_card',
+      submitterName: 'roll_card',
+      instagram: '@roll_card',
+      film: 'Kodak UltraMax 400',
+      camera: 'Leica M6',
+      caption: '',
+      created_at: new Date(2026, 0, i + 1).toISOString(),
+      createdAt: new Date(2026, 0, i + 1).toISOString(),
+      published: true,
+    }));
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        listApproved: async () => rows,
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/films.html');
+  const count = page.locator('#filmsGridLibrary .film-card[data-film="ultramax"] .film-count');
+  await expect(count).toHaveText('Roll 2 · 8 / 36', { timeout: 6000 });
+  await expect(count).toHaveClass(/has-rolls/);
+  await expect(count).toHaveAttribute('aria-label', '현재 2번째 롤 8/36컷');
 });
 
 test('모바일 Films Library는 초기 노출을 줄이고 더 보기로 확장한다', async ({ page }) => {

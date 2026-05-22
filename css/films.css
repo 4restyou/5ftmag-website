@@ -102,6 +102,10 @@
   padding: 5px 10px;
   border-radius: var(--badge-radius);
 }
+.film-count.has-rolls {
+  color: var(--accent-text);
+  background: var(--accent);
+}
 
 /* ── 즐겨찾기 토글 (필름 카드 우상단, 라인-only) ── */
 .film-fav {

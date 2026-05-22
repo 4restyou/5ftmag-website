@@ -708,7 +708,15 @@
       const aliasSet = new Set(aliases.map(normalize));
       const matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
       if (matched.length > 0) {
-        countPerSlug.set(slug, buildReaderRollState(matched).currentRows.length);
+        const rollState = buildReaderRollState(matched);
+        const label = typeof window.ReaderRoll?.formatCardLabel === 'function'
+          ? window.ReaderRoll.formatCardLabel(rollState, ROLL_LIMIT)
+          : `${rollState.currentRows.length} / ${ROLL_LIMIT}`;
+        countPerSlug.set(slug, {
+          label,
+          currentCount: rollState.currentRows.length,
+          currentNumber: rollState.currentNumber,
+        });
         readerSearchPerSlug.set(slug, normalizeLibrarySearch(matched.map(readerSearchTokensForSubmission).join(' ')));
       }
     }
@@ -721,12 +729,18 @@
       card.dataset.readerSearch = readerSearchPerSlug.get(card.dataset.film || '') || '';
     });
 
-    for (const [slug, count] of countPerSlug) {
+    for (const [slug, progress] of countPerSlug) {
       const card = libraryGrid.querySelector(`.film-card[data-film="${slug}"]`);
       if (!card) continue;
       const countEl = card.querySelector('.film-count');
       const ctaEl = card.querySelector('.film-cta');
-      if (countEl) countEl.textContent = `${count} / ${ROLL_LIMIT}`;
+      if (countEl) {
+        countEl.textContent = progress.label;
+        countEl.classList.toggle('has-rolls', progress.currentNumber > 1);
+        countEl.setAttribute('aria-label', progress.currentNumber > 1
+          ? `현재 ${progress.currentNumber}번째 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`
+          : `현재 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`);
+      }
       if (ctaEl) ctaEl.textContent = '컷 채우기 →';
     }
 
