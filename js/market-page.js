@@ -341,7 +341,25 @@ function renderDetail(r) {
       <div class="mkt-detail-actions">
         ${isMine ? `
           <button type="button" class="mkt-action-btn is-primary" data-action="edit">수정</button>
-          <button type="button" class="mkt-action-btn" data-action="cycle">상태 변경 (${escapeHtml(statusLabel(r.status))} →)</button>
+          <div class="mkt-status-control">
+            <button type="button" class="mkt-action-btn mkt-status-trigger" data-action="status-toggle"
+                    aria-haspopup="menu" aria-expanded="false">
+              상태 · <strong>${escapeHtml(statusLabel(r.status))}</strong>
+              <svg viewBox="0 0 12 8" width="9" height="6" aria-hidden="true" style="margin-left:4px;vertical-align:middle;">
+                <path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="mkt-status-menu" role="menu" hidden>
+              ${['available','reserved','sold'].map(s => `
+                <button type="button" role="menuitem"
+                        class="mkt-status-menu-item${s === r.status ? ' is-current' : ''}"
+                        data-action="set-status" data-status="${s}"
+                        ${s === r.status ? 'aria-current="true"' : ''}>
+                  ${escapeHtml(statusLabel(s))}${s === r.status ? ' ✓' : ''}
+                </button>
+              `).join('')}
+            </div>
+          </div>
           <button type="button" class="mkt-action-btn" data-action="share">링크 공유</button>
           <button type="button" class="mkt-action-btn is-danger" data-action="delete">삭제</button>
         ` : `
@@ -376,10 +394,30 @@ function bindDetailHandlers(r) {
         closeDetail();
         return openForm(r);
       }
-      if (a === 'cycle') {
+      if (a === 'status-toggle') {
+        const ctrl = el.closest('.mkt-status-control');
+        const menu = ctrl?.querySelector('.mkt-status-menu');
+        if (!menu) return;
+        const isOpen = !menu.hidden;
+        menu.hidden = isOpen;
+        el.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        return;
+      }
+      if (a === 'set-status') {
+        const next = el.dataset.status;
+        if (!next || next === r.status) {
+          // 현재 상태 다시 누름 → 메뉴만 닫음
+          const trigger = el.closest('.mkt-status-control')?.querySelector('.mkt-status-trigger');
+          el.closest('.mkt-status-menu').hidden = true;
+          trigger?.setAttribute('aria-expanded', 'false');
+          return;
+        }
         el.disabled = true;
-        const { next, error } = await db().market.cycleStatusMine(r.id, r.status);
-        if (error) { el.disabled = false; return window.notify?.('상태를 바꾸지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')', 'danger'); }
+        const result = await db().market.updateMine(r.id, { status: next });
+        if (result?.error) {
+          el.disabled = false;
+          return window.notify?.('상태를 바꾸지 못했어요. 새로고침 후 다시 시도해 주세요. (' + result.error.message + ')', 'danger');
+        }
         r.status = next;
         await loadList();
         renderDetail(r);
@@ -823,9 +861,24 @@ $('mktFormModal').addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  // 상태 드롭다운이 열려 있으면 그것만 닫기 (모달은 유지)
+  const openMenu = document.querySelector('#mktDetailCard .mkt-status-menu:not([hidden])');
+  if (openMenu) {
+    openMenu.hidden = true;
+    document.querySelector('#mktDetailCard .mkt-status-trigger')?.setAttribute('aria-expanded', 'false');
+    return;
+  }
   if ($('mktDetailModal').classList.contains('open')) closeDetail();
   else if ($('mktFormModal').classList.contains('open')) closeForm();
 });
+// 상태 드롭다운 외부 클릭 시 닫기 (capture phase 로 다른 click 핸들러보다 먼저)
+document.addEventListener('click', (e) => {
+  const openMenu = document.querySelector('#mktDetailCard .mkt-status-menu:not([hidden])');
+  if (!openMenu) return;
+  if (e.target.closest('.mkt-status-control')) return;
+  openMenu.hidden = true;
+  document.querySelector('#mktDetailCard .mkt-status-trigger')?.setAttribute('aria-expanded', 'false');
+}, true);
 
 (async function main() {
   for (let i = 0; i < 50; i++) {
