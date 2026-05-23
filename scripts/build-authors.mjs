@@ -208,7 +208,7 @@ const authorList = [...authors.values()]
 mkdirSync(join(ROOT, 'authors'), { recursive: true });
 mkdirSync(join(ROOT, 'data'), { recursive: true });
 
-const listHtml = `${rootHead('Authors — 5ft.mag', '5ft.mag에 참여한 작가와 contributor의 글을 한곳에서 모아봅니다.', '/authors.html')}
+const listHtml = `${rootHead('Authors | 5ft.mag', '5ft.mag에 참여한 작가와 contributor의 글을 한곳에서 모아봅니다.', '/authors.html')}
 <body>
 ${header()}
 <main class="authors-page">
@@ -233,7 +233,7 @@ ${footer()}
 writeFileSync(join(ROOT, 'authors.html'), listHtml);
 
 for (const author of authorList) {
-  const title = `${author.name} — 5ft.mag Authors`;
+  const title = `${author.name} | 5ft.mag Authors`;
   const description = `${author.name}의 5ft.mag 아카이브. ${author.stories.length}개의 글을 모았습니다.`;
   const html = `${subHead(title, description, `/authors/${author.slug}.html`)}
 <body>

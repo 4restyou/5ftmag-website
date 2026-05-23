@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "5ft.mag — 필름 매거진 웹사이트",
+  "description": "5ft.mag | 필름 매거진 웹사이트",
   "scripts": {
     "validate": "node scripts/validate-assets.mjs",
     "qa": "npm run validate && node scripts/qa-smoke.mjs",
