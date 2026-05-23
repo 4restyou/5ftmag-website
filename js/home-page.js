@@ -553,14 +553,13 @@
   // ════════════════════════════
   // 뉴스레터 구독
   // ════════════════════════════
-  // 현재는 외부 발송 서비스 미연동 상태 — 안내 메시지만 표시.
-  // 실제 운영 시 Buttondown / Mailchimp / Substack 폼 액션으로 교체할 것.
+  // 이메일만 수집 — newsletter_subscribers 테이블에 저장. 발송 서비스 연동은 추후.
   const newsletterForm = document.getElementById('newsletterForm');
   const newsletterMessage = document.getElementById('newsletterMessage');
   const newsletterEmail = document.getElementById('newsletterEmail');
 
   if (newsletterForm) {
-    newsletterForm.addEventListener('submit', (e) => {
+    newsletterForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = newsletterEmail.value.trim();
 
@@ -571,12 +570,23 @@
         return;
       }
 
-      // 현재는 발송 시스템 미준비 — 임시 안내
-      newsletterMessage.textContent = '준비 중인 기능이에요. 인스타그램(@5ft.magazine)이나 hello@5ftmag.com으로 연락주시면 새 이슈 소식을 직접 보내드릴게요.';
+      const submitBtn = newsletterForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const { error } = (await window.MagDB?.newsletter?.subscribe(email)) || { error: { message: 'unavailable' } };
+
+      if (submitBtn) submitBtn.disabled = false;
+
+      if (error) {
+        newsletterMessage.textContent = '잠시 후 다시 시도해주세요. 계속 안 되면 hello@5ftmag.com 으로 알려주세요.';
+        newsletterMessage.className = 'nl-message error';
+        return;
+      }
+
+      newsletterMessage.textContent = '구독 신청이 완료됐어요. 새 이슈가 나오면 이메일로 알려드릴게요.';
       newsletterMessage.className = 'nl-message success';
       newsletterEmail.value = '';
 
-      // 5초 후 메시지 자동 제거
       setTimeout(() => {
         newsletterMessage.textContent = '';
         newsletterMessage.className = 'nl-message';

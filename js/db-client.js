@@ -218,6 +218,19 @@
     },
   };
 
+  // ─── 뉴스레터 구독 (이메일만 수집) ───
+  const newsletter = {
+    async subscribe(email) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const clean = String(email || '').trim().toLowerCase();
+      if (!clean || clean.length > 200) return { error: { message: 'invalid email' } };
+      const { error } = await c.from('newsletter_subscribers').insert({ email: clean, source: 'home' });
+      // 23505 = unique_violation → 이미 구독한 이메일. 사용자에겐 성공으로 처리.
+      if (error && error.code !== '23505') return { error };
+      return { error: null };
+    },
+  };
+
   function mapApprovedSubmission(r) {
     const sname = r.submitter_name || '';
     const ig    = r.instagram || '';
@@ -1013,6 +1026,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films,
+    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, newsletter,
   };
 })();
