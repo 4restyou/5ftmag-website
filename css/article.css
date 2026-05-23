@@ -428,21 +428,21 @@ body {
   .contributors-mini { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .article-header { padding: 40px 20px 32px; }
+  .article-header { padding: 40px 24px 32px; }
   .article-title { font-size: 28px; }
   .article-subtitle { font-size: 17px; }
-  .article-body { padding: 0 20px 60px; }
+  .article-body { padding: 0 24px 60px; }
   .article-body p { font-size: 16px; }
   .article-body p.lead { font-size: 18px; }
   .article-body h2 { font-size: 23px; }
   .article-body h3 { font-size: 19px; }
-  .article-body figure { margin: 32px -20px; }
-  .article-body figure.full-width { margin: 40px -20px; width: auto; }
+  .article-body figure { margin: 32px -24px; }
+  .article-body figure.full-width { margin: 40px -24px; width: auto; }
   .preview-card, .toc-box, .cta-box { padding: 24px; }
   .preview-card-title, .cta-box-title { font-size: 22px; }
   .toc-item { flex-wrap: wrap; }
   .toc-item-label { min-width: 0; }
-  .article-end { padding: 32px 20px 60px; }
+  .article-end { padding: 32px 24px 60px; }
   .article-nav { grid-template-columns: 1fr; padding: 40px 0; }
   .article-nav a { padding: 24px 20px; }
   .article-nav .next-article { text-align: left; }
