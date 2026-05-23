@@ -3,7 +3,7 @@
     "name": "5ft.mag 편집부",
     "slug": "5ftmag",
     "note": "필름 매거진 5ft.mag의 기획과 편집을 맡습니다.",
-    "count": 7,
+    "count": 9,
     "page": "authors/5ftmag.html",
     "externalLinks": [
       {
@@ -36,7 +36,7 @@
     "name": "Film Social Club",
     "slug": "film-social-club",
     "note": "광주 충장로를 기반으로 필름과 사진 문화를 이어가는 공간입니다.",
-    "count": 2,
+    "count": 3,
     "page": "authors/film-social-club.html",
     "externalLinks": [
       {
@@ -119,6 +119,20 @@
         "type": "instagram",
         "url": "https://instagram.com/shinnoguchiphotos",
         "label": "@shinnoguchiphotos"
+      }
+    ]
+  },
+  {
+    "name": "Street Photography Club",
+    "slug": "street-photography-club",
+    "note": "스트리트 포토를 좋아하는 사람들의 모임. 자체 사진첩 시리즈를 발행하고 5ft.mag 매거진을 유통합니다.",
+    "count": 1,
+    "page": "authors/street-photography-club.html",
+    "externalLinks": [
+      {
+        "type": "shop",
+        "url": "https://smartstore.naver.com/film_socialclub",
+        "label": "Shop"
       }
     ]
   }
