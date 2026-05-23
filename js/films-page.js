@@ -953,7 +953,8 @@
       </div>`;
 
     // ── 3) 모달 헤더 (썸네일 상태 별 분기) ──
-    const photographerLine = photographers.length
+    // featured 필름은 EDITORIAL 섹션 헤드에 사진가가 들어가(섹션과 함께 이동) 헤더엔 중복 노출하지 않는다.
+    const photographerLine = (!isFeatured && photographers.length)
       ? `<span>Photographers <strong>${escapeAttr(photographers.join(', '))}</strong></span>`
       : '';
 
