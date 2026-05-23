@@ -114,6 +114,16 @@ header {
 
 .main-nav a.current {
   font-weight: var(--fw-heading);
+  position: relative;
+}
+.main-nav a.current::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--text);
 }
 
 .main-nav .nav-account {
