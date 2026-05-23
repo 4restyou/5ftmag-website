@@ -760,8 +760,8 @@ footer {
 .ft-toast.is-in  { opacity: 1; transform: translateY(0); }
 .ft-toast.is-out { opacity: 0; transform: translateY(8px); }
 .ft-toast-danger  { background: var(--color-danger-text); color: #fff; }
-.ft-toast-success { background: var(--color-success-text); color: #fff; }
-.ft-toast-info    { background: var(--color-info-text); color: #fff; }
+.ft-toast-success,
+.ft-toast-info    { background: var(--accent); color: var(--accent-text); }
 
 
 /* ════════════════════════════════════════════════
