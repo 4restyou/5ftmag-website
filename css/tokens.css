@@ -8,7 +8,7 @@
   --bg:           #ffffff;
   --bg-sub:       #f4f4f4;
   --text:         #000000;
-  --text-muted:   rgba(0, 0, 0, 0.55);
+  --text-muted:   rgba(0, 0, 0, 0.65);
   --border:       #e0e0e0;
 
   /* 매거진 정체성 컬러 */
@@ -30,6 +30,12 @@
   --fw-all:       600;      /* 일반 텍스트 굵기 (SemiBold) — 가독성 강화 */
   --fw-heading:   800;      /* 타이틀/제목 굵기 (ExtraBold) */
   --ls-default:   -0.02em;
+
+  /* line-height 스케일 — 본문은 article.css 가 1.7~1.8 로 별도 정의(매거진 호흡) */
+  --lh-display:   1.1;      /* 40px+ 큰 제목 */
+  --lh-title:     1.3;      /* 24px+ 제목 */
+  --lh-body:      1.5;      /* 본문/리스트 */
+  --lh-meta:      1.4;      /* 캡션·메타데이터 */
 
   /* 인터랙션 형태 — 매거진 표면은 낮은 반경, 기능 표면은 안정적인 4px */
   --btn-radius:   4px;
@@ -108,7 +114,7 @@
   --bg:           #0c0c0c;
   --bg-sub:       #181818;
   --text:         #f0f0f0;
-  --text-muted:   rgba(240, 240, 240, 0.55);
+  --text-muted:   rgba(240, 240, 240, 0.7);
   --border:       #282828;
 
   /* semantic 컬러 — 다크 배경 위에서 가독성 + 톤 다운 */
