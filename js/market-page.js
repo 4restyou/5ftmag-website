@@ -42,6 +42,14 @@ function fmtDate(iso) {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
+// "30000000" → "30,000,000원". 숫자가 아니면 (예: "가격 협의") 원문 그대로.
+function fmtPrice(v) {
+  const raw = String(v ?? '').trim();
+  if (!raw) return '';
+  const n = Number(raw.replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
+  return escapeHtml(n.toLocaleString('ko-KR')) + '원';
+}
 function categoryLabel(k) {
   return (CATEGORIES.find(c => c.key === k) || {}).label || k;
 }
@@ -191,7 +199,7 @@ function renderCard(r) {
       </div>
       <div class="market-card-body">
         <h3 class="market-card-title">${escapeHtml(r.title)}</h3>
-        <span class="market-card-price">${escapeHtml(r.price)}</span>
+        <span class="market-card-price">${fmtPrice(r.price)}</span>
         <span class="market-card-meta">
           <span>${escapeHtml(categoryLabel(r.category))}</span>
           ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
@@ -311,7 +319,7 @@ function renderDetail(r) {
     <div class="mkt-detail">
       <span class="mkt-detail-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
       <h2 class="mkt-detail-title">${escapeHtml(r.title)}</h2>
-      <div class="mkt-detail-price">${escapeHtml(r.price)}</div>
+      <div class="mkt-detail-price">${fmtPrice(r.price)}</div>
       <div class="mkt-detail-meta">
         <span>${escapeHtml(categoryLabel(r.category))}</span>
         ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
@@ -331,13 +339,14 @@ function renderDetail(r) {
       </div>
       <div class="mkt-detail-author">올린 사람 · ${escapeHtml(author)}</div>
       <div class="mkt-detail-actions">
-        <button type="button" class="mkt-btn-link" data-action="share">링크 공유</button>
         ${isMine ? `
-          <button type="button" class="mkt-btn-link" data-action="edit">수정</button>
-          <button type="button" class="mkt-btn-link" data-action="cycle">상태 변경 (${escapeHtml(statusLabel(r.status))} →)</button>
-          <button type="button" class="mkt-btn-link" data-action="delete">삭제</button>
+          <button type="button" class="mkt-action-btn is-primary" data-action="edit">수정</button>
+          <button type="button" class="mkt-action-btn" data-action="cycle">상태 변경 (${escapeHtml(statusLabel(r.status))} →)</button>
+          <button type="button" class="mkt-action-btn" data-action="share">링크 공유</button>
+          <button type="button" class="mkt-action-btn is-danger" data-action="delete">삭제</button>
         ` : `
-          <button type="button" class="mkt-btn-link" data-action="report">신고하기</button>
+          <button type="button" class="mkt-action-btn is-primary" data-action="share">링크 공유</button>
+          <button type="button" class="mkt-action-btn" data-action="report">신고하기</button>
         `}
       </div>
     </div>`;

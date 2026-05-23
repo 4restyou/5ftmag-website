@@ -33,6 +33,14 @@ function fmtDateShort(iso) {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
+// "30000000" → "30,000,000원". 숫자가 아니면 (예: "가격 협의") 원문 그대로.
+function fmtPrice(v) {
+  const raw = String(v ?? '').trim();
+  if (!raw) return '';
+  const n = Number(raw.replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
+  return escapeHtml(n.toLocaleString('ko-KR')) + '원';
+}
 function statusLabel(s) {
   return ({ pending:'대기', approved:'공개 중', rejected:'반려',
            available:'판매중', reserved:'예약중', sold:'판매완료', hidden:'숨김' })[s] || s;
@@ -276,7 +284,7 @@ function renderMarketCard(r) {
           <span class="me-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
         </div>
         <h3 class="me-market-card-title">${escapeHtml(r.title)}</h3>
-        <div class="me-market-card-price">${escapeHtml(r.price)}</div>
+        <div class="me-market-card-price">${fmtPrice(r.price)}</div>
         <div class="me-market-card-meta">
           <span>${escapeHtml(CAT_LABELS[r.category] || r.category)}</span>
           ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
