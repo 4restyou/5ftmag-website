@@ -127,7 +127,12 @@
   // 카드 그리드 렌더링
   function renderGrid(stories) {
     if (stories.length === 0) {
-      grid.innerHTML = '<div class="no-results">일치하는 글이 없습니다. 제목, 카테고리, 작가명을 줄여서 다시 검색해 보세요.</div>';
+      const hasFilter = currentSearchQuery || currentCategory !== 'all';
+      grid.innerHTML = `<div class="no-results">
+        일치하는 글이 없습니다. 제목, 카테고리, 작가명을 줄여서 다시 검색해 보세요.
+        ${hasFilter ? '<button type="button" class="no-results-reset" id="noResultsReset">전체 글 보기</button>' : ''}
+      </div>`;
+      document.getElementById('noResultsReset')?.addEventListener('click', resetFilters);
       renderPagination(0);
       return;
     }
@@ -187,6 +192,17 @@
 
     renderGrid(result);
     syncUrl();
+  }
+
+  // 빈 결과에서 "전체 글 보기" — 카테고리·검색 초기화
+  function resetFilters() {
+    currentCategory = 'all';
+    currentSearchQuery = '';
+    currentPage = 1;
+    const si = document.getElementById('searchInput');
+    if (si) si.value = '';
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.category === 'all'));
+    applyFilters();
   }
 
   // JSON 로딩

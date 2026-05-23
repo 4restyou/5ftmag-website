@@ -652,6 +652,10 @@
   50% { box-shadow: 0 0 0 6px rgba(255, 230, 0, 0); opacity: 0.72; }
 }
 .mkt-form-error { color: #b91c1c; font-size: 13px; min-height: 16px; }
+.mkt-form [aria-invalid="true"] {
+  border-color: var(--color-danger-border, #fca5a5);
+  background: var(--color-danger-bg, #fee2e2);
+}
 
 /* ── 로그인 게이트 ── */
 .mkt-gate {

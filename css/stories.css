@@ -110,6 +110,20 @@
   color: var(--text-muted);
   font-size: 15px;
 }
+.no-results-reset {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  font: inherit;
+  font-weight: var(--fw-heading);
+  color: var(--text);
+  background: var(--bg-sub);
+  border: none;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  transition: background var(--duration-base) var(--easing);
+}
+.no-results-reset:hover { background: var(--accent-soft); }
 @media (max-width: 640px) {
   .search-bar { padding: 20px 20px 0; }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }

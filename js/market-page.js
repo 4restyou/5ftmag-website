@@ -586,6 +586,10 @@ function renderForm(existing) {
   renderPhotoSlots();
   $('mktFormCard').querySelectorAll('[data-action="close"]').forEach(b => b.addEventListener('click', closeForm));
   $('mktForm').addEventListener('submit', onSubmit);
+  // 입력 시작하면 누락 표시(aria-invalid) 해제
+  $('mktForm').querySelectorAll('[name]').forEach(el => {
+    el.addEventListener('input', () => el.removeAttribute('aria-invalid'));
+  });
 }
 
 function setMarketUploadStatus(state, title, detail = '') {
@@ -762,7 +766,18 @@ async function onSubmit(e) {
     const seller_name     = String(fd.get('seller_name') || '').trim();
     const phone           = String(fd.get('phone') || '').trim();
     const contact         = String(fd.get('contact') || '').trim();
-    if (!title || !price || !category || !location || !delivery_method || !seller_name || !phone || !contact) {
+    const requiredFields = [
+      ['title', title], ['price', price], ['category', category], ['location', location],
+      ['delivery_method', delivery_method], ['seller_name', seller_name], ['phone', phone], ['contact', contact],
+    ];
+    const missing = requiredFields.find(([, v]) => !v);
+    if (missing) {
+      const field = form.querySelector(`[name="${missing[0]}"]`);
+      if (field) {
+        field.setAttribute('aria-invalid', 'true');
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        field.focus({ preventScroll: true });
+      }
       throw new Error('필수 항목(제목·가격·카테고리·지역·거래 방식·이름·핸드폰·기타 연락처)을 모두 입력해 주세요.');
     }
     if (!['courier','direct','both'].includes(delivery_method)) throw new Error('거래 방식을 다시 선택해 주세요.');
