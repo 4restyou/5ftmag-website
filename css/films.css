@@ -542,6 +542,7 @@
 .lightbox img {
   max-width: 100%;
   max-height: calc(100vh - 240px);
+  max-height: calc(100dvh - 240px);
   width: auto;
   height: auto;
   object-fit: contain;
@@ -838,7 +839,7 @@
 
 @media (max-width: 640px) {
   .lightbox { padding: 72px 18px 92px; }
-  .lightbox img { max-height: calc(100vh - 196px); }
+  .lightbox img { max-height: calc(100vh - 196px); max-height: calc(100dvh - 196px); }
   .lightbox.is-zoomed img { transform: scale(1.28); }
   .lightbox-toolbar { top: 16px; left: 16px; }
   .lightbox-close { top: 16px; right: 16px; width: 40px; height: 40px; }

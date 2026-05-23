@@ -125,7 +125,13 @@
 }
 .no-results-reset:hover { background: var(--accent-soft); }
 @media (max-width: 640px) {
-  .search-bar { padding: 20px 20px 0; }
+  .search-bar {
+    padding: 20px 20px 12px;
+    position: sticky;
+    top: var(--header-h);
+    z-index: 290;
+    background: var(--bg);
+  }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
 }
 

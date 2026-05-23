@@ -688,6 +688,7 @@ body.modal-open { overflow: hidden; }
 .photo-lightbox img {
   max-width: 100%;
   max-height: calc(100vh - 220px);
+  max-height: calc(100dvh - 220px);
   width: auto; height: auto;
   object-fit: contain;
   display: block;
@@ -824,7 +825,7 @@ body.modal-open { overflow: hidden; }
 
 @media (max-width: 640px) {
   .photo-lightbox { padding: 20px; }
-  .photo-lightbox img { max-height: calc(100vh - 180px); }
+  .photo-lightbox img { max-height: calc(100vh - 180px); max-height: calc(100dvh - 180px); }
   .photo-lb-close { top: 16px; right: 16px; width: 40px; height: 40px; }
   .photo-lb-prev  { left: 12px;  width: 40px; height: 40px; }
   .photo-lb-next  { right: 12px; width: 40px; height: 40px; }
