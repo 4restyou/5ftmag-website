@@ -250,7 +250,7 @@
 
     if (action === 'delete') {
       const ok = await deleteComment(btn.dataset.id);
-      if (ok) await refresh();
+      if (ok) { await refresh(); window.notify?.('댓글을 삭제했어요.', 'info'); }
       return;
     }
   }
@@ -273,7 +273,11 @@
     let ok = false;
     if (editId) ok = await updateComment(editId, body);
     else        ok = await postComment(body, parentId);
-    if (ok) { form.reset(); await refresh(); }
+    if (ok) {
+      form.reset();
+      await refresh();
+      window.notify?.(editId ? '댓글을 수정했어요.' : (parentId ? '답글을 등록했어요.' : '댓글을 등록했어요.'), 'info');
+    }
     else if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.textContent = originalLabel;
