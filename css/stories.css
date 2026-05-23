@@ -345,8 +345,20 @@
 @media (max-width: 640px) {
   .articles-grid { gap: 40px 20px; }
   .pagination-bar { padding: 16px 20px; }
-  .filter-bar { padding: 18px 20px; gap: 6px; }
-  .filter-chip { padding: 6px 14px; font-size: 12px; }
+  /* 칩이 늘어나도 줄바꿈 대신 한 줄 가로 스크롤. 오른쪽 페이드로 '더 있음' 암시. */
+  .filter-bar {
+    padding: 18px 20px; gap: 6px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+            mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-chip { padding: 6px 14px; font-size: 12px; flex-shrink: 0; }
   .articles-section { padding: 32px 20px; }
   .article-title { font-size: 19px; }
 }
