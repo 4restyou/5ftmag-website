@@ -148,6 +148,20 @@ body {
   border-bottom: 1px solid var(--text-dim);
 }
 .article-body a:hover { border-color: var(--text); }
+.article-body ul,
+.article-body ol {
+  margin: 0 0 24px;
+  padding-left: 1.6em;
+}
+.article-body li {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--text);
+  margin-bottom: 8px;
+  padding-left: 0.35em;
+}
+.article-body li:last-child { margin-bottom: 0; }
+.article-body li::marker { color: var(--text-muted); }
 
 /* ── 매거진 미리보기 카드 ── */
 .preview-card {
@@ -433,6 +447,7 @@ body {
   .article-subtitle { font-size: 17px; }
   .article-body { padding: 0 24px 60px; }
   .article-body p { font-size: 16px; }
+  .article-body li { font-size: 16px; }
   .article-body p.lead { font-size: 18px; }
   .article-body h2 { font-size: 23px; }
   .article-body h3 { font-size: 19px; }
