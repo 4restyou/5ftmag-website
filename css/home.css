@@ -230,6 +230,16 @@
 .pagination a:hover { background: var(--bg-sub); color: var(--text); }
 .pagination .cur { color: var(--text); }
 
+/* 모바일 터치 타깃 보강 — 작은 패딩(4×10) 으로는 44×44 권고 미달이라 a, span 모두 키움 */
+@media (max-width: 640px) {
+  .pagination a, .pagination span {
+    padding: 10px 14px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
 /* 페이지 번호 (텍스트만) */
 .story-num-nav {
   gap: 18px;
