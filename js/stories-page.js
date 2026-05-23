@@ -140,8 +140,20 @@
   }
 
   // 현재 필터/검색 상태
-  let currentCategory = 'all';
-  let currentSearchQuery = '';
+  const _urlParams = new URLSearchParams(location.search);
+  let currentCategory = _urlParams.get('cat') || 'all';
+  let currentSearchQuery = (_urlParams.get('q') || '').trim();
+
+  // 현재 상태(cat·q·page) 를 URL 에 반영 — 공유·새로고침·뒤로가기 복구용.
+  // 연속 입력에 history 가 쌓이지 않게 replaceState.
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (currentCategory && currentCategory !== 'all') params.set('cat', currentCategory);
+    if (currentSearchQuery) params.set('q', currentSearchQuery);
+    if (currentPage > 1) params.set('page', String(currentPage));
+    const qs = params.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+  }
 
   // 통합 필터링 (카테고리 + 검색)
   function applyFilters() {
@@ -174,6 +186,7 @@
     }
 
     renderGrid(result);
+    syncUrl();
   }
 
   // JSON 로딩
@@ -269,9 +282,12 @@
       applyFilters();
     });
   });
+  // URL 의 cat 으로 칩 active 초기 동기화
+  chips.forEach(c => c.classList.toggle('active', c.dataset.category === currentCategory));
 
   // 검색 입력 (디바운스)
   const searchInput = document.getElementById('searchInput');
+  if (currentSearchQuery) searchInput.value = currentSearchQuery;
   const searchClear = document.getElementById('searchClear');
   let searchTimer = null;
   searchInput.addEventListener('input', (e) => {

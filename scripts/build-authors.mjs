@@ -121,7 +121,7 @@ function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css?
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css?v=20260523-lhmuted">
-  <link rel="stylesheet" href="css/common.css?v=20260522-kimhyunasize">
+  <link rel="stylesheet" href="css/common.css?v=20260523-navindicator">
   <link rel="stylesheet" href="${cssHref}">
 </head>`;
 }
