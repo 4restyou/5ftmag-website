@@ -422,6 +422,7 @@ function bindDetailHandlers(r) {
         await loadList();
         renderDetail(r);
         $('mktDetailModal').classList.add('open');
+        window.notify?.(`상태를 '${statusLabel(next)}' 로 바꿨어요.`, 'info');
         return;
       }
       if (a === 'delete') {
@@ -431,6 +432,7 @@ function bindDetailHandlers(r) {
         if (error) { el.disabled = false; return window.notify?.('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + error.message + ')', 'danger'); }
         if (r.storage_paths?.length) await db().market.removePhotos(r.storage_paths);
         closeDetail();
+        window.notify?.('매물을 삭제했어요.', 'info');
         return loadList();
       }
       if (a === 'report') {
