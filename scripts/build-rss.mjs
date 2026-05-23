@@ -48,7 +48,7 @@ async function main() {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
-    <title>5ft.mag — 필름 사진 매거진</title>
+    <title>5ft.mag | 필름 사진 매거진</title>
     <link>${SITE}</link>
     <atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>

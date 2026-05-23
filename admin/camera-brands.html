@@ -5,7 +5,7 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>카메라 브랜드 관리 — 5ft.mag Admin</title>
+  <title>카메라 브랜드 관리 | 5ft.mag Admin</title>
   <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css">
@@ -200,7 +200,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260522-cdnproxy"></script>
+<script src="../js/db-client.js?v=20260523-cdnproxy"></script>
 <script src="../js/camera-brands.js?v=20260516-crosscheck"></script>
 <script src="../js/site-common.js?v=20260522-accountmenu"></script>
 <script>
@@ -241,7 +241,7 @@ function brandSelectHtml(currentBrand, currentDisplay, selfKey) {
   return `
     <div class="brand-input-wrap">
       <select class="brand-select" data-role="brand-select">
-        <option value="">— 브랜드 선택 —</option>
+        <option value="">브랜드 선택</option>
         ${opts}
       </select>
       <input class="brand-input" data-role="brand-input" placeholder="또는 새 브랜드 직접 입력" />
@@ -251,7 +251,7 @@ function brandSelectHtml(currentBrand, currentDisplay, selfKey) {
     </div>
     <div class="brand-input-wrap" style="margin-top:6px;">
       <select class="brand-select" data-role="merge-select">
-        <option value="">— 다른 모델과 병합 안 함 —</option>
+        <option value="">다른 모델과 병합 안 함</option>
         ${mergeOpts}
       </select>
     </div>`;
