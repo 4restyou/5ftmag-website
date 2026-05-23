@@ -476,7 +476,8 @@
     // 햄버거 메뉴 토글
     if (menuBtn && mobileNav) {
       menuBtn.addEventListener('click', function () {
-        mobileNav.classList.toggle('open');
+        const opened = mobileNav.classList.toggle('open');
+        document.body.classList.toggle('modal-open', opened);
         updateMenuButton(menuBtn, mobileNav);
       });
 
@@ -484,6 +485,7 @@
       mobileNav.addEventListener('click', function (event) {
         if (event.target.closest('a')) {
           mobileNav.classList.remove('open');
+          document.body.classList.remove('modal-open');
           updateMenuButton(menuBtn, mobileNav);
         }
       });

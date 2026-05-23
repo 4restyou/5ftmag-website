@@ -175,7 +175,7 @@ function footer(prefix = '') {
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="${prefix}js/db-client.js?v=20260523-cdnproxy"></script>
-<script src="${prefix}js/site-common.js?v=20260522-accountmenu"></script>`;
+<script src="${prefix}js/site-common.js?v=20260523-scrolllock"></script>`;
 }
 
 function storyCard(story, prefix = '') {
