@@ -540,7 +540,7 @@
           return;
         }
         if (e.target.closest('.film-cta-action')) return;
-        openModal(card.dataset.film);
+        openModal(card.dataset.film, { source: card.closest('#filmsGridLibrary') ? 'library' : 'issue' });
       });
     });
   }
@@ -969,8 +969,7 @@
           ${photographerLine}
         </div>
       </div>
-      ${editorialBlock}
-      ${readerBlock}
+      ${options.source === 'library' ? readerBlock + editorialBlock : editorialBlock + readerBlock}
       <section class="modal-comments" data-comments data-page-id="films/${escapeAttr(filmKey)}"></section>
     `;
 
@@ -1772,7 +1771,7 @@
   // 필름 카드 클릭
   document.querySelectorAll('.film-card').forEach(card => {
     card.addEventListener('click', () => {
-      openModal(card.dataset.film);
+      openModal(card.dataset.film, { source: card.closest('#filmsGridLibrary') ? 'library' : 'issue' });
     });
   });
 
