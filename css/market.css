@@ -475,6 +475,46 @@
   border-color: #f87171;
   color: #fca5a5;
 }
+/* 상태 변경 드롭다운 */
+.mkt-status-control { position: relative; display: inline-block; }
+.mkt-status-trigger strong { font-weight: var(--fw-heading); }
+.mkt-status-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 140px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  padding: 4px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+[data-theme="dark"] .mkt-status-menu {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.mkt-status-menu-item {
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .12s;
+}
+.mkt-status-menu-item:hover { background: var(--bg-sub); }
+.mkt-status-menu-item.is-current {
+  color: var(--text-muted);
+  font-weight: var(--fw-heading);
+  cursor: default;
+}
+.mkt-status-menu-item.is-current:hover { background: transparent; }
 .mkt-detail-author {
   font-size: 12px; color: var(--text-muted);
   border-top: 1px solid var(--border);
