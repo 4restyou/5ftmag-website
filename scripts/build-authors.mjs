@@ -15,6 +15,7 @@ const SITE_URL = 'https://www.5ftmag.com';
 const AUTHOR_SLUGS = new Map([
   ['5ft.mag 편집부', '5ftmag'],
   ['Film Social Club', 'film-social-club'],
+  ['Street Photography Club', 'street-photography-club'],
   ['Shin Noguchi', 'shin-noguchi'],
   ['Brisnap TV', 'brisnap-tv'],
   ['김현아', 'kim-hyuna'],
@@ -27,6 +28,7 @@ const AUTHOR_SLUGS = new Map([
 const AUTHOR_NOTES = new Map([
   ['5ft.mag 편집부', '필름 매거진 5ft.mag의 기획과 편집을 맡습니다.'],
   ['Film Social Club', '광주 충장로를 기반으로 필름과 사진 문화를 이어가는 공간입니다.'],
+  ['Street Photography Club', '스트리트 포토를 좋아하는 사람들의 모임. 자체 사진첩 시리즈를 발행하고 5ft.mag 매거진을 유통합니다.'],
   ['Shin Noguchi', '일상의 낯선 순간을 거리에서 포착하는 일본의 스트리트 포토그래퍼입니다.'],
   ['Brisnap TV', '필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널입니다.'],
   ['김현아', '일상과 관계의 결을 짧은 에세이로 기록합니다.'],
@@ -43,6 +45,9 @@ const AUTHOR_EXTERNAL_LINKS = new Map([
   ]],
   ['Film Social Club', [
     { type: 'instagram', url: 'https://instagram.com/film_socialclub',           label: '@film_socialclub' },
+    { type: 'shop',      url: 'https://smartstore.naver.com/film_socialclub',    label: 'Shop' },
+  ]],
+  ['Street Photography Club', [
     { type: 'shop',      url: 'https://smartstore.naver.com/film_socialclub',    label: 'Shop' },
   ]],
   ['Shin Noguchi', [
@@ -90,11 +95,12 @@ function formatDate(date) {
   return date.replaceAll('-', '.');
 }
 
-function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css') {
+function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css?v=20260520-init') {
   return `<!DOCTYPE html>
 <html lang="ko" data-theme="light">
 <head>
   <meta charset="UTF-8" />
+  <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeHtml(description)}">
@@ -103,7 +109,7 @@ function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css'
   <meta property="og:type" content="website">
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
-  <meta property="og:image" content="${SITE_URL}/img/og/og-default.jpg">
+  <meta property="og:image" content="${SITE_URL}/img/og/5ft-link1.webp">
   <meta property="og:url" content="${SITE_URL}${canonicalPath}">
   <meta property="og:site_name" content="5ft.mag">
   <meta property="og:locale" content="ko_KR">
@@ -112,20 +118,21 @@ function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css'
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/icon-16.png">
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
-  <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
+  <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/common.css?v=20260511-imgfix">
+  <link rel="stylesheet" href="css/common.css?v=20260522-kimhyunasize">
   <link rel="stylesheet" href="${cssHref}">
 </head>`;
 }
 
 function subHead(title, description, canonicalPath) {
-  return rootHead(title, description, canonicalPath, '../css/authors.css')
+  return rootHead(title, description, canonicalPath, '../css/authors.css?v=20260520-init')
     .replaceAll('href="rss.xml"', 'href="../rss.xml"')
     .replaceAll('href="img/', 'href="../img/')
     .replaceAll('href="pretendard.css"', 'href="../pretendard.css"')
-    .replaceAll('href="css/', 'href="../css/');
+    .replaceAll('href="css/', 'href="../css/')
+    .replaceAll('src="./js/', 'src="../js/');
 }
 
 function header(prefix = '') {
@@ -166,7 +173,9 @@ function footer(prefix = '') {
   </div>
   <span class="footer-copy">© 2024 5ft.mag</span>
 </footer>
-<script src="${prefix}js/site-common.js?v=20260511-linkfix"></script>`;
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="${prefix}js/db-client.js?v=20260523-cdnproxy"></script>
+<script src="${prefix}js/site-common.js?v=20260522-accountmenu"></script>`;
 }
 
 function storyCard(story, prefix = '') {
