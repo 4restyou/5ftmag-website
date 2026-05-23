@@ -60,10 +60,15 @@
         </div>`;
     }
 
+    // .share-bar 는 .article-end 안에 중첩돼 있어 article 의 직계 자식이 아니다.
+    // insertBefore 의 기준 노드는 직계 자식이어야 하므로, share-bar 를 품은
+    // 최상위 자식(보통 .article-end)을 찾아 그 앞에 끼운다.
     const shareBar = articleEl.querySelector('.share-bar');
-    if (shareBar) {
-      articleEl.insertBefore(bioSection, shareBar);
-      if (relatedSection) articleEl.insertBefore(relatedSection, shareBar);
+    let ref = shareBar;
+    while (ref && ref.parentNode !== articleEl) ref = ref.parentNode;
+    if (ref) {
+      articleEl.insertBefore(bioSection, ref);
+      if (relatedSection) articleEl.insertBefore(relatedSection, ref);
     } else {
       articleEl.appendChild(bioSection);
       if (relatedSection) articleEl.appendChild(relatedSection);
