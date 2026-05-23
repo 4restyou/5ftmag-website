@@ -1457,14 +1457,23 @@
 }
 .reader-person-filter {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   margin: 0 0 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* 우측 edge 살짝 페이드 — 더 있음을 시각적으로 암시 */
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
 }
+.reader-person-filter::-webkit-scrollbar { display: none; }
 .reader-roll-controls .reader-person-filter {
   margin: 0;
 }
 .reader-person-chip {
+  flex-shrink: 0;
   appearance: none;
   -webkit-appearance: none;
   display: inline-flex;
