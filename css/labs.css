@@ -60,15 +60,19 @@
   border-color: var(--text);
 }
 
-/* ── 인트로 (films 페이지와 동일 스타일) ── */
+/* ── 인트로 (films 문단 + 오른쪽 안내 박스) ── */
 .intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
   padding: 40px 32px 28px;
   background: var(--bg);
 }
 .intro-inner {
+  flex: 1 1 auto;
   max-width: 720px;
 }
-.intro p {
+.intro-inner p {
   font-size: 19px;
   line-height: 1.65;
   color: var(--text);
@@ -76,17 +80,24 @@
   overflow-wrap: anywhere;
   margin: 0;
 }
-.intro p .accent {
+.intro-inner p .accent {
   background: var(--accent);
   color: var(--accent-text);
   padding: 0 6px;
 }
 .labs-safety {
-  margin-top: 18px;
+  flex: 0 0 320px;
   padding: 14px 16px;
   border: 1px solid var(--border);
   background: var(--bg-sub);
   border-radius: 6px;
+}
+.labs-safety .labs-updated {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  opacity: 0.8;
 }
 .labs-safety strong {
   display: block;
@@ -117,7 +128,7 @@
 
 /* ── 지도 ── */
 .labs-map-section {
-  max-width: 1080px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 24px 24px 0;
 }
@@ -149,14 +160,15 @@
 .labs-map-info-links a { color: #1452c8; border-bottom: 1px solid currentColor; font-weight: var(--fw-heading); }
 
 .labs-section {
-  max-width: 1080px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 24px 24px 80px;
 }
+/* 카드 그리드 — Articles 와 동일하게 최대 4열, 좁아지면 3 → 2 → 1 */
 .labs-list {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 .labs-empty {
   grid-column: 1 / -1;
@@ -282,9 +294,14 @@
   .filter-chip { padding: 6px 14px; font-size: 12px; flex-shrink: 0; }
 }
 
-@media (min-width: 700px) {
-  .labs-list { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-}
-@media (min-width: 1040px) {
+@media (max-width: 1280px) {
   .labs-list { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 880px) {
+  .labs-list { grid-template-columns: repeat(2, 1fr); }
+  .intro { flex-direction: column; gap: 16px; }
+  .labs-safety { flex: 0 0 auto; align-self: stretch; }
+}
+@media (max-width: 540px) {
+  .labs-list { grid-template-columns: 1fr; }
 }
