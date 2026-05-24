@@ -27,7 +27,9 @@
   padding: 0 6px;
 }
 .market-safety {
-  flex: 0 0 360px;
+  flex: 0 0 auto;
+  width: 640px;
+  max-width: 100%;
   padding: 14px 16px;
   border: 1px solid var(--border);
   background: var(--bg-sub);
@@ -36,7 +38,7 @@
 }
 @media (max-width: 880px) {
   .market-intro { flex-direction: column; gap: 16px; padding: 28px 24px 12px; }
-  .market-safety { flex: 0 0 auto; align-self: stretch; }
+  .market-safety { flex: 0 0 auto; width: auto; align-self: stretch; }
 }
 .market-safety strong {
   display: block;

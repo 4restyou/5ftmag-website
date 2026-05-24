@@ -106,11 +106,12 @@
   border-radius: 6px;
 }
 .labs-safety .labs-updated {
-  margin-top: 10px;
+  flex-shrink: 0;
   font-size: 11px;
   letter-spacing: 0.02em;
   color: var(--text-muted);
   opacity: 0.8;
+  white-space: nowrap;
 }
 .labs-safety strong {
   display: block;
@@ -132,6 +133,14 @@
   white-space: nowrap;
 }
 .labs-safety a:hover { border-color: var(--text); }
+.labs-safety-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.labs-safety-head strong { margin-bottom: 0; }
 .labs-count {
   text-align: center;
   font-size: 13px;
