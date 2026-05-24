@@ -60,40 +60,54 @@
   border-color: var(--text);
 }
 
-.labs-intro {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 48px 24px 8px;
-  text-align: center;
+/* ── 인트로 (films 페이지와 동일 스타일) ── */
+.intro {
+  padding: 40px 32px 28px;
+  background: var(--bg);
 }
-.labs-intro h1 {
-  font-size: 34px;
-  font-weight: var(--fw-heading);
-  letter-spacing: var(--ls-default);
-  line-height: var(--lh-title);
-  margin: 0 0 12px;
+.intro-inner {
+  max-width: 720px;
 }
-.labs-intro p {
-  font-size: 15px;
-  line-height: var(--lh-body);
-  color: var(--text-muted);
+.intro p {
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--text);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   margin: 0;
 }
-.labs-note {
-  max-width: 540px;
-  margin: 20px auto 0;
-  font-size: 12px;
-  line-height: 1.7;
-  letter-spacing: 0.01em;
-  color: var(--text-muted);
-  opacity: 0.7;
+.intro p .accent {
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 0 6px;
 }
-.labs-note a {
+.labs-safety {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-sub);
+  border-radius: 6px;
+}
+.labs-safety strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.labs-safety p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--text-muted);
+}
+.labs-safety a {
+  color: var(--text);
   border-bottom: 1px solid var(--text-dim, var(--border));
   white-space: nowrap;
 }
-.labs-note a:hover { color: var(--text); border-color: var(--text); }
+.labs-safety a:hover { border-color: var(--text); }
 .labs-count {
   text-align: center;
   font-size: 13px;
@@ -248,8 +262,8 @@
 @media (max-width: 640px) {
   .search-bar { padding: 20px 20px 12px; }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
-  .labs-intro { padding: 32px 20px 4px; }
-  .labs-intro h1 { font-size: 28px; }
+  .intro { padding: 28px 20px 20px; }
+  .intro p { font-size: 16px; }
   .labs-map-section { padding: 16px 20px 0; }
   .labs-map { height: 300px; }
   /* 지역 칩이 많아 한 줄 가로 스크롤 + 오른쪽 페이드 */
@@ -270,7 +284,6 @@
 
 @media (min-width: 700px) {
   .labs-list { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .labs-intro h1 { font-size: 40px; }
 }
 @media (min-width: 1040px) {
   .labs-list { grid-template-columns: repeat(3, 1fr); }
