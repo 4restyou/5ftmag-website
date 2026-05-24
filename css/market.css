@@ -142,11 +142,15 @@
 }
 
 /* ── 카드 그리드 ── */
+/* 카드 그리드 — Articles 와 동일하게 최대 4열, 좁아지면 3 → 2 → 1 */
 .market-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* 모바일 기본 */
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
 }
+@media (max-width: 1280px) { .market-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 880px)  { .market-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px)  { .market-grid { grid-template-columns: 1fr; } }
 
 .market-card {
   display: flex;
@@ -677,7 +681,7 @@
   .mkt-modal-card { grid-template-columns: 1.1fr 1fr; }
   .mkt-gallery-main { min-height: 320px; }
   .market-controls-right { width: auto; margin-left: auto; }
-  .market-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+  .market-grid { gap: 20px; }
   .mkt-detail { padding: 24px 28px 28px; }
   .mkt-form { padding: 24px 28px 28px; }
 }
