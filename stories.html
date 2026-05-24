@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
   <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
-  <link rel="stylesheet" href="./css/stories.css?v=20260523-filterscroll">
+  <link rel="stylesheet" href="./css/stories.css?v=20260524-onerow">
 </head>
 <body>
 
@@ -78,7 +78,8 @@
 </div>
 
 <!-- ════════ 검색바 ════════ -->
-<div class="search-bar">
+<!-- ════════ 검색 + 카테고리 필터 (한 줄) ════════ -->
+<div class="articles-controls">
   <div class="search-input-wrap">
     <input type="search" id="searchInput" class="search-input" placeholder="제목, 작가, 키워드로 검색…" aria-label="글 검색" autocomplete="off">
     <svg class="search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -87,22 +88,20 @@
     </svg>
     <button class="search-clear" id="searchClear" aria-label="검색어 지우기">✕</button>
   </div>
+  <div class="filter-bar">
+    <button class="filter-chip active" data-category="all">All</button>
+    <button class="filter-chip" data-category="photo">Photo</button>
+    <button class="filter-chip" data-category="essay">Essay</button>
+    <button class="filter-chip" data-category="film">Film</button>
+    <button class="filter-chip" data-category="camera">Camera</button>
+    <button class="filter-chip" data-category="interview">Interview</button>
+    <button class="filter-chip" data-category="goods">Goods</button>
+    <button class="filter-chip" data-category="exhibition">Exhibition</button>
+    <button class="filter-chip" data-category="illustration">Illustration</button>
+    <button class="filter-chip" data-category="editorial">Editorial</button>
+  </div>
 </div>
 <div class="search-results-count" id="searchResultsCount"></div>
-
-<!-- ════════ 카테고리 필터 ════════ -->
-<div class="filter-bar">
-  <button class="filter-chip active" data-category="all">All</button>
-  <button class="filter-chip" data-category="photo">Photo</button>
-  <button class="filter-chip" data-category="essay">Essay</button>
-  <button class="filter-chip" data-category="film">Film</button>
-  <button class="filter-chip" data-category="camera">Camera</button>
-  <button class="filter-chip" data-category="interview">Interview</button>
-  <button class="filter-chip" data-category="goods">Goods</button>
-  <button class="filter-chip" data-category="exhibition">Exhibition</button>
-  <button class="filter-chip" data-category="illustration">Illustration</button>
-  <button class="filter-chip" data-category="editorial">Editorial</button>
-</div>
 
 <!-- ════════ 아티클 그리드 ════════ -->
 <div class="articles-section">
