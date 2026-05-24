@@ -1,14 +1,17 @@
 /* 5ft.mag — 필름 현상소 리스트 (mobile-first) */
 
-/* ── 검색바 (labs 페이지 자립 스타일; stories.css 미로드) ── */
-.search-bar {
-  display: flex; align-items: center; justify-content: center;
-  padding: 28px 32px 0;
+/* ── 검색 + 지역 필터 (한 줄, 필터는 가로 스크롤) ── */
+.labs-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 24px;
 }
 .search-input-wrap {
   position: relative;
-  width: 100%;
-  max-width: 480px;
+  flex: 0 0 clamp(180px, 26vw, 300px);
 }
 .search-input {
   width: 100%;
@@ -33,15 +36,25 @@
   pointer-events: none;
 }
 
-/* ── 지역 필터 칩 ── */
+/* ── 지역 필터 칩 (한 줄, 넘치면 가로 스크롤) ── */
 .filter-bar {
-  display: flex; align-items: center; justify-content: center;
-  flex-wrap: wrap; gap: 8px;
-  padding: 24px 32px;
-  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
 }
+.filter-bar::-webkit-scrollbar { display: none; }
 .filter-chip {
   display: inline-block;
+  flex-shrink: 0;
+  white-space: nowrap;
   padding: 8px 18px;
   font-size: var(--fs-meta);
   font-weight: var(--fw-heading);
@@ -272,26 +285,14 @@
 }
 
 @media (max-width: 640px) {
-  .search-bar { padding: 20px 20px 12px; }
+  .labs-controls { padding: 14px 20px; gap: 10px; }
+  .search-input-wrap { flex-basis: 140px; }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
   .intro { padding: 28px 20px 20px; }
-  .intro p { font-size: 16px; }
+  .intro-inner p { font-size: 16px; }
   .labs-map-section { padding: 16px 20px 0; }
   .labs-map { height: 300px; }
-  /* 지역 칩이 많아 한 줄 가로 스크롤 + 오른쪽 페이드 */
-  .filter-bar {
-    padding: 16px 20px;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-            mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-  }
-  .filter-bar::-webkit-scrollbar { display: none; }
-  .filter-chip { padding: 6px 14px; font-size: 12px; flex-shrink: 0; }
+  .filter-chip { padding: 6px 14px; font-size: 12px; }
 }
 
 @media (max-width: 1280px) {
