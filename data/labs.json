@@ -1,7 +1,7 @@
 {
   "source": "필름 현상소_Update_07.11.xlsx",
   "type": "film-lab",
-  "count": 86,
+  "count": 88,
   "labs": [
     {
       "name": "갤러리 사진관",
@@ -576,15 +576,66 @@
       }
     },
     {
-      "name": "스코피 노량진 홍대",
+      "name": "스코피 홍대",
       "region": "서울",
-      "address": "노량진 / 홍대",
+      "address": "서울 마포구 양화로18안길 17 홍익빌딩 2층",
       "lat": null,
       "lng": null,
       "scanRes": "1800*1200",
       "features": null,
       "url": null,
-      "multiLocation": true,
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 6000,
+            "high": null
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "스코피 노량진",
+      "region": "서울",
+      "address": "서울 동작구 장승배기로 164",
+      "lat": null,
+      "lng": null,
+      "scanRes": "1800*1200",
+      "features": null,
+      "url": null,
       "prices": {
         "color": {
           "120": {
@@ -683,13 +734,12 @@
     {
       "name": "엘리카메라",
       "region": "서울",
-      "address": "연남점 / 성산점",
+      "address": "서울 마포구 성암로 28 105호",
       "lat": null,
       "lng": null,
       "scanRes": "3000*2000",
-      "features": "필름카메라 전문 판매점 연남과 성산에 두 군데에 있음",
-      "url": "http://www.allycamera.com",
-      "multiLocation": true,
+      "features": "필름카메라 전문 판매점 · 매장 겸 현상소",
+      "url": "https://www.allycamera.com/filmlab_price",
       "prices": {
         "color": {
           "120": {
@@ -1774,15 +1824,66 @@
       }
     },
     {
-      "name": "필름로그",
+      "name": "필름로그 서울",
       "region": "서울",
-      "address": "쌍림점 / 역삼점",
+      "address": "서울 중구 퇴계로53길 6-17 1층",
       "lat": null,
       "lng": null,
       "scanRes": "1545*1024",
-      "features": "스캐너 선택 가능, 제주도,경주에도 있음",
+      "features": "스캐너 선택 가능",
       "url": "http://www.filmlog.co.kr/",
-      "multiLocation": true,
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": 9000
+          },
+          "135": {
+            "basic": 5000,
+            "high": 9000
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": 12000
+          },
+          "135": {
+            "basic": 8000,
+            "high": 12000
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": 14000
+          },
+          "135": {
+            "basic": 10000,
+            "high": 14000
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "필름로그 제주",
+      "region": "제주",
+      "address": "제주 제주시 서광로11길 37",
+      "lat": null,
+      "lng": null,
+      "scanRes": "1545*1024",
+      "features": "스캐너 선택 가능",
+      "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
           "120": {
