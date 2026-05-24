@@ -1,0 +1,143 @@
+/* 5ft.mag — 필름 현상소 리스트 (mobile-first) */
+
+.labs-intro {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px 8px;
+  text-align: center;
+}
+.labs-intro h1 {
+  font-size: 34px;
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default);
+  line-height: var(--lh-title);
+  margin: 0 0 12px;
+}
+.labs-intro p {
+  font-size: 15px;
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  margin: 0;
+}
+.labs-count {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 8px 20px 0;
+}
+
+.labs-section {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+}
+.labs-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.labs-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 64px 20px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.lab-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  background: var(--bg);
+  transition: border-color var(--duration-base) var(--easing);
+}
+.lab-card:hover { border-color: var(--text); }
+.lab-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.lab-name {
+  font-size: 18px;
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default);
+  margin: 0;
+}
+.lab-region {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.06em;
+  color: var(--accent-text);
+  background: var(--accent);
+  border-radius: var(--badge-radius);
+  padding: 3px 7px;
+}
+.lab-addr {
+  font-size: 14px;
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  margin: 8px 0 0;
+}
+.lab-prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 12px 0 0;
+}
+.lab-price {
+  font-size: 13px;
+  font-weight: var(--fw-all);
+}
+.lab-price-k {
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+.lab-price-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+.lab-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 8px 0 0;
+}
+.lab-features {
+  font-size: 13px;
+  line-height: var(--lh-body);
+  color: var(--text);
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.lab-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 12px;
+}
+.lab-link {
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  color: var(--text);
+  border-bottom: 1px solid var(--text-dim, var(--border));
+}
+.lab-link:hover { border-color: var(--text); }
+.lab-link-map { color: var(--text); }
+
+.labs-chip-count {
+  margin-left: 5px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+@media (min-width: 700px) {
+  .labs-list { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .labs-intro h1 { font-size: 40px; }
+}
+@media (min-width: 1040px) {
+  .labs-list { grid-template-columns: repeat(3, 1fr); }
+}

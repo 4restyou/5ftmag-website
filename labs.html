@@ -4,21 +4,38 @@
   <meta charset="UTF-8" />
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Market | 5ft.mag</title>
-  <meta name="description" content="5ft.mag 구독자들이 직접 올리는 필름·카메라·렌즈 중고 장터. 거래는 개인 간 진행됩니다.">
-  <link rel="canonical" href="https://www.5ftmag.com/market.html">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Market | 5ft.mag">
-  <meta property="og:description" content="5ft.mag 구독자 중고 장터.">
-  <meta property="og:url" content="https://www.5ftmag.com/market.html">
+  <title>필름 현상소 | 5ft.mag</title>
+  <!-- SEO & Social Sharing -->
+  <meta name="description" content="전국 필름 현상소 정보. 지역별 위치, 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 한자리에서.">
+  <link rel="canonical" href="https://www.5ftmag.com/labs.html">
 
+  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="./rss.xml">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="필름 현상소 | 5ft.mag">
+  <meta property="og:description" content="전국 필름 현상소 정보. 지역별 위치, 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 한자리에서.">
+  <meta property="og:image" content="https://www.5ftmag.com/img/og/5ft-link1.webp">
+  <meta property="og:url" content="https://www.5ftmag.com/labs.html">
+  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="필름 현상소 | 5ft.mag">
+  <meta name="twitter:description" content="전국 필름 현상소 정보. 지역별 위치, 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 한자리에서.">
+  <meta name="twitter:image" content="https://www.5ftmag.com/img/og/5ft-link1.webp">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/icon-16.png">
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
   <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
-  <link rel="stylesheet" href="./css/market.css?v=20260523-formfocus">
+  <link rel="stylesheet" href="./css/labs.css?v=20260524-labs">
 </head>
 <body>
 
@@ -29,8 +46,8 @@
     <ul class="main-nav">
       <li><a href="stories.html">Articles</a></li>
       <li><a href="films.html">Films</a></li>
-      <li><a href="labs.html">Labs</a></li>
-      <li><a href="market.html" class="current">Market</a></li>
+      <li><a href="labs.html" class="current">Labs</a></li>
+      <li><a href="market.html">Market</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
@@ -49,56 +66,35 @@
   </nav>
 </header>
 
-<div class="market-intro">
-  <p>구독자들이 직접 매물을 올리는 <span class="accent">중고 장터</span>예요. 거래·결제는 판매자와 구매자가 직접 진행해주세요. 사기나 부적절한 매물은 매물 상세에서 <strong>신고</strong>해주시면 편집부가 검토합니다.</p>
-  <div class="market-safety" aria-label="거래 전 확인사항">
-    <strong>거래 전 확인</strong>
-    <ul>
-      <li>5ft.mag는 매물 노출과 신고 접수만 돕고, 결제·배송·환불을 중개하지 않습니다.</li>
-      <li>상태와 구성품을 사진으로 확인하고, 고가 장비는 직거래나 안전결제를 우선해주세요.</li>
-      <li>도난품·가품·불법 개조품·매거진 성격과 무관한 물품은 숨김 처리될 수 있습니다.</li>
-    </ul>
+<!-- ════════ 인트로 ════════ -->
+<div class="labs-intro">
+  <h1>필름 현상소</h1>
+  <p>전국 필름 현상소를 지역별로 모았습니다. 위치와 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 한자리에서 확인하세요. 지도는 곧 추가됩니다.</p>
+</div>
+
+<!-- ════════ 검색바 ════════ -->
+<div class="search-bar">
+  <div class="search-input-wrap">
+    <input type="search" id="labsSearch" class="search-input" placeholder="현상소·지역·특징으로 검색…" aria-label="현상소 검색" autocomplete="off">
+    <svg class="search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="7" cy="7" r="5"/>
+      <line x1="14" y1="14" x2="11" y2="11"/>
+    </svg>
   </div>
 </div>
 
-<section class="market-section">
-  <div class="market-controls">
-    <label class="market-search-label">
-      <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
-        <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/>
-        <line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-      <input type="search" class="market-search" id="marketSearch" placeholder="제목·설명으로 검색" aria-label="매물 검색" autocomplete="off" />
-    </label>
-    <div class="market-controls-right">
-      <div class="market-filter" id="marketFilter" role="tablist" aria-label="카테고리"></div>
-      <button type="button" class="market-new-btn" id="marketNewBtn">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        매물 올리기
-      </button>
-    </div>
-  </div>
+<!-- ════════ 지역 필터 ════════ -->
+<div class="filter-bar" id="labsFilter" role="tablist" aria-label="지역 필터"></div>
+<div class="labs-count" id="labsCount"></div>
 
-  <div class="market-grid" id="marketGrid">
-    <div class="market-empty">불러오는 중…</div>
-  </div>
-</section>
-
-<!-- ════════ 상세 모달 ════════ -->
-<div class="mkt-modal" id="mktDetailModal" role="dialog" aria-modal="true" aria-label="매물 상세">
-  <div class="mkt-modal-card" id="mktDetailCard">
-    <!-- 동적 생성 -->
+<!-- ════════ 리스트 ════════ -->
+<div class="labs-section">
+  <div class="labs-list" id="labsList">
+    <div class="labs-empty">불러오는 중…</div>
   </div>
 </div>
 
-<!-- ════════ 폼 모달 ════════ -->
-<div class="mkt-modal mkt-form-modal" id="mktFormModal" role="dialog" aria-modal="true" aria-label="매물 폼">
-  <div class="mkt-modal-card mkt-form-card" id="mktFormCard">
-    <!-- 동적 생성 -->
-  </div>
-</div>
-
-<!-- ════════ PARTNERS ════════ -->
+<!-- ════════ FOOTER ════════ -->
 <div class="footer-partners">
   <span class="footer-partners-label">PARTNERS</span>
   <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
@@ -123,7 +119,6 @@
   </a>
 </div>
 
-<!-- ════════ FOOTER ════════ -->
 <footer>
   <div class="footer-inner-left">
     <span class="footer-logo">5ft.mag</span>
@@ -138,11 +133,7 @@
   <span class="footer-copy">© 2024 5ft.mag</span>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260523-newsletter"></script>
-<script src="./js/image-processor.js?v=20260520-mobileupload"></script>
 <script src="./js/site-common.js?v=20260523-reveal"></script>
-<script src="./js/market-page.js?v=20260523-formfocus"></script>
-
+<script src="./js/labs-page.js?v=20260524-labs"></script>
 </body>
 </html>
