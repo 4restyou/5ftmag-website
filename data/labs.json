@@ -10,7 +10,7 @@
       "lat": 37.5174072,
       "lng": 127.0513431,
       "scanRes": "2250*1500",
-      "features": "컬러 네가 기본 스캔이 1500*2250이기에 다른 현상소 기본 화질로 하려면 11000원 + 컬러 네가는 1롤에 5000원 동시에 추가 현상시 롤당 3000원",
+      "features": "컬러 네거티브 기본 스캔 1500×2250. 타 업체 수준 화질은 11,000원, 컬러 네거티브 현상 롤당 5,000원, 동시 추가 현상 시 롤당 3,000원.",
       "url": "https://www.instagram.com/gallery_studio_official/",
       "prices": {
         "color": {
@@ -62,7 +62,7 @@
       "lat": 37.5630981,
       "lng": 126.9915303,
       "scanRes": "3000*2000",
-      "features": "현상+스캔권 판매 + 자가 스캔 가능",
+      "features": "현상·스캔권 판매, 자가 스캔 가능.",
       "url": "https://www.slowlens.net/",
       "prices": {
         "color": {
@@ -166,7 +166,7 @@
       "lat": 37.5215141,
       "lng": 127.0210161,
       "scanRes": "1500*1000",
-      "features": "자가현상 가능",
+      "features": "자가 현상 가능.",
       "url": "https://www.photomatic.co.kr/",
       "prices": {
         "color": {
@@ -426,7 +426,7 @@
       "lat": 37.5614704,
       "lng": 126.9903691,
       "scanRes": null,
-      "features": "이마콘X5 드럼스캔 가능 // 흑백 전용액 현상 가능 // 프리미엄 현상 가능 // 밀착인화 가능",
+      "features": "이마콘 X5 드럼 스캔, 흑백 전용액 현상, 프리미엄 현상, 밀착 인화 가능.",
       "url": "http://www.bodabom.com/",
       "prices": {
         "color": {
@@ -686,7 +686,7 @@
       "lat": 37.5204413,
       "lng": 127.0272235,
       "scanRes": "1545*1024",
-      "features": "노리츠 후지 스캐너 선택 가능",
+      "features": "노리츠·후지 스캐너 선택 가능.",
       "url": "https://www.instagram.com/sscolor_film/",
       "prices": {
         "color": {
@@ -738,7 +738,7 @@
       "lat": 37.5691833,
       "lng": 126.9133164,
       "scanRes": "3000*2000",
-      "features": "필름카메라 전문 판매점 · 매장 겸 현상소",
+      "features": "필름 카메라 전문 판매점, 매장 겸 현상소.",
       "url": "https://www.allycamera.com/filmlab_price",
       "prices": {
         "color": {
@@ -842,7 +842,7 @@
       "lat": 37.5655864,
       "lng": 127.0020961,
       "scanRes": "3000*2000",
-      "features": "정보 부족",
+      "features": null,
       "url": "http://instagram.com/ox.film",
       "prices": {
         "color": {
@@ -1050,7 +1050,7 @@
       "lat": 37.5631115,
       "lng": 126.9733938,
       "scanRes": "2728*1830",
-      "features": "선불권 제도 : 컬러 네가 4롤 10000원 기준으로 중형은 롤당 1500원 추가 흑백, 슬라이드는 롤당 5천원 추가",
+      "features": "선불권 운영. 컬러 네거티브 4롤 10,000원 기준, 중형 롤당 1,500원 추가, 흑백·슬라이드 롤당 5,000원 추가.",
       "url": null,
       "prices": {
         "color": {
@@ -1102,7 +1102,7 @@
       "lat": 37.5628417,
       "lng": 126.9927046,
       "scanRes": "2681*1807",
-      "features": "4롤에 11000원 1년동안 사용 가능 (선불)",
+      "features": "선불권 4롤 11,000원, 1년간 사용 가능.",
       "url": "http://www.instagram.com/film_135_36",
       "prices": {
         "color": {
@@ -1206,7 +1206,7 @@
       "lat": 37.5656101,
       "lng": 127.0063949,
       "scanRes": "3000*2048",
-      "features": "왼쪽 가격표는 노리츠 기준 후지는 4000/6000/9000 // APS 퍼포레이션까지 스캔 가능",
+      "features": "표시 가격은 노리츠 기준. 후지 스캐너는 4,000·6,000·9,000원. APS 퍼포레이션까지 스캔 가능.",
       "url": "https://blog.naver.com/dldndyd30129",
       "prices": {
         "color": {
@@ -1258,7 +1258,7 @@
       "lat": 37.5686381,
       "lng": 126.9981855,
       "scanRes": "1512*1002",
-      "features": "제일 기본 화질은 1512*1002라서 제외",
+      "features": "최저 화질(1512×1002) 등급은 제외.",
       "url": "http://www.instagram.com/cheonggye_film",
       "prices": {
         "color": {
@@ -1466,7 +1466,7 @@
       "lat": 37.5612773,
       "lng": 126.9918976,
       "scanRes": "2700*1830",
-      "features": "중형필름 찍은 규격마다 가격이 다름 6*45_12000 / 6*6_10000 / 6*7_9000 // 컬러기준 흑백은 +2000 슬라이드는 +3000원",
+      "features": "중형 필름은 규격별 차등. 6×4.5 12,000원, 6×6 10,000원, 6×7 9,000원(컬러 기준). 흑백 +2,000원, 슬라이드 +3,000원.",
       "url": "http://www.timephoto.co.kr/",
       "prices": {
         "color": {
@@ -1518,7 +1518,7 @@
       "lat": 37.5374011,
       "lng": 127.0767486,
       "scanRes": "2300*1500",
-      "features": "영화용 필름 현상액 C-41 사용 ECN-2 아님",
+      "features": "영화용 필름 현상에 C-41 사용(ECN-2 아님).",
       "url": "http://www.instagram.com/palettefilmlab",
       "prices": {
         "color": {
@@ -1570,7 +1570,7 @@
       "lat": 37.5626921,
       "lng": 126.9905735,
       "scanRes": "2300*1500",
-      "features": "APS / 110 / 127 / 126 / 220 / 620 / 820 / Minox 현상 가능",
+      "features": "APS·110·127·126·220·620·820·Minox 현상 가능.",
       "url": "https://www.fotomaru.com",
       "prices": {
         "color": {
@@ -1622,7 +1622,7 @@
       "lat": 37.5708345,
       "lng": 126.9798606,
       "scanRes": "3089*2048",
-      "features": "중형필름 스캔 고장 당분간 중지",
+      "features": "중형 필름 스캔 일시 중단.",
       "url": "http://www.photowith.net/",
       "prices": {
         "color": {
@@ -1674,7 +1674,7 @@
       "lat": 37.6469771,
       "lng": 126.894778,
       "scanRes": null,
-      "features": "네이버 스마트 스토어에 입점",
+      "features": "네이버 스마트스토어 입점.",
       "url": null,
       "prices": {
         "color": {
@@ -1726,7 +1726,7 @@
       "lat": 37.5627298,
       "lng": 126.9909643,
       "scanRes": "2728*1830",
-      "features": "필름 컷 수당 가격이 다름",
+      "features": "필름 컷 수에 따라 가격 차등.",
       "url": "https://www.photopia.co.kr/main.asp",
       "prices": {
         "color": {
@@ -1830,7 +1830,7 @@
       "lat": 37.5642554,
       "lng": 127.0043472,
       "scanRes": "1545*1024",
-      "features": "스캐너 선택 가능",
+      "features": "스캐너 선택 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
@@ -1882,7 +1882,7 @@
       "lat": 33.5033218,
       "lng": 126.5164581,
       "scanRes": "1545*1024",
-      "features": "스캐너 선택 가능",
+      "features": "스캐너 선택 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
@@ -1934,7 +1934,7 @@
       "lat": 37.5484741,
       "lng": 126.8636739,
       "scanRes": null,
-      "features": "카드 1000원 추가",
+      "features": "카드 결제 시 1,000원 추가.",
       "url": null,
       "prices": {
         "color": {
@@ -1986,7 +1986,7 @@
       "lat": 37.5567321,
       "lng": 126.9204791,
       "scanRes": "2400*1700",
-      "features": "컬러 네가 제외 모든 가격은 스캔 제외 현상만",
+      "features": "컬러 네거티브 외 표시 가격은 현상만(스캔 미포함).",
       "url": "http://www.photopan.co.kr",
       "prices": {
         "color": {
@@ -2038,7 +2038,7 @@
       "lat": 37.5763234,
       "lng": 127.0059137,
       "scanRes": "3089*2048",
-      "features": "APS 필름도 현상 가능하다고 적혀있지만가격 확인 불가",
+      "features": "APS 필름 현상 가능.",
       "url": "http://hp1996.blog.me/",
       "prices": {
         "color": {
@@ -2090,7 +2090,7 @@
       "lat": 37.5630479,
       "lng": 126.9914439,
       "scanRes": null,
-      "features": "흑백만 현상 + 밀착인화",
+      "features": "흑백 전용 현상, 밀착 인화.",
       "url": "https://blog.naver.com/bnw_film",
       "prices": {
         "color": {
@@ -2142,7 +2142,7 @@
       "lat": 37.4774201,
       "lng": 126.6177253,
       "scanRes": "2279*1535",
-      "features": "흑백은 서울에 맡김 // 후지스캐너",
+      "features": "흑백은 서울 외주 현상, 후지 스캐너 사용.",
       "url": "https://www.instagram.com/hdh_studio/",
       "prices": {
         "color": {
@@ -2194,7 +2194,7 @@
       "lat": 37.4699734,
       "lng": 126.6252461,
       "scanRes": null,
-      "features": "후지스캐너 2000원 추가시 노리츠 스캐너로 변경 가능",
+      "features": "후지 스캐너 기본, 2,000원 추가 시 노리츠 스캐너 선택 가능.",
       "url": null,
       "prices": {
         "color": {
@@ -2246,7 +2246,7 @@
       "lat": 37.4465109,
       "lng": 126.6941594,
       "scanRes": null,
-      "features": "암실 체험 가능",
+      "features": "암실 체험 가능.",
       "url": "https://cxp.modoo.at/",
       "prices": {
         "color": {
@@ -2298,7 +2298,7 @@
       "lat": 37.3966909,
       "lng": 127.1106823,
       "scanRes": "3088*2048",
-      "features": "노리츠 스캐너 // 흑백 외주",
+      "features": "노리츠 스캐너 사용, 흑백 외주 현상.",
       "url": "https://nkodak.modoo.at/",
       "prices": {
         "color": {
@@ -2350,7 +2350,7 @@
       "lat": 37.6901649,
       "lng": 126.7703181,
       "scanRes": "3024*2005",
-      "features": "흑백은 XP2 만 현상 가능",
+      "features": "흑백은 XP2 한정 현상 가능.",
       "url": "https://www.filmparadise.co.kr/",
       "prices": {
         "color": {
@@ -2402,7 +2402,7 @@
       "lat": 37.6612864,
       "lng": 126.7688372,
       "scanRes": null,
-      "features": "노리츠 스캐너 // 6~10롤 - 롤당 5500원 // 11롤 이상 - 롤당 5000원",
+      "features": "노리츠 스캐너 사용. 6~10롤 롤당 5,500원, 11롤 이상 롤당 5,000원.",
       "url": "https://blog.naver.com/lbstudio",
       "prices": {
         "color": {
@@ -2506,7 +2506,7 @@
       "lat": 37.4116428,
       "lng": 127.1276099,
       "scanRes": "3072*2048",
-      "features": "컬러 네가 10롤 이상부터는 롤당 2000원 // 홀수달은 개당 500원씩 할인",
+      "features": "컬러 네거티브 10롤 이상 롤당 2,000원. 홀수 달 개당 500원 할인.",
       "url": null,
       "prices": {
         "color": {
@@ -2610,7 +2610,7 @@
       "lat": 37.3503982,
       "lng": 127.1107975,
       "scanRes": null,
-      "features": "컬러 네가 10롤 현상하면 1롤 무료(스탬프 형식)",
+      "features": "컬러 네거티브 10롤 현상 시 1롤 무료(스탬프 적립).",
       "url": null,
       "prices": {
         "color": {
@@ -2818,7 +2818,7 @@
       "lat": 35.8717377,
       "lng": 128.600564,
       "scanRes": null,
-      "features": "필름 현상을 다른곳으로 받는게 아니라 USB를 동봉해서 보내면 그 USB에 담아서 다시 받을 수 있음",
+      "features": "필름과 USB를 함께 보내면 스캔 파일을 그 USB에 담아 반송.",
       "url": "http://www.the35mm.com/",
       "prices": {
         "color": {
@@ -2870,7 +2870,7 @@
       "lat": 35.8569839,
       "lng": 128.5929864,
       "scanRes": null,
-      "features": "모든 작업을 직접 기계 말고 수작업으로 하시고 왼쪽 가격은 필름 스캔이 아닌 \"밀착 인화\" 입니다. // 스캔은 135 2500원 120 3000원 입니다.",
+      "features": "전 공정 수작업. 표시 가격은 스캔이 아닌 밀착 인화 기준이며, 스캔은 135 2,500원·120 3,000원.",
       "url": "http://solist.alltheway.kr/",
       "prices": {
         "color": {
@@ -2922,7 +2922,7 @@
       "lat": 35.8584032,
       "lng": 128.5918023,
       "scanRes": null,
-      "features": "이마콘 848 드럼 스캔 // 흑백과 슬라이드 필름은 화질이 5mb 18mb 60mb 왼쪽 가격표는 5mb 18mb // 노리츠 스캐너",
+      "features": "이마콘 848 드럼 스캔, 노리츠 스캐너. 흑백·슬라이드는 5MB·18MB·60MB 화질 제공(표시 가격은 5MB·18MB 기준).",
       "url": "http://www.photomagic.co.kr/",
       "prices": {
         "color": {
@@ -2974,7 +2974,7 @@
       "lat": 35.8656504,
       "lng": 128.5963456,
       "scanRes": null,
-      "features": "흑백은 1주일에 한번 외주 맡김 //",
+      "features": "흑백은 주 1회 외주 현상.",
       "url": null,
       "prices": {
         "color": {
@@ -3026,7 +3026,7 @@
       "lat": 35.8608798,
       "lng": 128.5981959,
       "scanRes": null,
-      "features": "재재상회, 재재프로젝트로도 불리움 // 사진관이 현재 공사중이라 가을 즈음에 현상 재개",
+      "features": "재재상회·재재프로젝트로도 운영. 현재 공사로 휴업, 가을 현상 재개 예정.",
       "url": "http://www.seokjustudio.com/develop.html",
       "prices": {
         "color": {
@@ -3130,7 +3130,7 @@
       "lat": 35.8335221,
       "lng": 128.5764778,
       "scanRes": null,
-      "features": "확인 해봐야겠지만 프로젝트88이라는 스냅사진쪽 회사가 같이 진행하는 것 처럼 보임 추후 추가 예정 // 대구광역시 중구 서성로 31-14 2층에 무인 접수",
+      "features": "프로젝트88 운영. 대구 중구 서성로 31-14 2층 무인 접수처 운영.",
       "url": "http://project88.kr/",
       "prices": {
         "color": {
@@ -3234,7 +3234,7 @@
       "lat": 35.8407482,
       "lng": 129.2117803,
       "scanRes": null,
-      "features": "스캐너 선택 가능",
+      "features": "스캐너 선택 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
@@ -3286,7 +3286,7 @@
       "lat": 35.8425358,
       "lng": 129.2124666,
       "scanRes": null,
-      "features": "바라보다사진관 이라는 사진관에서 운영하지만 필름 접수는 네이버 스토어에서 가능한 것 같음 // 감은 영화용 필름 판매",
+      "features": "바라보다사진관 운영, 필름 접수는 네이버 스토어. 영화용 필름 판매.",
       "url": "https://smartstore.naver.com/gyeongju_film",
       "prices": {
         "color": {
@@ -3338,7 +3338,7 @@
       "lat": 36.0261353,
       "lng": 129.3603764,
       "scanRes": null,
-      "features": "매주 월, 수, 금 현상",
+      "features": "매주 월·수·금 현상.",
       "url": "https://www.instagram.com/heemang_photo/",
       "prices": {
         "color": {
@@ -3442,7 +3442,7 @@
       "lat": 35.228414,
       "lng": 128.6794813,
       "scanRes": null,
-      "features": "창원에 유일한 현상소 // 월, 수, 금 현상",
+      "features": "창원 유일의 현상소, 월·수·금 현상.",
       "url": "http://blog.naver.com/gdcolor",
       "prices": {
         "color": {
@@ -3494,7 +3494,7 @@
       "lat": 35.1914019,
       "lng": 128.0845516,
       "scanRes": null,
-      "features": "dkcolor.com 이라는 사이트는 접속 불가 오른쪽 사이트는 2006년에 멈춰있음 // 정보 부족",
+      "features": null,
       "url": "http://211.49.171.149/index.html",
       "prices": {
         "color": {
@@ -3702,7 +3702,7 @@
       "lat": 36.8173856,
       "lng": 127.1553355,
       "scanRes": null,
-      "features": "전 한암 스튜디오",
+      "features": "구 한암 스튜디오.",
       "url": null,
       "prices": {
         "color": {
@@ -3806,7 +3806,7 @@
       "lat": 36.7678603,
       "lng": 126.4687477,
       "scanRes": null,
-      "features": "포토클래식",
+      "features": "포토클래식으로도 운영.",
       "url": "https://www.photoclassic.kr/",
       "prices": {
         "color": {
@@ -3858,7 +3858,7 @@
       "lat": 36.8084479,
       "lng": 127.1490309,
       "scanRes": null,
-      "features": "흑백필름으로만 촬영하는 사진관 // 암실교육 가능",
+      "features": "흑백 필름 전문 사진관, 암실 교육 가능.",
       "url": "https://blog.naver.com/aggeee",
       "prices": {
         "color": {
@@ -3962,7 +3962,7 @@
       "lat": 35.727109,
       "lng": 126.7373979,
       "scanRes": null,
-      "features": "전주로 보내서 현상 // 현상비 8000원 + 이메일 전환비 5000원",
+      "features": "전주 외주 현상. 현상비 8,000원, 이메일 전송비 5,000원.",
       "url": null,
       "prices": {
         "color": {
@@ -4014,7 +4014,7 @@
       "lat": 35.8636889,
       "lng": 127.1165601,
       "scanRes": null,
-      "features": "매직 포토에서 베르베르 스튜디오로 통합",
+      "features": "매직포토가 베르베르 스튜디오로 통합.",
       "url": "https://blog.naver.com/olive21cc",
       "prices": {
         "color": {
@@ -4066,7 +4066,7 @@
       "lat": 34.9469738,
       "lng": 127.4980021,
       "scanRes": null,
-      "features": "필름로그랑 심다 책방이랑 함께 운영하는 드랍포인트 // 옆에 자판기도 있으며 심다 책방에 필름을 가져다주면 현상 가능",
+      "features": "필름로그·심다 책방이 함께 운영하는 드롭 포인트. 심다 책방에 필름을 맡기면 현상 가능, 옆에 자판기 운영.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
@@ -4222,7 +4222,7 @@
       "lat": 37.7558141,
       "lng": 128.8798223,
       "scanRes": null,
-      "features": "필름로그랑 안드로메다랑 함께 운영하는 드랍포인트 // 옆에 자판기도 있으며 안드로메다에 필름을 가져다주면 현상 가능",
+      "features": "필름로그·안드로메다가 함께 운영하는 드롭 포인트. 안드로메다에 필름을 맡기면 현상 가능, 옆에 자판기 운영.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
@@ -4274,7 +4274,7 @@
       "lat": 35.170972,
       "lng": 129.1776622,
       "scanRes": "1536*1024",
-      "features": "노리츠 스캐너",
+      "features": "노리츠 스캐너 사용.",
       "url": "https://blog.naver.com/7047717",
       "prices": {
         "color": {
@@ -4378,7 +4378,7 @@
       "lat": 35.101494,
       "lng": 129.0368109,
       "scanRes": "3088*2048",
-      "features": "영화용 필름 현상스캔 가능",
+      "features": "영화용 필름 현상·스캔 가능.",
       "url": "https://blog.naver.com/mhg1109",
       "prices": {
         "color": {
@@ -4430,7 +4430,7 @@
       "lat": 35.1408672,
       "lng": 129.0599207,
       "scanRes": null,
-      "features": "범일동 대부분의 필름 현상 대행해주는 곳",
+      "features": "범일동 일대 필름 현상 대행.",
       "url": null,
       "prices": {
         "color": {
@@ -4534,7 +4534,7 @@
       "lat": 33.4461341,
       "lng": 126.8866129,
       "scanRes": null,
-      "features": "스캐너 선택 가능 // 필름로그 연계 현상소",
+      "features": "스캐너 선택 가능, 필름로그 연계 현상소.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
