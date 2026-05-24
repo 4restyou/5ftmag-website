@@ -34,7 +34,7 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
-  <link rel="stylesheet" href="./css/common.css?v=20260523-reveal">
+  <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
   <link rel="stylesheet" href="./css/home.css?v=20260523-dvh">
 
@@ -109,7 +109,22 @@
       <p>필름과 사진, 매거진을 둘러싼 이야기들</p>
     </div>
     <div class="post-list" id="storyList">
-      <!-- 자바스크립트가 data/stories.json을 읽어서 자동 생성 -->
+      <!-- 자바스크립트가 data/stories.json을 읽어서 자동 생성. 그 전까지 스켈레톤 노출 -->
+      <div class="skeleton-post" aria-hidden="true">
+        <div class="skeleton skeleton-thumb skeleton-thumb--wide"></div>
+        <div class="skeleton skeleton-line" style="width:80%"></div>
+        <div class="skeleton skeleton-line" style="width:55%"></div>
+      </div>
+      <div class="skeleton-post" aria-hidden="true">
+        <div class="skeleton skeleton-thumb skeleton-thumb--wide"></div>
+        <div class="skeleton skeleton-line" style="width:80%"></div>
+        <div class="skeleton skeleton-line" style="width:55%"></div>
+      </div>
+      <div class="skeleton-post" aria-hidden="true">
+        <div class="skeleton skeleton-thumb skeleton-thumb--wide"></div>
+        <div class="skeleton skeleton-line" style="width:80%"></div>
+        <div class="skeleton skeleton-line" style="width:55%"></div>
+      </div>
     </div>
 
     <nav class="pagination story-num-nav" id="storyNumNav" aria-label="글 번호로 바로 가기"></nav>
