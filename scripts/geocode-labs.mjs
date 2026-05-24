@@ -22,16 +22,19 @@ const data = JSON.parse(fs.readFileSync(PATH, 'utf8'));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// 2025년 네이버 지도 API 개편으로 엔드포인트가 바뀌었을 수 있어 env 로 override 가능.
+// 2025년 개편으로 지도 API 가 AI·NAVER API → Application Services > Maps 로 이전됐다.
+// 새 콘솔(Application Services > Maps)에서 발급한 키는 신규 게이트웨이 호스트를 써야 한다.
+// 레거시 naveropenapi.apigw.ntruss.com 호스트로는 신규 키가 인증되지 않는다.
+// 필요하면 env 로 override 가능.
 const GEOCODE_URL = process.env.NAVER_GEOCODE_URL
-  || 'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode';
+  || 'https://maps.apigw.ntruss.com/map-geocode/v2/geocode';
 
 async function geocode(address) {
   const url = `${GEOCODE_URL}?query=${encodeURIComponent(address)}`;
   const res = await fetch(url, {
     headers: { 'X-NCP-APIGW-API-KEY-ID': ID, 'X-NCP-APIGW-API-KEY': SECRET },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} — ${(await res.text()).slice(0, 120)}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} — ${(await res.text()).slice(0, 400)}`);
   const json = await res.json();
   const hit = json.addresses && json.addresses[0];
   if (!hit) return null;
@@ -54,8 +57,16 @@ for (const lab of data.labs) {
 }
 
 fs.writeFileSync(PATH, JSON.stringify(data, null, 2) + '\n');
-console.log(`좌표 채움: ${filled}곳`);
+console.log(`좌표 채움: ${filled}곳 (엔드포인트: ${GEOCODE_URL})`);
 if (failed.length) {
   console.log(`수동 보정 필요 ${failed.length}곳:`);
   failed.forEach((f) => console.log('  -', f));
+}
+if (filled === 0 && failed.some((f) => /HTTP 40[0-9]/.test(f))) {
+  console.error(
+    '\n전부 인증/요청 거부(40x)다. 키와 엔드포인트가 맞는지 확인:\n' +
+    '  - 콘솔: Application Services > Maps 에서 발급한 Client ID/Secret 인지\n' +
+    '  - 그 키는 신규 호스트(maps.apigw.ntruss.com)용 — 레거시 naveropenapi 호스트 아님\n' +
+    '  - GitHub Secrets(NAVER_MAP_CLIENT_ID/SECRET) 값이 실제로 들어있는지',
+  );
 }
