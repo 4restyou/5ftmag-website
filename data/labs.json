@@ -67,38 +67,38 @@
       "prices": {
         "color": {
           "120": {
-            "basic": 5000,
-            "high": 6000
+            "basic": 7000,
+            "high": null
           },
           "135": {
-            "basic": 4000,
-            "high": 5000
+            "basic": 6000,
+            "high": null
           }
         },
         "bw": {
           "120": {
-            "basic": 7000,
-            "high": 8000
+            "basic": 8000,
+            "high": null
           },
           "135": {
-            "basic": 7000,
-            "high": 8000
+            "basic": 8000,
+            "high": null
           }
         },
         "slide": {
           "120": {
-            "basic": null,
-            "high": 11000
+            "basic": 10000,
+            "high": null
           },
           "135": {
-            "basic": null,
-            "high": 10000
+            "basic": 10000,
+            "high": null
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
-            "high": 6000
+            "basic": 7000,
+            "high": null
           }
         },
         "etc": {
@@ -619,6 +619,58 @@
           "135": {
             "basic": null,
             "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "세하포토랩",
+      "region": "대구",
+      "address": "대구 북구 팔달로35길 4 3층",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": "C-41·ECN-2·흑백 필름 현상·스캔. 고해상 스캔 추가 5,000원. 120 흑백 TIFF 스캔.",
+      "url": null,
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 6000,
+            "high": 7000
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": 12000,
+            "high": null
+          },
+          "135": {
+            "basic": 8000,
+            "high": 10000
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": 10000,
+            "high": 12000
           }
         },
         "etc": {
@@ -4399,6 +4451,58 @@
           "135": {
             "basic": null,
             "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "화양연화",
+      "region": "충북",
+      "address": "충북 청주시 상당구 중앙로 5-2 2층",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": "컬러·흑백 필름 현상·스캔, 화질(저·중·고) 선택. 사진 인화 서비스.",
+      "url": null,
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 8000,
+            "high": 13000
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 13000,
+            "high": 17000
           }
         },
         "slide": {
