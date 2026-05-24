@@ -26,11 +26,14 @@
 .films-section {
   padding: 60px 32px 80px;
 }
+/* 카드 그리드 — Articles 처럼 최대 4열, 좁아지면 3 → 2 (모바일 세부는 아래 미디어쿼리) */
 .films-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 48px 32px;
 }
+@media (max-width: 1280px) { .films-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px)  { .films-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .film-card {
   display: block;
   width: 100%;
