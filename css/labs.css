@@ -138,6 +138,8 @@
 }
 
 .lab-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -210,7 +212,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  margin-top: 12px;
+  margin-top: auto;
+  padding-top: 14px;
 }
 .lab-link {
   font-size: 13px;
