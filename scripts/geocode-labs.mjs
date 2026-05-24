@@ -34,7 +34,7 @@ async function geocode(address) {
   const res = await fetch(url, {
     headers: { 'X-NCP-APIGW-API-KEY-ID': ID, 'X-NCP-APIGW-API-KEY': SECRET },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} — ${(await res.text()).slice(0, 120)}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} — ${(await res.text()).slice(0, 400)}`);
   const json = await res.json();
   const hit = json.addresses && json.addresses[0];
   if (!hit) return null;
