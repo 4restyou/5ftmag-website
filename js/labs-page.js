@@ -1,6 +1,6 @@
 // 필름 현상소 리스트 페이지.
 //   data/labs.json 을 읽어 지역 필터 + 검색 + 카드 리스트 렌더.
-//   지도(네이버)는 다음 단계. 지금은 주소별 네이버 지도 검색 링크로 위치 연결.
+//   네이버 지도(Web Dynamic Map)에 현재 필터·검색 결과를 마커로 표시한다.
 
 (function () {
   'use strict';
@@ -10,6 +10,11 @@
   const searchEl = document.getElementById('labsSearch');
   const countEl = document.getElementById('labsCount');
   if (!listEl) return;
+
+  let map = null;
+  let markers = [];
+  let infoWindow = null;
+  let mapReady = false;
 
   // 지역 정렬 우선순위 (그 외는 뒤에 등장 순)
   const REGION_ORDER = ['서울', '경기', '인천', '강원', '대전', '충남', '충북', '세종',
@@ -37,6 +42,7 @@
     .then((data) => {
       labs = Array.isArray(data.labs) ? data.labs : [];
       renderFilter();
+      initMap();
       apply();
     })
     .catch(() => {
@@ -111,9 +117,73 @@
       </article>`;
   }
 
+  function initMap() {
+    const el = document.getElementById('labsMap');
+    const section = document.getElementById('labsMapSection');
+    // SDK 로드 실패(오프라인·차단) 시 지도 영역을 숨기고 리스트만 유지한다.
+    if (!el || !window.naver || !naver.maps) {
+      if (section) section.hidden = true;
+      return;
+    }
+    // 도메인·키 인증 실패 시에도 빈 회색 박스 대신 영역을 접는다.
+    window.navermap_authFailure = function () {
+      if (section) section.hidden = true;
+    };
+    map = new naver.maps.Map(el, {
+      center: new naver.maps.LatLng(36.5, 127.8),
+      zoom: 7,
+      scaleControl: false,
+      mapDataControl: false,
+    });
+    infoWindow = new naver.maps.InfoWindow({ borderWidth: 1, borderColor: '#111', anchorSize: new naver.maps.Size(10, 10) });
+    mapReady = true;
+  }
+
+  function infoContent(lab) {
+    const naverMap = lab.address
+      ? `https://map.naver.com/p/search/${encodeURIComponent(lab.address)}`
+      : null;
+    const links = [];
+    if (naverMap) links.push(`<a href="${escapeAttr(naverMap)}" target="_blank" rel="noopener">길찾기 ↗</a>`);
+    if (lab.url) links.push(`<a href="${escapeAttr(lab.url)}" target="_blank" rel="noopener">홈페이지 ↗</a>`);
+    return `<div class="labs-map-info">
+      <strong>${escapeHtml(lab.name)}</strong>
+      ${lab.address ? `<span class="labs-map-info-addr">${escapeHtml(lab.address)}</span>` : ''}
+      ${links.length ? `<span class="labs-map-info-links">${links.join('')}</span>` : ''}
+    </div>`;
+  }
+
+  function updateMarkers(shown) {
+    if (!mapReady || !map) return;
+    markers.forEach((m) => m.setMap(null));
+    markers = [];
+    if (infoWindow) infoWindow.close();
+    const bounds = new naver.maps.LatLngBounds();
+    let count = 0;
+    for (const lab of shown) {
+      if (lab.lat == null || lab.lng == null) continue;
+      const pos = new naver.maps.LatLng(lab.lat, lab.lng);
+      const marker = new naver.maps.Marker({ position: pos, map, title: lab.name });
+      naver.maps.Event.addListener(marker, 'click', () => {
+        infoWindow.setContent(infoContent(lab));
+        infoWindow.open(map, marker);
+      });
+      markers.push(marker);
+      bounds.extend(pos);
+      count++;
+    }
+    if (count === 1) {
+      map.setCenter(bounds.getCenter());
+      map.setZoom(15);
+    } else if (count > 1) {
+      map.fitBounds(bounds, { top: 48, right: 48, bottom: 48, left: 48 });
+    }
+  }
+
   function apply() {
     const shown = labs.filter(matches);
     if (countEl) countEl.textContent = `${shown.length}곳`;
+    updateMarkers(shown);
     if (!shown.length) {
       listEl.innerHTML = '<div class="labs-empty">조건에 맞는 현상소가 없습니다. 지역이나 검색어를 바꿔보세요.</div>';
       return;
