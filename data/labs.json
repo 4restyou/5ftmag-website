@@ -524,6 +524,58 @@
       }
     },
     {
+      "name": "부광사진관",
+      "region": "울산",
+      "address": "울산 남구 왕생로66번길 30 1층",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": "필름 현상·스캔(현상만·스캔만 개별 가능). 증명사진 스튜디오 겸업.",
+      "url": "https://www.instagram.com/bk_photo_film/",
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 8000,
+            "high": null
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
       "name": "서초사진관",
       "region": "서울",
       "address": "서울 서초구 반포대로10길 35 신영Gwell상가 8호",
@@ -810,6 +862,58 @@
           },
           "135": {
             "basic": null,
+            "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "에이티사진관",
+      "region": "울산",
+      "address": "울산 중구 새즈믄해거리 40",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": "흑백 필름 현상, 습판 사진(예약제). 증명사진 스튜디오 겸업.",
+      "url": "https://instagram.com/a.t_hyunkussi",
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 5000,
             "high": null
           }
         },
@@ -3150,6 +3254,58 @@
           },
           "135": {
             "basic": 9000,
+            "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "헤르츠삼오 부산점",
+      "region": "부산",
+      "address": "부산 부산진구 서전로46번길 60 1층",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": "필름 현상, 필름 카메라 무료 대여.",
+      "url": null,
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 5000,
+            "high": null
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
             "high": null
           }
         },
