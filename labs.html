@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
   <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
-  <link rel="stylesheet" href="./css/labs.css?v=20260524-labsfix">
+  <link rel="stylesheet" href="./css/labs.css?v=20260524-map">
 </head>
 <body>
 
@@ -69,7 +69,7 @@
 <!-- ════════ 인트로 ════════ -->
 <div class="labs-intro">
   <h1>필름 현상소</h1>
-  <p>전국 필름 현상소를 지역별로 모았습니다. 위치와 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 한자리에서 확인하세요. 지도는 곧 추가됩니다.</p>
+  <p>전국 필름 현상소를 지역별로 모았습니다. 위치와 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 한자리에서 확인하세요. 아래 지도에서 위치도 함께 볼 수 있습니다.</p>
 </div>
 
 <!-- ════════ 검색바 ════════ -->
@@ -86,6 +86,13 @@
 <!-- ════════ 지역 필터 ════════ -->
 <div class="filter-bar" id="labsFilter" role="tablist" aria-label="지역 필터"></div>
 <div class="labs-count" id="labsCount"></div>
+
+<!-- ════════ 지도 ════════ -->
+<div class="labs-map-section" id="labsMapSection">
+  <div class="labs-map-wrap">
+    <div id="labsMap" class="labs-map" role="application" aria-label="현상소 위치 지도"></div>
+  </div>
+</div>
 
 <!-- ════════ 리스트 ════════ -->
 <div class="labs-section">
@@ -134,6 +141,7 @@
 </footer>
 
 <script src="./js/site-common.js?v=20260523-reveal"></script>
-<script src="./js/labs-page.js?v=20260524-labs"></script>
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=uu78cn9rbi"></script>
+<script src="./js/labs-page.js?v=20260524-map"></script>
 </body>
 </html>
