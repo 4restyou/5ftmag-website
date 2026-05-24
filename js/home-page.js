@@ -83,7 +83,7 @@
                </div>`;
 
           return `
-            <a href="${escapeAttr(link)}" class="post-item" data-category="${escapeAttr(s.category || '')}" data-issue="${escapeAttr(s.issue || '')}">
+            <a href="${escapeAttr(link)}" class="post-item" data-reveal data-category="${escapeAttr(s.category || '')}" data-issue="${escapeAttr(s.issue || '')}">
               <div class="post-img-wrap">${imgBlock}</div>
               <div class="post-text">
                 <h3 class="post-title">${escapeHtml(s.title)}</h3>
