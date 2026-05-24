@@ -79,6 +79,18 @@
   color: var(--text-muted);
   margin: 0;
 }
+.labs-note {
+  margin: 14px auto 0;
+  font-size: 13px;
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+.labs-note a {
+  color: var(--text);
+  border-bottom: 1px solid var(--text-dim, var(--border));
+}
+.labs-note a:hover { border-color: var(--text); }
 .labs-count {
   text-align: center;
   font-size: 13px;
