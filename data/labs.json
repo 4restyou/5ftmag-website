@@ -10,42 +10,42 @@
       "lat": 37.5174072,
       "lng": 127.0513431,
       "scanRes": "2250*1500",
-      "features": "컬러 네거티브 기본 스캔 1500×2250. 타 업체 수준 화질은 11,000원, 컬러 네거티브 현상 롤당 5,000원, 동시 추가 현상 시 롤당 3,000원.",
+      "features": "기본 스캔 1500×2250, 고해상 옵션(최대 3600×5400). 스캔 단독 1롤 3,000원, 현상 추가 롤당 4,000원.",
       "url": "https://www.instagram.com/gallery_studio_official/",
       "prices": {
         "color": {
           "120": {
-            "basic": 8000,
+            "basic": 9000,
             "high": null
           },
           "135": {
             "basic": 5000,
-            "high": null
+            "high": 11000
           }
         },
         "bw": {
           "120": {
-            "basic": 10000,
+            "basic": 11000,
             "high": null
           },
           "135": {
-            "basic": 10000,
+            "basic": 11000,
             "high": null
           }
         },
         "slide": {
           "120": {
-            "basic": 10000,
+            "basic": 11000,
             "high": null
           },
           "135": {
-            "basic": 10000,
+            "basic": 11000,
             "high": null
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
+            "basic": 12000,
             "high": null
           }
         },
@@ -327,32 +327,32 @@
       "prices": {
         "color": {
           "120": {
-            "basic": 7000,
-            "high": 14000
+            "basic": null,
+            "high": null
           },
           "135": {
-            "basic": 3000,
-            "high": 9000
+            "basic": 5000,
+            "high": null
           }
         },
         "bw": {
           "120": {
-            "basic": 8000,
-            "high": 15000
+            "basic": null,
+            "high": null
           },
           "135": {
-            "basic": 7000,
-            "high": 13000
+            "basic": 9000,
+            "high": null
           }
         },
         "slide": {
           "120": {
-            "basic": 8000,
-            "high": 15000
+            "basic": null,
+            "high": null
           },
           "135": {
-            "basic": 8000,
-            "high": 14000
+            "basic": 14000,
+            "high": null
           }
         },
         "cinema": {
@@ -1050,7 +1050,7 @@
       "lat": 37.5655864,
       "lng": 127.0020961,
       "scanRes": "3000*2000",
-      "features": null,
+      "features": "컬러·흑백·슬라이드·영화용(ECN-2) 현상·스캔, 화질(기본·고해상) 선택. 중형 필름 미취급.",
       "url": "http://instagram.com/ox.film",
       "prices": {
         "color": {
@@ -1059,8 +1059,8 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
-            "high": null
+            "basic": 5000,
+            "high": 9000
           }
         },
         "bw": {
@@ -1069,8 +1069,8 @@
             "high": null
           },
           "135": {
-            "basic": null,
-            "high": null
+            "basic": 8000,
+            "high": 13000
           }
         },
         "slide": {
@@ -1079,14 +1079,14 @@
             "high": null
           },
           "135": {
-            "basic": null,
-            "high": null
+            "basic": 13000,
+            "high": 16000
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
-            "high": null
+            "basic": 10000,
+            "high": 14000
           }
         },
         "etc": {
@@ -1310,42 +1310,42 @@
       "lat": 37.5628417,
       "lng": 126.9927046,
       "scanRes": "2681*1807",
-      "features": "선불권 4롤 11,000원, 1년간 사용 가능.",
+      "features": "컬러 네거티브 선불 4롤 16,000원(1년) 또는 개별 5,500원. 화질 3단계 선택, 현상만·스트립 스캔 별도.",
       "url": "http://www.instagram.com/film_135_36",
       "prices": {
         "color": {
           "120": {
-            "basic": 7000,
-            "high": 11000
+            "basic": 9000,
+            "high": 13000
           },
           "135": {
-            "basic": 4500,
-            "high": 9000
+            "basic": 5500,
+            "high": 10000
           }
         },
         "bw": {
           "120": {
-            "basic": 9000,
-            "high": 12000
+            "basic": 12000,
+            "high": 16000
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
+            "basic": 10000,
+            "high": 14000
           }
         },
         "slide": {
           "120": {
-            "basic": 9000,
-            "high": 12000
+            "basic": 12000,
+            "high": 16000
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
+            "basic": 10000,
+            "high": 14000
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
+            "basic": 16000,
             "high": null
           }
         },
@@ -2090,37 +2090,37 @@
       "lat": 37.5642554,
       "lng": 127.0043472,
       "scanRes": "1545*1024",
-      "features": "스캐너 선택 가능.",
+      "features": "컬러·흑백 현상+스캔(M·L 화질 선택), 스캔 단독 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
           "120": {
             "basic": null,
-            "high": 9000
+            "high": null
           },
           "135": {
-            "basic": 5000,
-            "high": 9000
+            "basic": 8500,
+            "high": 11500
           }
         },
         "bw": {
           "120": {
             "basic": null,
-            "high": 12000
+            "high": null
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
+            "basic": 11500,
+            "high": 14500
           }
         },
         "slide": {
           "120": {
             "basic": null,
-            "high": 14000
+            "high": null
           },
           "135": {
-            "basic": 10000,
-            "high": 14000
+            "basic": null,
+            "high": null
           }
         },
         "cinema": {
@@ -2142,37 +2142,37 @@
       "lat": 33.5033218,
       "lng": 126.5164581,
       "scanRes": "1545*1024",
-      "features": "스캐너 선택 가능.",
+      "features": "컬러·흑백 현상+스캔(M·L 화질 선택), 스캔 단독 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "color": {
           "120": {
             "basic": null,
-            "high": 9000
+            "high": null
           },
           "135": {
-            "basic": 5000,
-            "high": 9000
+            "basic": 8500,
+            "high": 11500
           }
         },
         "bw": {
           "120": {
             "basic": null,
-            "high": 12000
+            "high": null
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
+            "basic": 11500,
+            "high": 14500
           }
         },
         "slide": {
           "120": {
             "basic": null,
-            "high": 14000
+            "high": null
           },
           "135": {
-            "basic": 10000,
-            "high": 14000
+            "basic": null,
+            "high": null
           }
         },
         "cinema": {
