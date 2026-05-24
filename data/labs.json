@@ -212,6 +212,58 @@
       }
     },
     {
+      "name": "다크룸서울",
+      "region": "서울",
+      "address": "서울 마포구 어울마당로5길 26 2층",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": null,
+      "url": "https://blog.naver.com/darkroom_seoul",
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 6000,
+            "high": null
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 10000,
+            "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
       "name": "달의바다",
       "region": "경기",
       "address": "경기 부천시 원미구 장말로 173 지층",
@@ -383,7 +435,7 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
+            "basic": 6000,
             "high": null
           }
         },
@@ -1007,7 +1059,7 @@
             "high": null
           },
           "135": {
-            "basic": 5000,
+            "basic": 6000,
             "high": 8000
           }
         },
@@ -1027,13 +1079,13 @@
             "high": null
           },
           "135": {
-            "basic": 11000,
+            "basic": 14000,
             "high": null
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
+            "basic": 10000,
             "high": null
           }
         },
@@ -1258,12 +1310,12 @@
       "lat": 37.5631115,
       "lng": 126.9733938,
       "scanRes": "2728*1830",
-      "features": "선불권 운영. 컬러 네거티브 4롤 10,000원 기준, 중형 롤당 1,500원 추가, 흑백·슬라이드 롤당 5,000원 추가.",
-      "url": null,
+      "features": "필름 스캔 전문. 135 1롤 5,000원(2롤 이상 4,000원), 120 1롤 7,000원.",
+      "url": "https://www.instagram.com/filmscanstudioin",
       "prices": {
         "color": {
           "120": {
-            "basic": 6000,
+            "basic": 7000,
             "high": null
           },
           "135": {
