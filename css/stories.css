@@ -143,6 +143,7 @@
   align-items: center;
   gap: 14px;
   padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
 }
 .articles-controls .search-input-wrap {
   flex: 0 0 clamp(180px, 26vw, 320px);
