@@ -125,25 +125,48 @@
 }
 .no-results-reset:hover { background: var(--accent-soft); }
 @media (max-width: 640px) {
-  .search-bar {
-    padding: 20px 20px 12px;
+  .articles-controls {
+    padding: 14px 20px;
+    gap: 10px;
     position: sticky;
     top: var(--header-h);
     z-index: 290;
     background: var(--bg);
   }
+  .articles-controls .search-input-wrap { flex-basis: 130px; }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
 }
 
-/* ── 카테고리 필터 ── */
-.filter-bar {
-  display: flex; align-items: center; justify-content: center;
-  flex-wrap: wrap; gap: 8px;
-  padding: 24px 32px;
-  border-bottom: 1px solid var(--border);
+/* ── 검색 + 카테고리 필터 (한 줄, 필터는 가로 스크롤) ── */
+.articles-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 40px;
 }
+.articles-controls .search-input-wrap {
+  flex: 0 0 clamp(180px, 26vw, 320px);
+  width: auto;
+  max-width: none;
+}
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
+}
+.filter-bar::-webkit-scrollbar { display: none; }
 .filter-chip {
   display: inline-block;
+  flex-shrink: 0;
+  white-space: nowrap;
   padding: 8px 18px;
   font-size: var(--fs-meta);
   font-weight: var(--fw-heading);
@@ -345,20 +368,8 @@
 @media (max-width: 640px) {
   .articles-grid { gap: 40px 20px; }
   .pagination-bar { padding: 16px 20px; }
-  /* 칩이 늘어나도 줄바꿈 대신 한 줄 가로 스크롤. 오른쪽 페이드로 '더 있음' 암시. */
-  .filter-bar {
-    padding: 18px 20px; gap: 6px;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-            mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-  }
-  .filter-bar::-webkit-scrollbar { display: none; }
-  .filter-chip { padding: 6px 14px; font-size: 12px; flex-shrink: 0; }
+  .filter-bar { gap: 6px; }
+  .filter-chip { padding: 6px 14px; font-size: 12px; }
   .articles-section { padding: 32px 20px; }
   .article-title { font-size: 19px; }
 }
