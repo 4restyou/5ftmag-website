@@ -22,12 +22,16 @@ const data = JSON.parse(fs.readFileSync(PATH, 'utf8'));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// 2025년 네이버 지도 API 개편으로 엔드포인트가 바뀌었을 수 있어 env 로 override 가능.
+const GEOCODE_URL = process.env.NAVER_GEOCODE_URL
+  || 'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode';
+
 async function geocode(address) {
-  const url = 'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=' + encodeURIComponent(address);
+  const url = `${GEOCODE_URL}?query=${encodeURIComponent(address)}`;
   const res = await fetch(url, {
     headers: { 'X-NCP-APIGW-API-KEY-ID': ID, 'X-NCP-APIGW-API-KEY': SECRET },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} — ${(await res.text()).slice(0, 120)}`);
   const json = await res.json();
   const hit = json.addresses && json.addresses[0];
   if (!hit) return null;

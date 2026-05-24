@@ -1,0 +1,54 @@
+name: Geocode labs
+
+# 필름 현상소 좌표 채우기 — Actions 탭에서 수동 실행(Run workflow).
+# data/labs.json 의 빈 lat/lng 를 네이버 지오코딩으로 채워 PR 을 연다.
+#
+# 필요한 시크릿 (GitHub → Settings → Secrets and variables → Actions → New repository secret):
+#   NAVER_MAP_CLIENT_ID      — 네이버 클라우드 플랫폼 Maps Client ID
+#   NAVER_MAP_CLIENT_SECRET  — 같은 곳의 Client Secret
+# (선택) NAVER_GEOCODE_URL    — 2025 개편으로 엔드포인트가 바뀐 경우 override
+#
+# main 직접 커밋 금지 정책에 따라 결과는 새 브랜치 + PR 로 올린다.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  geocode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run geocoder
+        env:
+          NAVER_MAP_CLIENT_ID: ${{ secrets.NAVER_MAP_CLIENT_ID }}
+          NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
+          NAVER_GEOCODE_URL: ${{ secrets.NAVER_GEOCODE_URL }}
+        run: node scripts/geocode-labs.mjs
+
+      - name: Open PR if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- data/labs.json; then
+            echo "변경 없음 — 모든 좌표가 이미 채워져 있습니다."
+            exit 0
+          fi
+          BRANCH="labs-geocode-$(date +%Y%m%d-%H%M%S)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add data/labs.json
+          git commit -m "data: 현상소 좌표 지오코딩 채움"
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "data: 현상소 좌표 지오코딩 채움" \
+            --body "네이버 지오코딩으로 data/labs.json 의 lat/lng 를 채웠습니다. (Geocode labs 워크플로 자동 생성)"
