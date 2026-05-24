@@ -1467,7 +1467,7 @@
       "lng": 127.0063949,
       "scanRes": "3000*2048",
       "features": "표시 가격은 노리츠 기준. 후지 스캐너는 4,000·6,000·9,000원. APS 퍼포레이션까지 스캔 가능.",
-      "url": "https://blog.naver.com/dldndyd30129",
+      "url": "https://www.instagram.com/joongangcolor/",
       "prices": {
         "color": {
           "120": {
@@ -1475,7 +1475,7 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
+            "basic": 5000,
             "high": 12000
           }
         },
@@ -1495,13 +1495,13 @@
             "high": null
           },
           "135": {
-            "basic": 12000,
+            "basic": 14000,
             "high": 21000
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
+            "basic": 10000,
             "high": null
           }
         },
@@ -2351,7 +2351,7 @@
       "lng": 127.0059137,
       "scanRes": "3089*2048",
       "features": "APS 필름 현상 가능.",
-      "url": "http://hp1996.blog.me/",
+      "url": "https://blog.naver.com/hp1996",
       "prices": {
         "color": {
           "120": {
@@ -2359,7 +2359,7 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
+            "basic": 6000,
             "high": null
           }
         },
@@ -2402,7 +2402,7 @@
       "lat": 37.5630479,
       "lng": 126.9914439,
       "scanRes": null,
-      "features": "흑백 전용 현상, 밀착 인화.",
+      "features": "흑백 전용 현상소. 현상 6,000원, 스캔 4,000원, 현상+스캔 10,000원. 4×5 현상·밀착 인화 가능.",
       "url": "https://blog.naver.com/bnw_film",
       "prices": {
         "color": {
@@ -2417,7 +2417,7 @@
         },
         "bw": {
           "120": {
-            "basic": 10000,
+            "basic": 6000,
             "high": null
           },
           "135": {
@@ -2454,7 +2454,7 @@
       "lat": 37.4774201,
       "lng": 126.6177253,
       "scanRes": "2279*1535",
-      "features": "흑백은 서울 외주 현상, 후지 스캐너 사용.",
+      "features": "컬러 현상 5,000원(3롤 13,000), 고화질 스캔 옵션, 흑백 현상+스캔 12,000원. 증명사진 스튜디오 겸업.",
       "url": "https://www.instagram.com/hdh_studio/",
       "prices": {
         "color": {
@@ -2463,7 +2463,7 @@
             "high": null
           },
           "135": {
-            "basic": 7000,
+            "basic": 5000,
             "high": 9000
           }
         },
@@ -2473,7 +2473,7 @@
             "high": null
           },
           "135": {
-            "basic": 10000,
+            "basic": 12000,
             "high": null
           }
         },
@@ -2559,7 +2559,7 @@
       "lng": 126.6941594,
       "scanRes": null,
       "features": "암실 체험 가능.",
-      "url": "https://cxp.modoo.at/",
+      "url": "https://blog.naver.com/cameraxphoto",
       "prices": {
         "color": {
           "120": {
@@ -2567,7 +2567,7 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
+            "basic": 6000,
             "high": null
           }
         },
@@ -2818,8 +2818,8 @@
       "lat": 37.4116428,
       "lng": 127.1276099,
       "scanRes": "3072*2048",
-      "features": "컬러 네거티브 10롤 이상 롤당 2,000원. 홀수 달 개당 500원 할인.",
-      "url": null,
+      "features": "우편 접수. 컬러 네거티브는 스캔가에 현상비 포함, 흑백·슬라이드는 별도 현상. APS 가능.",
+      "url": "http://yatapphoto.co.kr",
       "prices": {
         "color": {
           "120": {
@@ -2833,7 +2833,7 @@
         },
         "bw": {
           "120": {
-            "basic": null,
+            "basic": 11000,
             "high": null
           },
           "135": {
@@ -2843,11 +2843,11 @@
         },
         "slide": {
           "120": {
-            "basic": null,
+            "basic": 5000,
             "high": null
           },
           "135": {
-            "basic": null,
+            "basic": 5000,
             "high": null
           }
         },
@@ -2975,7 +2975,7 @@
       "lng": 127.3491592,
       "scanRes": "1800*2700",
       "features": null,
-      "url": null,
+      "url": "https://photonics.modoo.at",
       "prices": {
         "color": {
           "120": {
@@ -2984,7 +2984,7 @@
           },
           "135": {
             "basic": 6000,
-            "high": 10000
+            "high": null
           }
         },
         "bw": {
@@ -3087,7 +3087,7 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
+            "basic": 6000,
             "high": null
           }
         },
@@ -3139,8 +3139,8 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
-            "high": 8000
+            "basic": 6000,
+            "high": 10000
           }
         },
         "bw": {
@@ -3149,7 +3149,7 @@
             "high": null
           },
           "135": {
-            "basic": null,
+            "basic": 11000,
             "high": null
           }
         },
@@ -3280,13 +3280,13 @@
       }
     },
     {
-      "name": "헤르츠삼오 Hertz 35",
+      "name": "헤르츠삼오 대구점",
       "region": "대구",
       "address": "대구 중구 동성로1길 58 1층",
       "lat": 35.8656504,
       "lng": 128.5963456,
       "scanRes": null,
-      "features": "흑백은 주 1회 외주 현상.",
+      "features": "필름 현상·스캔, 필름 카메라 판매·무료 대여.",
       "url": null,
       "prices": {
         "color": {
@@ -3295,8 +3295,8 @@
             "high": null
           },
           "135": {
-            "basic": 4000,
-            "high": 7000
+            "basic": 5000,
+            "high": null
           }
         },
         "bw": {
@@ -3305,7 +3305,7 @@
             "high": null
           },
           "135": {
-            "basic": 9000,
+            "basic": null,
             "high": null
           }
         },
@@ -3338,7 +3338,7 @@
       "lat": null,
       "lng": null,
       "scanRes": null,
-      "features": "필름 현상, 필름 카메라 무료 대여.",
+      "features": "필름 현상·스캔, 필름 카메라 판매·무료 대여.",
       "url": null,
       "prices": {
         "color": {
@@ -3972,58 +3972,6 @@
           },
           "135": {
             "basic": 9000,
-            "high": null
-          }
-        },
-        "bw": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "etc": {
-          "110": null,
-          "aps": null
-        }
-      }
-    },
-    {
-      "name": "포토닉스",
-      "region": "대전",
-      "address": "대전 유성구 궁동로18번길 31 2층 포토닉스",
-      "lat": 36.362882,
-      "lng": 127.3491592,
-      "scanRes": null,
-      "features": null,
-      "url": "https://photonics.modoo.at",
-      "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
             "high": null
           }
         },
