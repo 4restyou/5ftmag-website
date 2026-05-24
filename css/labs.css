@@ -97,7 +97,9 @@
   padding: 0 6px;
 }
 .labs-safety {
-  flex: 0 0 320px;
+  flex: 0 0 auto;
+  width: 560px;
+  max-width: 100%;
   padding: 14px 16px;
   border: 1px solid var(--border);
   background: var(--bg-sub);
@@ -295,7 +297,7 @@
 @media (max-width: 880px) {
   .labs-list { grid-template-columns: repeat(2, 1fr); }
   .intro { flex-direction: column; gap: 16px; }
-  .labs-safety { flex: 0 0 auto; align-self: stretch; }
+  .labs-safety { flex: 0 0 auto; width: auto; align-self: stretch; }
 }
 @media (max-width: 540px) {
   .labs-list { grid-template-columns: 1fr; }

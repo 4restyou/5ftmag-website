@@ -53,7 +53,8 @@
 }
 .market-safety li {
   color: var(--text-muted);
-  line-height: 1.55;
+  line-height: 1.6;
+  font-size: 13px;
 }
 
 .market-section {
