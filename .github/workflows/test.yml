@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -19,12 +21,37 @@ jobs:
       - run: npm ci || npm install
       - name: 자산 참조 검증
         run: npm run validate
+      # data/img/문서만 바뀐 경우 무거운 Playwright 단계를 건너뛴다 (자산 검증은 항상 수행).
+      - name: 변경 파일 판별
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            FILES=$(git diff --name-only HEAD~1 HEAD)
+          else
+            FILES=""
+          fi
+          echo "변경 파일:"; echo "$FILES"
+          # data/img/문서가 아닌(=코드) 파일 목록. 파이프+grep -q 는 pipefail 에서 SIGPIPE 로 뒤집히므로 변수로 받아 판정.
+          CODE=$(printf '%s\n' "$FILES" | grep -vE '^(data/|img/)|\.md$' || true)
+          if [ "${{ github.event_name }}" != "pull_request" ] && [ "${{ github.event_name }}" != "push" ]; then
+            echo "run_tests=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "$CODE" ]; then
+            echo "코드 변경 감지 — 전체 테스트 실행"; echo "run_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "data/img/문서만 변경 — Playwright 생략"; echo "run_tests=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Playwright 브라우저 캐시
+        if: steps.changes.outputs.run_tests == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
       - name: Playwright 의존성
+        if: steps.changes.outputs.run_tests == 'true'
         run: npx playwright install --with-deps chromium
       - name: 스모크 테스트
+        if: steps.changes.outputs.run_tests == 'true'
         run: npm test

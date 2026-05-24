@@ -130,7 +130,7 @@ for (const file of [...htmlFiles, ...jsFiles]) {
 }
 
 // 2) JSON 데이터 파일의 내부 page/link/image/thumbnail/photos[].src 참조
-const dataFiles = ['data/readers.json', 'data/stories.json', 'data/films.json', 'data/news.json'];
+const dataFiles = ['data/readers.json', 'data/stories.json', 'data/films.json', 'data/news.json', 'data/labs.json'];
 for (const jf of dataFiles) {
   const p = join(ROOT, jf);
   if (!existsSync(p)) continue;
