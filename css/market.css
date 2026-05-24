@@ -2,22 +2,41 @@
    Market — 중고 장터
    ════════════════════════════════════════════════════════════ */
 
+/* 인트로 — films/labs 와 동일: 문단 + 오른쪽 안내 박스 */
 .market-intro {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 32px 24px 16px;
-  color: var(--text-muted);
-  font-size: 15px;
-  line-height: 1.7;
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  padding: 40px 40px 16px;
 }
-.market-intro .accent { color: var(--text); font-weight: var(--fw-heading); }
+.market-intro-inner {
+  flex: 1 1 auto;
+  max-width: 720px;
+}
+.market-intro-inner p {
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--text);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.market-intro .accent {
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 0 6px;
+}
 .market-safety {
-  margin-top: 18px;
-  padding: 16px 18px;
+  flex: 0 0 360px;
+  padding: 14px 16px;
   border: 1px solid var(--border);
   background: var(--bg-sub);
   color: var(--text);
   border-radius: 6px;
+}
+@media (max-width: 880px) {
+  .market-intro { flex-direction: column; gap: 16px; padding: 28px 24px 12px; }
+  .market-safety { flex: 0 0 auto; align-self: stretch; }
 }
 .market-safety strong {
   display: block;
@@ -38,9 +57,7 @@
 }
 
 .market-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
+  padding: 24px 40px;
 }
 
 .market-controls {

@@ -5,9 +5,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 20px 24px;
+  padding: 20px 40px;
 }
 .search-input-wrap {
   position: relative;
@@ -78,7 +76,7 @@
   display: flex;
   align-items: flex-start;
   gap: 28px;
-  padding: 40px 32px 28px;
+  padding: 40px 40px 28px;
   background: var(--bg);
 }
 .intro-inner {
@@ -141,9 +139,7 @@
 
 /* ── 지도 ── */
 .labs-map-section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 24px 24px 0;
+  padding: 24px 40px 0;
 }
 .labs-map-wrap {
   position: relative;
@@ -173,9 +169,7 @@
 .labs-map-info-links a { color: #1452c8; border-bottom: 1px solid currentColor; font-weight: var(--fw-heading); }
 
 .labs-section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 24px 24px 80px;
+  padding: 24px 40px 80px;
 }
 /* 카드 그리드 — Articles 와 동일하게 최대 4열, 좁아지면 3 → 2 → 1 */
 .labs-list {
