@@ -212,6 +212,58 @@
       }
     },
     {
+      "name": "달의바다",
+      "region": "경기",
+      "address": "경기 부천시 원미구 장말로 173 지층",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": "사진 스튜디오 겸 현상소. 흑백 암실 인화 원데이 클래스 운영.",
+      "url": "https://pf.kakao.com/_bxcqPn",
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 9000,
+            "high": null
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 9000,
+            "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
       "name": "동부칼라",
       "region": "서울",
       "address": "서울 중랑구 봉화산로 81",
@@ -1508,6 +1560,58 @@
         "etc": {
           "110": null,
           "aps": "7000 원 / 10000 원"
+        }
+      }
+    },
+    {
+      "name": "태그원스튜디오",
+      "region": "서울",
+      "address": "서울 송파구 백제고분로 264 지하1층",
+      "lat": null,
+      "lng": null,
+      "scanRes": null,
+      "features": "증명·프로필·가족 사진 스튜디오 겸 현상소. 35mm 컬러·흑백 현상·스캔.",
+      "url": "https://tag1studio.com",
+      "prices": {
+        "color": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 8000,
+            "high": null
+          }
+        },
+        "bw": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": 8000,
+            "high": null
+          }
+        },
+        "slide": {
+          "120": {
+            "basic": null,
+            "high": null
+          },
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
         }
       }
     },
