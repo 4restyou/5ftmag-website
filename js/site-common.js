@@ -449,6 +449,10 @@
     // 페이지뷰 로깅 — 한 페이지당 한 번
     recordPageView();
 
+    // 스크롤 등장 + 글 읽기 진행바
+    initScrollReveal();
+    initReadingProgress();
+
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');
     const mobileNav = document.getElementById('mobileNav');
@@ -1136,6 +1140,72 @@
     btn.setAttribute('aria-label', on ? '스크랩 해제' : '스크랩 추가');
     const label = btn.querySelector('.article-fav-label');
     if (label) label.textContent = on ? '스크랩됨' : '스크랩';
+  }
+
+  // ════════════════════════════════════════════════
+  // 스크롤 등장 — [data-reveal] 요소가 뷰포트에 들어오면 fade+slide-in.
+  // 동적으로 렌더되는 카드까지 잡기 위해 MutationObserver 로 자동 재무장.
+  // IntersectionObserver 미지원 또는 모션 줄임 선호 시 비활성(콘텐츠 그대로 노출).
+  // ════════════════════════════════════════════════
+  function initScrollReveal() {
+    if (!('IntersectionObserver' in window)) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.documentElement.classList.add('js-reveal');
+
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          io.unobserve(entry.target);
+        }
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+
+    function arm() {
+      document.querySelectorAll('[data-reveal]:not([data-reveal-armed])').forEach((el) => {
+        el.setAttribute('data-reveal-armed', '');
+        io.observe(el);
+      });
+    }
+    arm();
+
+    let scheduled = false;
+    const mo = new MutationObserver(() => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(() => { scheduled = false; arm(); });
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+  }
+
+  // ════════════════════════════════════════════════
+  // 글 읽기 진행바 — .article-body 가 있는 글 페이지에서만 상단 2px 바를 채운다.
+  // ════════════════════════════════════════════════
+  function initReadingProgress() {
+    const article = document.querySelector('.article-body');
+    if (!article) return;
+
+    const bar = document.createElement('div');
+    bar.className = 'reading-progress';
+    bar.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(bar);
+
+    let ticking = false;
+    function update() {
+      ticking = false;
+      const total = article.offsetHeight - window.innerHeight;
+      const scrolled = -article.getBoundingClientRect().top;
+      const ratio = total > 0 ? Math.min(Math.max(scrolled / total, 0), 1) : 0;
+      bar.style.transform = `scaleX(${ratio})`;
+    }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
   }
 
   if (document.readyState === 'loading') {

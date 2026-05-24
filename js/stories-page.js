@@ -88,7 +88,7 @@
          </div>`;
 
     return `
-      <a href="${escapeAttr(link)}" class="article-card" data-category="${escapeAttr(storyFilterKey(story))}" data-issue="${escapeAttr(story.issue || '')}">
+      <a href="${escapeAttr(link)}" class="article-card" data-reveal data-category="${escapeAttr(storyFilterKey(story))}" data-issue="${escapeAttr(story.issue || '')}">
         ${imgBlock}
         ${favHtml}
         <span class="article-category">${escapeHtml(categoryLabel(story))}</span>
