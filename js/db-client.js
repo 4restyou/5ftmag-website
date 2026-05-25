@@ -1110,9 +1110,55 @@
     },
   };
 
+  // ─── 수리실 (repair_shops 테이블) ───
+  // public 은 SELECT, editor 만 INSERT/UPDATE/DELETE. 좌표 미저장(주소 지오코딩).
+  const repairs = {
+    async list() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('repair_shops')
+        .select('*').eq('is_hidden', false)
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+      if (error) { console.warn('[repairs.list]', error.message); return []; }
+      return data || [];
+    },
+    async listAll() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('repair_shops')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+      if (error) { console.warn('[repairs.listAll]', error.message); return []; }
+      return data || [];
+    },
+    async upsert(record) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const payload = {
+        name:        (record.name || '').trim(),
+        region:      record.region ?? null,
+        address:     record.address ?? null,
+        specialty:   record.specialty ?? null,
+        description: record.description ?? null,
+        url:         record.url ?? null,
+        is_hidden:   typeof record.is_hidden === 'boolean' ? record.is_hidden : false,
+      };
+      if (record.id) payload.id = record.id;
+      if (record.sort_order != null) payload.sort_order = record.sort_order;
+      return c.from('repair_shops').upsert(payload);
+    },
+    async setHidden(id, hidden) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('repair_shops').update({ is_hidden: !!hidden }).eq('id', id);
+    },
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('repair_shops').delete().eq('id', id);
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, newsletter,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, repairs, newsletter,
   };
 })();

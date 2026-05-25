@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>수리실 관리 | 5ft.mag Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css?v=20260523-lhmuted">
+  <link rel="stylesheet" href="../css/common.css?v=20260524-skeleton">
+  <script src="../js/theme-init.js"></script>
+  <style>
+    body { background: var(--bg); color: var(--text); }
+    .admin-header { max-width: 1100px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .admin-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; transition: color .15s; }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-user { font-size: 13px; color: var(--text-muted); }
+    .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .admin-user button:hover { color: var(--text); }
+    .admin-subnav { display: flex; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; flex-wrap: wrap; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; display: inline-flex; align-items: center; gap: 6px; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
+
+    .gate { max-width: 480px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; margin-bottom: 12px; }
+    .gate p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .gate-btn { font: inherit; font-weight: var(--fw-heading); font-size: 14px; padding: 12px 24px; background: var(--text); color: var(--bg); border: none; border-radius: 4px; cursor: pointer; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .toolbar .filter { font: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); min-width: 220px; }
+    .toolbar .count { color: var(--text-muted); font-size: 13px; }
+    .toolbar .primary-btn { margin-left: auto; font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; border: none; background: var(--text); color: var(--bg); cursor: pointer; }
+    .toolbar .primary-btn:hover { opacity: 0.85; }
+
+    table.labs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .labs-table th, .labs-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .labs-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .labs-table .col-name { font-weight: var(--fw-heading); }
+    .labs-table .col-meta { font-size: 12px; color: var(--text-muted); }
+    .labs-table .col-actions { text-align: right; white-space: nowrap; }
+    .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; border-radius: 2px; }
+    .row-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: border-color .15s; margin-left: 6px; }
+    .row-btn:hover { border-color: var(--text); }
+    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+    .empty { padding: 32px; text-align: center; color: var(--text-muted); }
+
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-start; justify-content: center; z-index: 1000; padding: 40px 16px; overflow-y: auto; }
+    .modal.open { display: flex; }
+    .modal-box { background: var(--bg); border-radius: 6px; max-width: 640px; width: 100%; padding: 24px; }
+    .modal-box h2 { margin: 0 0 16px; font-size: 18px; font-weight: var(--fw-heading); }
+    .form-row { display: grid; grid-template-columns: 110px 1fr; gap: 8px 14px; align-items: start; margin-bottom: 12px; }
+    .form-row label { font-size: 13px; color: var(--text-muted); padding-top: 6px; }
+    .form-row input, .form-row textarea {
+      font: inherit; font-size: 14px; padding: 8px 10px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px; width: 100%;
+    }
+    .form-row textarea { min-height: 80px; resize: vertical; }
+    .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    .form-actions .cancel { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .form-actions .save { background: var(--text); color: var(--bg); border: none; }
+    .form-actions .save:disabled { opacity: 0.55; cursor: progress; }
+
+    @media (max-width: 700px) {
+      .labs-table thead { display: none; }
+      .labs-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      .labs-table td { display: block; border: none; padding: 4px 0; }
+      .labs-table .col-actions { text-align: left; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../labs.html">Labs</a></li>
+      <li><a href="../market.html">Market</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../labs.html">Labs</a>
+    <a href="../market.html">Market</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<div class="admin-header">
+  <a href="../index.html" class="admin-back">← 5ft.mag</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">수리실 관리</h1>
+    <div class="admin-user" id="adminUser"></div>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <a href="submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="comments.html" class="admin-subnav-link">댓글</a>
+    <a href="camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
+    <a href="films.html" class="admin-subnav-link">필름 카탈로그</a>
+    <a href="labs.html" class="admin-subnav-link">현상소</a>
+    <a href="repairs.html" class="admin-subnav-link is-current">수리실</a>
+    <a href="analytics.html" class="admin-subnav-link">통계</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>편집부 권한이 있는 계정으로 로그인해야 이 페이지를 볼 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<main id="app" hidden>
+  <div class="toolbar">
+    <input type="search" class="filter" id="filter" placeholder="이름·지역·전문분야 검색" />
+    <span class="count" id="count"></span>
+    <button type="button" class="primary-btn" id="newBtn">+ 새 수리실</button>
+  </div>
+  <table class="labs-table">
+    <thead>
+      <tr><th>이름</th><th>지역</th><th>전문분야</th><th></th></tr>
+    </thead>
+    <tbody id="tbody"><tr><td colspan="4" class="empty">불러오는 중…</td></tr></tbody>
+  </table>
+</main>
+
+<!-- 폼 모달 -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2 id="modalTitle">새 수리실</h2>
+    <form id="shopForm">
+      <input type="hidden" id="f-id" />
+      <div class="form-row"><label for="f-name">이름 *</label><input type="text" id="f-name" required /></div>
+      <div class="form-row"><label for="f-region">지역</label><div><input type="text" id="f-region" placeholder="서울 / 부산 / 경기 …" /><div class="hint">지역 칩·필터에 쓰여요. 비워두면 '전체'에서만 보입니다.</div></div></div>
+      <div class="form-row"><label for="f-address">주소</label><div><input type="text" id="f-address" placeholder="도로명 주소" /><div class="hint">주소를 넣으면 공개 지도에 핀이 찍혀요.</div></div></div>
+      <div class="form-row"><label for="f-specialty">전문분야</label><input type="text" id="f-specialty" placeholder="라이카·수동 RF / 컴팩트 자동 …" /></div>
+      <div class="form-row"><label for="f-url">홈페이지·SNS</label><input type="text" id="f-url" placeholder="https://" /></div>
+      <div class="form-row"><label for="f-description">설명</label><textarea id="f-description" placeholder="특징, 대기·비용, 카드결제·AS 여부 등"></textarea></div>
+      <div class="form-actions">
+        <button type="button" class="cancel" id="cancelBtn">취소</button>
+        <button type="submit" class="save" id="saveBtn">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/db-client.js?v=20260525-repairs"></script>
+<script src="../js/site-common.js?v=20260523-reveal"></script>
+<script>
+'use strict';
+
+const STATE = { user: null, isEditor: false, shops: [], filter: '', editingId: null };
+
+function $(id) { return document.getElementById(id); }
+function db() { return window.MagDB; }
+
+// 세션 만료 시 저장이 응답 없이 멈추는 것을 막는다(10초 타임아웃 → 새로고침 안내).
+function withWriteTimeout(promise, ms = 10000) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const t = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      resolve({ error: { message: '세션이 만료된 것 같아요. 페이지를 새로고침한 뒤 다시 시도해주세요.' } });
+    }, ms);
+    Promise.resolve(promise).then(
+      (res) => { if (!settled) { settled = true; clearTimeout(t); resolve(res); } },
+      (err) => { if (!settled) { settled = true; clearTimeout(t); resolve({ error: { message: err?.message || String(err) } }); } }
+    );
+  });
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+const escapeAttr = escapeHtml;
+
+function showGate(msg) { $('gate').hidden = false; if (msg) $('gate').querySelector('p').textContent = msg; }
+
+async function checkAccess() {
+  for (let i = 0; i < 50; i++) {
+    if (db() && db().isReady()) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  if (!db() || !db().isReady()) { showGate('서비스 준비 실패. 잠시 후 새로고침해주세요.'); return false; }
+  const session = await db().auth.getSession();
+  if (!session) { showGate(); return false; }
+  STATE.user = session.user;
+  const profile = await db().profiles.getMine();
+  if (!profile?.is_editor) { showGate('편집부 권한이 있는 계정으로 로그인해야 이 페이지를 볼 수 있어요.'); return false; }
+  STATE.isEditor = true;
+  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
+  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
+  return true;
+}
+
+$('gateLogin').addEventListener('click', async () => {
+  await db().auth.signInWithGoogle(window.location.href);
+});
+
+async function reload() {
+  const shops = await db().repairs.listAll();
+  STATE.shops = Array.isArray(shops) ? shops : [];
+  render();
+}
+
+function applyFilter(shops, q) {
+  const k = String(q || '').trim().toLowerCase();
+  if (!k) return shops;
+  return shops.filter(s => (
+    String(s.name || '').toLowerCase().includes(k) ||
+    String(s.region || '').toLowerCase().includes(k) ||
+    String(s.specialty || '').toLowerCase().includes(k) ||
+    String(s.address || '').toLowerCase().includes(k)
+  ));
+}
+
+function render() {
+  const filtered = applyFilter(STATE.shops, STATE.filter);
+  $('count').textContent = `${filtered.length} / ${STATE.shops.length}`;
+  if (filtered.length === 0) {
+    $('tbody').innerHTML = '<tr><td colspan="4" class="empty">수리실이 없어요.</td></tr>';
+    return;
+  }
+  $('tbody').innerHTML = filtered.map(s => {
+    const hidden = !!s.is_hidden;
+    return `
+      <tr${hidden ? ' style="opacity:.55"' : ''}>
+        <td>
+          <div class="col-name">${escapeHtml(s.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
+        </td>
+        <td class="col-meta">${escapeHtml(s.region || '')}</td>
+        <td class="col-meta">${escapeHtml(s.specialty || '')}</td>
+        <td class="col-actions">
+          <button type="button" class="row-btn" data-edit="${escapeAttr(s.id)}">수정</button>
+          <button type="button" class="row-btn" data-hide="${escapeAttr(s.id)}" data-cur="${hidden}">${hidden ? '복원' : '숨김'}</button>
+          <button type="button" class="row-btn danger" data-del="${escapeAttr(s.id)}">삭제</button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  $('tbody').querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openForm(b.dataset.edit)));
+  $('tbody').querySelectorAll('[data-hide]').forEach(b => b.addEventListener('click', () => toggleHidden(b.dataset.hide, b.dataset.cur === 'true')));
+  $('tbody').querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => removeShop(b.dataset.del)));
+}
+
+$('filter').addEventListener('input', (e) => { STATE.filter = e.target.value; render(); });
+
+function openForm(id) {
+  STATE.editingId = id || null;
+  $('modal').classList.add('open');
+  const s = id ? STATE.shops.find(x => x.id === id) : null;
+  if (s) {
+    $('modalTitle').textContent = `수리실 수정 · ${s.name}`;
+    $('f-id').value = s.id;
+    $('f-name').value = s.name || '';
+    $('f-region').value = s.region || '';
+    $('f-address').value = s.address || '';
+    $('f-specialty').value = s.specialty || '';
+    $('f-url').value = s.url || '';
+    $('f-description').value = s.description || '';
+  } else {
+    $('modalTitle').textContent = '새 수리실';
+    $('shopForm').reset();
+    $('f-id').value = '';
+  }
+}
+
+function closeForm() {
+  $('modal').classList.remove('open');
+  STATE.editingId = null;
+  $('shopForm').reset();
+}
+
+$('newBtn').addEventListener('click', () => openForm(null));
+$('cancelBtn').addEventListener('click', closeForm);
+$('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeForm(); });
+
+$('shopForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const saveBtn = $('saveBtn');
+  saveBtn.disabled = true; saveBtn.textContent = '저장 중…';
+  try {
+    const name = $('f-name').value.trim();
+    if (!name) { window.notify?.('이름이 필요해요.', 'danger'); return; }
+    const record = {
+      name,
+      region: $('f-region').value.trim() || null,
+      address: $('f-address').value.trim() || null,
+      specialty: $('f-specialty').value.trim() || null,
+      url: $('f-url').value.trim() || null,
+      description: $('f-description').value.trim() || null,
+    };
+    const id = $('f-id').value.trim();
+    if (id) {
+      record.id = id;
+    } else {
+      const maxSort = STATE.shops.reduce((m, x) => Math.max(m, x.sort_order || 0), 0);
+      record.sort_order = maxSort + 1;
+    }
+    const { error } = await withWriteTimeout(db().repairs.upsert(record));
+    if (error) { window.notify?.('저장 실패: ' + (error.message || ''), 'danger'); return; }
+    window.notify?.(id ? '수리실을 수정했어요.' : '새 수리실을 추가했어요.', 'info');
+    closeForm();
+    await reload();
+  } catch (err) {
+    window.notify?.('저장 실패: ' + (err?.message || err), 'danger');
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = '저장';
+  }
+});
+
+async function toggleHidden(id, cur) {
+  const { error } = await withWriteTimeout(db().repairs.setHidden(id, !cur));
+  if (error) { window.notify?.('처리 실패: ' + (error.message || ''), 'danger'); return; }
+  await reload();
+}
+
+async function removeShop(id) {
+  const s = STATE.shops.find(x => x.id === id);
+  if (!confirm(`'${s?.name || ''}' 수리실을 삭제할까요? 되돌릴 수 없어요.`)) return;
+  const { error } = await withWriteTimeout(db().repairs.remove(id));
+  if (error) { window.notify?.('삭제 실패: ' + (error.message || ''), 'danger'); return; }
+  await reload();
+}
+
+(async function main() {
+  const ok = await checkAccess();
+  if (!ok) return;
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  await reload();
+})();
+</script>
+
+</body>
+</html>

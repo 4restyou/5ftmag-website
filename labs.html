@@ -36,6 +36,12 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
   <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
   <link rel="stylesheet" href="./css/labs.css?v=20260524-divider">
+  <style>
+    .labs-tabs { display: flex; gap: 8px; max-width: 1100px; margin: 0 auto; padding: 24px 24px 0; }
+    .labs-tab { font: inherit; font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.01em; padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--text-muted); cursor: pointer; transition: color .15s, border-color .15s, background .15s; }
+    .labs-tab:hover { color: var(--text); border-color: var(--text); }
+    .labs-tab.is-active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  </style>
 </head>
 <body>
 
@@ -69,7 +75,7 @@
 <!-- ════════ 인트로 ════════ -->
 <div class="intro">
   <div class="intro-inner">
-    <p>전국 필름 현상소를 한자리에 모았어요. 지역과 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 비교하고 <span class="accent">지도에서 위치까지</span> 확인할 수 있는 목록이에요.</p>
+    <p id="labsIntro">전국 필름 현상소를 한자리에 모았어요. 지역과 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 비교하고 <span class="accent">지도에서 위치까지</span> 확인할 수 있는 목록이에요.</p>
   </div>
   <aside class="labs-safety" aria-label="참고사항">
     <div class="labs-safety-head">
@@ -78,6 +84,12 @@
     </div>
     <p>가격·정보는 바뀔 수 있어요. 정정·누락은 <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">인스타그램 DM</a>으로 알려주세요.</p>
   </aside>
+</div>
+
+<!-- ════════ 탭 (현상소 / 수리실) ════════ -->
+<div class="labs-tabs" role="tablist" aria-label="현상소·수리실 전환">
+  <button type="button" class="labs-tab is-active" data-tab="labs" role="tab" aria-selected="true">현상소</button>
+  <button type="button" class="labs-tab" data-tab="repairs" role="tab" aria-selected="false">수리실</button>
 </div>
 
 <!-- ════════ 검색 + 지역 필터 (한 줄) ════════ -->
@@ -147,9 +159,9 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./js/db-client.js?v=20260525-labs"></script>
+<script src="./js/db-client.js?v=20260525-repairs"></script>
 <script src="./js/site-common.js?v=20260523-reveal"></script>
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=uu78cn9rbi&submodules=geocoder"></script>
-<script src="./js/labs-page.js?v=20260525-livedb"></script>
+<script src="./js/labs-page.js?v=20260525-repairs"></script>
 </body>
 </html>
