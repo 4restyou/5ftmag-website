@@ -1,7 +1,7 @@
-// 필름 현상소 리스트 페이지.
-//   원본 Supabase labs 테이블을 직접 읽어 지역 필터 + 검색 + 카드 리스트 렌더.
-//   (admin 저장이 재배포 없이 새로고침만으로 반영되도록.) 실패하면 정적
-//   data/labs.json 으로 폴백.
+// 필름 현상소 / 카메라 수리실 리스트 페이지.
+//   상단 탭으로 현상소(labs)·수리실(repair_shops)을 전환한다.
+//   둘 다 원본 Supabase 테이블을 직접 읽어 admin 수정이 새로고침만으로 반영된다.
+//   (현상소는 실패 시 정적 data/labs.json 으로 폴백.)
 //   네이버 지도(Web Dynamic Map)에 현재 필터·검색 결과를 마커로 표시한다.
 
 (function () {
@@ -11,6 +11,8 @@
   const filterEl = document.getElementById('labsFilter');
   const searchEl = document.getElementById('labsSearch');
   const countEl = document.getElementById('labsCount');
+  const tabsEl = document.querySelector('.labs-tabs');
+  const introEl = document.getElementById('labsIntro');
   if (!listEl) return;
 
   let map = null;
@@ -22,7 +24,24 @@
   const REGION_ORDER = ['서울', '경기', '인천', '강원', '대전', '충남', '충북', '세종',
     '대구', '경북', '부산', '울산', '경남', '광주', '전북', '전남', '제주'];
 
-  let labs = [];
+  const TAB = {
+    labs: {
+      intro: '전국 필름 현상소를 한자리에 모았어요. 지역과 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 비교하고 <span class="accent">지도에서 위치까지</span> 확인할 수 있는 목록이에요.',
+      placeholder: '현상소·지역·특징으로 검색…',
+      empty: '조건에 맞는 현상소가 없습니다. 지역이나 검색어를 바꿔보세요.',
+      loadFail: '현상소 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.',
+    },
+    repairs: {
+      intro: '전국 카메라 수리실을 모았어요. 라이카·올드카메라·SLR·컴팩트 등 <span class="accent">전문 분야와 지역</span>을 비교할 수 있어요. 주소가 등록된 곳은 지도에서 위치도 확인할 수 있습니다.',
+      placeholder: '수리실·지역·전문분야로 검색…',
+      empty: '조건에 맞는 수리실이 없습니다. 지역이나 검색어를 바꿔보세요.',
+      loadFail: '수리실 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.',
+    },
+  };
+
+  let tab = 'labs';
+  const datasets = { labs: null, repairs: null };
+  let data = [];
   let region = 'all';
   let query = '';
 
@@ -39,7 +58,7 @@
     return typeof v === 'number' ? `${v.toLocaleString('ko-KR')}원` : String(v);
   }
 
-  // 테이블 row(컬럼명) → 페이지가 쓰는 형태(scan_res → scanRes 만 다름).
+  // 테이블 row(컬럼명) → 현상소 카드가 쓰는 형태(scan_res → scanRes 만 다름).
   function rowToLab(r) {
     return {
       name: r.name || '',
@@ -53,30 +72,53 @@
   }
 
   async function loadLabs() {
-    // 원본 = Supabase labs 테이블. admin 저장이 바로 보이도록 직접 읽는다.
-    // list() 는 is_hidden=false, sort_order·name 순. 정적 빌드와 동일한 정렬.
+    // 원본 = Supabase labs 테이블. 실패 시 정적 data/labs.json 으로 폴백.
     try {
       const rows = await window.MagDB?.labs?.list?.();
       if (Array.isArray(rows) && rows.length) return rows.map(rowToLab);
     } catch (_) { /* 폴백으로 진행 */ }
-    // 폴백: 정적 data/labs.json (Supabase 불가 시)
-    const data = await (await fetch('/data/labs.json')).json();
-    return Array.isArray(data.labs) ? data.labs : [];
+    const res = await (await fetch('/data/labs.json')).json();
+    return Array.isArray(res.labs) ? res.labs : [];
   }
 
-  loadLabs()
-    .then((list) => {
-      labs = list;
-      renderFilter();
-      initMap();
-      apply();
-    })
-    .catch(() => {
-      listEl.innerHTML = '<div class="labs-empty">현상소 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.</div>';
-    });
+  async function loadRepairs() {
+    // 원본 = Supabase repair_shops 테이블. (정적 폴백 없음)
+    try {
+      const rows = await window.MagDB?.repairs?.list?.();
+      if (Array.isArray(rows)) return rows;
+    } catch (_) { /* 빈 목록으로 진행 */ }
+    return [];
+  }
+
+  async function setTab(next) {
+    if (next === tab && datasets[tab]) return;
+    tab = next;
+    if (tabsEl) {
+      tabsEl.querySelectorAll('.labs-tab').forEach((b) => {
+        const on = b.dataset.tab === tab;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+    if (introEl) introEl.innerHTML = TAB[tab].intro;
+    if (searchEl) searchEl.placeholder = TAB[tab].placeholder;
+    region = 'all';
+    if (!datasets[tab]) {
+      listEl.innerHTML = '<div class="labs-empty">불러오는 중…</div>';
+      try {
+        datasets[tab] = tab === 'labs' ? await loadLabs() : await loadRepairs();
+      } catch (_) {
+        listEl.innerHTML = `<div class="labs-empty">${TAB[tab].loadFail}</div>`;
+        return;
+      }
+    }
+    data = datasets[tab] || [];
+    renderFilter();
+    apply();
+  }
 
   function regionsInOrder() {
-    const present = new Set(labs.map((l) => l.region).filter(Boolean));
+    const present = new Set(data.map((l) => l.region).filter(Boolean));
     const ordered = REGION_ORDER.filter((r) => present.has(r));
     for (const r of present) if (!ordered.includes(r)) ordered.push(r);
     return ordered;
@@ -87,8 +129,8 @@
     const regions = regionsInOrder();
     const chip = (key, label, n) =>
       `<button type="button" class="filter-chip${key === region ? ' active' : ''}" data-region="${escapeAttr(key)}">${escapeHtml(label)}<span class="labs-chip-count">${n}</span></button>`;
-    let html = chip('all', '전체', labs.length);
-    for (const r of regions) html += chip(r, r, labs.filter((l) => l.region === r).length);
+    let html = chip('all', '전체', data.length);
+    for (const r of regions) html += chip(r, r, data.filter((l) => l.region === r).length);
     filterEl.innerHTML = html;
     filterEl.querySelectorAll('.filter-chip').forEach((b) => {
       b.addEventListener('click', () => {
@@ -99,10 +141,13 @@
     });
   }
 
-  function matches(lab) {
-    if (region !== 'all' && lab.region !== region) return false;
+  function matches(item) {
+    if (region !== 'all' && item.region !== region) return false;
     if (query) {
-      const hay = `${lab.name} ${lab.address || ''} ${lab.features || ''} ${lab.region || ''}`.toLowerCase();
+      const hay = (tab === 'labs'
+        ? `${item.name} ${item.address || ''} ${item.features || ''} ${item.region || ''}`
+        : `${item.name} ${item.address || ''} ${item.specialty || ''} ${item.description || ''} ${item.region || ''}`
+      ).toLowerCase();
       if (!hay.includes(query)) return false;
     }
     return true;
@@ -122,7 +167,7 @@
       .join('')}<span class="lab-price-note">135 기본 기준</span></div>`;
   }
 
-  function card(lab) {
+  function labCard(lab) {
     const mapHref = lab.address
       ? `https://map.naver.com/p/search/${encodeURIComponent(lab.address)}`
       : null;
@@ -141,6 +186,30 @@
         ${lab.features ? `<p class="lab-features">${escapeHtml(lab.features)}</p>` : ''}
         ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
       </article>`;
+  }
+
+  function repairCard(s) {
+    const mapHref = s.address
+      ? `https://map.naver.com/p/search/${encodeURIComponent(s.address)}`
+      : null;
+    const links = [];
+    if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">지도에서 보기 ↗</a>`);
+    if (s.url) links.push(`<a href="${escapeAttr(s.url)}" target="_blank" rel="noopener" class="lab-link">홈페이지·SNS ↗</a>`);
+    return `
+      <article class="lab-card" data-reveal>
+        <div class="lab-card-head">
+          <h3 class="lab-name">${escapeHtml(s.name)}</h3>
+          <span class="lab-region">${escapeHtml(s.region || '')}</span>
+        </div>
+        ${s.address ? `<p class="lab-addr">${escapeHtml(s.address)}</p>` : ''}
+        ${s.specialty ? `<p class="lab-meta">전문 ${escapeHtml(s.specialty)}</p>` : ''}
+        ${s.description ? `<p class="lab-features">${escapeHtml(s.description)}</p>` : ''}
+        ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
+      </article>`;
+  }
+
+  function card(item) {
+    return tab === 'labs' ? labCard(item) : repairCard(item);
   }
 
   function initMap() {
@@ -165,16 +234,16 @@
     mapReady = true;
   }
 
-  function infoContent(lab) {
-    const naverMap = lab.address
-      ? `https://map.naver.com/p/search/${encodeURIComponent(lab.address)}`
+  function infoContent(item) {
+    const naverMap = item.address
+      ? `https://map.naver.com/p/search/${encodeURIComponent(item.address)}`
       : null;
     const links = [];
     if (naverMap) links.push(`<a href="${escapeAttr(naverMap)}" target="_blank" rel="noopener">길찾기 ↗</a>`);
-    if (lab.url) links.push(`<a href="${escapeAttr(lab.url)}" target="_blank" rel="noopener">홈페이지 ↗</a>`);
+    if (item.url) links.push(`<a href="${escapeAttr(item.url)}" target="_blank" rel="noopener">홈페이지 ↗</a>`);
     return `<div class="labs-map-info">
-      <strong>${escapeHtml(lab.name)}</strong>
-      ${lab.address ? `<span class="labs-map-info-addr">${escapeHtml(lab.address)}</span>` : ''}
+      <strong>${escapeHtml(item.name)}</strong>
+      ${item.address ? `<span class="labs-map-info-addr">${escapeHtml(item.address)}</span>` : ''}
       ${links.length ? `<span class="labs-map-info-links">${links.join('')}</span>` : ''}
     </div>`;
   }
@@ -217,14 +286,14 @@
     if (infoWindow) infoWindow.close();
     const bounds = new naver.maps.LatLngBounds();
     let count = 0;
-    for (const lab of shown) {
-      const coord = await geocodeAddress(lab.address);
+    for (const item of shown) {
+      const coord = await geocodeAddress(item.address);
       if (token !== renderToken) return; // 더 최신 렌더가 시작됨 → 중단
       if (!coord) continue;
       const pos = new naver.maps.LatLng(coord.lat, coord.lng);
-      const marker = new naver.maps.Marker({ position: pos, map, title: lab.name });
+      const marker = new naver.maps.Marker({ position: pos, map, title: item.name });
       naver.maps.Event.addListener(marker, 'click', () => {
-        infoWindow.setContent(infoContent(lab));
+        infoWindow.setContent(infoContent(item));
         infoWindow.open(map, marker);
       });
       markers.push(marker);
@@ -241,11 +310,11 @@
   }
 
   function apply() {
-    const shown = labs.filter(matches);
+    const shown = data.filter(matches);
     if (countEl) countEl.textContent = `${shown.length}곳`;
     updateMarkers(shown);
     if (!shown.length) {
-      listEl.innerHTML = '<div class="labs-empty">조건에 맞는 현상소가 없습니다. 지역이나 검색어를 바꿔보세요.</div>';
+      listEl.innerHTML = `<div class="labs-empty">${TAB[tab].empty}</div>`;
       return;
     }
     listEl.innerHTML = shown.map(card).join('');
@@ -257,4 +326,13 @@
       apply();
     });
   }
+
+  if (tabsEl) {
+    tabsEl.querySelectorAll('.labs-tab').forEach((b) => {
+      b.addEventListener('click', () => setTab(b.dataset.tab));
+    });
+  }
+
+  initMap();
+  setTab('labs');
 })();
