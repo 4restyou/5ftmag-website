@@ -12,12 +12,13 @@
     "test:ui": "playwright test --ui",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
-    "build": "node scripts/build-from-notion.mjs && node scripts/build-films.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs",
+    "build": "node scripts/build-from-notion.mjs && node scripts/build-films.mjs && node scripts/build-labs.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs",
     "build:dry": "DRY_RUN=1 node scripts/build-from-notion.mjs",
     "build:rss": "node scripts/build-rss.mjs",
     "build:authors": "node scripts/build-authors.mjs",
     "build:sitemap": "node scripts/build-sitemap.mjs",
-    "build:films": "node scripts/build-films.mjs"
+    "build:films": "node scripts/build-films.mjs",
+    "build:labs": "node scripts/build-labs.mjs"
   },
   "engines": {
     "node": ">=18"
