@@ -203,6 +203,7 @@
         </div>
         ${s.address ? `<p class="lab-addr">${escapeHtml(s.address)}</p>` : ''}
         ${s.specialty ? `<p class="lab-meta">전문 ${escapeHtml(s.specialty)}</p>` : ''}
+        ${s.contact ? `<p class="lab-meta">연락처 ${escapeHtml(s.contact)}</p>` : ''}
         ${s.description ? `<p class="lab-features">${escapeHtml(s.description)}</p>` : ''}
         ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
       </article>`;

@@ -77,6 +77,9 @@
       .labs-table .col-actions { text-align: left; }
       .form-row { grid-template-columns: 1fr; }
     }
+    .admin-subnav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .admin-subnav::-webkit-scrollbar { display: none; }
+    .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
 </head>
 <body>
@@ -156,6 +159,7 @@
       <div class="form-row"><label for="f-address">주소</label><div><input type="text" id="f-address" placeholder="도로명 주소" /><div class="hint">주소를 넣으면 공개 지도에 핀이 찍혀요.</div></div></div>
       <div class="form-row"><label for="f-specialty">전문분야</label><input type="text" id="f-specialty" placeholder="라이카·수동 RF / 컴팩트 자동 …" /></div>
       <div class="form-row"><label for="f-url">홈페이지·SNS</label><input type="text" id="f-url" placeholder="https://" /></div>
+      <div class="form-row"><label for="f-contact">연락처</label><div><input type="text" id="f-contact" placeholder="전화·문자·카톡·인스타 등" /><div class="hint">전화번호, 문자 상담, 카카오톡, 인스타 DM 등 자유롭게.</div></div></div>
       <div class="form-row"><label for="f-description">설명</label><textarea id="f-description" placeholder="특징, 대기·비용, 카드결제·AS 여부 등"></textarea></div>
       <div class="form-actions">
         <button type="button" class="cancel" id="cancelBtn">취소</button>
@@ -166,7 +170,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260525-repairs"></script>
+<script src="../js/db-client.js?v=20260525-repaircontact"></script>
 <script src="../js/site-common.js?v=20260523-reveal"></script>
 <script>
 'use strict';
@@ -280,6 +284,7 @@ function openForm(id) {
     $('f-address').value = s.address || '';
     $('f-specialty').value = s.specialty || '';
     $('f-url').value = s.url || '';
+    $('f-contact').value = s.contact || '';
     $('f-description').value = s.description || '';
   } else {
     $('modalTitle').textContent = '새 수리실';
@@ -311,6 +316,7 @@ $('shopForm').addEventListener('submit', async (e) => {
       address: $('f-address').value.trim() || null,
       specialty: $('f-specialty').value.trim() || null,
       url: $('f-url').value.trim() || null,
+      contact: $('f-contact').value.trim() || null,
       description: $('f-description').value.trim() || null,
     };
     const id = $('f-id').value.trim();
