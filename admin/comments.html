@@ -57,6 +57,18 @@
     .ccard-btn.danger { color: #b91c1c; }
     .ccard-btn.danger:hover { border-color: #ef4444; }
 
+    .term-manager { max-width: 1100px; margin: 0 auto 4px; background: var(--bg-sub); border-radius: 6px; padding: 4px 18px; }
+    .term-manager summary { cursor: pointer; font-size: 13px; font-weight: var(--fw-heading); padding: 10px 0; color: var(--text); list-style: none; }
+    .term-manager summary::-webkit-details-marker { display: none; }
+    .term-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 18px; padding: 0 6px; background: var(--text); color: var(--bg); font-size: 11px; border-radius: 999px; margin-left: 4px; }
+    .term-add { display: flex; gap: 8px; margin: 4px 0 12px; }
+    .term-add input { font: inherit; font-size: 14px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); min-width: 220px; }
+    .term-list { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 8px; }
+    .term-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 6px 4px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; }
+    .term-chip button { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; line-height: 1; padding: 0 4px; }
+    .term-chip button:hover { color: #b91c1c; }
+    .term-hint { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.5; }
+
     .empty-state { text-align: center; padding: 80px 24px; color: var(--text-muted); font-size: 14px; }
     .gate { max-width: 560px; margin: 80px auto; padding: 40px 24px; text-align: center; }
     .gate h2 { font-size: 22px; font-weight: var(--fw-heading); margin: 0 0 12px; }
@@ -120,6 +132,15 @@
 </div>
 
 <main id="app" hidden>
+  <details class="term-manager" id="termManager">
+    <summary>금칙어 관리 <span class="term-count" id="termCount">0</span></summary>
+    <form class="term-add" id="termForm">
+      <input type="text" id="termInput" placeholder="금칙어 입력 후 추가" maxlength="40" autocomplete="off" />
+      <button type="submit" class="ccard-btn">추가</button>
+    </form>
+    <div class="term-list" id="termList"></div>
+    <p class="term-hint">등록한 단어가 포함된 댓글은 자동으로 "금칙어"로 표시되고, 새로 올라오면 편집부에 알림이 갑니다.</p>
+  </details>
   <div class="toolbar">
     <input type="search" class="filter" id="q" placeholder="본문·작성자 검색" />
     <select id="pageFilter"><option value="">모든 페이지</option></select>
@@ -133,7 +154,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260525-comments"></script>
+<script src="../js/db-client.js?v=20260525-cfterms"></script>
 <script src="../js/site-common.js?v=20260523-reveal"></script>
 <script>
 'use strict';
@@ -142,6 +163,8 @@ const STATE = {
   user: null,
   isEditor: false,
   all: [],          // 전체 댓글 (flags 계산 포함)
+  terms: [],        // 금칙어 문자열 목록
+  termRows: [],     // 금칙어 원본 행 (id 포함)
   query: '',
   page: '',
   flaggedOnly: false,
@@ -159,15 +182,16 @@ function fmtDate(iso) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-// ── 자동 필터(휴리스틱) ── 확정 차단이 아니라 "의심" 표시용. 목록은 deploy 로 조정.
-const BANNED = ['시발','씨발','씨바','병신','지랄','새끼','개새','좆','보지','자지','니미','애미','엠창','꺼져','죽어버려'];
+// ── 자동 필터 ── 확정 차단이 아니라 "의심" 표시용.
+//   금칙어는 DB(comment_filter_terms)에서 STATE.terms 로 로드, 편집부가 관리.
+//   스팸/링크/반복/장문은 내장 휴리스틱.
 const SPAM_HINTS = ['카톡','카카오톡','텔레그램','telegram','오픈채팅','대출','홍보합니다','부업','재택알바','코인','토토','카지노','먹튀','베팅','광고문의','매입니다'];
 
 function flagsFor(text) {
   const reasons = [];
   const body = String(text || '');
   const low = body.toLowerCase();
-  if (BANNED.some(w => body.includes(w))) reasons.push('금칙어');
+  if (STATE.terms.some(w => w && body.includes(w))) reasons.push('금칙어');
   if (/https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|kr|shop|io|co|me|biz|info|link)\b/i.test(body)) reasons.push('링크');
   if (SPAM_HINTS.some(w => low.includes(w.toLowerCase()))) reasons.push('스팸 의심');
   if (/(.)\1{7,}/.test(body)) reasons.push('문자 반복');
@@ -203,8 +227,30 @@ function showGate(msg) {
   });
 }
 
+async function loadTerms() {
+  STATE.termRows = await db().commentFilterTerms.list();
+  STATE.terms = STATE.termRows.map(t => t.term);
+  renderTerms();
+}
+
+function renderTerms() {
+  $('termCount').textContent = STATE.termRows.length;
+  $('termList').innerHTML = STATE.termRows.length
+    ? STATE.termRows.map(t => `<span class="term-chip">${escapeHtml(t.term)}<button type="button" data-term-id="${escapeHtml(t.id)}" aria-label="삭제">×</button></span>`).join('')
+    : '<span class="term-hint">등록된 금칙어가 없어요.</span>';
+  $('termList').querySelectorAll('[data-term-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      const { error } = await db().commentFilterTerms.remove(btn.dataset.termId);
+      if (error) { window.notify?.('삭제 실패: ' + (error.message || ''), 'danger'); btn.disabled = false; return; }
+      await load();
+    });
+  });
+}
+
 async function load() {
   $('list').innerHTML = '<div class="empty-state">불러오는 중…</div>';
+  await loadTerms();
   const { data, error } = await db().comments.adminListAll({ limit: 1000 });
   if (error) {
     $('list').innerHTML = `<div class="empty-state">불러오기 실패: ${escapeHtml(error.message || '')}</div>`;
@@ -304,6 +350,17 @@ $('q').addEventListener('input', (e) => { STATE.query = e.target.value; render()
 $('pageFilter').addEventListener('change', (e) => { STATE.page = e.target.value; render(); });
 $('flaggedOnly').addEventListener('change', (e) => { STATE.flaggedOnly = e.target.checked; render(); });
 $('includeDeleted').addEventListener('change', (e) => { STATE.includeDeleted = e.target.checked; render(); });
+
+$('termForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const term = $('termInput').value.trim();
+  if (!term) return;
+  if (STATE.terms.includes(term)) { window.notify?.('이미 등록된 금칙어예요.', 'info'); return; }
+  const { error } = await db().commentFilterTerms.add(term);
+  if (error) { window.notify?.('등록 실패: ' + (error.message || ''), 'danger'); return; }
+  $('termInput').value = '';
+  await load();
+});
 
 (async function main() {
   for (let i = 0; i < 50; i++) {

@@ -206,6 +206,25 @@
     },
   };
 
+  // ─── 금칙어(편집부 관리) ───
+  const commentFilterTerms = {
+    async list() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('comment_filter_terms').select('*').order('term', { ascending: true });
+      if (error) return [];
+      return data || [];
+    },
+    async add(term) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      return c.from('comment_filter_terms').insert({ term: String(term || '').trim(), created_by: uid });
+    },
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('comment_filter_terms').delete().eq('id', id);
+    },
+  };
+
   // ─── 좋아요 ───
   const likes = {
     async listMine() {
@@ -1094,6 +1113,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, newsletter,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, newsletter,
   };
 })();
