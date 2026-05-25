@@ -11,8 +11,9 @@
 *.swo
 *~
 
-# Claude Code
-.claude/
+# Claude Code (로컬 설정은 무시, 공유 스킬만 트래킹)
+.claude/*
+!.claude/skills/
 
 # Node (혹시 나중에 빌드 도구 추가될 때 대비)
 node_modules/
