@@ -193,6 +193,17 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('comments').update({ deleted_at: new Date().toISOString() }).eq('id', id);
     },
+    // ─ 모더레이션(편집부) ─ 페이지 구분 없이 전체 댓글을 최신순으로.
+    async adminListAll({ limit = 500 } = {}) {
+      const c = client(); if (!c) return { data: [], error: null };
+      const { data, error } = await c.from('comments_with_meta')
+        .select('*').order('created_at', { ascending: false }).limit(limit);
+      return { data: data || [], error };
+    },
+    async adminRestore(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('comments').update({ deleted_at: null }).eq('id', id);
+    },
   };
 
   // ─── 좋아요 ───
