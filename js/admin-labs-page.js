@@ -4,6 +4,24 @@ const STATE = { user: null, isEditor: false, labs: [], filter: '', editingId: nu
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
+
+// 세션 만료 시 인증 쓰기 요청이 응답 없이 멈추는 것을 막는다.
+// 일정 시간 안에 안 끝나면 끊고, 새로고침 안내를 error 로 돌려준다.
+function withWriteTimeout(promise, ms = 10000) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const t = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      resolve({ error: { message: '세션이 만료된 것 같아요. 페이지를 새로고침한 뒤 다시 시도해주세요.' } });
+    }, ms);
+    Promise.resolve(promise).then(
+      (res) => { if (!settled) { settled = true; clearTimeout(t); resolve(res); } },
+      (err) => { if (!settled) { settled = true; clearTimeout(t); resolve({ error: { message: err?.message || String(err) } }); } }
+    );
+  });
+}
+
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -172,7 +190,7 @@ $('labForm').addEventListener('submit', async (e) => {
       const maxSort = STATE.labs.reduce((m, x) => Math.max(m, x.sort_order || 0), 0);
       record.sort_order = maxSort + 1;
     }
-    const { error } = await db().labs.upsert(record);
+    const { error } = await withWriteTimeout(db().labs.upsert(record));
     if (error) { window.notify?.('저장 실패: ' + (error.message || ''), 'danger'); return; }
     window.notify?.(id ? '현상소를 수정했어요.' : '새 현상소를 추가했어요.', 'info');
     closeForm();
