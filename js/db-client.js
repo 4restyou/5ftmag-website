@@ -1140,6 +1140,7 @@
         specialty:   record.specialty ?? null,
         description: record.description ?? null,
         url:         record.url ?? null,
+        contact:     record.contact ?? null,
         is_hidden:   typeof record.is_hidden === 'boolean' ? record.is_hidden : false,
       };
       if (record.id) payload.id = record.id;
