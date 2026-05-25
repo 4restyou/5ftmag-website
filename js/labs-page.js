@@ -1,5 +1,7 @@
 // 필름 현상소 리스트 페이지.
-//   data/labs.json 을 읽어 지역 필터 + 검색 + 카드 리스트 렌더.
+//   원본 Supabase labs 테이블을 직접 읽어 지역 필터 + 검색 + 카드 리스트 렌더.
+//   (admin 저장이 재배포 없이 새로고침만으로 반영되도록.) 실패하면 정적
+//   data/labs.json 으로 폴백.
 //   네이버 지도(Web Dynamic Map)에 현재 필터·검색 결과를 마커로 표시한다.
 
 (function () {
@@ -37,10 +39,34 @@
     return typeof v === 'number' ? `${v.toLocaleString('ko-KR')}원` : String(v);
   }
 
-  fetch('/data/labs.json')
-    .then((r) => r.json())
-    .then((data) => {
-      labs = Array.isArray(data.labs) ? data.labs : [];
+  // 테이블 row(컬럼명) → 페이지가 쓰는 형태(scan_res → scanRes 만 다름).
+  function rowToLab(r) {
+    return {
+      name: r.name || '',
+      region: r.region ?? null,
+      address: r.address ?? null,
+      scanRes: r.scan_res ?? null,
+      features: r.features ?? null,
+      url: r.url ?? null,
+      prices: r.prices || {},
+    };
+  }
+
+  async function loadLabs() {
+    // 원본 = Supabase labs 테이블. admin 저장이 바로 보이도록 직접 읽는다.
+    // list() 는 is_hidden=false, sort_order·name 순. 정적 빌드와 동일한 정렬.
+    try {
+      const rows = await window.MagDB?.labs?.list?.();
+      if (Array.isArray(rows) && rows.length) return rows.map(rowToLab);
+    } catch (_) { /* 폴백으로 진행 */ }
+    // 폴백: 정적 data/labs.json (Supabase 불가 시)
+    const data = await (await fetch('/data/labs.json')).json();
+    return Array.isArray(data.labs) ? data.labs : [];
+  }
+
+  loadLabs()
+    .then((list) => {
+      labs = list;
       renderFilter();
       initMap();
       apply();
