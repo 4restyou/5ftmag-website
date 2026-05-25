@@ -62,11 +62,10 @@ function render() {
   $('tbody').innerHTML = filtered.map(l => {
     const hidden = !!l.is_hidden;
     const c135 = l.prices?.color?.['135']?.basic;
-    const noCoord = (l.lat == null || l.lng == null);
     return `
       <tr${hidden ? ' style="opacity:.55"' : ''}>
         <td>
-          <div class="col-name">${escapeHtml(l.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}${noCoord ? ' <span class="badge" style="background:#e0e7ff;color:#3730a3">좌표없음</span>' : ''}</div>
+          <div class="col-name">${escapeHtml(l.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
         </td>
         <td class="col-meta">${escapeHtml(l.region || '')}</td>
         <td class="col-meta">${escapeHtml(l.address || '')}</td>
@@ -127,8 +126,6 @@ function openForm(id) {
     $('f-name').value = l.name || '';
     $('f-region').value = l.region || '';
     $('f-address').value = l.address || '';
-    $('f-lat').value = (l.lat == null ? '' : l.lat);
-    $('f-lng').value = (l.lng == null ? '' : l.lng);
     $('f-scanRes').value = l.scan_res || '';
     $('f-url').value = l.url || '';
     $('f-features').value = l.features || '';
@@ -162,8 +159,6 @@ $('labForm').addEventListener('submit', async (e) => {
       name,
       region: $('f-region').value.trim() || null,
       address: $('f-address').value.trim() || null,
-      lat: numOrNull($('f-lat').value),
-      lng: numOrNull($('f-lng').value),
       scan_res: $('f-scanRes').value.trim() || null,
       url: $('f-url').value.trim() || null,
       features: $('f-features').value.trim() || null,
