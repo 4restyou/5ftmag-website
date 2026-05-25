@@ -1023,9 +1023,66 @@
     },
   };
 
+  // ─── 현상소 카탈로그 (labs 테이블) ───
+  // public 은 SELECT, editor 만 INSERT/UPDATE/DELETE. prices 는 JSONB(객체 그대로).
+  const labs = {
+    async list() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('labs')
+        .select('*').eq('is_hidden', false)
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+      if (error) { console.warn('[labs.list]', error.message); return []; }
+      return data || [];
+    },
+    // admin 용 — 숨김 포함 전체
+    async listAll() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('labs')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+      if (error) { console.warn('[labs.listAll]', error.message); return []; }
+      return data || [];
+    },
+    async get(id) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.from('labs').select('*').eq('id', id).maybeSingle();
+      if (error) { console.warn('[labs.get]', error.message); return null; }
+      return data || null;
+    },
+    async upsert(record) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const payload = {
+        name:      (record.name || '').trim(),
+        region:    record.region ?? null,
+        address:   record.address ?? null,
+        lat:       record.lat ?? null,
+        lng:       record.lng ?? null,
+        scan_res:  record.scan_res ?? record.scanRes ?? null,
+        features:  record.features ?? null,
+        url:       record.url ?? null,
+        prices:    record.prices || {},
+        is_hidden: typeof record.is_hidden === 'boolean' ? record.is_hidden
+                    : (typeof record.isHidden === 'boolean' ? record.isHidden : false),
+      };
+      if (record.id) payload.id = record.id;
+      if (record.sort_order != null) payload.sort_order = record.sort_order;
+      return c.from('labs').upsert(payload);
+    },
+    async setHidden(id, hidden) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('labs').update({ is_hidden: !!hidden }).eq('id', id);
+    },
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('labs').delete().eq('id', id);
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, newsletter,
+    auth, profiles, comments, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, newsletter,
   };
 })();
