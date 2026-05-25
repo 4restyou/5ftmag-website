@@ -147,7 +147,7 @@
   <p class="section-help" style="font-size:12px; color:var(--text-muted); margin: 0 0 18px; line-height:1.6;">
     여기서 추가·수정·삭제한 내용은 <strong>다음 사이트 빌드</strong>부터 반영됩니다.
     바로 적용하려면 Netlify 대시보드의 "Trigger deploy" 를 눌러주세요. 빌드 시 Supabase 의 labs 테이블을 data/labs.json 으로 동기화합니다.
-    좌표(위도·경도)를 비우면 지도에 안 뜨며, Actions 의 "Geocode labs" 워크플로로 채울 수 있어요.
+    지도는 주소로 자동 표시되니 좌표는 입력하지 않아도 됩니다(주소만 정확하면 됨).
   </p>
 
   <table class="labs-table">
@@ -176,16 +176,6 @@
       <div class="form-row">
         <label for="f-address">주소</label>
         <input type="text" id="f-address" name="address" placeholder="서울 강남구 …" />
-      </div>
-      <div class="form-row">
-        <label>좌표</label>
-        <div>
-          <div class="two">
-            <input type="number" step="any" id="f-lat" name="lat" placeholder="위도 lat (비우면 지오코딩)" />
-            <input type="number" step="any" id="f-lng" name="lng" placeholder="경도 lng" />
-          </div>
-          <div class="hint">비워두면 지도에 표시되지 않습니다. 주소가 바뀌면 좌표를 비워 재지오코딩하세요.</div>
-        </div>
       </div>
       <div class="form-row">
         <label for="f-scanRes">스캔 화질</label>
@@ -251,7 +241,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260525-labs"></script>
 <script src="../js/site-common.js?v=20260523-reveal"></script>
-<script src="../js/admin-labs-page.js?v=20260525-labs"></script>
+<script src="../js/admin-labs-page.js?v=20260525-addrmap"></script>
 
 </body>
 </html>

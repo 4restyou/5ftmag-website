@@ -153,16 +153,49 @@
     </div>`;
   }
 
-  function updateMarkers(shown) {
+  // ── 주소 → 좌표 (브라우저 즉석 변환 + localStorage 캐시) ──
+  // 좌표를 데이터로 저장하지 않고, 지도 표시 때 주소를 변환한다.
+  // 캐시는 주소 키라, admin 에서 주소만 고치면 다음 방문에 자동 반영.
+  const GEO_CACHE_KEY = '5ft-labs-geo-v1';
+  let geoCache;
+  try { geoCache = JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); } catch (_) { geoCache = {}; }
+  function saveGeoCache() { try { localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(geoCache)); } catch (_) {} }
+
+  function geocodeAddress(address) {
+    return new Promise((resolve) => {
+      if (!address) { resolve(null); return; }
+      if (geoCache[address]) { resolve(geoCache[address]); return; }
+      if (!window.naver || !naver.maps || !naver.maps.Service) { resolve(null); return; }
+      let done = false;
+      const timer = setTimeout(() => { if (!done) { done = true; resolve(null); } }, 4000);
+      try {
+        naver.maps.Service.geocode({ query: address }, (status, res) => {
+          if (done) return;
+          done = true; clearTimeout(timer);
+          const a = status === naver.maps.Service.Status.OK && res && res.v2 && res.v2.addresses && res.v2.addresses[0];
+          if (!a) { resolve(null); return; }
+          const coord = { lat: Number(a.y), lng: Number(a.x) };
+          geoCache[address] = coord; saveGeoCache();
+          resolve(coord);
+        });
+      } catch (_) { if (!done) { done = true; clearTimeout(timer); resolve(null); } }
+    });
+  }
+
+  let renderToken = 0;
+  async function updateMarkers(shown) {
     if (!mapReady || !map) return;
+    const token = ++renderToken;
     markers.forEach((m) => m.setMap(null));
     markers = [];
     if (infoWindow) infoWindow.close();
     const bounds = new naver.maps.LatLngBounds();
     let count = 0;
     for (const lab of shown) {
-      if (lab.lat == null || lab.lng == null) continue;
-      const pos = new naver.maps.LatLng(lab.lat, lab.lng);
+      const coord = await geocodeAddress(lab.address);
+      if (token !== renderToken) return; // 더 최신 렌더가 시작됨 → 중단
+      if (!coord) continue;
+      const pos = new naver.maps.LatLng(coord.lat, coord.lng);
       const marker = new naver.maps.Marker({ position: pos, map, title: lab.name });
       naver.maps.Event.addListener(marker, 'click', () => {
         infoWindow.setContent(infoContent(lab));
@@ -172,6 +205,7 @@
       bounds.extend(pos);
       count++;
     }
+    if (token !== renderToken) return;
     if (count === 1) {
       map.setCenter(bounds.getCenter());
       map.setZoom(15);
