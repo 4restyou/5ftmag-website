@@ -15,6 +15,17 @@
 
   let _client = null;
   let _originRestoreInstalled = false;
+
+  // 인증 토큰 접근 직렬화 락. supabase 기본값(navigator.locks)이 iOS 인앱
+  // 브라우저 등에서 두 번째 인증 요청을 데드락시키는 사례가 있어(=저장 한 번
+  // 뒤 다음 저장이 멈춤), 메모리 프라미스 체인으로 직렬화하는 락으로 대체한다.
+  let _authLockChain = Promise.resolve();
+  function authLock(_name, _acquireTimeout, fn) {
+    const run = _authLockChain.then(() => fn(), () => fn());
+    _authLockChain = run.then(() => {}, () => {});
+    return run;
+  }
+
   function client() {
     if (_client) return _client;
     if (!window.supabase) return null;
@@ -25,6 +36,7 @@
         detectSessionInUrl: true,
         flowType: 'pkce',
         storage: window.localStorage,
+        lock: authLock,
       },
     });
     installOriginRestore();
