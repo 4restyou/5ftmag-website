@@ -140,7 +140,6 @@
     <span class="count" id="count"></span>
     <button type="button" class="primary-btn" id="newBtn">+ 새 수리실</button>
   </div>
-  <div id="diag" style="margin:-6px 0 14px;font-size:12px;color:var(--text-muted);white-space:pre-wrap;word-break:break-all;">진단 빌드 authlock3 · 저장하면 단계별 시간이 여기 표시됩니다.</div>
   <table class="labs-table">
     <thead>
       <tr><th>이름</th><th>지역</th><th>전문분야</th><th></th></tr>
@@ -195,21 +194,6 @@ function withWriteTimeout(promise, ms = 10000) {
       (err) => { if (!settled) { settled = true; clearTimeout(t); resolve({ error: { message: err?.message || String(err) } }); } }
     );
   });
-}
-
-// ── 임시 진단(authlock3): 두 번째 저장이 어디서 멈추는지 화면에 표시 ──
-function setDiag(s) {
-  const d = $('diag');
-  if (d) d.textContent = '[' + new Date().toLocaleTimeString('ko') + '] ' + s;
-}
-async function raceTimed(promise, ms) {
-  const t0 = Date.now();
-  let state = 'ok';
-  await Promise.race([
-    Promise.resolve(promise).then(() => {}, (e) => { state = 'err:' + (e?.message || e); }),
-    new Promise((r) => setTimeout(() => { state = 'timeout'; r(); }, ms)),
-  ]);
-  return { ms: Date.now() - t0, state };
 }
 
 function escapeHtml(s) {
@@ -350,12 +334,7 @@ $('shopForm').addEventListener('submit', async (e) => {
       const maxSort = STATE.shops.reduce((m, x) => Math.max(m, x.sort_order || 0), 0);
       record.sort_order = maxSort + 1;
     }
-    setDiag('저장 중… getSession 확인');
-    const gs = await raceTimed(db().auth.getSession(), 6000);
-    const upT0 = Date.now();
     const { error } = await withWriteTimeout(db().repairs.upsert(record));
-    const upMs = Date.now() - upT0;
-    setDiag(`getSession ${gs.ms}ms(${gs.state}) · upsert ${upMs}ms ${error ? '(' + (error.message || 'err') + ')' : '(ok)'}`);
     if (error) { window.notify?.('저장 실패: ' + (error.message || ''), 'danger'); return; }
     window.notify?.(id ? '수리실을 수정했어요.' : '새 수리실을 추가했어요.', 'info');
     closeForm();
