@@ -34,7 +34,7 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
-  <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
+  <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
   <link rel="stylesheet" href="./css/home.css?v=20260523-dvh">
 
@@ -101,8 +101,10 @@
   </nav>
 </header>
 
+<h1 class="sr-only">5ft.mag — 필름 사진 매거진</h1>
+
 <!-- ════════ SPLIT LAYOUT ════════ -->
-<div class="split-layout">
+<div class="split-layout" role="main" id="main">
 
   <!-- 좌: STORIES (작가들의 글, 인터뷰, 에세이) -->
   <div class="panel panel-left" id="stories">
@@ -305,7 +307,7 @@
 
 
 <script src="./js/site-common.js?v=20260523-reveal"></script>
-<script src="./js/home-page.js?v=20260523-reveal"></script>
+<script src="./js/home-page.js?v=20260526-a11y"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="./js/db-client.js?v=20260526-dbclient"></script>

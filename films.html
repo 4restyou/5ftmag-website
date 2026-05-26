@@ -36,7 +36,7 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
-  <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
+  <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260518-dropzone">
   <link rel="stylesheet" href="./css/films.css?v=20260524-grid4">
@@ -70,6 +70,8 @@
   </nav>
 </header>
 
+<h1 class="sr-only">필름 카탈로그</h1>
+
 <!-- ════════ 인트로 ════════ -->
 <div class="intro">
   <div class="intro-inner">
@@ -78,7 +80,7 @@
 </div>
 
 <!-- ════════ 필름 그리드 (데이터 기반) ════════ -->
-<div class="films-section">
+<div class="films-section" role="main" id="main">
   <div class="films-section-head">
     <h2 class="films-section-title">5ft Issue</h2>
     <p class="films-section-sub">매거진이 한 호를 통째로 다룬 필름. 사진가 3명의 시선이 한 자리에 모입니다.</p>
@@ -227,7 +229,7 @@
 <script src="./js/films-export.js?v=20260522-contribselect"></script>
 <script src="./js/films-utils.js?v=20260520-modules"></script>
 <script src="./js/films-cards.js?v=20260523-reveal"></script>
-<script src="./js/films-page.js?v=20260526-readers"></script>
+<script src="./js/films-page.js?v=20260526-a11y"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script src="./js/db-client.js?v=20260526-dbclient"></script>

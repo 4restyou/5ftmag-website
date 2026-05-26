@@ -34,7 +34,7 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
-  <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
+  <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
   <link rel="stylesheet" href="./css/labs.css?v=20260524-divider">
   <style>
     .labs-tabs { display: flex; align-items: center; gap: 8px; padding: 20px 40px 0; }
@@ -77,6 +77,8 @@
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
   </nav>
 </header>
+
+<h1 class="sr-only">필름 현상소·수리실</h1>
 
 <!-- ════════ 인트로 ════════ -->
 <div class="intro">
@@ -123,7 +125,7 @@
 </div>
 
 <!-- ════════ 리스트 ════════ -->
-<div class="labs-section">
+<div class="labs-section" role="main" id="main">
   <div class="labs-list" id="labsList">
     <div class="labs-empty">불러오는 중…</div>
   </div>

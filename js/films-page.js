@@ -1992,7 +1992,7 @@
     };
     lightboxImg.dataset.fallback = '0';
     lightboxImg.src = source.webp;
-    lightboxImg.alt = photo.author || '';
+    lightboxImg.alt = [photo.author, photo.film].filter(Boolean).join(' · ') || '필름 사진';
 
     // 캡션: editorial 모드 → "작가 · brand name"
     //       reader 모드   → "@핸들 · 필름명(클릭→필름 모달) · 카메라(클릭→카메라 모달)"
