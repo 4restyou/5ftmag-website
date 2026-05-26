@@ -2028,7 +2028,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 22px;
+  padding: 11px 20px;
   background: var(--accent);
   color: var(--accent-text);
   border: none;
@@ -2037,7 +2037,7 @@
   font-weight: var(--fw-heading);
   letter-spacing: 0.04em;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: var(--btn-radius);
   transition: opacity .15s, transform .15s;
 }
 .reader-submit-btn:hover { opacity: 0.85; }

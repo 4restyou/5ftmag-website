@@ -140,7 +140,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 18px;
+  padding: 11px 20px;
   background: var(--accent);
   color: var(--accent-text);
   border: none;
