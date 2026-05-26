@@ -45,7 +45,7 @@
   let data = [];
   let region = 'all';
   let query = '';
-  let sort = 'default'; // default = 편집부 지정순(sort_order) | name | region
+  let sort = 'name'; // 기본 = 가나다·ABC(이름순) | region = 지역별 구분
 
   function escapeHtml(s) {
     const d = document.createElement('div');
@@ -155,15 +155,26 @@
     return true;
   }
 
-  // 방문자 정렬. default 는 데이터 순서(편집부 sort_order)를 그대로 유지.
-  function sortItems(arr) {
-    const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ko');
-    if (sort === 'name') return arr.slice().sort(byName);
-    if (sort === 'region') {
-      const rank = (r) => { const i = REGION_ORDER.indexOf(r); return i === -1 ? 999 : i; };
-      return arr.slice().sort((a, b) => (rank(a.region) - rank(b.region)) || byName(a, b));
+  // 방문자 정렬.
+  const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ko');
+  function sortByName(arr) { return arr.slice().sort(byName); }
+
+  // 지역순: 지역별로 묶어 구분 헤더와 함께 렌더. REGION_ORDER 우선, 그 외는 가나다,
+  // 지역 없는 항목은 '기타'로 맨 끝. 각 지역 안은 이름순.
+  function renderGrouped(items) {
+    const groups = new Map();
+    for (const it of items) {
+      const key = it.region || '기타';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(it);
     }
-    return arr;
+    const rank = (r) => (r === '기타' ? 9999 : (REGION_ORDER.indexOf(r) === -1 ? 998 : REGION_ORDER.indexOf(r)));
+    const keys = [...groups.keys()].sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b, 'ko'));
+    return keys.map((k) => {
+      const grp = groups.get(k).sort(byName);
+      return `<h2 class="labs-region-divider">${escapeHtml(k)}<span class="labs-region-divider-count">${grp.length}곳</span></h2>`
+        + grp.map(card).join('');
+    }).join('');
   }
 
   function priceChips(p) {
@@ -324,14 +335,16 @@
   }
 
   function apply() {
-    const shown = sortItems(data.filter(matches));
-    if (countEl) countEl.textContent = `${shown.length}곳`;
-    updateMarkers(shown);
-    if (!shown.length) {
+    const filtered = data.filter(matches);
+    if (countEl) countEl.textContent = `${filtered.length}곳`;
+    updateMarkers(filtered);
+    if (!filtered.length) {
       listEl.innerHTML = `<div class="labs-empty">${TAB[tab].empty}</div>`;
       return;
     }
-    listEl.innerHTML = shown.map(card).join('');
+    listEl.innerHTML = sort === 'region'
+      ? renderGrouped(filtered)
+      : sortByName(filtered).map(card).join('');
   }
 
   if (searchEl) {
