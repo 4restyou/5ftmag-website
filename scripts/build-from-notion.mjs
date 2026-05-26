@@ -125,7 +125,8 @@ async function buildStories() {
                          category.toUpperCase();
     const author = getRichText(props['Author']) || getTitle(props['Author']) || '5ft.mag 편집부';
     const date = getDate(props['Date']) || new Date().toISOString().split('T')[0];
-    const issue = getSelect(props['Issue']) || getRichText(props['Issue']) || 'Vol.01';
+    // 기본은 일반 카테고리(이슈 없음). 호 편입은 Notion 의 Issue 속성을 채울 때만.
+    const issue = getSelect(props['Issue']) || getRichText(props['Issue']) || '';
     const excerpt = getRichText(props['Excerpt']) || getRichText(props['요약']) || '';
     const published = getCheckbox(props['Published']);
 
@@ -191,7 +192,7 @@ async function buildStories() {
       .replaceAll('{{ID}}', id)
       .replaceAll('{{HERO_ABS}}', heroRel || '')
       .replaceAll('{{HERO_BLOCK}}', heroBlock)
-      .replaceAll('{{ISSUE}}', escapeHtml(issue))
+      .replaceAll('{{ISSUE_TAG}}', issue ? `<span class="article-tag issue">${escapeHtml(issue)}</span>` : '')
       .replaceAll('{{CATEGORY_LABEL}}', escapeHtml(categoryLabel))
       .replaceAll('{{CATEGORY}}', escapeHtml(category))
       .replaceAll('{{SUBTITLE}}', escapeHtml(subtitle || excerpt))
