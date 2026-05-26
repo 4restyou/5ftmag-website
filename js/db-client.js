@@ -16,13 +16,23 @@
   let _client = null;
   let _originRestoreInstalled = false;
 
+  // /admin/ 페이지 여부. 관리 화면은 토큰 유효시간 내의 짧은 편집 세션이라
+  // 자동 갱신이 필요 없고, 자동 갱신을 끄면 아래 데드락 자체가 사라진다.
+  const IS_ADMIN_PAGE = /\/admin\//.test(location.pathname);
+
   // 인증 토큰 접근 직렬화 락. supabase 기본값(navigator.locks)이 iOS 인앱
   // 브라우저 등에서 두 번째 인증 요청을 데드락시키는 사례가 있어(=저장 한 번
   // 뒤 다음 저장이 멈춤), 메모리 프라미스 체인으로 직렬화하는 락으로 대체한다.
+  // 추가로, fn 이 (멈춘 네트워크 refresh 등으로) 영영 끝나지 않아도 다음 대기자가
+  // 영구히 막히지 않도록 일정 시간 뒤 체인을 강제로 진행시키는 self-heal 을 둔다.
   let _authLockChain = Promise.resolve();
   function authLock(_name, _acquireTimeout, fn) {
     const run = _authLockChain.then(() => fn(), () => fn());
-    _authLockChain = run.then(() => {}, () => {});
+    _authLockChain = new Promise((resolve) => {
+      const timer = setTimeout(resolve, 12000);
+      const release = () => { clearTimeout(timer); resolve(); };
+      run.then(release, release);
+    });
     return run;
   }
 
@@ -32,7 +42,10 @@
     _client = window.supabase.createClient(URL_, ANON_, {
       auth: {
         persistSession: true,
-        autoRefreshToken: true,
+        // 관리 화면에서는 자동 토큰 갱신 타이머를 끈다. iOS/인앱 등에서 백그라운드
+        // refresh 요청이 멈추면 gotrue 내부 인증 락이 영구 점유돼(첫 저장 뒤
+        // 다음 저장이 멈춤) 이후 쓰기가 모두 막히기 때문. 공개 페이지는 유지.
+        autoRefreshToken: !IS_ADMIN_PAGE,
         detectSessionInUrl: true,
         flowType: 'pkce',
         storage: window.localStorage,

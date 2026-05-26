@@ -170,7 +170,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260525-authlock"></script>
+<script src="../js/db-client.js?v=20260525-authlock2"></script>
 <script src="../js/site-common.js?v=20260523-reveal"></script>
 <script>
 'use strict';
@@ -225,8 +225,16 @@ $('gateLogin').addEventListener('click', async () => {
 });
 
 async function reload() {
-  const shops = await db().repairs.listAll();
-  STATE.shops = Array.isArray(shops) ? shops : [];
+  // 목록 조회도 인증 경로를 타므로 멈출 수 있다. 타임아웃을 둬서 화면이
+  // 영구 대기에 빠지지 않게 한다(데이터는 다음 동작/새로고침 때 다시 채워짐).
+  const shops = await new Promise((resolve) => {
+    const t = setTimeout(() => resolve(null), 10000);
+    Promise.resolve(db().repairs.listAll()).then(
+      (v) => { clearTimeout(t); resolve(v); },
+      () => { clearTimeout(t); resolve(null); }
+    );
+  });
+  if (Array.isArray(shops)) STATE.shops = shops;
   render();
 }
 
