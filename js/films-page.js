@@ -753,20 +753,59 @@
     return null;
   }
 
+  // 초기 정적 구독자 사진(data/readers.json) — Supabase 제출과 같은 형태로 매핑.
+  // 표시 전용: 문자열 id 를 주지 않아 submissionId 가 빈 값이 되고(라이트박스 ♡ 미노출),
+  // createdAt 이 없어 reader roll 에서 가장 오래된(첫 롤) 쪽에 배치된다.
+  let staticReadersCache = null;
+  async function getStaticReaders() {
+    if (staticReadersCache) return staticReadersCache;
+    try {
+      const rows = await (await fetch('data/readers.json')).json();
+      staticReadersCache = (Array.isArray(rows) ? rows : [])
+        .filter(r => r && r.published !== false && r.image && r.film)
+        .map(r => {
+          const ig = String(r.instagram || (r.author || '').replace(/^@/, '')).trim();
+          return {
+            image: r.image,
+            author: r.author || (ig ? '@' + ig : ''),
+            submitterName: '',
+            instagram: ig,
+            instagramUrl: r.instagramUrl || (ig ? `https://instagram.com/${ig.replace(/^@/, '')}` : ''),
+            film: r.film,
+            camera: r.camera || '',
+            caption: r.caption || '',
+            createdAt: '',
+            submissionId: '',
+            published: true,
+            _static: true,
+            _source: 'submission',
+          };
+        });
+    } catch (_) {
+      staticReadersCache = [];
+    }
+    return staticReadersCache;
+  }
+
   async function getApprovedSubmissions({ force = false } = {}) {
     if (!force && approvedSubmissionsCache) return approvedSubmissionsCache;
     if (!force && approvedSubmissionsPromise) return approvedSubmissionsPromise;
 
     approvedSubmissionsPromise = (async () => {
       const fetcher = await waitForApprovedFetcher();
-      if (!fetcher) return approvedSubmissionsCache || [];
+      const staticReaders = await getStaticReaders();
+      if (!fetcher) {
+        approvedSubmissionsCache = approvedSubmissionsCache || staticReaders;
+        return approvedSubmissionsCache;
+      }
       try {
         const rows = await fetcher();
-        approvedSubmissionsCache = Array.isArray(rows) ? rows : [];
+        approvedSubmissionsCache = (Array.isArray(rows) ? rows : []).concat(staticReaders);
         return approvedSubmissionsCache;
       } catch (e) {
         console.warn('승인된 제출 fetch 실패:', e);
-        return approvedSubmissionsCache || [];
+        approvedSubmissionsCache = approvedSubmissionsCache || staticReaders;
+        return approvedSubmissionsCache;
       } finally {
         approvedSubmissionsPromise = null;
       }
@@ -1028,8 +1067,15 @@
       return null;
     }
 
-    const rangeApi = await waitForRollRangeApi();
+    let rangeApi = await waitForRollRangeApi();
     const aliasSet = new Set(rawAliases.map(normalize));
+    // 정적 구독자 사진(readers.json)이 매칭되는 필름은 Supabase 페이지네이션 대신
+    // 통합 경로(getApprovedSubmissions)로 처리한다. 페이지네이션 API 는 정적
+    // 사진을 모르기 때문에, 그대로 두면 카드 카운트와 모달 롤이 어긋난다.
+    if (rangeApi) {
+      const staticReaders = await getStaticReaders();
+      if (staticReaders.some(s => aliasSet.has(normalize(s.film)))) rangeApi = null;
+    }
     let fallbackSubmissions = null;
     let fallbackRollState = null;
     let rollTotal = 0;
