@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260526-fontscale">
   <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
-  <link rel="stylesheet" href="./css/labs.css?v=20260526-spacing">
+  <link rel="stylesheet" href="./css/labs.css?v=20260526-loadmore">
   <style>
     .labs-tabs { display: flex; align-items: center; gap: 8px; padding: 20px 40px 0; }
     .labs-sort { margin-left: auto; font: inherit; font-size: 14px; font-weight: var(--fw-heading); padding: 8px 32px 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--text); cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
@@ -129,6 +129,9 @@
   <div class="labs-list" id="labsList">
     <div class="labs-empty">불러오는 중…</div>
   </div>
+  <div class="labs-more-wrap" id="labsMoreWrap" hidden>
+    <button type="button" class="btn btn-secondary btn-md labs-more-btn" id="labsMoreBtn">더 보기</button>
+  </div>
 </div>
 
 <!-- ════════ FOOTER ════════ -->
@@ -174,6 +177,6 @@
 <script src="./js/db-client.js?v=20260526-dbclient"></script>
 <script src="./js/site-common.js?v=20260526-iaberr"></script>
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=uu78cn9rbi&submodules=geocoder"></script>
-<script src="./js/labs-page.js?v=20260526-sort2"></script>
+<script src="./js/labs-page.js?v=20260526-loadmore"></script>
 </body>
 </html>
