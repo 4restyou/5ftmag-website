@@ -127,7 +127,7 @@
   // 카드 그리드 렌더링
   function renderGrid(stories) {
     if (stories.length === 0) {
-      const hasFilter = currentSearchQuery || currentCategory !== 'all';
+      const hasFilter = currentSearchQuery || currentCategory !== 'all' || currentMonth !== 'all';
       grid.innerHTML = `<div class="no-results">
         일치하는 글이 없습니다. 제목, 카테고리, 작가명을 줄여서 다시 검색해 보세요.
         ${hasFilter ? '<button type="button" class="no-results-reset" id="noResultsReset">전체 글 보기</button>' : ''}
@@ -148,12 +148,29 @@
   const _urlParams = new URLSearchParams(location.search);
   let currentCategory = _urlParams.get('cat') || 'all';
   let currentSearchQuery = (_urlParams.get('q') || '').trim();
+  let currentMonth = _urlParams.get('m') || 'all'; // 'all' | 'YYYY-MM'
+
+  // 글 날짜에서 월 목록(YYYY-MM)을 뽑아 최신순으로 select 채우기
+  function populateMonths() {
+    const sel = document.getElementById('monthFilter');
+    if (!sel) return;
+    const months = [...new Set(
+      allStories.map(s => String(s.date || '').slice(0, 7)).filter(m => /^\d{4}-\d{2}$/.test(m))
+    )].sort((a, b) => b.localeCompare(a));
+    sel.innerHTML = ['<option value="all">전체 기간</option>']
+      .concat(months.map(m => {
+        const [y, mo] = m.split('-');
+        return `<option value="${m}">${y}년 ${Number(mo)}월</option>`;
+      })).join('');
+    sel.value = currentMonth;
+  }
 
   // 현재 상태(cat·q·page) 를 URL 에 반영 — 공유·새로고침·뒤로가기 복구용.
   // 연속 입력에 history 가 쌓이지 않게 replaceState.
   function syncUrl() {
     const params = new URLSearchParams();
     if (currentCategory && currentCategory !== 'all') params.set('cat', currentCategory);
+    if (currentMonth && currentMonth !== 'all') params.set('m', currentMonth);
     if (currentSearchQuery) params.set('q', currentSearchQuery);
     if (currentPage > 1) params.set('page', String(currentPage));
     const qs = params.toString();
@@ -165,6 +182,11 @@
     let result = currentCategory === 'all'
       ? allStories
       : allStories.filter(s => storyFilterKey(s) === currentCategory);
+
+    // 월 필터
+    if (currentMonth !== 'all') {
+      result = result.filter(s => String(s.date || '').slice(0, 7) === currentMonth);
+    }
 
     // 검색어가 있으면 추가 필터
     if (currentSearchQuery) {
@@ -198,9 +220,12 @@
   function resetFilters() {
     currentCategory = 'all';
     currentSearchQuery = '';
+    currentMonth = 'all';
     currentPage = 1;
     const si = document.getElementById('searchInput');
     if (si) si.value = '';
+    const mf = document.getElementById('monthFilter');
+    if (mf) mf.value = 'all';
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.category === 'all'));
     applyFilters();
   }
@@ -216,6 +241,7 @@
       allStories = data
         .filter(s => s.published !== false)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
+      populateMonths();
       applyFilters();
       // 스크랩 상태는 DB 준비 후 비동기로 — 카드 렌더 막지 않음
       (async () => {
@@ -300,6 +326,16 @@
   });
   // URL 의 cat 으로 칩 active 초기 동기화
   chips.forEach(c => c.classList.toggle('active', c.dataset.category === currentCategory));
+
+  // 월별 보기 select
+  const monthFilter = document.getElementById('monthFilter');
+  if (monthFilter) {
+    monthFilter.addEventListener('change', () => {
+      currentMonth = monthFilter.value;
+      currentPage = 1;
+      applyFilters();
+    });
+  }
 
   // 검색 입력 (디바운스)
   const searchInput = document.getElementById('searchInput');
