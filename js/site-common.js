@@ -147,6 +147,9 @@
     // 안드로이드 IAB (Instagram 등) — "Java object is gone" 패턴으로 lifecycle 종료
     /Java object is gone/i,
     /Error invoking [A-Za-z]+:/i,
+    // iOS 인스타·페이스북 인앱 브라우저가 주입하는 PCM 브리지 콜백.
+    // 호스트 코드가 아니라 inject 스크립트가 부재 환경에서 throw 하는 케이스.
+    /_pcmBridge/i,
   ];
   // source URL 기반 무시 — extension 또는 native bridge 의 inject 스크립트
   const ERROR_IGNORE_SOURCES = [
