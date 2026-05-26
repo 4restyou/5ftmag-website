@@ -62,7 +62,7 @@
   gap: 6px;
   background: var(--text);
   color: var(--bg);
-  padding: 11px 22px;
+  padding: 11px 20px;
   border: none;
   border-radius: var(--btn-radius);
   font-size: 13px;
@@ -873,7 +873,7 @@ body.modal-open { overflow: hidden; }
 /* rs-trigger 와 같은 높이로 정렬 */
 .readers-cta .rs-trigger {
   font-size: 13px;
-  padding: 10px 18px;
+  padding: 11px 20px;
   line-height: 1;
 }
 
