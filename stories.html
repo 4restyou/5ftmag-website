@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
   <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
-  <link rel="stylesheet" href="./css/stories.css?v=20260524-divider">
+  <link rel="stylesheet" href="./css/stories.css?v=20260526-month">
 </head>
 <body>
 
@@ -100,6 +100,9 @@
     <button class="filter-chip" data-category="illustration">Illustration</button>
     <button class="filter-chip" data-category="editorial">Editorial</button>
   </div>
+  <select id="monthFilter" class="month-filter" aria-label="월별 보기">
+    <option value="all">전체 기간</option>
+  </select>
 </div>
 <div class="search-results-count" id="searchResultsCount"></div>
 
@@ -198,7 +201,7 @@
 </footer>
 
 <script src="./js/site-common.js?v=20260523-reveal"></script>
-<script src="./js/stories-page.js?v=20260523-reveal"></script>
+<script src="./js/stories-page.js?v=20260526-month"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260523-newsletter"></script>
 </body>

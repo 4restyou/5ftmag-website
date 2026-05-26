@@ -124,6 +124,24 @@
   transition: background var(--duration-base) var(--easing);
 }
 .no-results-reset:hover { background: var(--accent-soft); }
+
+/* 월별 보기 드롭다운 — 컨트롤 줄 오른쪽 고정 */
+.month-filter {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  padding: 8px 30px 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 12px center;
+  color: var(--text);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.month-filter:hover { border-color: var(--text); }
+
 @media (max-width: 640px) {
   .articles-controls {
     padding: 14px 20px;
@@ -135,6 +153,7 @@
   }
   .articles-controls .search-input-wrap { flex-basis: 130px; }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
+  .month-filter { font-size: 12px; padding: 7px 26px 7px 12px; }
 }
 
 /* ── 검색 + 카테고리 필터 (한 줄, 필터는 가로 스크롤) ── */
