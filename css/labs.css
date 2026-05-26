@@ -85,7 +85,7 @@
   max-width: 720px;
 }
 .intro-inner p {
-  font-size: 19px;
+  font-size: var(--fs-body);
   line-height: 1.65;
   color: var(--text);
   word-break: keep-all;
@@ -295,7 +295,6 @@
   .search-input-wrap { flex-basis: 140px; }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
   .intro { padding: 28px 20px 20px; }
-  .intro-inner p { font-size: 16px; }
   .labs-map-section { padding: 16px 20px 0; }
   .labs-map { height: 300px; }
   .filter-chip { padding: 6px 14px; font-size: 12px; }

@@ -2,7 +2,7 @@
 /* TODO mobile-first 리팩토링 대기 — @media (max-width) → (min-width) 플립. base 가 모바일 값을 갖도록 조정 필요. 회귀 위험 있어 별도 라운드에서 처리. (PoC: comments.css / market.css)*/
 /* ── 인트로 ── */
 .intro {
-  padding: 40px 32px 60px;
+  padding: 40px 40px 60px;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
@@ -10,7 +10,7 @@
   max-width: 720px;
 }
 .intro p {
-  font-size: 19px;
+  font-size: var(--fs-body);
   line-height: 1.65;
   color: var(--text);
   word-break: keep-all;
@@ -24,7 +24,7 @@
 
 /* ── 필름 그리드 ── */
 .films-section {
-  padding: 60px 32px 80px;
+  padding: 60px 40px 80px;
 }
 /* 카드 그리드 — Articles 처럼 최대 4열, 좁아지면 3 → 2 (모바일 세부는 아래 미디어쿼리) */
 .films-grid {
