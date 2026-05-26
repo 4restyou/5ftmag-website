@@ -47,6 +47,13 @@
   let query = '';
   let sort = 'name'; // 기본 = 가나다·ABC(이름순) | region = 지역별 구분
 
+  // 모바일에서 목록이 길어 스크롤 피로가 크므로, 필터·검색이 없을 때만 처음 일부만
+  // 보여주고 "더 보기" 로 확장한다. (films 라이브러리와 동일 패턴)
+  const MOBILE_INITIAL = 30;
+  const MOBILE_STEP = 30;
+  let mobileVisible = MOBILE_INITIAL;
+  const isMobileLabs = () => !!(window.matchMedia && window.matchMedia('(max-width: 640px)').matches);
+
   function escapeHtml(s) {
     const d = document.createElement('div');
     d.textContent = String(s ?? '');
@@ -105,6 +112,7 @@
     if (introEl) introEl.innerHTML = TAB[tab].intro;
     if (searchEl) searchEl.placeholder = TAB[tab].placeholder;
     region = 'all';
+    mobileVisible = MOBILE_INITIAL;
     if (!datasets[tab]) {
       listEl.innerHTML = '<div class="labs-empty">불러오는 중…</div>';
       try {
@@ -137,6 +145,7 @@
     filterEl.querySelectorAll('.filter-chip').forEach((b) => {
       b.addEventListener('click', () => {
         region = b.dataset.region;
+        mobileVisible = MOBILE_INITIAL;
         filterEl.querySelectorAll('.filter-chip').forEach((c) => c.classList.toggle('active', c === b));
         apply();
       });
@@ -334,22 +343,37 @@
     }
   }
 
+  function updateMoreButton(total) {
+    const wrap = document.getElementById('labsMoreWrap');
+    const btn = document.getElementById('labsMoreBtn');
+    if (!wrap || !btn) return;
+    const shouldShow = total > mobileVisible;
+    wrap.hidden = !shouldShow;
+    if (shouldShow) btn.textContent = `더 보기 (${total - mobileVisible})`;
+  }
+
   function apply() {
     const filtered = data.filter(matches);
     if (countEl) countEl.textContent = `${filtered.length}곳`;
     updateMarkers(filtered);
     if (!filtered.length) {
       listEl.innerHTML = `<div class="labs-empty">${TAB[tab].empty}</div>`;
+      updateMoreButton(0);
       return;
     }
+    // 모바일 + 필터·검색 없을 때만 처음 일부만 렌더. 지도 마커는 전체(filtered) 유지.
+    const capped = isMobileLabs() && region === 'all' && !query;
+    const shown = capped ? filtered.slice(0, mobileVisible) : filtered;
     listEl.innerHTML = sort === 'region'
-      ? renderGrouped(filtered)
-      : sortByName(filtered).map(card).join('');
+      ? renderGrouped(shown)
+      : sortByName(shown).map(card).join('');
+    updateMoreButton(capped ? filtered.length : 0);
   }
 
   if (searchEl) {
     searchEl.addEventListener('input', () => {
       query = searchEl.value.trim().toLowerCase();
+      mobileVisible = MOBILE_INITIAL;
       apply();
     });
   }
@@ -364,6 +388,14 @@
   if (tabsEl) {
     tabsEl.querySelectorAll('.labs-tab').forEach((b) => {
       b.addEventListener('click', () => setTab(b.dataset.tab));
+    });
+  }
+
+  const moreBtn = document.getElementById('labsMoreBtn');
+  if (moreBtn) {
+    moreBtn.addEventListener('click', () => {
+      mobileVisible += MOBILE_STEP;
+      apply();
     });
   }
 
