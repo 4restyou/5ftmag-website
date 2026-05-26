@@ -45,7 +45,7 @@
   let photoFavIds  = new Set();
   let contributorFavKeys = new Set();
   // 라이브러리 카드의 "원본" 정렬 순서 (좋아요 해제 시 복귀용)
-  // 데스크탑은 sortLibrary 알파벳 순, 모바일은 첫 렌더 때 결정된 셔플 순서
+  // 데스크탑·모바일 모두 sortLibrary 알파벳(브랜드→이름 가나다·ABC) 순
   let libraryOriginalOrder = [];
 
   function hasActiveLibraryFilter() {
@@ -484,28 +484,12 @@
       const favA = filmFavSlugs.has(a[0]) ? 0 : 1;
       const favB = filmFavSlugs.has(b[0]) ? 0 : 1;
       if (favA !== favB) return favA - favB;
-      const bc = (fa.brand || '').localeCompare(fb.brand || '', 'en');
+      const bc = (fa.brand || '').localeCompare(fb.brand || '', 'ko');
       if (bc !== 0) return bc;
       const na = fa.displayName || fa.name || '';
       const nb = fb.displayName || fb.name || '';
-      return na.localeCompare(nb, 'en', { numeric: true });
+      return na.localeCompare(nb, 'ko', { numeric: true });
     });
-  }
-
-  function shuffleLibrary(entries) {
-    let t = (Date.now() ^ Math.floor(Math.random() * 0xFFFFFFFF)) >>> 0;
-    const rng = () => {
-      t = (t + 0x6D2B79F5) >>> 0;
-      let r = Math.imul(t ^ (t >>> 15), 1 | t);
-      r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
-      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-    };
-    const a = entries.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(rng() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
   }
 
   function renderFilmsGrid() {
@@ -514,8 +498,8 @@
     // 5ft Issue 섹션: editorial 강조 (사진 보기, 36 photos)
     // Library 섹션: 구독자 카탈로그 — featured 필름도 포함되어 알파벳 정렬
     //  단, Library 컨텍스트로 렌더되므로 같은 필름이라도 "0 / 36 · 자리 채우기" 표현
-    const sortedLibrary = sortLibrary(entries);
-    const libraryAll = isMobileFilms() ? shuffleLibrary(sortedLibrary) : sortedLibrary;
+    // 데스크탑·모바일 모두 브랜드(가나다·ABC) → 이름(가나다·ABC) 알파벳 순 통일.
+    const libraryAll = sortLibrary(entries);
     // 좋아요 해제 시 카드를 이 자리로 돌려보내기 위해 원본 순서 저장
     libraryOriginalOrder = libraryAll.map(([slug]) => slug);
 
