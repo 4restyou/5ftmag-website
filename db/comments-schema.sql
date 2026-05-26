@@ -125,8 +125,37 @@ DROP POLICY IF EXISTS "profiles_select" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
 CREATE POLICY "profiles_select"     ON public.profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_update_own" ON public.profiles FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "profiles_update_own" ON public.profiles FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "profiles_insert_own" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- 권한 상승 차단: 편집부가 아닌 인증 사용자는 is_editor / user_id 를 바꿀 수 없다.
+-- (service_role/대시보드 = auth.uid() NULL 경로로만 is_editor 부여)
+CREATE OR REPLACE FUNCTION public.profiles_privilege_guard()
+RETURNS TRIGGER AS $$
+DECLARE
+  is_editor_now BOOLEAN;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN NEW;
+  END IF;
+  SELECT COALESCE(is_editor, FALSE) INTO is_editor_now
+  FROM public.profiles WHERE user_id = auth.uid();
+  IF NOT COALESCE(is_editor_now, FALSE) THEN
+    IF NEW.is_editor IS DISTINCT FROM OLD.is_editor THEN
+      RAISE EXCEPTION 'is_editor 는 본인이 변경할 수 없습니다';
+    END IF;
+    IF NEW.user_id IS DISTINCT FROM OLD.user_id THEN
+      RAISE EXCEPTION 'user_id 변경 불가';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS profiles_privilege_guard ON public.profiles;
+CREATE TRIGGER profiles_privilege_guard
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.profiles_privilege_guard();
 
 -- comments: 누구나 읽기, 인증된 사용자만 작성/본인 댓글만 수정·삭제
 DROP POLICY IF EXISTS "comments_select" ON public.comments;
