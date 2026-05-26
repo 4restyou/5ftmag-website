@@ -146,14 +146,18 @@
   .articles-controls {
     padding: 14px 20px;
     gap: 10px;
+    flex-wrap: wrap;
     position: sticky;
     top: var(--header-h);
     z-index: 290;
     background: var(--bg);
   }
-  .articles-controls .search-input-wrap { flex-basis: 130px; }
+  /* 1행: 검색(가변 폭) + 기간 필터 / 2행: 카테고리 칩 (풀폭, 가로 스크롤).
+     셋을 한 줄에 두면 칩이 으스러져 깨지므로 칩만 다음 줄로 내린다. */
+  .articles-controls .search-input-wrap { flex: 1 1 auto; order: 1; }
+  .articles-controls .month-filter { order: 2; font-size: 12px; padding: 7px 26px 7px 12px; }
+  .articles-controls .filter-bar { order: 3; flex-basis: 100%; }
   .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
-  .month-filter { font-size: 12px; padding: 7px 26px 7px 12px; }
 }
 
 /* ── 검색 + 카테고리 필터 (한 줄, 필터는 가로 스크롤) ── */
