@@ -1461,14 +1461,6 @@ body.modal-open { overflow: hidden; }
 /* ════════════════════════════
    RESPONSIVE
 ════════════════════════════ */
-@media (max-width: 1100px) {
-  :root {
-    --fs-display: 32px;
-    --fs-title:   20px;
-    --fs-body:    16px;
-    --fs-nav:     15px;
-  }
-}
 @media (max-width: 900px) {
   .split-layout { grid-template-columns: 1fr; }
   .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
@@ -1499,10 +1491,6 @@ body.modal-open { overflow: hidden; }
   .cta-title { font-size: 32px; }
 }
 @media (max-width: 560px) {
-  :root {
-    --fs-display: 28px;
-    --fs-title:   18px;
-  }
   .news-card { grid-template-columns: 70px 1fr; gap: 12px; }
   .news-thumb { width: 70px; }
   .discover-grid {
