@@ -41,6 +41,9 @@
     table.labs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .labs-table th, .labs-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     .labs-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .labs-table th.th-sort { cursor: pointer; user-select: none; }
+    .labs-table th.th-sort:hover { color: var(--text); }
+    .labs-table th .sort-ind { margin-left: 4px; font-size: 10px; }
     .labs-table .col-name { font-weight: var(--fw-heading); }
     .labs-table .col-meta { font-size: 12px; color: var(--text-muted); }
     .labs-table .col-actions { text-align: right; white-space: nowrap; }
@@ -142,7 +145,7 @@
   </div>
   <table class="labs-table">
     <thead>
-      <tr><th>이름</th><th>지역</th><th>전문분야</th><th></th></tr>
+      <tr><th class="th-sort" data-sort="name">이름<span class="sort-ind"></span></th><th class="th-sort" data-sort="region">지역<span class="sort-ind"></span></th><th class="th-sort" data-sort="specialty">전문분야<span class="sort-ind"></span></th><th></th></tr>
     </thead>
     <tbody id="tbody"><tr><td colspan="4" class="empty">불러오는 중…</td></tr></tbody>
   </table>
@@ -175,7 +178,7 @@
 <script>
 'use strict';
 
-const STATE = { user: null, isEditor: false, shops: [], filter: '', editingId: null };
+const STATE = { user: null, isEditor: false, shops: [], filter: '', editingId: null, sortKey: null, sortDir: 1 };
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
@@ -249,8 +252,23 @@ function applyFilter(shops, q) {
   ));
 }
 
+function sortShops(arr) {
+  if (!STATE.sortKey) return arr;
+  const k = STATE.sortKey, dir = STATE.sortDir;
+  return arr.slice().sort((a, b) =>
+    dir * String(a[k] || '').localeCompare(String(b[k] || ''), 'ko', { numeric: true }));
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll('.labs-table thead th.th-sort').forEach(th => {
+    const ind = th.querySelector('.sort-ind');
+    if (ind) ind.textContent = STATE.sortKey === th.dataset.sort ? (STATE.sortDir > 0 ? ' ▲' : ' ▼') : '';
+  });
+}
+
 function render() {
-  const filtered = applyFilter(STATE.shops, STATE.filter);
+  updateSortIndicators();
+  const filtered = sortShops(applyFilter(STATE.shops, STATE.filter));
   $('count').textContent = `${filtered.length} / ${STATE.shops.length}`;
   if (filtered.length === 0) {
     $('tbody').innerHTML = '<tr><td colspan="4" class="empty">수리실이 없어요.</td></tr>';
@@ -279,6 +297,15 @@ function render() {
 }
 
 $('filter').addEventListener('input', (e) => { STATE.filter = e.target.value; render(); });
+
+document.querySelectorAll('.labs-table thead th.th-sort').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.dataset.sort;
+    if (STATE.sortKey === k) STATE.sortDir *= -1;
+    else { STATE.sortKey = k; STATE.sortDir = 1; }
+    render();
+  });
+});
 
 function openForm(id) {
   STATE.editingId = id || null;

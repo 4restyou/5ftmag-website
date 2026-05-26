@@ -41,6 +41,9 @@
     table.labs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .labs-table th, .labs-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     .labs-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .labs-table th.th-sort { cursor: pointer; user-select: none; }
+    .labs-table th.th-sort:hover { color: var(--text); }
+    .labs-table th .sort-ind { margin-left: 4px; font-size: 10px; }
     .labs-table .col-name { font-weight: var(--fw-heading); }
     .labs-table .col-meta { font-size: 12px; color: var(--text-muted); }
     .labs-table .col-actions { text-align: right; white-space: nowrap; }
@@ -157,7 +160,7 @@
 
   <table class="labs-table">
     <thead>
-      <tr><th>이름</th><th>지역</th><th>주소</th><th>컬러135</th><th></th></tr>
+      <tr><th class="th-sort" data-sort="name">이름<span class="sort-ind"></span></th><th class="th-sort" data-sort="region">지역<span class="sort-ind"></span></th><th class="th-sort" data-sort="address">주소<span class="sort-ind"></span></th><th>컬러135</th><th></th></tr>
     </thead>
     <tbody id="tbody">
       <tr><td colspan="5" class="empty">불러오는 중…</td></tr>
@@ -246,7 +249,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260525-authlock2"></script>
 <script src="../js/site-common.js?v=20260523-reveal"></script>
-<script src="../js/admin-labs-page.js?v=20260525-savetimeout"></script>
+<script src="../js/admin-labs-page.js?v=20260526-sort"></script>
 
 </body>
 </html>
