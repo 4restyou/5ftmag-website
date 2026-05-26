@@ -28,10 +28,6 @@
   const isMobileHome = () => window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
 
   if (storyList) {
-    function formatDateMain(dateStr) {
-      return dateStr.replace(/-/g, '.');
-    }
-
     fetch('data/stories.json')
       .then(res => res.json())
       .then(data => {
@@ -175,9 +171,6 @@
   // Photo 그리드 (통합): editorial + 독자 사진 랜덤 18장
   // ════════════════════════════
   const photoGrid = document.getElementById('photoGrid');
-  const modalOverlay = document.getElementById('modalOverlay');
-  const modalContent = document.getElementById('modalContent');
-  const modalClose = document.getElementById('modalClose');
   let filmsData = {};
 
   function normalizeFilmLabel(s) {
@@ -480,75 +473,6 @@
         photoGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">사진 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.</div>';
       });
   }
-
-  // 모달 열기
-  function openFilmModal(filmKey) {
-    const film = filmsData[filmKey];
-    if (!film) return;
-
-    let photosHTML = '';
-    film.photos.forEach(photo => {
-      const imgSrc = photo.src || `https://picsum.photos/seed/${photo.seed}/600/750`;
-      const webpSrc = photo.src ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
-      const pictureBlock = webpSrc
-        ? `<picture>
-             <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
-             <img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(photo.author || '')}" />
-           </picture>`
-        : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="" />`;
-      photosHTML += `
-        <div>
-          <div class="modal-photo">
-            ${pictureBlock}
-          </div>
-          <p class="modal-photo-caption">${escapeHtml(photo.author || '')}</p>
-        </div>
-      `;
-    });
-
-    modalContent.innerHTML = `
-      <div class="modal-header">
-        <span class="modal-brand">${escapeHtml(film.brand || '')}</span>
-        <h2 class="modal-name">${escapeHtml(film.name || '')}</h2>
-        <p class="modal-desc">${escapeHtml(film.desc || '')}</p>
-        <div class="modal-meta">
-          <span>ISO <strong>${escapeHtml(film.iso || '')}</strong></span>
-          <span>Type <strong>${escapeHtml(film.type || '')}</strong></span>
-          <span>Format <strong>${escapeHtml(film.format || '')}</strong></span>
-          <span>Photographers <strong>${escapeHtml((film.photographers || []).join(', '))}</strong></span>
-        </div>
-        <a href="films.html" class="modal-cta">필름 페이지에서 더 보기 →</a>
-      </div>
-      <span class="modal-gallery-title">Photos · ${film.photos.length}</span>
-      <div class="modal-gallery">
-        ${photosHTML}
-      </div>
-    `;
-
-    modalOverlay.classList.add('open');
-    document.body.classList.add('modal-open');
-    modalOverlay.scrollTop = 0;
-  }
-
-  // 모달 닫기
-  function closeFilmModal() {
-    if (modalOverlay) {
-      modalOverlay.classList.remove('open');
-      document.body.classList.remove('modal-open');
-    }
-  }
-
-  if (modalClose) modalClose.addEventListener('click', closeFilmModal);
-  if (modalOverlay) {
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) closeFilmModal();
-    });
-  }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('open')) {
-      closeFilmModal();
-    }
-  });
 
   // ════════════════════════════
   // 뉴스레터 구독
