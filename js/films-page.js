@@ -768,17 +768,9 @@
           return {
             image: r.image,
             author: r.author || (ig ? '@' + ig : ''),
-            submitterName: '',
             instagram: ig,
-            instagramUrl: r.instagramUrl || (ig ? `https://instagram.com/${ig.replace(/^@/, '')}` : ''),
+            instagramUrl: r.instagramUrl || (ig ? `https://instagram.com/${ig}` : ''),
             film: r.film,
-            camera: r.camera || '',
-            caption: r.caption || '',
-            createdAt: '',
-            submissionId: '',
-            published: true,
-            _static: true,
-            _source: 'submission',
           };
         });
     } catch (_) {
