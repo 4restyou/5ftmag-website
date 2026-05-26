@@ -1,6 +1,6 @@
 'use strict';
 
-const STATE = { user: null, isEditor: false, labs: [], filter: '', editingId: null };
+const STATE = { user: null, isEditor: false, labs: [], filter: '', editingId: null, sortKey: null, sortDir: 1 };
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
@@ -70,8 +70,23 @@ function applyFilter(labs, q) {
 
 function fmt(n) { return n == null ? '' : Number(n).toLocaleString('ko-KR'); }
 
+function sortLabs(arr) {
+  if (!STATE.sortKey) return arr;
+  const k = STATE.sortKey, dir = STATE.sortDir;
+  return arr.slice().sort((a, b) =>
+    dir * String(a[k] || '').localeCompare(String(b[k] || ''), 'ko', { numeric: true }));
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll('.labs-table thead th.th-sort').forEach(th => {
+    const ind = th.querySelector('.sort-ind');
+    if (ind) ind.textContent = STATE.sortKey === th.dataset.sort ? (STATE.sortDir > 0 ? ' ▲' : ' ▼') : '';
+  });
+}
+
 function render() {
-  const filtered = applyFilter(STATE.labs, STATE.filter);
+  updateSortIndicators();
+  const filtered = sortLabs(applyFilter(STATE.labs, STATE.filter));
   $('count').textContent = `${filtered.length} / ${STATE.labs.length}`;
   if (filtered.length === 0) {
     $('tbody').innerHTML = '<tr><td colspan="5" class="empty">현상소가 없어요.</td></tr>';
@@ -102,6 +117,15 @@ function render() {
 }
 
 $('filter').addEventListener('input', (e) => { STATE.filter = e.target.value; render(); });
+
+document.querySelectorAll('.labs-table thead th.th-sort').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.dataset.sort;
+    if (STATE.sortKey === k) STATE.sortDir *= -1;
+    else { STATE.sortKey = k; STATE.sortDir = 1; }
+    render();
+  });
+});
 
 // ── 가격 폼 ↔ 객체 ──
 const numOrNull = (v) => { const s = String(v ?? '').trim(); return s === '' ? null : Number(s); };
