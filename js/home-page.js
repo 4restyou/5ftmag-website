@@ -703,7 +703,7 @@
       : src;
     photoLbImg.onerror = () => { photoLbImg.onerror = null; photoLbImg.src = src; };
     photoLbImg.src = webpSrc;
-    photoLbImg.alt = p.author || '';
+    photoLbImg.alt = [p.author, p.filmName].filter(Boolean).join(' · ') || '필름 사진';
 
     photoLbAuthor.textContent = p.author || '';
     photoLbFilm.textContent = p.filmName || '';

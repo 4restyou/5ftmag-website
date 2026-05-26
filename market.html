@@ -17,7 +17,7 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260523-lhmuted">
-  <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
+  <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
   <link rel="stylesheet" href="./css/market.css?v=20260524-divider">
 </head>
 <body>
@@ -49,6 +49,8 @@
   </nav>
 </header>
 
+<h1 class="sr-only">필름 장터</h1>
+
 <div class="market-intro">
   <div class="market-intro-inner">
     <p>구독자들이 직접 매물을 올리는 <span class="accent">중고 장터</span>예요. 거래·결제는 판매자와 구매자가 직접 진행해주세요. 사기나 부적절한 매물은 매물 상세에서 <strong>신고</strong>해주시면 편집부가 검토합니다.</p>
@@ -62,7 +64,7 @@
   </div>
 </div>
 
-<section class="market-section">
+<section class="market-section" role="main" id="main">
   <div class="market-controls">
     <label class="market-search-label">
       <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
