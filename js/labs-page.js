@@ -12,6 +12,7 @@
   const searchEl = document.getElementById('labsSearch');
   const countEl = document.getElementById('labsCount');
   const tabsEl = document.querySelector('.labs-tabs');
+  const sortEl = document.getElementById('labsSort');
   const introEl = document.getElementById('labsIntro');
   if (!listEl) return;
 
@@ -44,6 +45,7 @@
   let data = [];
   let region = 'all';
   let query = '';
+  let sort = 'default'; // default = 편집부 지정순(sort_order) | name | region
 
   function escapeHtml(s) {
     const d = document.createElement('div');
@@ -151,6 +153,17 @@
       if (!hay.includes(query)) return false;
     }
     return true;
+  }
+
+  // 방문자 정렬. default 는 데이터 순서(편집부 sort_order)를 그대로 유지.
+  function sortItems(arr) {
+    const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ko');
+    if (sort === 'name') return arr.slice().sort(byName);
+    if (sort === 'region') {
+      const rank = (r) => { const i = REGION_ORDER.indexOf(r); return i === -1 ? 999 : i; };
+      return arr.slice().sort((a, b) => (rank(a.region) - rank(b.region)) || byName(a, b));
+    }
+    return arr;
   }
 
   function priceChips(p) {
@@ -311,7 +324,7 @@
   }
 
   function apply() {
-    const shown = data.filter(matches);
+    const shown = sortItems(data.filter(matches));
     if (countEl) countEl.textContent = `${shown.length}곳`;
     updateMarkers(shown);
     if (!shown.length) {
@@ -324,6 +337,13 @@
   if (searchEl) {
     searchEl.addEventListener('input', () => {
       query = searchEl.value.trim().toLowerCase();
+      apply();
+    });
+  }
+
+  if (sortEl) {
+    sortEl.addEventListener('change', () => {
+      sort = sortEl.value;
       apply();
     });
   }
