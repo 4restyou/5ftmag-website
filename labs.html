@@ -37,8 +37,10 @@
   <link rel="stylesheet" href="./css/common.css?v=20260524-skeleton">
   <link rel="stylesheet" href="./css/labs.css?v=20260524-divider">
   <style>
-    .labs-tabs { display: flex; gap: 8px; padding: 20px 40px 0; }
-    @media (max-width: 640px) { .labs-tabs { padding: 14px 20px 0; } }
+    .labs-tabs { display: flex; align-items: center; gap: 8px; padding: 20px 40px 0; }
+    .labs-sort { margin-left: auto; font: inherit; font-size: 14px; font-weight: var(--fw-heading); padding: 8px 32px 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--text); cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+    .labs-sort:hover { border-color: var(--text); }
+    @media (max-width: 640px) { .labs-tabs { padding: 14px 20px 0; } .labs-sort { font-size: 13px; padding: 7px 28px 7px 12px; } }
     .labs-tab { font: inherit; font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.01em; padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--text-muted); cursor: pointer; transition: color .15s, border-color .15s, background .15s; }
     .labs-tab:hover { color: var(--text); border-color: var(--text); }
     .labs-tab.is-active { background: var(--text); color: var(--bg); border-color: var(--text); }
@@ -91,6 +93,11 @@
 <div class="labs-tabs" role="tablist" aria-label="현상소·수리실 전환">
   <button type="button" class="labs-tab is-active" data-tab="labs" role="tab" aria-selected="true">현상소</button>
   <button type="button" class="labs-tab" data-tab="repairs" role="tab" aria-selected="false">수리실</button>
+  <select id="labsSort" class="labs-sort" aria-label="정렬 기준">
+    <option value="default">기본순</option>
+    <option value="name">가나다·ABC</option>
+    <option value="region">지역순</option>
+  </select>
 </div>
 
 <!-- ════════ 검색 + 지역 필터 (한 줄) ════════ -->
@@ -163,6 +170,6 @@
 <script src="./js/db-client.js?v=20260525-repairs"></script>
 <script src="./js/site-common.js?v=20260523-reveal"></script>
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=uu78cn9rbi&submodules=geocoder"></script>
-<script src="./js/labs-page.js?v=20260525-contact"></script>
+<script src="./js/labs-page.js?v=20260526-sort"></script>
 </body>
 </html>
