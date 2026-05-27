@@ -21,6 +21,15 @@
   color: var(--accent-text);
   padding: 0 6px;
 }
+.intro-count {
+  margin-top: 12px;
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+}
+.intro-count strong {
+  color: var(--text);
+  font-weight: var(--fw-heading);
+}
 
 /* ── 필름 그리드 ── */
 .films-section {
