@@ -676,7 +676,7 @@
     // 인트로 하단: 지금까지 모인 독자 사진 총 개수
     const introCount = document.getElementById('filmsIntroCount');
     if (introCount) {
-      introCount.innerHTML = `지금까지 독자들이 더한 사진 <strong>${submissions.length.toLocaleString('ko-KR')}</strong>장이 모여 있어요.`;
+      introCount.innerHTML = `지금까지 독자들이 더한 사진 <strong>${submissions.length.toLocaleString('ko-KR')}</strong>컷이 모여 있어요.`;
       introCount.hidden = false;
     }
 
