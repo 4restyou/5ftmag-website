@@ -306,6 +306,11 @@
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       if (openState) { closeOpen(); return; }            // 열려 있으면 ESC 와 동일하게 닫기만
       if (currentRow) nav(currentRow, e.key === 'ArrowRight' ? 1 : -1);
+    } else if (e.key === 'Enter') {
+      const ae = document.activeElement;
+      if (ae && /^(BUTTON|A|INPUT|TEXTAREA)$/.test(ae.tagName)) return;  // 포커스된 요소가 처리
+      if (openState) return;
+      if (currentRow) { e.preventDefault(); openBook(currentRow, currentRow.active); }  // 가운데 책 펼치기
     }
   });
 
