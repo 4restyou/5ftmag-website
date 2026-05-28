@@ -1,9 +1,9 @@
 'use strict';
 
-// 5ft.mag 웹진 — 분류(시즌)별로 한 줄씩 세로로 쌓고, 각 줄은 코버플로우(가운데 책이
-// 도드라지며 좌우로 미끄러짐). 책등은 제목 상단 정렬 + 하단 5ft 심볼, 종이 질감(CSS).
-// 한 권을 고르면 새 창이 아니라 "그 줄 안에서" 표지가 돌아 펼쳐지며 이웃 책을 밀어내고
-// 옆에 정보·좋아요·공유·"책 읽기"가 뜬다. 좋아요는 user_favorites(target_type 'webzine').
+// 5ft.mag 웹진 — 분류(시즌)별 한 줄(코버플로우). 책 한 권이 옆으로 회전해 책등↔표지로 돈다
+// (단일 큐보이드 + transform 전환). 고르면 그 줄 안에서 표지로 돌아서며 슬롯 폭이 늘어
+// 이웃을 밀어내고 옆에 정보가 뜬다. 스와이프하면 역회전으로 다시 책등으로 접힌다.
+// 좋아요는 user_favorites(target_type 'webzine')로 저장돼 마이페이지에 표시. 오리지널.
 (function () {
   const root = document.getElementById('wzSeasons');
   if (!root) return;
@@ -19,6 +19,7 @@
   const slotIndex = new Map();   // 전역 인덱스 i -> { rs, pos }
   let favSet = new Set();
   let openState = null;          // { rs, pos, i }
+  let followId = null, followFlow = null;
 
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
@@ -78,8 +79,12 @@
     });
   }
 
-  function spineBook(it, c) {
-    return `<div class="wz-cuboid wz-spinebook" style="--spine:${c.spine};--spine-text:${c.text}">
+  function bookMarkup(it, c) {
+    const cover = it.cover_path
+      ? `<img src="${esc(coverUrl(it))}" alt="" loading="lazy" />`
+      : `<span class="wz-f-text">${esc(it.title)}</span>`;
+    return `<div class="wz-book3d" style="--spine:${c.spine};--spine-text:${c.text}">
+      <div class="f-front">${cover}</div>
       <div class="f-spine">
         <span class="wz-spine-head">
           <span class="wz-spine-title">${esc(it.title)}</span>
@@ -87,19 +92,6 @@
         </span>
         <span class="wz-spine-mark" aria-hidden="true"></span>
       </div>
-      <div class="f-cover"></div>
-      <div class="f-top wz-pages"></div>
-    </div>`;
-  }
-  function spineBtn(it, c) {
-    return `<button type="button" class="wz-spine-btn" aria-label="${esc(it.title)} 보기">${spineBook(it, c)}</button>`;
-  }
-  function coverBook(it, c) {
-    const front = it.cover_path
-      ? `<img src="${esc(coverUrl(it))}" alt="${esc(it.title)} 표지" />`
-      : `<span class="wz-f-text">${esc(it.title)}</span>`;
-    return `<div class="wz-cuboid wz-coverbook" style="--spine:${c.spine}">
-      <div class="f-front">${front}</div>
       <div class="f-edge wz-pages"></div>
       <div class="f-top wz-pages"></div>
     </div>`;
@@ -107,13 +99,14 @@
   function infoHtml(it) {
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
     const fav = favSet.has(it.id);
-    return `${it.issue_label ? `<span class="wz-meta-issue">${esc(it.issue_label)}</span>` : ''}
+    return `<button type="button" class="wz-close" aria-label="닫기">✕</button>
+      ${it.issue_label ? `<span class="wz-meta-issue">${esc(it.issue_label)}</span>` : ''}
       <h2 class="wz-meta-title">${esc(it.title)}</h2>
       ${it.description ? `<p class="wz-meta-desc">${esc(it.description)}</p>` : ''}
       ${read ? `<a class="wz-meta-read" href="${read}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}
       <div class="wz-open-actions">
-        <button type="button" class="wz-act wz-like${fav ? ' is-on' : ''}" data-act="like" aria-pressed="${fav}">${fav ? '♥' : '♡'} <span>좋아요</span></button>
-        <button type="button" class="wz-act wz-share" data-act="share">↗ <span>공유</span></button>
+        <button type="button" class="wz-act wz-like${fav ? ' is-on' : ''}" aria-pressed="${fav}">${fav ? '♥' : '♡'} <span>좋아요</span></button>
+        <button type="button" class="wz-act wz-share">↗ <span>공유</span></button>
       </div>`;
   }
 
@@ -132,8 +125,7 @@
     rs.trackEl.style.transform = `translateX(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px)`;
     rs.slots.forEach((slot, pos) => {
       const d = pos - rs.active, ad = Math.abs(d);
-      const book = slot.querySelector('.wz-spinebook');
-      if (book) book.style.transform = `scale(${d === 0 ? 1.12 : 0.86})`;
+      slot.classList.toggle('is-center', d === 0);
       slot.style.opacity = String(slot.classList.contains('is-open') ? 1 : Math.max(0, 1 - ad * 0.16));
       slot.style.pointerEvents = (ad > 6 && !slot.classList.contains('is-open')) ? 'none' : 'auto';
     });
@@ -141,55 +133,52 @@
     if (prev) prev.disabled = rs.active <= 0;
     if (next) next.disabled = rs.active >= rs.slots.length - 1;
   }
-  function nav(rs, d) {
-    const n = rs.active + d;
-    if (n < 0 || n >= rs.slots.length || n === rs.active) return;
-    closeOpen();
-    rs.active = n; layout(rs);
+  // 슬롯 폭이 전환되는 동안(열림/접힘) 매 프레임 중앙을 다시 맞춰 트랙이 따라가게 한다.
+  function follow(rs) {
+    if (followId) cancelAnimationFrame(followId);
+    if (followFlow && followFlow !== rs.flowEl) followFlow.classList.remove('following');
+    followFlow = rs.flowEl;
+    rs.flowEl.classList.add('following');
+    const t0 = performance.now();
+    const step = (t) => {
+      layout(rs);
+      if (t - t0 < 720) { followId = requestAnimationFrame(step); }
+      else { rs.flowEl.classList.remove('following'); followId = null; followFlow = null; layout(rs); }
+    };
+    followId = requestAnimationFrame(step);
   }
 
-  function onSpine(rs, pos) {
+  function onBook(rs, pos) {
+    const slot = rs.slots[pos];
+    if (slot.classList.contains('is-open')) { closeOpen(); return; }
     if (pos === rs.active && !openState) { openBook(rs, pos); return; }
-    closeOpen();
-    rs.active = pos; layout(rs);
-  }
-
-  function openBook(rs, pos) {
-    closeOpen();
-    const slot = rs.slots[pos]; const i = Number(slot.dataset.i);
-    const it = issues[i], c = palette[i]; if (!it) return;
-    slot.classList.add('is-open');
-    slot.innerHTML = `
-      <div class="wz-open-inline" style="--wz-glow:${c.spine}">
-        <button type="button" class="wz-cover-btn" aria-label="닫기">${coverBook(it, c)}</button>
-        <div class="wz-flow-info">${infoHtml(it)}</div>
-        <button type="button" class="wz-close" aria-label="닫기">✕</button>
-      </div>`;
-    slot.querySelector('.wz-cover-btn').addEventListener('click', closeOpen);
-    slot.querySelector('.wz-close').addEventListener('click', closeOpen);
-    const read = slot.querySelector('.wz-meta-read');
-    if (read) read.addEventListener('click', (e) => {
-      if (!window.WebzineReader) return;
-      e.preventDefault();
-      window.WebzineReader.open(read.href, it.title);
-    });
-    const likeBtn = slot.querySelector('.wz-like');
-    if (likeBtn) likeBtn.addEventListener('click', () => toggleLike(it, likeBtn));
-    const shareBtn = slot.querySelector('.wz-share');
-    if (shareBtn) shareBtn.addEventListener('click', () => share(it));
-    openState = { rs, pos, i };
+    const wasOpen = !!openState;
+    if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
     rs.active = pos;
-    layout(rs);
+    if (wasOpen) follow(rs); else layout(rs);
+  }
+  function openBook(rs, pos) {
+    if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
+    const slot = rs.slots[pos];
+    slot.classList.add('is-open');
+    rs.active = pos;
+    openState = { rs, pos, i: Number(slot.dataset.i) };
+    follow(rs);
   }
   function closeOpen() {
     if (!openState) return;
-    const { rs, pos, i } = openState;
-    const slot = rs.slots[pos];
-    slot.classList.remove('is-open');
-    slot.innerHTML = spineBtn(issues[i], palette[i]);
-    slot.querySelector('.wz-spine-btn').addEventListener('click', () => onSpine(rs, pos));
+    const { rs, pos } = openState;
+    rs.slots[pos].classList.remove('is-open');
     openState = null;
-    layout(rs);
+    follow(rs);
+  }
+  function nav(rs, d) {
+    const n = rs.active + d;
+    if (n < 0 || n >= rs.slots.length || n === rs.active) return;
+    const wasOpen = !!openState;
+    if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
+    rs.active = n;
+    if (wasOpen) follow(rs); else layout(rs);
   }
 
   function setLikeBtn(btn, on) {
@@ -223,7 +212,11 @@
         <div class="wz-flow no-anim">
           <button type="button" class="wz-nav wz-prev" aria-label="이전">‹</button>
           <div class="wz-track">
-            ${g.idxs.map((i, pos) => `<div class="wz-slot" data-i="${i}" data-pos="${pos}">${spineBtn(issues[i], palette[i])}</div>`).join('')}
+            ${g.idxs.map((i, pos) => `
+              <div class="wz-slot" data-i="${i}" data-pos="${pos}">
+                <button type="button" class="wz-book-btn" aria-label="${esc(issues[i].title)} 보기">${bookMarkup(issues[i], palette[i])}</button>
+                <div class="wz-info">${infoHtml(issues[i])}</div>
+              </div>`).join('')}
           </div>
           <button type="button" class="wz-nav wz-next" aria-label="다음">›</button>
         </div>
@@ -234,8 +227,16 @@
       const rs = { flowEl, trackEl: flowEl.querySelector('.wz-track'), slots: Array.from(flowEl.querySelectorAll('.wz-slot')), active: 0 };
       rows.push(rs);
       rs.slots.forEach((slot, pos) => {
+        const it = issues[Number(slot.dataset.i)];
         slotIndex.set(Number(slot.dataset.i), { rs, pos });
-        slot.querySelector('.wz-spine-btn').addEventListener('click', () => onSpine(rs, pos));
+        slot.querySelector('.wz-book-btn').addEventListener('click', () => onBook(rs, pos));
+        slot.querySelector('.wz-close').addEventListener('click', (e) => { e.stopPropagation(); closeOpen(); });
+        const read = slot.querySelector('.wz-meta-read');
+        if (read) read.addEventListener('click', (e) => { e.stopPropagation(); if (!window.WebzineReader) return; e.preventDefault(); window.WebzineReader.open(read.href, it.title); });
+        const likeBtn = slot.querySelector('.wz-like');
+        if (likeBtn) likeBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleLike(it, likeBtn); });
+        const shareBtn = slot.querySelector('.wz-share');
+        if (shareBtn) shareBtn.addEventListener('click', (e) => { e.stopPropagation(); share(it); });
       });
       flowEl.querySelector('.wz-prev').addEventListener('click', () => nav(rs, -1));
       flowEl.querySelector('.wz-next').addEventListener('click', () => nav(rs, 1));
@@ -275,6 +276,10 @@
     render();
 
     try { favSet = await db().favorites.idsForType('webzine'); } catch (_) { favSet = new Set(); }
+    root.querySelectorAll('.wz-slot').forEach(slot => {
+      const b = slot.querySelector('.wz-like');
+      if (b) setLikeBtn(b, favSet.has(issues[Number(slot.dataset.i)].id));
+    });
 
     const slug = new URLSearchParams(location.search).get('issue');
     if (slug) { const i = issues.findIndex(x => x.slug === slug); const ref = slotIndex.get(i); if (ref) openBook(ref.rs, ref.pos); }
@@ -284,14 +289,8 @@
       pickColor(coverUrl(it)).then(c => {
         if (!c) return;
         palette[i] = c;
-        const sb = root.querySelector(`.wz-slot[data-i="${i}"] .wz-spinebook`);
-        if (sb) { sb.style.setProperty('--spine', c.spine); sb.style.setProperty('--spine-text', c.text); }
-        if (openState && openState.i === i) {
-          const inl = openState.rs.slots[openState.pos].querySelector('.wz-open-inline');
-          if (inl) inl.style.setProperty('--wz-glow', c.spine);
-          const cb = openState.rs.slots[openState.pos].querySelector('.wz-coverbook');
-          if (cb) cb.style.setProperty('--spine', c.spine);
-        }
+        const b3 = root.querySelector(`.wz-slot[data-i="${i}"] .wz-book3d`);
+        if (b3) { b3.style.setProperty('--spine', c.spine); b3.style.setProperty('--spine-text', c.text); }
       });
     });
   })();
