@@ -34,7 +34,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 
 /* 슬롯: 닫힘=책등폭, 열림=표지+정보폭. 폭이 전환되며 이웃을 부드럽게 밀어낸다 */
 .wz-slot {
-  --st: clamp(46px, 4.8vw, 64px); --cw2: clamp(150px, 17vw, 210px); --h: min(46vh, 380px);
+  --st: clamp(46px, 4.8vw, 64px); --cw2: clamp(150px, 17vw, 210px); --h: min(360px, calc(100vh - 290px));
   --infow: min(40vw, 320px); --infogap: clamp(20px, 3vw, 44px);
   position: relative; flex: 0 0 auto; width: var(--st); height: var(--h);
   transition: width .6s var(--wz-ease), opacity .45s;
@@ -133,7 +133,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   .wz-intro { padding: 28px 20px 0; }
   .wz-nav { display: none; }
   .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
-  .wz-slot { --st: clamp(38px, 11vw, 58px); --cw2: clamp(120px, 34vw, 160px); --h: min(40vh, 320px); --infow: 46vw; --infogap: clamp(14px, 4vw, 24px); }
+  .wz-slot { --st: clamp(38px, 11vw, 58px); --cw2: clamp(120px, 34vw, 160px); --h: min(300px, calc(100vh - 230px)); --infow: 46vw; --infogap: clamp(14px, 4vw, 24px); }
   .wz-spine-title { font-size: clamp(11px, 2.8vw, 14px); }
   .wz-meta-title { font-size: 22px; }
   .wz-meta-desc { max-height: 7em; }

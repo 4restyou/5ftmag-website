@@ -166,6 +166,7 @@
     rs.active = pos;
     openState = { rs, pos, i: Number(slot.dataset.i) };
     follow(rs);
+    requestAnimationFrame(() => slot.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' }));
   }
   function closeOpen() {
     if (!openState) return;
@@ -291,8 +292,8 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { if (openState) closeOpen(); return; }
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-      const rs = (openState && openState.rs) || currentRow;
-      if (rs) nav(rs, e.key === 'ArrowRight' ? 1 : -1);   // 열려 있으면 접고 넘김
+      if (openState) { closeOpen(); return; }            // 열려 있으면 ESC 와 동일하게 닫기만
+      if (currentRow) nav(currentRow, e.key === 'ArrowRight' ? 1 : -1);
     }
   });
 
