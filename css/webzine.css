@@ -119,6 +119,19 @@
   .wz-coverbook { animation: none; transform: rotateY(-8deg) rotateX(3deg); }
   .wz-flow-info { animation: none; }
 }
+/* ── 책 읽기(flipbook 리더) ── */
+.wz-reader { position: fixed; inset: 0; z-index: 1300; background: #0b0a0d; display: flex; flex-direction: column; }
+.wz-reader-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 18px; border-bottom: 1px solid rgba(255, 255, 255, .08); color: #fff; }
+.wz-reader-title { font-size: 14px; font-weight: var(--fw-heading); opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wz-reader-tools { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.wz-reader-pageno { font-size: 12px; opacity: .7; min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+.wz-reader-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .06); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+.wz-reader-btn:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .5); }
+.wz-reader-stage { position: relative; flex: 1 1 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 16px; }
+.wz-reader-loading, .wz-reader-error { position: absolute; color: rgba(255, 255, 255, .72); font-size: 14px; text-align: center; }
+.wz-reader-error a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.wz-reader-book { filter: drop-shadow(0 30px 60px rgba(0, 0, 0, .6)); }
+
 @media (max-width: 1100px) { .wz-peek { display: none; } }
 @media (max-width: 760px) {
   .wz-intro { padding: 30px 20px 0; }
