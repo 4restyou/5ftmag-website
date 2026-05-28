@@ -11,6 +11,7 @@ const STATE = {
   // favorites
   favPhotos: null,       // null = 미로딩, [] = 비어있음
   favFilms:  null,
+  favWebzine: null,
   favArticles: null,
   favContributors: null,
   filmsData: null,       // films.json 캐시 (좋아한 필름 렌더용)
@@ -347,11 +348,13 @@ function switchSection(sec) {
   $('section-market').hidden           = sec !== 'market';
   $('section-fav-photos').hidden       = sec !== 'fav-photos';
   $('section-fav-films').hidden        = sec !== 'fav-films';
+  $('section-fav-webzine').hidden      = sec !== 'fav-webzine';
   $('section-fav-contributors').hidden = sec !== 'fav-contributors';
   $('section-fav-articles').hidden     = sec !== 'fav-articles';
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
   if (sec === 'fav-photos'        && STATE.favPhotos        === null) loadFavPhotos();
   if (sec === 'fav-films'         && STATE.favFilms         === null) loadFavFilms();
+  if (sec === 'fav-webzine'       && STATE.favWebzine       === null) loadFavWebzine();
   if (sec === 'fav-contributors'  && STATE.favContributors  === null) loadFavContributors();
   if (sec === 'fav-articles'      && STATE.favArticles      === null) loadFavArticles();
   // URL hash 동기화
@@ -486,6 +489,58 @@ function renderFavFilms() {
       if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
       STATE.favFilms = STATE.favFilms.filter(x => x.slug !== slug);
       renderFavFilms();
+    });
+  });
+}
+
+// ═════════════════════════════════════════
+// 좋아한 웹진 (webzine_issues 중 본인이 ♡ 한 것)
+// ═════════════════════════════════════════
+async function loadFavWebzine() {
+  $('favWebzineGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  const favs = await db().favorites.list('webzine');
+  if (favs.length === 0) {
+    STATE.favWebzine = [];
+    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 웹진이 없어요.<br /><a class="me-empty-cta" href="webzine.html">웹진 보러 가기 →</a></div>`;
+    return;
+  }
+  let list = [];
+  try { list = await db().webzine.listPublished(); } catch (_) { list = []; }
+  const byId = new Map(list.map(it => [it.id, it]));
+  STATE.favWebzine = favs.map(f => byId.get(f.target_id)).filter(Boolean);
+  renderFavWebzine();
+}
+
+function renderFavWebzine() {
+  const items = STATE.favWebzine || [];
+  if (items.length === 0) {
+    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 웹진이 없어요.<br /><a class="me-empty-cta" href="webzine.html">웹진 보러 가기 →</a></div>`;
+    return;
+  }
+  $('favWebzineGrid').innerHTML = items.map(it => {
+    const cover = it.cover_path ? db().webzine.publicUrl(it.cover_path) : '';
+    const thumb = cover
+      ? `<img src="${escapeAttr(cover)}" alt="${escapeAttr(it.title || '')}" loading="lazy" />`
+      : `<span style="color:var(--text-muted); font-size:12px;">${escapeHtml(it.title || '')}</span>`;
+    return `
+      <div class="me-fav-film-card" data-id="${escapeAttr(it.id)}">
+        <button type="button" class="me-fav-unbtn" data-action="unfav-webzine" data-id="${escapeAttr(it.id)}" aria-label="좋아요 해제" title="좋아요 해제">♥</button>
+        <a href="webzine.html?issue=${encodeURIComponent(it.slug)}">
+          <div class="me-fav-film-img">${thumb}</div>
+          <span class="me-fav-film-brand">${escapeHtml(it.issue_label || it.category || '')}</span>
+          <p class="me-fav-film-spec">${escapeHtml(it.title || '')}</p>
+        </a>
+      </div>`;
+  }).join('');
+  $('favWebzineGrid').querySelectorAll('[data-action="unfav-webzine"]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const { error } = await db().favorites.remove('webzine', id);
+      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
+      STATE.favWebzine = STATE.favWebzine.filter(x => x.id !== id);
+      renderFavWebzine();
     });
   });
 }

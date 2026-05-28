@@ -3,6 +3,11 @@
    돌아 펼쳐지고(카드 없이) 옆에 정보·책 읽기가 뜬다. 오리지널 구현. */
 /* 웹진은 다크 톤 고정(data-theme=dark) — 테마 토글 숨김 */
 #themeBtn { display: none; }
+/* 종이/천 결 질감(에셋 없이 SVG 노이즈) + 5ft 심볼 마스크 */
+.wz-stage, .wz-open {
+  --wz-mark: url("./img/symbol-w.svg");
+  --wz-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
 .wz-stage {
   min-height: calc(100vh - var(--header-h, 72px));
   background:
@@ -40,17 +45,22 @@
 }
 .wz-spinebook .f-spine {
   width: var(--t); height: var(--h); transform: translateZ(calc(var(--cw) / 2));
-  background:
-    linear-gradient(100deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 26%, rgba(0, 0, 0, .12) 92%),
-    var(--spine);
+  background-image:
+    var(--wz-grain),
+    linear-gradient(100deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 26%, rgba(0, 0, 0, .12) 92%);
+  background-color: var(--spine);
+  background-size: 150px 150px, auto;
+  background-blend-mode: soft-light, normal;
   color: var(--spine-text);
   box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, .6), inset 7px 0 12px -8px rgba(255, 255, 255, .3);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 26px 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 14px; padding: 24px 0 20px;
 }
-.wz-spinebook .f-cover { width: var(--cw); height: var(--h); transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); background: color-mix(in srgb, var(--spine) 58%, #000); }
+.wz-spinebook .f-cover { width: var(--cw); height: var(--h); transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); background-color: color-mix(in srgb, var(--spine) 58%, #000); background-image: var(--wz-grain); background-size: 150px 150px; background-blend-mode: soft-light; }
 .wz-spinebook .f-top { width: var(--t); height: var(--cw); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
-.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(14px, 1.1vw, 18px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: 76%; overflow: hidden; }
+.wz-spine-head { display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 0; }
+.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(14px, 1.1vw, 18px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: calc(var(--h) * 0.6); overflow: hidden; }
 .wz-spine-issue { writing-mode: vertical-rl; font-size: 11px; letter-spacing: 0.16em; opacity: .58; }
+.wz-spine-mark { flex: 0 0 auto; width: clamp(18px, 2.2vw, 26px); height: clamp(18px, 2.2vw, 26px); background: var(--spine-text); opacity: .82; -webkit-mask: var(--wz-mark) center / contain no-repeat; mask: var(--wz-mark) center / contain no-repeat; }
 
 .wz-nav {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 4;
@@ -82,6 +92,7 @@
 }
 .wz-coverbook .f-front { width: var(--cw); height: var(--h); transform: translateZ(calc(var(--t) / 2)); background: var(--spine); }
 .wz-coverbook .f-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wz-coverbook .f-front::after { content: ""; position: absolute; inset: 0; background: var(--wz-grain); background-size: 160px 160px; mix-blend-mode: overlay; opacity: .28; pointer-events: none; }
 .wz-coverbook .f-front .wz-f-text { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 16px; color: #fff; font-weight: var(--fw-heading); text-align: center; }
 .wz-coverbook .f-edge { width: var(--t); height: var(--h); transform: rotateY(90deg) translateZ(calc(var(--cw) / 2)); --pg-dir: to bottom; }
 .wz-coverbook .f-top { width: var(--cw); height: var(--t); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
@@ -94,6 +105,10 @@
 .wz-meta-read { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 26px; padding: 13px 26px; border-radius: var(--btn-radius); background: #fff; color: #111; font-size: 14px; font-weight: var(--fw-heading); letter-spacing: 0.02em; text-decoration: none; transition: opacity .15s; }
 .wz-meta-desc + .wz-meta-read { margin-top: 0; }
 .wz-meta-read:hover { opacity: .85; }
+.wz-open-actions { display: flex; gap: 10px; margin-top: 16px; }
+.wz-act { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--btn-radius); border: 1px solid rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .06); color: #fff; font-size: 13px; font-weight: var(--fw-heading); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.wz-act:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .55); }
+.wz-act.is-on { background: #fff; color: #111; border-color: #fff; }
 @keyframes wz-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 .wz-open-back {
@@ -136,6 +151,7 @@
   .wz-coverbook { --cw: 230px; --h: 345px; --t: 40px; }
   .wz-flow-info { text-align: center; }
   .wz-meta-title { font-size: 26px; }
+  .wz-open-actions { justify-content: center; }
 }
 @media (max-width: 600px) {
   .wz-reader-title { display: none; }

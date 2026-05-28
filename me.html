@@ -62,6 +62,7 @@
     <button type="button" class="me-pagetab" data-section="market">매물</button>
     <button type="button" class="me-pagetab" data-section="fav-photos">좋아한 사진</button>
     <button type="button" class="me-pagetab" data-section="fav-films">좋아한 필름</button>
+    <button type="button" class="me-pagetab" data-section="fav-webzine">좋아한 웹진</button>
     <button type="button" class="me-pagetab" data-section="fav-contributors">좋아한 작가</button>
     <button type="button" class="me-pagetab" data-section="fav-articles">스크랩한 글</button>
   </div>
@@ -103,6 +104,13 @@
     </div>
   </section>
 
+  <!-- ─── 좋아한 웹진 섹션 ─── -->
+  <section id="section-fav-webzine" hidden>
+    <div class="me-fav-films-grid" id="favWebzineGrid">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
+
   <!-- ─── 좋아한 작가 섹션 ─── -->
   <section id="section-fav-contributors" hidden>
     <div class="me-fav-contributors-grid" id="favContributorsGrid">
@@ -123,7 +131,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260528-webzine"></script>
 <script src="./js/site-common.js?v=20260526-iaberr"></script>
-<script src="./js/me-page.js?v=20260523-priceformat"></script>
+<script src="./js/me-page.js?v=20260528-favwebzine"></script>
 
 </body>
 </html>
