@@ -1,12 +1,12 @@
 'use strict';
 
-// 5ft.mag 웹진 — 어두운 갤러리에 책등이 한 줄로 서고, 좌우로 부드럽게 미끄러진다
-// (스와이프·휠·화살표·좌우키). 트랙은 한 번만 그리고 transform 으로 이동해 끊김이 없다.
-// 가운데 책을 고르면 같은 무대에서 표지가 돌아 펼쳐지고(카드 없이), 옆에 호라벨·제목·
-// 소개·"책 읽기"(PDF flipbook)가 뜬다. 색은 표지 대표색(채도 가중 + HSL 보정).
+// 5ft.mag 웹진 — 분류(시즌)별로 한 줄(가로 책장)씩 세로로 쌓아 보여준다. 같은 분류의
+// 호들이 한 줄에 모이고, 줄 위에 분류명이 제목으로 붙는다. 좌우로 넘겨 책등을 훑고,
+// 한 권을 고르면 같은 색의 무대에서 표지가 돌아 펼쳐지며 정보·"책 읽기"(PDF flipbook)가
+// 뜬다. 책등 색은 표지 대표색(채도 가중 평균 + HSL 보정)에 맞춘다. 오리지널 구현.
 (function () {
-  const flow = document.getElementById('wzFlow');
-  if (!flow) return;
+  const root = document.getElementById('wzSeasons');
+  if (!root) return;
 
   function db() { return window.MagDB; }
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -15,8 +15,7 @@
 
   let issues = [];
   const palette = [];
-  let active = 0, opened = false;
-  let track = null, slots = [];
+  let openEl = null, opened = false, openIdx = -1;
 
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
@@ -104,98 +103,77 @@
       ${read ? `<a class="wz-meta-read" href="${read}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}`;
   }
 
-  // 트랙(책등 줄)과 펼침 오버레이를 한 번만 만든다. 이후 이동은 transform 만 바꾼다.
-  function render() {
-    if (!issues.length) { flow.innerHTML = '<p class="wz-empty">아직 발행된 웹진이 없어요.</p>'; return; }
-    flow.classList.add('no-anim');
-    flow.innerHTML = `
-      <button type="button" class="wz-nav wz-prev" aria-label="이전 호">‹</button>
-      <div class="wz-track" id="wzTrack">
-        ${issues.map((it, i) => `<button type="button" class="wz-slot" data-i="${i}" aria-label="${esc(it.title)} 보기">${spineBook(it, palette[i])}</button>`).join('')}
-      </div>
-      <button type="button" class="wz-nav wz-next" aria-label="다음 호">›</button>
-      <div class="wz-open" id="wzOpen" aria-hidden="true">
-        <button type="button" class="wz-open-back" id="wzOpenBack">← 목록으로</button>
-        <div class="wz-open-grid">
-          <button type="button" class="wz-open-cover" id="wzOpenCover" aria-label="목록으로"></button>
-          <div class="wz-flow-info" id="wzOpenInfo"></div>
-        </div>
-      </div>`;
-    track = document.getElementById('wzTrack');
-    slots = Array.from(track.querySelectorAll('.wz-slot'));
-    slots.forEach((s, i) => s.addEventListener('click', () => onSlot(i)));
-    flow.querySelector('.wz-prev').addEventListener('click', () => nav(-1));
-    flow.querySelector('.wz-next').addEventListener('click', () => nav(1));
-    document.getElementById('wzOpenBack').addEventListener('click', closeBook);
-    document.getElementById('wzOpenCover').addEventListener('click', closeBook);
-
-    flow.addEventListener('wheel', (e) => {
-      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (Math.abs(d) < 6) return;
-      e.preventDefault();
-      nav(d > 0 ? 1 : -1);
-    }, { passive: false });
-    let tx = null;
-    flow.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
-    flow.addEventListener('touchend', (e) => {
-      if (tx == null) return;
-      const dx = e.changedTouches[0].clientX - tx; tx = null;
-      if (Math.abs(dx) > 40) nav(dx < 0 ? 1 : -1);
-    }, { passive: true });
-
-    layout();
-    requestAnimationFrame(() => flow.classList.remove('no-anim'));
-  }
-
-  function layout() {
-    if (!track || !slots.length) return;
-    const s = slots[active];
-    track.style.transform = `translateX(${flow.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px)`;
-    slots.forEach((slot, i) => {
-      const d = i - active, ad = Math.abs(d);
-      const book = slot.querySelector('.wz-spinebook');
-      if (book) book.style.transform = `scale(${d === 0 ? 1.14 : 0.86})`;
-      slot.style.opacity = String(Math.max(0, 1 - ad * 0.16));   // 멀수록 흐려지며 ~6권 옆까지 보임
-      slot.style.pointerEvents = ad > 6 ? 'none' : 'auto';
+  // 분류(시즌)별로 묶되, 목록 정렬(sort_order)대로 처음 나온 분류부터 위에서 아래로.
+  function groupByCategory() {
+    const order = [], map = new Map();
+    issues.forEach((it, i) => {
+      const key = (it.category && it.category.trim()) || '';
+      if (!map.has(key)) { map.set(key, []); order.push(key); }
+      map.get(key).push(i);
     });
-    flow.style.setProperty('--wz-glow', palette[active].spine);
-    const prev = flow.querySelector('.wz-prev'), next = flow.querySelector('.wz-next');
-    if (prev) prev.disabled = active <= 0;
-    if (next) next.disabled = active >= issues.length - 1;
+    return order.map(name => ({ name, idxs: map.get(name) }));
   }
 
-  function fillOpen() {
-    const it = issues[active], c = palette[active];
-    document.getElementById('wzOpenCover').innerHTML = coverBook(it, c);
-    document.getElementById('wzOpenInfo').innerHTML = infoHtml(it);
-    const read = document.querySelector('#wzOpenInfo .wz-meta-read');
+  function render() {
+    if (!issues.length) { root.innerHTML = '<p class="wz-empty">아직 발행된 웹진이 없어요.</p>'; return; }
+    root.innerHTML = groupByCategory().map(g => `
+      <section class="wz-shelf">
+        ${g.name ? `<h2 class="wz-shelf-title">${esc(g.name)}</h2>` : ''}
+        <div class="wz-rail-wrap">
+          <button type="button" class="wz-nav wz-prev" aria-label="왼쪽으로">‹</button>
+          <div class="wz-rail">
+            ${g.idxs.map(i => `<button type="button" class="wz-slot" data-i="${i}" aria-label="${esc(issues[i].title)} 보기">${spineBook(issues[i], palette[i])}</button>`).join('')}
+          </div>
+          <button type="button" class="wz-nav wz-next" aria-label="오른쪽으로">›</button>
+        </div>
+      </section>`).join('');
+    root.querySelectorAll('.wz-slot').forEach(b => b.addEventListener('click', () => openBook(Number(b.dataset.i))));
+    root.querySelectorAll('.wz-rail-wrap').forEach(wrap => {
+      const rail = wrap.querySelector('.wz-rail');
+      wrap.querySelector('.wz-prev').addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * 0.8, behavior: 'smooth' }));
+      wrap.querySelector('.wz-next').addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * 0.8, behavior: 'smooth' }));
+    });
+  }
+
+  function ensureOpen() {
+    if (openEl) return;
+    openEl = document.createElement('div');
+    openEl.className = 'wz-open';
+    openEl.innerHTML = `
+      <button type="button" class="wz-open-back" aria-label="목록으로">← 목록으로</button>
+      <div class="wz-open-grid">
+        <button type="button" class="wz-open-cover" aria-label="닫기"></button>
+        <div class="wz-flow-info"></div>
+      </div>`;
+    document.body.appendChild(openEl);
+    openEl.querySelector('.wz-open-back').addEventListener('click', closeBook);
+    openEl.querySelector('.wz-open-cover').addEventListener('click', closeBook);
+    openEl.addEventListener('click', (e) => { if (e.target === openEl) closeBook(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && opened) closeBook(); });
+  }
+
+  function openBook(i) {
+    const it = issues[i], c = palette[i]; if (!it) return;
+    ensureOpen();
+    openIdx = i;
+    openEl.style.setProperty('--wz-glow', c.spine);
+    openEl.querySelector('.wz-open-cover').innerHTML = coverBook(it, c);
+    openEl.querySelector('.wz-flow-info').innerHTML = infoHtml(it);
+    const read = openEl.querySelector('.wz-meta-read');
     if (read) read.addEventListener('click', (e) => {
       if (!window.WebzineReader) return;
       e.preventDefault();
       window.WebzineReader.open(read.href, it.title);
     });
+    opened = true;
+    openEl.classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
-
-  function nav(d) {
-    const n = active + d;
-    if (n < 0 || n >= issues.length || n === active) return;
-    active = n;
-    if (opened) fillOpen();
-    layout();
+  function closeBook() {
+    opened = false; openIdx = -1;
+    if (openEl) openEl.classList.remove('open');
+    document.body.style.overflow = '';
   }
-  function onSlot(i) {
-    if (i === active) openBook();
-    else { active = i; layout(); }
-  }
-  function openBook() { opened = true; fillOpen(); flow.classList.add('is-open'); }
-  function closeBook() { opened = false; flow.classList.remove('is-open'); }
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && opened) closeBook();
-    else if (e.key === 'ArrowRight') nav(1);
-    else if (e.key === 'ArrowLeft') nav(-1);
-  });
-  window.addEventListener('resize', () => { const p = flow.classList.contains('no-anim'); flow.classList.add('no-anim'); layout(); if (!p) requestAnimationFrame(() => flow.classList.remove('no-anim')); });
 
   (async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
@@ -209,9 +187,13 @@
       pickColor(coverUrl(it)).then(c => {
         if (!c) return;
         palette[i] = c;
-        const sb = slots[i] && slots[i].querySelector('.wz-spinebook');
+        const sb = root.querySelector(`.wz-slot[data-i="${i}"] .wz-spinebook`);
         if (sb) { sb.style.setProperty('--spine', c.spine); sb.style.setProperty('--spine-text', c.text); }
-        if (i === active) { flow.style.setProperty('--wz-glow', c.spine); if (opened) fillOpen(); }
+        if (opened && openIdx === i && openEl) {
+          openEl.style.setProperty('--wz-glow', c.spine);
+          const cb = openEl.querySelector('.wz-coverbook');
+          if (cb) cb.style.setProperty('--spine', c.spine);
+        }
       });
     });
   })();
