@@ -720,17 +720,24 @@
 }
 .lightbox-note-wrap {
   display: block;
+  width: 100%;
   margin-top: 8px;
+  text-align: center;
 }
 .lightbox-note {
-  display: inline-block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   max-width: min(620px, calc(100vw - 72px));
+  margin: 0 auto;
   color: rgba(255, 255, 255, 0.88);
   font-size: 14px;
   line-height: 1.55;
   letter-spacing: var(--ls-default);
   word-break: keep-all;
   overflow-wrap: anywhere;
+  text-align: center;
 }
 .lightbox-counter {
   flex: 0 0 auto;
