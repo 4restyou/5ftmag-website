@@ -24,7 +24,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-empty { text-align: center; color: rgba(255, 255, 255, .5); padding: 80px 24px; }
 
 /* ── 시즌(분류)별 책장 ── */
-.wz-seasons { padding: 8px 0 72px; }
+.wz-seasons { padding: 8px 0 72px; overflow-x: clip; }
 .wz-shelf { padding: 8px 0 2px; }
 .wz-shelf-title { font-size: clamp(17px, 1.7vw, 23px); font-weight: var(--fw-heading); letter-spacing: -0.01em; color: #fff; margin: 0; padding: 0 max(20px, 5vw); }
 .wz-flow { position: relative; overflow: visible; }
@@ -138,6 +138,11 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   .wz-spine-title { font-size: clamp(11px, 2.8vw, 14px); }
   .wz-meta-title { font-size: 22px; }
   .wz-meta-desc { max-height: 7em; }
+  /* 좁은 화면: 표지 옆이 아니라 표지 아래로 정보를 쌓는다(가로로 안 넘치게). */
+  .wz-slot.is-open { width: var(--cw2); }
+  .wz-info { left: 50%; width: 86vw; top: calc(var(--h) + 14px); height: auto; transform: translateX(-50%); justify-content: flex-start; }
+  .wz-slot.is-open .wz-info { transform: translateX(-50%); }
+  .wz-shelf:has(.wz-slot.is-open) { padding-bottom: 300px; }
 }
 @media (max-width: 600px) {
   .wz-reader-title { display: none; }
