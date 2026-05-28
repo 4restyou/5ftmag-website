@@ -1,10 +1,10 @@
-/* 5ft.mag 웹진 — 어두운 갤러리. 책등들이 한 줄로 서고, 좌우로 부드럽게 미끄러지며
-   가운데 한 권이 도드라진다(스와이프·휠·화살표·키). 고르면 같은 무대에서 표지가
-   돌아 펼쳐지고(카드 없이 배경 위), 옆에 정보·책 읽기가 뜬다. 오리지널 구현. */
+/* 5ft.mag 웹진 — 분류(시즌)별로 한 줄(가로 책장)씩 세로로 쌓는다. 줄 위에 분류명이
+   제목으로 붙고, 좌우로 넘겨 책등을 훑는다. 한 권을 고르면 같은 색의 무대에서 표지가
+   돌아 펼쳐지고(카드 없이) 옆에 정보·책 읽기가 뜬다. 오리지널 구현. */
 .wz-stage {
   min-height: calc(100vh - var(--header-h, 72px));
   background:
-    radial-gradient(120% 80% at 50% 0%, #211c25 0%, #151219 55%, #100e13 100%);
+    radial-gradient(120% 70% at 50% 0%, #211c25 0%, #151219 48%, #100e13 100%) fixed;
   color: #fff; display: flex; flex-direction: column;
 }
 
@@ -13,30 +13,35 @@
 .wz-cuboid > * { position: absolute; inset: 0; margin: auto; backface-visibility: hidden; overflow: hidden; }
 .wz-pages { background: repeating-linear-gradient(var(--pg-dir, to bottom), #efe9dd, #efe9dd 1px, #d3c9b5 2px, #efe9dd 3px); }
 
-.wz-intro { padding: 40px 40px 0; text-align: center; }
-.wz-intro-inner { max-width: 660px; margin: 0 auto; }
+.wz-intro { padding: 40px 40px 4px; text-align: center; }
+.wz-intro-inner { max-width: 680px; margin: 0 auto; }
 .wz-intro p { font-size: var(--fs-body); line-height: 1.65; color: rgba(255, 255, 255, .62); }
 .wz-empty { text-align: center; color: rgba(255, 255, 255, .5); padding: 80px 24px; }
 
-/* ── 진열(좌우 슬라이드) ── */
-.wz-flow { position: relative; flex: 1 1 auto; display: flex; align-items: center; overflow: hidden; min-height: 0; }
-.wz-flow::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(54% 48% at 50% 52%, color-mix(in srgb, var(--wz-glow, #5a4d63) 28%, transparent), transparent 72%);
-  transition: background .5s;
+/* ── 시즌(분류)별 책장 ── */
+.wz-seasons { padding: 8px 0 72px; }
+.wz-shelf { padding: 14px 0 6px; }
+.wz-shelf-title { font-size: clamp(17px, 1.7vw, 23px); font-weight: var(--fw-heading); letter-spacing: -0.01em; color: #fff; margin: 0; padding: 0 max(20px, 5vw) 4px; }
+.wz-rail-wrap { position: relative; }
+.wz-rail {
+  display: flex; align-items: flex-end; gap: clamp(18px, 3vw, 40px);
+  overflow-x: auto; scroll-behavior: smooth; perspective: 1700px;
+  padding: 22px max(20px, 5vw) 30px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
-.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); will-change: transform; transition: transform .55s cubic-bezier(.22, .61, .27, 1), opacity .35s; }
-.wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-spinebook { transition: none !important; }
-.wz-slot { flex: 0 0 auto; background: none; border: none; padding: 0; cursor: pointer; perspective: 1500px; transition: opacity .45s; }
+.wz-rail::-webkit-scrollbar { display: none; }
+
+.wz-slot { flex: 0 0 auto; background: none; border: none; padding: 0; cursor: pointer; }
 .wz-slot:focus-visible { outline: none; }
-.wz-slot .wz-spinebook {
-  --t: clamp(80px, 9vw, 116px); --h: min(62vh, 520px); --cw: 210px;
+.wz-spinebook {
+  --t: clamp(74px, 8vw, 100px); --h: min(46vh, 380px); --cw: 190px;
   --spine: #2b2b2b; --spine-text: #fff;
   width: var(--t); height: var(--h);
-  transition: transform .5s cubic-bezier(.22, .61, .27, 1);
+  transition: transform .35s cubic-bezier(.2, .7, .2, 1);
   will-change: transform;
-  filter: drop-shadow(14px 20px 18px rgba(0, 0, 0, .45));
+  filter: drop-shadow(12px 16px 16px rgba(0, 0, 0, .45));
 }
+.wz-slot:hover .wz-spinebook, .wz-slot:focus-visible .wz-spinebook { transform: translateY(-10px) rotateY(-7deg); }
 .wz-spinebook .f-spine {
   width: var(--t); height: var(--h); transform: translateZ(calc(var(--cw) / 2));
   background:
@@ -44,30 +49,31 @@
     var(--spine);
   color: var(--spine-text);
   box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, .6), inset 7px 0 12px -8px rgba(255, 255, 255, .3);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 28px 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 26px 0;
 }
 .wz-spinebook .f-cover { width: var(--cw); height: var(--h); transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); background: color-mix(in srgb, var(--spine) 58%, #000); }
 .wz-spinebook .f-top { width: var(--t); height: var(--cw); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
-.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(15px, 1.2vw, 19px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: 76%; overflow: hidden; }
+.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(14px, 1.1vw, 18px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: 76%; overflow: hidden; }
 .wz-spine-issue { writing-mode: vertical-rl; font-size: 11px; letter-spacing: 0.16em; opacity: .58; }
 
 .wz-nav {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 4;
-  width: 46px; height: 46px; border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .06); color: #fff;
-  font-size: 20px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background .15s, border-color .15s, opacity .15s;
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .22); background: rgba(20, 16, 22, .55); color: #fff;
+  font-size: 19px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s; backdrop-filter: blur(4px);
 }
-.wz-nav:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .5); }
-.wz-nav:disabled { opacity: .25; cursor: default; }
-.wz-prev { left: clamp(10px, 2vw, 30px); }
-.wz-next { right: clamp(10px, 2vw, 30px); }
-.wz-flow.is-open .wz-nav { opacity: 0; pointer-events: none; }
-.wz-flow.is-open .wz-track { opacity: 0; pointer-events: none; }
+.wz-nav:hover { background: rgba(40, 32, 44, .8); border-color: rgba(255, 255, 255, .5); }
+.wz-prev { left: 8px; }
+.wz-next { right: 8px; }
 
-/* ── 펼침(같은 무대, 카드 없이 배경 위 표지 + 정보) ── */
-.wz-open { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .4s; }
-.wz-flow.is-open .wz-open { opacity: 1; pointer-events: auto; }
+/* ── 펼침(같은 색 무대, 카드 없이 표지 + 정보) ── */
+.wz-open {
+  position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 48px 24px;
+  background: radial-gradient(60% 55% at 42% 50%, color-mix(in srgb, var(--wz-glow, #5a4d63) 30%, #0d0a0c), #0c090b 76%);
+  opacity: 0; pointer-events: none; transition: opacity .35s;
+}
+.wz-open.open { opacity: 1; pointer-events: auto; }
 .wz-open-grid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 340px); gap: clamp(32px, 4vw, 64px); align-items: center; width: min(820px, 86vw); }
 .wz-open-cover { background: none; border: none; padding: 0; margin: 0; cursor: pointer; perspective: 1700px; display: flex; align-items: center; justify-content: center; }
 .wz-open-cover:focus-visible { outline: none; }
@@ -102,7 +108,7 @@
 .wz-open-back:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .5); }
 
 @media (prefers-reduced-motion: reduce) {
-  .wz-track, .wz-slot, .wz-slot .wz-spinebook { transition: none; }
+  .wz-spinebook { transition: none; }
   .wz-coverbook { animation: none; transform: rotateY(-8deg) rotateX(3deg); }
   .wz-flow-info { animation: none; }
 }
@@ -125,10 +131,10 @@
 .wz-reader-book .wz-page canvas { width: 100%; height: 100%; display: block; }
 
 @media (max-width: 760px) {
-  .wz-intro { padding: 30px 20px 0; }
+  .wz-intro { padding: 28px 20px 0; }
   .wz-nav { display: none; }
-  .wz-track { gap: clamp(12px, 4vw, 30px); }
-  .wz-slot .wz-spinebook { --t: clamp(60px, 17vw, 96px); --h: min(54vh, 440px); --cw: 170px; }
+  .wz-rail { gap: clamp(14px, 4vw, 28px); padding: 18px 20px 24px; }
+  .wz-spinebook { --t: clamp(62px, 18vw, 96px); --h: min(42vh, 340px); --cw: 168px; }
   .wz-open-grid { grid-template-columns: 1fr; gap: 26px; justify-items: center; text-align: center; width: min(360px, 86vw); }
   .wz-coverbook { --cw: 230px; --h: 345px; --t: 40px; }
   .wz-flow-info { text-align: center; }

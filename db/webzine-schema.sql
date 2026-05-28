@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS public.webzine_issues (
   slug        TEXT UNIQUE NOT NULL,          -- URL 식별자 (예: vol-01)
   title       TEXT NOT NULL,
   issue_label TEXT,                          -- 표지 뱃지 (예: Vol.01)
+  category    TEXT,                          -- 분류/시즌 (같은 값끼리 한 줄로 묶임. 예: 시즌 1)
   description TEXT,                           -- 쇼케이스 소개 문구
   cover_path  TEXT,                          -- 표지 이미지 storage 경로
   pdf_path    TEXT,                          -- 원본 PDF storage 경로
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public.webzine_issues (
 
 -- 기존 테이블에도 안전하게 컬럼 추가 (이미 있으면 무시)
 ALTER TABLE public.webzine_issues ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.webzine_issues ADD COLUMN IF NOT EXISTS category TEXT;
 
 ALTER TABLE public.webzine_issues ENABLE ROW LEVEL SECURITY;
 

@@ -54,11 +54,12 @@ async function reload() {
 function render() {
   const tbody = $('tbody');
   $('count').textContent = `${STATE.issues.length}개`;
-  if (!STATE.issues.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">아직 등록된 웹진이 없습니다.</td></tr>'; return; }
+  if (!STATE.issues.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">아직 등록된 웹진이 없습니다.</td></tr>'; return; }
   tbody.innerHTML = STATE.issues.map(it => `
     <tr data-id="${escapeHtml(it.id)}">
       <td class="col-title">${escapeHtml(it.title)}</td>
       <td>${escapeHtml(it.issue_label || '')}</td>
+      <td>${escapeHtml(it.category || '')}</td>
       <td>${it.published ? '<span class="badge live">공개</span>' : '<span class="badge">비공개</span>'}</td>
       <td>${Number(it.sort_order) || 0}</td>
       <td class="col-actions">
@@ -95,6 +96,7 @@ function openModal(issue) {
   $('f-id').value = issue?.id || '';
   $('f-title').value = issue?.title || '';
   $('f-issue').value = issue?.issue_label || '';
+  $('f-category').value = issue?.category || '';
   $('f-desc').value = issue?.description || '';
   $('f-slug').value = issue?.slug || '';
   $('f-sort').value = issue?.sort_order ?? 0;
@@ -147,6 +149,7 @@ $('wzForm').addEventListener('submit', async (e) => {
     const record = {
       slug, title,
       issue_label: $('f-issue').value.trim() || null,
+      category: $('f-category').value.trim() || null,
       description: $('f-desc').value.trim() || null,
       cover_path, pdf_path,
       published: $('f-pub').checked,

@@ -81,10 +81,10 @@
   </div>
   <table class="wz-table">
     <thead>
-      <tr><th>제목</th><th>호</th><th>상태</th><th>정렬</th><th></th></tr>
+      <tr><th>제목</th><th>호</th><th>분류</th><th>상태</th><th>정렬</th><th></th></tr>
     </thead>
     <tbody id="tbody">
-      <tr><td colspan="5" class="empty">불러오는 중…</td></tr>
+      <tr><td colspan="6" class="empty">불러오는 중…</td></tr>
     </tbody>
   </table>
 </main>
@@ -101,6 +101,13 @@
       <div class="form-row">
         <label for="f-issue">호 라벨</label>
         <input type="text" id="f-issue" placeholder="Vol.01" />
+      </div>
+      <div class="form-row">
+        <label for="f-category">분류</label>
+        <div>
+          <input type="text" id="f-category" placeholder="시즌 1" />
+          <div class="hint">같은 분류끼리 한 줄(책장)로 묶여 표시돼요. 비우면 기본 줄에 들어갑니다.</div>
+        </div>
       </div>
       <div class="form-row">
         <label for="f-desc">소개</label>
@@ -147,7 +154,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260528-webzine"></script>
 <script src="../js/site-common.js?v=20260526-iaberr"></script>
-<script src="../js/admin-webzine-page.js?v=20260528-desc"></script>
+<script src="../js/admin-webzine-page.js?v=20260528-cat"></script>
 
 </body>
 </html>
