@@ -152,11 +152,11 @@
     const s = slots[active];
     track.style.transform = `translateX(${flow.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px)`;
     slots.forEach((slot, i) => {
-      const d = i - active;
+      const d = i - active, ad = Math.abs(d);
       const book = slot.querySelector('.wz-spinebook');
-      if (book) book.style.transform = `scale(${d === 0 ? 1.12 : 0.9})`;
-      slot.style.opacity = String(Math.max(0, 1 - Math.abs(d) * 0.22));
-      slot.style.pointerEvents = Math.abs(d) > 3 ? 'none' : 'auto';
+      if (book) book.style.transform = `scale(${d === 0 ? 1.14 : 0.86})`;
+      slot.style.opacity = String(Math.max(0, 1 - ad * 0.16));   // 멀수록 흐려지며 ~6권 옆까지 보임
+      slot.style.pointerEvents = ad > 6 ? 'none' : 'auto';
     });
     flow.style.setProperty('--wz-glow', palette[active].spine);
     const prev = flow.querySelector('.wz-prev'), next = flow.querySelector('.wz-next');
