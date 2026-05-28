@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Webzine | 5ft.mag</title>
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="shortcut icon" href="img/favicon/favicon.ico">
+  <script src="./js/theme-init.js"></script>
+  <link rel="stylesheet" href="./pretendard.css" />
+  <link rel="stylesheet" href="./css/tokens.css?v=20260526-fontscale">
+  <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
+  <link rel="stylesheet" href="./css/webzine.css?v=20260528-shelf">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="stories.html">Articles</a></li>
+      <li><a href="films.html">Films</a></li>
+      <li><a href="labs.html">Labs</a></li>
+      <li><a href="market.html">Market</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="stories.html">Articles</a>
+    <a href="films.html">Films</a>
+    <a href="labs.html">Labs</a>
+    <a href="market.html">Market</a>
+    <a href="about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<h1 class="sr-only">5ft.mag 웹진</h1>
+
+<div class="wz-intro">
+  <div class="wz-intro-inner">
+    <p>매거진을 한 권씩 펼쳐 보세요. 표지를 누르면 책처럼 넘겨 읽을 수 있어요.</p>
+  </div>
+</div>
+
+<main class="wz-shelf-section" role="main" id="main">
+  <div class="wz-shelf" id="wzShelf" aria-label="웹진 목록">
+    <p class="wz-empty" id="wzEmpty">불러오는 중…</p>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./js/db-client.js?v=20260528-webzine"></script>
+<script src="./js/site-common.js?v=20260526-iaberr"></script>
+<script src="./js/webzine-page.js?v=20260528-shelf"></script>
+
+</body>
+</html>
