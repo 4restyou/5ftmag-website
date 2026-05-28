@@ -1,101 +1,85 @@
 'use strict';
 
-// 5ft.mag 웹진 — 가로 책등 진열. 책등이 줄지어 있고(제목·호라벨), 휠·좌우 화살표·
-// 스와이프·키보드로 옆으로 넘기면 선택된 책이 회전해 표지(전면)로 펼쳐진다.
-// 펼쳐진 책의 "읽기" 또는 다시 누르면 PDF 원본을 새 탭으로(플립북은 다음 단계).
+// 5ft.mag 웹진 — 입체 책을 가로로 진열하고, 한 권을 클릭하면 상세(호라벨·제목·
+// 소개)를 먼저 보여준 뒤 "책 읽기" 버튼으로 PDF 원본을 새 탭에 연다(플립북은 다음).
 (function () {
   const rail = document.getElementById('wzRail');
   if (!rail) return;
 
   function db() { return window.MagDB; }
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  const SPINES = ['#2b2b2b', '#3a2f28', '#26303a', '#39283a', '#2f3a2c', '#7a2540'];
+  const spineOf = (i) => SPINES[i % SPINES.length];
 
-  const SPINES = ['#2b2b2b', '#3a2f28', '#26303a', '#39283a', '#2f3a2c', '#3a3326'];
   let issues = [];
-  let active = 0;
-  let track = null;
+  let detail = null;
+
+  function book3d(it, spine) {
+    const front = it.cover_path
+      ? `<img src="${esc(db().webzine.publicUrl(it.cover_path))}" alt="${esc(it.title)} 표지" loading="lazy" />`
+      : `<span class="wz-f-text">${esc(it.title)}</span>`;
+    const label = `${it.title}${it.issue_label ? ' · ' + it.issue_label : ''}`;
+    return `<div class="wz-book3d" style="--spine:${spine}">
+      <div class="wz-f-front">${front}</div>
+      <div class="wz-f-spine"><span>${esc(label)}</span></div>
+      <div class="wz-f-pages"></div>
+      <div class="wz-f-top"></div>
+    </div>`;
+  }
 
   function render() {
     if (!issues.length) { rail.innerHTML = '<p class="wz-empty">아직 발행된 웹진이 없어요.</p>'; return; }
-    const books = issues.map((it, i) => {
-      const label = `${it.title}${it.issue_label ? ' · ' + it.issue_label : ''}`;
-      const cover = it.cover_path
-        ? `<img src="${esc(db().webzine.publicUrl(it.cover_path))}" alt="${esc(it.title)} 표지" loading="lazy" />`
-        : `<span>${esc(it.title)}</span>`;
-      return `<button type="button" class="wz-book3d" data-i="${i}" style="--spine:${SPINES[i % SPINES.length]}" aria-label="${esc(it.title)}">
-        <span class="wz-face wz-spine"><span class="wz-spine-label">${esc(label)}</span></span>
-        <span class="wz-face wz-cover ${it.cover_path ? '' : 'is-text'}">
-          ${cover}
-          <span class="wz-cover-cap">
-            ${it.issue_label ? `<span class="wz-cover-issue">${esc(it.issue_label)}</span>` : ''}
-            <span class="wz-cover-title">${esc(it.title)}</span>
-          </span>
-        </span>
-      </button>`;
-    }).join('');
     rail.innerHTML = `
-      <button type="button" class="wz-nav wz-prev" aria-label="이전 책">‹</button>
-      <div class="wz-track" id="wzTrack">${books}</div>
-      <button type="button" class="wz-nav wz-next" aria-label="다음 책">›</button>
-      <div class="wz-read" id="wzRead"></div>`;
-    track = document.getElementById('wzTrack');
-    bind();
-    setActive(0, false);
-  }
+      <button type="button" class="wz-nav wz-prev" aria-label="이전">‹</button>
+      <div class="wz-track" id="wzTrack">
+        ${issues.map((it, i) => `<button type="button" class="wz-book" data-i="${i}" aria-label="${esc(it.title)} 보기">${book3d(it, spineOf(i))}</button>`).join('')}
+      </div>
+      <button type="button" class="wz-nav wz-next" aria-label="다음">›</button>`;
+    const track = document.getElementById('wzTrack');
 
-  function setActive(i, smooth = true) {
-    active = Math.max(0, Math.min(issues.length - 1, i));
-    const books = track.querySelectorAll('.wz-book3d');
-    books.forEach((b, idx) => b.classList.toggle('is-active', idx === active));
-    const el = books[active];
-    if (el) {
-      const center = () => { try { el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: smooth ? 'smooth' : 'auto' }); } catch (_) {} };
-      center(); setTimeout(center, 420);
-    }
-    const it = issues[active];
-    const href = it && it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
-    document.getElementById('wzRead').innerHTML = href ? `<a href="${href}" target="_blank" rel="noopener">읽기 →</a>` : '';
-    rail.querySelector('.wz-prev').disabled = active === 0;
-    rail.querySelector('.wz-next').disabled = active === issues.length - 1;
-  }
-
-  function bind() {
-    rail.querySelector('.wz-prev').addEventListener('click', () => setActive(active - 1));
-    rail.querySelector('.wz-next').addEventListener('click', () => setActive(active + 1));
-
-    track.querySelectorAll('.wz-book3d').forEach(b => {
-      b.addEventListener('click', () => {
-        const i = Number(b.dataset.i);
-        if (i === active) { const it = issues[i]; if (it.pdf_path) window.open(db().webzine.publicUrl(it.pdf_path), '_blank', 'noopener'); }
-        else setActive(i);
-      });
-    });
-
-    // 휠: 세로/가로 스크롤을 책 넘김으로
-    let wheelLock = false;
+    track.querySelectorAll('.wz-book').forEach(b => b.addEventListener('click', () => openDetail(Number(b.dataset.i))));
+    rail.querySelector('.wz-prev').addEventListener('click', () => track.scrollBy({ left: -320, behavior: 'smooth' }));
+    rail.querySelector('.wz-next').addEventListener('click', () => track.scrollBy({ left: 320, behavior: 'smooth' }));
     track.addEventListener('wheel', (e) => {
       const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (Math.abs(d) < 8) return;
+      if (Math.abs(d) < 4) return;
       e.preventDefault();
-      if (wheelLock) return;
-      wheelLock = true; setTimeout(() => { wheelLock = false; }, 360);
-      setActive(active + (d > 0 ? 1 : -1));
+      track.scrollLeft += d;
     }, { passive: false });
+  }
 
-    // 키보드 ← →
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') setActive(active + 1);
-      else if (e.key === 'ArrowLeft') setActive(active - 1);
-    });
+  function ensureDetail() {
+    if (detail) return;
+    detail = document.createElement('div');
+    detail.className = 'wz-detail';
+    detail.id = 'wzDetail';
+    detail.innerHTML = `
+      <button type="button" class="wz-detail-close" aria-label="닫기">✕</button>
+      <div class="wz-detail-inner">
+        <div class="wz-detail-stage" id="wzDetailStage"></div>
+        <div class="wz-detail-info" id="wzDetailInfo"></div>
+      </div>`;
+    document.body.appendChild(detail);
+    const close = () => { detail.classList.remove('open'); document.body.style.overflow = ''; };
+    detail.querySelector('.wz-detail-close').addEventListener('click', close);
+    detail.addEventListener('click', (e) => { if (e.target === detail) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && detail.classList.contains('open')) close(); });
+  }
 
-    // 스와이프(드래그)
-    let sx = null;
-    track.addEventListener('pointerdown', (e) => { sx = e.clientX; });
-    track.addEventListener('pointerup', (e) => {
-      if (sx == null) return;
-      const dx = e.clientX - sx; sx = null;
-      if (Math.abs(dx) > 50) setActive(active + (dx < 0 ? 1 : -1));
-    });
+  function openDetail(i) {
+    const it = issues[i]; if (!it) return;
+    ensureDetail();
+    const spine = spineOf(i);
+    detail.style.setProperty('--detail-bg', `color-mix(in srgb, ${spine} 40%, #14100f)`);
+    document.getElementById('wzDetailStage').innerHTML = book3d(it, spine);
+    const pdf = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
+    document.getElementById('wzDetailInfo').innerHTML = `
+      ${it.issue_label ? `<span class="wz-detail-issue">${esc(it.issue_label)}</span>` : ''}
+      <h2 class="wz-detail-title">${esc(it.title)}</h2>
+      ${it.description ? `<p class="wz-detail-desc">${esc(it.description)}</p>` : ''}
+      ${pdf ? `<a class="wz-detail-read" href="${pdf}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}`;
+    detail.classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
 
   (async function load() {
