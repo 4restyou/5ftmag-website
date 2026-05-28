@@ -3,15 +3,19 @@
    돌아 펼쳐지고(카드 없이) 옆에 정보·책 읽기가 뜬다. 오리지널 구현. */
 /* 웹진은 다크 톤 고정(data-theme=dark) — 테마 토글 숨김 */
 #themeBtn { display: none; }
-/* 종이/천 결 질감(에셋 없이 SVG 노이즈) + 5ft 심볼 마스크 */
-.wz-stage, .wz-open {
-  --wz-mark: url("./img/symbol-w.svg");
+/* 질감(SVG 노이즈)·5ft 심볼 마스크·갤러리 배경. url() 은 이 스타일시트(css/) 기준이라 ../img */
+html {
+  --wz-mark: url("../img/symbol-w.svg");
   --wz-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --wz-bg: radial-gradient(120% 70% at 50% 0%, #211c25 0%, #151219 48%, #100e13 100%) fixed;
 }
+/* 헤더·본문·푸터를 하나의 갤러리 배경으로 자연스럽게 연결(고정 배경이라 seam 없음) */
+body { background: var(--wz-bg); color: #fff; }
+header { background: var(--wz-bg); border-bottom-color: transparent; }
+footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(255, 255, 255, .8); }
 .wz-stage {
   min-height: calc(100vh - var(--header-h, 72px));
-  background:
-    radial-gradient(120% 70% at 50% 0%, #211c25 0%, #151219 48%, #100e13 100%) fixed;
+  background: none;
   color: #fff; display: flex; flex-direction: column;
 }
 
@@ -36,7 +40,7 @@
 .wz-slot { flex: 0 0 auto; background: none; border: none; padding: 0; cursor: pointer; perspective: 1500px; transition: opacity .45s; }
 .wz-slot:focus-visible { outline: none; }
 .wz-spinebook {
-  --t: clamp(76px, 8vw, 108px); --h: min(44vh, 360px); --cw: 200px;
+  --t: clamp(46px, 4.8vw, 64px); --h: min(44vh, 360px); --cw: 200px;
   --spine: #2b2b2b; --spine-text: #fff;
   width: var(--t); height: var(--h);
   transition: transform .5s cubic-bezier(.22, .61, .27, 1);
@@ -146,7 +150,7 @@
   .wz-intro { padding: 28px 20px 0; }
   .wz-nav { display: none; }
   .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
-  .wz-spinebook { --t: clamp(64px, 18vw, 98px); --h: min(40vh, 320px); --cw: 172px; }
+  .wz-spinebook { --t: clamp(38px, 11vw, 58px); --h: min(40vh, 320px); --cw: 172px; }
   .wz-open-grid { grid-template-columns: 1fr; gap: 26px; justify-items: center; text-align: center; width: min(360px, 86vw); }
   .wz-coverbook { --cw: 230px; --h: 345px; --t: 40px; }
   .wz-flow-info { text-align: center; }
