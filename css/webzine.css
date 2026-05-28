@@ -1,6 +1,7 @@
-/* 5ft.mag 웹진 — 어두운 갤러리. 가운데 한 권이 옆으로 돌아 표지가 보이고
-   표지색으로 물든 카드 위에 정보·책 읽기가 뜬다. 양옆에는 이웃 호의 책등이
-   기대어 서서 좌우로 넘길 수 있다(화살표·휠·스와이프·키보드). 오리지널 구현. */
+/* 5ft.mag 웹진 — 어두운 갤러리. 처음엔 가운데 책이 책등을 보이고 서 있고,
+   고르면 그 자리에서 옆으로 돌아 표지가 펼쳐지며 옆에 정보·책 읽기가 뜬다.
+   카드 없이 어두운 배경 위에 표지색 글로우로 자연스럽게 펼쳐진다. 양옆에는
+   이웃 호의 책등이 기대어 서고 화살표·휠·스와이프·좌우키로 넘긴다. 오리지널. */
 .wz-stage {
   min-height: calc(100vh - var(--header-h, 72px));
   background:
@@ -18,12 +19,14 @@
 .wz-intro p { font-size: var(--fs-body); line-height: 1.65; color: rgba(255, 255, 255, .62); }
 .wz-empty { text-align: center; color: rgba(255, 255, 255, .5); padding: 80px 24px; }
 
-/* ── 무대(가운데 펼침 + 양옆 책등) ── */
+/* ── 무대 ── */
 .wz-flow { position: relative; flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
 .wz-flow::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(54% 46% at 42% 52%, color-mix(in srgb, var(--wz-glow, #5a4d63) 30%, transparent), transparent 72%);
+  background: radial-gradient(52% 46% at 42% 52%, color-mix(in srgb, var(--wz-glow, #5a4d63) 26%, transparent), transparent 72%);
+  opacity: .5; transition: opacity .5s;
 }
+.wz-flow.is-open::before { opacity: 1; }
 
 /* 좌우 화살표 */
 .wz-nav {
@@ -38,49 +41,56 @@
 .wz-prev { left: clamp(10px, 2vw, 30px); }
 .wz-next { right: clamp(10px, 2vw, 30px); }
 
-/* 이웃 책등(기대어 선 peek) */
-.wz-peek { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; background: none; border: none; padding: 0; cursor: pointer; perspective: 1500px; }
-.wz-peek-prev { left: clamp(56px, 9vw, 170px); }
-.wz-peek-next { right: clamp(56px, 9vw, 170px); }
-.wz-peekbook {
-  --t: clamp(58px, 7vw, 86px); --h: min(58vh, 470px); --cw: 130px;
+/* 책등(가운데 닫힘 + 양옆 peek 공용) */
+.wz-spinebook {
+  --t: clamp(96px, 11vw, 128px); --h: min(66vh, 560px); --cw: 240px;
   --spine: #2b2b2b; --spine-text: #fff;
   width: var(--t); height: var(--h);
-  filter: drop-shadow(18px 24px 24px rgba(0, 0, 0, .5));
-  transition: transform .4s cubic-bezier(.2, .7, .2, 1);
 }
-.wz-peek-prev .wz-peekbook { transform: rotateY(-17deg); }
-.wz-peek-next .wz-peekbook { transform: rotateY(17deg); }
-.wz-peek-prev:hover .wz-peekbook { transform: rotateY(-10deg) translateY(-8px); }
-.wz-peek-next:hover .wz-peekbook { transform: rotateY(10deg) translateY(-8px); }
-.wz-peek:focus-visible { outline: none; }
-.wz-peek:focus-visible .wz-peekbook { transform: translateY(-8px); }
-.wz-peekbook .f-spine {
+.wz-spinebook .f-spine {
   width: var(--t); height: var(--h); transform: translateZ(calc(var(--cw) / 2));
   background:
     linear-gradient(100deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 26%, rgba(0, 0, 0, .12) 92%),
     var(--spine);
   color: var(--spine-text);
-  box-shadow: inset -8px 0 16px -10px rgba(0, 0, 0, .6), inset 6px 0 10px -8px rgba(255, 255, 255, .3);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px 0;
+  box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, .6), inset 7px 0 12px -8px rgba(255, 255, 255, .3);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 28px 0;
 }
-.wz-peekbook .f-side { width: var(--cw); height: var(--h); background: color-mix(in srgb, var(--spine) 62%, #000); }
-.wz-peek-prev .wz-peekbook .f-side { transform: rotateY(90deg) translateZ(calc(var(--t) / 2)); }
-.wz-peek-next .wz-peekbook .f-side { transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); }
-.wz-peekbook .f-top { width: var(--t); height: var(--cw); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
-.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(13px, 1vw, 16px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: 76%; overflow: hidden; }
-.wz-spine-issue { writing-mode: vertical-rl; font-size: 10px; letter-spacing: 0.16em; opacity: .58; }
+.wz-spinebook .f-cover { width: var(--cw); height: var(--h); background: color-mix(in srgb, var(--spine) 58%, #000); }
+.wz-spinebook .f-cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 60%); }
+.wz-spinebook .f-top { width: var(--t); height: var(--cw); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
+.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(15px, 1.2vw, 19px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: 76%; overflow: hidden; }
+.wz-spine-issue { writing-mode: vertical-rl; font-size: 11px; letter-spacing: 0.16em; opacity: .58; }
 
-/* 가운데 카드(표지색으로 물든 둥근 무대) */
-.wz-flow-card {
-  position: relative; z-index: 1;
-  display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 340px); gap: clamp(32px, 4vw, 56px);
-  align-items: center; padding: clamp(36px, 4vw, 56px) clamp(40px, 5vw, 72px);
-  border-radius: 16px; width: min(860px, 76vw);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--spine) 30%, #120c0e), color-mix(in srgb, var(--spine) 16%, #0d090b));
-  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, .7), inset 0 0 0 1px rgba(255, 255, 255, .04);
+/* 가운데(닫힘=책등, 열림=표지+정보) */
+.wz-flow-center { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; }
+.wz-flow-center.is-open { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 340px); gap: clamp(32px, 4vw, 64px); align-items: center; width: min(820px, 80vw); }
+.wz-center-book { background: none; border: none; padding: 0; margin: 0; cursor: pointer; perspective: 1700px; display: flex; align-items: center; justify-content: center; }
+.wz-center-book:focus-visible { outline: none; }
+.wz-center-book .wz-spinebook {
+  transform: rotateY(10deg);
+  transition: transform .45s cubic-bezier(.2, .7, .2, 1);
+  filter: drop-shadow(26px 32px 28px rgba(0, 0, 0, .5));
 }
-.wz-flow-card-cover { display: flex; justify-content: center; align-items: center; perspective: 1700px; }
+.wz-center-book:hover .wz-spinebook { transform: rotateY(5deg) translateY(-10px); }
+.wz-center-book .wz-spinebook .f-cover { transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); }
+
+/* 양옆 peek */
+.wz-peek { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; background: none; border: none; padding: 0; cursor: pointer; perspective: 1500px; }
+.wz-peek-prev { left: clamp(40px, 7vw, 150px); }
+.wz-peek-next { right: clamp(40px, 7vw, 150px); }
+.wz-peek .wz-spinebook { --t: clamp(54px, 6.5vw, 80px); --h: min(52vh, 420px); --cw: 130px; filter: drop-shadow(16px 22px 22px rgba(0, 0, 0, .5)); transition: transform .4s cubic-bezier(.2, .7, .2, 1); }
+.wz-peek-prev .wz-spinebook { transform: rotateY(-18deg); }
+.wz-peek-next .wz-spinebook { transform: rotateY(18deg); }
+.wz-peek-prev:hover .wz-spinebook { transform: rotateY(-11deg) translateY(-8px); }
+.wz-peek-next:hover .wz-spinebook { transform: rotateY(11deg) translateY(-8px); }
+.wz-peek-prev .wz-spinebook .f-cover { transform: rotateY(90deg) translateZ(calc(var(--t) / 2)); }
+.wz-peek-next .wz-spinebook .f-cover { transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); }
+.wz-peek .wz-spine-title { font-size: clamp(12px, .95vw, 15px); }
+.wz-peek .wz-spine-issue { font-size: 10px; }
+.wz-flow.is-open .wz-peek { opacity: .6; }
+
+/* 열림: 표지(돌아선 책) */
 .wz-coverbook {
   --cw: 300px; --h: 450px; --t: 46px; --spine: #2b2b2b;
   width: var(--cw); height: var(--h);
@@ -94,26 +104,28 @@
 .wz-coverbook .f-top { width: var(--cw); height: var(--t); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
 @keyframes wz-turn { from { transform: rotateY(72deg) rotateX(3deg); } to { transform: rotateY(-8deg) rotateX(3deg); } }
 
-.wz-flow-card-info { color: #fff; animation: wz-fade .5s .35s both; }
-.wz-card-issue { display: block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; opacity: .7; margin-bottom: 10px; }
-.wz-card-title { font-size: var(--fs-display); font-weight: var(--fw-heading); letter-spacing: -0.02em; line-height: 1.12; margin: 0; }
-.wz-card-desc { font-size: 15px; line-height: 1.75; opacity: .82; margin: 16px 0 26px; word-break: keep-all; white-space: pre-line; }
-.wz-card-read { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 26px; padding: 13px 26px; border-radius: var(--btn-radius); background: #fff; color: #111; font-size: 14px; font-weight: var(--fw-heading); letter-spacing: 0.02em; text-decoration: none; transition: opacity .15s; }
-.wz-card-desc + .wz-card-read { margin-top: 0; }
-.wz-card-read:hover { opacity: .85; }
+/* 열림: 정보 */
+.wz-flow-info { color: #fff; animation: wz-fade .5s .3s both; }
+.wz-meta-issue { display: block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; opacity: .7; margin-bottom: 10px; }
+.wz-meta-title { font-size: var(--fs-display); font-weight: var(--fw-heading); letter-spacing: -0.02em; line-height: 1.12; margin: 0; }
+.wz-meta-desc { font-size: 15px; line-height: 1.75; opacity: .82; margin: 16px 0 26px; word-break: keep-all; white-space: pre-line; }
+.wz-meta-read { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 26px; padding: 13px 26px; border-radius: var(--btn-radius); background: #fff; color: #111; font-size: 14px; font-weight: var(--fw-heading); letter-spacing: 0.02em; text-decoration: none; transition: opacity .15s; }
+.wz-meta-desc + .wz-meta-read { margin-top: 0; }
+.wz-meta-read:hover { opacity: .85; }
 @keyframes wz-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .wz-peekbook { transition: none; }
+  .wz-center-book .wz-spinebook, .wz-peek .wz-spinebook { transition: none; }
   .wz-coverbook { animation: none; transform: rotateY(-8deg) rotateX(3deg); }
-  .wz-flow-card-info { animation: none; }
+  .wz-flow-info { animation: none; }
 }
 @media (max-width: 1100px) { .wz-peek { display: none; } }
 @media (max-width: 760px) {
   .wz-intro { padding: 30px 20px 0; }
   .wz-nav { display: none; }
-  .wz-flow-card { grid-template-columns: 1fr; gap: 28px; justify-items: center; text-align: center; width: min(360px, 86vw); padding: 28px 24px 32px; }
+  .wz-spinebook { --t: clamp(86px, 26vw, 120px); --h: min(58vh, 480px); --cw: 220px; }
+  .wz-flow-center.is-open { grid-template-columns: 1fr; gap: 28px; justify-items: center; text-align: center; width: min(360px, 86vw); }
   .wz-coverbook { --cw: 230px; --h: 345px; --t: 40px; }
-  .wz-flow-card-info { text-align: center; }
-  .wz-card-title { font-size: 26px; }
+  .wz-flow-info { text-align: center; }
+  .wz-meta-title { font-size: 26px; }
 }
