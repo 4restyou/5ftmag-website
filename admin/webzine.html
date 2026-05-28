@@ -45,7 +45,8 @@
     .modal-box h2 { margin: 0 0 16px; font-size: 18px; font-weight: var(--fw-heading); }
     .form-row { display: grid; grid-template-columns: 110px 1fr; gap: 8px 14px; align-items: start; margin-bottom: 12px; }
     .form-row label { font-size: 13px; color: var(--text-muted); padding-top: 6px; }
-    .form-row input[type=text], .form-row input[type=number] { font: inherit; font-size: 14px; padding: 8px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); width: 100%; }
+    .form-row input[type=text], .form-row input[type=number], .form-row textarea { font: inherit; font-size: 14px; padding: 8px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); width: 100%; }
+    .form-row textarea { min-height: 72px; resize: vertical; }
     .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
     .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
     .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: var(--btn-radius); cursor: pointer; }
@@ -102,6 +103,10 @@
         <input type="text" id="f-issue" placeholder="Vol.01" />
       </div>
       <div class="form-row">
+        <label for="f-desc">소개</label>
+        <textarea id="f-desc" placeholder="쇼케이스에 들어갈 짧은 소개 문구"></textarea>
+      </div>
+      <div class="form-row">
         <label for="f-slug">slug *</label>
         <div>
           <input type="text" id="f-slug" required placeholder="vol-01" />
@@ -142,7 +147,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260528-webzine"></script>
 <script src="../js/site-common.js?v=20260526-iaberr"></script>
-<script src="../js/admin-webzine-page.js?v=20260528-webzine"></script>
+<script src="../js/admin-webzine-page.js?v=20260528-desc"></script>
 
 </body>
 </html>
