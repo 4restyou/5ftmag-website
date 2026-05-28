@@ -1556,12 +1556,25 @@ body.modal-open { overflow: hidden; }
 .home-wz { margin-top: 28px; }
 .home-wz-all { text-decoration: none; }
 .home-wz-all:hover { color: var(--text); }
+.home-wz-railwrap { position: relative; }
 .home-wz-rail {
   display: flex; align-items: flex-end; gap: 14px;
-  overflow-x: auto; padding: 8px 2px 14px;
+  overflow-x: auto; padding: 8px 22px 14px; scroll-behavior: smooth;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
 }
 .home-wz-rail::-webkit-scrollbar { display: none; }
+.home-wz-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-muted);
+  font-size: 16px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: color .15s, border-color .15s;
+}
+.home-wz-nav:hover { color: var(--text); border-color: var(--text); }
+.home-wz-prev { left: -6px; }
+.home-wz-next { right: -6px; }
 .home-wz-spine {
   flex: 0 0 auto; width: 48px; height: 184px; border-radius: 2px; text-decoration: none;
   background:

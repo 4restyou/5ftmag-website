@@ -69,12 +69,20 @@
     });
   }
 
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
   (async function load() {
+   try {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
     let issues = [];
     try { issues = await db().webzine.listPublished(); } catch (_) { issues = []; }
     if (!Array.isArray(issues) || !issues.length) { sec.hidden = true; return; }
     sec.hidden = false;
+    shuffle(issues);   // 매번 랜덤 순서로 노출
+
+    const prev = document.getElementById('homeWzPrev'), next = document.getElementById('homeWzNext');
+    if (prev) prev.addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * 0.8, behavior: 'smooth' }));
+    if (next) next.addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * 0.8, behavior: 'smooth' }));
 
     rail.innerHTML = issues.map((it, i) => {
       const c = { spine: FALLBACK[i % FALLBACK.length], text: '#fff' };
@@ -92,5 +100,6 @@
         if (el) { el.style.setProperty('--spine', c.spine); el.style.setProperty('--spine-text', c.text); }
       });
     });
+   } catch (_) { /* 홈 프로모는 실패해도 본문에 영향 없도록 무시 */ }
   })();
 })();

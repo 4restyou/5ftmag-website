@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260526-fontscale">
   <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260526-btncta">
-  <link rel="stylesheet" href="./css/home.css?v=20260528-homewz">
+  <link rel="stylesheet" href="./css/home.css?v=20260528-homewz2">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -221,7 +221,11 @@
         <h3>Webzine</h3>
         <a class="label home-wz-all" href="webzine.html">전체 보기 →</a>
       </div>
-      <div class="home-wz-rail" id="homeWzRail" aria-label="웹진"></div>
+      <div class="home-wz-railwrap">
+        <button type="button" class="home-wz-nav home-wz-prev" id="homeWzPrev" aria-label="이전">‹</button>
+        <div class="home-wz-rail" id="homeWzRail" aria-label="웹진"></div>
+        <button type="button" class="home-wz-nav home-wz-next" id="homeWzNext" aria-label="다음">›</button>
+      </div>
     </section>
 
   </div>
@@ -317,6 +321,6 @@
 <script src="./js/image-processor.js?v=20260520-mobileupload"></script>
 <script src="./js/camera-brands.js?v=20260522-camerasearch"></script>
 <script src="./js/reader-submissions.js?v=20260527-plainupload"></script>
-<script src="./js/home-webzine.js?v=20260528-homewz"></script>
+<script src="./js/home-webzine.js?v=20260528-homewz2"></script>
 </body>
 </html>
