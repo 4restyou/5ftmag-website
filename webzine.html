@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260526-fontscale">
   <link rel="stylesheet" href="./css/common.css?v=20260526-a11y">
-  <link rel="stylesheet" href="./css/webzine.css?v=20260528-lux">
+  <link rel="stylesheet" href="./css/webzine.css?v=20260528-turn">
 </head>
 <body>
 
@@ -45,20 +45,29 @@
 <h1 class="sr-only">5ft.mag 웹진</h1>
 
 <main class="wz-stage" role="main" id="main">
-  <div class="wz-intro">
-    <div class="wz-intro-inner">
-      <p>책등을 옆으로 넘겨 보세요. 한 권을 고르면 표지가 돌아 펼쳐집니다.</p>
+  <div class="wz-shelf" id="wzShelf">
+    <div class="wz-intro">
+      <div class="wz-intro-inner">
+        <p>책등을 옆으로 넘겨 보세요. 한 권을 고르면 그 자리에서 표지가 돌아 펼쳐집니다.</p>
+      </div>
+    </div>
+    <div class="wz-rail" id="wzRail" aria-label="웹진 목록">
+      <p class="wz-empty">불러오는 중…</p>
     </div>
   </div>
-  <div class="wz-rail" id="wzRail" aria-label="웹진 목록">
-    <p class="wz-empty">불러오는 중…</p>
+  <div class="wz-open" id="wzOpen" hidden>
+    <button type="button" class="wz-open-back" id="wzOpenBack">← 목록으로</button>
+    <div class="wz-open-inner">
+      <div class="wz-open-stage" id="wzOpenStage"></div>
+      <div class="wz-open-info" id="wzOpenInfo"></div>
+    </div>
   </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260528-webzine"></script>
 <script src="./js/site-common.js?v=20260526-iaberr"></script>
-<script src="./js/webzine-page.js?v=20260528-lux"></script>
+<script src="./js/webzine-page.js?v=20260528-turn"></script>
 
 </body>
 </html>

@@ -1,22 +1,57 @@
 'use strict';
 
 // 5ft.mag 웹진 — 어두운 갤러리에 책등이 정면으로 선 진열. 책등 색은 표지의
-// 대표색에서 뽑아 맞추고(글자색은 명암에 따라 흑/백 자동), 한 권을 클릭하면
-// 상세(표지 + 호라벨·제목·소개)와 "책 읽기"(PDF 원본 새 탭)를 보여준다.
+// 대표색(채도 가중 평균 + HSL 보정)에 맞춰 선명하게 뽑고(글자색은 명암에 따라
+// 흑/백 자동), 한 권을 고르면 같은 자리에서 책이 옆으로 돌아 표지가 보이고
+// 그 옆에 호라벨·제목·소개와 "책 읽기"(PDF 원본 새 탭)가 뜬다.
 (function () {
   const rail = document.getElementById('wzRail');
   if (!rail) return;
+  const shelf = document.getElementById('wzShelf');
+  const open = document.getElementById('wzOpen');
+  const back = document.getElementById('wzOpenBack');
 
   function db() { return window.MagDB; }
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-  const FALLBACK = ['#2b2b2b', '#3a2f28', '#26303a', '#39283a', '#2f3a2c', '#7a2540'];
+  const FALLBACK = ['#7a3b52', '#3f5a78', '#6b5036', '#4a6b4f', '#5a4a78', '#8a4a32'];
   const coverUrl = (it) => (it.cover_path ? db().webzine.publicUrl(it.cover_path) : '');
 
   let issues = [];
   const palette = [];   // { spine, text } per issue (대표색)
-  let detail = null;
 
-  // 표지 대표색(평균) 추출 — 같은 출처(public storage, CORS 허용) 이미지에서.
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    const l = (mx + mn) / 2;
+    const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+    let h = 0;
+    if (d) {
+      if (mx === r) h = ((g - b) / d) % 6;
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60; if (h < 0) h += 360;
+    }
+    return [h, s, l];
+  }
+  function hslToRgb(h, s, l) {
+    const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+  // 평균 RGB 를 표지에 맞춘 선명한 책등 색으로: 채도는 올리고 명도는 읽히는 범위로.
+  function vivid(r, g, b) {
+    let [h, s, l] = rgbToHsl(r, g, b);
+    s = Math.min(1, s * 1.4 + 0.08);
+    l = Math.min(0.6, Math.max(0.34, l));
+    const [R, G, B] = hslToRgb(h, s, l);
+    const lum = (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255;
+    return { spine: `rgb(${R},${G},${B})`, text: lum > 0.62 ? '#1a1a1a' : '#fff' };
+  }
+
+  // 표지 대표색 — 채도 높은 픽셀에 가중치를 줘(흐릿한 회색에 묻히지 않게) 평균낸다.
   function pickColor(url) {
     return new Promise((resolve) => {
       if (!url) { resolve(null); return; }
@@ -24,15 +59,20 @@
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         try {
-          const cv = document.createElement('canvas'); cv.width = 16; cv.height = 16;
-          const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, 16, 16);
-          const d = ctx.getImageData(0, 0, 16, 16).data;
-          let r = 0, g = 0, b = 0, n = 0;
-          for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 128) continue; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
-          if (!n) { resolve(null); return; }
-          r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
-          const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-          resolve({ spine: `rgb(${r},${g},${b})`, text: lum > 0.6 ? '#1a1a1a' : '#fff' });
+          const S = 24;
+          const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+          const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, S, S);
+          const d = ctx.getImageData(0, 0, S, S).data;
+          let r = 0, g = 0, b = 0, w = 0;
+          for (let i = 0; i < d.length; i += 4) {
+            if (d[i + 3] < 128) continue;
+            const R = d[i], G = d[i + 1], B = d[i + 2];
+            const mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+            const k = 0.25 + (mx ? (mx - mn) / mx : 0);   // 채도 가중
+            r += R * k; g += G * k; b += B * k; w += k;
+          }
+          if (!w) { resolve(null); return; }
+          resolve(vivid(r / w, g / w, b / w));
         } catch (_) { resolve(null); }
       };
       img.onerror = () => resolve(null);
@@ -52,13 +92,13 @@
     </div>`;
   }
 
-  function coverBook(it, c) {
+  function openBookEl(it, c) {
     const front = it.cover_path
       ? `<img src="${esc(coverUrl(it))}" alt="${esc(it.title)} 표지" />`
       : `<span class="wz-f-text">${esc(it.title)}</span>`;
-    return `<div class="wz-cuboid wz-coverbook" style="--spine:${c.spine}">
+    return `<div class="wz-cuboid wz-openbook" style="--spine:${c.spine}">
       <div class="f-front">${front}</div>
-      <div class="f-side"></div>
+      <div class="f-spine"><span>${esc(it.title)}</span></div>
       <div class="f-top wz-pages"></div>
     </div>`;
   }
@@ -72,7 +112,7 @@
       </div>
       <button type="button" class="wz-nav wz-next" aria-label="다음">›</button>`;
     const track = document.getElementById('wzTrack');
-    track.querySelectorAll('.wz-book').forEach(b => b.addEventListener('click', () => openDetail(Number(b.dataset.i))));
+    track.querySelectorAll('.wz-book').forEach(b => b.addEventListener('click', () => openBook(Number(b.dataset.i))));
     rail.querySelector('.wz-prev').addEventListener('click', () => track.scrollBy({ left: -360, behavior: 'smooth' }));
     rail.querySelector('.wz-next').addEventListener('click', () => track.scrollBy({ left: 360, behavior: 'smooth' }));
     track.addEventListener('wheel', (e) => {
@@ -94,39 +134,27 @@
     });
   }
 
-  function ensureDetail() {
-    if (detail) return;
-    detail = document.createElement('div');
-    detail.className = 'wz-detail';
-    detail.id = 'wzDetail';
-    detail.innerHTML = `
-      <button type="button" class="wz-detail-close" aria-label="닫기">✕</button>
-      <div class="wz-detail-inner">
-        <div class="wz-detail-stage" id="wzDetailStage"></div>
-        <div class="wz-detail-info" id="wzDetailInfo"></div>
-      </div>`;
-    document.body.appendChild(detail);
-    const close = () => { detail.classList.remove('open'); document.body.style.overflow = ''; };
-    detail.querySelector('.wz-detail-close').addEventListener('click', close);
-    detail.addEventListener('click', (e) => { if (e.target === detail) close(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && detail.classList.contains('open')) close(); });
+  function openBook(i) {
+    const it = issues[i]; if (!it) return;
+    const c = palette[i];
+    document.getElementById('wzOpenStage').innerHTML = openBookEl(it, c);
+    const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
+    document.getElementById('wzOpenInfo').innerHTML = `
+      ${it.issue_label ? `<span class="wz-open-issue">${esc(it.issue_label)}</span>` : ''}
+      <h2 class="wz-open-title">${esc(it.title)}</h2>
+      ${it.description ? `<p class="wz-open-desc">${esc(it.description)}</p>` : ''}
+      ${read ? `<a class="wz-open-read" href="${read}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}`;
+    open.style.setProperty('--wz-glow', c.spine);
+    shelf.hidden = true;
+    open.hidden = false;
   }
 
-  function openDetail(i) {
-    const it = issues[i]; if (!it) return;
-    ensureDetail();
-    const c = palette[i];
-    detail.style.setProperty('--detail-bg', `color-mix(in srgb, ${c.spine} 42%, #110d10)`);
-    document.getElementById('wzDetailStage').innerHTML = coverBook(it, c);
-    const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
-    document.getElementById('wzDetailInfo').innerHTML = `
-      ${it.issue_label ? `<span class="wz-detail-issue">${esc(it.issue_label)}</span>` : ''}
-      <h2 class="wz-detail-title">${esc(it.title)}</h2>
-      ${it.description ? `<p class="wz-detail-desc">${esc(it.description)}</p>` : ''}
-      ${read ? `<a class="wz-detail-read" href="${read}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}`;
-    detail.classList.add('open');
-    document.body.style.overflow = 'hidden';
+  function closeBook() {
+    open.hidden = true;
+    shelf.hidden = false;
   }
+  back.addEventListener('click', closeBook);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !open.hidden) closeBook(); });
 
   (async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
