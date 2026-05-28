@@ -18,6 +18,10 @@
     .admin-back:hover { color: var(--text); }
     .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
     .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-subnav { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
     .admin-user { font-size: 13px; color: var(--text-muted); }
     .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
     .gate { max-width: 480px; margin: 80px auto; padding: 40px 24px; text-align: center; }
@@ -63,9 +67,20 @@
 <div class="admin-header">
   <a class="admin-back" href="../index.html">← 5ft.mag 으로</a>
   <div class="admin-title-row">
-    <h1 class="admin-title">웹진 관리 (비공개)</h1>
+    <h1 class="admin-title">웹진 관리</h1>
     <span class="admin-user" id="adminUser">불러오는 중…</span>
   </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <a href="submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="comments.html" class="admin-subnav-link">댓글</a>
+    <a href="camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
+    <a href="films.html" class="admin-subnav-link">필름 카탈로그</a>
+    <a href="labs.html" class="admin-subnav-link">현상소</a>
+    <a href="repairs.html" class="admin-subnav-link">수리실</a>
+    <a href="webzine.html" class="admin-subnav-link is-current">웹진</a>
+    <a href="analytics.html" class="admin-subnav-link">통계</a>
+  </nav>
 </div>
 
 <div id="gate" class="gate" hidden>
