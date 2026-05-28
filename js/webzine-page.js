@@ -72,7 +72,9 @@
             r += R * k; g += G * k; b += B * k; w += k;
           }
           if (!w) { resolve(null); return; }
-          resolve(vivid(r / w, g / w, b / w));
+          const col = vivid(r / w, g / w, b / w);
+          col.aspect = (img.naturalWidth && img.naturalHeight) ? img.naturalWidth / img.naturalHeight : 0;
+          resolve(col);
         } catch (_) { resolve(null); }
       };
       img.onerror = () => resolve(null);
@@ -318,9 +320,13 @@
       if (!it.cover_path) return;
       pickColor(coverUrl(it)).then(c => {
         if (!c) return;
-        palette[i] = c;
-        const b3 = root.querySelector(`.wz-slot[data-i="${i}"] .wz-book3d`);
+        palette[i] = { spine: c.spine, text: c.text };
+        const slot = root.querySelector(`.wz-slot[data-i="${i}"]`);
+        const b3 = slot && slot.querySelector('.wz-book3d');
         if (b3) { b3.style.setProperty('--spine', c.spine); b3.style.setProperty('--spine-text', c.text); }
+        // 표지 박스를 이미지 실제 비율(폭=높이×비율)에 맞춰 좌우 잘림 없이 표시
+        if (slot && c.aspect && isFinite(c.aspect)) slot.style.setProperty('--cw2', `calc(var(--h) * ${c.aspect.toFixed(4)})`);
+        if (openState && openState.i === i) follow(openState.rs);
       });
     });
   })();
