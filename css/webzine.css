@@ -18,30 +18,24 @@
 .wz-intro p { font-size: var(--fs-body); line-height: 1.65; color: rgba(255, 255, 255, .62); }
 .wz-empty { text-align: center; color: rgba(255, 255, 255, .5); padding: 80px 24px; }
 
-/* ── 시즌(분류)별 책장 ── */
+/* ── 시즌(분류)별 책장 — 줄마다 코버플로우 ── */
 .wz-seasons { padding: 8px 0 72px; }
-.wz-shelf { padding: 14px 0 6px; }
-.wz-shelf-title { font-size: clamp(17px, 1.7vw, 23px); font-weight: var(--fw-heading); letter-spacing: -0.01em; color: #fff; margin: 0; padding: 0 max(20px, 5vw) 4px; }
-.wz-rail-wrap { position: relative; }
-.wz-rail {
-  display: flex; align-items: flex-end; gap: clamp(18px, 3vw, 40px);
-  overflow-x: auto; scroll-behavior: smooth; perspective: 1700px;
-  padding: 22px max(20px, 5vw) 30px;
-  scrollbar-width: none; -webkit-overflow-scrolling: touch;
-}
-.wz-rail::-webkit-scrollbar { display: none; }
+.wz-shelf { padding: 8px 0 2px; }
+.wz-shelf-title { font-size: clamp(17px, 1.7vw, 23px); font-weight: var(--fw-heading); letter-spacing: -0.01em; color: #fff; margin: 0; padding: 0 max(20px, 5vw); }
+.wz-flow { position: relative; overflow: hidden; }
+.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 46px 0 56px; will-change: transform; transition: transform .55s cubic-bezier(.22, .61, .27, 1); }
+.wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-spinebook { transition: none !important; }
 
-.wz-slot { flex: 0 0 auto; background: none; border: none; padding: 0; cursor: pointer; }
+.wz-slot { flex: 0 0 auto; background: none; border: none; padding: 0; cursor: pointer; perspective: 1500px; transition: opacity .45s; }
 .wz-slot:focus-visible { outline: none; }
 .wz-spinebook {
-  --t: clamp(74px, 8vw, 100px); --h: min(46vh, 380px); --cw: 190px;
+  --t: clamp(76px, 8vw, 108px); --h: min(44vh, 360px); --cw: 200px;
   --spine: #2b2b2b; --spine-text: #fff;
   width: var(--t); height: var(--h);
-  transition: transform .35s cubic-bezier(.2, .7, .2, 1);
+  transition: transform .5s cubic-bezier(.22, .61, .27, 1);
   will-change: transform;
-  filter: drop-shadow(12px 16px 16px rgba(0, 0, 0, .45));
+  filter: drop-shadow(14px 20px 18px rgba(0, 0, 0, .45));
 }
-.wz-slot:hover .wz-spinebook, .wz-slot:focus-visible .wz-spinebook { transform: translateY(-10px) rotateY(-7deg); }
 .wz-spinebook .f-spine {
   width: var(--t); height: var(--h); transform: translateZ(calc(var(--cw) / 2));
   background:
@@ -61,9 +55,10 @@
   width: 42px; height: 42px; border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, .22); background: rgba(20, 16, 22, .55); color: #fff;
   font-size: 19px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background .15s, border-color .15s; backdrop-filter: blur(4px);
+  transition: background .15s, border-color .15s, opacity .15s; backdrop-filter: blur(4px);
 }
 .wz-nav:hover { background: rgba(40, 32, 44, .8); border-color: rgba(255, 255, 255, .5); }
+.wz-nav:disabled { opacity: .2; cursor: default; }
 .wz-prev { left: 8px; }
 .wz-next { right: 8px; }
 
@@ -108,7 +103,7 @@
 .wz-open-back:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .5); }
 
 @media (prefers-reduced-motion: reduce) {
-  .wz-spinebook { transition: none; }
+  .wz-track, .wz-slot, .wz-spinebook { transition: none; }
   .wz-coverbook { animation: none; transform: rotateY(-8deg) rotateX(3deg); }
   .wz-flow-info { animation: none; }
 }
@@ -133,8 +128,8 @@
 @media (max-width: 760px) {
   .wz-intro { padding: 28px 20px 0; }
   .wz-nav { display: none; }
-  .wz-rail { gap: clamp(14px, 4vw, 28px); padding: 18px 20px 24px; }
-  .wz-spinebook { --t: clamp(62px, 18vw, 96px); --h: min(42vh, 340px); --cw: 168px; }
+  .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
+  .wz-spinebook { --t: clamp(64px, 18vw, 98px); --h: min(40vh, 320px); --cw: 172px; }
   .wz-open-grid { grid-template-columns: 1fr; gap: 26px; justify-items: center; text-align: center; width: min(360px, 86vw); }
   .wz-coverbook { --cw: 230px; --h: 345px; --t: 40px; }
   .wz-flow-info { text-align: center; }
