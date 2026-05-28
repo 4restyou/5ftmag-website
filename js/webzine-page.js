@@ -189,12 +189,11 @@
   function nav(rs, d) {
     currentRow = rs;
     clearTimeout(seqT);
+    if (openState) { closeOpen(); return; }   // 펼쳐져 있으면 닫기만(ESC 와 동일) — 닫으며 이동하면 모션이 튄다
     const n = rs.active + d;
     if (n < 0 || n >= rs.slots.length || n === rs.active) return;
-    const wasOpen = !!openState;
-    if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
     rs.active = n;
-    if (wasOpen) follow(rs); else layout(rs);
+    layout(rs);
   }
 
   function setLikeBtn(btn, on) {
@@ -263,7 +262,8 @@
         const d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
         if (!d) return;
         const dir = d > 0 ? 1 : -1;
-        if ((dir > 0 && rs.active >= rs.slots.length - 1) || (dir < 0 && rs.active <= 0)) return;
+        // 펼쳐져 있으면 방향·위치 무관하게 닫기만(ESC 와 동일). 닫혀 있을 때만 줄 끝에서 페이지 스크롤에 양보.
+        if (!openState && ((dir > 0 && rs.active >= rs.slots.length - 1) || (dir < 0 && rs.active <= 0))) return;
         e.preventDefault();
         if (wheelLock) return;            // 한 번 스와이프 = 한 칸(너무 빨리 지나가지 않게)
         wheelLock = true; setTimeout(() => { wheelLock = false; }, 480);
