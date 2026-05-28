@@ -1247,18 +1247,31 @@
         let activeBlob = blob;
         const triedPaths = [initialPath];
 
-        // TUS resumable 업로드 한 회. 진행률 % 를 버튼/상태창에 실시간 표시.
-        async function tryResumableUpload(targetPath, targetBlob, attemptLabel, timeoutKind) {
+        // 업로드 한 회: 단일 요청(plain) 우선 → 실패 시 TUS 재개 폴백.
+        // 소형(2000px 축소) 이미지엔 단일 요청이 충분하고, 사파리/인앱에서
+        // TUS 가 onError 없이 정체되는 문제를 피한다. plain 경로는 supabase
+        // 클라이언트 세션을 자동 사용 → 수동 getSession hang 도 우회.
+        async function tryUpload(targetPath, targetBlob, attemptLabel, timeoutKind) {
+          submitBtn.textContent = `${attemptLabel} (${fmtBytes(targetBlob.size)})`;
+          markProgress('storage', attemptLabel, `${fmtBytes(targetBlob.size)} 전송 중입니다. 창을 닫지 마세요.`);
+          const simple = await withNetworkTimeout(
+            db().submissions.uploadPhoto(targetPath, targetBlob),
+            readerUploadTimeoutMs(timeoutKind),
+            attemptLabel
+          ).catch(err => ({ error: { message: err.message } }));
+          if (!simple || !simple.error) return { error: null };
+
+          // 폴백: TUS 재개 업로드 (끊기는 네트워크 대비). 진행률 표시.
           let lastPct = -1;
           const onProgress = (sent, total) => {
             const pct = Math.max(0, Math.min(100, Math.round((sent / (total || targetBlob.size)) * 100)));
             if (pct === lastPct) return;
             lastPct = pct;
             submitBtn.textContent = `${attemptLabel} ${pct}% (${fmtBytes(sent)} / ${fmtBytes(targetBlob.size)})`;
-            markProgress('storage', `${attemptLabel}`, `${pct}% · ${fmtBytes(sent)} / ${fmtBytes(targetBlob.size)} 전송 중`);
+            markProgress('storage', attemptLabel, `${pct}% · ${fmtBytes(sent)} / ${fmtBytes(targetBlob.size)} 전송 중`);
           };
-          submitBtn.textContent = `${attemptLabel} 0%`;
-          markProgress('storage', `${attemptLabel}`, `${fmtBytes(targetBlob.size)} 파일을 청크 단위로 보내는 중입니다. 창을 닫지 마세요.`);
+          submitBtn.textContent = `${attemptLabel} 재시도 0%`;
+          markProgress('storage', attemptLabel, `다시 청크 단위로 보내는 중입니다. 창을 닫지 마세요.`);
           return withNetworkTimeout(
             db().submissions.uploadPhotoResumable(targetPath, targetBlob, { onProgress }),
             readerUploadTimeoutMs(timeoutKind),
@@ -1286,7 +1299,7 @@
 
         // 1차: 1600px / 76%
         uploadMeta.uploadBytes = activeBlob.size;
-        let { error: upErr } = await tryResumableUpload(path, activeBlob, '사진 업로드 중…', 'primary');
+        let { error: upErr } = await tryUpload(path, activeBlob, '사진 업로드 중…', 'primary');
 
         // 2차: 1200px / 68% (1차가 어떤 이유로든 실패하면)
         if (upErr) {
@@ -1294,7 +1307,7 @@
           path = `${user.id}/${Date.now()}-${uuid()}-lite.jpg`;
           triedPaths.push(path);
           uploadMeta.uploadBytes = activeBlob.size;
-          ({ error: upErr } = await tryResumableUpload(path, activeBlob, '저용량 사진 업로드 중…', 'fallback'));
+          ({ error: upErr } = await tryUpload(path, activeBlob, '저용량 사진 업로드 중…', 'fallback'));
         }
 
         // 3차: 800px / 55% — 마지막 시도
@@ -1303,7 +1316,7 @@
           path = `${user.id}/${Date.now()}-${uuid()}-tiny.jpg`;
           triedPaths.push(path);
           uploadMeta.uploadBytes = activeBlob.size;
-          ({ error: upErr } = await tryResumableUpload(path, activeBlob, '최소용량 사진 업로드 중…', 'tertiary'));
+          ({ error: upErr } = await tryUpload(path, activeBlob, '최소용량 사진 업로드 중…', 'tertiary'));
         }
 
         if (upErr) {
