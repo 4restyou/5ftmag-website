@@ -31,6 +31,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 46px 0 56px; will-change: transform; transition: transform .55s var(--wz-ease); }
 .wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-book3d { transition: none !important; }
 .wz-flow.following .wz-track { transition: none; }
+.wz-flow.following .wz-slot { filter: none; }   /* 움직이는 동안 그림자 재래스터 방지 → 부드럽게 */
 
 /* 슬롯: 닫힘=책등폭, 열림=표지+정보폭. 폭이 전환되며 이웃을 부드럽게 밀어낸다 */
 .wz-slot {

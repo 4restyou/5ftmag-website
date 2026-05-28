@@ -19,7 +19,7 @@
   const slotIndex = new Map();   // 전역 인덱스 i -> { rs, pos }
   let favSet = new Set();
   let openState = null;          // { rs, pos, i }
-  let followId = null, followFlow = null;
+  let followId = null, followFlow = null, seqT = null;
   let currentRow = null;         // 키보드 좌우 이동 대상(최근 조작/펼친 줄)
 
   function rgbToHsl(r, g, b) {
@@ -136,16 +136,19 @@
     if (prev) prev.disabled = rs.active <= 0;
     if (next) next.disabled = rs.active >= rs.slots.length - 1;
   }
-  // 슬롯 폭이 전환되는 동안(열림/접힘) 매 프레임 중앙을 다시 맞춰 트랙이 따라가게 한다.
+  // 슬롯 폭이 전환되는 동안(열림/접힘) 트랙 위치만 매 프레임 갱신해 부드럽게 따라간다.
+  // (전체 레이아웃/그림자 재계산은 프레임마다 하지 않음 — 끊김 방지)
   function follow(rs) {
     if (followId) cancelAnimationFrame(followId);
     if (followFlow && followFlow !== rs.flowEl) followFlow.classList.remove('following');
     followFlow = rs.flowEl;
     rs.flowEl.classList.add('following');
+    layout(rs);
     const t0 = performance.now();
     const step = (t) => {
-      layout(rs);
-      if (t - t0 < 720) { followId = requestAnimationFrame(step); }
+      const s = rs.slots[rs.active];
+      if (s) rs.trackEl.style.transform = `translateX(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px)`;
+      if (t - t0 < 660) { followId = requestAnimationFrame(step); }
       else { rs.flowEl.classList.remove('following'); followId = null; followFlow = null; layout(rs); }
     };
     followId = requestAnimationFrame(step);
@@ -153,13 +156,18 @@
 
   function onBook(rs, pos) {
     currentRow = rs;
+    clearTimeout(seqT);
     const slot = rs.slots[pos];
-    if (slot.classList.contains('is-open')) { closeOpen(); return; }
-    if (pos === rs.active && !openState) { openBook(rs, pos); return; }
-    const wasOpen = !!openState;
-    if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
-    rs.active = pos;
-    if (wasOpen) follow(rs); else layout(rs);
+    if (slot.classList.contains('is-open')) { closeOpen(); return; }   // 펼친 책 다시 클릭 → 닫기
+    if (openState) {
+      // 다른 책 클릭: 접고 → 그 책으로 이동 → 펼치기
+      closeOpen();
+      rs.active = pos; follow(rs);
+      seqT = setTimeout(() => openBook(rs, pos), 460);
+      return;
+    }
+    if (pos === rs.active) { openBook(rs, pos); return; }
+    rs.active = pos; layout(rs);
   }
   function openBook(rs, pos) {
     if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
@@ -171,6 +179,7 @@
     requestAnimationFrame(() => slot.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' }));
   }
   function closeOpen() {
+    clearTimeout(seqT);
     if (!openState) return;
     const { rs, pos } = openState;
     rs.slots[pos].classList.remove('is-open');
@@ -179,6 +188,7 @@
   }
   function nav(rs, d) {
     currentRow = rs;
+    clearTimeout(seqT);
     const n = rs.active + d;
     if (n < 0 || n >= rs.slots.length || n === rs.active) return;
     const wasOpen = !!openState;
