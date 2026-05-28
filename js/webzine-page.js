@@ -20,6 +20,7 @@
   let favSet = new Set();
   let openState = null;          // { rs, pos, i }
   let followId = null, followFlow = null;
+  let currentRow = null;         // 키보드 좌우 이동 대상(최근 조작/펼친 줄)
 
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
@@ -87,7 +88,7 @@
       <div class="f-front">${cover}</div>
       <div class="f-spine">
         <span class="wz-spine-head">
-          <span class="wz-spine-title">${esc(it.title)}</span>
+          <span class="wz-spine-title"><span class="wz-spine-title-in">${esc(it.title)}</span></span>
           ${it.issue_label ? `<span class="wz-spine-issue">${esc(it.issue_label)}</span>` : ''}
         </span>
         <span class="wz-spine-mark" aria-hidden="true"></span>
@@ -149,6 +150,7 @@
   }
 
   function onBook(rs, pos) {
+    currentRow = rs;
     const slot = rs.slots[pos];
     if (slot.classList.contains('is-open')) { closeOpen(); return; }
     if (pos === rs.active && !openState) { openBook(rs, pos); return; }
@@ -173,6 +175,7 @@
     follow(rs);
   }
   function nav(rs, d) {
+    currentRow = rs;
     const n = rs.active + d;
     if (n < 0 || n >= rs.slots.length || n === rs.active) return;
     const wasOpen = !!openState;
@@ -240,13 +243,16 @@
       });
       flowEl.querySelector('.wz-prev').addEventListener('click', () => nav(rs, -1));
       flowEl.querySelector('.wz-next').addEventListener('click', () => nav(rs, 1));
+      let wheelLock = false;
       flowEl.addEventListener('wheel', (e) => {
         if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
         e.preventDefault();
+        if (wheelLock) return;            // 한 번 스와이프 = 한 칸(너무 빨리 지나가지 않게)
+        wheelLock = true; setTimeout(() => { wheelLock = false; }, 520);
         nav(rs, e.deltaX > 0 ? 1 : -1);
       }, { passive: false });
       let tx = null, ty = null;
-      flowEl.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+      flowEl.addEventListener('touchstart', (e) => { currentRow = rs; tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
       flowEl.addEventListener('touchend', (e) => {
         if (tx == null) return;
         const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
@@ -255,17 +261,40 @@
       layout(rs);
       requestAnimationFrame(() => flowEl.classList.remove('no-anim'));
     });
+    currentRow = rows[0] || null;
+    requestAnimationFrame(measureTitles);
+  }
+
+  // 책등 제목이 넘치면(잘리면) 세로로 천천히 흐르게(마퀴) 해서 다 읽히게 한다.
+  function measureTitles() {
+    root.querySelectorAll('.wz-spine-title').forEach(el => {
+      const over = el.scrollHeight - el.clientHeight;
+      if (over > 6) {
+        el.style.setProperty('--scroll', over + 'px');
+        el.style.setProperty('--marq-dur', (over / 22 + 4).toFixed(1) + 's');
+        el.classList.add('is-scroll');
+      } else { el.classList.remove('is-scroll'); }
+    });
   }
 
   let resizeT = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeT);
-    resizeT = setTimeout(() => rows.forEach(rs => {
-      rs.flowEl.classList.add('no-anim'); layout(rs);
-      requestAnimationFrame(() => rs.flowEl.classList.remove('no-anim'));
-    }), 120);
+    resizeT = setTimeout(() => {
+      rows.forEach(rs => {
+        rs.flowEl.classList.add('no-anim'); layout(rs);
+        requestAnimationFrame(() => rs.flowEl.classList.remove('no-anim'));
+      });
+      measureTitles();
+    }, 120);
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && openState) closeOpen(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { if (openState) closeOpen(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const rs = (openState && openState.rs) || currentRow;
+      if (rs) nav(rs, e.key === 'ArrowRight' ? 1 : -1);   // 열려 있으면 접고 넘김
+    }
+  });
 
   (async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
