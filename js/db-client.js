@@ -1182,9 +1182,50 @@
     },
   };
 
+  const WEBZINE_BUCKET = 'webzine';
+  const webzine = {
+    async listPublished() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('webzine_issues')
+        .select('*').eq('published', true)
+        .order('sort_order', { ascending: false }).order('created_at', { ascending: false });
+      if (error) { console.warn('[webzine.listPublished]', error.message); return []; }
+      return data || [];
+    },
+    async listAll() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('webzine_issues')
+        .select('*').order('sort_order', { ascending: false }).order('created_at', { ascending: false });
+      if (error) { console.warn('[webzine.listAll]', error.message); return []; }
+      return data || [];
+    },
+    async getBySlug(slug) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.from('webzine_issues')
+        .select('*').eq('slug', slug).eq('published', true).maybeSingle();
+      if (error) { console.warn('[webzine.getBySlug]', error.message); return null; }
+      return data || null;
+    },
+    async upsert(record) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('webzine_issues').upsert(record).select().maybeSingle();
+    },
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('webzine_issues').delete().eq('id', id);
+    },
+    async uploadFile(path, file) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.storage.from(WEBZINE_BUCKET).upload(path, file, {
+        contentType: file.type || 'application/octet-stream', upsert: true,
+      });
+    },
+    publicUrl(path) { return `${URL_}/storage/v1/object/public/${WEBZINE_BUCKET}/${path}`; },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, repairs, newsletter,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, repairs, newsletter, webzine,
   };
 })();
