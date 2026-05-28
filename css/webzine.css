@@ -25,7 +25,7 @@
   background: radial-gradient(54% 48% at 50% 52%, color-mix(in srgb, var(--wz-glow, #5a4d63) 28%, transparent), transparent 72%);
   transition: background .5s;
 }
-.wz-track { display: flex; align-items: center; gap: clamp(22px, 6vw, 80px); will-change: transform; transition: transform .55s cubic-bezier(.22, .61, .27, 1), opacity .35s; }
+.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); will-change: transform; transition: transform .55s cubic-bezier(.22, .61, .27, 1), opacity .35s; }
 .wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-spinebook { transition: none !important; }
 .wz-slot { flex: 0 0 auto; background: none; border: none; padding: 0; cursor: pointer; perspective: 1500px; transition: opacity .45s; }
 .wz-slot:focus-visible { outline: none; }
@@ -127,8 +127,8 @@
 @media (max-width: 760px) {
   .wz-intro { padding: 30px 20px 0; }
   .wz-nav { display: none; }
-  .wz-track { gap: clamp(16px, 5vw, 48px); }
-  .wz-slot .wz-spinebook { --t: clamp(66px, 19vw, 104px); --h: min(56vh, 460px); --cw: 180px; }
+  .wz-track { gap: clamp(12px, 4vw, 30px); }
+  .wz-slot .wz-spinebook { --t: clamp(60px, 17vw, 96px); --h: min(54vh, 440px); --cw: 170px; }
   .wz-open-grid { grid-template-columns: 1fr; gap: 26px; justify-items: center; text-align: center; width: min(360px, 86vw); }
   .wz-coverbook { --cw: 230px; --h: 345px; --t: 40px; }
   .wz-flow-info { text-align: center; }
