@@ -79,6 +79,16 @@
   function onMouseDown(e) { if (zoom > 1.01) { e.preventDefault(); e.stopPropagation(); mDrag = true; mx0 = e.clientX - panX; my0 = e.clientY - panY; } }
   function onMouseMove(e) { if (!mDrag) return; panX = e.clientX - mx0; panY = e.clientY - my0; clampPan(); applyZoom(); }
   function onMouseUp() { mDrag = false; }
+  // 휠/스크롤로 페이지 넘김(확대 중엔 끔). 한 번 = 한 장.
+  let wheelLock = false;
+  function onWheel(e) {
+    if (zoom > 1.01 || !flip) return;
+    e.preventDefault();
+    if (wheelLock) return;
+    wheelLock = true; setTimeout(() => { wheelLock = false; }, 600);
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (d > 0) flip.flipNext(); else flip.flipPrev();
+  }
 
   function build(title) {
     overlay = document.createElement('div');
@@ -111,6 +121,7 @@
     stage.addEventListener('touchmove', onTouchMove, { capture: true, passive: false });
     stage.addEventListener('touchend', onTouchEnd, { capture: true, passive: false });
     stage.addEventListener('mousedown', onMouseDown, { capture: true });
+    stage.addEventListener('wheel', onWheel, { passive: false });
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
     onKey = (e) => {
