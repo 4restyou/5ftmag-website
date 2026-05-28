@@ -9,7 +9,7 @@ html {
   --wz-ease: cubic-bezier(.22, .61, .27, 1);
 }
 /* 헤더·본문·푸터를 하나의 갤러리 배경으로 연결(고정 배경이라 seam 없음) */
-body { background: var(--wz-bg); color: #fff; }
+body { background: var(--wz-bg); color: #fff; overflow-x: hidden; }
 header { background: var(--wz-bg); border-bottom-color: transparent; }
 footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(255, 255, 255, .8); }
 .wz-stage { min-height: calc(100vh - var(--header-h, 72px)); background: none; color: #fff; display: flex; flex-direction: column; }
@@ -27,7 +27,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-seasons { padding: 8px 0 72px; }
 .wz-shelf { padding: 8px 0 2px; }
 .wz-shelf-title { font-size: clamp(17px, 1.7vw, 23px); font-weight: var(--fw-heading); letter-spacing: -0.01em; color: #fff; margin: 0; padding: 0 max(20px, 5vw); }
-.wz-flow { position: relative; overflow: hidden; }
+.wz-flow { position: relative; overflow: visible; }
 .wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 46px 0 56px; will-change: transform; transition: transform .55s var(--wz-ease); }
 .wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-book3d { transition: none !important; }
 .wz-flow.following .wz-track { transition: none; }
@@ -68,7 +68,10 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-book3d .f-edge { width: var(--st); height: var(--h); transform: rotateY(90deg) translateZ(calc(var(--cw2) / 2)); --pg-dir: to bottom; }
 .wz-book3d .f-top { width: var(--cw2); height: var(--st); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
 .wz-spine-head { display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 0; }
-.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(14px, 1.1vw, 18px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: calc(var(--h) * 0.6); overflow: hidden; }
+.wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(13px, 1.05vw, 17px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: calc(var(--h) - 96px); overflow: hidden; }
+.wz-spine-title-in { display: block; }
+.wz-spine-title.is-scroll .wz-spine-title-in { animation: wz-marq var(--marq-dur, 7s) ease-in-out infinite alternate; }
+@keyframes wz-marq { to { transform: translateY(calc(-1 * var(--scroll, 0px))); } }
 .wz-spine-issue { writing-mode: vertical-rl; font-size: 11px; letter-spacing: 0.16em; opacity: .58; }
 .wz-spine-mark { flex: 0 0 auto; width: clamp(18px, 2.2vw, 26px); height: clamp(18px, 2.2vw, 26px); background: var(--spine-text); opacity: .82; -webkit-mask: var(--wz-mark) center / contain no-repeat; mask: var(--wz-mark) center / contain no-repeat; }
 
@@ -106,6 +109,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 
 @media (prefers-reduced-motion: reduce) {
   .wz-track, .wz-slot, .wz-book3d, .wz-info { transition: none; }
+  .wz-spine-title.is-scroll .wz-spine-title-in { animation: none; }
 }
 
 /* ── 책 읽기(flipbook 리더) ── */
@@ -130,6 +134,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   .wz-nav { display: none; }
   .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
   .wz-slot { --st: clamp(38px, 11vw, 58px); --cw2: clamp(120px, 34vw, 160px); --h: min(40vh, 320px); --infow: 46vw; --infogap: clamp(14px, 4vw, 24px); }
+  .wz-spine-title { font-size: clamp(11px, 2.8vw, 14px); }
   .wz-meta-title { font-size: 22px; }
   .wz-meta-desc { max-height: 7em; }
 }
