@@ -126,6 +126,12 @@
     flow.querySelector('.wz-next').addEventListener('click', () => nav(1));
     flow.querySelector('.wz-center-book').addEventListener('click', () => { opened = !opened; paint(); });
     flow.querySelectorAll('.wz-peek').forEach(b => b.addEventListener('click', () => select(active + Number(b.dataset.go))));
+    const read = flow.querySelector('.wz-meta-read');
+    if (read) read.addEventListener('click', (e) => {
+      if (!window.WebzineReader) return;          // JS 미로드 시 새 탭(기본 동작) 폴백
+      e.preventDefault();
+      window.WebzineReader.open(read.href, it.title);
+    });
   }
 
   function nav(d) {
