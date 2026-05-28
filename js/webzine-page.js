@@ -1,9 +1,9 @@
 'use strict';
 
 // 5ft.mag 웹진 — 분류(시즌)별로 한 줄씩 세로로 쌓고, 각 줄은 코버플로우(가운데 책이
-// 도드라지며 좌우로 부드럽게 미끄러짐: 스와이프·가로 휠·화살표). 분류명은 줄 제목으로
-// 붙고, 호는 1→2→3 순(오름차순). 한 권을 고르면 같은 색 무대에서 표지가 돌아 펼쳐지며
-// 정보·"책 읽기"(PDF flipbook)가 뜬다. 책등 색은 표지 대표색(채도 가중 + HSL 보정).
+// 도드라지며 좌우로 미끄러짐). 책등은 제목 상단 정렬 + 하단 5ft 심볼, 종이 질감(CSS).
+// 한 권을 고르면 같은 색 무대에서 표지가 돌아 펼쳐지고 정보·좋아요·공유·"책 읽기"가 뜬다.
+// 좋아요는 user_favorites(target_type 'webzine')로 저장돼 마이페이지에 표시된다.
 (function () {
   const root = document.getElementById('wzSeasons');
   if (!root) return;
@@ -16,6 +16,7 @@
   let issues = [];
   const palette = [];
   const rows = [];
+  let favSet = new Set();
   let openEl = null, opened = false, openIdx = -1;
 
   function rgbToHsl(r, g, b) {
@@ -79,8 +80,11 @@
   function spineBook(it, c) {
     return `<div class="wz-cuboid wz-spinebook" style="--spine:${c.spine};--spine-text:${c.text}">
       <div class="f-spine">
-        <span class="wz-spine-title">${esc(it.title)}</span>
-        ${it.issue_label ? `<span class="wz-spine-issue">${esc(it.issue_label)}</span>` : ''}
+        <span class="wz-spine-head">
+          <span class="wz-spine-title">${esc(it.title)}</span>
+          ${it.issue_label ? `<span class="wz-spine-issue">${esc(it.issue_label)}</span>` : ''}
+        </span>
+        <span class="wz-spine-mark" aria-hidden="true"></span>
       </div>
       <div class="f-cover"></div>
       <div class="f-top wz-pages"></div>
@@ -98,13 +102,17 @@
   }
   function infoHtml(it) {
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
+    const fav = favSet.has(it.id);
     return `${it.issue_label ? `<span class="wz-meta-issue">${esc(it.issue_label)}</span>` : ''}
       <h2 class="wz-meta-title">${esc(it.title)}</h2>
       ${it.description ? `<p class="wz-meta-desc">${esc(it.description)}</p>` : ''}
-      ${read ? `<a class="wz-meta-read" href="${read}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}`;
+      ${read ? `<a class="wz-meta-read" href="${read}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}
+      <div class="wz-open-actions">
+        <button type="button" class="wz-act wz-like${fav ? ' is-on' : ''}" data-act="like" aria-pressed="${fav}">${fav ? '♥' : '♡'} <span>좋아요</span></button>
+        <button type="button" class="wz-act wz-share" data-act="share">↗ <span>공유</span></button>
+      </div>`;
   }
 
-  // 분류(시즌)별로 묶음. issues 는 이미 1→2→3(오름차순)으로 정렬돼 있어 줄 순서·줄 내 순서 모두 오름차순.
   function groupByCategory() {
     const order = [], map = new Map();
     issues.forEach((it, i) => {
@@ -161,7 +169,7 @@
       flowEl.querySelector('.wz-prev').addEventListener('click', () => nav(rs, -1));
       flowEl.querySelector('.wz-next').addEventListener('click', () => nav(rs, 1));
       flowEl.addEventListener('wheel', (e) => {
-        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;   // 세로 휠은 페이지 스크롤
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
         e.preventDefault();
         nav(rs, e.deltaX > 0 ? 1 : -1);
       }, { passive: false });
@@ -194,6 +202,29 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && opened) closeBook(); });
   }
 
+  function setLikeBtn(btn, on) {
+    if (!btn) return;
+    btn.classList.toggle('is-on', on);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.innerHTML = `${on ? '♥' : '♡'} <span>좋아요</span>`;
+  }
+  async function toggleLike(it, btn) {
+    const session = await db().auth.getSession();
+    if (!session) { db().auth.signInWithGoogle(location.href); return; }
+    const on = favSet.has(it.id);
+    const { error } = await db().favorites.toggle('webzine', it.id, on);
+    if (error) { window.notify?.('좋아요 처리 실패: ' + error.message, 'danger'); return; }
+    if (on) favSet.delete(it.id); else favSet.add(it.id);
+    setLikeBtn(btn, !on);
+  }
+  async function share(it) {
+    const url = `${location.origin}/webzine.html?issue=${encodeURIComponent(it.slug)}`;
+    const data = { title: `5ft.mag — ${it.title}`, text: it.title, url };
+    if (navigator.share) { try { await navigator.share(data); } catch (_) {} return; }
+    try { await navigator.clipboard.writeText(url); window.notify?.('링크를 복사했어요.', 'success'); }
+    catch (_) { window.notify?.(url, 'info'); }
+  }
+
   function openBook(i) {
     const it = issues[i], c = palette[i]; if (!it) return;
     ensureOpen();
@@ -207,6 +238,10 @@
       e.preventDefault();
       window.WebzineReader.open(read.href, it.title);
     });
+    const likeBtn = openEl.querySelector('.wz-like');
+    if (likeBtn) likeBtn.addEventListener('click', () => toggleLike(it, likeBtn));
+    const shareBtn = openEl.querySelector('.wz-share');
+    if (shareBtn) shareBtn.addEventListener('click', () => share(it));
     opened = true;
     openEl.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -230,10 +265,15 @@
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
     try { issues = await db().webzine.listPublished(); } catch (_) { issues = []; }
     if (!Array.isArray(issues)) issues = [];
-    // 1→2→3 오름차순(정렬값 우선, 같으면 생성순)
     issues.sort((a, b) => ((a.sort_order || 0) - (b.sort_order || 0)) || (new Date(a.created_at || 0) - new Date(b.created_at || 0)));
     issues.forEach((_, i) => { palette[i] = { spine: FALLBACK[i % FALLBACK.length], text: '#fff' }; });
     render();
+
+    try { favSet = await db().favorites.idsForType('webzine'); } catch (_) { favSet = new Set(); }
+
+    // 호별 딥링크(?issue=slug) — 공유 링크로 들어오면 해당 호를 펼침
+    const slug = new URLSearchParams(location.search).get('issue');
+    if (slug) { const i = issues.findIndex(x => x.slug === slug); if (i >= 0) openBook(i); }
 
     issues.forEach((it, i) => {
       if (!it.cover_path) return;
