@@ -37,7 +37,8 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   --st: clamp(46px, 4.8vw, 64px); --cw2: clamp(150px, 17vw, 210px); --h: min(46vh, 380px);
   --infow: min(40vw, 320px); --infogap: clamp(20px, 3vw, 44px);
   position: relative; flex: 0 0 auto; width: var(--st); height: var(--h);
-  perspective: 1500px; transition: width .6s var(--wz-ease), opacity .45s;
+  transition: width .6s var(--wz-ease), opacity .45s;
+  filter: drop-shadow(12px 18px 16px rgba(0, 0, 0, .45));
 }
 .wz-slot.is-open { width: calc(var(--cw2) + var(--infogap) + var(--infow)); }
 
@@ -48,8 +49,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   --bx: calc((var(--st) - var(--cw2)) / 2); --by: 90deg; --bs: .9;
   position: absolute; top: 0; left: 0; width: var(--cw2); height: var(--h);
   transform-style: preserve-3d; transform: translateX(var(--bx)) rotateY(var(--by)) scale(var(--bs));
-  transition: transform .6s var(--wz-ease);
-  filter: drop-shadow(12px 18px 16px rgba(0, 0, 0, .45)); will-change: transform;
+  transition: transform .6s var(--wz-ease); will-change: transform;
 }
 .wz-slot.is-center .wz-book3d { --bs: 1; }
 .wz-slot.is-open .wz-book3d { --bx: 0; --by: -8deg; --bs: 1; }
