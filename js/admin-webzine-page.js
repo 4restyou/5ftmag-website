@@ -95,6 +95,7 @@ function openModal(issue) {
   $('f-id').value = issue?.id || '';
   $('f-title').value = issue?.title || '';
   $('f-issue').value = issue?.issue_label || '';
+  $('f-desc').value = issue?.description || '';
   $('f-slug').value = issue?.slug || '';
   $('f-sort').value = issue?.sort_order ?? 0;
   $('f-cover').value = '';
@@ -146,6 +147,7 @@ $('wzForm').addEventListener('submit', async (e) => {
     const record = {
       slug, title,
       issue_label: $('f-issue').value.trim() || null,
+      description: $('f-desc').value.trim() || null,
       cover_path, pdf_path,
       published: $('f-pub').checked,
       sort_order: Number($('f-sort').value) || 0,
