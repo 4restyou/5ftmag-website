@@ -2,8 +2,8 @@
 
 // 5ft.mag 웹진 — 분류(시즌)별로 한 줄씩 세로로 쌓고, 각 줄은 코버플로우(가운데 책이
 // 도드라지며 좌우로 미끄러짐). 책등은 제목 상단 정렬 + 하단 5ft 심볼, 종이 질감(CSS).
-// 한 권을 고르면 같은 색 무대에서 표지가 돌아 펼쳐지고 정보·좋아요·공유·"책 읽기"가 뜬다.
-// 좋아요는 user_favorites(target_type 'webzine')로 저장돼 마이페이지에 표시된다.
+// 한 권을 고르면 새 창이 아니라 "그 줄 안에서" 표지가 돌아 펼쳐지며 이웃 책을 밀어내고
+// 옆에 정보·좋아요·공유·"책 읽기"가 뜬다. 좋아요는 user_favorites(target_type 'webzine').
 (function () {
   const root = document.getElementById('wzSeasons');
   if (!root) return;
@@ -16,8 +16,9 @@
   let issues = [];
   const palette = [];
   const rows = [];
+  const slotIndex = new Map();   // 전역 인덱스 i -> { rs, pos }
   let favSet = new Set();
-  let openEl = null, opened = false, openIdx = -1;
+  let openState = null;          // { rs, pos, i }
 
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
@@ -90,6 +91,9 @@
       <div class="f-top wz-pages"></div>
     </div>`;
   }
+  function spineBtn(it, c) {
+    return `<button type="button" class="wz-spine-btn" aria-label="${esc(it.title)} 보기">${spineBook(it, c)}</button>`;
+  }
   function coverBook(it, c) {
     const front = it.cover_path
       ? `<img src="${esc(coverUrl(it))}" alt="${esc(it.title)} 표지" />`
@@ -130,8 +134,8 @@
       const d = pos - rs.active, ad = Math.abs(d);
       const book = slot.querySelector('.wz-spinebook');
       if (book) book.style.transform = `scale(${d === 0 ? 1.12 : 0.86})`;
-      slot.style.opacity = String(Math.max(0, 1 - ad * 0.16));
-      slot.style.pointerEvents = ad > 6 ? 'none' : 'auto';
+      slot.style.opacity = String(slot.classList.contains('is-open') ? 1 : Math.max(0, 1 - ad * 0.16));
+      slot.style.pointerEvents = (ad > 6 && !slot.classList.contains('is-open')) ? 'none' : 'auto';
     });
     const prev = rs.flowEl.querySelector('.wz-prev'), next = rs.flowEl.querySelector('.wz-next');
     if (prev) prev.disabled = rs.active <= 0;
@@ -140,66 +144,52 @@
   function nav(rs, d) {
     const n = rs.active + d;
     if (n < 0 || n >= rs.slots.length || n === rs.active) return;
+    closeOpen();
     rs.active = n; layout(rs);
   }
 
-  function render() {
-    if (!issues.length) { root.innerHTML = '<p class="wz-empty">아직 발행된 웹진이 없어요.</p>'; return; }
-    root.innerHTML = groupByCategory().map(g => `
-      <section class="wz-shelf">
-        ${g.name ? `<h2 class="wz-shelf-title">${esc(g.name)}</h2>` : ''}
-        <div class="wz-flow no-anim">
-          <button type="button" class="wz-nav wz-prev" aria-label="이전">‹</button>
-          <div class="wz-track">
-            ${g.idxs.map((i, pos) => `<button type="button" class="wz-slot" data-i="${i}" data-pos="${pos}" aria-label="${esc(issues[i].title)} 보기">${spineBook(issues[i], palette[i])}</button>`).join('')}
-          </div>
-          <button type="button" class="wz-nav wz-next" aria-label="다음">›</button>
-        </div>
-      </section>`).join('');
-
-    rows.length = 0;
-    root.querySelectorAll('.wz-flow').forEach(flowEl => {
-      const rs = { flowEl, trackEl: flowEl.querySelector('.wz-track'), slots: Array.from(flowEl.querySelectorAll('.wz-slot')), active: 0 };
-      rows.push(rs);
-      rs.slots.forEach(s => s.addEventListener('click', () => {
-        const pos = Number(s.dataset.pos);
-        if (pos === rs.active) openBook(Number(s.dataset.i));
-        else { rs.active = pos; layout(rs); }
-      }));
-      flowEl.querySelector('.wz-prev').addEventListener('click', () => nav(rs, -1));
-      flowEl.querySelector('.wz-next').addEventListener('click', () => nav(rs, 1));
-      flowEl.addEventListener('wheel', (e) => {
-        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-        e.preventDefault();
-        nav(rs, e.deltaX > 0 ? 1 : -1);
-      }, { passive: false });
-      let tx = null, ty = null;
-      flowEl.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
-      flowEl.addEventListener('touchend', (e) => {
-        if (tx == null) return;
-        const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
-        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) nav(rs, dx < 0 ? 1 : -1);
-      }, { passive: true });
-      layout(rs);
-      requestAnimationFrame(() => flowEl.classList.remove('no-anim'));
-    });
+  function onSpine(rs, pos) {
+    if (pos === rs.active && !openState) { openBook(rs, pos); return; }
+    closeOpen();
+    rs.active = pos; layout(rs);
   }
 
-  function ensureOpen() {
-    if (openEl) return;
-    openEl = document.createElement('div');
-    openEl.className = 'wz-open';
-    openEl.innerHTML = `
-      <button type="button" class="wz-open-back" aria-label="목록으로">← 목록으로</button>
-      <div class="wz-open-grid">
-        <button type="button" class="wz-open-cover" aria-label="닫기"></button>
-        <div class="wz-flow-info"></div>
+  function openBook(rs, pos) {
+    closeOpen();
+    const slot = rs.slots[pos]; const i = Number(slot.dataset.i);
+    const it = issues[i], c = palette[i]; if (!it) return;
+    slot.classList.add('is-open');
+    slot.innerHTML = `
+      <div class="wz-open-inline" style="--wz-glow:${c.spine}">
+        <button type="button" class="wz-cover-btn" aria-label="닫기">${coverBook(it, c)}</button>
+        <div class="wz-flow-info">${infoHtml(it)}</div>
+        <button type="button" class="wz-close" aria-label="닫기">✕</button>
       </div>`;
-    document.body.appendChild(openEl);
-    openEl.querySelector('.wz-open-back').addEventListener('click', closeBook);
-    openEl.querySelector('.wz-open-cover').addEventListener('click', closeBook);
-    openEl.addEventListener('click', (e) => { if (e.target === openEl) closeBook(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && opened) closeBook(); });
+    slot.querySelector('.wz-cover-btn').addEventListener('click', closeOpen);
+    slot.querySelector('.wz-close').addEventListener('click', closeOpen);
+    const read = slot.querySelector('.wz-meta-read');
+    if (read) read.addEventListener('click', (e) => {
+      if (!window.WebzineReader) return;
+      e.preventDefault();
+      window.WebzineReader.open(read.href, it.title);
+    });
+    const likeBtn = slot.querySelector('.wz-like');
+    if (likeBtn) likeBtn.addEventListener('click', () => toggleLike(it, likeBtn));
+    const shareBtn = slot.querySelector('.wz-share');
+    if (shareBtn) shareBtn.addEventListener('click', () => share(it));
+    openState = { rs, pos, i };
+    rs.active = pos;
+    layout(rs);
+  }
+  function closeOpen() {
+    if (!openState) return;
+    const { rs, pos, i } = openState;
+    const slot = rs.slots[pos];
+    slot.classList.remove('is-open');
+    slot.innerHTML = spineBtn(issues[i], palette[i]);
+    slot.querySelector('.wz-spine-btn').addEventListener('click', () => onSpine(rs, pos));
+    openState = null;
+    layout(rs);
   }
 
   function setLikeBtn(btn, on) {
@@ -225,31 +215,45 @@
     catch (_) { window.notify?.(url, 'info'); }
   }
 
-  function openBook(i) {
-    const it = issues[i], c = palette[i]; if (!it) return;
-    ensureOpen();
-    openIdx = i;
-    openEl.style.setProperty('--wz-glow', c.spine);
-    openEl.querySelector('.wz-open-cover').innerHTML = coverBook(it, c);
-    openEl.querySelector('.wz-flow-info').innerHTML = infoHtml(it);
-    const read = openEl.querySelector('.wz-meta-read');
-    if (read) read.addEventListener('click', (e) => {
-      if (!window.WebzineReader) return;
-      e.preventDefault();
-      window.WebzineReader.open(read.href, it.title);
+  function render() {
+    if (!issues.length) { root.innerHTML = '<p class="wz-empty">아직 발행된 웹진이 없어요.</p>'; return; }
+    root.innerHTML = groupByCategory().map(g => `
+      <section class="wz-shelf">
+        ${g.name ? `<h2 class="wz-shelf-title">${esc(g.name)}</h2>` : ''}
+        <div class="wz-flow no-anim">
+          <button type="button" class="wz-nav wz-prev" aria-label="이전">‹</button>
+          <div class="wz-track">
+            ${g.idxs.map((i, pos) => `<div class="wz-slot" data-i="${i}" data-pos="${pos}">${spineBtn(issues[i], palette[i])}</div>`).join('')}
+          </div>
+          <button type="button" class="wz-nav wz-next" aria-label="다음">›</button>
+        </div>
+      </section>`).join('');
+
+    rows.length = 0; slotIndex.clear();
+    root.querySelectorAll('.wz-flow').forEach(flowEl => {
+      const rs = { flowEl, trackEl: flowEl.querySelector('.wz-track'), slots: Array.from(flowEl.querySelectorAll('.wz-slot')), active: 0 };
+      rows.push(rs);
+      rs.slots.forEach((slot, pos) => {
+        slotIndex.set(Number(slot.dataset.i), { rs, pos });
+        slot.querySelector('.wz-spine-btn').addEventListener('click', () => onSpine(rs, pos));
+      });
+      flowEl.querySelector('.wz-prev').addEventListener('click', () => nav(rs, -1));
+      flowEl.querySelector('.wz-next').addEventListener('click', () => nav(rs, 1));
+      flowEl.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+        e.preventDefault();
+        nav(rs, e.deltaX > 0 ? 1 : -1);
+      }, { passive: false });
+      let tx = null, ty = null;
+      flowEl.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+      flowEl.addEventListener('touchend', (e) => {
+        if (tx == null) return;
+        const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) nav(rs, dx < 0 ? 1 : -1);
+      }, { passive: true });
+      layout(rs);
+      requestAnimationFrame(() => flowEl.classList.remove('no-anim'));
     });
-    const likeBtn = openEl.querySelector('.wz-like');
-    if (likeBtn) likeBtn.addEventListener('click', () => toggleLike(it, likeBtn));
-    const shareBtn = openEl.querySelector('.wz-share');
-    if (shareBtn) shareBtn.addEventListener('click', () => share(it));
-    opened = true;
-    openEl.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeBook() {
-    opened = false; openIdx = -1;
-    if (openEl) openEl.classList.remove('open');
-    document.body.style.overflow = '';
   }
 
   let resizeT = null;
@@ -260,6 +264,7 @@
       requestAnimationFrame(() => rs.flowEl.classList.remove('no-anim'));
     }), 120);
   });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && openState) closeOpen(); });
 
   (async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
@@ -271,9 +276,8 @@
 
     try { favSet = await db().favorites.idsForType('webzine'); } catch (_) { favSet = new Set(); }
 
-    // 호별 딥링크(?issue=slug) — 공유 링크로 들어오면 해당 호를 펼침
     const slug = new URLSearchParams(location.search).get('issue');
-    if (slug) { const i = issues.findIndex(x => x.slug === slug); if (i >= 0) openBook(i); }
+    if (slug) { const i = issues.findIndex(x => x.slug === slug); const ref = slotIndex.get(i); if (ref) openBook(ref.rs, ref.pos); }
 
     issues.forEach((it, i) => {
       if (!it.cover_path) return;
@@ -282,9 +286,10 @@
         palette[i] = c;
         const sb = root.querySelector(`.wz-slot[data-i="${i}"] .wz-spinebook`);
         if (sb) { sb.style.setProperty('--spine', c.spine); sb.style.setProperty('--spine-text', c.text); }
-        if (opened && openIdx === i && openEl) {
-          openEl.style.setProperty('--wz-glow', c.spine);
-          const cb = openEl.querySelector('.wz-coverbook');
+        if (openState && openState.i === i) {
+          const inl = openState.rs.slots[openState.pos].querySelector('.wz-open-inline');
+          if (inl) inl.style.setProperty('--wz-glow', c.spine);
+          const cb = openState.rs.slots[openState.pos].querySelector('.wz-coverbook');
           if (cb) cb.style.setProperty('--spine', c.spine);
         }
       });
