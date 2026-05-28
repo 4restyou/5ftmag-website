@@ -1,27 +1,21 @@
-/* 5ft.mag 웹진 — 분류(시즌)별로 한 줄(가로 책장)씩 세로로 쌓는다. 줄 위에 분류명이
-   제목으로 붙고, 좌우로 넘겨 책등을 훑는다. 한 권을 고르면 같은 색의 무대에서 표지가
-   돌아 펼쳐지고(카드 없이) 옆에 정보·책 읽기가 뜬다. 오리지널 구현. */
-/* 웹진은 다크 톤 고정(data-theme=dark) — 테마 토글 숨김 */
+/* 5ft.mag 웹진 — 분류(시즌)별 한 줄(코버플로우). 책 한 권이 옆으로 회전해 책등↔표지로
+   돌고(단일 큐보이드), 고르면 그 줄 안에서 표지로 돌아서며 슬롯이 늘어나 이웃을 밀어내고
+   옆에 정보가 뜬다. 스와이프하면 역회전으로 다시 책등으로 접힌다. 다크 톤 고정. 오리지널. */
 #themeBtn { display: none; }
-/* 질감(SVG 노이즈)·5ft 심볼 마스크·갤러리 배경. url() 은 이 스타일시트(css/) 기준이라 ../img */
 html {
   --wz-mark: url("../img/symbol-w.svg");
   --wz-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --wz-bg: radial-gradient(120% 70% at 50% 0%, #211c25 0%, #151219 48%, #100e13 100%) fixed;
+  --wz-ease: cubic-bezier(.22, .61, .27, 1);
 }
-/* 헤더·본문·푸터를 하나의 갤러리 배경으로 자연스럽게 연결(고정 배경이라 seam 없음) */
+/* 헤더·본문·푸터를 하나의 갤러리 배경으로 연결(고정 배경이라 seam 없음) */
 body { background: var(--wz-bg); color: #fff; }
 header { background: var(--wz-bg); border-bottom-color: transparent; }
 footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(255, 255, 255, .8); }
-.wz-stage {
-  min-height: calc(100vh - var(--header-h, 72px));
-  background: none;
-  color: #fff; display: flex; flex-direction: column;
-}
+.wz-stage { min-height: calc(100vh - var(--header-h, 72px)); background: none; color: #fff; display: flex; flex-direction: column; }
 
 /* 공통 정육면체 */
-.wz-cuboid { position: relative; transform-style: preserve-3d; }
-.wz-cuboid > * { position: absolute; inset: 0; margin: auto; backface-visibility: hidden; overflow: hidden; }
+.wz-cuboid > * , .wz-book3d > * { position: absolute; inset: 0; margin: auto; backface-visibility: hidden; overflow: hidden; }
 .wz-pages { background: repeating-linear-gradient(var(--pg-dir, to bottom), #efe9dd, #efe9dd 1px, #d3c9b5 2px, #efe9dd 3px); }
 
 .wz-intro { padding: 40px 40px 4px; text-align: center; }
@@ -29,42 +23,74 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-intro p { font-size: var(--fs-body); line-height: 1.65; color: rgba(255, 255, 255, .62); }
 .wz-empty { text-align: center; color: rgba(255, 255, 255, .5); padding: 80px 24px; }
 
-/* ── 시즌(분류)별 책장 — 줄마다 코버플로우 ── */
+/* ── 시즌(분류)별 책장 ── */
 .wz-seasons { padding: 8px 0 72px; }
 .wz-shelf { padding: 8px 0 2px; }
 .wz-shelf-title { font-size: clamp(17px, 1.7vw, 23px); font-weight: var(--fw-heading); letter-spacing: -0.01em; color: #fff; margin: 0; padding: 0 max(20px, 5vw); }
 .wz-flow { position: relative; overflow: hidden; }
-.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 46px 0 56px; will-change: transform; transition: transform .55s cubic-bezier(.22, .61, .27, 1); }
-.wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-spinebook { transition: none !important; }
+.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 46px 0 56px; will-change: transform; transition: transform .55s var(--wz-ease); }
+.wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-book3d { transition: none !important; }
+.wz-flow.following .wz-track { transition: none; }
 
-.wz-slot { flex: 0 0 auto; background: none; border: none; padding: 0; cursor: pointer; perspective: 1500px; transition: opacity .45s; }
-.wz-slot:focus-visible { outline: none; }
-.wz-spinebook {
-  --t: clamp(46px, 4.8vw, 64px); --h: min(44vh, 360px); --cw: 200px;
-  --spine: #2b2b2b; --spine-text: #fff;
-  width: var(--t); height: var(--h);
-  transition: transform .5s cubic-bezier(.22, .61, .27, 1);
-  will-change: transform;
-  filter: drop-shadow(14px 20px 18px rgba(0, 0, 0, .45));
+/* 슬롯: 닫힘=책등폭, 열림=표지+정보폭. 폭이 전환되며 이웃을 부드럽게 밀어낸다 */
+.wz-slot {
+  --st: clamp(46px, 4.8vw, 64px); --cw2: clamp(150px, 17vw, 210px); --h: min(46vh, 380px);
+  --infow: min(40vw, 320px); --infogap: clamp(20px, 3vw, 44px);
+  position: relative; flex: 0 0 auto; width: var(--st); height: var(--h);
+  perspective: 1500px; transition: width .6s var(--wz-ease), opacity .45s;
 }
-.wz-spinebook .f-spine {
-  width: var(--t); height: var(--h); transform: translateZ(calc(var(--cw) / 2));
-  background-image:
-    var(--wz-grain),
-    linear-gradient(100deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 26%, rgba(0, 0, 0, .12) 92%);
-  background-color: var(--spine);
-  background-size: 150px 150px, auto;
-  background-blend-mode: soft-light, normal;
-  color: var(--spine-text);
-  box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, .6), inset 7px 0 12px -8px rgba(255, 255, 255, .3);
+.wz-slot.is-open { width: calc(var(--cw2) + var(--infogap) + var(--infow)); }
+
+/* 책(단일 큐보이드) — 책등(-X) / 표지(+Z) / 책배(+X) / 윗면 */
+.wz-book-btn { position: absolute; inset: 0; background: none; border: none; padding: 0; margin: 0; cursor: pointer; perspective: 1500px; }
+.wz-book-btn:focus-visible { outline: none; }
+.wz-book3d {
+  --bx: calc((var(--st) - var(--cw2)) / 2); --by: 90deg; --bs: .9;
+  position: absolute; top: 0; left: 0; width: var(--cw2); height: var(--h);
+  transform-style: preserve-3d; transform: translateX(var(--bx)) rotateY(var(--by)) scale(var(--bs));
+  transition: transform .6s var(--wz-ease);
+  filter: drop-shadow(12px 18px 16px rgba(0, 0, 0, .45)); will-change: transform;
+}
+.wz-slot.is-center .wz-book3d { --bs: 1; }
+.wz-slot.is-open .wz-book3d { --bx: 0; --by: -8deg; --bs: 1; }
+
+.wz-book3d .f-front { width: var(--cw2); height: var(--h); transform: translateZ(calc(var(--st) / 2)); background: var(--spine); }
+.wz-book3d .f-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wz-book3d .f-front::after { content: ""; position: absolute; inset: 0; background: var(--wz-grain); background-size: 160px 160px; mix-blend-mode: overlay; opacity: .26; pointer-events: none; }
+.wz-book3d .f-front .wz-f-text { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 14px; color: #fff; font-weight: var(--fw-heading); text-align: center; }
+.wz-book3d .f-spine {
+  width: var(--st); height: var(--h); transform: rotateY(-90deg) translateZ(calc(var(--cw2) / 2));
+  background-image: var(--wz-grain), linear-gradient(100deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 26%, rgba(0, 0, 0, .12) 92%);
+  background-color: var(--spine); background-size: 150px 150px, auto; background-blend-mode: soft-light, normal;
+  color: var(--spine-text); box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, .6), inset 7px 0 12px -8px rgba(255, 255, 255, .3);
   display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 14px; padding: 24px 0 20px;
 }
-.wz-spinebook .f-cover { width: var(--cw); height: var(--h); transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); background-color: color-mix(in srgb, var(--spine) 58%, #000); background-image: var(--wz-grain); background-size: 150px 150px; background-blend-mode: soft-light; }
-.wz-spinebook .f-top { width: var(--t); height: var(--cw); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
+.wz-book3d .f-edge { width: var(--st); height: var(--h); transform: rotateY(90deg) translateZ(calc(var(--cw2) / 2)); --pg-dir: to bottom; }
+.wz-book3d .f-top { width: var(--cw2); height: var(--st); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
 .wz-spine-head { display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 0; }
 .wz-spine-title { writing-mode: vertical-rl; text-orientation: mixed; font-size: clamp(14px, 1.1vw, 18px); font-weight: var(--fw-heading); letter-spacing: 0.01em; white-space: nowrap; max-height: calc(var(--h) * 0.6); overflow: hidden; }
 .wz-spine-issue { writing-mode: vertical-rl; font-size: 11px; letter-spacing: 0.16em; opacity: .58; }
 .wz-spine-mark { flex: 0 0 auto; width: clamp(18px, 2.2vw, 26px); height: clamp(18px, 2.2vw, 26px); background: var(--spine-text); opacity: .82; -webkit-mask: var(--wz-mark) center / contain no-repeat; mask: var(--wz-mark) center / contain no-repeat; }
+
+/* 펼침 정보(표지 옆) */
+.wz-info {
+  position: absolute; top: 0; left: calc(var(--cw2) + var(--infogap)); width: var(--infow); height: var(--h);
+  display: flex; flex-direction: column; justify-content: center; color: #fff;
+  opacity: 0; pointer-events: none; transform: translateX(-12px); transition: opacity .4s, transform .4s;
+}
+.wz-slot.is-open .wz-info { opacity: 1; pointer-events: auto; transform: none; transition-delay: .18s; }
+.wz-meta-issue { display: block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; opacity: .7; margin-bottom: 10px; }
+.wz-meta-title { font-size: var(--fs-display); font-weight: var(--fw-heading); letter-spacing: -0.02em; line-height: 1.12; margin: 0; }
+.wz-meta-desc { font-size: 15px; line-height: 1.7; opacity: .82; margin: 14px 0 22px; word-break: keep-all; white-space: pre-line; max-height: 9em; overflow: hidden; }
+.wz-meta-read { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 22px; padding: 12px 24px; border-radius: var(--btn-radius); background: #fff; color: #111; font-size: 14px; font-weight: var(--fw-heading); letter-spacing: 0.02em; text-decoration: none; transition: opacity .15s; }
+.wz-meta-desc + .wz-meta-read { margin-top: 0; }
+.wz-meta-read:hover { opacity: .85; }
+.wz-open-actions { display: flex; gap: 10px; margin-top: 14px; }
+.wz-act { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: var(--btn-radius); border: 1px solid rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .06); color: #fff; font-size: 13px; font-weight: var(--fw-heading); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.wz-act:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .55); }
+.wz-act.is-on { background: #fff; color: #111; border-color: #fff; }
+.wz-close { position: absolute; top: -4px; right: 0; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25); background: rgba(20, 16, 22, .55); color: #fff; font-size: 14px; line-height: 1; cursor: pointer; }
+.wz-close:hover { background: rgba(40, 32, 44, .85); border-color: rgba(255, 255, 255, .5); }
 
 .wz-nav {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 4;
@@ -78,48 +104,8 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-prev { left: 8px; }
 .wz-next { right: 8px; }
 
-/* ── 펼침(같은 줄 안에서 인라인 — 이웃 책을 밀어내고 옆에 정보) ── */
-.wz-spine-btn { background: none; border: none; padding: 0; margin: 0; cursor: pointer; display: block; perspective: 1500px; }
-.wz-spine-btn:focus-visible { outline: none; }
-.wz-open-inline { position: relative; display: flex; align-items: center; gap: clamp(20px, 3vw, 44px); padding: 8px clamp(10px, 2vw, 24px); }
-.wz-open-inline::before { content: ""; position: absolute; inset: -30px -12px; pointer-events: none; background: radial-gradient(58% 70% at 32% 50%, color-mix(in srgb, var(--wz-glow, #5a4d63) 26%, transparent), transparent 72%); }
-.wz-cover-btn { background: none; border: none; padding: 0; margin: 0; cursor: pointer; perspective: 1700px; flex: 0 0 auto; display: flex; align-items: center; }
-.wz-cover-btn:focus-visible { outline: none; }
-.wz-slot.is-open .wz-coverbook { --cw: 220px; --h: 318px; --t: 40px; }
-.wz-open-inline .wz-flow-info { width: min(42vw, 320px); }
-.wz-close { position: absolute; top: -6px; right: -2px; z-index: 2; width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25); background: rgba(20, 16, 22, .6); color: #fff; font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.wz-close:hover { background: rgba(40, 32, 44, .85); border-color: rgba(255, 255, 255, .5); }
-.wz-coverbook {
-  --cw: 300px; --h: 450px; --t: 46px; --spine: #2b2b2b;
-  width: var(--cw); height: var(--h);
-  filter: drop-shadow(26px 34px 36px rgba(0, 0, 0, .55));
-  animation: wz-turn .8s cubic-bezier(.2, .62, .25, 1) both;
-}
-.wz-coverbook .f-front { width: var(--cw); height: var(--h); transform: translateZ(calc(var(--t) / 2)); background: var(--spine); }
-.wz-coverbook .f-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.wz-coverbook .f-front::after { content: ""; position: absolute; inset: 0; background: var(--wz-grain); background-size: 160px 160px; mix-blend-mode: overlay; opacity: .28; pointer-events: none; }
-.wz-coverbook .f-front .wz-f-text { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 16px; color: #fff; font-weight: var(--fw-heading); text-align: center; }
-.wz-coverbook .f-edge { width: var(--t); height: var(--h); transform: rotateY(90deg) translateZ(calc(var(--cw) / 2)); --pg-dir: to bottom; }
-.wz-coverbook .f-top { width: var(--cw); height: var(--t); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
-@keyframes wz-turn { from { transform: rotateY(70deg) rotateX(3deg); } to { transform: rotateY(-8deg) rotateX(3deg); } }
-
-.wz-flow-info { color: #fff; animation: wz-fade .5s .28s both; }
-.wz-meta-issue { display: block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; opacity: .7; margin-bottom: 10px; }
-.wz-meta-title { font-size: var(--fs-display); font-weight: var(--fw-heading); letter-spacing: -0.02em; line-height: 1.12; margin: 0; }
-.wz-meta-desc { font-size: 15px; line-height: 1.75; opacity: .82; margin: 16px 0 26px; word-break: keep-all; white-space: pre-line; }
-.wz-meta-read { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 26px; padding: 13px 26px; border-radius: var(--btn-radius); background: #fff; color: #111; font-size: 14px; font-weight: var(--fw-heading); letter-spacing: 0.02em; text-decoration: none; transition: opacity .15s; }
-.wz-meta-desc + .wz-meta-read { margin-top: 0; }
-.wz-meta-read:hover { opacity: .85; }
-.wz-open-actions { display: flex; gap: 10px; margin-top: 16px; }
-.wz-act { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--btn-radius); border: 1px solid rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .06); color: #fff; font-size: 13px; font-weight: var(--fw-heading); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
-.wz-act:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .55); }
-.wz-act.is-on { background: #fff; color: #111; border-color: #fff; }
-@keyframes wz-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-
 @media (prefers-reduced-motion: reduce) {
-  .wz-track, .wz-slot, .wz-spinebook { transition: none; }
-  .wz-coverbook { animation: none; transform: rotateY(-8deg) rotateX(3deg); }
-  .wz-flow-info { animation: none; }
+  .wz-track, .wz-slot, .wz-book3d, .wz-info { transition: none; }
 }
 
 /* ── 책 읽기(flipbook 리더) ── */
@@ -143,13 +129,9 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   .wz-intro { padding: 28px 20px 0; }
   .wz-nav { display: none; }
   .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
-  .wz-spinebook { --t: clamp(38px, 11vw, 58px); --h: min(40vh, 320px); --cw: 172px; }
-  .wz-open-inline { flex-direction: column; gap: 18px; text-align: center; padding: 8px 12px 16px; }
-  .wz-open-inline .wz-flow-info { width: min(82vw, 360px); }
-  .wz-slot.is-open .wz-coverbook { --cw: 200px; --h: 290px; --t: 36px; }
-  .wz-flow-info { text-align: center; }
-  .wz-meta-title { font-size: 26px; }
-  .wz-open-actions { justify-content: center; }
+  .wz-slot { --st: clamp(38px, 11vw, 58px); --cw2: clamp(120px, 34vw, 160px); --h: min(40vh, 320px); --infow: 46vw; --infogap: clamp(14px, 4vw, 24px); }
+  .wz-meta-title { font-size: 22px; }
+  .wz-meta-desc { max-height: 7em; }
 }
 @media (max-width: 600px) {
   .wz-reader-title { display: none; }
