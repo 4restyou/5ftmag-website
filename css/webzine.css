@@ -78,16 +78,17 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-prev { left: 8px; }
 .wz-next { right: 8px; }
 
-/* ── 펼침(같은 색 무대, 카드 없이 표지 + 정보) ── */
-.wz-open {
-  position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 48px 24px;
-  background: radial-gradient(60% 55% at 42% 50%, color-mix(in srgb, var(--wz-glow, #5a4d63) 30%, #0d0a0c), #0c090b 76%);
-  opacity: 0; pointer-events: none; transition: opacity .35s;
-}
-.wz-open.open { opacity: 1; pointer-events: auto; }
-.wz-open-grid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 340px); gap: clamp(32px, 4vw, 64px); align-items: center; width: min(820px, 86vw); }
-.wz-open-cover { background: none; border: none; padding: 0; margin: 0; cursor: pointer; perspective: 1700px; display: flex; align-items: center; justify-content: center; }
-.wz-open-cover:focus-visible { outline: none; }
+/* ── 펼침(같은 줄 안에서 인라인 — 이웃 책을 밀어내고 옆에 정보) ── */
+.wz-spine-btn { background: none; border: none; padding: 0; margin: 0; cursor: pointer; display: block; perspective: 1500px; }
+.wz-spine-btn:focus-visible { outline: none; }
+.wz-open-inline { position: relative; display: flex; align-items: center; gap: clamp(20px, 3vw, 44px); padding: 8px clamp(10px, 2vw, 24px); }
+.wz-open-inline::before { content: ""; position: absolute; inset: -30px -12px; pointer-events: none; background: radial-gradient(58% 70% at 32% 50%, color-mix(in srgb, var(--wz-glow, #5a4d63) 26%, transparent), transparent 72%); }
+.wz-cover-btn { background: none; border: none; padding: 0; margin: 0; cursor: pointer; perspective: 1700px; flex: 0 0 auto; display: flex; align-items: center; }
+.wz-cover-btn:focus-visible { outline: none; }
+.wz-slot.is-open .wz-coverbook { --cw: 220px; --h: 318px; --t: 40px; }
+.wz-open-inline .wz-flow-info { width: min(42vw, 320px); }
+.wz-close { position: absolute; top: -6px; right: -2px; z-index: 2; width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25); background: rgba(20, 16, 22, .6); color: #fff; font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.wz-close:hover { background: rgba(40, 32, 44, .85); border-color: rgba(255, 255, 255, .5); }
 .wz-coverbook {
   --cw: 300px; --h: 450px; --t: 46px; --spine: #2b2b2b;
   width: var(--cw); height: var(--h);
@@ -114,14 +115,6 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-act:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .55); }
 .wz-act.is-on { background: #fff; color: #111; border-color: #fff; }
 @keyframes wz-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-
-.wz-open-back {
-  position: absolute; top: 18px; left: clamp(16px, 4vw, 40px); z-index: 2;
-  background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .22); color: #fff;
-  padding: 9px 16px; border-radius: 999px; font-size: 13px; font-weight: var(--fw-heading); cursor: pointer;
-  transition: background .15s, border-color .15s;
-}
-.wz-open-back:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .5); }
 
 @media (prefers-reduced-motion: reduce) {
   .wz-track, .wz-slot, .wz-spinebook { transition: none; }
@@ -151,8 +144,9 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   .wz-nav { display: none; }
   .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
   .wz-spinebook { --t: clamp(38px, 11vw, 58px); --h: min(40vh, 320px); --cw: 172px; }
-  .wz-open-grid { grid-template-columns: 1fr; gap: 26px; justify-items: center; text-align: center; width: min(360px, 86vw); }
-  .wz-coverbook { --cw: 230px; --h: 345px; --t: 40px; }
+  .wz-open-inline { flex-direction: column; gap: 18px; text-align: center; padding: 8px 12px 16px; }
+  .wz-open-inline .wz-flow-info { width: min(82vw, 360px); }
+  .wz-slot.is-open .wz-coverbook { --cw: 200px; --h: 290px; --t: 36px; }
   .wz-flow-info { text-align: center; }
   .wz-meta-title { font-size: 26px; }
   .wz-open-actions { justify-content: center; }
