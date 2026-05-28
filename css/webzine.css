@@ -1,6 +1,8 @@
 /* 5ft.mag 웹진 — 분류(시즌)별로 한 줄(가로 책장)씩 세로로 쌓는다. 줄 위에 분류명이
    제목으로 붙고, 좌우로 넘겨 책등을 훑는다. 한 권을 고르면 같은 색의 무대에서 표지가
    돌아 펼쳐지고(카드 없이) 옆에 정보·책 읽기가 뜬다. 오리지널 구현. */
+/* 웹진은 다크 톤 고정(data-theme=dark) — 테마 토글 숨김 */
+#themeBtn { display: none; }
 .wz-stage {
   min-height: calc(100vh - var(--header-h, 72px));
   background:
