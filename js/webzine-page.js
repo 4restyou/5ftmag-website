@@ -258,11 +258,16 @@
       flowEl.querySelector('.wz-next').addEventListener('click', () => nav(rs, 1));
       let wheelLock = false;
       flowEl.addEventListener('wheel', (e) => {
-        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+        currentRow = rs;
+        // 줄 위에서 휠(가로·세로 모두)로 좌우 넘김. 줄 끝에서는 페이지 스크롤에 양보.
+        const d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        if (!d) return;
+        const dir = d > 0 ? 1 : -1;
+        if ((dir > 0 && rs.active >= rs.slots.length - 1) || (dir < 0 && rs.active <= 0)) return;
         e.preventDefault();
         if (wheelLock) return;            // 한 번 스와이프 = 한 칸(너무 빨리 지나가지 않게)
-        wheelLock = true; setTimeout(() => { wheelLock = false; }, 520);
-        nav(rs, e.deltaX > 0 ? 1 : -1);
+        wheelLock = true; setTimeout(() => { wheelLock = false; }, 480);
+        nav(rs, dir);
       }, { passive: false });
       let tx = null, ty = null;
       flowEl.addEventListener('touchstart', (e) => { currentRow = rs; tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
