@@ -1,9 +1,9 @@
 'use strict';
 
-// 5ft.mag 웹진 — 분류(시즌)별로 한 줄(가로 책장)씩 세로로 쌓아 보여준다. 같은 분류의
-// 호들이 한 줄에 모이고, 줄 위에 분류명이 제목으로 붙는다. 좌우로 넘겨 책등을 훑고,
-// 한 권을 고르면 같은 색의 무대에서 표지가 돌아 펼쳐지며 정보·"책 읽기"(PDF flipbook)가
-// 뜬다. 책등 색은 표지 대표색(채도 가중 평균 + HSL 보정)에 맞춘다. 오리지널 구현.
+// 5ft.mag 웹진 — 분류(시즌)별로 한 줄씩 세로로 쌓고, 각 줄은 코버플로우(가운데 책이
+// 도드라지며 좌우로 부드럽게 미끄러짐: 스와이프·가로 휠·화살표). 분류명은 줄 제목으로
+// 붙고, 호는 1→2→3 순(오름차순). 한 권을 고르면 같은 색 무대에서 표지가 돌아 펼쳐지며
+// 정보·"책 읽기"(PDF flipbook)가 뜬다. 책등 색은 표지 대표색(채도 가중 + HSL 보정).
 (function () {
   const root = document.getElementById('wzSeasons');
   if (!root) return;
@@ -15,6 +15,7 @@
 
   let issues = [];
   const palette = [];
+  const rows = [];
   let openEl = null, opened = false, openIdx = -1;
 
   function rgbToHsl(r, g, b) {
@@ -103,7 +104,7 @@
       ${read ? `<a class="wz-meta-read" href="${read}" target="_blank" rel="noopener">책 읽기 →</a>` : ''}`;
   }
 
-  // 분류(시즌)별로 묶되, 목록 정렬(sort_order)대로 처음 나온 분류부터 위에서 아래로.
+  // 분류(시즌)별로 묶음. issues 는 이미 1→2→3(오름차순)으로 정렬돼 있어 줄 순서·줄 내 순서 모두 오름차순.
   function groupByCategory() {
     const order = [], map = new Map();
     issues.forEach((it, i) => {
@@ -114,24 +115,65 @@
     return order.map(name => ({ name, idxs: map.get(name) }));
   }
 
+  function layout(rs) {
+    const s = rs.slots[rs.active]; if (!s) return;
+    rs.trackEl.style.transform = `translateX(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px)`;
+    rs.slots.forEach((slot, pos) => {
+      const d = pos - rs.active, ad = Math.abs(d);
+      const book = slot.querySelector('.wz-spinebook');
+      if (book) book.style.transform = `scale(${d === 0 ? 1.12 : 0.86})`;
+      slot.style.opacity = String(Math.max(0, 1 - ad * 0.16));
+      slot.style.pointerEvents = ad > 6 ? 'none' : 'auto';
+    });
+    const prev = rs.flowEl.querySelector('.wz-prev'), next = rs.flowEl.querySelector('.wz-next');
+    if (prev) prev.disabled = rs.active <= 0;
+    if (next) next.disabled = rs.active >= rs.slots.length - 1;
+  }
+  function nav(rs, d) {
+    const n = rs.active + d;
+    if (n < 0 || n >= rs.slots.length || n === rs.active) return;
+    rs.active = n; layout(rs);
+  }
+
   function render() {
     if (!issues.length) { root.innerHTML = '<p class="wz-empty">아직 발행된 웹진이 없어요.</p>'; return; }
     root.innerHTML = groupByCategory().map(g => `
       <section class="wz-shelf">
         ${g.name ? `<h2 class="wz-shelf-title">${esc(g.name)}</h2>` : ''}
-        <div class="wz-rail-wrap">
-          <button type="button" class="wz-nav wz-prev" aria-label="왼쪽으로">‹</button>
-          <div class="wz-rail">
-            ${g.idxs.map(i => `<button type="button" class="wz-slot" data-i="${i}" aria-label="${esc(issues[i].title)} 보기">${spineBook(issues[i], palette[i])}</button>`).join('')}
+        <div class="wz-flow no-anim">
+          <button type="button" class="wz-nav wz-prev" aria-label="이전">‹</button>
+          <div class="wz-track">
+            ${g.idxs.map((i, pos) => `<button type="button" class="wz-slot" data-i="${i}" data-pos="${pos}" aria-label="${esc(issues[i].title)} 보기">${spineBook(issues[i], palette[i])}</button>`).join('')}
           </div>
-          <button type="button" class="wz-nav wz-next" aria-label="오른쪽으로">›</button>
+          <button type="button" class="wz-nav wz-next" aria-label="다음">›</button>
         </div>
       </section>`).join('');
-    root.querySelectorAll('.wz-slot').forEach(b => b.addEventListener('click', () => openBook(Number(b.dataset.i))));
-    root.querySelectorAll('.wz-rail-wrap').forEach(wrap => {
-      const rail = wrap.querySelector('.wz-rail');
-      wrap.querySelector('.wz-prev').addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * 0.8, behavior: 'smooth' }));
-      wrap.querySelector('.wz-next').addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * 0.8, behavior: 'smooth' }));
+
+    rows.length = 0;
+    root.querySelectorAll('.wz-flow').forEach(flowEl => {
+      const rs = { flowEl, trackEl: flowEl.querySelector('.wz-track'), slots: Array.from(flowEl.querySelectorAll('.wz-slot')), active: 0 };
+      rows.push(rs);
+      rs.slots.forEach(s => s.addEventListener('click', () => {
+        const pos = Number(s.dataset.pos);
+        if (pos === rs.active) openBook(Number(s.dataset.i));
+        else { rs.active = pos; layout(rs); }
+      }));
+      flowEl.querySelector('.wz-prev').addEventListener('click', () => nav(rs, -1));
+      flowEl.querySelector('.wz-next').addEventListener('click', () => nav(rs, 1));
+      flowEl.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;   // 세로 휠은 페이지 스크롤
+        e.preventDefault();
+        nav(rs, e.deltaX > 0 ? 1 : -1);
+      }, { passive: false });
+      let tx = null, ty = null;
+      flowEl.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+      flowEl.addEventListener('touchend', (e) => {
+        if (tx == null) return;
+        const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) nav(rs, dx < 0 ? 1 : -1);
+      }, { passive: true });
+      layout(rs);
+      requestAnimationFrame(() => flowEl.classList.remove('no-anim'));
     });
   }
 
@@ -175,10 +217,21 @@
     document.body.style.overflow = '';
   }
 
+  let resizeT = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(() => rows.forEach(rs => {
+      rs.flowEl.classList.add('no-anim'); layout(rs);
+      requestAnimationFrame(() => rs.flowEl.classList.remove('no-anim'));
+    }), 120);
+  });
+
   (async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
     try { issues = await db().webzine.listPublished(); } catch (_) { issues = []; }
     if (!Array.isArray(issues)) issues = [];
+    // 1→2→3 오름차순(정렬값 우선, 같으면 생성순)
+    issues.sort((a, b) => ((a.sort_order || 0) - (b.sort_order || 0)) || (new Date(a.created_at || 0) - new Date(b.created_at || 0)));
     issues.forEach((_, i) => { palette[i] = { spine: FALLBACK[i % FALLBACK.length], text: '#fff' }; });
     render();
 
