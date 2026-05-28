@@ -3,12 +3,14 @@
 // 5ft.mag 웹진 리더 — "책 읽기" 를 누르면 전체화면에서 PDF 를 책장 넘김(flipbook)으로 본다.
 // PDF.js(페이지 렌더) + StPageFlip(넘김 효과)을 첫 열람 때만 CDN 에서 지연 로드한다.
 // StPageFlip 은 HTML 모드로 쓰고, 보이는 페이지 주변만 레티나 해상도 캔버스로 직접 렌더하며
-// 멀어진 페이지는 비운다(220 쪽짜리도 메모리·선명도 문제 없이). 실패 시 새 탭 링크를 보여준다.
+// 멀어진 페이지는 비운다(220 쪽도 메모리·선명도 문제 없이). 확대(핀치·버튼·드래그 팬) 지원.
+// 실패 시 새 탭 링크를 보여준다.
 (function () {
   const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
   const PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
   const FLIP = 'https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js';
   const NEAR = 2, KEEP = 5;          // 현재 기준 ±NEAR 렌더, ±KEEP 밖은 비움
+  const ZMAX = 3.5;
 
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function loadScript(src) {
@@ -27,6 +29,8 @@
   let overlay = null, flip = null, pdfDoc = null;
   let total = 0, busy = false, onKey = null;
   let pageDivs = [], rendered = [], baseW = 1, baseH = 1, dispW = 0, dpr = 1;
+  let zoom = 1, panX = 0, panY = 0;
+  let pinchD0 = 0, zoom0 = 1, panActive = false, px0 = 0, py0 = 0;
 
   function setLoading(msg) { const el = overlay && overlay.querySelector('.wz-reader-loading'); if (el) el.textContent = msg; }
   function clearLoading() { const el = overlay && overlay.querySelector('.wz-reader-loading'); if (el) el.remove(); }
@@ -36,6 +40,46 @@
     const el = overlay.querySelector('[data-pageno]'); if (el) el.textContent = `${Math.min(curIndex() + 1, total)} / ${total}`;
   }
 
+  function applyZoom() {
+    const z = overlay && overlay.querySelector('.wz-reader-zoom'); if (!z) return;
+    z.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    overlay.classList.toggle('is-zoomed', zoom > 1.01);
+  }
+  function clampPan() {
+    const book = overlay && overlay.querySelector('.wz-reader-book');
+    const stage = overlay && overlay.querySelector('.wz-reader-stage');
+    if (!book || !stage) return;
+    const mx = Math.max(0, (book.offsetWidth * zoom - stage.clientWidth) / 2);
+    const my = Math.max(0, (book.offsetHeight * zoom - stage.clientHeight) / 2);
+    panX = Math.max(-mx, Math.min(mx, panX));
+    panY = Math.max(-my, Math.min(my, panY));
+  }
+  function setZoom(z) {
+    zoom = Math.max(1, Math.min(ZMAX, z));
+    if (zoom <= 1.01) { zoom = 1; panX = 0; panY = 0; } else clampPan();
+    applyZoom();
+  }
+  function resetZoom() { zoom = 1; panX = 0; panY = 0; applyZoom(); }
+
+  function dist(t) { const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY; return Math.hypot(dx, dy); }
+
+  function onTouchStart(e) {
+    if (e.touches.length === 2) { e.preventDefault(); e.stopPropagation(); pinchD0 = dist(e.touches); zoom0 = zoom; panActive = false; }
+    else if (e.touches.length === 1 && zoom > 1.01) { e.preventDefault(); e.stopPropagation(); panActive = true; px0 = e.touches[0].clientX - panX; py0 = e.touches[0].clientY - panY; }
+  }
+  function onTouchMove(e) {
+    if (pinchD0 && e.touches.length >= 2) { e.preventDefault(); e.stopPropagation(); setZoom(zoom0 * dist(e.touches) / pinchD0); }
+    else if (panActive && e.touches.length === 1) { e.preventDefault(); e.stopPropagation(); panX = e.touches[0].clientX - px0; panY = e.touches[0].clientY - py0; clampPan(); applyZoom(); }
+  }
+  function onTouchEnd(e) {
+    if (pinchD0 && e.touches.length < 2) { e.stopPropagation(); pinchD0 = 0; if (zoom <= 1.01) resetZoom(); }
+    if (panActive && e.touches.length === 0) { e.stopPropagation(); panActive = false; }
+  }
+  let mDrag = false, mx0 = 0, my0 = 0;
+  function onMouseDown(e) { if (zoom > 1.01) { e.preventDefault(); e.stopPropagation(); mDrag = true; mx0 = e.clientX - panX; my0 = e.clientY - panY; } }
+  function onMouseMove(e) { if (!mDrag) return; panX = e.clientX - mx0; panY = e.clientY - my0; clampPan(); applyZoom(); }
+  function onMouseUp() { mDrag = false; }
+
   function build(title) {
     overlay = document.createElement('div');
     overlay.className = 'wz-reader';
@@ -43,36 +87,52 @@
       <div class="wz-reader-bar">
         <span class="wz-reader-title">${esc(title)}</span>
         <div class="wz-reader-tools">
-          <button type="button" class="wz-reader-btn" data-prev aria-label="이전 페이지">‹</button>
+          <button type="button" class="wz-reader-btn" data-zout aria-label="축소">−</button>
+          <button type="button" class="wz-reader-btn" data-zin aria-label="확대">+</button>
+          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-prev aria-label="이전 페이지">‹</button>
           <span class="wz-reader-pageno" data-pageno>· / ·</span>
-          <button type="button" class="wz-reader-btn" data-next aria-label="다음 페이지">›</button>
+          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-next aria-label="다음 페이지">›</button>
           <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="닫기">✕</button>
         </div>
       </div>
       <div class="wz-reader-stage">
         <div class="wz-reader-loading">불러오는 중…</div>
-        <div class="wz-reader-book"></div>
+        <div class="wz-reader-zoom"><div class="wz-reader-book"></div></div>
       </div>`;
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
     overlay.querySelector('[data-close]').addEventListener('click', close);
     overlay.querySelector('[data-prev]').addEventListener('click', () => flip && flip.flipPrev());
     overlay.querySelector('[data-next]').addEventListener('click', () => flip && flip.flipNext());
+    overlay.querySelector('[data-zin]').addEventListener('click', () => setZoom(zoom + 0.6));
+    overlay.querySelector('[data-zout]').addEventListener('click', () => setZoom(zoom - 0.6));
+    const stage = overlay.querySelector('.wz-reader-stage');
+    stage.addEventListener('touchstart', onTouchStart, { capture: true, passive: false });
+    stage.addEventListener('touchmove', onTouchMove, { capture: true, passive: false });
+    stage.addEventListener('touchend', onTouchEnd, { capture: true, passive: false });
+    stage.addEventListener('mousedown', onMouseDown, { capture: true });
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
     onKey = (e) => {
       if (e.key === 'Escape') close();
       else if (e.key === 'ArrowLeft') flip && flip.flipPrev();
       else if (e.key === 'ArrowRight') flip && flip.flipNext();
+      else if (e.key === '+' || e.key === '=') setZoom(zoom + 0.6);
+      else if (e.key === '-') setZoom(zoom - 0.6);
     };
     document.addEventListener('keydown', onKey);
   }
 
   function close() {
     if (onKey) { document.removeEventListener('keydown', onKey); onKey = null; }
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
     if (flip) { try { flip.destroy(); } catch (_) {} flip = null; }
     if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
     if (overlay) { overlay.remove(); overlay = null; }
     document.body.style.overflow = '';
     total = 0; pageDivs = []; rendered = [];
+    zoom = 1; panX = 0; panY = 0; pinchD0 = 0; panActive = false; mDrag = false;
   }
 
   function fit(aspect) {
@@ -128,7 +188,7 @@
       const base = first.getViewport({ scale: 1 });
       baseW = base.width; baseH = base.height;
       const { w, h, portrait } = fit(baseW / baseH);
-      dispW = w; dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dispW = w; dpr = Math.min(window.devicePixelRatio || 1, 2.5);
 
       const book = overlay.querySelector('.wz-reader-book');
       pageDivs = [];
@@ -141,8 +201,9 @@
         maxShadowOpacity: 0.5, drawShadow: true, flippingTime: 700, useMouseEvents: true
       });
       flip.loadFromHTML(book.querySelectorAll('.wz-page'));
-      flip.on('flip', () => { updateNo(); renderAround(); });
+      flip.on('flip', () => { resetZoom(); updateNo(); renderAround(); });
       flip.on('changeState', renderAround);
+      resetZoom();
       renderAround();
       clearLoading();
       updateNo();
