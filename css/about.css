@@ -138,6 +138,13 @@ a.contrib-handle:hover { color: var(--text); }
   font-size: 14px; color: var(--text);
   line-height: 1.6; margin-top: 4px;
 }
+.contrib-archive {
+  margin-top: auto; padding-top: 10px;
+  font-size: 14px; font-weight: var(--fw-heading);
+  color: var(--text); text-decoration: none;
+  transition: color .15s;
+}
+.contrib-archive:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── 객원 · 게스트 (작은 카드 목록) ── */
 .contrib-subheader {
