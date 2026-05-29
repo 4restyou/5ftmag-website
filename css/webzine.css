@@ -63,7 +63,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   background: radial-gradient(54% 130% at 50% 0%, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0) 74%);
   pointer-events: none;
 }
-.wz-track { display: flex; align-items: center; gap: clamp(14px, 2.6vw, 34px); padding: 40px 0 52px; will-change: transform; transition: transform .55s var(--wz-ease); position: relative; z-index: 1; }
+.wz-track { display: flex; align-items: center; gap: clamp(14px, 2.6vw, 34px); padding: 40px 0 52px; will-change: transform; transition: transform .55s var(--wz-ease); position: relative; z-index: 1; user-select: none; }
 .wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-book3d { transition: none !important; }
 .wz-flow.following .wz-track { transition: none; }
 .wz-flow.following .wz-slot { filter: none; }   /* 움직이는 동안 그림자 재래스터 방지 → 부드럽게 */
@@ -91,7 +91,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-slot.is-open .wz-book3d { --bx: 0; --by: -8deg; --bs: 1; }
 
 .wz-book3d .f-front { width: var(--cw2); height: var(--h); transform: translateZ(calc(var(--st) / 2)); background: var(--spine); }
-.wz-book3d .f-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wz-book3d .f-front img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; }
 .wz-book3d .f-front::after { content: ""; position: absolute; inset: 0; background: var(--paper) center / cover; mix-blend-mode: multiply; opacity: .22; pointer-events: none; }
 .wz-book3d .f-front .wz-f-text { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 14px; color: #fff; font-weight: var(--fw-heading); text-align: center; }
 .wz-book3d .f-spine {
