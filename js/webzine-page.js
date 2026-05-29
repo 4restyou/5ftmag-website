@@ -4,28 +4,6 @@
 // (단일 큐보이드 + transform 전환). 고르면 그 줄 안에서 표지로 돌아서며 슬롯 폭이 늘어
 // 이웃을 밀어내고 옆에 정보가 뜬다. 스와이프하면 역회전으로 다시 책등으로 접힌다.
 // 좋아요는 user_favorites(target_type 'webzine')로 저장돼 마이페이지에 표시. 오리지널.
-
-// 페이지 이탈 전환: 내부 링크 클릭 시 veil 을 밝은 화면으로 덮고 이동(웹진 다크 → 밝은 페이지로 스르륵).
-// 진입(밝음 → 다크)은 .wz-veil.enter 의 CSS 애니메이션이 처리한다.
-(function () {
-  const veil = document.querySelector('.wz-veil');
-  if (!veil || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  // 뒤로가기(bfcache) 복원 시 veil 이 덮인 채 남지 않도록 초기화
-  window.addEventListener('pageshow', e => { if (e.persisted) veil.classList.remove('leave'); });
-  document.addEventListener('click', e => {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const a = e.target.closest('a[href]');
-    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
-    let url;
-    try { url = new URL(a.href, location.href); } catch (_) { return; }
-    if (url.origin !== location.origin) return;                                       // 외부 링크
-    if (url.pathname === location.pathname && url.search === location.search) return; // 같은 페이지(앵커 등)
-    e.preventDefault();
-    veil.classList.add('leave');
-    setTimeout(() => { location.assign(a.href); }, 430);
-  });
-})();
-
 (function () {
   const root = document.getElementById('wzSeasons');
   if (!root) return;
