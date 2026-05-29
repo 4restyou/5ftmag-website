@@ -27,32 +27,32 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-empty { text-align: center; color: rgba(255, 255, 255, .5); padding: 80px 24px; }
 
 /* ── 시즌(분류)별 책장 ── */
-.wz-seasons { padding: 28px max(20px, 4vw) 88px; overflow-x: clip; }
-/* 각 시즌 = 하나의 책장 패널. 좌우 여백을 두고 패널 배경으로 빈 느낌을 메운다. */
-.wz-shelf {
-  position: relative;
-  max-width: 1180px;
-  margin: 0 auto 34px;
-  padding: 26px 0 10px;
-  border-radius: 20px;
-  background:
-    radial-gradient(140% 120% at 50% -10%, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 55%),
-    linear-gradient(180deg, rgba(255, 255, 255, .04) 0%, rgba(0, 0, 0, .14) 100%);
-  border: 1px solid rgba(255, 255, 255, .08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 30px 70px -40px rgba(0, 0, 0, .85);
-  overflow: hidden;
+.wz-seasons { padding: 8px max(20px, 4vw) 80px; overflow-x: clip; }
+/* 박스로 가두지 않고, 위에서 내리는 조명 + 책이 올라선 선반으로 "열린 책장"을 만든다 */
+.wz-shelf { position: relative; max-width: 1180px; margin: 0 auto; padding: 22px 0 58px; }
+.wz-shelf + .wz-shelf { margin-top: 12px; }
+/* 조명 풀: 책을 비추고 좌우로 자연스럽게 어두워져 빈 공간을 갤러리 조명처럼 보이게 한다 */
+.wz-shelf::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 4px; bottom: 32px; z-index: 0;
+  background: radial-gradient(68% 84% at 50% 4%, rgba(255, 255, 255, .085), rgba(255, 255, 255, 0) 66%);
+  pointer-events: none;
 }
 .wz-shelf-title {
-  font-size: clamp(16px, 1.6vw, 22px); font-weight: var(--fw-heading);
-  letter-spacing: 0.01em; color: rgba(255, 255, 255, .92); margin: 0;
-  padding: 0 max(22px, 3vw); display: flex; align-items: center; gap: 16px;
+  position: relative; z-index: 2; text-align: center;
+  font-size: clamp(15px, 1.5vw, 20px); font-weight: var(--fw-heading);
+  letter-spacing: 0.02em; color: rgba(255, 255, 255, .82); margin: 0;
 }
-.wz-shelf-title::after { content: ""; flex: 1 1 auto; height: 1px; background: linear-gradient(90deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0)); }
 .wz-flow { position: relative; overflow: visible; }
-/* 선반 바닥: 책 밑동 자리에 깔리는 접지 그림자(책이 떠 보이지 않게) */
+/* 선반 널빤지: 책 밑동 라인에 얇은 보드, 좌우 끝은 페이드 → 갇히지 않은 열린 선반 */
+.wz-flow::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 50px; height: 2px; z-index: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .16) 22%, rgba(255, 255, 255, .16) 78%, transparent);
+  pointer-events: none;
+}
+/* 선반 위 접지 그림자: 책이 보드에 닿은 느낌(떠 보이지 않게) */
 .wz-flow::after {
-  content: ""; position: absolute; left: 8%; right: 8%; bottom: 44px; height: 26px; z-index: 0;
-  background: radial-gradient(58% 130% at 50% 0%, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 74%);
+  content: ""; position: absolute; left: 12%; right: 12%; bottom: 26px; height: 26px; z-index: 0;
+  background: radial-gradient(54% 130% at 50% 0%, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0) 74%);
   pointer-events: none;
 }
 .wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 40px 0 52px; will-change: transform; transition: transform .55s var(--wz-ease); position: relative; z-index: 1; }
