@@ -18,17 +18,44 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-cuboid > * , .wz-book3d > * { position: absolute; inset: 0; margin: auto; backface-visibility: hidden; overflow: hidden; }
 .wz-pages { background: repeating-linear-gradient(var(--pg-dir, to bottom), #efe9dd, #efe9dd 1px, #d3c9b5 2px, #efe9dd 3px); }
 
-.wz-intro { padding: 40px 40px 4px; text-align: center; }
-.wz-intro-inner { max-width: 680px; margin: 0 auto; }
-.wz-intro p { font-size: var(--fs-body); line-height: 1.65; color: rgba(255, 255, 255, .62); }
+.wz-intro { padding: 68px 40px 8px; text-align: center; }
+.wz-intro-inner { max-width: 660px; margin: 0 auto; }
+.wz-kicker { display: block; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 255, 255, .42); margin-bottom: 16px; }
+.wz-page-title { font-size: clamp(40px, 6vw, 66px); font-weight: var(--fw-heading); letter-spacing: -0.03em; line-height: 1; margin: 0 0 20px; color: #fff; }
+.wz-lede { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: rgba(255, 255, 255, .82); margin: 0 0 12px; }
+.wz-howto { font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, .48); margin: 0; }
 .wz-empty { text-align: center; color: rgba(255, 255, 255, .5); padding: 80px 24px; }
 
 /* ── 시즌(분류)별 책장 ── */
-.wz-seasons { padding: 8px 0 72px; overflow-x: clip; }
-.wz-shelf { padding: 8px 0 2px; }
-.wz-shelf-title { font-size: clamp(17px, 1.7vw, 23px); font-weight: var(--fw-heading); letter-spacing: -0.01em; color: #fff; margin: 0; padding: 0 max(20px, 5vw); }
+.wz-seasons { padding: 28px max(20px, 4vw) 88px; overflow-x: clip; }
+/* 각 시즌 = 하나의 책장 패널. 좌우 여백을 두고 패널 배경으로 빈 느낌을 메운다. */
+.wz-shelf {
+  position: relative;
+  max-width: 1180px;
+  margin: 0 auto 34px;
+  padding: 26px 0 10px;
+  border-radius: 20px;
+  background:
+    radial-gradient(140% 120% at 50% -10%, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, .04) 0%, rgba(0, 0, 0, .14) 100%);
+  border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 30px 70px -40px rgba(0, 0, 0, .85);
+  overflow: hidden;
+}
+.wz-shelf-title {
+  font-size: clamp(16px, 1.6vw, 22px); font-weight: var(--fw-heading);
+  letter-spacing: 0.01em; color: rgba(255, 255, 255, .92); margin: 0;
+  padding: 0 max(22px, 3vw); display: flex; align-items: center; gap: 16px;
+}
+.wz-shelf-title::after { content: ""; flex: 1 1 auto; height: 1px; background: linear-gradient(90deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0)); }
 .wz-flow { position: relative; overflow: visible; }
-.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 46px 0 56px; will-change: transform; transition: transform .55s var(--wz-ease); }
+/* 선반 바닥: 책 밑동 자리에 깔리는 접지 그림자(책이 떠 보이지 않게) */
+.wz-flow::after {
+  content: ""; position: absolute; left: 8%; right: 8%; bottom: 44px; height: 26px; z-index: 0;
+  background: radial-gradient(58% 130% at 50% 0%, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 74%);
+  pointer-events: none;
+}
+.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 40px 0 52px; will-change: transform; transition: transform .55s var(--wz-ease); position: relative; z-index: 1; }
 .wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-book3d { transition: none !important; }
 .wz-flow.following .wz-track { transition: none; }
 .wz-flow.following .wz-slot { filter: none; }   /* 움직이는 동안 그림자 재래스터 방지 → 부드럽게 */
@@ -39,7 +66,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   --infow: min(40vw, 320px); --infogap: clamp(20px, 3vw, 44px);
   position: relative; flex: 0 0 auto; width: var(--st); height: var(--h);
   transition: width .6s var(--wz-ease), opacity .45s;
-  filter: drop-shadow(12px 18px 16px rgba(0, 0, 0, .45));
+  filter: drop-shadow(2px 22px 18px rgba(0, 0, 0, .5));
 }
 .wz-slot.is-open { width: calc(var(--cw2) + var(--infogap) + var(--infow)); }
 
