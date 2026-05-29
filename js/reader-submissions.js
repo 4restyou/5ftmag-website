@@ -20,6 +20,31 @@
   const THEME_PATH = 'data/current-theme.json';
   const FILMS_PATH = 'data/films.json';
   const db = () => window.MagDB;
+
+  // 업로드/폼 전용 의존(tus, image-processor, camera-brands)은 첫 화면 부담을 줄이려
+  // 사진 올리기 폼을 처음 열 때 동적 로드한다. 한 번 로드하면 캐시한다.
+  const _depPromises = {};
+  function loadScriptOnce(src) {
+    if (_depPromises[src]) return _depPromises[src];
+    _depPromises[src] = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => { _depPromises[src] = null; reject(new Error('스크립트 로드 실패: ' + src)); };
+      document.head.appendChild(s);
+    });
+    return _depPromises[src];
+  }
+  function ensureUploadDeps() {
+    const jobs = [];
+    if (!window.tus || typeof window.tus.Upload !== 'function')
+      jobs.push(loadScriptOnce('https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js'));
+    if (typeof window.processImageForUpload !== 'function')
+      jobs.push(loadScriptOnce('./js/image-processor.js?v=20260520-mobileupload'));
+    if (typeof window.normalizeCamera !== 'function')
+      jobs.push(loadScriptOnce('./js/camera-brands.js?v=20260522-camerasearch'));
+    return Promise.all(jobs);
+  }
   let formOutsideClickHandler = null;
 
   function clearFormOutsideClickHandler() {
@@ -653,6 +678,13 @@
       let savedPrefill = prefillFilm;
       if (!savedPrefill) {
         savedPrefill = readTransient(SS_PREFILL, LS_PREFILL);
+      }
+      // 업로드/폼 전용 스크립트를 이 시점에 동적 로드 (첫 화면에서는 받지 않는다)
+      try {
+        await ensureUploadDeps();
+      } catch (_) {
+        window.notify?.('업로드 도구를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.', 'danger');
+        return;
       }
       // 8초 외부 timeout — 안쪽 fetchWithTimeout 이 우회되는 극단적 케이스 대비
       const dataPromise = Promise.all([getCurrentTheme(), getFilms()]);
