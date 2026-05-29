@@ -10,6 +10,14 @@ html {
 }
 /* 헤더·본문·푸터를 하나의 갤러리 배경으로 연결(고정 배경이라 seam 없음) */
 body { background: var(--wz-bg); color: #fff; overflow-x: hidden; }
+
+/* 페이지 전환 veil: 진입 시 밝은 화면에서 다크로 스르륵, 이탈 시 다크에서 밝은 화면으로 스르륵.
+   색은 직전/다음 페이지(사이트 테마)에 맞춰 head 스크립트가 정한다(기본 흰색). */
+.wz-veil { position: fixed; inset: 0; z-index: 2000; background: var(--wz-veil-bg, #fff); opacity: 0; pointer-events: none; }
+.wz-veil.enter { animation: wzVeilOut .55s var(--wz-ease) both; }
+.wz-veil.leave { animation: none; opacity: 1; pointer-events: auto; transition: opacity .42s var(--wz-ease); }
+@keyframes wzVeilOut { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .wz-veil { display: none; } }
 header { background: var(--wz-bg); border-bottom-color: transparent; }
 footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(255, 255, 255, .8); }
 .wz-stage { min-height: calc(100vh - var(--header-h, 72px)); background: none; color: #fff; display: flex; flex-direction: column; }
