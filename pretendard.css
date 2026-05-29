@@ -1,67 +1,9 @@
 /*
 Pretendard 웹폰트 — 5ft.mag 프로젝트용
-폰트 파일은 ./fonts/woff/ 폴더에 위치
+
+dynamic-subset: 페이지에 실제 쓰인 글자(unicode-range)만 woff2 로 받아온다.
+self-host woff(굵기당 약 1.1MB, 9종) 대신 jsdelivr CDN 의 글자 단위 subset 을
+사용해 폰트 트래픽을 크게 줄인다. CDN 이 응답하지 않으면 font-display: swap 으로
+시스템 폰트(common.css 의 --font fallback)로 표시된다.
 */
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 900;
-  font-display: swap;
-  src: local('Pretendard Black'), url('./fonts/woff/Pretendard-Black.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 800;
-  font-display: swap;
-  src: local('Pretendard ExtraBold'), url('./fonts/woff/Pretendard-ExtraBold.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 700;
-  font-display: swap;
-  src: local('Pretendard Bold'), url('./fonts/woff/Pretendard-Bold.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 600;
-  font-display: swap;
-  src: local('Pretendard SemiBold'), url('./fonts/woff/Pretendard-SemiBold.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 500;
-  font-display: swap;
-  src: local('Pretendard Medium'), url('./fonts/woff/Pretendard-Medium.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 400;
-  font-display: swap;
-  src: local('Pretendard Regular'), url('./fonts/woff/Pretendard-Regular.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 300;
-  font-display: swap;
-  src: local('Pretendard Light'), url('./fonts/woff/Pretendard-Light.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 200;
-  font-display: swap;
-  src: local('Pretendard ExtraLight'), url('./fonts/woff/Pretendard-ExtraLight.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 100;
-  font-display: swap;
-  src: local('Pretendard Thin'), url('./fonts/woff/Pretendard-Thin.woff') format('woff');
-}
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
