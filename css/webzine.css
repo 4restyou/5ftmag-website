@@ -159,6 +159,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 
 @media (max-width: 760px) {
   .wz-intro { padding: 28px 20px 0; }
+  .wz-howto br { display: none; }   /* 좁은 화면에선 강제 줄바꿈 없이 자연 흐름 */
   .wz-nav { display: none; }
   .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
   .wz-slot { --st: clamp(38px, 11vw, 58px); --cw2: calc(var(--h) * 0.72); --h: min(300px, calc(100vh - 230px)); --infow: 46vw; --infogap: clamp(14px, 4vw, 24px); }
