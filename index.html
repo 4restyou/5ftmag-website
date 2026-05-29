@@ -300,13 +300,11 @@
 </footer>
 
 
-<script src="./js/site-common.js?v=20260526-iaberr"></script>
-<script src="./js/home-page.js?v=20260529-mobilemix"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
-<script src="./js/db-client.js?v=20260528-webzine"></script>
-<script src="./js/image-processor.js?v=20260520-mobileupload"></script>
-<script src="./js/camera-brands.js?v=20260522-camerasearch"></script>
-<script src="./js/reader-submissions.js?v=20260527-plainupload"></script>
+<script src="./js/site-common.js?v=20260526-iaberr" defer></script>
+<script src="./js/home-page.js?v=20260529-mobilemix" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="./js/db-client.js?v=20260528-webzine" defer></script>
+<!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->
+<script src="./js/reader-submissions.js?v=20260529-lazyupload" defer></script>
 </body>
 </html>
