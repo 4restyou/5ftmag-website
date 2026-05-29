@@ -129,8 +129,8 @@
     rs.slots.forEach((slot, pos) => {
       const d = pos - rs.active, ad = Math.abs(d);
       slot.classList.toggle('is-center', d === 0);
-      // 기울어진(표지 보이는) 왼쪽 책과 펼친 책은 흐리지 않는다. 오른쪽 책등만 거리감으로 살짝 흐림.
-      slot.style.opacity = String((slot.classList.contains('is-open') || d < 0) ? 1 : Math.max(0, 1 - ad * 0.16));
+      // 가운데에서 멀어질수록 좌우 대칭으로 흐려져 화살표 쪽에서 배경으로 자연스럽게 사라진다(펼친 책 제외).
+      slot.style.opacity = String(slot.classList.contains('is-open') ? 1 : Math.max(0, 1 - ad * 0.16));
       slot.style.pointerEvents = (ad > 6 && !slot.classList.contains('is-open')) ? 'none' : 'auto';
       // 닫힌 책: 가운데·오른쪽은 책등(90°), 가운데 왼쪽으로 갈수록 표지가 한 칸당 10°씩 더 보인다(최대 58°).
       const b3 = slot.querySelector('.wz-book3d');
