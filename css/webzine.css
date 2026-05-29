@@ -62,14 +62,14 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   background: radial-gradient(54% 130% at 50% 0%, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0) 74%);
   pointer-events: none;
 }
-.wz-track { display: flex; align-items: center; gap: clamp(16px, 3.4vw, 46px); padding: 40px 0 52px; will-change: transform; transition: transform .55s var(--wz-ease); position: relative; z-index: 1; }
+.wz-track { display: flex; align-items: center; gap: clamp(14px, 2.6vw, 34px); padding: 40px 0 52px; will-change: transform; transition: transform .55s var(--wz-ease); position: relative; z-index: 1; }
 .wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-book3d { transition: none !important; }
 .wz-flow.following .wz-track { transition: none; }
 .wz-flow.following .wz-slot { filter: none; }   /* 움직이는 동안 그림자 재래스터 방지 → 부드럽게 */
 
 /* 슬롯: 닫힘=책등폭, 열림=표지+정보폭. 폭이 전환되며 이웃을 부드럽게 밀어낸다 */
 .wz-slot {
-  --st: clamp(46px, 4.8vw, 64px); --cw2: calc(var(--h) * 0.72); --h: min(360px, calc(100vh - 290px));
+  --st: clamp(30px, 3.2vw, 42px); --cw2: calc(var(--h) * 0.72); --h: min(360px, calc(100vh - 290px));
   --infow: min(40vw, 320px); --infogap: clamp(20px, 3vw, 44px);
   position: relative; flex: 0 0 auto; width: var(--st); height: var(--h);
   transition: width .6s var(--wz-ease), opacity .45s;
@@ -108,7 +108,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-spine-title.is-scroll .wz-spine-title-in { animation: wz-marq var(--marq-dur, 7s) ease-in-out infinite alternate; }
 @keyframes wz-marq { to { transform: translateY(calc(-1 * var(--scroll, 0px))); } }
 .wz-spine-issue { writing-mode: vertical-rl; font-size: 11px; letter-spacing: 0.16em; opacity: .58; }
-.wz-spine-mark { flex: 0 0 auto; width: clamp(18px, 2.2vw, 26px); height: clamp(18px, 2.2vw, 26px); background: var(--spine-text); opacity: .82; -webkit-mask: var(--wz-mark) center / contain no-repeat; mask: var(--wz-mark) center / contain no-repeat; }
+.wz-spine-mark { flex: 0 0 auto; width: clamp(14px, 1.7vw, 20px); height: clamp(14px, 1.7vw, 20px); background: var(--spine-text); opacity: .82; -webkit-mask: var(--wz-mark) center / contain no-repeat; mask: var(--wz-mark) center / contain no-repeat; }
 
 /* 펼침 정보(표지 옆) */
 .wz-info {
@@ -169,7 +169,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   .wz-howto br { display: none; }   /* 좁은 화면에선 강제 줄바꿈 없이 자연 흐름 */
   .wz-nav { display: none; }
   .wz-track { gap: clamp(14px, 4vw, 30px); padding: 40px 0 48px; }
-  .wz-slot { --st: clamp(38px, 11vw, 58px); --cw2: calc(var(--h) * 0.72); --h: min(300px, calc(100vh - 230px)); --infow: 46vw; --infogap: clamp(14px, 4vw, 24px); }
+  .wz-slot { --st: clamp(26px, 8vw, 40px); --cw2: calc(var(--h) * 0.72); --h: min(300px, calc(100vh - 230px)); --infow: 46vw; --infogap: clamp(14px, 4vw, 24px); }
   .wz-spine-title { font-size: clamp(11px, 2.8vw, 14px); }
   .wz-meta-title { font-size: 22px; }
   .wz-meta-desc { max-height: 7em; }
