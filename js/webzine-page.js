@@ -241,7 +241,6 @@
               </div>`).join('')}
           </div>
           <button type="button" class="wz-nav wz-next" aria-label="다음">›</button>
-          <span class="wz-fade" aria-hidden="true"></span>
         </div>
       </section>`).join('');
 
