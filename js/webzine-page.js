@@ -21,6 +21,7 @@
   let openState = null;          // { rs, pos, i }
   let followId = null, followFlow = null, seqT = null;
   let currentRow = null;         // 키보드 좌우 이동 대상(최근 조작/펼친 줄)
+  let suppressClick = false;     // 마우스 드래그로 넘긴 직후의 클릭(책 펼치기) 억제
 
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
@@ -265,11 +266,10 @@
       let wheelLock = false;
       flowEl.addEventListener('wheel', (e) => {
         currentRow = rs;
-        // 줄 위에서 휠(가로·세로 모두)로 좌우 넘김. 줄 끝에서는 페이지 스크롤에 양보.
-        const d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-        if (!d) return;
-        const dir = d > 0 ? 1 : -1;
-        // 펼쳐져 있으면 방향·위치 무관하게 닫기만(ESC 와 동일). 닫혀 있을 때만 줄 끝에서 페이지 스크롤에 양보.
+        // 가로 휠(트랙패드 가로 스와이프)로만 책을 넘긴다. 세로 휠은 페이지 스크롤에 양보(가로채지 않음).
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+        const dir = e.deltaX > 0 ? 1 : -1;
+        // 펼쳐져 있으면 닫기만(ESC 와 동일). 닫혀 있을 땐 줄 끝에서 페이지에 양보.
         if (!openState && ((dir > 0 && rs.active >= rs.slots.length - 1) || (dir < 0 && rs.active <= 0))) return;
         e.preventDefault();
         if (wheelLock) return;            // 한 번 스와이프 = 한 칸(너무 빨리 지나가지 않게)
@@ -283,6 +283,26 @@
         const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
         if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) nav(rs, dx < 0 ? 1 : -1);
       }, { passive: true });
+      // 마우스로 좌우로 끌어서 넘기기(데스크탑). 80px 끌 때마다 한 칸. 실제 넘긴 직후의 클릭만 억제한다.
+      flowEl.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        currentRow = rs;
+        let sx = e.clientX, navd = false;
+        const onMove = (ev) => {
+          const dx = ev.clientX - sx;
+          if (Math.abs(dx) >= 80) { nav(rs, dx < 0 ? 1 : -1); sx = ev.clientX; navd = true; }
+        };
+        const onUp = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          if (navd) { suppressClick = true; setTimeout(() => { suppressClick = false; }, 60); }
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+      flowEl.addEventListener('click', (e) => {
+        if (suppressClick) { e.stopPropagation(); e.preventDefault(); }
+      }, true);
       layout(rs);
       requestAnimationFrame(() => flowEl.classList.remove('no-anim'));
     });
