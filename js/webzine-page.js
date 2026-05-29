@@ -131,6 +131,12 @@
       slot.classList.toggle('is-center', d === 0);
       slot.style.opacity = String(slot.classList.contains('is-open') ? 1 : Math.max(0, 1 - ad * 0.16));
       slot.style.pointerEvents = (ad > 6 && !slot.classList.contains('is-open')) ? 'none' : 'auto';
+      // 닫힌 책: 가운데·오른쪽은 책등(90°), 가운데 왼쪽으로 갈수록 표지가 한 칸당 10°씩 더 보인다(최대 58°).
+      const b3 = slot.querySelector('.wz-book3d');
+      if (b3) {
+        if (slot.classList.contains('is-open')) b3.style.removeProperty('--by');  // 펼침: 표지 정면(CSS -8deg)
+        else b3.style.setProperty('--by', (d < 0 ? Math.max(58, 90 + d * 10) : 90) + 'deg');
+      }
     });
     const prev = rs.flowEl.querySelector('.wz-prev'), next = rs.flowEl.querySelector('.wz-next');
     if (prev) prev.disabled = rs.active <= 0;
