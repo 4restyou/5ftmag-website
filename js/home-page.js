@@ -32,13 +32,24 @@
       .then(res => res.json())
       .then(data => {
         // 발행된 글만, 최신순
-        // 데스크톱은 최신 글 10장, 모바일은 스크롤 피로를 줄이기 위해 5장 노출
-        // 나머지는 stories.html 페이지네이션으로 이어짐
         const all = data
           .filter(s => s.published !== false)
           .sort((a, b) => new Date(b.date) - new Date(a.date));
-        const storyLimit = isMobileHome() ? 5 : 10;
-        const stories = all.slice(0, storyLimit);
+        // 데스크톱은 최신 10장. 모바일은 발행이 느려도 풍성하게 보이도록 최신 3장 +
+        // 그 이전 글 중 랜덤 5장을 섞어, 재방문 때마다 묻혀 있던 글이 다시 노출되게 한다.
+        let stories;
+        if (isMobileHome()) {
+          const LATEST_N = 3, RANDOM_N = 5;
+          const latest = all.slice(0, LATEST_N);
+          const pastPool = all.slice(LATEST_N);
+          for (let i = pastPool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pastPool[i], pastPool[j]] = [pastPool[j], pastPool[i]];
+          }
+          stories = [...latest, ...pastPool.slice(0, RANDOM_N)];
+        } else {
+          stories = all.slice(0, 10);
+        }
 
         // 페이지 번호 네비게이션 (stories.html 의 pageSize=12 와 동일하게 계산)
         const numNav = document.getElementById('storyNumNav');
