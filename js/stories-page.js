@@ -167,6 +167,8 @@
 
   // 현재 상태(cat·q·page) 를 URL 에 반영 — 공유·새로고침·뒤로가기 복구용.
   // 연속 입력에 history 가 쌓이지 않게 replaceState.
+  // 주의: <base href="/"> 가 있어 상대 URL "?…" 만 넘기면 base 기준으로 해석돼
+  //       path 가 root 로 떨어진다(/?q=…). 현재 path 를 명시한다.
   function syncUrl() {
     const params = new URLSearchParams();
     if (currentCategory && currentCategory !== 'all') params.set('cat', currentCategory);
@@ -174,7 +176,7 @@
     if (currentSearchQuery) params.set('q', currentSearchQuery);
     if (currentPage > 1) params.set('page', String(currentPage));
     const qs = params.toString();
-    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : ''));
   }
 
   // 통합 필터링 (카테고리 + 검색)
@@ -367,7 +369,16 @@
     }
   });
 
-  // 헤더 검색 아이콘에서 #search 로 진입한 경우 검색바로 스크롤 + 포커스
+  // 헤더 검색 진입 처리:
+  //   - ?q=… : 값으로 검색 즉시 실행
+  //   - #search: 검색바로 스크롤 + 포커스
+  const qFromUrl = (new URLSearchParams(location.search).get('q') || '').trim();
+  if (qFromUrl) {
+    searchInput.value = qFromUrl;
+    currentSearchQuery = qFromUrl;
+    currentPage = 1;
+    applyFilters();
+  }
   function focusSearchFromHash() {
     if (window.location.hash !== '#search') return;
     searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });

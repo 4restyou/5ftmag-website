@@ -34,7 +34,7 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260526-fontscale">
-  <link rel="stylesheet" href="./css/common.css?v=20260531-auth">
+  <link rel="stylesheet" href="./css/common.css?v=20260531-clean">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260526-btncta">
   <link rel="stylesheet" href="./css/home.css?v=20260528-nowz">
 
@@ -88,9 +88,8 @@
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
     <div class="nav-right">
-      <a href="stories.html#search" class="icon-btn" aria-label="글 검색" title="글 검색">🔎</a>
+      <a href="stories.html" class="icon-btn" id="headerSearchBtn" aria-label="글 검색" title="글 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
-      <div class="auth-slot" id="authSlot"></div>
       <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
@@ -302,12 +301,11 @@
 </footer>
 
 
-<script src="./js/site-common.js?v=20260526-iaberr" defer></script>
+<script src="./js/site-common.js?v=20260531-headersearch" defer></script>
 <script src="./js/home-page.js?v=20260531-unsub" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db-client.js?v=20260531-unsub" defer></script>
 <!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->
 <script src="./js/reader-submissions.js?v=20260529-lazyupload" defer></script>
-<script src="./js/header-user.js?v=20260531-auth" defer></script>
 </body>
 </html>
