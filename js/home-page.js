@@ -518,14 +518,14 @@
         return;
       }
 
-      newsletterMessage.textContent = '구독 신청이 완료됐어요. 새 이슈가 나오면 이메일로 알려드릴게요.';
+      newsletterMessage.textContent = '구독 신청이 완료됐어요. 새 이슈 안내 메일에 언제든 해지할 수 있는 링크를 함께 보내드릴게요.';
       newsletterMessage.className = 'nl-message success';
       newsletterEmail.value = '';
 
       setTimeout(() => {
         newsletterMessage.textContent = '';
         newsletterMessage.className = 'nl-message';
-      }, 8000);
+      }, 10000);
     });
   }
 
