@@ -507,7 +507,6 @@
 
     linkArticleAuthor();
     setupAuthNav();
-    setupHeaderSearch();
     setupNotifications();
     setupArticleScrap();
     setupFavoritePulse();
@@ -1212,72 +1211,6 @@
     update();
   }
 
-  // ════════════════════════════════════════════════
-  // 헤더 검색 — 아이콘 클릭 시 모달 펼침, 엔터로 검색
-  //   stories 페이지면 그 자리에서 inline 적용(검색바에 값 주입 + input 이벤트)
-  //   다른 페이지면 stories.html?q=… 로 이동
-  // ════════════════════════════════════════════════
-  function setupHeaderSearch() {
-    const trigger = document.getElementById('headerSearchBtn');
-    if (!trigger) return;
-    let modal = null;
-
-    function onStoriesPage() {
-      return /\/stories\.html$/i.test(location.pathname);
-    }
-
-    function close() {
-      if (!modal) return;
-      modal.remove();
-      modal = null;
-      document.removeEventListener('keydown', onKey);
-    }
-    function onKey(ev) { if (ev.key === 'Escape') close(); }
-
-    function open(ev) {
-      if (ev) ev.preventDefault();
-      if (modal) { modal.querySelector('input').focus(); return; }
-      // 헤더 트리거의 href 가 페이지 깊이에 맞춘 stories.html 경로(루트/../) 를 들고 있다.
-      const base = trigger.getAttribute('href') || 'stories.html';
-      modal = document.createElement('div');
-      modal.className = 'header-search-modal';
-      modal.innerHTML =
-        '<div class="header-search-form" role="search">' +
-        '<svg class="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>' +
-        '<input type="search" placeholder="제목, 작가, 키워드로 검색…" aria-label="글 검색" autocomplete="off" />' +
-        '<button type="button" class="header-search-close" aria-label="닫기">✕</button>' +
-        '</div>';
-      document.body.appendChild(modal);
-      const input = modal.querySelector('input');
-      function submit() {
-        const q = input.value.trim();
-        if (onStoriesPage()) {
-          const si = document.getElementById('searchInput');
-          if (si) {
-            si.value = q;
-            si.dispatchEvent(new Event('input', { bubbles: true }));
-            si.focus();
-          }
-          close();
-          return;
-        }
-        const url = new URL(base, location.href);
-        if (q) url.searchParams.set('q', q); else url.searchParams.delete('q');
-        location.assign(url.href);
-      }
-      input.addEventListener('keydown', (e) => {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        submit();
-      });
-      modal.querySelector('.header-search-close').addEventListener('click', close);
-      modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-      document.addEventListener('keydown', onKey);
-      setTimeout(() => input.focus(), 30);
-    }
-
-    trigger.addEventListener('click', open);
-  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

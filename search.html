@@ -1,35 +1,40 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webzine | 5ft.mag</title>
+  <title>검색 | 5ft.mag</title>
+  <meta name="description" content="5ft.mag 의 글·필름·웹진·현상소·매물을 한꺼번에 찾는 통합 검색.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://www.5ftmag.com/search.html">
+
   <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/icon-32.png">
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
+
+  <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260526-fontscale">
   <link rel="stylesheet" href="./css/common.css?v=20260531-search">
-  <link rel="stylesheet" href="./css/webzine.css?v=20260529-drag">
-  <script>try{if((localStorage.getItem('5ftTheme')||'light')==='dark')document.documentElement.style.setProperty('--wz-veil-bg','#0c0c0c');}catch(e){}</script>
+  <link rel="stylesheet" href="./css/search.css?v=20260531-init">
 </head>
 <body>
-<div class="wz-veil enter" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
-    <a href="index.html" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <a href="/" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
     <ul class="main-nav">
       <li><a href="stories.html">Articles</a></li>
       <li><a href="films.html">Films</a></li>
-      <li><a href="webzine.html" class="current">Webzine</a></li>
+      <li><a href="webzine.html">Webzine</a></li>
       <li><a href="labs.html">Labs</a></li>
       <li><a href="market.html">Market</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
     <div class="nav-right">
-      <a href="search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <a href="search.html" class="icon-btn" id="headerSearchBtn" aria-label="글 검색" title="글 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
       <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
@@ -37,7 +42,7 @@
   <nav class="mobile-nav" id="mobileNav">
     <a href="stories.html">Articles</a>
     <a href="films.html">Films</a>
-    <a href="webzine.html" class="current">Webzine</a>
+    <a href="webzine.html">Webzine</a>
     <a href="labs.html">Labs</a>
     <a href="market.html">Market</a>
     <a href="about.html">About</a>
@@ -45,17 +50,15 @@
   </nav>
 </header>
 
-<main class="wz-stage" role="main" id="main">
-  <header class="wz-intro">
-    <div class="wz-intro-inner">
-      <span class="wz-kicker">5ft.mag · 디지털 책장</span>
-      <h1 class="wz-page-title">Webzine</h1>
-      <p class="wz-lede">5FT와 함께하는 여러 웹진. 표지를 골라 펼쳐 읽어요.</p>
-      <p class="wz-howto">좌우로 넘겨(스와이프, 마우스 휠, 좌우 방향키, 화살표 버튼) 매거진을 고르고, <br>책을 클릭하면 표지가 펼쳐져요. 닫을 땐 Esc나 방향키, 표지 클릭.</p>
-    </div>
-  </header>
-  <div class="wz-seasons" id="wzSeasons" aria-label="웹진 목록">
-    <p class="wz-empty">불러오는 중…</p>
+<main class="search-page" id="main">
+  <h1 class="search-title">전체 검색</h1>
+  <form id="searchForm" class="search-form" role="search">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+    <input type="search" id="searchQ" name="q" placeholder="제목, 작가, 키워드, 필름 이름…" aria-label="검색어" autocomplete="off" />
+    <button type="submit" class="search-submit">검색</button>
+  </form>
+  <div id="searchResults" aria-live="polite">
+    <p class="search-hint">키워드 한 줄이면 글·필름·웹진·현상소·매물을 한꺼번에 찾아요.</p>
   </div>
 </main>
 
@@ -67,17 +70,15 @@
   <div class="footer-links">
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
     <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
-    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a>
     <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
   </div>
-  <span class="footer-copy">© 2024 5ft.mag</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./js/db-client.js?v=20260531-unsub"></script>
 <script src="./js/site-common.js?v=20260531-search"></script>
-<script src="./js/webzine-reader.js?v=20260528-wheel"></script>
-<script src="./js/webzine-page.js?v=20260529-drag"></script>
+<script src="./js/search-page.js?v=20260531-init" defer></script>
 
 </body>
 </html>
