@@ -284,6 +284,18 @@
       if (error && error.code !== '23505') return { error };
       return { error: null };
     },
+    // 토큰으로 해지. 운영자가 새 이슈 메일에 unsubscribe.html?token=... 형태로 박는다.
+    // SECURITY DEFINER 함수가 RLS 를 우회하며 정확히 일치하는 row 하나만 삭제.
+    async unsubscribe(token) {
+      const c = client(); if (!c) return { ok: false, error: { message: 'unavailable' } };
+      const t = String(token || '').trim();
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(t)) {
+        return { ok: false, error: { message: 'invalid token' } };
+      }
+      const { data, error } = await c.rpc('newsletter_unsubscribe', { p_token: t });
+      if (error) return { ok: false, error };
+      return { ok: !!data };
+    },
   };
 
   function mapApprovedSubmission(r) {
