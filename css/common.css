@@ -213,41 +213,6 @@ header {
   gap: 4px;
 }
 
-/* ────────── 헤더 인증 슬롯 (로그인/아바타/로그아웃) ────────── */
-.auth-slot { display: inline-flex; align-items: center; gap: 4px; }
-.auth-slot:empty { display: none; }
-.auth-login {
-  background: none;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  color: var(--text);
-  font: inherit;
-  font-family: var(--font);
-  font-size: 13px;
-  padding: 6px 12px;
-  cursor: pointer;
-  opacity: .8;
-  transition: opacity .15s;
-}
-.auth-login:hover { opacity: 1; }
-.auth-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(127,127,127,.15);
-  color: var(--text);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-  overflow: hidden;
-  transition: opacity .15s;
-}
-.auth-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.auth-avatar:hover { opacity: .8; }
-
 /* ────────── 알림 종 + 뱃지 + 드롭다운 ────────── */
 .notif-bell { position: relative; }
 .notif-bell svg {
@@ -1053,3 +1018,53 @@ textarea:focus-visible {
     color: #555;
   }
 }
+
+/* ────────── 헤더 검색 모달 ────────── */
+.header-search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 64px 16px 0;
+  animation: hsfade .18s ease-out;
+}
+@keyframes hsfade { from { opacity: 0; } to { opacity: 1; } }
+.header-search-form {
+  background: var(--bg);
+  border: 1px solid var(--border, rgba(127,127,127,.25));
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  box-shadow: 0 16px 40px rgba(0,0,0,.18);
+}
+.header-search-icon { width: 18px; height: 18px; color: var(--text); flex: 0 0 auto; opacity: .7; }
+.header-search-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-family: var(--font);
+  font-size: 16px;
+  padding: 10px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+}
+.header-search-close {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 6px 8px;
+  font-size: 14px;
+  color: var(--text);
+  opacity: .6;
+  transition: opacity .15s;
+}
+.header-search-close:hover { opacity: 1; }
