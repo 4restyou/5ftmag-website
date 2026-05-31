@@ -787,11 +787,18 @@ async function loadMyComments() {
   renderMyComments();
 }
 
-// page_id 를 본문 페이지 URL 로 변환. page_id 가 정상이면 'stories/01' 형태지만
-// 앞에 '/' 가 있거나 이미 '.html' 이 붙은 경우도 안전하게 처리.
+// page_id 를 본문 페이지 URL 로 변환.
+// 패턴:
+//   stories/<slug> → /stories/<slug>.html#comments  (실제 파일 존재)
+//   films/<slug>   → /films.html?film=<slug>#comments  (단일 films.html + ?film= 으로 모달 자동 오픈)
+//   기타           → /<page_id>(.html 보강)#comments  (정규화 fallback)
 function buildCommentLink(page_id) {
   const p = String(page_id || '').trim();
   if (!p) return '#';
+  if (p.startsWith('films/')) {
+    const slug = p.slice('films/'.length);
+    return '/films.html?film=' + encodeURIComponent(slug) + '#comments';
+  }
   const withSlash = p.startsWith('/') ? p : '/' + p;
   const withExt   = /\.html?$/i.test(withSlash) ? withSlash : withSlash + '.html';
   return withExt + '#comments';
