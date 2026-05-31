@@ -787,6 +787,16 @@ async function loadMyComments() {
   renderMyComments();
 }
 
+// page_id 를 본문 페이지 URL 로 변환. page_id 가 정상이면 'stories/01' 형태지만
+// 앞에 '/' 가 있거나 이미 '.html' 이 붙은 경우도 안전하게 처리.
+function buildCommentLink(page_id) {
+  const p = String(page_id || '').trim();
+  if (!p) return '#';
+  const withSlash = p.startsWith('/') ? p : '/' + p;
+  const withExt   = /\.html?$/i.test(withSlash) ? withSlash : withSlash + '.html';
+  return withExt + '#comments';
+}
+
 function renderMyComments() {
   const rows = STATE.myComments || [];
   if (rows.length === 0) {
@@ -797,7 +807,7 @@ function renderMyComments() {
     return;
   }
   $('myCommentsList').innerHTML = rows.map(r => {
-    const link = '/' + r.page_id + '.html#comments';
+    const link = buildCommentLink(r.page_id);
     return `
       <div class="me-mycomment">
         <div class="me-mycomment-meta">
