@@ -2,12 +2,15 @@
 
 const STATE = {
   user: null,
-  section: 'photos',     // 'photos' | 'market' | 'fav-photos' | 'fav-films'
+  section: 'photos',     // 'photos' | 'market' | 'notifs' | 'my-comments' | 'fav-*'
   // photos
   rows: [],
   filter: 'all',
   // market
   marketRows: [],
+  // notifications & 내 댓글
+  notifs: null,
+  myComments: null,
   // favorites
   favPhotos: null,       // null = 미로딩, [] = 비어있음
   favFilms:  null,
@@ -346,17 +349,23 @@ function switchSection(sec) {
   document.querySelectorAll('.me-pagetab').forEach(t => t.classList.toggle('active', t.dataset.section === sec));
   $('section-photos').hidden           = sec !== 'photos';
   $('section-market').hidden           = sec !== 'market';
+  $('section-notifs').hidden           = sec !== 'notifs';
+  $('section-my-comments').hidden      = sec !== 'my-comments';
   $('section-fav-photos').hidden       = sec !== 'fav-photos';
   $('section-fav-films').hidden        = sec !== 'fav-films';
   $('section-fav-webzine').hidden      = sec !== 'fav-webzine';
   $('section-fav-contributors').hidden = sec !== 'fav-contributors';
   $('section-fav-articles').hidden     = sec !== 'fav-articles';
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
+  if (sec === 'notifs'            && STATE.notifs           === null) loadNotifs();
+  if (sec === 'my-comments'       && STATE.myComments       === null) loadMyComments();
   if (sec === 'fav-photos'        && STATE.favPhotos        === null) loadFavPhotos();
   if (sec === 'fav-films'         && STATE.favFilms         === null) loadFavFilms();
   if (sec === 'fav-webzine'       && STATE.favWebzine       === null) loadFavWebzine();
   if (sec === 'fav-contributors'  && STATE.favContributors  === null) loadFavContributors();
   if (sec === 'fav-articles'      && STATE.favArticles      === null) loadFavArticles();
+  // 알림 탭에 들어왔으면 안 읽은 건 자동으로 읽음 처리(뱃지 즉시 0 으로)
+  if (sec === 'notifs') markNotifsRead();
   // URL hash 동기화
   try { history.replaceState(null, '', '#' + sec); } catch (_) {}
 }
@@ -708,6 +717,98 @@ $('imgZoom').addEventListener('click', () => {
   $('imgZoomTarget').src = '';
 });
 
+// ═════════════════════════════════════════
+// 알림 (user_notifications)
+// ═════════════════════════════════════════
+async function loadNotifs() {
+  $('notifsList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  STATE.notifs = await db().notifications.list({ limit: 50 });
+  renderNotifs();
+}
+
+function renderNotifs() {
+  const rows = STATE.notifs || [];
+  const markBtn = $('notifsMarkAll');
+  const anyUnread = rows.some(r => !r.read_at);
+  if (markBtn) markBtn.hidden = !anyUnread;
+  if (rows.length === 0) {
+    $('notifsList').innerHTML = '<div class="me-empty">아직 알림이 없어요.</div>';
+    return;
+  }
+  $('notifsList').innerHTML = rows.map(r => `
+    <div class="me-notif${r.read_at ? '' : ' is-unread'}" data-id="${escapeAttr(r.id)}">
+      <span class="me-notif-dot" aria-hidden="true"></span>
+      <div class="me-notif-body">
+        <div class="me-notif-title">${escapeHtml(r.title || '')}</div>
+        ${r.body ? `<div class="me-notif-text">${escapeHtml(r.body)}</div>` : ''}
+        <div class="me-notif-meta">${fmtDate(r.created_at)}${r.link ? ` · <a href="${escapeAttr(r.link)}">바로가기 →</a>` : ''}</div>
+      </div>
+    </div>`).join('');
+}
+
+async function markNotifsRead() {
+  if (!STATE.notifs || STATE.notifs.length === 0) return;
+  const unread = STATE.notifs.filter(n => !n.read_at).map(n => n.id);
+  if (unread.length === 0) return;
+  await db().notifications.markRead(unread);
+  // 로컬 state 갱신 + 뱃지 갱신
+  STATE.notifs = STATE.notifs.map(n => n.read_at ? n : { ...n, read_at: new Date().toISOString() });
+  await refreshNotifsBadge();
+  renderNotifs();
+}
+
+async function refreshNotifsBadge() {
+  const badge = $('notifsBadge');
+  if (!badge) return;
+  let unread = 0;
+  try { unread = await db().notifications.unreadCount(); } catch (_) {}
+  if (unread > 0) {
+    badge.textContent = String(unread);
+    badge.hidden = false;
+  } else {
+    badge.textContent = '';
+    badge.hidden = true;
+  }
+}
+
+$('notifsMarkAll')?.addEventListener('click', async () => {
+  await db().notifications.markAllRead();
+  STATE.notifs = (STATE.notifs || []).map(n => n.read_at ? n : { ...n, read_at: new Date().toISOString() });
+  await refreshNotifsBadge();
+  renderNotifs();
+});
+
+// ═════════════════════════════════════════
+// 내 댓글
+// ═════════════════════════════════════════
+async function loadMyComments() {
+  $('myCommentsList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  STATE.myComments = await db().comments.listByUser({ limit: 50 });
+  renderMyComments();
+}
+
+function renderMyComments() {
+  const rows = STATE.myComments || [];
+  if (rows.length === 0) {
+    $('myCommentsList').innerHTML = `
+      <div class="me-empty">아직 남긴 댓글이 없어요.
+        <br /><a class="me-empty-cta" href="stories.html">글 읽으러 가기 →</a>
+      </div>`;
+    return;
+  }
+  $('myCommentsList').innerHTML = rows.map(r => {
+    const link = '/' + r.page_id + '.html#comments';
+    return `
+      <div class="me-mycomment">
+        <div class="me-mycomment-meta">
+          <a href="${escapeAttr(link)}" class="me-mycomment-link">${escapeHtml(r.page_id)}</a>
+          <span class="me-mycomment-date">${fmtDate(r.created_at)}</span>
+        </div>
+        <p class="me-mycomment-body">${escapeHtml(r.body || '')}</p>
+      </div>`;
+  }).join('');
+}
+
 (async function main() {
   for (let i = 0; i < 50; i++) {
     if (db() && db().isReady()) break;
@@ -718,8 +819,10 @@ $('imgZoom').addEventListener('click', () => {
   $('gate').hidden = true;
   $('app').hidden = false;
   await loadPhotos();
+  // 초기 알림 뱃지 (다른 탭에서도 보이게)
+  refreshNotifsBadge();
   // URL hash 로 초기 탭 결정
-  const validSections = ['photos', 'market', 'fav-photos', 'fav-films', 'fav-contributors', 'fav-articles'];
+  const validSections = ['photos', 'market', 'notifs', 'my-comments', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
   const hashSection = (location.hash || '').replace(/^#/, '');
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);

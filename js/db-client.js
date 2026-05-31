@@ -207,6 +207,19 @@
         body: String(body || '').trim(),
       });
     },
+    // 본인이 쓴 댓글 목록(삭제 안 된 것). 마이페이지의 "내 댓글" 탭에서 사용.
+    async listByUser({ limit = 50 } = {}) {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      const { data, error } = await c.from('comments').select('*')
+        .eq('user_id', uid)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) return [];
+      return data || [];
+    },
     async update(id, body) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('comments').update({
