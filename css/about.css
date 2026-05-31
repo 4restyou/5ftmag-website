@@ -109,6 +109,15 @@
   letter-spacing: -0.03em; line-height: 1.1;
 }
 .contrib-header p { font-size: var(--fs-body); color: var(--text-muted); }
+.contrib-header .contrib-all-link {
+  color: var(--text);
+  font-weight: var(--fw-heading);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-left: 4px;
+  transition: opacity .15s;
+}
+.contrib-header .contrib-all-link:hover { opacity: .55; }
 .contrib-grid {
   max-width: 1200px; margin: 0 auto;
   display: grid; grid-template-columns: repeat(3, 1fr);
