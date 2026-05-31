@@ -9,7 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css?v=20260526-fontscale">
-  <link rel="stylesheet" href="../css/common.css?v=20260526-a11y">
+  <link rel="stylesheet" href="../css/common.css?v=20260531-auth">
   <script src="../js/theme-init.js"></script>
   <style>
     body { background: var(--bg); color: var(--text); }
@@ -98,7 +98,9 @@
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
     <div class="nav-right">
+      <a href="../stories.html#search" class="icon-btn" aria-label="글 검색" title="글 검색">🔎</a>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <div class="auth-slot" id="authSlot"></div>
       <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
@@ -382,5 +384,6 @@ $('termForm').addEventListener('submit', async (e) => {
 })();
 </script>
 
+<script src="../js/header-user.js?v=20260531-auth" defer></script>
 </body>
 </html>

@@ -366,3 +366,12 @@
       applyFilters();
     }
   });
+
+  // 헤더 검색 아이콘에서 #search 로 진입한 경우 검색바로 스크롤 + 포커스
+  function focusSearchFromHash() {
+    if (window.location.hash !== '#search') return;
+    searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => searchInput.focus({ preventScroll: true }), 200);
+  }
+  focusSearchFromHash();
+  window.addEventListener('hashchange', focusSearchFromHash);

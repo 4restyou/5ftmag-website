@@ -23,7 +23,7 @@
   <script src="../js/theme-init.js"></script>
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css?v=20260526-fontscale">
-  <link rel="stylesheet" href="../css/common.css?v=20260526-a11y">
+  <link rel="stylesheet" href="../css/common.css?v=20260531-auth">
   <link rel="stylesheet" href="../css/authors.css?v=20260520-init">
 </head>
 <body>
@@ -38,7 +38,9 @@
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
     <div class="nav-right">
+      <a href="../stories.html#search" class="icon-btn" aria-label="글 검색" title="글 검색">🔎</a>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <div class="auth-slot" id="authSlot"></div>
       <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
@@ -100,5 +102,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260528-webzine"></script>
 <script src="../js/site-common.js?v=20260526-iaberr"></script>
+<script src="../js/header-user.js?v=20260531-auth" defer></script>
 </body>
 </html>
