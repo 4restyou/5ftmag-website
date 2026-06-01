@@ -1,5 +1,19 @@
 [
   {
+    "id": "verita-200d-fuji-bw",
+    "title": "확장하는 코닥, 정리하는 후지. 2026 봄의 필름 풍경",
+    "category": "essay",
+    "categoryLabel": "FILM",
+    "author": "5ft.mag 편집부",
+    "date": "2026-06-01",
+    "issue": "",
+    "thumbnail": "img/stories/verita-200d-fuji-bw/verita-family.jpg",
+    "excerpt": "한쪽에선 코닥이 VERITA 200D 를 새로 풀었고, 다른 한쪽에선 후지필름의 흑백 라인이 정리된다는 이야기가 빠르게 번졌다. 두 사건이 같은 결론에 닿는 이유.",
+    "page": "stories/verita-200d-fuji-bw.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "fred-herzog",
     "title": "남들보다 20년 빨랐던 사진가, 세상이 따라오는 데는 50년이 걸렸다",
     "category": "essay",
