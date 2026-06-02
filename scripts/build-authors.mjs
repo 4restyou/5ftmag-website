@@ -26,9 +26,9 @@ const AUTHOR_SLUGS = new Map([
 ]);
 
 const AUTHOR_NOTES = new Map([
-  ['5ft.mag 편집부', '필름 매거진 5ft.mag의 기획과 편집을 맡습니다.'],
+  ['5ft.mag 편집부', '필름 매거진 5ft magazine의 기획과 편집을 맡습니다.'],
   ['Film Social Club', '광주 충장로를 기반으로 필름과 사진 문화를 이어가는 공간입니다.'],
-  ['Street Photography Club', '스트리트 포토를 좋아하는 사람들의 모임. 자체 사진첩 시리즈를 발행하고 5ft.mag 매거진을 유통합니다.'],
+  ['Street Photography Club', '스트리트 포토를 좋아하는 사람들의 모임. 자체 사진첩 시리즈를 발행하고 5ft magazine 매거진을 유통합니다.'],
   ['Shin Noguchi', '일상의 낯선 순간을 거리에서 포착하는 일본의 스트리트 포토그래퍼입니다.'],
   ['Brisnap TV', '필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널입니다.'],
   ['김현아', '일상과 관계의 결을 짧은 에세이로 기록합니다.'],
@@ -105,13 +105,13 @@ function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css?
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${SITE_URL}${canonicalPath}">
-  <link rel="alternate" type="application/rss+xml" title="5ft.mag RSS" href="rss.xml">
+  <link rel="alternate" type="application/rss+xml" title="5ft magazine RSS" href="rss.xml">
   <meta property="og:type" content="website">
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:image" content="${SITE_URL}/img/og/5ft-link1.webp">
   <meta property="og:url" content="${SITE_URL}${canonicalPath}">
-  <meta property="og:site_name" content="5ft.mag">
+  <meta property="og:site_name" content="5ft magazine">
   <meta property="og:locale" content="ko_KR">
   <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/icon-32.png">
@@ -138,7 +138,7 @@ function subHead(title, description, canonicalPath) {
 function header(prefix = '') {
   return `<header>
   <div class="header-inner">
-    <a href="${prefix}index.html" class="site-logo"><img src="${prefix}img/symbol-b.svg" alt="5ft.mag" class="logo-light" /><img src="${prefix}img/symbol-w.svg" alt="5ft.mag" class="logo-dark" /></a>
+    <a href="${prefix}index.html" class="site-logo"><img src="${prefix}img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="${prefix}img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     <ul class="main-nav">
       <li><a href="${prefix}stories.html">Articles</a></li>
       <li><a href="${prefix}films.html">Films</a></li>
@@ -169,7 +169,7 @@ function header(prefix = '') {
 function footer(prefix = '') {
   return `<footer>
   <div class="footer-inner-left">
-    <span class="footer-logo">5ft.mag</span>
+    <span class="footer-logo">5ft magazine</span>
     <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
   </div>
   <div class="footer-links">
@@ -178,7 +178,7 @@ function footer(prefix = '') {
     <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
     <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
   </div>
-  <span class="footer-copy">© 2024 5ft.mag</span>
+  <span class="footer-copy">© 2024 5ft magazine</span>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="${prefix}js/db-client.js?v=20260531-unsub"></script>
@@ -210,7 +210,7 @@ for (const story of stories) {
     authors.set(author, {
       name: author,
       slug: slugify(author),
-      note: AUTHOR_NOTES.get(author) || '5ft.mag에 글과 사진으로 참여한 contributor입니다.',
+      note: AUTHOR_NOTES.get(author) || '5ft magazine에 글과 사진으로 참여한 contributor입니다.',
       externalLinks: AUTHOR_EXTERNAL_LINKS.get(author) || [],
       stories: [],
     });
@@ -224,7 +224,7 @@ const authorList = [...authors.values()]
 mkdirSync(join(ROOT, 'authors'), { recursive: true });
 mkdirSync(join(ROOT, 'data'), { recursive: true });
 
-const listHtml = `${rootHead('Authors | 5ft.mag', '5ft.mag에 참여한 작가와 contributor의 글을 한곳에서 모아봅니다.', '/authors.html')}
+const listHtml = `${rootHead('Authors | 5ft magazine', '5ft magazine에 참여한 작가와 contributor의 글을 한곳에서 모아봅니다.', '/authors.html')}
 <body>
 ${header()}
 <main class="authors-page">
@@ -249,8 +249,8 @@ ${footer()}
 writeFileSync(join(ROOT, 'authors.html'), listHtml);
 
 for (const author of authorList) {
-  const title = `${author.name} | 5ft.mag Authors`;
-  const description = `${author.name}의 5ft.mag 아카이브. ${author.stories.length}개의 글을 모았습니다.`;
+  const title = `${author.name} | 5ft magazine Authors`;
+  const description = `${author.name}의 5ft magazine 아카이브. ${author.stories.length}개의 글을 모았습니다.`;
   const html = `${subHead(title, description, `/authors/${author.slug}.html`)}
 <body>
 ${header('../')}

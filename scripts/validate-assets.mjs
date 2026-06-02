@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 5ft.mag 자산 검증
+ * 5ft magazine 자산 검증
  * - HTML 파일의 로컬 src/href 참조 → 실제 파일 존재 여부
  * - JSON 데이터 파일의 내부 page/link/image/thumbnail/photo 참조 → 실제 파일 존재 여부
  * - CSS 중괄호 균형 검사
