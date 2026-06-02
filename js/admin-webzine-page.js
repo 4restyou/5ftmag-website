@@ -6,9 +6,7 @@ const STATE = { user: null, issues: [], editingId: null };
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
 
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
+function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
 
 function withWriteTimeout(promise, ms = 60000) {
   return new Promise((resolve) => {

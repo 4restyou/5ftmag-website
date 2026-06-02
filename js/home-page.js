@@ -3,12 +3,8 @@
   // XSS 가드: 동적 HTML 삽입 시 사용자/외부 입력은 반드시 escapeHtml/escapeAttr
   // (Notion 데이터도 일관성 위해 동일 적용 — 편집자 계정 탈취 대비)
   // ════════════════════════════
-  function escapeHtml(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => (
-      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
-    ));
-  }
-  const escapeAttr = escapeHtml;
+  const escapeHtml = window.MagUtil.escapeHtml;
+  const escapeAttr = window.MagUtil.escapeAttr;
 
   function thumbnailPicture(src, alt, loading = 'lazy') {
     const cleanSrc = String(src || '');

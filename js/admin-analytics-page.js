@@ -13,10 +13,8 @@ const STATE = {
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function escapeAttr(s) { return escapeHtml(s); }
+function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
+function escapeAttr(s) { return window.MagUtil.escapeAttr(s); }
 function fmtNum(n) {
   return Number(n || 0).toLocaleString('ko-KR');
 }

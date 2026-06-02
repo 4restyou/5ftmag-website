@@ -4,11 +4,7 @@
 (function () {
   'use strict';
 
-  function escapeAttr(value) {
-    return String(value ?? '').replace(/[&<>"']/g, c => (
-      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-    ));
-  }
+  const escapeAttr = window.MagUtil.escapeAttr;
 
   function normalizeFilmLabel(value) {
     return String(value ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');

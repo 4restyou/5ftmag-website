@@ -14,12 +14,8 @@
   let articleFavIds = new Set();
 
   // XSS 가드: 동적 삽입 escape
-  function escapeHtml(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => (
-      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
-    ));
-  }
-  const escapeAttr = escapeHtml;
+  const escapeHtml = window.MagUtil.escapeHtml;
+  const escapeAttr = window.MagUtil.escapeAttr;
 
   function thumbnailPicture(src, alt, loading = 'lazy') {
     const cleanSrc = String(src || '');

@@ -26,10 +26,8 @@ const CAT_LABELS = { film:'필름', camera:'카메라', lens:'렌즈', accessory
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function escapeAttr(s) { return escapeHtml(s); }
+function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
+function escapeAttr(s) { return window.MagUtil.escapeAttr(s); }
 function fmtDate(iso) {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
