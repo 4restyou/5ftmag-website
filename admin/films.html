@@ -86,6 +86,12 @@
     .admin-subnav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
+    /* 캔 썸네일 업로더 */
+    .thumb-uploader { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+    .thumb-uploader img { max-width: 120px; max-height: 120px; border: 1px solid var(--border, #ddd); border-radius: 4px; background: #fff; padding: 6px; object-fit: contain; }
+    .thumb-uploader-actions { display: flex; gap: 8px; align-items: center; }
+    .thumb-clear { font: inherit; font-size: 12px; padding: 4px 10px; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: var(--text); cursor: pointer; opacity: .75; }
+    .thumb-clear:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -231,10 +237,15 @@
         <textarea id="f-desc" name="description" placeholder="5ft.mag 톤으로 한두 문장."></textarea>
       </div>
       <div class="form-row">
-        <label for="f-canThumbnail">캐니스터 썸네일</label>
-        <div>
-          <input type="text" id="f-canThumbnail" name="canThumbnail" placeholder="img/films/portra400-can.webp (없으면 비워두면 pending)" />
-          <div class="hint">파일 경로만 입력. 비우면 라이브러리 카드에 PENDING 으로 표시.</div>
+        <label for="f-canThumbFile">캐니스터 썸네일</label>
+        <div class="thumb-uploader">
+          <img id="f-canThumbPreview" alt="" hidden />
+          <input type="hidden" id="f-canThumbnail" name="canThumbnail" />
+          <div class="thumb-uploader-actions">
+            <input type="file" id="f-canThumbFile" accept="image/webp,image/png,image/jpeg" />
+            <button type="button" id="f-canThumbClear" class="thumb-clear" hidden>제거</button>
+          </div>
+          <div class="hint">webp 권장(가벼움). png/jpg 도 가능. 비우면 라이브러리 카드에 PENDING 으로 표시.</div>
         </div>
       </div>
       <div class="form-actions">
@@ -246,9 +257,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260531-unsub"></script>
+<script src="../js/db-client.js?v=20260602-thumb"></script>
 <script src="../js/site-common.js?v=20260531-search"></script>
-<script src="../js/admin-films-page.js?v=20260527-cut"></script>
+<script src="../js/admin-films-page.js?v=20260602-upload"></script>
 
 </body>
 </html>
