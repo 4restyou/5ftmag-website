@@ -132,13 +132,19 @@
       const d = pos - rs.active, ad = Math.abs(d);
       slot.classList.toggle('is-center', d === 0);
       // 가운데에서 멀어질수록 좌우 대칭으로 흐려져 화살표 쪽에서 배경으로 자연스럽게 사라진다(펼친 책 제외).
-      slot.style.opacity = String(slot.classList.contains('is-open') ? 1 : Math.max(0, 1 - ad * 0.16));
+      slot.style.opacity = String(slot.classList.contains('is-open') ? 1 : Math.max(0, 1 - ad * 0.12));
       slot.style.pointerEvents = (ad > 6 && !slot.classList.contains('is-open')) ? 'none' : 'auto';
-      // 닫힌 책: 가운데·오른쪽은 책등(90°), 가운데 왼쪽으로 갈수록 표지가 한 칸당 10°씩 더 보인다(최대 58°).
+      // 닫힌 책: 가운데 책은 표지가 살짝 보이고, 좌우로 갈수록 책등에 가까워진다.
+      // 새 책이 중앙으로 들어올 때도 각도가 함께 변해 "툭" 바뀌지 않게 한다.
       const b3 = slot.querySelector('.wz-book3d');
       if (b3) {
         if (slot.classList.contains('is-open')) b3.style.removeProperty('--by');  // 펼침: 표지 정면(CSS -8deg)
-        else b3.style.setProperty('--by', (d < 0 ? Math.max(58, 90 + d * 10) : 90) + 'deg');
+        else {
+          const angle = d === 0
+            ? 74
+            : (d < 0 ? Math.max(52, 74 + d * 11) : Math.min(90, 74 + d * 8));
+          b3.style.setProperty('--by', angle + 'deg');
+        }
       }
     });
     const prev = rs.flowEl.querySelector('.wz-prev'), next = rs.flowEl.querySelector('.wz-next');
@@ -190,11 +196,13 @@
       // 다른 책 클릭: 접고 → 그 책으로 이동 → 펼치기
       closeOpen();
       rs.active = pos; follow(rs);
-      seqT = setTimeout(() => openBook(rs, pos), 460);
+      seqT = setTimeout(() => openBook(rs, pos), 360);
       return;
     }
     if (pos === rs.active) { openBook(rs, pos); return; }
-    rs.active = pos; layout(rs);
+    rs.active = pos;
+    follow(rs);
+    seqT = setTimeout(() => openBook(rs, pos), 360);
   }
   function openBook(rs, pos) {
     if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
