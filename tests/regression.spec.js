@@ -1783,6 +1783,25 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
         uploadsThemeRatio: async () => ({ theme_count: 1, general_count: 3, total: 4, theme_ratio: 0.25 }),
         clientErrorsRecent: async () => [{
           message: '[reader-upload:storage] 사진 업로드가 완료되지 않았어요. (storage down)',
+          stack: [
+            'stage=storage',
+            'input_bytes=1234567',
+            'upload_bytes=456789',
+            'file_name=sample.jpg',
+            'file_type=image/jpeg',
+            'attempt_count=3',
+            'attempt_1_kind=primary',
+            'attempt_1_simple=storage down',
+            'attempt_1_resumable=storage down',
+            'attempt_2_kind=fallback',
+            'attempt_2_simple=storage down',
+            'attempt_2_resumable=storage down',
+            'attempt_3_kind=tertiary',
+            'attempt_3_simple=storage down',
+            'attempt_3_resumable=storage down',
+            'last_error=storage down',
+            'tried_paths=user-1/sample.jpg,user-1/sample-lite.jpg,user-1/sample-tiny.jpg',
+          ].join('\n'),
           source: 'reader-submissions:storage',
           path: '/films.html',
           ts: new Date().toISOString(),
@@ -1813,6 +1832,9 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
   await expect(page.locator('#clientErrorList')).toContainText('Reader 업로드 · 사진 업로드');
   await expect(page.locator('#clientErrorList')).toContainText('Market 업로드 · 기록 저장');
   await expect(page.locator('#clientErrorList')).toContainText('사진 업로드가 완료되지 않았어요.');
+  await expect(page.locator('#clientErrorList')).toContainText('파일 sample.jpg');
+  await expect(page.locator('#clientErrorList')).toContainText('시도 3회');
+  await expect(page.locator('#clientErrorList')).toContainText('마지막 최소 경로');
   await expect(page.locator('#opsHealth')).toHaveText('확인 필요');
   await expect(page.locator('#topFilms')).toContainText('Kodak Portra 400');
   await expect(page.locator('#topCameras')).toContainText('Leica M6');

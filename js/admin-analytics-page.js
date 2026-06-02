@@ -33,6 +33,20 @@ function fmtDuration(ms) {
   return m ? `${h}시간 ${m}분` : `${h}시간`;
 }
 
+function fmtBytesShort(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return '';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let size = n;
+  let unit = 0;
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit += 1;
+  }
+  const digits = unit === 0 ? 0 : (size < 10 ? 1 : 0);
+  return `${size.toFixed(digits)}${units[unit]}`;
+}
+
 function fmtDay(d) {
   // d 가 'YYYY-MM-DD' 또는 Date
   const date = (d instanceof Date) ? d : new Date(d + 'T00:00:00');
@@ -513,6 +527,60 @@ function clientErrorMeta(row) {
   };
 }
 
+function parseClientErrorStack(row) {
+  const stack = String(row?.stack || row?.details || '');
+  if (!stack.trim()) return {};
+  return stack.split(/\r?\n/).reduce((acc, line) => {
+    const index = line.indexOf('=');
+    if (index <= 0) return acc;
+    const key = line.slice(0, index).trim();
+    const value = line.slice(index + 1).trim();
+    if (key) acc[key] = value;
+    return acc;
+  }, {});
+}
+
+function uploadPathLabel(kind) {
+  return ({
+    primary: '기본 경로',
+    fallback: '경량 경로',
+    tertiary: '최소 경로',
+  })[String(kind || '').toLowerCase()] || kind || '';
+}
+
+function clipClientErrorText(text, max = 96) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+}
+
+function clientUploadDetail(row) {
+  const data = parseClientErrorStack(row);
+  if (!Object.keys(data).length) return '';
+  const parts = [];
+  if (data.file_name) parts.push(`파일 ${data.file_name}`);
+  const inputBytes = fmtBytesShort(data.input_bytes);
+  const uploadBytes = fmtBytesShort(data.upload_bytes);
+  if (inputBytes && uploadBytes && inputBytes !== uploadBytes) {
+    parts.push(`용량 ${inputBytes} → ${uploadBytes}`);
+  } else if (inputBytes || uploadBytes) {
+    parts.push(`용량 ${inputBytes || uploadBytes}`);
+  }
+  const attemptCount = Number(data.attempt_count) || 0;
+  if (attemptCount > 0) parts.push(`시도 ${fmtNum(attemptCount)}회`);
+  const lastKind = uploadPathLabel(data.last_successful_kind || data[`attempt_${attemptCount}_kind`]);
+  const lastError = clipClientErrorText(data.final_error || data.last_error || data[`attempt_${attemptCount}_resumable`] || data[`attempt_${attemptCount}_simple`]);
+  if (lastKind && data.last_successful_path) {
+    parts.push(`마지막 ${lastKind} 성공`);
+  } else if (lastKind && lastError) {
+    parts.push(`마지막 ${lastKind} · ${lastError}`);
+  } else if (lastError) {
+    parts.push(`마지막 오류 ${lastError}`);
+  }
+  const triedCount = String(data.tried_paths || '').split(',').map(s => s.trim()).filter(Boolean).length;
+  if (triedCount > 1) parts.push(`경로 ${fmtNum(triedCount)}개`);
+  return parts.join(' · ');
+}
+
 function clientUploadSummaries(rows) {
   const map = new Map();
   rows.forEach(row => {
@@ -563,6 +631,7 @@ async function loadClientErrors() {
     listEl.innerHTML = rows.map(row => {
       const meta = clientErrorMeta(row);
       const loc = [row.source, row.lineno ? `${row.lineno}:${row.colno || 0}` : ''].filter(Boolean).join(' ');
+      const uploadDetail = meta.kind === 'upload' ? clientUploadDetail(row) : '';
       return `
         <div class="ops-row">
           <div class="ops-row-main">
@@ -570,6 +639,7 @@ async function loadClientErrors() {
               <span class="ops-badge ${meta.kind === 'upload' ? 'is-danger' : ''}">${escapeHtml(meta.label)}</span>${escapeHtml(meta.displayMessage || 'Unknown error')}
             </div>
             <div class="ops-row-sub">${escapeHtml(row.path || '-')} ${loc ? `· ${escapeHtml(loc)}` : ''}</div>
+            ${uploadDetail ? `<div class="ops-row-sub">${escapeHtml(uploadDetail)}</div>` : ''}
           </div>
           <div class="ops-row-meta">${escapeHtml(fmtAgoShort(row.ts))}<br>${fmtNum(row.occurrences)}건</div>
         </div>
