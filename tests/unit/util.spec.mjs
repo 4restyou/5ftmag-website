@@ -59,9 +59,41 @@ describe('window.MagUtil.escapeAttr', () => {
   });
 });
 
+describe('window.MagUtil.normalizeFilmLabel', () => {
+  it('lowercases and strips separator characters', () => {
+    expect(window.MagUtil.normalizeFilmLabel('Portra 400')).toBe('portra400');
+    expect(window.MagUtil.normalizeFilmLabel('PORTRA-400')).toBe('portra400');
+    expect(window.MagUtil.normalizeFilmLabel('Kodak_Portra+400')).toBe('kodakportra400');
+    expect(window.MagUtil.normalizeFilmLabel('Tri/X.400 (ISO)')).toBe('trix400iso');
+  });
+
+  it('preserves Korean characters', () => {
+    expect(window.MagUtil.normalizeFilmLabel('포트라 400')).toBe('포트라400');
+    expect(window.MagUtil.normalizeFilmLabel('포 트 라')).toBe('포트라');
+  });
+
+  it('handles nullish input', () => {
+    expect(window.MagUtil.normalizeFilmLabel(null)).toBe('');
+    expect(window.MagUtil.normalizeFilmLabel(undefined)).toBe('');
+    expect(window.MagUtil.normalizeFilmLabel('')).toBe('');
+  });
+
+  it('coerces non-string input to string', () => {
+    expect(window.MagUtil.normalizeFilmLabel(400)).toBe('400');
+  });
+
+  it('produces same key for common alias variants (search invariant)', () => {
+    const variants = ['Portra 400', 'portra400', 'PORTRA-400', 'portra_400', 'portra+400'];
+    const keys = variants.map((v) => window.MagUtil.normalizeFilmLabel(v));
+    expect(new Set(keys).size).toBe(1);
+  });
+});
+
 describe('window.MagUtil shape', () => {
-  it('exposes only escapeHtml and escapeAttr', () => {
-    expect(Object.keys(window.MagUtil).sort()).toEqual(['escapeAttr', 'escapeHtml']);
+  it('exposes escapeHtml, escapeAttr, normalizeFilmLabel', () => {
+    expect(Object.keys(window.MagUtil).sort()).toEqual(
+      ['escapeAttr', 'escapeHtml', 'normalizeFilmLabel']
+    );
   });
 
   it('is frozen (immutable surface)', () => {

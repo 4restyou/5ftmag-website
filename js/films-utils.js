@@ -6,9 +6,7 @@
 
   const escapeAttr = window.MagUtil.escapeAttr;
 
-  function normalizeFilmLabel(value) {
-    return String(value ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
-  }
+  const normalizeFilmLabel = window.MagUtil.normalizeFilmLabel;
 
   function normalizeContributorKey(value) {
     return String(value ?? '').trim().replace(/^@/, '').toLowerCase();
