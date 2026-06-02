@@ -8,6 +8,8 @@ const PORT = Number(process.env.PORT || 4399);
 
 export default defineConfig({
   testDir: './tests',
+  // tests/unit/** 은 Vitest 영역. Playwright 가 가져가서 실행하지 않도록 제외.
+  testIgnore: ['**/unit/**'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
