@@ -63,19 +63,24 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   background: radial-gradient(54% 130% at 50% 0%, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0) 74%);
   pointer-events: none;
 }
-.wz-track { display: flex; align-items: center; gap: clamp(14px, 2.6vw, 34px); padding: 40px 0 52px; will-change: transform; transition: transform .48s var(--wz-ease); position: relative; z-index: 1; user-select: none; transform: translate3d(0, 0, 0); }
+.wz-track { display: flex; align-items: center; gap: clamp(14px, 2.6vw, 34px); padding: 40px 0 52px; will-change: transform; transition: none; position: relative; z-index: 1; user-select: none; transform: translate3d(0, 0, 0); }
 .wz-flow.no-anim .wz-track, .wz-flow.no-anim .wz-slot, .wz-flow.no-anim .wz-book3d { transition: none !important; }
+.wz-flow.is-flip-measuring .wz-track,
+.wz-flow.is-flip-measuring .wz-slot { transition: none !important; }
 .wz-flow.following .wz-track { transition: none; }
 .wz-flow.following .wz-slot,
+.wz-flow.is-flipping .wz-slot,
 .wz-flow.is-moving .wz-slot { filter: none; }   /* 움직이는 동안 그림자 재래스터 방지 → 부드럽게 */
 
-/* 슬롯: 닫힘=책등폭, 열림=표지+정보폭. 폭이 전환되며 이웃을 부드럽게 밀어낸다 */
+/* 슬롯: 닫힘=책등폭, 열림=표지+정보폭. 위치 변화는 JS 의 FLIP transform 으로 보간한다. */
 .wz-slot {
   --st: clamp(30px, 3.2vw, 42px); --cw2: calc(var(--h) * 0.72); --h: min(360px, calc(100vh - 290px));
   --infow: min(40vw, 320px); --infogap: clamp(20px, 3vw, 44px);
   position: relative; flex: 0 0 auto; width: var(--st); height: var(--h);
   contain: layout style;
-  transition: width .54s var(--wz-ease), opacity .32s;
+  will-change: transform, opacity;
+  transition: opacity .32s;
+  transform: translate3d(0, 0, 0);
   filter: drop-shadow(2px 22px 18px rgba(0, 0, 0, .5));
 }
 .wz-slot.is-open { width: calc(var(--cw2) + var(--infogap) + var(--infow)); }

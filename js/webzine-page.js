@@ -157,6 +157,49 @@
     clearTimeout(moveT);
     moveT = setTimeout(() => rs.flowEl.classList.remove('is-moving'), ms);
   }
+  function runFlip(rs, mutate, duration = 620) {
+    if (!rs?.slots?.length) {
+      mutate?.();
+      if (rs) layout(rs);
+      return;
+    }
+    const before = rs.slots.map(slot => slot.getBoundingClientRect());
+    rs.flowEl.classList.add('is-flip-measuring', 'is-moving');
+    mutate?.();
+    layout(rs);
+    const after = rs.slots.map(slot => slot.getBoundingClientRect());
+    const moved = [];
+    rs.slots.forEach((slot, i) => {
+      const dx = before[i].left - after[i].left;
+      const dy = before[i].top - after[i].top;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      moved.push(slot);
+      slot.style.transition = 'none';
+      slot.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+    });
+    // final layout 을 먼저 확정한 뒤, 이전 좌표에서 현재 좌표로 transform 만 애니메이션한다.
+    rs.flowEl.offsetHeight;
+    rs.flowEl.classList.remove('is-flip-measuring');
+    const token = (rs.flipToken || 0) + 1;
+    rs.flipToken = token;
+    requestAnimationFrame(() => {
+      rs.flowEl.classList.add('is-flipping');
+      moved.forEach(slot => {
+        slot.style.transition = `transform ${duration}ms var(--wz-ease), opacity .32s`;
+        slot.style.transform = 'translate3d(0, 0, 0)';
+      });
+      clearTimeout(rs.flipTimer);
+      rs.flipTimer = setTimeout(() => {
+        if (rs.flipToken !== token) return;
+        moved.forEach(slot => {
+          slot.style.transition = '';
+          slot.style.transform = '';
+        });
+        rs.flowEl.classList.remove('is-flipping', 'is-moving');
+        layout(rs);
+      }, duration + 90);
+    });
+  }
   function settleSlotIntoView(slot) {
     if (!slot) return;
     requestAnimationFrame(() => {
@@ -168,23 +211,14 @@
       }
     });
   }
-  // 슬롯 폭이 전환되는 동안(열림/접힘) 트랙 위치만 매 프레임 갱신해 부드럽게 따라간다.
-  // (전체 레이아웃/그림자 재계산은 프레임마다 하지 않음 — 끊김 방지)
+  // 이미지 로드/리사이즈처럼 상태 변화 없이 위치만 다시 맞출 때 사용한다.
   function follow(rs) {
     if (followId) cancelAnimationFrame(followId);
     if (followFlow && followFlow !== rs.flowEl) followFlow.classList.remove('following');
     followFlow = rs.flowEl;
-    rs.flowEl.classList.add('following');
-    markMoving(rs, 700);
+    markMoving(rs, 620);
     layout(rs);
-    const t0 = performance.now();
-    const step = (t) => {
-      const s = rs.slots[rs.active];
-      if (s) rs.trackEl.style.transform = `translate3d(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px, 0, 0)`;
-      if (t - t0 < 660) { followId = requestAnimationFrame(step); }
-      else { rs.flowEl.classList.remove('following'); followId = null; followFlow = null; layout(rs); }
-    };
-    followId = requestAnimationFrame(step);
+    followId = null;
   }
 
   function onBook(rs, pos) {
@@ -194,32 +228,35 @@
     if (slot.classList.contains('is-open')) { closeOpen(); return; }   // 펼친 책 다시 클릭 → 닫기
     if (openState) {
       // 다른 책 클릭: 접고 → 그 책으로 이동 → 펼치기
-      closeOpen();
-      rs.active = pos; follow(rs);
+      const prev = openState;
+      runFlip(prev.rs, () => { prev.rs.slots[prev.pos].classList.remove('is-open'); }, 520);
+      openState = null;
+      runFlip(rs, () => { rs.active = pos; }, 560);
       seqT = setTimeout(() => openBook(rs, pos), 360);
       return;
     }
     if (pos === rs.active) { openBook(rs, pos); return; }
-    rs.active = pos;
-    follow(rs);
+    runFlip(rs, () => { rs.active = pos; }, 560);
     seqT = setTimeout(() => openBook(rs, pos), 360);
   }
   function openBook(rs, pos) {
-    if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
     const slot = rs.slots[pos];
-    slot.classList.add('is-open');
-    rs.active = pos;
-    openState = { rs, pos, i: Number(slot.dataset.i) };
-    follow(rs);
+    runFlip(rs, () => {
+      if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
+      slot.classList.add('is-open');
+      rs.active = pos;
+      openState = { rs, pos, i: Number(slot.dataset.i) };
+    }, 620);
     settleSlotIntoView(slot);
   }
   function closeOpen() {
     clearTimeout(seqT);
     if (!openState) return;
     const { rs, pos } = openState;
-    rs.slots[pos].classList.remove('is-open');
-    openState = null;
-    follow(rs);
+    runFlip(rs, () => {
+      rs.slots[pos].classList.remove('is-open');
+      openState = null;
+    }, 560);
   }
   function nav(rs, d) {
     currentRow = rs;
@@ -227,9 +264,7 @@
     if (openState) { closeOpen(); return; }   // 펼쳐져 있으면 닫기만(ESC 와 동일) — 닫으며 이동하면 모션이 튄다
     const n = rs.active + d;
     if (n < 0 || n >= rs.slots.length || n === rs.active) return;
-    rs.active = n;
-    markMoving(rs);
-    layout(rs);
+    runFlip(rs, () => { rs.active = n; }, 560);
   }
 
   function setLikeBtn(btn, on) {
