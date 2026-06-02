@@ -9,11 +9,6 @@
 
   const MAX_LONG_SIDE = 1600;
   const JPEG_QUALITY = 0.76;
-  const FALLBACK_LONG_SIDE = 1200;
-  const FALLBACK_JPEG_QUALITY = 0.68;
-  const TERTIARY_LONG_SIDE = 800;
-  const TERTIARY_JPEG_QUALITY = 0.55;
-  const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
   const LS_KEY = '5ft_submission_meta';
   const LS_RECENT_CAMERAS = '5ft_recent_cameras';
   const RECENT_CAMERA_LIMIT = 6;
@@ -220,16 +215,6 @@
       const t = setTimeout(() => reject(new Error(`${label} 시간 초과 (${Math.round(ms/1000)}초). 네트워크 상태 확인 후 다시 시도해 주세요.`)), ms);
       promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
     });
-  }
-
-  // TUS resumable 청크 업로드 기반이라 단일 POST 보다 훨씬 관대하게 대기.
-  // 진행률 표시가 있어서 사용자가 멈춰있는지 진행중인지 구분 가능.
-  function readerUploadTimeoutMs(kind = 'primary') {
-    const override = Number(window.__readerUploadTimeoutMs || 0);
-    if (override > 0) return override;
-    if (kind === 'tertiary') return 300000;   // 5분 (800px / 55%)
-    if (kind === 'fallback') return 240000;   // 4분 (1200px / 68%)
-    return 180000;                            // 3분 (1600px / 76%)
   }
 
   // Supabase JS v2 가 localStorage 의 'sb-<ref>-auth-token' 에 세션 JSON 을 둠.
@@ -1242,119 +1227,26 @@
           if (m?.type === 'exact') film = m.canonical;
         }
 
-        // 변환 — 단계별로 버튼 텍스트 갱신해 "멈춘 것처럼 보이는" 무음 hang 방지
-        submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
-        markProgress('decode', '사진을 읽는 중', `${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`);
-        const { blob, width, height } = await withNetworkTimeout(
-          resizeToJpeg(file, ({ stage, width: w, height: h }) => {
-            if (stage === 'decode') {
-              submitBtn.textContent = `사진 디코딩 중… (${fmtBytes(file.size)})`;
-              markProgress('decode', '사진을 읽는 중', '큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.');
-            } else if (stage === 'resize') {
-              submitBtn.textContent = `사진 크기 줄이는 중… (${w}×${h})`;
-              markProgress('resize', '사진 크기 줄이는 중', `${w}×${h} 크기로 변환하고 있어요.`);
-            } else if (stage === 'encode') {
-              submitBtn.textContent = `사진 인코딩 중… (${w}×${h})`;
-              markProgress('encode', '사진을 압축하는 중', '업로드 전에 용량을 줄이고 있어요.');
-            }
-          }),
-          52000,
-          '사진 변환'
-        );
-        if (blob.size > MAX_UPLOAD_BYTES) throw new Error('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.');
-
-        markProgress('auth', '로그인 상태 확인 중', '업로드 권한을 확인하고 있어요.');
-        // 1) localStorage 의 JWT 를 sync 로 파싱 — Supabase 클라이언트 호출 없이
-        //    user.id 와 exp 추출. 만료 안 됐으면 즉시 진행.
-        // 2) 토큰이 없거나 만료됐으면 db.auth.getSession() 으로 refresh 시도.
-        //    실제 권한 검증은 RLS 가 백엔드에서 다시 확인하므로 사전 검증은 생략.
-        let user = readLocalJwtUser();
-        if (!user) {
-          const session = await withNetworkTimeout(db().auth.getSession(), 6000, '로그인 확인');
-          user = session?.user;
-        }
-        if (!user) throw new Error('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.');
-        const initialPath = `${user.id}/${Date.now()}-${uuid()}.jpg`;
-        let path = initialPath;
-        let activeBlob = blob;
-        const triedPaths = [initialPath];
-
-        // 업로드 한 회: 단일 요청(plain) 우선 → 실패 시 TUS 재개 폴백.
-        // 소형(2000px 축소) 이미지엔 단일 요청이 충분하고, 사파리/인앱에서
-        // TUS 가 onError 없이 정체되는 문제를 피한다. plain 경로는 supabase
-        // 클라이언트 세션을 자동 사용 → 수동 getSession hang 도 우회.
-        async function tryUpload(targetPath, targetBlob, attemptLabel, timeoutKind) {
-          submitBtn.textContent = `${attemptLabel} (${fmtBytes(targetBlob.size)})`;
-          markProgress('storage', attemptLabel, `${fmtBytes(targetBlob.size)} 전송 중입니다. 창을 닫지 마세요.`);
-          const simple = await withNetworkTimeout(
-            db().submissions.uploadPhoto(targetPath, targetBlob),
-            readerUploadTimeoutMs(timeoutKind),
-            attemptLabel
-          ).catch(err => ({ error: { message: err.message } }));
-          if (!simple || !simple.error) return { error: null };
-
-          // 폴백: TUS 재개 업로드 (끊기는 네트워크 대비). 진행률 표시.
-          let lastPct = -1;
-          const onProgress = (sent, total) => {
-            const pct = Math.max(0, Math.min(100, Math.round((sent / (total || targetBlob.size)) * 100)));
-            if (pct === lastPct) return;
-            lastPct = pct;
-            submitBtn.textContent = `${attemptLabel} ${pct}% (${fmtBytes(sent)} / ${fmtBytes(targetBlob.size)})`;
-            markProgress('storage', attemptLabel, `${pct}% · ${fmtBytes(sent)} / ${fmtBytes(targetBlob.size)} 전송 중`);
-          };
-          submitBtn.textContent = `${attemptLabel} 재시도 0%`;
-          markProgress('storage', attemptLabel, `다시 청크 단위로 보내는 중입니다. 창을 닫지 마세요.`);
-          return withNetworkTimeout(
-            db().submissions.uploadPhotoResumable(targetPath, targetBlob, { onProgress }),
-            readerUploadTimeoutMs(timeoutKind),
-            attemptLabel
-          ).catch(err => ({ error: { message: err.message } }));
+        if (!window.ReaderUploadFlow?.uploadPhoto) {
+          throw new Error('사진 업로드 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
         }
 
-        // 변환 헬퍼 — 폴백용 더 작은 이미지로 재인코딩
-        async function reencode(longSide, quality, attemptLabel) {
-          submitBtn.textContent = `${attemptLabel} 준비 중…`;
-          markProgress('storage', `${attemptLabel} 준비 중`, `더 가벼운 ${longSide}px 이미지로 다시 인코딩하고 있어요.`);
-          const out = await withNetworkTimeout(
-            resizeToJpeg(file, ({ stage, width: w, height: h }) => {
-              if (stage === 'resize') {
-                submitBtn.textContent = `${attemptLabel} 준비 중… (${w}×${h})`;
-              } else if (stage === 'encode') {
-                submitBtn.textContent = `${attemptLabel} 압축 중… (${w}×${h})`;
-              }
-            }, { maxLongSide: longSide, quality }),
-            52000,
-            `${attemptLabel} 변환`
-          );
-          return out.blob;
-        }
-
-        // 1차: 1600px / 76%
-        uploadMeta.uploadBytes = activeBlob.size;
-        let { error: upErr } = await tryUpload(path, activeBlob, '사진 업로드 중…', 'primary');
-
-        // 2차: 1200px / 68% (1차가 어떤 이유로든 실패하면)
-        if (upErr) {
-          activeBlob = await reencode(FALLBACK_LONG_SIDE, FALLBACK_JPEG_QUALITY, '저용량 사진');
-          path = `${user.id}/${Date.now()}-${uuid()}-lite.jpg`;
-          triedPaths.push(path);
-          uploadMeta.uploadBytes = activeBlob.size;
-          ({ error: upErr } = await tryUpload(path, activeBlob, '저용량 사진 업로드 중…', 'fallback'));
-        }
-
-        // 3차: 800px / 55% — 마지막 시도
-        if (upErr) {
-          activeBlob = await reencode(TERTIARY_LONG_SIDE, TERTIARY_JPEG_QUALITY, '최소용량 사진');
-          path = `${user.id}/${Date.now()}-${uuid()}-tiny.jpg`;
-          triedPaths.push(path);
-          uploadMeta.uploadBytes = activeBlob.size;
-          ({ error: upErr } = await tryUpload(path, activeBlob, '최소용량 사진 업로드 중…', 'tertiary'));
-        }
-
-        if (upErr) {
-          showEmergencyHelp(true);
-          throw new Error('사진 업로드가 완료되지 않았어요. 네트워크가 매우 불안정한 것 같습니다. 아래 안내된 경로로 보내주시면 직접 등록해 드릴게요. (' + upErr.message + ')');
-        }
+        const uploadResult = await window.ReaderUploadFlow.uploadPhoto({
+          file,
+          db: db(),
+          fmtBytes,
+          readLocalJwtUser,
+          resizeToJpeg,
+          uuid,
+          withNetworkTimeout,
+          uploadMeta,
+          setSubmitText: (text) => { submitBtn.textContent = text; },
+          markProgress,
+        }).catch(err => {
+          showEmergencyHelp(String(err?.message || '').includes('사진 업로드가 완료되지 않았어요'));
+          throw err;
+        });
+        const { user, path, triedPaths } = uploadResult;
 
         const igNorm = instagram ? instagram.replace(/^@/, '') : '';
         const themeApplyVal = fd.get('theme_apply');
