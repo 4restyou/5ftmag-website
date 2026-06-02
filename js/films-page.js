@@ -225,42 +225,11 @@
     }
   }
 
-  // 필름 카탈로그 — Supabase 직접 fetch (admin/films 변경 즉시 반영).
-  // DB 가 일시 down 일 때 정적 data/films.json 으로 fallback.
+  // 필름 카탈로그 — DB 우선, 정적 data/films.json fallback 및 보강.
   (async () => {
     try {
-      for (let i = 0; i < 60; i++) {
-        if (window.MagDB && window.MagDB.isReady()) break;
-        await new Promise(r => setTimeout(r, 50));
-      }
-      let data = null;
-      if (window.MagDB && window.MagDB.isReady() && window.MagDB.films?.listAsObject) {
-        try {
-          const obj = await window.MagDB.films.listAsObject();
-          if (obj && Object.keys(obj).length) data = obj;
-        } catch (err) {
-          console.warn('[films] DB catalog fallback:', err?.message || err);
-        }
-      }
-      if (!data) {
-        const res = await fetch('data/films.json');
-        data = await res.json();
-      } else {
-        // DB 에는 없지만 data/films.json 에 등록된 slug 를 보강.
-        // (신규 항목을 admin/films 로 DB 에 옮기기 전까지 정적 JSON 으로 노출)
-        try {
-          const staticRes = await fetch('data/films.json');
-          const staticObj = await staticRes.json();
-          let supplemented = 0;
-          for (const [slug, entry] of Object.entries(staticObj || {})) {
-            if (!data[slug]) { data[slug] = entry; supplemented++; }
-          }
-          if (supplemented) {
-            console.info('[films] supplemented from static JSON:', supplemented);
-          }
-        } catch (_) { /* 정적 JSON 실패는 무시 */ }
-      }
-      filmsData = data;
+      const catalog = await window.FilmsCatalogLoader.load();
+      filmsData = catalog.data;
       renderFilmsGrid();
       updateReaderCounts();
       handleInitialDeepLink();
