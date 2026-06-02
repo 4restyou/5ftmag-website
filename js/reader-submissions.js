@@ -59,12 +59,33 @@
   function reportUploadFailure(stage, err, meta = {}) {
     const safeStage = String(stage || 'unknown').replace(/[^a-z0-9_-]/gi, '').slice(0, 40) || 'unknown';
     const message = err?.message || String(err || '알 수 없는 업로드 오류');
+    const attempts = Array.isArray(meta.attempts) ? meta.attempts : [];
+    const attemptDetails = attempts.map((a, idx) => [
+      `attempt_${idx + 1}_kind=${a.kind || ''}`,
+      `attempt_${idx + 1}_bytes=${Number(a.bytes || 0)}`,
+      `attempt_${idx + 1}_simple=${a.simple || ''}`,
+      `attempt_${idx + 1}_resumable=${a.resumable || ''}`,
+      `attempt_${idx + 1}_path=${a.path || ''}`,
+    ].join('\n'));
     const details = [
       err?.stack || '',
       `stage=${safeStage}`,
       `online=${navigator.onLine ? '1' : '0'}`,
+      `url=${location.href}`,
+      `user_agent=${navigator.userAgent || ''}`,
+      `language=${navigator.language || ''}`,
       `input_bytes=${Number(meta.inputBytes || 0)}`,
       `upload_bytes=${Number(meta.uploadBytes || 0)}`,
+      `file_name=${meta.fileName || ''}`,
+      `file_type=${meta.fileType || ''}`,
+      `file_last_modified=${meta.fileLastModified || ''}`,
+      `attempt_count=${attempts.length}`,
+      `tried_paths=${(meta.triedPaths || []).join(',')}`,
+      `last_successful_path=${meta.lastSuccessfulPath || ''}`,
+      `last_successful_kind=${meta.lastSuccessfulKind || ''}`,
+      `last_error=${meta.lastError || ''}`,
+      `final_error=${meta.finalError || ''}`,
+      ...attemptDetails,
     ].filter(Boolean).join('\n');
     if (typeof window.reportClientError === 'function') {
       window.reportClientError({
@@ -830,6 +851,9 @@
         const { file } = fields;
         if (!isAcceptedImage(file)) throw new Error('JPG, PNG, WebP, HEIC 같은 이미지 파일만 올릴 수 있어요.');
         uploadMeta.inputBytes = file.size;
+        uploadMeta.fileName = file.name || '';
+        uploadMeta.fileType = file.type || '';
+        uploadMeta.fileLastModified = file.lastModified || '';
         fields = validateAndNormalizeSubmissionFields(fields, films);
 
         if (!window.ReaderUploadFlow?.uploadPhoto) {

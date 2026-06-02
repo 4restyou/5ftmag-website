@@ -1064,6 +1064,16 @@ test('사진 업로드 실패는 실패 단계를 운영 오류 로그로 남긴
   expect(reports[0].source).toBe('reader-submissions:storage');
   expect(reports[0].stack).toContain('input_bytes=');
   expect(reports[0].stack).toContain('upload_bytes=');
+  expect(reports[0].stack).toContain('file_name=sample.jpg');
+  expect(reports[0].stack).toContain('file_type=image/jpeg');
+  expect(reports[0].stack).toContain('attempt_count=3');
+  expect(reports[0].stack).toContain('attempt_1_kind=primary');
+  expect(reports[0].stack).toContain('attempt_2_kind=fallback');
+  expect(reports[0].stack).toContain('attempt_3_kind=tertiary');
+  expect(reports[0].stack).toContain('attempt_1_simple=storage down');
+  expect(reports[0].stack).toContain('attempt_1_resumable=storage down');
+  expect(reports[0].stack).toContain('tried_paths=user-1/');
+  expect(reports[0].stack).toContain('user_agent=');
 });
 
 test('로그인 복귀 후 사진 업로드 폼을 자동으로 다시 연다', async ({ page }) => {

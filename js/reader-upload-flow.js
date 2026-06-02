@@ -27,6 +27,8 @@
     markProgress = () => {},
     uploadMeta = {},
   }) {
+    uploadMeta.attempts = Array.isArray(uploadMeta.attempts) ? uploadMeta.attempts : [];
+    uploadMeta.finalError = '';
     setSubmitText(`사진 디코딩 중… (${fmtBytes(file.size)})`);
     markProgress('decode', '사진을 읽는 중', `${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`);
     const { blob } = await withNetworkTimeout(
@@ -59,8 +61,18 @@
     let path = initialPath;
     let activeBlob = blob;
     const triedPaths = [initialPath];
+    uploadMeta.triedPaths = triedPaths.slice();
 
     async function tryUpload(targetPath, targetBlob, attemptLabel, timeoutKind) {
+      const attempt = {
+        label: attemptLabel,
+        kind: timeoutKind,
+        path: targetPath,
+        bytes: targetBlob.size,
+        simple: 'pending',
+        resumable: 'not-started',
+      };
+      uploadMeta.attempts.push(attempt);
       setSubmitText(`${attemptLabel} (${fmtBytes(targetBlob.size)})`);
       markProgress('storage', attemptLabel, `${fmtBytes(targetBlob.size)} 전송 중입니다. 창을 닫지 마세요.`);
       const simple = await withNetworkTimeout(
@@ -68,7 +80,14 @@
         readerUploadTimeoutMs(timeoutKind),
         attemptLabel
       ).catch(err => ({ error: { message: err.message } }));
-      if (!simple || !simple.error) return { error: null };
+      if (!simple || !simple.error) {
+        attempt.simple = 'ok';
+        uploadMeta.lastSuccessfulPath = targetPath;
+        uploadMeta.lastSuccessfulKind = timeoutKind;
+        return { error: null };
+      }
+      attempt.simple = simple.error?.message || 'error';
+      uploadMeta.lastError = attempt.simple;
 
       let lastPct = -1;
       const onProgress = (sent, total) => {
@@ -80,11 +99,20 @@
       };
       setSubmitText(`${attemptLabel} 재시도 0%`);
       markProgress('storage', attemptLabel, '다시 청크 단위로 보내는 중입니다. 창을 닫지 마세요.');
-      return withNetworkTimeout(
+      const resumable = await withNetworkTimeout(
         db.submissions.uploadPhotoResumable(targetPath, targetBlob, { onProgress }),
         readerUploadTimeoutMs(timeoutKind),
         attemptLabel
       ).catch(err => ({ error: { message: err.message } }));
+      if (!resumable || !resumable.error) {
+        attempt.resumable = 'ok';
+        uploadMeta.lastSuccessfulPath = targetPath;
+        uploadMeta.lastSuccessfulKind = timeoutKind;
+        return { error: null };
+      }
+      attempt.resumable = resumable.error?.message || 'error';
+      uploadMeta.lastError = attempt.resumable;
+      return resumable;
     }
 
     async function reencode(longSide, quality, attemptLabel) {
@@ -111,6 +139,7 @@
       activeBlob = await reencode(FALLBACK_LONG_SIDE, FALLBACK_JPEG_QUALITY, '저용량 사진');
       path = `${user.id}/${Date.now()}-${uuid()}-lite.jpg`;
       triedPaths.push(path);
+      uploadMeta.triedPaths = triedPaths.slice();
       uploadMeta.uploadBytes = activeBlob.size;
       ({ error: upErr } = await tryUpload(path, activeBlob, '저용량 사진 업로드 중…', 'fallback'));
     }
@@ -119,11 +148,13 @@
       activeBlob = await reencode(TERTIARY_LONG_SIDE, TERTIARY_JPEG_QUALITY, '최소용량 사진');
       path = `${user.id}/${Date.now()}-${uuid()}-tiny.jpg`;
       triedPaths.push(path);
+      uploadMeta.triedPaths = triedPaths.slice();
       uploadMeta.uploadBytes = activeBlob.size;
       ({ error: upErr } = await tryUpload(path, activeBlob, '최소용량 사진 업로드 중…', 'tertiary'));
     }
 
     if (upErr) {
+      uploadMeta.finalError = upErr.message || String(upErr);
       throw new Error('사진 업로드가 완료되지 않았어요. 네트워크가 매우 불안정한 것 같습니다. 아래 안내된 경로로 보내주시면 직접 등록해 드릴게요. (' + upErr.message + ')');
     }
 
