@@ -83,8 +83,21 @@ async function main() {
     films[r.slug] = rowToJson(r);
   }
 
+  // 기존 data/films.json 에는 있는데 DB 에는 없는 slug 를 보강.
+  // (정적 JSON 에 먼저 등록한 신규 항목을 admin/films 로 DB 에 옮기기 전까지
+  //  빌드 결과에서 사라지지 않게 한다.)
+  let supplemented = 0;
+  try {
+    const existingRaw = await fs.readFile(TARGET, 'utf8');
+    const existing = JSON.parse(existingRaw);
+    for (const [slug, entry] of Object.entries(existing || {})) {
+      if (!films[slug]) { films[slug] = entry; supplemented++; }
+    }
+  } catch (_) { /* 첫 빌드 등 파일 없으면 무시 */ }
+
   await fs.writeFile(TARGET, JSON.stringify(films, null, 2) + '\n', 'utf8');
-  console.log(`🎞 Films: ${Object.keys(films).length} entry → data/films.json`);
+  console.log(`🎞 Films: ${Object.keys(films).length} entry → data/films.json`
+    + (supplemented ? ` (DB ${rows.length} + static ${supplemented})` : ''));
 }
 
 main().catch(err => {
