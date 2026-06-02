@@ -18,6 +18,15 @@
     isMobileFilms,
   } = window.FilmsUtils;
   const { renderFilmCard } = window.FilmsCards;
+  const {
+    routeParam,
+    filmsBasePath,
+    prettyFilmPath,
+    prettyCameraPath,
+    prettyContributorPath,
+    shareFilm: shareFilmLink,
+    shareCamera: shareCameraLink,
+  } = window.FilmsShare;
 
   const FILTER_LABELS = {
     all: '전체',
@@ -815,30 +824,6 @@
 
   function buildReaderRollState(rows) {
     return window.ReaderRoll.buildState(rows, ROLL_LIMIT);
-  }
-
-  function routeParam(kind) {
-    try {
-      const parts = location.pathname.split('/').filter(Boolean);
-      if (parts.length >= 2 && parts[0] === kind) return decodeURIComponent(parts.slice(1).join('/'));
-    } catch (_) {}
-    return '';
-  }
-
-  function filmsBasePath() {
-    return '/films';
-  }
-
-  function prettyFilmPath(filmKey) {
-    return `/film/${encodeURIComponent(filmKey)}`;
-  }
-
-  function prettyCameraPath(key) {
-    return `/camera/${encodeURIComponent(key)}`;
-  }
-
-  function prettyContributorPath(key) {
-    return `/contributor/${encodeURIComponent(key)}`;
   }
 
   async function handleInitialDeepLink() {
@@ -1770,34 +1755,6 @@
     showLightbox(index, 'reader');
   }
 
-  async function shareCameraModal(key) {
-    const info = cameraIndex.get(key);
-    if (!info) return;
-    const url = `${location.origin}${prettyCameraPath(key)}`;
-    const title = `${info.display} · 5ft.mag Films`;
-    const text  = `5ft.mag 에서 ${info.display} 으로 찍은 사진 보기`;
-    if (navigator.share) {
-      navigator.share({ title, text, url }).catch(() => {});
-      return;
-    }
-    const ok = await window.copyTextToClipboard?.(url);
-    window.notify?.(ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요', ok ? 'info' : 'danger');
-  }
-
-  // 필름 모달 공유 — market 의 shareListing 과 같은 패턴
-  async function shareFilm(filmKey) {
-    const data = filmsData[filmKey];
-    const url = `${location.origin}${prettyFilmPath(filmKey)}`;
-    const filmName = data?.displayName || data?.name || filmKey;
-    const title = `${filmName} · 5ft.mag Films`;
-    const text  = `5ft.mag Films 에서 ${filmName} 보기`;
-    if (navigator.share) {
-      try { await navigator.share({ title, text, url }); return; } catch (_) { return; }
-    }
-    const ok = await window.copyTextToClipboard?.(url);
-    window.notify?.(ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요', ok ? 'info' : 'danger');
-  }
-
   // 필름 카드 클릭
   document.querySelectorAll('.film-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -1813,8 +1770,8 @@
   if (modalShare) {
     modalShare.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (currentCameraKey) shareCameraModal(currentCameraKey);
-      else if (currentFilmKey) shareFilm(currentFilmKey);
+      if (currentCameraKey) shareCameraLink(currentCameraKey, cameraIndex.get(currentCameraKey));
+      else if (currentFilmKey) shareFilmLink(currentFilmKey, filmsData[currentFilmKey]);
     });
   }
 
