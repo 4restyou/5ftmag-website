@@ -4187,5 +4187,119 @@
     "photos": [],
     "canThumbnail": "img/films/fndkumo250d-can.webp",
     "canThumbnailStatus": "set"
+  },
+  "monopan50": {
+    "slug": "monopan50",
+    "brand": "LEICA",
+    "name": "MONOPAN 50",
+    "displayName": "Leica MONOPAN 50",
+    "aliases": [
+      "Leica MONOPAN 50",
+      "MONOPAN 50",
+      "Monopan 50",
+      "Leica Pan 50",
+      "모노판 50",
+      "라이카 모노판 50",
+      "monopan50"
+    ],
+    "desc": "라이카가 2025년에 내놓은 첫 흑백 필름. ISO 50, 280 lp/mm 의 초고해상도와 780nm 까지의 슈퍼-팬크로매틱 감도가 특징. 햇볕 좋은 날 큰 조리개 렌즈와 짝지을 때 본 모습이 드러납니다.",
+    "iso": "50",
+    "type": "BW Negative",
+    "format": "35mm",
+    "issue": "",
+    "photographers": [],
+    "photos": [],
+    "tier": "library"
+  },
+  "fujisuperhg1600": {
+    "slug": "fujisuperhg1600",
+    "brand": "FUJIFILM",
+    "name": "Fujicolor Super HG 1600",
+    "displayName": "Fujifilm Fujicolor Super HG 1600",
+    "aliases": [
+      "Fujifilm Super HG 1600",
+      "Fujicolor Super HG 1600",
+      "Super HG 1600",
+      "Fuji Super HG 1600",
+      "후지필름 슈퍼 HG 1600",
+      "슈퍼 HG 1600",
+      "fujisuperhg1600"
+    ],
+    "desc": "후지필름의 옛 고감도 컬러 네거티브. ISO 1600 으로 실내 파티·무대처럼 어두운 현장을 한 롤에 담아낼 수 있게 만든 필름. 현재는 단종돼 만나기 어렵습니다.",
+    "iso": "1600",
+    "type": "Color Negative",
+    "format": "35mm",
+    "issue": "",
+    "photographers": [],
+    "photos": [],
+    "tier": "library"
+  },
+  "konicaindustrial100": {
+    "slug": "konicaindustrial100",
+    "brand": "KONICA",
+    "name": "Industrial 100",
+    "displayName": "Konica Industrial 100",
+    "aliases": [
+      "Konica Industrial 100",
+      "Industrial 100",
+      "業務用 100",
+      "業務用100",
+      "코니카 인더스트리얼 100",
+      "코니카 업무용 100",
+      "konicaindustrial100"
+    ],
+    "desc": "일본에서 업무용(業務用)으로 유통됐던 코니카의 ISO 100 컬러 네거티브. 중성에 가까운 발색과 단정한 입자감이 특징이고, 권장 EI 가 50~80 사이로도 잘 받아 라티튜드 여유가 넓다는 평. 단종.",
+    "iso": "100",
+    "type": "Color Negative",
+    "format": "35mm",
+    "issue": "",
+    "photographers": [],
+    "photos": [],
+    "tier": "library"
+  },
+  "e100vs": {
+    "slug": "e100vs",
+    "brand": "KODAK",
+    "name": "Ektachrome E100VS",
+    "displayName": "Kodak Ektachrome E100VS",
+    "aliases": [
+      "Kodak Ektachrome E100VS",
+      "Ektachrome E100VS",
+      "E100VS",
+      "E100 VS",
+      "Vivid Saturation",
+      "코닥 엑타크롬 E100VS",
+      "엑타크롬 E100VS",
+      "e100vs"
+    ],
+    "desc": "1999년 출시되고 2012년 단종된 코닥의 비비드 슬라이드 필름. ISO 100, E-6 현상. 이름의 VS 는 \"Vividly Saturated\" 의 약자로, 자연·풍경·요리처럼 강한 색이 어울리는 피사체에 맞춰 설계됐습니다.",
+    "iso": "100",
+    "type": "Slide",
+    "format": "35mm, 120",
+    "issue": "",
+    "photographers": [],
+    "photos": [],
+    "tier": "library"
+  },
+  "1shot400": {
+    "slug": "1shot400",
+    "brand": "1SHOT",
+    "name": "400",
+    "displayName": "1SHOT 400",
+    "aliases": [
+      "1SHOT 400",
+      "1Shot 400",
+      "1 Shot 400",
+      "원샷 400",
+      "1shot400"
+    ],
+    "desc": "실내부터 햇볕 좋은 야외까지 한 롤로 무난히 받아내는 ISO 400 컬러 네거티브. C-41 현상. 24컷 단위로 가볍게 풀려 부담 없이 한 롤을 가져갈 수 있는 데일리 옵션.",
+    "iso": "400",
+    "type": "Color Negative",
+    "format": "35mm",
+    "issue": "",
+    "photographers": [],
+    "photos": [],
+    "tier": "library"
   }
 }
