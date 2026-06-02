@@ -548,44 +548,6 @@
     if (el) el.hidden = !visible;
   }
 
-  function normalizeCameraLabel(s) {
-    return String(s ?? '').trim().replace(/\s+/g, ' ');
-  }
-
-  function readRecentCameras() {
-    try {
-      const rows = JSON.parse(localStorage.getItem(LS_RECENT_CAMERAS) || '[]');
-      if (!Array.isArray(rows)) return [];
-      if (!rows.length) {
-        try {
-          const meta = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-          if (meta.camera) rows.push(meta.camera);
-        } catch {}
-      }
-      const seen = new Set();
-      const out = [];
-      for (const row of rows) {
-        const label = normalizeCameraLabel(row);
-        const key = label.toLowerCase();
-        if (!label || seen.has(key)) continue;
-        seen.add(key);
-        out.push(label);
-        if (out.length >= RECENT_CAMERA_LIMIT) break;
-      }
-      return out;
-    } catch {
-      return [];
-    }
-  }
-
-  function saveRecentCamera(camera) {
-    const label = normalizeCameraLabel(camera);
-    if (!label) return;
-    const next = [label].concat(readRecentCameras().filter(c => c.toLowerCase() !== label.toLowerCase()))
-      .slice(0, RECENT_CAMERA_LIMIT);
-    try { localStorage.setItem(LS_RECENT_CAMERAS, JSON.stringify(next)); } catch {}
-  }
-
   // OAuth 복귀 후 모달 상태 복원용 keys
   //  - 5ft_prefill_film : 로그인 전 클릭한 필름명 복원용
   //  - 5ft_pending_submission_open : 로그인 후 폼 모달 자동 재진입 플래그
@@ -733,235 +695,23 @@
     if (session?.user) reopen();
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 카메라 옵션 — 승인된 제출 + DB 오버라이드 + MODEL_BRAND_HINTS 카탈로그.
-  //   - 정규화로 같은 모델 묶고 브랜드 alias 병합
-  //   - 카탈로그 모델은 첫 제출 전이라도 자동완성에 표시
-  //   - 브랜드 A-Z, 그 안에서 display A-Z 정렬
-  //   - 자유 입력은 그대로 받되 유사 모델은 힌트로 제안
-  // ════════════════════════════════════════════════════════════
-  function modelKeyHelper(s) {
-    return String(s ?? '').toLowerCase().replace(/[\s\-_]/g, '');
-  }
-  // 카메라 키를 보기 좋은 display 로 변환 — 카탈로그 default 표기용
-  //   key='m6'   → 'M6'
-  //   key='m6ttl'→ 'M6 TTL'  (숫자→문자 경계, 문자→숫자 경계에 공백)
-  //   brand='leica' → 'Leica M6 TTL'
-  function prettifyCameraKey(brand, key) {
-    if (!key) return '';
-    // 숫자/문자 경계에 공백 삽입
-    let s = String(key).replace(/([a-z])(\d)/gi, '$1 $2').replace(/(\d)([a-z])/gi, '$1 $2');
-    // 약어 (FM, EOS, OM, MD 등) 는 대문자 유지가 자연스러우니 전체 대문자화
-    s = s.toUpperCase();
-    // 일부 흔한 토큰은 mixed-case 보정
-    s = s.replace(/\bTTL\b/g, 'TTL').replace(/\bMD\b/g, 'MD');
-    const bl = brand ? (brand.charAt(0).toUpperCase() + brand.slice(1)) : '';
-    return bl ? `${bl} ${s}` : s;
-  }
-
-  let cachedCameraList = null;
-  async function buildCameraList() {
-    if (cachedCameraList) return cachedCameraList;
-    if (!window.normalizeCamera || !db()) return [];
-    let subs = [];
-    try { subs = await db().submissions.listApproved(2000); } catch (_) { return []; }
-
-    // 1) submissions 를 model_key 로 그룹화
-    const buckets = new Map();
-    for (const s of subs) {
-      const cam = s.camera || '';
-      if (!cam.trim()) continue;
-      const n = window.normalizeCamera(cam);
-      if (!n.key) continue;
-      if (!buckets.has(n.key)) buckets.set(n.key, { originals: [], brand: n.brand || null });
-      const b = buckets.get(n.key);
-      b.originals.push(n.original);
-      if (!b.brand && n.brand) b.brand = n.brand;
-    }
-
-    // 2) DB 오버라이드 적용 (alias 병합 + brand/display)
-    if (window.MagDB && window.MagDB.cameraOverrides) {
-      let overrides = null;
-      try { overrides = await window.MagDB.cameraOverrides.list(); } catch (_) {}
-      if (overrides && overrides.size) {
-        // alias 먼저
-        for (const [aliasKey, o] of overrides) {
-          if (!o.alias_of || !buckets.has(aliasKey)) continue;
-          if (!buckets.has(o.alias_of)) buckets.set(o.alias_of, { originals: [], brand: o.brand || null });
-          const target = buckets.get(o.alias_of);
-          target.originals = target.originals.concat(buckets.get(aliasKey).originals);
-          if (!target.brand && o.brand) target.brand = o.brand;
-          buckets.delete(aliasKey);
-        }
-        // brand/display
-        for (const [key, o] of overrides) {
-          if (o.alias_of) continue;
-          if (!buckets.has(key)) continue;
-          const b = buckets.get(key);
-          b.brand = o.brand || b.brand;
-          if (o.display) b.overrideDisplay = o.display;
-        }
-      }
-    }
-
-    const pickDisplay = window.pickCameraDisplay || ((arr) => arr[0] || '');
-    const list = [];
-    for (const [key, b] of buckets) {
-      const display = b.overrideDisplay || pickDisplay(b.originals);
-      if (!display) continue;
-      list.push({ key, display, brand: b.brand || '' });
-    }
-
-    // 3) MODEL_BRAND_HINTS 카탈로그도 힌트 후보에 포함 — 첫 제출 전이라도
-    //    이미 알려진 모델들이 제안에 떠야 사용자가 선택 가능.
-    //    이미 submissions 에 있는 키는 건너뜀 (중복 방지).
-    if (Array.isArray(window.MODEL_BRAND_HINTS)) {
-      const seenKeys = new Set(list.map(c => c.key));
-      for (const hint of window.MODEL_BRAND_HINTS) {
-        const brandText = hint.brand || '';
-        for (const m of (hint.models || [])) {
-          // entry 는 string 또는 { key, display } 둘 다 지원
-          const k = typeof m === 'string' ? m : (m && m.key);
-          const explicit = typeof m === 'object' && m && m.display ? m.display : null;
-          if (!k) continue;
-          const mk = modelKeyHelper(k);
-          if (!mk || seenKeys.has(mk)) continue;
-          // display 자동 생성 — 명시값 없으면 brand+key 정형화
-          const display = explicit || prettifyCameraKey(brandText, k);
-          list.push({ key: mk, display, brand: brandText });
-          seenKeys.add(mk);
-        }
-      }
-    }
-
-    // 브랜드 A-Z (빈 브랜드는 끝), 그 안에서 display A-Z
-    list.sort((a, b) => {
-      if (!a.brand && b.brand) return 1;
-      if (a.brand && !b.brand) return -1;
-      const bc = (a.brand || '').localeCompare(b.brand || '', 'en');
-      if (bc !== 0) return bc;
-      return a.display.localeCompare(b.display, 'en');
-    });
-    cachedCameraList = list;
-    return list;
-  }
-
-  // Levenshtein 거리 (작은 입력 대상 — 이미 위에 있는 함수 사용)
-  function similarCameras(query, list, max = 4) {
-    if (!query || query.length < 2) return [];
-    const q = query.toLowerCase();
-    const qKey = modelKeyHelper(q);
-    const scored = [];
-    for (const c of list) {
-      const formatted = formatCameraName(c);
-      const d = formatted.toLowerCase();
-      const display = c.display.toLowerCase();
-      const brand = (c.brand || '').toLowerCase();
-      const key = modelKeyHelper(c.key || '');
-      const displayKey = modelKeyHelper(display);
-      const formattedKey = modelKeyHelper(d);
-      let score = -1;
-      if (d === q || display === q || key === qKey || displayKey === qKey || formattedKey === qKey) score = 0;
-      else if (key.startsWith(qKey)) score = 0;
-      else if (displayKey.startsWith(qKey)) score = 0;
-      else if (formattedKey.startsWith(qKey)) score = 0;
-      else if (key.includes(qKey) || displayKey.includes(qKey) || formattedKey.includes(qKey)) score = 1;
-      else if (d.startsWith(q)) score = 0;
-      else if (display.startsWith(q)) score = 1;
-      else if (brand && brand.startsWith(q)) score = 2;
-      else if (d.includes(q) || display.includes(q) || q.includes(d)) score = Math.abs(d.length - q.length) + 4;
-      else {
-        const lev = levenshtein(q, d);
-        const threshold = Math.min(3, Math.max(1, Math.floor(Math.max(q.length, d.length) * 0.35)));
-        if (lev <= threshold) score = lev;
-      }
-      if (score >= 0) scored.push({ c, score });
-    }
-    scored.sort((a, b) => a.score - b.score);
-    return scored.slice(0, max).map(s => s.c);
-  }
-
-  // 브랜드명 표시 — 카메라 사전의 canonical 소문자 → 대문자 시작
-  function brandLabel(b) {
-    if (!b) return '';
-    return b.charAt(0).toUpperCase() + b.slice(1);
-  }
-  // 브랜드 + 모델 형식 — 입력값/공유용
-  function formatCameraName(c) {
-    if (!c || !c.display) return '';
-    const bl = brandLabel(c.brand);
-    if (!bl) return c.display;
-    // display 가 이미 브랜드를 포함하면 그대로 (e.g. 'Leica M6')
-    if (c.display.toLowerCase().includes(c.brand.toLowerCase())) return c.display;
-    return `${bl} ${c.display}`;
-  }
-
-  function renderRecentCameraChips(container, input) {
-    if (!container || !input) return;
-    const recent = readRecentCameras();
-    if (!recent.length) {
-      container.hidden = true;
-      container.innerHTML = '';
-      return;
-    }
-    container.innerHTML = '<span class="rs-recent-cameras-label">최근 사용</span>'
-      + recent.map(camera => `<button type="button" class="rs-recent-camera" data-camera="${escapeAttr(camera)}">${escapeHtml(camera)}</button>`).join('');
-    container.hidden = false;
-  }
-
-  async function populateCameraDatalist() {
-    const input    = document.getElementById('rs-camera-input');
-    const recent   = document.getElementById('rs-recent-cameras');
-    const hint     = document.getElementById('rs-camera-hint');
-    if (!input) return;
-    const list = await buildCameraList();
-
-    renderRecentCameraChips(recent, input);
-    recent?.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-camera]');
-      if (!btn) return;
-      input.value = btn.dataset.camera || '';
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.focus();
-    });
-
-    if (!hint) return;
-    let debounce = null;
-    input.addEventListener('input', () => {
-      clearTimeout(debounce);
-      debounce = setTimeout(() => {
-        const v = input.value.trim();
-        if (!v) { hint.hidden = true; return; }
-        const matches = similarCameras(v, list, 6);
-        if (!matches.length) { hint.hidden = true; return; }
-        hint.innerHTML = '<span class="rs-camera-hint-label">혹시 이 카메라?</span> '
-          + matches.map(m => {
-              const formatted = formatCameraName(m);
-              const labelHtml = m.brand
-                ? `<span class="rs-cam-hint-brand">${escapeHtml(brandLabel(m.brand))}</span> · ${escapeHtml(m.display)}`
-                : escapeHtml(m.display);
-              return `<button type="button" class="rs-cam-hint-btn" data-pick="${escapeAttr(formatted)}">${labelHtml}</button>`;
-            }).join(' ');
-        hint.hidden = false;
-      }, 200);
-    });
-    hint.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-pick]');
-      if (!btn) return;
-      input.value = btn.dataset.pick;
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      hint.hidden = true;
-      input.focus();
-    });
-  }
-
   function bindFormHandlers(films) {
     const form = document.getElementById('rs-form');
     if (!form) return;
     let submitting = false;
 
+    if (!window.ReaderCameraInput?.bindCameraInput) {
+      showError('카메라 입력 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
+      return;
+    }
     // 카메라 입력 — 최근 사용 + 유사 모델 힌트
-    populateCameraDatalist();
+    window.ReaderCameraInput.bindCameraInput({
+      recentKey: LS_RECENT_CAMERAS,
+      legacyMetaKey: LS_KEY,
+      limit: RECENT_CAMERA_LIMIT,
+      escapeHtml,
+      escapeAttr,
+    });
 
     if (!window.ReaderUploadFormUi?.createUploadUi) {
       showError('업로드 폼 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
@@ -1197,7 +947,11 @@
         }
 
         // 4) 메타 기억
-        saveRecentCamera(camera);
+        window.ReaderCameraInput.saveRecentCamera(camera, {
+          recentKey: LS_RECENT_CAMERAS,
+          legacyMetaKey: LS_KEY,
+          limit: RECENT_CAMERA_LIMIT,
+        });
         try {
           localStorage.setItem(LS_KEY, JSON.stringify({
             submitterName,
