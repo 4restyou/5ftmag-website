@@ -22,10 +22,8 @@ function withWriteTimeout(promise, ms = 10000) {
   });
 }
 
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-const escapeAttr = escapeHtml;
+function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
+const escapeAttr = window.MagUtil.escapeAttr;
 
 // ── 접근 권한 ──
 function showGate(msg) { $('gate').hidden = false; if (msg) $('gate').querySelector('p').textContent = msg; }

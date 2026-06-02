@@ -17,14 +17,7 @@
     realtimeChannel: null,
   };
 
-  function escapeHtml(s) {
-    return String(s ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+  const escapeHtml = window.MagUtil.escapeHtml;
 
   function nl2br(s) {
     return escapeHtml(s).replace(/\n/g, '<br>');
