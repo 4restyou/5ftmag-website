@@ -21,6 +21,8 @@ jobs:
       - run: npm ci || npm install
       - name: 자산 참조 검증
         run: npm run validate
+      - name: Vitest 단위 테스트
+        run: npm run test:unit
       # data/img/문서만 바뀐 경우 무거운 Playwright 단계를 건너뛴다 (자산 검증은 항상 수행).
       - name: 변경 파일 판별
         id: changes

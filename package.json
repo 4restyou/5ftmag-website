@@ -10,6 +10,8 @@
     "qa:visual": "node scripts/qa-visual.mjs",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
     "build": "node scripts/build-from-notion.mjs && node scripts/build-films.mjs && node scripts/build-labs.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs",
@@ -27,6 +29,8 @@
     "@notionhq/client": "^2.2.15"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.60.0",
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.9"
   }
 }
