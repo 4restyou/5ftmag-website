@@ -416,7 +416,7 @@ async function toggleHidden(slug, currentlyHidden) {
     return;
   }
   if (f) f.is_hidden = next;
-  window.notify?.(`"${label}" 을 ${next ? '숨김' : '복원'} 처리했어요. 다음 빌드부터 사이트에 반영됩니다.`, 'info');
+  window.notify?.(`"${label}" 을 ${next ? '숨김' : '복원'} 처리했어요. 라이브에 바로 반영돼요.`, 'info');
   render();
 }
 
