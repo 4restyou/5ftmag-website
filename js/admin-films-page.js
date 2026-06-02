@@ -67,14 +67,79 @@ $('gateLogin').addEventListener('click', async () => {
 // 목록 로드 + 렌더
 // ═════════════════════════════════════════
 async function reload() {
-  const [films, submissions] = await Promise.all([
+  const [films, submissions, proposals] = await Promise.all([
     db().films.listAll(),
     db().submissions.listApproved(null),
+    db().filmProposals.listForReview({ status: 'pending' }),
   ]);
   STATE.films = Array.isArray(films) ? films : [];
   STATE.readerCounts = buildReaderCountsByFilm(STATE.films, submissions || []);
+  STATE.proposals = Array.isArray(proposals) ? proposals : [];
   render();
+  renderProposals();
 }
+
+function renderProposals() {
+  const box = document.getElementById('proposalsBox');
+  const list = document.getElementById('proposalsList');
+  const count = document.getElementById('proposalsCount');
+  if (!box || !list) return;
+  const rows = STATE.proposals || [];
+  if (rows.length === 0) { box.hidden = true; return; }
+  box.hidden = false;
+  count.textContent = String(rows.length);
+  list.innerHTML = rows.map(p => {
+    const display = p.display_name || `${p.brand || ''} ${p.name || ''}`.trim();
+    const meta = [p.iso, p.type, p.format].filter(Boolean).join(' · ');
+    const desc = p.description ? `<div class="proposal-desc">${escapeHtml(p.description)}</div>` : '';
+    return `
+      <div class="proposal-row" data-id="${escapeAttr(p.id)}">
+        <div>
+          <div class="proposal-title">${escapeHtml(display)}</div>
+          <div class="proposal-meta">${escapeHtml(meta || '메타 없음')} · ${escapeHtml(new Date(p.created_at).toLocaleDateString('ko-KR'))}</div>
+          ${desc}
+        </div>
+        <div class="proposal-actions">
+          <button type="button" class="approve" data-action="approve-proposal">이 내용으로 새 필름</button>
+          <button type="button" data-action="reject-proposal">반려</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// 이벤트 위임: 검토 액션
+document.addEventListener('click', async (e) => {
+  const row = e.target.closest('.proposal-row');
+  if (!row) return;
+  const id = row.dataset.id;
+  const p = (STATE.proposals || []).find(x => x.id === id);
+  if (!p) return;
+  if (e.target.dataset.action === 'approve-proposal') {
+    // 새 필름 폼 열고 미리 채움. 저장 시 처리: 신청을 approved 로 + 알림.
+    STATE.pendingProposalForForm = p;
+    openForm(null);
+    // 폼 미리 채움
+    document.getElementById('f-brand').value = p.brand || '';
+    document.getElementById('f-name').value = p.name || '';
+    document.getElementById('f-displayName').value = p.display_name || '';
+    document.getElementById('f-iso').value = p.iso || '';
+    document.getElementById('f-type').value = p.type || '';
+    document.getElementById('f-format').value = p.format || '';
+    document.getElementById('f-desc').value = p.description || '';
+    document.getElementById('f-aliases').value = aliasesToText(p.aliases || []);
+    // slug 추천(브랜드+이름의 lowercase, 비영문 제거)
+    const slugGuess = String(`${p.brand || ''}${p.name || ''}`).toLowerCase().replace(/[^a-z0-9]+/g, '');
+    document.getElementById('f-slug').value = slugGuess;
+  } else if (e.target.dataset.action === 'reject-proposal') {
+    const note = prompt('반려 사유(신청자에게 안내됨, 선택):') || '';
+    if (note === null) return;
+    const { error } = await db().filmProposals.reject(id, note);
+    if (error) { window.notify?.('반려 실패: ' + error.message, 'danger'); return; }
+    await db().filmProposals.notifyDecision({ ...p, reviewer_notes: note }, 'rejected');
+    window.notify?.('반려 처리했어요.', 'info');
+    await reload();
+  }
+});
 
 function normalizeFilmLabel(value) {
   return String(value ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
@@ -303,6 +368,15 @@ $('filmForm').addEventListener('submit', async (e) => {
       return;
     }
     window.notify?.(STATE.editingSlug ? '필름을 수정했어요.' : '새 필름을 추가했어요.', 'info');
+    // 검토 대기 신청에서 들어온 경우 신청을 승인 처리 + 신청자 알림
+    if (STATE.pendingProposalForForm && !STATE.editingSlug) {
+      const p = STATE.pendingProposalForForm;
+      try {
+        await db().filmProposals.approve(p.id, slug, null);
+        await db().filmProposals.notifyDecision(p, 'approved', `/films.html#film-${slug}`);
+      } catch (_) { /* silently — 새 필름 저장은 이미 성공 */ }
+      STATE.pendingProposalForForm = null;
+    }
     closeForm();
     await reload();
   } catch (err) {

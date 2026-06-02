@@ -1267,9 +1267,92 @@
     publicUrl(path) { return `${URL_}/storage/v1/object/public/${WEBZINE_BUCKET}/${path}`; },
   };
 
+  // ─── 필름 신청 (film_proposals) ───
+  // 구독자가 라이브러리에 없는 필름을 신청하면 편집부가 검토 후 승인 시
+  // films 테이블로 promote. 본인 신청만 SELECT, 편집부는 전체 권한(RLS).
+  const filmProposals = {
+    async create(rec) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      const payload = {
+        user_id: uid,
+        brand: String(rec.brand || '').trim(),
+        name:  String(rec.name  || '').trim(),
+        display_name: rec.displayName ? String(rec.displayName).trim() : null,
+        iso:    rec.iso    ? String(rec.iso).trim()    : null,
+        type:   rec.type   ? String(rec.type).trim()   : null,
+        format: rec.format ? String(rec.format).trim() : null,
+        description: rec.description ? String(rec.description).trim() : null,
+        aliases: Array.isArray(rec.aliases) ? rec.aliases : [],
+        status: 'pending',
+      };
+      if (!payload.brand || !payload.name) {
+        return { error: { message: 'brand 와 name 은 필수예요.' } };
+      }
+      return c.from('film_proposals').insert(payload).select().maybeSingle();
+    },
+    async listMine() {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      const { data, error } = await c.from('film_proposals')
+        .select('*').eq('user_id', uid)
+        .order('created_at', { ascending: false });
+      if (error) return [];
+      return data || [];
+    },
+    // 편집부 전용 — pending(또는 전체) 목록
+    async listForReview({ status = 'pending', limit = 100 } = {}) {
+      const c = client(); if (!c) return [];
+      let q = c.from('film_proposals')
+        .select('*').order('created_at', { ascending: false }).limit(limit);
+      if (status && status !== 'all') q = q.eq('status', status);
+      const { data, error } = await q;
+      if (error) { console.warn('[filmProposals.listForReview]', error.message); return []; }
+      return data || [];
+    },
+    // 승인: status=approved + approved_slug 기록. 실제 films INSERT 는 admin/films 폼에서.
+    async approve(id, slug, notes) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('film_proposals').update({
+        status: 'approved',
+        approved_slug: slug || null,
+        reviewer_notes: notes || null,
+        reviewed_at: new Date().toISOString(),
+      }).eq('id', id);
+    },
+    async reject(id, notes) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('film_proposals').update({
+        status: 'rejected',
+        reviewer_notes: notes || null,
+        reviewed_at: new Date().toISOString(),
+      }).eq('id', id);
+    },
+    // 신청자 알림 — 편집부가 승인/반려 후 호출 (RLS 가 본인+편집부만 인서트 허용
+    // 하지 않으므로 RPC 가 없다면 편집부 권한으로 user_notifications 직접 INSERT).
+    async notifyDecision(proposal, kind /* 'approved'|'rejected' */, link) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const titles = {
+        approved: '신청하신 필름이 등록됐어요',
+        rejected: '신청하신 필름이 반려됐어요',
+      };
+      const type = kind === 'approved' ? 'proposal_approved' : 'proposal_rejected';
+      return c.from('user_notifications').insert({
+        user_id: proposal.user_id,
+        type,
+        related_id: proposal.id,
+        title: titles[kind] || '신청 결과',
+        body: `${proposal.brand} ${proposal.name}` + (proposal.reviewer_notes ? ` · ${proposal.reviewer_notes}` : ''),
+        link: link || null,
+      });
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, labs, repairs, newsletter, webzine,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine,
   };
 })();
