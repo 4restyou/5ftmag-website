@@ -2263,15 +2263,36 @@
 /* (Reader's Roll 라이트박스는 editorial lightbox 와 통합됨 — dead CSS 제거) */
 
 /* ────────── 새 필름 제안 버튼 + 모달 ────────── */
-.library-head-actions { display: inline-flex; align-items: center; gap: 14px; }
+.library-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+/* head-actions 안에 들어온 mine-link 는 옛 absolute 정렬을 해제하고 같은 라인에 정렬 */
+.library-head-actions .library-mine-link {
+  position: static;
+  right: auto; bottom: auto;
+  margin-top: 0;
+}
 .library-propose-btn {
   font: inherit; font-family: var(--font);
-  font-size: 13px; padding: 6px 12px;
-  border: 1px solid currentColor; border-radius: 4px;
-  background: transparent; color: var(--text);
-  cursor: pointer; opacity: .85; transition: opacity .15s;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color .15s, border-color .15s;
 }
-.library-propose-btn:hover { opacity: 1; }
+.library-propose-btn:hover {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
 
 .propose-modal {
   position: fixed; inset: 0; z-index: 1200;
