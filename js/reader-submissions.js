@@ -695,6 +695,76 @@
     if (session?.user) reopen();
   }
 
+  function readSubmissionFields(form) {
+    const fd = new FormData(form);
+    const file = fd.get('photo');
+    if (!file || !file.size) throw new Error('올릴 사진을 1장 선택해 주세요.');
+
+    const submitterName = String(fd.get('submitter_name') || '').trim();
+    const instagram = String(fd.get('instagram') || '').trim();
+    const film = String(fd.get('film') || '').trim();
+    const camera = String(fd.get('camera') || '').trim();
+    const caption = String(fd.get('caption') || '').trim();
+    const consent = fd.get('consent') === 'on';
+
+    return { fd, file, submitterName, instagram, film, camera, caption, consent };
+  }
+
+  function validateAndNormalizeSubmissionFields(fields, films) {
+    if (!fields.submitterName && !fields.instagram) throw new Error('이름이나 인스타그램 ID 중 하나는 입력해 주세요.');
+    if (!fields.film) throw new Error('촬영한 필름을 선택하거나 직접 신청해 주세요.');
+    if (!fields.consent) throw new Error('사이트와 매거진에 게재해도 되는 사진인지 확인 체크가 필요해요.');
+
+    if (films) {
+      const m = findFilmMatch(fields.film, films);
+      if (m?.type === 'exact') return { ...fields, film: m.canonical };
+    }
+    return fields;
+  }
+
+  function normalizeInstagramHandle(instagram) {
+    return instagram ? String(instagram).trim().replace(/^@/, '') : '';
+  }
+
+  function buildSubmissionInsertData({ userId, path, fields }) {
+    const igNorm = normalizeInstagramHandle(fields.instagram);
+    const data = {
+      user_id: userId,
+      storage_path: path,
+      instagram: igNorm ? '@' + igNorm : null,
+      film: fields.film,
+      camera: fields.camera || null,
+      caption: fields.caption || null,
+      theme_month: fields.fd.get('theme_apply') || null,
+      consent_publish: true,
+    };
+    if (fields.submitterName) data.submitter_name = fields.submitterName;
+    return data;
+  }
+
+  function rememberSubmissionMeta(fields) {
+    window.ReaderCameraInput.saveRecentCamera(fields.camera, {
+      recentKey: LS_RECENT_CAMERAS,
+      legacyMetaKey: LS_KEY,
+      limit: RECENT_CAMERA_LIMIT,
+    });
+    const igNorm = normalizeInstagramHandle(fields.instagram);
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        submitterName: fields.submitterName,
+        instagram: igNorm ? '@' + igNorm : '',
+        film: fields.film,
+        camera: fields.camera,
+      }));
+    } catch {}
+  }
+
+  function displaySubmissionAuthor(fields) {
+    const igNorm = normalizeInstagramHandle(fields.instagram);
+    if (fields.submitterName && igNorm) return `${fields.submitterName} (@${igNorm})`;
+    return fields.submitterName || (igNorm ? '@' + igNorm : '');
+  }
+
   function bindFormHandlers(films) {
     const form = document.getElementById('rs-form');
     if (!form) return;
@@ -756,28 +826,11 @@
       };
 
       try {
-        const fd = new FormData(form);
-        const file = fd.get('photo');
-        if (!file || !file.size) throw new Error('올릴 사진을 1장 선택해 주세요.');
+        let fields = readSubmissionFields(form);
+        const { file } = fields;
         if (!isAcceptedImage(file)) throw new Error('JPG, PNG, WebP, HEIC 같은 이미지 파일만 올릴 수 있어요.');
         uploadMeta.inputBytes = file.size;
-
-        const submitterName = String(fd.get('submitter_name') || '').trim();
-        const instagram = String(fd.get('instagram') || '').trim();
-        let film = String(fd.get('film') || '').trim();
-        const camera = String(fd.get('camera') || '').trim();
-        const caption = String(fd.get('caption') || '').trim();
-        const consent = fd.get('consent') === 'on';
-        if (!submitterName && !instagram) throw new Error('이름이나 인스타그램 ID 중 하나는 입력해 주세요.');
-        if (!film) throw new Error('촬영한 필름을 선택하거나 직접 신청해 주세요.');
-        if (!consent) throw new Error('사이트와 매거진에 게재해도 되는 사진인지 확인 체크가 필요해요.');
-
-        // 4겹 B: alias 정확히 일치 시 정식 표기로 자동 치환
-        // (사용자가 "포트라400"이라 적었으면 DB엔 "Kodak Portra 400"으로 저장됨)
-        if (films) {
-          const m = findFilmMatch(film, films);
-          if (m?.type === 'exact') film = m.canonical;
-        }
+        fields = validateAndNormalizeSubmissionFields(fields, films);
 
         if (!window.ReaderUploadFlow?.uploadPhoto) {
           throw new Error('사진 업로드 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
@@ -800,20 +853,7 @@
         });
         const { user, path, triedPaths } = uploadResult;
 
-        const igNorm = instagram ? instagram.replace(/^@/, '') : '';
-        const themeApplyVal = fd.get('theme_apply');
-        const insertData = {
-          user_id: user.id,
-          storage_path: path,
-          instagram: igNorm ? '@' + igNorm : null,
-          film,
-          camera: camera || null,
-          caption: caption || null,
-          theme_month: themeApplyVal || null,
-          consent_publish: true,
-        };
-        // submitter_name 컬럼이 없는 구버전 환경 대비: 값 있을 때만 키 포함
-        if (submitterName) insertData.submitter_name = submitterName;
+        const insertData = buildSubmissionInsertData({ userId: user.id, path, fields });
         submitBtn.textContent = '제출 기록 저장 중…';
         markProgress('database', '제출 기록 저장 중', '사진 정보와 필름 정보를 함께 저장하고 있어요.');
         const { error: dbErr } = await withNetworkTimeout(
@@ -841,26 +881,11 @@
         }
 
         // 4) 메타 기억
-        window.ReaderCameraInput.saveRecentCamera(camera, {
-          recentKey: LS_RECENT_CAMERAS,
-          legacyMetaKey: LS_KEY,
-          limit: RECENT_CAMERA_LIMIT,
-        });
-        try {
-          localStorage.setItem(LS_KEY, JSON.stringify({
-            submitterName,
-            instagram: igNorm ? '@' + igNorm : '',
-            film,
-            camera,
-          }));
-        } catch {}
+        rememberSubmissionMeta(fields);
 
         // 5) 확인 화면
-        const displayAuthor = submitterName && igNorm
-          ? `${submitterName} (@${igNorm})`
-          : submitterName || (igNorm ? '@' + igNorm : '');
         setUploadStatus('done', '제출 완료', 'Reader’s Roll 검토 큐에 들어갔어요.');
-        openModal(renderSubmittedConfirm({ author: displayAuthor, film }));
+        openModal(renderSubmittedConfirm({ author: displaySubmissionAuthor(fields), film: fields.film }));
       } catch (err) {
         if (uploadStage !== 'validate') reportUploadFailure(uploadStage, err, uploadMeta);
         setUploadStatus('error', '제출이 중단됐어요', '입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.');
