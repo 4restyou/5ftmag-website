@@ -33,6 +33,29 @@ PR 생성 후 CI(`validate`) 통과하면 **사용자가 "배포하지 마" / "P
 
 정적 자산(`css/*.css`, `js/*.js`) 을 수정하면 그 파일을 참조하는 모든 HTML 의 `?v=YYYYMMDD-feature` 쿼리를 일괄 갱신한다.
 
+## 데이터 소스 (admin 페이지가 source of truth)
+
+다음 카탈로그·자료는 **Supabase 테이블이 원본**이고, 정적 JSON(`data/*.json`) 은 *빌드 산출물*이다. 빌드 시 `scripts/build-*.mjs` 가 DB 를 dump 해서 정적 파일을 덮어쓴다.
+
+| 정적 파일 | 원본 (DB) | admin UI | 빌드 스크립트 |
+|---|---|---|---|
+| `data/films.json` | `films` 테이블 | `admin/films.html` | `scripts/build-films.mjs` |
+| `data/labs.json` | `labs` 테이블 | `admin/labs.html` | `scripts/build-labs.mjs` |
+| `data/authors.json` | `profiles` 등 | — | `scripts/build-authors.mjs` |
+
+### 신규 항목 추가 절차
+
+**git push 로 `data/films.json` 만 수정해도 라이브에 반영되지 않는다.** 빌드 시 DB dump 로 덮어쓰여 사라지기 때문.
+
+올바른 흐름:
+
+1. **admin 페이지에서 등록** — `admin/films.html` "+ 새 필름" / `admin/labs.html` 등. 가장 안전. 즉시 반영.
+2. **수량이 많으면 SQL INSERT** — Supabase Studio SQL Editor 에서 한 번에. `films` 의 `aliases`/`photographers`/`photos` 는 **jsonb** (예: `'[...]'::jsonb`). `ON CONFLICT (slug) DO NOTHING` 권장.
+3. 정적 JSON 에 직접 추가하는 경우엔 `build-films.mjs` 의 supplement 로직(DB 에 없는 slug 만 보강) + `films-page.js` 클라이언트 supplement 가 자동 살려주지만, **admin 페이지들은 DB 만 보므로 거기서는 안 보인다** — 임시 노출만 되고 운영 관리 불가. 빠른 노출이 끝나면 위 1·2 로 옮겨야 한다.
+
+### 정공법 우선
+세 경로 중 1·2 가 정공법, 3 은 안전망. **신규 작업은 항상 1 또는 2 로 시작**한다.
+
 ## 의도된 디자인 선택 (평가에서 제외)
 
 평가·리뷰 시 다음 항목은 "갭" 으로 지적하지 않는다. 의도된 선택이다.
