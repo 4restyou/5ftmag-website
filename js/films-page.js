@@ -29,6 +29,25 @@
   } = window.FilmsShare;
   const readerRollUi = window.FilmsReaderRollUI;
   const readerRollData = window.FilmsReaderRollData;
+  const libraryFilters = window.FilmsLibraryFilters.create({
+    filmsGridLibrary,
+    escapeAttr,
+    escapeHtml,
+    filterCategoryOf,
+    isMobileFilms,
+  });
+  const cameraIndex = libraryFilters.cameraIndex;
+  const currentCameras = libraryFilters.currentCameras;
+  const normalizeLibrarySearch = libraryFilters.normalizeSearch;
+  const readerSearchTokensForSubmission = libraryFilters.readerSearchTokensForSubmission;
+  const applyLibraryFilter = () => libraryFilters.apply();
+  const applyCameraOverrides = () => libraryFilters.applyCameraOverrides();
+  const rebuildCameraIndex = (submissions, filmsBySlug) => libraryFilters.rebuildCameraIndex(submissions, filmsBySlug);
+  const renderLibraryBrandSelect = (libraryFilms) => libraryFilters.renderBrandSelect(libraryFilms);
+  const renderLibraryCameraSelect = () => libraryFilters.renderCameraSelect();
+  const renderLibraryFilterChips = (libraryFilms) => libraryFilters.renderFilterChips(libraryFilms);
+  const resolveCanonicalCameraKey = (key) => libraryFilters.resolveCanonicalCameraKey(key);
+  const sortLibrary = (entries) => libraryFilters.sortLibrary(entries, filmFavSlugs);
 
   const readerExport = window.FilmsReaderExport.create({
     getFilm: (filmKey) => filmsData[filmKey] || {},
@@ -36,25 +55,6 @@
     notify: window.notify,
   });
 
-  const FILTER_LABELS = {
-    all: '전체',
-    color: 'Color',
-    bw: 'B&W',
-    slide: 'Slide',
-    cinema: 'Cinema',
-  };
-  let currentFilter = 'all';
-  // 다중 선택: 비어 있으면 "전체" 로 간주, 값 있으면 OR 매칭
-  let currentBrands  = new Set();
-  let currentCameras = new Set();   // 카메라 model key (브랜드 prefix 제거 후 정규화)
-  let currentSearch = '';
-  const MOBILE_LIBRARY_INITIAL = 30;
-  const MOBILE_LIBRARY_STEP = 30;
-  let libraryMobileVisible = MOBILE_LIBRARY_INITIAL;
-  // slug → Set<cameraKey>  — 어떤 필름 카드가 현재 카메라 필터에 매칭되는지 빠르게 조회
-  const cameraKeysByFilmSlug = new Map();
-  // cameraKey → { display, brand, count } — 드롭다운 옵션 빌드용
-  const cameraIndex = new Map();
   let approvedSubmissionsCache = null;
   let approvedSubmissionsPromise = null;
   // 본인이 즐겨찾기한 필름 slug / 사진 ID / 작가 키 집합 — 페이지 로드 후 한 번 fetch
@@ -67,66 +67,12 @@
   // 데스크탑·모바일 모두 sortLibrary 알파벳(브랜드→이름 가나다·ABC) 순
   let libraryOriginalOrder = [];
 
-  function hasActiveLibraryFilter() {
-    return currentFilter !== 'all' ||
-      currentBrands.size > 0 ||
-      currentCameras.size > 0 ||
-      currentSearch.trim() !== '';
-  }
-
-  function normalizeLibrarySearch(value) {
-    return String(value || '').toLowerCase().replace(/@/g, ' ').replace(/\s+/g, ' ').trim();
-  }
-
-  function readerSearchTokensForSubmission(submission) {
-    const instagram = String(submission.instagram || '').trim();
-    const instagramBare = instagram.replace(/^@+/, '');
-    return [
-      submission.submitterName,
-      submission.author,
-      instagram,
-      instagramBare,
-      submission.camera,
-    ].filter(Boolean).join(' ');
-  }
-
   function contributorKeyOfSubmission(submission = {}) {
     return normalizeContributorKey(submission.instagram || submission.submitterName || submission.author || '');
   }
 
   function contributorLabelOfSubmission(submission = {}) {
     return submission.submitterName || submission.author || submission.instagram || '이름 없음';
-  }
-
-  function activeAdvancedFilterCount() {
-    return (currentFilter !== 'all' ? 1 : 0) + currentBrands.size + currentCameras.size;
-  }
-
-  function updateAdvancedFilterToggle() {
-    const btn = document.getElementById('libraryAdvancedToggle');
-    const panel = document.getElementById('libraryAdvancedFilters');
-    if (!btn || !panel) return;
-    const count = activeAdvancedFilterCount();
-    btn.textContent = count > 0 ? `필터 ${count}` : '필터';
-    btn.classList.toggle('has-active', count > 0);
-    if (count > 0 && isMobileFilms()) {
-      panel.classList.add('is-open');
-      btn.setAttribute('aria-expanded', 'true');
-    }
-  }
-
-  function resetMobileLibraryLimit() {
-    libraryMobileVisible = MOBILE_LIBRARY_INITIAL;
-  }
-
-  function updateLibraryMoreButton(matchedCount) {
-    const wrap = document.getElementById('libraryMoreWrap');
-    const btn = document.getElementById('libraryMoreBtn');
-    if (!wrap || !btn) return;
-    const shouldPage = isMobileFilms() && !hasActiveLibraryFilter() && matchedCount > libraryMobileVisible;
-    wrap.hidden = !shouldPage;
-    if (!shouldPage) return;
-    btn.textContent = `필름 더 보기 (${matchedCount - libraryMobileVisible})`;
   }
 
   function resolveFilmKey(input) {
@@ -139,380 +85,6 @@
       if (aliases.some(alias => normalizeFilmLabel(alias) === q)) return slug;
     }
     return '';
-  }
-
-  function renderLibraryFilterChips(libraryFilms) {
-    const filterBar = document.getElementById('libraryFilter');
-    if (!filterBar) return;
-    // 사용 중인 카테고리 + 개수 집계
-    const counts = { all: libraryFilms.length };
-    for (const [, f] of libraryFilms) {
-      const cat = filterCategoryOf(f);
-      counts[cat] = (counts[cat] || 0) + 1;
-    }
-    const order = ['all', 'color', 'bw', 'slide', 'cinema'];
-    filterBar.innerHTML = order
-      .filter(k => counts[k])
-      .map(k => `
-        <button type="button" class="library-filter-chip${k === currentFilter ? ' is-active' : ''}"
-                data-filter="${k}" role="tab" aria-selected="${k === currentFilter}">
-          ${FILTER_LABELS[k]}<span class="library-filter-count">${counts[k]}</span>
-        </button>
-      `).join('');
-    filterBar.querySelectorAll('.library-filter-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        currentFilter = chip.dataset.filter;
-        resetMobileLibraryLimit();
-        applyLibraryFilter();
-        filterBar.querySelectorAll('.library-filter-chip').forEach(c => {
-          const active = c.dataset.filter === currentFilter;
-          c.classList.toggle('is-active', active);
-          c.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
-      });
-    });
-  }
-
-  function applyLibraryFilter() {
-    const q = normalizeLibrarySearch(currentSearch);
-    const mobileCapped = isMobileFilms() && !hasActiveLibraryFilter();
-    let matched = 0;
-    let visible = 0;
-    filmsGridLibrary.querySelectorAll('.film-card').forEach(card => {
-      const cat = card.dataset.filterCategory;
-      const brand = card.dataset.brand || '';
-      const slug = card.dataset.film || '';
-      const tokens = normalizeLibrarySearch(`${card.dataset.search || ''} ${card.dataset.readerSearch || ''}`);
-      const matchCat    = currentFilter === 'all' || cat === currentFilter;
-      const matchBrand  = currentBrands.size === 0 || currentBrands.has(brand);
-      const cameraKeysForFilm = cameraKeysByFilmSlug.get(slug);
-      const matchCamera = currentCameras.size === 0 ||
-                          (cameraKeysForFilm && [...currentCameras].some(k => cameraKeysForFilm.has(k)));
-      const matchSearch = !q || tokens.includes(q);
-      const matches = matchCat && matchBrand && matchCamera && matchSearch;
-      // 검색어가 brand 에 직접 포함되면 상위 정렬용 클래스를 붙인다.
-      // (예: "leica" 검색 시 brand=LEICA 카드를 카메라 매칭(부산물) 보다 앞에 노출)
-      const brandHit = !!q && normalizeLibrarySearch(brand).includes(q);
-      card.classList.toggle('is-brand-hit', matches && brandHit);
-      if (matches) matched++;
-      const show = matches && (!mobileCapped || matched <= libraryMobileVisible);
-      card.hidden = !show;
-      if (show) visible++;
-    });
-    const emptyEl = document.getElementById('libraryEmpty');
-    if (emptyEl) emptyEl.hidden = matched !== 0;
-    updateLibraryMoreButton(matched);
-    updateAdvancedFilterToggle();
-  }
-
-  // 브랜드 dropdown 옵션 빌드 — 다중 선택 체크박스
-  function renderLibraryBrandSelect(libraryFilms) {
-    const root = document.getElementById('libraryBrandMS');
-    if (!root) return;
-    const brands = new Set();
-    for (const [, f] of libraryFilms) if (f.brand) brands.add(f.brand);
-    const sorted = Array.from(brands).sort((a, b) => a.localeCompare(b, 'en'));
-    // 존재하지 않는 brand 가 currentBrands 에 있으면 정리
-    for (const b of [...currentBrands]) if (!brands.has(b)) currentBrands.delete(b);
-    buildMultiselect(root, '브랜드', sorted.map(b => ({ value: b, label: b })),
-      () => currentBrands,
-      (set) => { currentBrands = set; resetMobileLibraryLimit(); applyLibraryFilter(); });
-  }
-
-  // 카메라 드롭다운 — reader_submissions 의 카메라 컬럼 집계
-  //   1) 모든 승인된 제출을 normalizeCamera 로 그룹화 (model key 기준)
-  //   2) 같은 model key 내에서 가장 자주 쓰인 원본 표기를 display 로 채택
-  //   3) brand 가 인식되면 '브랜드 — 모델' 형식으로 가독성 보강
-  //   4) 사전에 없는 브랜드는 optgroup 으로 분리 → 편집부가 사전에 추가하면 됨
-  function rebuildCameraIndex(submissions, filmsBySlug) {
-    cameraKeysByFilmSlug.clear();
-    cameraIndex.clear();
-    if (!Array.isArray(submissions) || !submissions.length) return;
-    const normalize = window.normalizeFilmName
-      || ((s) => String(s || '').toLowerCase().replace(/[\s\-_+()/.]+/g, ''));
-    // 미리 슬러그별 alias set 만들어두기 (반복 매칭 절약)
-    const slugAliases = new Map();
-    for (const slug of Object.keys(filmsBySlug || {})) {
-      const f = filmsBySlug[slug];
-      const aliases = (f.aliases || []).concat([f.displayName, f.name]).filter(Boolean);
-      slugAliases.set(slug, new Set(aliases.map(normalize)));
-    }
-    // model key → { originals: [], brand, slugSet }
-    const buckets = new Map();
-    for (const s of submissions) {
-      const cam = s.camera || '';
-      if (!cam.trim()) continue;
-      const n = (typeof window.normalizeCamera === 'function')
-        ? window.normalizeCamera(cam)
-        : { key: cam.toLowerCase().replace(/\s+/g, ''), brand: null, original: cam };
-      if (!n.key) continue;
-      if (!buckets.has(n.key)) buckets.set(n.key, { originals: [], brand: n.brand, slugSet: new Set() });
-      const b = buckets.get(n.key);
-      b.originals.push(n.original);
-      if (!b.brand && n.brand) b.brand = n.brand;
-      // 이 사진이 매핑되는 필름 slug 찾기 — 카드 노출 조건에 사용
-      const filmNorm = normalize(s.film);
-      for (const [slug, aliasSet] of slugAliases) {
-        if (aliasSet.has(filmNorm)) {
-          b.slugSet.add(slug);
-          if (!cameraKeysByFilmSlug.has(slug)) cameraKeysByFilmSlug.set(slug, new Set());
-          cameraKeysByFilmSlug.get(slug).add(n.key);
-        }
-      }
-    }
-    // display 결정 + 노출 카운트
-    const pickDisplay = window.pickCameraDisplay || ((arr) => arr[0] || '');
-    for (const [key, b] of buckets) {
-      cameraIndex.set(key, {
-        display: pickDisplay(b.originals),
-        brand: b.brand,
-        count: b.originals.length,
-      });
-    }
-  }
-
-  // DB 의 camera_brand_overrides 적용 — 정적 사전이 못 잡은 모델의 브랜드를
-  // 편집부가 admin 페이지에서 지정한 값으로 덮어씀.
-  // alias_of 가 설정된 행은 그 모델을 다른 canonical 모델로 병합.
-  const cameraAliasMap = new Map(); // aliasKey → canonicalKey (필터/모달에서 참조)
-  async function applyCameraOverrides() {
-    cameraAliasMap.clear();
-    if (!window.MagDB || !window.MagDB.isReady() || !window.MagDB.cameraOverrides) return;
-    let overrides = null;
-    try { overrides = await window.MagDB.cameraOverrides.list(); } catch (_) {}
-    if (!overrides || !overrides.size) return;
-
-    // 1) 별칭 매핑 먼저 수집
-    for (const [k, o] of overrides) {
-      if (o.alias_of) cameraAliasMap.set(k, o.alias_of);
-    }
-    // 2) cameraIndex 에서 alias 항목을 canonical 항목에 병합
-    for (const [aliasKey, canonicalKey] of cameraAliasMap) {
-      const alias = cameraIndex.get(aliasKey);
-      if (!alias) continue;
-      let canonical = cameraIndex.get(canonicalKey);
-      if (!canonical) {
-        // canonical 이 아직 cameraIndex 에 없는 경우 — alias 자료로 신규 entry 만들기
-        canonical = { display: alias.display, brand: alias.brand, count: 0 };
-        cameraIndex.set(canonicalKey, canonical);
-      }
-      canonical.count += alias.count || 0;
-      cameraIndex.delete(aliasKey);
-      // 카드별 필름 슬러그 집합도 alias → canonical 로 redirect
-      for (const [slug, keys] of cameraKeysByFilmSlug) {
-        if (keys.has(aliasKey)) {
-          keys.delete(aliasKey);
-          keys.add(canonicalKey);
-        }
-      }
-    }
-    // 3) 일반 brand/display 오버라이드 적용
-    for (const [key, info] of cameraIndex) {
-      const o = overrides.get(key);
-      if (o && !o.alias_of) {
-        info.brand = o.brand;
-        if (o.display) info.display = o.display;
-      }
-    }
-  }
-  // 외부에서 사용할 alias 해소 헬퍼
-  function resolveCanonicalCameraKey(key) {
-    return cameraAliasMap.get(key) || key;
-  }
-
-  function renderLibraryCameraSelect() {
-    const root = document.getElementById('libraryCameraMS');
-    if (!root) return;
-    // 브랜드 별 그룹화 + 미인식 카메라 — 알파벳 정렬
-    const byBrand = new Map();
-    const unknowns = [];
-    for (const [key, info] of cameraIndex) {
-      if (info.brand) {
-        if (!byBrand.has(info.brand)) byBrand.set(info.brand, []);
-        byBrand.get(info.brand).push({ key, ...info });
-      } else {
-        unknowns.push({ key, ...info });
-      }
-    }
-    const sortedBrands = Array.from(byBrand.keys()).sort((a, b) => a.localeCompare(b, 'en'));
-    // 옵션 평면화 — 브랜드 헤더 텍스트는 dropdown panel 내부에서 처리 (group separator)
-    const options = [];
-    for (const brand of sortedBrands) {
-      const arr = byBrand.get(brand).sort((a, b) => a.display.localeCompare(b.display, 'en'));
-      options.push({ groupLabel: brand });
-      for (const c of arr) options.push({ value: c.key, label: c.display, meta: String(c.count) });
-    }
-    if (unknowns.length) {
-      unknowns.sort((a, b) => a.display.localeCompare(b.display, 'en'));
-      options.push({ groupLabel: '기타 (브랜드 미확인)' });
-      for (const c of unknowns) options.push({ value: c.key, label: c.display, meta: String(c.count) });
-    }
-    // 사라진 카메라는 제거
-    for (const k of [...currentCameras]) if (!cameraIndex.has(k)) currentCameras.delete(k);
-    buildMultiselect(root, '카메라', options,
-      () => currentCameras,
-      (set) => { currentCameras = set; resetMobileLibraryLimit(); applyLibraryFilter(); });
-  }
-
-  // 공통 다중 선택 dropdown 빌더
-  //   options: [{ value, label, meta? } | { groupLabel }]
-  //   getSelected: () => Set<string>
-  //   onChange: (Set<string>) => void
-  function buildMultiselect(root, labelPrefix, options, getSelected, onChange) {
-    const btn   = root.querySelector('.ms-dropdown-btn');
-    const label = root.querySelector('.ms-dropdown-label');
-    const panel = root.querySelector('.ms-dropdown-panel');
-    if (!btn || !label || !panel) return;
-
-    // 재호출시 최신 options/getSelected/onChange/labelPrefix 가 click handler 에서 보이도록
-    // 클로저 대신 root 에 저장한다. listener 는 한 번만 wiring.
-    root._ms = { labelPrefix, options, getSelected, onChange };
-
-    function refreshLabel() {
-      const ctx = root._ms;
-      const sel = ctx.getSelected();
-      if (sel.size === 0) {
-        label.textContent = `${ctx.labelPrefix} 전체`;
-      } else if (sel.size === 1) {
-        const v = [...sel][0];
-        const opt = (ctx.options || []).find(o => o.value === v);
-        label.textContent = (opt && opt.label) || v;
-      } else {
-        label.innerHTML = `${escapeHtml(ctx.labelPrefix)} <span class="ms-count">${sel.size}</span>`;
-      }
-    }
-
-    function renderPanel() {
-      const ctx = root._ms;
-      const opts = ctx.options || [];
-      const sel = ctx.getSelected();
-      const clearBtn = `<div class="ms-dropdown-panel-head">
-        <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${sel.size}개 선택</span>
-        <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>전체 해제</button>
-      </div>`;
-      const rows = opts.map(o => {
-        if (o.groupLabel) {
-          return `<div class="ms-dropdown-empty" style="padding:8px 14px 4px;font-weight:var(--fw-heading);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">${escapeHtml(o.groupLabel)}</div>`;
-        }
-        const checked = sel.has(o.value);
-        return `<label class="ms-dropdown-option">
-          <input type="checkbox" data-value="${escapeAttr(o.value)}" ${checked ? 'checked' : ''} />
-          <span class="ms-opt-text">${escapeHtml(o.label)}</span>
-          ${o.meta ? `<span class="ms-opt-meta">${escapeHtml(o.meta)}</span>` : ''}
-        </label>`;
-      }).join('');
-      panel.innerHTML = clearBtn + (rows || `<div class="ms-dropdown-empty">옵션 없음</div>`);
-      panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-          const ctx2 = root._ms;
-          const v = cb.dataset.value;
-          const next = new Set(ctx2.getSelected());
-          if (cb.checked) next.add(v); else next.delete(v);
-          ctx2.onChange(next);
-          refreshLabel();
-          // panel 헤더의 카운트·전체 해제 버튼 disabled 상태 즉시 갱신
-          const headLabel = panel.querySelector('.ms-dropdown-clear-label');
-          const clearEl = panel.querySelector('[data-action="ms-clear"]');
-          if (headLabel) headLabel.textContent = `${next.size}개 선택`;
-          if (clearEl) clearEl.disabled = next.size === 0;
-        });
-      });
-      const clearBtnEl = panel.querySelector('[data-action="ms-clear"]');
-      if (clearBtnEl) clearBtnEl.addEventListener('click', (e) => {
-        e.stopPropagation();
-        root._ms.onChange(new Set());
-        renderPanel();
-        refreshLabel();
-      });
-    }
-
-    // 첫 wiring 한 번만
-    if (!root.dataset.bound) {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const open = !root.classList.contains('is-open');
-        // 다른 dropdown 닫기
-        document.querySelectorAll('.ms-dropdown.is-open').forEach(el => {
-          if (el !== root) {
-            el.classList.remove('is-open');
-            el.querySelector('.ms-dropdown-btn')?.setAttribute('aria-expanded', 'false');
-            const p = el.querySelector('.ms-dropdown-panel'); if (p) p.hidden = true;
-          }
-        });
-        root.classList.toggle('is-open', open);
-        btn.setAttribute('aria-expanded', String(open));
-        panel.hidden = !open;
-        if (open) renderPanel();
-      });
-      document.addEventListener('click', (e) => {
-        if (!root.contains(e.target) && root.classList.contains('is-open')) {
-          root.classList.remove('is-open');
-          btn.setAttribute('aria-expanded', 'false');
-          panel.hidden = true;
-        }
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && root.classList.contains('is-open')) {
-          root.classList.remove('is-open');
-          btn.setAttribute('aria-expanded', 'false');
-          panel.hidden = true;
-        }
-      });
-      root.dataset.bound = '1';
-    }
-    refreshLabel();
-    if (!panel.hidden) renderPanel();
-  }
-
-  // 검색 입력 핸들러 (페이지 로드 직후 한 번 wiring)
-  (function bindLibrarySearch() {
-    const input = document.getElementById('librarySearch');
-    if (!input) return;
-    let debounce = null;
-    input.addEventListener('input', () => {
-      clearTimeout(debounce);
-      debounce = setTimeout(() => {
-        currentSearch = input.value;
-        resetMobileLibraryLimit();
-        applyLibraryFilter();
-      }, 120);
-    });
-  })();
-
-  (function bindLibraryAdvancedToggle() {
-    const btn = document.getElementById('libraryAdvancedToggle');
-    const panel = document.getElementById('libraryAdvancedFilters');
-    if (!btn || !panel) return;
-    btn.addEventListener('click', () => {
-      const open = !panel.classList.contains('is-open');
-      panel.classList.toggle('is-open', open);
-      btn.setAttribute('aria-expanded', String(open));
-    });
-  })();
-
-  (function bindLibraryMore() {
-    const btn = document.getElementById('libraryMoreBtn');
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      libraryMobileVisible += MOBILE_LIBRARY_STEP;
-      applyLibraryFilter();
-    });
-  })();
-
-  // Library 정렬: 좋아요한 필름 먼저 → 브랜드 알파벳 → displayName 알파벳
-  // (Featured 는 매거진 발행 순서가 의미 있으므로 정렬하지 않음)
-  function sortLibrary(entries) {
-    return entries.slice().sort((a, b) => {
-      const fa = a[1], fb = b[1];
-      const favA = filmFavSlugs.has(a[0]) ? 0 : 1;
-      const favB = filmFavSlugs.has(b[0]) ? 0 : 1;
-      if (favA !== favB) return favA - favB;
-      const bc = (fa.brand || '').localeCompare(fb.brand || '', 'ko');
-      if (bc !== 0) return bc;
-      const na = fa.displayName || fa.name || '';
-      const nb = fb.displayName || fb.name || '';
-      return na.localeCompare(nb, 'ko', { numeric: true });
-    });
   }
 
   function renderFilmsGrid() {
