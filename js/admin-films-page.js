@@ -7,6 +7,8 @@ const STATE = {
   readerCounts: new Map(),
   filter: '',
   editingSlug: null,
+  proposals: [],
+  pendingProposalForForm: null,
 };
 
 function $(id) { return document.getElementById(id); }
@@ -68,9 +70,10 @@ $('gateLogin').addEventListener('click', async () => {
 // ═════════════════════════════════════════
 async function reload() {
   const [films, submissions, proposals] = await Promise.all([
-    db().films.listAll(),
-    db().submissions.listApproved(null),
-    db().filmProposals.listForReview({ status: 'pending' }),
+    db().films.listAll().catch(() => []),
+    db().submissions.listApproved(null).catch(() => []),
+    // filmProposals 가 정의 안 된 빌드(또는 테스트 mock) 에선 빈 배열로 폴백
+    (db().filmProposals?.listForReview?.({ status: 'pending' })?.catch?.(() => []) || Promise.resolve([])),
   ]);
   STATE.films = Array.isArray(films) ? films : [];
   STATE.readerCounts = buildReaderCountsByFilm(STATE.films, submissions || []);
