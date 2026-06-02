@@ -4209,7 +4209,9 @@
     "issue": "",
     "photographers": [],
     "photos": [],
-    "tier": "library"
+    "tier": "library",
+    "canThumbnail": "img/films/monopan50-can.webp",
+    "canThumbnailStatus": "set"
   },
   "fujisuperhg1600": {
     "slug": "fujisuperhg1600",
@@ -4232,7 +4234,9 @@
     "issue": "",
     "photographers": [],
     "photos": [],
-    "tier": "library"
+    "tier": "library",
+    "canThumbnail": "img/films/fujisuperhg1600-can.webp",
+    "canThumbnailStatus": "set"
   },
   "konicaindustrial100": {
     "slug": "konicaindustrial100",
@@ -4255,7 +4259,9 @@
     "issue": "",
     "photographers": [],
     "photos": [],
-    "tier": "library"
+    "tier": "library",
+    "canThumbnail": "img/films/konicaindustrial100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "e100vs": {
     "slug": "e100vs",
@@ -4279,7 +4285,9 @@
     "issue": "",
     "photographers": [],
     "photos": [],
-    "tier": "library"
+    "tier": "library",
+    "canThumbnail": "img/films/e100vs-can.webp",
+    "canThumbnailStatus": "set"
   },
   "1shot400": {
     "slug": "1shot400",
@@ -4300,7 +4308,9 @@
     "issue": "",
     "photographers": [],
     "photos": [],
-    "tier": "library"
+    "tier": "library",
+    "canThumbnail": "img/films/1shot400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "chinesecinestill100d": {
     "slug": "chinesecinestill100d",
@@ -4326,7 +4336,9 @@
     "format": "35mm",
     "issue": "",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/chinesecinestill100d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "chinesecinestill320t": {
     "slug": "chinesecinestill320t",
@@ -4352,7 +4364,9 @@
     "format": "35mm",
     "issue": "",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/chinesecinestill320t-can.webp",
+    "canThumbnailStatus": "set"
   },
   "chinesecinestill400d": {
     "slug": "chinesecinestill400d",
@@ -4378,7 +4392,9 @@
     "format": "35mm",
     "issue": "",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/chinesecinestill400d-can.webp",
+    "canThumbnailStatus": "set"
   },
   "chinesecinestill800t": {
     "slug": "chinesecinestill800t",
@@ -4404,6 +4420,8 @@
     "format": "35mm",
     "issue": "",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/chinesecinestill800t-can.webp",
+    "canThumbnailStatus": "set"
   }
 }
