@@ -1,6 +1,7 @@
-// 5ft.mag 전체 검색 — Articles + Films + Webzine + Labs + Market 통합.
+// 5ft magazine 전체 검색 — Articles + Films + Webzine + Labs + Market 통합.
 // 정적 JSON(data/stories.json, data/films.json) + Supabase(webzine/labs/market) 병렬 조회 후
-// 클라이언트에서 lowercase substring 매칭. 카테고리별 섹션으로 결과 노출.
+// 클라이언트에서 점수 기반 매칭. 도메인별로 필드 가중치 (제목 > 부제 > 본문) +
+// exact / prefix / includes 단계별 점수. 점수 0 이면 비매칭, 점수순으로 정렬해 노출.
 (function () {
   'use strict';
 
@@ -28,18 +29,44 @@
     } catch (_) { return null; }
   }
 
-  // 매칭: 입력어를 공백으로 나눠 모든 토큰이 어딘가 매칭되면 hit (AND).
-  function makeMatcher(q) {
-    const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
-    return function (fields) {
-      const hay = fields.filter(Boolean).join(' ').toLowerCase();
-      return tokens.every((t) => hay.includes(t));
-    };
+  // ── 점수 매칭 ──
+  // tokens: 사용자가 입력한 키워드를 소문자 + 공백으로 나눈 토큰 배열.
+  // fields: [{ text, weight }, ...] — 가중치는 도메인별로 정의 (제목 큰 가중, 본문 작은 가중).
+  // 한 토큰이 어떤 필드에 매칭되는 단계:
+  //   - 필드 전체와 정확히 일치 → weight × 2
+  //   - 필드가 토큰으로 시작 → weight × 1.5
+  //   - 필드에 토큰 포함 → weight × 1.0
+  // 토큰 하나라도 어느 필드에도 매칭 안 되면 점수 0 (AND 매칭 유지).
+  // 토큰별 최고 점수를 누적해 최종 점수 반환.
+  function scoreMatch(tokens, fields) {
+    if (!tokens.length) return 0;
+    let total = 0;
+    for (const tok of tokens) {
+      let best = 0;
+      for (const f of fields) {
+        if (!f || !f.text) continue;
+        const lower = String(f.text).toLowerCase();
+        if (lower === tok) {
+          best = Math.max(best, f.weight * 2);
+        } else if (lower.startsWith(tok)) {
+          best = Math.max(best, f.weight * 1.5);
+        } else if (lower.includes(tok)) {
+          best = Math.max(best, f.weight);
+        }
+      }
+      if (best === 0) return 0;
+      total += best;
+    }
+    return total;
+  }
+
+  function tokenize(q) {
+    return q.toLowerCase().split(/\s+/).filter(Boolean);
   }
 
   function highlight(text, q) {
     if (!q) return esc(text);
-    const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
+    const tokens = tokenize(q);
     if (tokens.length === 0) return esc(text);
     // 단순: 첫 토큰만 강조 (지나치게 화려해지지 않게)
     const first = tokens[0];
@@ -127,7 +154,7 @@
   async function searchAll(q) {
     if (!q) { renderHint(); return; }
     setHtml('<p class="search-hint">검색 중…</p>');
-    const match = makeMatcher(q);
+    const tokens = tokenize(q);
 
     const dbReady = db() && db().isReady && db().isReady();
 
@@ -139,28 +166,84 @@
       dbReady ? db().market.list({ limit: 500 }) : Promise.resolve([]),
     ]);
 
+    // 도메인별 점수 매기기. weight 는 사용자 검색 의도에 맞춰 제목 > 부제목 > 본문 순.
     const stories = (storiesArr || [])
       .filter((a) => a && a.published !== false)
-      .filter((a) => match([a.title, a.author, a.excerpt, a.categoryLabel, a.category]));
+      .map((a) => ({
+        item: a,
+        score: scoreMatch(tokens, [
+          { text: a.title, weight: 10 },
+          { text: a.author, weight: 5 },
+          { text: a.categoryLabel, weight: 3 },
+          { text: a.category, weight: 3 },
+          { text: a.excerpt, weight: 2 },
+        ]),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
 
     const films = Object.values(filmsObj || {})
-      .filter((f) => f && match([f.name, f.displayName, f.brand, f.desc, (f.aliases || []).join(' ')]));
+      .map((f) => ({
+        item: f,
+        score: scoreMatch(tokens, [
+          { text: f.displayName, weight: 10 },
+          { text: f.name, weight: 10 },
+          { text: f.brand, weight: 7 },
+          { text: (f.aliases || []).join(' '), weight: 8 },
+          { text: f.desc, weight: 2 },
+        ]),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
 
     const webzine = (webzineArr || [])
-      .filter((w) => match([w.title, w.category, w.issue_label, w.description, w.slug]));
+      .map((w) => ({
+        item: w,
+        score: scoreMatch(tokens, [
+          { text: w.title, weight: 10 },
+          { text: w.issue_label, weight: 5 },
+          { text: w.category, weight: 3 },
+          { text: w.description, weight: 2 },
+          { text: w.slug, weight: 1 },
+        ]),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
 
     const labs = (labsArr || [])
-      .filter((l) => match([l.name, l.region, l.address, (l.tags || []).join(' '), l.summary, l.description]));
+      .map((l) => ({
+        item: l,
+        score: scoreMatch(tokens, [
+          { text: l.name, weight: 10 },
+          { text: l.region, weight: 5 },
+          { text: (l.tags || []).join(' '), weight: 4 },
+          { text: l.address, weight: 3 },
+          { text: l.summary, weight: 2 },
+          { text: l.description, weight: 2 },
+        ]),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
 
     const market = (marketArr || [])
-      .filter((m) => match([m.title, m.description, m.category, m.brand]));
+      .map((m) => ({
+        item: m,
+        score: scoreMatch(tokens, [
+          { text: m.title, weight: 10 },
+          { text: m.brand, weight: 5 },
+          { text: m.category, weight: 3 },
+          { text: m.description, weight: 2 },
+        ]),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
 
     const sections = [
-      { label: 'Articles', items: stories, all: 'stories.html?q=' + encodeURIComponent(q), card: (s) => cardArticle(s, q) },
-      { label: 'Films',    items: films,   all: 'films.html',                              card: (f) => cardFilm(f, q) },
-      { label: 'Webzine',  items: webzine, all: 'webzine.html',                            card: (w) => cardWebzine(w, q) },
-      { label: 'Labs',     items: labs,    all: 'labs.html',                               card: (l) => cardLab(l, q) },
-      { label: 'Market',   items: market,  all: 'market.html',                             card: (m) => cardMarket(m, q) },
+      { label: 'Articles', items: stories, all: 'stories.html?q=' + encodeURIComponent(q), card: (x) => cardArticle(x.item, q) },
+      { label: 'Films',    items: films,   all: 'films.html',                              card: (x) => cardFilm(x.item, q) },
+      { label: 'Webzine',  items: webzine, all: 'webzine.html',                            card: (x) => cardWebzine(x.item, q) },
+      { label: 'Labs',     items: labs,    all: 'labs.html',                               card: (x) => cardLab(x.item, q) },
+      { label: 'Market',   items: market,  all: 'market.html',                             card: (x) => cardMarket(x.item, q) },
     ];
 
     const total = sections.reduce((a, s) => a + s.items.length, 0);
