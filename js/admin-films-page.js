@@ -203,14 +203,46 @@ function openForm(slug) {
     $('f-aliases').value = aliasesToText(f.aliases);
     $('f-desc').value = f.description || '';
     $('f-canThumbnail').value = f.can_thumbnail || '';
+    setCanThumbPreview(f.can_thumbnail || '');
   } else {
     $('modalTitle').textContent = '새 필름';
     $('originalSlug').value = '';
     $('filmForm').reset();
     $('f-slug').readOnly = false;
     $('f-tier').value = 'library';
+    setCanThumbPreview('');
   }
 }
+
+function setCanThumbPreview(url) {
+  const img = $('f-canThumbPreview');
+  const clearBtn = $('f-canThumbClear');
+  if (url) {
+    img.src = url;
+    img.hidden = false;
+    clearBtn.hidden = false;
+  } else {
+    img.removeAttribute('src');
+    img.hidden = true;
+    clearBtn.hidden = true;
+  }
+}
+
+// 파일 선택 → 미리보기(데이터 URL). 실제 업로드는 폼 submit 시 (slug 확정 후).
+$('f-canThumbFile').addEventListener('change', () => {
+  const file = $('f-canThumbFile').files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => setCanThumbPreview(reader.result);
+  reader.readAsDataURL(file);
+});
+
+// 등록된 썸네일 제거 — 파일 선택 초기화 + 저장된 URL 도 지움
+$('f-canThumbClear').addEventListener('click', () => {
+  $('f-canThumbFile').value = '';
+  $('f-canThumbnail').value = '';
+  setCanThumbPreview('');
+});
 
 function closeForm() {
   $('modal').classList.remove('open');
@@ -234,6 +266,22 @@ $('filmForm').addEventListener('submit', async (e) => {
     const form = e.target;
     const slug = String(form.slug.value || '').trim();
     if (!slug) { window.notify?.('slug 가 필요해요.', 'danger'); return; }
+
+    // 캔 썸네일 파일이 선택되어 있으면 먼저 Storage 에 업로드 → URL 을 record 에 채움.
+    // 파일 미선택이면 기존 hidden 값(편집 진입 시 채워졌거나 빈 값) 그대로 사용.
+    let canThumbUrl = form.canThumbnail.value.trim() || null;
+    const canThumbFile = $('f-canThumbFile').files?.[0];
+    if (canThumbFile) {
+      saveBtn.textContent = '썸네일 업로드 중…';
+      const up = await db().films.uploadCanThumbnail(slug, canThumbFile);
+      if (up.error) {
+        window.notify?.('썸네일 업로드 실패: ' + (up.error.message || ''), 'danger');
+        return;
+      }
+      canThumbUrl = up.url;
+    }
+    saveBtn.textContent = '저장 중…';
+
     const record = {
       slug,
       tier: form.tier.value || 'library',
@@ -246,8 +294,8 @@ $('filmForm').addEventListener('submit', async (e) => {
       type: form.type.value.trim() || null,
       format: form.format.value.trim() || null,
       issue: form.issue.value.trim() || null,
-      canThumbnail: form.canThumbnail.value.trim() || null,
-      canThumbnailStatus: form.canThumbnail.value.trim() ? 'set' : 'pending',
+      canThumbnail: canThumbUrl,
+      canThumbnailStatus: canThumbUrl ? 'set' : 'pending',
     };
     const { error } = await withWriteTimeout(db().films.upsert(record));
     if (error) {

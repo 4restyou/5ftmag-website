@@ -1101,6 +1101,25 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('films').delete().eq('slug', slug);
     },
+    // 캔(필름통) 썸네일 업로드 — 편집부만(Storage RLS).
+    // 반환: { url, error }. url 은 public Storage URL (그대로 can_thumbnail 컬럼에 저장).
+    async uploadCanThumbnail(slug, file) {
+      const c = client(); if (!c) return { url: null, error: { message: 'unavailable' } };
+      const cleanSlug = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+      if (!cleanSlug) return { url: null, error: { message: 'invalid slug' } };
+      if (!file || !file.size) return { url: null, error: { message: 'no file' } };
+      // 확장자 보존(웹 호환 webp/png/jpg 우선).
+      const ext = (file.name.match(/\.[a-z0-9]+$/i) || ['.webp'])[0].toLowerCase();
+      const path = `${cleanSlug}-can${ext}`;
+      const up = await c.storage.from('film-thumbnails').upload(path, file, {
+        contentType: file.type || 'image/webp',
+        upsert: true,
+        cacheControl: '3600',
+      });
+      if (up.error) return { url: null, error: up.error };
+      const { data: pub } = c.storage.from('film-thumbnails').getPublicUrl(path);
+      return { url: pub?.publicUrl || null, error: null };
+    },
   };
 
   // ─── 현상소 카탈로그 (labs 테이블) ───
