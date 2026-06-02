@@ -15,7 +15,7 @@
 .search-input {
   width: 100%;
   padding: 12px 44px 12px 18px;
-  font-size: 15px;
+  font-size: 16px; /* iOS Safari 자동 확대 방지 (16px 미만이면 focus 시 zoom) */
   font-family: inherit;
   color: var(--text);
   background: var(--bg);
@@ -302,7 +302,7 @@
   .labs-more-wrap:not([hidden]) { display: flex; }
   .labs-controls { padding: 14px 20px; gap: 10px; }
   .search-input-wrap { flex-basis: 140px; }
-  .search-input { font-size: 14px; padding: 10px 40px 10px 16px; }
+  .search-input { padding: 10px 40px 10px 16px; }
   .intro { padding: 28px 20px 20px; }
   .labs-map-section { padding: 16px 20px 0; }
   .labs-map { height: 300px; }

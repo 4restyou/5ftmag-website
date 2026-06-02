@@ -570,7 +570,7 @@
 .mkt-field-label em { color: #b91c1c; font-style: normal; }
 .mkt-field input, .mkt-field textarea, .mkt-field select {
   width: 100%; font: inherit;
-  padding: 9px 12px; font-size: 14px;
+  padding: 9px 12px; font-size: 16px; /* iOS Safari 자동 확대 방지 */
   border: 1px solid var(--border); border-radius: 4px;
   background: var(--bg); color: var(--text);
 }

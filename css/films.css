@@ -2327,7 +2327,7 @@
 .propose-form .req { color: #e0245e; margin-left: 2px; }
 .propose-form .opt { font-size: 11px; opacity: .7; }
 .propose-form input, .propose-form textarea {
-  font: inherit; font-family: var(--font); font-size: 14px;
+  font: inherit; font-family: var(--font); font-size: 16px; /* iOS Safari 자동 확대 방지 */
   padding: 8px 10px;
   border: 1px solid var(--border, rgba(127,127,127,.3));
   border-radius: 4px; background: transparent; color: var(--text);
