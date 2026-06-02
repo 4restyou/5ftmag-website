@@ -1019,3 +1019,35 @@ textarea:focus-visible {
   }
 }
 
+/* ════════════════════════════════════════════════
+   Micro-motion — 모바일 탭 피드백 + 페이지 전환
+   ──────────────────────────────────────────────
+   - 카드·아이콘 버튼·칩에 :active 시 살짝 눌리는 transform
+   - View Transitions API 로 페이지 이동 시 자동 cross-fade
+   prefers-reduced-motion 은 tokens.css 가 duration 을 0s 로 만들어
+   자동으로 무력화됨 (별도 처리 불필요)
+   ════════════════════════════════════════════════ */
+
+/* 카드 탭 피드백 — transform transition 은 각 모듈 CSS 의 기존 transition 선언에서 관리,
+   여기서는 :active 변화량만 정의 (cascade 충돌 회피) */
+.article-card:active,
+.film-card:active,
+.lab-card:active,
+.market-card:active {
+  transform: scale(0.985);
+}
+
+/* 아이콘 버튼 (헤더 검색·테마·햄버거) 탭 피드백 */
+.icon-btn {
+  transition: opacity var(--duration-fast) var(--easing),
+              transform var(--duration-fast) var(--easing);
+}
+.icon-btn:active { transform: scale(0.9); }
+
+/* 필터 칩 탭 피드백 — transition 은 모듈 CSS 의 `all .15s` 가 이미 transform 포함 */
+.filter-chip:active { transform: scale(0.94); }
+
+/* View Transitions API — 페이지 이동 시 브라우저 네이티브 cross-fade.
+   Safari 18+ / Chrome 111+ 만 동작, 미지원 브라우저는 그대로 (progressive enhancement). */
+@view-transition { navigation: auto; }
+

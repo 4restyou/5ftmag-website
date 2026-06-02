@@ -212,7 +212,8 @@
   border-radius: var(--radius-lg);
   padding: 20px;
   background: var(--bg);
-  transition: border-color var(--duration-base) var(--easing);
+  transition: border-color var(--duration-base) var(--easing),
+              transform var(--duration-fast) var(--easing);
 }
 .lab-card:hover { border-color: var(--text); }
 .lab-card-head {
