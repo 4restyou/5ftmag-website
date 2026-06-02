@@ -379,8 +379,8 @@ header {
   border: none;
   cursor: pointer;
   color: var(--text);
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1046,6 +1046,16 @@ textarea:focus-visible {
 
 /* 필터 칩 탭 피드백 — transition 은 모듈 CSS 의 `all .15s` 가 이미 transform 포함 */
 .filter-chip:active { transform: scale(0.94); }
+
+/* 모바일 터치 타겟 — 손가락 탭이 빡빡한 필터칩을 44x44 권장치까지 끌어올린다.
+   시각 폭은 base padding 그대로 두고 min-height 와 inline-flex 로 hit-area 만 확대. */
+@media (max-width: 640px) {
+  .filter-chip {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
 
 /* View Transitions API — 페이지 이동 시 브라우저 네이티브 cross-fade.
    Safari 18+ / Chrome 111+ 만 동작, 미지원 브라우저는 그대로 (progressive enhancement). */
