@@ -190,6 +190,10 @@
                           (cameraKeysForFilm && [...currentCameras].some(k => cameraKeysForFilm.has(k)));
       const matchSearch = !q || tokens.includes(q);
       const matches = matchCat && matchBrand && matchCamera && matchSearch;
+      // 검색어가 brand 에 직접 포함되면 상위 정렬용 클래스를 붙인다.
+      // (예: "leica" 검색 시 brand=LEICA 카드를 카메라 매칭(부산물) 보다 앞에 노출)
+      const brandHit = !!q && normalizeLibrarySearch(brand).includes(q);
+      card.classList.toggle('is-brand-hit', matches && brandHit);
       if (matches) matched++;
       const show = matches && (!mobileCapped || matched <= libraryMobileVisible);
       card.hidden = !show;
