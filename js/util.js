@@ -21,8 +21,16 @@
     return escapeHtml(s);
   }
 
+  // 필름·카메라 라벨 정규화 — 공백/하이픈/언더스코어/괄호/슬래시/점/+ 제거 + 소문자.
+  // 검색·alias 매칭에서 "Portra 400" / "portra400" / "PORTRA-400" 을 같은 키로 묶는다.
+  // 한글은 그대로 보존 (포트라 400 / 포트라400 도 같이 정규화됨).
+  function normalizeFilmLabel(s) {
+    return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
+  }
+
   window.MagUtil = Object.freeze({
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
+    normalizeFilmLabel: normalizeFilmLabel,
   });
 })();

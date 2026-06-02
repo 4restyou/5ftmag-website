@@ -126,9 +126,7 @@
   //  - exact match: 정규화된 alias 집합에 hit
   //  - fuzzy match: 부분 포함 + Levenshtein 거리 ≤ 임계값
   // ════════════════════════════════════════════════════════════
-  function normalizeFilmName(s) {
-    return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
-  }
+  const normalizeFilmName = window.MagUtil.normalizeFilmLabel;
 
   // films 객체에서 정규화된 alias → 필름 entry 매핑 빌드
   function buildAliasIndex(films) {
