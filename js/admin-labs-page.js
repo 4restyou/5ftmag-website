@@ -246,7 +246,7 @@ async function toggleHidden(id, currentlyHidden) {
   const { error } = await db().labs.setHidden(id, next);
   if (error) { window.notify?.((next ? '숨김' : '복원') + ' 실패: ' + (error.message || ''), 'danger'); return; }
   if (l) l.is_hidden = next;
-  window.notify?.(`"${label}" 을 ${next ? '숨김' : '복원'} 처리했어요. 다음 빌드부터 반영됩니다.`, 'info');
+  window.notify?.(`"${label}" 을 ${next ? '숨김' : '복원'} 처리했어요. 라이브에 바로 반영돼요.`, 'info');
   render();
 }
 

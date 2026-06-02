@@ -157,8 +157,8 @@
     <button type="button" class="primary-btn" id="newBtn">+ 새 현상소</button>
   </div>
   <p class="section-help" style="font-size:12px; color:var(--text-muted); margin: 0 0 18px; line-height:1.6;">
-    여기서 추가·수정·삭제한 내용은 <strong>다음 사이트 빌드</strong>부터 반영됩니다.
-    바로 적용하려면 Netlify 대시보드의 "Trigger deploy" 를 눌러주세요. 빌드 시 Supabase 의 labs 테이블을 data/labs.json 으로 동기화합니다.
+    여기서 추가·수정·삭제한 내용은 <strong>저장 즉시 라이브에 반영</strong>됩니다 (DB primary).
+    SEO·오프라인 백업용 정적 파일 <code>data/labs.json</code> 만 다음 사이트 빌드 때 동기화돼요. 사용자 노출에는 영향 없음.
     지도는 주소로 자동 표시되니 좌표는 입력하지 않아도 됩니다(주소만 정확하면 됨).
   </p>
 
