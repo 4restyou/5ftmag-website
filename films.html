@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260531-search">
   <link rel="stylesheet" href="./css/comments.css?v=20260513-modalcontrast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260526-btncta">
-  <link rel="stylesheet" href="./css/films.css?v=20260602-brandpri">
+  <link rel="stylesheet" href="./css/films.css?v=20260602-propose">
 </head>
 <body>
 
@@ -98,7 +98,54 @@
   <div class="films-section-head films-section-head-library">
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
-    <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
+    <div class="library-head-actions">
+      <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
+      <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
+    </div>
+  </div>
+
+  <!-- 새 필름 제안 모달 -->
+  <div class="propose-modal" id="proposeModal" hidden aria-hidden="true" role="dialog" aria-labelledby="proposeModalTitle">
+    <div class="propose-modal-panel">
+      <header class="propose-modal-head">
+        <h3 id="proposeModalTitle">새 필름 제안</h3>
+        <button type="button" class="propose-modal-close" id="proposeModalClose" aria-label="닫기">✕</button>
+      </header>
+      <p class="propose-modal-lede">라이브러리에 없는 필름을 알려주세요. 편집부 검토 후 등록됩니다. 썸네일은 편집부가 준비해요.</p>
+      <form id="proposeForm" class="propose-form">
+        <label>브랜드<span class="req">*</span>
+          <input type="text" name="brand" required maxlength="60" placeholder="KODAK · LEICA · FUJIFILM …" />
+        </label>
+        <label>이름<span class="req">*</span>
+          <input type="text" name="name" required maxlength="80" placeholder="Portra 400 · MONOPAN 50 …" />
+        </label>
+        <label>표시 이름 <span class="opt">(선택)</span>
+          <input type="text" name="displayName" maxlength="140" placeholder="비우면 '브랜드 이름' 으로 자동" />
+        </label>
+        <div class="propose-row">
+          <label>ISO
+            <input type="text" name="iso" maxlength="20" placeholder="100 · 400 …" />
+          </label>
+          <label>type
+            <input type="text" name="type" maxlength="40" placeholder="Color Negative · BW · Slide · Tungsten" />
+          </label>
+          <label>format
+            <input type="text" name="format" maxlength="40" placeholder="35mm · 120 · 35mm, 120" />
+          </label>
+        </div>
+        <label>설명 <span class="opt">(선택)</span>
+          <textarea name="description" maxlength="1000" rows="3" placeholder="발색·입자 특징, 시기, 추천 광원 등"></textarea>
+        </label>
+        <label>별칭(쉼표 또는 줄바꿈) <span class="opt">(선택)</span>
+          <textarea name="aliases" maxlength="500" rows="2" placeholder="포트라 400, Kodak Portra 400, portra400"></textarea>
+        </label>
+        <p class="propose-form-msg" id="proposeFormMsg" aria-live="polite"></p>
+        <div class="propose-actions">
+          <button type="button" class="propose-cancel" id="proposeCancel">취소</button>
+          <button type="submit" class="propose-submit" id="proposeSubmit">제안하기</button>
+        </div>
+      </form>
+    </div>
   </div>
   <div class="library-controls">
     <label class="library-search-label">
@@ -241,9 +288,10 @@
 <script src="./js/films-reader-roll-ui.js?v=20260602-modules"></script>
 <script src="./js/films-reader-roll-data.js?v=20260602-modules"></script>
 <script src="./js/films-page.js?v=20260602-catalogloader"></script>
+<script src="./js/films-propose.js?v=20260602-propose" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
-<script src="./js/db-client.js?v=20260602-thumb"></script>
+<script src="./js/db-client.js?v=20260602-proposals"></script>
 <script src="./js/comments.js?v=20260523-successtoast"></script>
 <script src="./js/image-processor.js?v=20260520-mobileupload"></script>
 <script src="./js/camera-brands.js?v=20260522-camerasearch"></script>

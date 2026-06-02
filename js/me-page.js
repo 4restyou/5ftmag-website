@@ -11,6 +11,7 @@ const STATE = {
   // notifications & 내 댓글
   notifs: null,
   myComments: null,
+  myProposals: null,
   // favorites
   favPhotos: null,       // null = 미로딩, [] = 비어있음
   favFilms:  null,
@@ -351,6 +352,7 @@ function switchSection(sec) {
   $('section-market').hidden           = sec !== 'market';
   $('section-notifs').hidden           = sec !== 'notifs';
   $('section-my-comments').hidden      = sec !== 'my-comments';
+  $('section-my-proposals').hidden     = sec !== 'my-proposals';
   $('section-fav-photos').hidden       = sec !== 'fav-photos';
   $('section-fav-films').hidden        = sec !== 'fav-films';
   $('section-fav-webzine').hidden      = sec !== 'fav-webzine';
@@ -359,6 +361,7 @@ function switchSection(sec) {
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
   if (sec === 'notifs'            && STATE.notifs           === null) loadNotifs();
   if (sec === 'my-comments'       && STATE.myComments       === null) loadMyComments();
+  if (sec === 'my-proposals'      && STATE.myProposals      === null) loadMyProposals();
   if (sec === 'fav-photos'        && STATE.favPhotos        === null) loadFavPhotos();
   if (sec === 'fav-films'         && STATE.favFilms         === null) loadFavFilms();
   if (sec === 'fav-webzine'       && STATE.favWebzine       === null) loadFavWebzine();
@@ -826,6 +829,46 @@ function renderMyComments() {
   }).join('');
 }
 
+// ═════════════════════════════════════════
+// 내 제안 (film_proposals)
+// ═════════════════════════════════════════
+async function loadMyProposals() {
+  $('myProposalsList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  STATE.myProposals = await db().filmProposals.listMine();
+  renderMyProposals();
+}
+
+function statusLabelKor(s) {
+  return ({ pending: '검토 중', approved: '승인됨', rejected: '반려됨' })[s] || s;
+}
+
+function renderMyProposals() {
+  const rows = STATE.myProposals || [];
+  if (rows.length === 0) {
+    $('myProposalsList').innerHTML = `
+      <div class="me-empty">아직 제안한 필름이 없어요.
+        <br /><a class="me-empty-cta" href="films.html">필름 라이브러리로 →</a>
+      </div>`;
+    return;
+  }
+  $('myProposalsList').innerHTML = rows.map(r => {
+    const status = String(r.status || 'pending');
+    const meta = [r.iso, r.type, r.format].filter(Boolean).join(' · ');
+    const notes = r.reviewer_notes ? `<div class="me-prop-notes">편집부 메모: ${escapeHtml(r.reviewer_notes)}</div>` : '';
+    return `
+      <div class="me-prop me-prop--${escapeAttr(status)}">
+        <div class="me-prop-head">
+          <span class="me-prop-status">${escapeHtml(statusLabelKor(status))}</span>
+          <span class="me-prop-date">${fmtDate(r.created_at)}</span>
+        </div>
+        <div class="me-prop-title">${escapeHtml(r.display_name || (r.brand + ' ' + r.name))}</div>
+        ${meta ? `<div class="me-prop-meta">${escapeHtml(meta)}</div>` : ''}
+        ${r.description ? `<p class="me-prop-desc">${escapeHtml(r.description)}</p>` : ''}
+        ${notes}
+      </div>`;
+  }).join('');
+}
+
 (async function main() {
   for (let i = 0; i < 50; i++) {
     if (db() && db().isReady()) break;
@@ -839,7 +882,7 @@ function renderMyComments() {
   // 초기 알림 뱃지 (다른 탭에서도 보이게)
   refreshNotifsBadge();
   // URL hash 로 초기 탭 결정
-  const validSections = ['photos', 'market', 'notifs', 'my-comments', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
+  const validSections = ['photos', 'market', 'notifs', 'my-comments', 'my-proposals', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
   const hashSection = (location.hash || '').replace(/^#/, '');
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);

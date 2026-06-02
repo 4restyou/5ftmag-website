@@ -2261,3 +2261,73 @@
 }
 
 /* (Reader's Roll 라이트박스는 editorial lightbox 와 통합됨 — dead CSS 제거) */
+
+/* ────────── 새 필름 제안 버튼 + 모달 ────────── */
+.library-head-actions { display: inline-flex; align-items: center; gap: 14px; }
+.library-propose-btn {
+  font: inherit; font-family: var(--font);
+  font-size: 13px; padding: 6px 12px;
+  border: 1px solid currentColor; border-radius: 4px;
+  background: transparent; color: var(--text);
+  cursor: pointer; opacity: .85; transition: opacity .15s;
+}
+.library-propose-btn:hover { opacity: 1; }
+
+.propose-modal {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px;
+}
+.propose-modal[hidden] { display: none; }
+.propose-modal-panel {
+  width: 100%; max-width: 560px; max-height: 90vh; overflow: auto;
+  background: var(--bg); color: var(--text);
+  border-radius: 8px; padding: 24px 22px 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.propose-modal-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.propose-modal-head h3 { font-size: 18px; font-weight: var(--fw-heading, 700); margin: 0; }
+.propose-modal-close {
+  background: none; border: 0; cursor: pointer;
+  font-size: 16px; color: var(--text); padding: 4px 8px; opacity: .6;
+}
+.propose-modal-close:hover { opacity: 1; }
+.propose-modal-lede { font-size: 13px; color: var(--text-muted, rgba(127,127,127,.85)); margin: 0 0 18px; line-height: 1.55; }
+
+.propose-form label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: var(--text-muted, rgba(127,127,127,.9));
+  margin-bottom: 12px;
+}
+.propose-form .req { color: #e0245e; margin-left: 2px; }
+.propose-form .opt { font-size: 11px; opacity: .7; }
+.propose-form input, .propose-form textarea {
+  font: inherit; font-family: var(--font); font-size: 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--border, rgba(127,127,127,.3));
+  border-radius: 4px; background: transparent; color: var(--text);
+  outline: none;
+}
+.propose-form input:focus, .propose-form textarea:focus { border-color: var(--text); }
+.propose-form textarea { resize: vertical; min-height: 60px; }
+
+.propose-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .propose-row { grid-template-columns: 1fr; } }
+
+.propose-form-msg { font-size: 13px; min-height: 18px; margin: 4px 0 8px; }
+.propose-form-msg.error   { color: #e0245e; }
+.propose-form-msg.success { color: #2e7d32; }
+[data-theme="dark"] .propose-form-msg.success { color: #7cd190; }
+
+.propose-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.propose-cancel, .propose-submit {
+  font: inherit; font-family: var(--font); font-size: 14px;
+  padding: 8px 16px; border-radius: 4px; cursor: pointer;
+  border: 1px solid currentColor; background: transparent; color: var(--text);
+}
+.propose-submit { background: var(--text); color: var(--bg); border-color: var(--text); }
+.propose-submit:disabled { opacity: .55; cursor: not-allowed; }

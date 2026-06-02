@@ -86,6 +86,20 @@
     .admin-subnav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
+    /* 검토 대기(구독자 신청) */
+    .proposals-box { border: 1px solid var(--border, #ddd); border-radius: 6px; padding: 16px 18px 12px; margin: 0 0 24px; background: rgba(255,180,30,.06); }
+    .proposals-head h2 { font-size: 16px; font-weight: var(--fw-heading, 700); margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+    .proposals-head p { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.55; }
+    .proposals-count { font-size: 12px; padding: 1px 8px; border-radius: 10px; background: rgba(255,180,30,.3); color: #8a4a00; font-weight: 700; }
+    [data-theme="dark"] .proposals-count { background: rgba(255,200,80,.25); color: #ffd07a; }
+    .proposal-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; padding: 10px 0; border-top: 1px dashed var(--border, rgba(127,127,127,.3)); }
+    .proposal-row:first-child { border-top: 0; }
+    .proposal-title { font-weight: 600; font-size: 14px; }
+    .proposal-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .proposal-desc { font-size: 12px; line-height: 1.5; margin-top: 6px; white-space: pre-wrap; }
+    .proposal-actions { display: flex; gap: 6px; }
+    .proposal-actions button { font: inherit; font-size: 12px; padding: 6px 10px; border-radius: 4px; cursor: pointer; border: 1px solid currentColor; background: transparent; color: var(--text); }
+    .proposal-actions .approve { background: var(--text); color: var(--bg); border-color: var(--text); }
     /* 캔 썸네일 업로더 */
     .thumb-uploader { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
     .thumb-uploader img { max-width: 120px; max-height: 120px; border: 1px solid var(--border, #ddd); border-radius: 4px; background: #fff; padding: 6px; object-fit: contain; }
@@ -160,6 +174,15 @@
     여기서 추가·수정·삭제한 내용은 <strong>다음 사이트 빌드</strong>부터 반영됩니다.
     바로 적용하려면 Netlify 대시보드의 "Trigger deploy" 버튼을 눌러주세요 — 빌드 시점에 Supabase 의 films 테이블을 data/films.json 으로 동기화합니다.
   </p>
+
+  <!-- 구독자 신청 검토 영역 -->
+  <section class="proposals-box" id="proposalsBox" hidden>
+    <div class="proposals-head">
+      <h2>검토 대기 <span class="proposals-count" id="proposalsCount">0</span></h2>
+      <p>구독자가 제안한 필름. "이 내용으로 새 필름" 으로 등록 폼을 미리 채우면 됩니다. 저장 후 자동으로 신청은 승인 처리 + 신청자에게 알림이 나갑니다.</p>
+    </div>
+    <div class="proposals-list" id="proposalsList"></div>
+  </section>
 
   <table class="films-table">
     <thead>
@@ -257,9 +280,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/db-client.js?v=20260602-thumb"></script>
+<script src="../js/db-client.js?v=20260602-proposals"></script>
 <script src="../js/site-common.js?v=20260531-search"></script>
-<script src="../js/admin-films-page.js?v=20260602-upload"></script>
+<script src="../js/admin-films-page.js?v=20260602-proposals"></script>
 
 </body>
 </html>

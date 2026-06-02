@@ -240,3 +240,31 @@ body { background: var(--bg); color: var(--text); }
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+/* ────────── 내 제안 카드 (film_proposals) ────────── */
+.me-prop {
+  padding: 14px 16px;
+  border: 1px solid var(--border, rgba(127,127,127,.22));
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.me-prop-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; font-size: 12px;
+  color: var(--text-muted, rgba(127,127,127,.85)); margin-bottom: 6px;
+}
+.me-prop-status {
+  font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  background: rgba(127,127,127,.12); color: var(--text);
+  font-size: 11px;
+}
+.me-prop--pending .me-prop-status   { background: rgba(255,180,30,.22); color: #b96e00; }
+.me-prop--approved .me-prop-status  { background: rgba(46,125,50,.18); color: #2e7d32; }
+.me-prop--rejected .me-prop-status  { background: rgba(224,36,94,.16); color: #c2185b; }
+[data-theme="dark"] .me-prop--pending .me-prop-status  { color: #ffc966; }
+[data-theme="dark"] .me-prop--approved .me-prop-status { color: #7cd190; }
+[data-theme="dark"] .me-prop--rejected .me-prop-status { color: #ff89aa; }
+.me-prop-title { font-weight: var(--fw-heading, 600); font-size: 15px; line-height: 1.35; }
+.me-prop-meta { font-size: 13px; color: var(--text-muted, rgba(127,127,127,.85)); margin-top: 2px; }
+.me-prop-desc { font-size: 13px; line-height: 1.55; margin: 8px 0 0; white-space: pre-wrap; }
+.me-prop-notes { font-size: 12px; color: var(--text-muted, rgba(127,127,127,.9)); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border, rgba(127,127,127,.25)); }
