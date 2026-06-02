@@ -93,7 +93,7 @@
   min-height: 80px;
   padding: 14px 16px;
   font-family: var(--font);
-  font-size: 14px;               /* 모바일 기본 */
+  font-size: 16px;               /* iOS Safari 자동 확대 방지 */
   line-height: 1.6;
   color: var(--text);
   background: var(--bg);
@@ -241,7 +241,6 @@
   .cm-item { grid-template-columns: 40px 1fr; gap: 14px; padding: 20px 0; }
   .cm-avatar { width: 40px; height: 40px; }
   .cm-replies { padding-left: 20px; }
-  .cm-textarea { font-size: 15px; }
   .cm-actions { gap: 14px; }
   .cm-auth { padding: 16px 20px; }
 }
