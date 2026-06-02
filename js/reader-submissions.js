@@ -725,122 +725,16 @@
       isAcceptedImage,
     } = uploadUi;
 
-    // 필름 picker — 카탈로그 모드 / 신청 모드
-    const picker         = document.getElementById('rs-film-picker');
-    const filmInput      = document.getElementById('rs-film-input'); // hidden, 실제 form value
-    const trigger        = document.getElementById('rs-film-trigger');
-    const selectedLabel  = document.getElementById('rs-film-selected');
-
-    // 테마 응모 체크박스 — 선택된 필름이 테마 main film 과 같을 때만 자동 체크.
-    // 사용자가 수동 토글했어도 필름이 바뀌면 다시 동기화 (혼동 방지 — 매번 의도 재확인).
-    const themeRoot     = document.querySelector('.rs-theme');
-    const themeCheckbox = themeRoot?.querySelector('input[name="theme_apply"]') || null;
-    const themeHint     = document.getElementById('rs-theme-hint');
-    const themeCanonical = themeRoot?.dataset?.themeCanonical || '';
-
-    function filmMatchesTheme(filmName) {
-      if (!themeCanonical || !filmName) return false;
-      if (normalizeFilmName(filmName) === normalizeFilmName(themeCanonical)) return true;
-      const m = findFilmMatch(filmName, films);
-      return !!(m?.type === 'exact' &&
-        normalizeFilmName(m.canonical) === normalizeFilmName(themeCanonical));
+    if (!window.ReaderFilmPicker?.bindFilmPicker) {
+      showError('필름 선택 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
+      return;
     }
-    function syncThemeCheckbox(filmName) {
-      if (!themeCheckbox) return;
-      const match = filmMatchesTheme(filmName);
-      // 필름이 바뀔 때마다 의도를 다시 묻는다 — 일치하면 ON, 아니면 OFF.
-      // disabled 는 걸지 않음 — 사용자가 의도적으로 다시 체크해 응모할 여지는 남김.
-      themeCheckbox.checked = match;
-      if (themeHint) themeHint.hidden = match || !filmName;
-    }
-    // 초기 동기화 — render 시점에 calc 한 initialThemeChecked 와 정합
-    syncThemeCheckbox(filmInput?.value || '');
-    const dropdown       = document.getElementById('rs-film-dropdown');
-    const search         = document.getElementById('rs-film-search');
-    const optionList     = document.getElementById('rs-film-list');
-    const reqToggle      = document.getElementById('rs-film-request-toggle');
-    const reqInput       = document.getElementById('rs-film-request-input');
-    const reqCancel      = document.getElementById('rs-film-request-cancel');
-
-    function setMode(mode) {
-      if (picker) picker.dataset.mode = mode; // 'catalog' | 'request'
-    }
-
-    function openDropdown() {
-      if (!dropdown || !trigger) return;
-      dropdown.hidden = false;
-      trigger.setAttribute('aria-expanded', 'true');
-      // 검색창 포커스 (모바일에서는 자동 키보드 방지 위해 timeout)
-      setTimeout(() => search?.focus(), 50);
-    }
-    function closeDropdown() {
-      if (!dropdown || !trigger) return;
-      dropdown.hidden = true;
-      trigger.setAttribute('aria-expanded', 'false');
-    }
-    trigger?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (dropdown.hidden) openDropdown(); else closeDropdown();
-    });
-    // 모달 외부(폼 아닌 곳) 클릭 시 닫기. 폼이 다시 렌더될 때 이전 리스너는 제거.
-    clearFormOutsideClickHandler();
-    formOutsideClickHandler = (e) => {
-      if (!picker || dropdown?.hidden) return;
-      if (!picker.contains(e.target)) closeDropdown();
-    };
-    document.addEventListener('click', formOutsideClickHandler);
-
-    // 검색 필터
-    search?.addEventListener('input', () => {
-      const q = search.value.trim().toLowerCase();
-      const groups = optionList.querySelectorAll('.rs-film-group');
-      groups.forEach(group => {
-        let groupHasMatch = false;
-        group.querySelectorAll('.rs-film-option').forEach(opt => {
-          const tokens = opt.dataset.search || '';
-          const match = !q || tokens.includes(q);
-          opt.hidden = !match;
-          if (match) groupHasMatch = true;
-        });
-        group.hidden = !groupHasMatch;
-      });
-    });
-
-    // 옵션 선택
-    optionList?.addEventListener('click', (e) => {
-      const opt = e.target.closest('.rs-film-option');
-      if (!opt) return;
-      const name = opt.dataset.filmName || '';
-      // 이전 선택 해제
-      optionList.querySelectorAll('.rs-film-option.is-selected').forEach(el => el.classList.remove('is-selected'));
-      opt.classList.add('is-selected');
-      if (selectedLabel) selectedLabel.textContent = name;
-      if (filmInput) filmInput.value = name;
-      setMode('catalog');
-      closeDropdown();
-      syncThemeCheckbox(name);
-    });
-
-    // 신청 모드 토글
-    reqToggle?.addEventListener('click', () => {
-      setMode('request');
-      closeDropdown();
-      // 기존 catalog 선택 해제, hidden input 은 reqInput 값으로 동기화
-      optionList?.querySelectorAll('.rs-film-option.is-selected').forEach(el => el.classList.remove('is-selected'));
-      if (selectedLabel) selectedLabel.textContent = '필름을 선택해 주세요';
-      if (filmInput) filmInput.value = reqInput?.value?.trim() || '';
-      setTimeout(() => reqInput?.focus(), 50);
-      syncThemeCheckbox(filmInput?.value || '');
-    });
-    reqInput?.addEventListener('input', () => {
-      if (filmInput) filmInput.value = reqInput.value.trim();
-      syncThemeCheckbox(reqInput.value.trim());
-    });
-    reqCancel?.addEventListener('click', () => {
-      setMode('catalog');
-      if (reqInput) reqInput.value = '';
-      if (filmInput) filmInput.value = '';
-      syncThemeCheckbox('');
+    window.ReaderFilmPicker.bindFilmPicker({
+      films,
+      normalizeFilmName,
+      findFilmMatch,
+      clearOutsideClickHandler: clearFormOutsideClickHandler,
+      setOutsideClickHandler: (handler) => { formOutsideClickHandler = handler; },
     });
 
     form.addEventListener('submit', async (e) => {
