@@ -84,6 +84,8 @@ for (const file of [
 
 // 4) Published stories contract
 const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
+const rssXml = readFileSync(join(ROOT, 'rss.xml'), 'utf8');
+const sitemapXml = readFileSync(join(ROOT, 'sitemap.xml'), 'utf8');
 const seenIds = new Set();
 for (const story of stories) {
   if (!story || story.published === false) continue;
@@ -93,6 +95,11 @@ for (const story of stories) {
     seenIds.add(story.id);
   }
   check(story.page && existsSync(join(ROOT, story.page)), `Published story page missing: ${story.id || story.title} -> ${story.page}`);
+  if (story.page) {
+    const storyUrl = `https://www.5ftmag.com/${story.page}`;
+    check(rssXml.includes(storyUrl), `Published story missing from rss.xml: ${story.id || story.title} -> ${story.page}`);
+    check(sitemapXml.includes(storyUrl), `Published story missing from sitemap.xml: ${story.id || story.title} -> ${story.page}`);
+  }
   if (story.thumbnail) {
     check(existsSync(join(ROOT, story.thumbnail)), `Published story thumbnail missing: ${story.id} -> ${story.thumbnail}`);
   }

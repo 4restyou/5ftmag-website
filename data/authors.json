@@ -3,7 +3,7 @@
     "name": "5ft.mag 편집부",
     "slug": "5ftmag",
     "note": "필름 매거진 5ft.mag의 기획과 편집을 맡습니다.",
-    "count": 9,
+    "count": 10,
     "page": "authors/5ftmag.html",
     "externalLinks": [
       {
@@ -19,24 +19,10 @@
     ]
   },
   {
-    "name": "김현아",
-    "slug": "kim-hyuna",
-    "note": "일상과 관계의 결을 짧은 에세이로 기록합니다.",
-    "count": 3,
-    "page": "authors/kim-hyuna.html",
-    "externalLinks": [
-      {
-        "type": "instagram",
-        "url": "https://instagram.com/aaaaa._.nuyh",
-        "label": "@aaaaa._.nuyh"
-      }
-    ]
-  },
-  {
     "name": "Film Social Club",
     "slug": "film-social-club",
     "note": "광주 충장로를 기반으로 필름과 사진 문화를 이어가는 공간입니다.",
-    "count": 3,
+    "count": 4,
     "page": "authors/film-social-club.html",
     "externalLinks": [
       {
@@ -48,6 +34,20 @@
         "type": "shop",
         "url": "https://smartstore.naver.com/film_socialclub",
         "label": "Shop"
+      }
+    ]
+  },
+  {
+    "name": "김현아",
+    "slug": "kim-hyuna",
+    "note": "일상과 관계의 결을 짧은 에세이로 기록합니다.",
+    "count": 3,
+    "page": "authors/kim-hyuna.html",
+    "externalLinks": [
+      {
+        "type": "instagram",
+        "url": "https://instagram.com/aaaaa._.nuyh",
+        "label": "@aaaaa._.nuyh"
       }
     ]
   },

@@ -6,13 +6,31 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Sat, 23 May 2026 02:41:13 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 02 Jun 2026 01:26:39 GMT</lastBuildDate>
     <generator>5ft.mag</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft.mag</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>확장하는 코닥, 정리하는 후지. 2026 봄의 필름 풍경</title>
+      <link>https://www.5ftmag.com/stories/verita-200d-fuji-bw.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/verita-200d-fuji-bw.html</guid>
+      <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
+      <description>한쪽에선 코닥이 VERITA 200D 를 새로 풀었고, 다른 한쪽에선 후지필름의 흑백 라인이 정리된다는 이야기가 빠르게 번졌다. 두 사건이 같은 결론에 닿는 이유.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>남들보다 20년 빨랐던 사진가, 세상이 따라오는 데는 50년이 걸렸다</title>
+      <link>https://www.5ftmag.com/stories/fred-herzog.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/fred-herzog.html</guid>
+      <pubDate>Mon, 25 May 2026 00:00:00 GMT</pubDate>
+      <description>이글스턴보다 20년 먼저 컬러로 거리를 찍었지만 오래 무명이었던 사진가 프레드 헤어조그. 코다크롬 슬라이드의 색과, 그 색을 인화가 따라잡기까지 걸린 50년의 이야기.</description>
+      <category>PHOTOGRAPHER</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
     <item>
       <title>5월 23일, 어울마당로의 한 토요일</title>
       <link>https://www.5ftmag.com/stories/film-flea-market-s6.html</link>

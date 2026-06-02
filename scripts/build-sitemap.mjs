@@ -33,8 +33,15 @@ const urls = [];
 addUrl(urls, '/', { changefreq: 'weekly', priority: '1.0' });
 addUrl(urls, '/stories.html', { changefreq: 'weekly', priority: '0.9' });
 addUrl(urls, '/films.html', { changefreq: 'monthly', priority: '0.8' });
+addUrl(urls, '/webzine.html', { changefreq: 'monthly', priority: '0.7' });
+addUrl(urls, '/labs.html', { changefreq: 'monthly', priority: '0.7' });
+addUrl(urls, '/market.html', { changefreq: 'weekly', priority: '0.7' });
+addUrl(urls, '/search.html', { changefreq: 'monthly', priority: '0.6' });
 addUrl(urls, '/authors.html', { changefreq: 'monthly', priority: '0.7' });
 addUrl(urls, '/about.html', { changefreq: 'monthly', priority: '0.6' });
+addUrl(urls, '/legal/terms.html', { changefreq: 'yearly', priority: '0.3' });
+addUrl(urls, '/legal/privacy.html', { changefreq: 'yearly', priority: '0.3' });
+addUrl(urls, '/legal/copyright.html', { changefreq: 'yearly', priority: '0.3' });
 
 const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
 for (const story of stories) {

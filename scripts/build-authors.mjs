@@ -120,8 +120,8 @@ function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css?
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="pretendard.css" />
-  <link rel="stylesheet" href="css/tokens.css?v=20260523-lhmuted">
-  <link rel="stylesheet" href="css/common.css?v=20260523-dvh">
+  <link rel="stylesheet" href="css/tokens.css?v=20260526-fontscale">
+  <link rel="stylesheet" href="css/common.css?v=20260531-search">
   <link rel="stylesheet" href="${cssHref}">
 </head>`;
 }
@@ -142,10 +142,14 @@ function header(prefix = '') {
     <ul class="main-nav">
       <li><a href="${prefix}stories.html">Articles</a></li>
       <li><a href="${prefix}films.html">Films</a></li>
+      <li><a href="${prefix}webzine.html">Webzine</a></li>
+      <li><a href="${prefix}labs.html">Labs</a></li>
+      <li><a href="${prefix}market.html">Market</a></li>
       <li><a href="${prefix}about.html">About</a></li>
       <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
     </ul>
     <div class="nav-right">
+      <a href="${prefix}search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
       <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
@@ -153,6 +157,9 @@ function header(prefix = '') {
   <nav class="mobile-nav" id="mobileNav">
     <a href="${prefix}stories.html">Articles</a>
     <a href="${prefix}films.html">Films</a>
+    <a href="${prefix}webzine.html">Webzine</a>
+    <a href="${prefix}labs.html">Labs</a>
+    <a href="${prefix}market.html">Market</a>
     <a href="${prefix}about.html">About</a>
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
   </nav>
@@ -174,8 +181,8 @@ function footer(prefix = '') {
   <span class="footer-copy">© 2024 5ft.mag</span>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="${prefix}js/db-client.js?v=20260523-cdnproxy"></script>
-<script src="${prefix}js/site-common.js?v=20260523-scrolllock"></script>`;
+<script src="${prefix}js/db-client.js?v=20260531-unsub"></script>
+<script src="${prefix}js/site-common.js?v=20260531-search"></script>`;
 }
 
 function storyCard(story, prefix = '') {
