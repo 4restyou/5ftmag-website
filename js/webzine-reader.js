@@ -9,7 +9,7 @@
   const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
   const PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
   const FLIP = 'https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js';
-  const NEAR = 2, KEEP = 5;          // 현재 기준 ±NEAR 렌더, ±KEEP 밖은 비움
+  const NEAR = 1, KEEP = 3;          // 현재 기준 ±NEAR 렌더, ±KEEP 밖은 비움
   const ZMAX = 3.5;
 
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -199,7 +199,7 @@
       const base = first.getViewport({ scale: 1 });
       baseW = base.width; baseH = base.height;
       const { w, h, portrait } = fit(baseW / baseH);
-      dispW = w; dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      dispW = w; dpr = Math.min(window.devicePixelRatio || 1, 2);
 
       const book = overlay.querySelector('.wz-reader-book');
       pageDivs = [];
@@ -209,7 +209,7 @@
         width: w, height: h, size: 'fixed',
         showCover: true, usePortrait: portrait,
         mobileScrollSupport: false, swipeDistance: 30,
-        maxShadowOpacity: 0.5, drawShadow: true, flippingTime: 700, useMouseEvents: true
+        maxShadowOpacity: 0.35, drawShadow: true, flippingTime: 560, useMouseEvents: true
       });
       flip.loadFromHTML(book.querySelectorAll('.wz-page'));
       flip.on('flip', () => { resetZoom(); updateNo(); renderAround(); });

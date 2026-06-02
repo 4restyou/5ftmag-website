@@ -22,6 +22,7 @@
   let followId = null, followFlow = null, seqT = null;
   let currentRow = null;         // 키보드 좌우 이동 대상(최근 조작/펼친 줄)
   let suppressClick = false;     // 마우스 드래그로 넘긴 직후의 클릭(책 펼치기) 억제
+  let moveT = null;
 
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
@@ -126,7 +127,7 @@
 
   function layout(rs) {
     const s = rs.slots[rs.active]; if (!s) return;
-    rs.trackEl.style.transform = `translateX(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px)`;
+    rs.trackEl.style.transform = `translate3d(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px, 0, 0)`;
     rs.slots.forEach((slot, pos) => {
       const d = pos - rs.active, ad = Math.abs(d);
       slot.classList.toggle('is-center', d === 0);
@@ -144,6 +145,23 @@
     if (prev) prev.disabled = rs.active <= 0;
     if (next) next.disabled = rs.active >= rs.slots.length - 1;
   }
+  function markMoving(rs, ms = 620) {
+    if (!rs?.flowEl) return;
+    rs.flowEl.classList.add('is-moving');
+    clearTimeout(moveT);
+    moveT = setTimeout(() => rs.flowEl.classList.remove('is-moving'), ms);
+  }
+  function settleSlotIntoView(slot) {
+    if (!slot) return;
+    requestAnimationFrame(() => {
+      const rect = slot.getBoundingClientRect();
+      const topLimit = 72;
+      const bottomLimit = window.innerHeight - 24;
+      if (rect.top < topLimit || rect.bottom > bottomLimit) {
+        slot.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+      }
+    });
+  }
   // 슬롯 폭이 전환되는 동안(열림/접힘) 트랙 위치만 매 프레임 갱신해 부드럽게 따라간다.
   // (전체 레이아웃/그림자 재계산은 프레임마다 하지 않음 — 끊김 방지)
   function follow(rs) {
@@ -151,11 +169,12 @@
     if (followFlow && followFlow !== rs.flowEl) followFlow.classList.remove('following');
     followFlow = rs.flowEl;
     rs.flowEl.classList.add('following');
+    markMoving(rs, 700);
     layout(rs);
     const t0 = performance.now();
     const step = (t) => {
       const s = rs.slots[rs.active];
-      if (s) rs.trackEl.style.transform = `translateX(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px)`;
+      if (s) rs.trackEl.style.transform = `translate3d(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px, 0, 0)`;
       if (t - t0 < 660) { followId = requestAnimationFrame(step); }
       else { rs.flowEl.classList.remove('following'); followId = null; followFlow = null; layout(rs); }
     };
@@ -184,7 +203,7 @@
     rs.active = pos;
     openState = { rs, pos, i: Number(slot.dataset.i) };
     follow(rs);
-    requestAnimationFrame(() => slot.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' }));
+    settleSlotIntoView(slot);
   }
   function closeOpen() {
     clearTimeout(seqT);
@@ -201,6 +220,7 @@
     const n = rs.active + d;
     if (n < 0 || n >= rs.slots.length || n === rs.active) return;
     rs.active = n;
+    markMoving(rs);
     layout(rs);
   }
 
