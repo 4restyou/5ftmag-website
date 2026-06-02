@@ -235,7 +235,7 @@
 }
 .article-card {
   display: block;
-  transition: opacity .2s;
+  transition: opacity .2s, transform var(--duration-fast) var(--easing);
   position: relative;
 }
 .article-card:hover { opacity: 0.78; }
