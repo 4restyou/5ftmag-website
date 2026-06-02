@@ -53,6 +53,8 @@
   let filmFavSlugs = new Set();
   let photoFavIds  = new Set();
   let contributorFavKeys = new Set();
+  let currentFilmKey = null;
+  let currentCameraKey = null;
   // 라이브러리 카드의 "원본" 정렬 순서 (좋아요 해제 시 복귀용)
   // 데스크탑·모바일 모두 sortLibrary 알파벳(브랜드→이름 가나다·ABC) 순
   let libraryOriginalOrder = [];
@@ -1572,22 +1574,24 @@
   // Reader 사진을 통합 lightbox 로 열기
   //  (editorial 과 동일한 컴포넌트 사용 — zoom / fullscreen / thumb strip)
   // ════════════════════════════
-  function openFilmReaderLightbox(matched, index) {
-    // matched (Supabase 형식: {id: 'sub-<uuid>', image, author, film, camera, instagramUrl})
-    // → 라이트박스가 기대하는 {src, author, film, camera, instagramUrl, _source, submissionId} 로 매핑
-    currentReaderPhotos = matched.map(m => ({
-      src: m.image,
-      author: m.author || '',
-      instagram: m.instagram || '',
-      film: m.film || '',
-      camera: m.camera || '',
-      caption: m.caption || '',
-      instagramUrl: m.instagramUrl || '',
-      contributorKey: contributorKeyOfSubmission(m),
-      submissionId: typeof m.id === 'string' ? m.id.replace(/^sub-/, '') : '',
+  function toLightboxReaderPhoto(item = {}) {
+    return {
+      src: item.image || item.src,
+      webp: item.webp || item.image || item.src,
+      author: item.author || item.submitterName || '',
+      instagram: item.instagram || '',
+      film: item.film || '',
+      camera: item.camera || '',
+      caption: item.caption || '',
+      instagramUrl: item.instagramUrl || '',
+      contributorKey: item.contributorKey || contributorKeyOfSubmission(item),
+      submissionId: typeof item.id === 'string' ? item.id.replace(/^sub-/, '') : (item.submissionId || ''),
       _source: 'reader',
-    }));
-    showLightbox(index, 'reader');
+    };
+  }
+
+  function openFilmReaderLightbox(matched, index) {
+    filmsLightbox.openReader(matched.map(toLightboxReaderPhoto), index);
   }
 
   function closeModal() {
@@ -1738,21 +1742,7 @@
 
   let cameraModalPhotos = [];
   function showLightboxFromCameraModal(index) {
-    // 라이트박스에 reader 모드로 진입
-    currentReaderPhotos = cameraModalPhotos.map(p => ({
-      src: p.src,
-      webp: p.src,
-      author: p.author,
-      instagram: p.instagram,
-      instagramUrl: p.instagramUrl,
-      film: p.film,
-      camera: p.camera,
-      caption: p.caption || '',
-      contributorKey: p.contributorKey || normalizeContributorKey(p.instagram || p.author || ''),
-      submissionId: p.submissionId,
-      _source: 'reader',
-    }));
-    showLightbox(index, 'reader');
+    filmsLightbox.openReader(cameraModalPhotos.map(toLightboxReaderPhoto), index);
   }
 
   // 필름 카드 클릭
@@ -1780,104 +1770,34 @@
     if (e.target === modalOverlay) closeModal();
   });
 
-  // ════════════════════════════
-  // 라이트박스 (사진 한 장씩 크게 보기)
-  // ════════════════════════════
-  const lightbox       = document.getElementById('lightbox');
-  const lightboxImg    = document.getElementById('lightboxImg');
-  const lightboxCap    = document.getElementById('lightboxCaption');
-  const lightboxCounter = document.getElementById('lightboxCounter');
-  const lightboxClose  = document.getElementById('lightboxClose');
-  const lightboxPrev   = document.getElementById('lightboxPrev');
-  const lightboxNext   = document.getElementById('lightboxNext');
-  const lightboxZoom   = document.getElementById('lightboxZoom');
-  const lightboxFullscreen = document.getElementById('lightboxFullscreen');
-  const lightboxThumbs = document.getElementById('lightboxThumbs');
-  const lightboxInsta = document.getElementById('lightboxInsta');
-  const lightboxFav   = document.getElementById('lightboxFav');
-  let currentLightboxIndex = 0;
-  let currentFilmKey = null;
-  let currentCameraKey = null;   // 카메라 모달 활성화 시 set
-  let lastFocusedElement = null;
-  let thumbsCacheKey = null;
-  let currentLightboxMode = 'editorial';   // 'editorial' | 'reader'
-  let currentReaderPhotos = [];            // reader 모드에서 사용
-
-  function currentLightboxPhotos() {
-    if (currentLightboxMode === 'reader') return currentReaderPhotos;
-    if (!currentFilmKey) return [];
-    return (filmsData[currentFilmKey] && filmsData[currentFilmKey].photos) || [];
+  function setPhotoFavoriteState(subId, on) {
+    if (on) photoFavIds.add(subId);
+    else photoFavIds.delete(subId);
   }
 
-  function resetLightboxView() {
-    lightbox.classList.remove('is-zoomed');
-    if (lightboxZoom) {
-      lightboxZoom.textContent = '확대';
-      lightboxZoom.setAttribute('aria-label', '사진 확대');
+  async function ensurePhotoFavoriteSession() {
+    if (!window.MagDB || !window.MagDB.isReady()) {
+      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
+      return false;
     }
+    const sess = await window.MagDB.auth.getSession();
+    if (!sess) {
+      if (!confirm('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return false;
+      window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+      return false;
+    }
+    return true;
   }
 
-  function getPhotoSource(photo, large = true) {
-    const width = large ? 1200 : 220;
-    const height = large ? 1500 : 280;
-    const src = photo.src || `https://picsum.photos/seed/${photo.seed}/${width}/${height}`;
-    // Reader 사진(Supabase URL)은 webp variant 없음 — src 그대로 사용
-    const isReader = photo._source === 'reader' || /^https?:/.test(src);
-    const webp = (isReader || !photo.src) ? src : photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-    return { src, webp };
+  function resolveLightboxFilmSlug(name) {
+    const match = typeof window.findFilmMatch === 'function' && window.findFilmMatch(name, filmsData);
+    return match?.slug || resolveFilmKey(name);
   }
 
-  function escapeLightboxText(value = '') {
-    return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
-
-  function setLightboxLoading(isLoading) {
-    lightbox.classList.toggle('is-loading', isLoading);
-  }
-
-  function buildLightboxThumbs() {
-    const photos = currentLightboxPhotos();
-    const cacheKey = currentLightboxMode === 'reader'
-      ? `reader:${currentFilmKey || ''}:${photos.length}`
-      : `editorial:${currentFilmKey || ''}`;
-    if (thumbsCacheKey === cacheKey) return;
-    lightboxThumbs.innerHTML = photos.map((photo, idx) => {
-      const source = getPhotoSource(photo, false);
-      const label = `${idx + 1}번째 사진 보기${photo.author ? `, ${photo.author}` : ''}`;
-      return `
-        <button class="lightbox-thumb" type="button" data-photo-index="${idx}" aria-label="${escapeLightboxText(label)}">
-          <img src="${source.webp}" alt="" loading="lazy" />
-        </button>
-      `;
-    }).join('');
-    thumbsCacheKey = cacheKey;
-  }
-
-  function updateActiveThumb() {
-    lightboxThumbs.querySelectorAll('.lightbox-thumb').forEach((button) => {
-      const active = Number(button.dataset.photoIndex) === currentLightboxIndex;
-      button.classList.toggle('is-active', active);
-      button.setAttribute('aria-current', active ? 'true' : 'false');
-      if (active) {
-        button.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-      }
-    });
-  }
-
-  function preloadNeighborPhotos() {
-    const photos = currentLightboxPhotos();
-    if (!photos.length) return;
-    [currentLightboxIndex - 1, currentLightboxIndex + 1].forEach((index) => {
-      const safeIndex = (index + photos.length) % photos.length;
-      const source = getPhotoSource(photos[safeIndex], true);
-      const img = new Image();
-      img.src = source.webp;
-    });
+  function resolveLightboxCameraKey(cameraName) {
+    if (!cameraName || typeof window.normalizeCamera !== 'function') return '';
+    const key = resolveCanonicalCameraKey(window.normalizeCamera(cameraName).key);
+    return key && cameraIndex.has(key) ? key : '';
   }
 
   async function openContributorFromLightbox(rawKey) {
@@ -1888,215 +1808,30 @@
     if (!targetFilmKey) {
       const submissions = await getApprovedSubmissions();
       const first = submissions.find(sub => contributorKeyOfSubmission(sub) === key);
-      if (first) {
-        const match = typeof window.findFilmMatch === 'function'
-          ? window.findFilmMatch(first.film, filmsData)
-          : null;
-        targetFilmKey = match?.slug || resolveFilmKey(first.film);
-      }
+      if (first) targetFilmKey = resolveLightboxFilmSlug(first.film);
     }
-
-    closeLightbox();
-    if (targetFilmKey) {
-      openModal(targetFilmKey, { contributor: key });
-    }
+    if (targetFilmKey) openModal(targetFilmKey, { contributor: key });
   }
 
-  function trapLightboxFocus(event) {
-    const focusable = Array.from(lightbox.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])'))
-      .filter((el) => !el.disabled && el.offsetParent !== null);
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
+  const filmsLightbox = window.FilmsLightbox.create({
+    getCurrentFilmKey: () => currentFilmKey,
+    getEditorialPhotos: () => (currentFilmKey && filmsData[currentFilmKey]?.photos) || [],
+    getEditorialFilm: () => filmsData[currentFilmKey] || {},
+    normalizeContributorKey,
+    resolveFilmSlug: resolveLightboxFilmSlug,
+    resolveCameraKey: resolveLightboxCameraKey,
+    openFilm: (filmKey) => openModal(filmKey),
+    openCamera: (cameraKey) => openCameraModal(cameraKey),
+    openContributor: openContributorFromLightbox,
+    hasPhotoFavorite: (subId) => photoFavIds.has(subId),
+    setPhotoFavorite: setPhotoFavoriteState,
+    ensureFavoriteSession: ensurePhotoFavoriteSession,
+    togglePhotoFavorite: (subId, wasFav) => window.MagDB.favorites.toggle('submission', subId, wasFav),
+    isModalOpen: () => modalOverlay.classList.contains('open'),
+    closeModal,
+    notify: window.notify,
+  });
 
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
-  function showLightbox(index, mode) {
-    if (mode) currentLightboxMode = mode;
-    const photos = currentLightboxPhotos();
-    if (!photos.length) return;
-    // 순환: -1이면 마지막으로, 마지막+1이면 처음으로
-    if (index < 0) index = photos.length - 1;
-    if (index >= photos.length) index = 0;
-    const wasOpen = lightbox.classList.contains('open');
-    if (!wasOpen) {
-      lastFocusedElement = document.activeElement;
-    }
-    // 모드 별 thumbs 캐시 무효화는 buildLightboxThumbs 내부에서 처리
-    buildLightboxThumbs();
-    currentLightboxIndex = index;
-
-    const photo = photos[index];
-    const source = getPhotoSource(photo, true);
-    resetLightboxView();
-    setLightboxLoading(true);
-    lightboxImg.onload = () => setLightboxLoading(false);
-    lightboxImg.onerror = () => {
-      if (lightboxImg.dataset.fallback !== '1' && source.webp !== source.src) {
-        lightboxImg.dataset.fallback = '1';
-        lightboxImg.src = source.src;
-        return;
-      }
-      setLightboxLoading(false);
-    };
-    lightboxImg.dataset.fallback = '0';
-    lightboxImg.src = source.webp;
-    lightboxImg.alt = [photo.author, photo.film].filter(Boolean).join(' · ') || '필름 사진';
-
-    // 캡션: editorial 모드 → "작가 · brand name"
-    //       reader 모드   → "@핸들 · 필름명(클릭→필름 모달) · 카메라(클릭→카메라 모달)"
-    let captionHtml;
-    if (currentLightboxMode === 'reader') {
-      const parts = [];
-      const contributorKey = photo.contributorKey || normalizeContributorKey(photo.instagram || photo.author || '');
-      if (photo.author && contributorKey) {
-        parts.push(`<button type="button" class="lightbox-caption-author lightbox-caption-link" data-jump-contributor="${escapeLightboxText(contributorKey)}">${escapeLightboxText(photo.author)}</button>`);
-      } else if (photo.author) {
-        parts.push(`<strong>${escapeLightboxText(photo.author)}</strong>`);
-      }
-      if (photo.film) {
-        parts.push(`<button type="button" class="lightbox-caption-film lightbox-caption-link" data-jump-film="${escapeLightboxText(photo.film)}">${escapeLightboxText(photo.film)}</button>`);
-      }
-      if (photo.camera) {
-        parts.push(`<button type="button" class="lightbox-caption-camera lightbox-caption-link" data-jump-camera="${escapeLightboxText(photo.camera)}">${escapeLightboxText(photo.camera)}</button>`);
-      }
-      const metaHtml = parts.join(' · ');
-      const noteHtml = photo.caption
-        ? `<span class="lightbox-note">${escapeLightboxText(photo.caption)}</span>`
-        : '';
-      captionHtml = noteHtml ? `${metaHtml}<span class="lightbox-note-wrap">${noteHtml}</span>` : metaHtml;
-    } else {
-      const film = filmsData[currentFilmKey] || {};
-      captionHtml = `<strong>${escapeLightboxText(photo.author || '')}</strong> ${escapeLightboxText(film.brand || '')} ${escapeLightboxText(film.name || '')}`;
-    }
-    lightboxCap.innerHTML = captionHtml;
-    // 작가/필름/카메라 점프 핸들러 — 라이트박스 닫고 해당 모달로
-    lightboxCap.querySelectorAll('[data-jump-contributor]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openContributorFromLightbox(btn.dataset.jumpContributor);
-      });
-    });
-    lightboxCap.querySelectorAll('[data-jump-film]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const name = btn.dataset.jumpFilm;
-        const match = typeof window.findFilmMatch === 'function' && window.findFilmMatch(name, filmsData);
-        const slug = match?.slug || resolveFilmKey(name);
-        if (!slug) return;
-        closeLightbox();
-        openModal(slug);
-      });
-    });
-    lightboxCap.querySelectorAll('[data-jump-camera]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const camRaw = btn.dataset.jumpCamera;
-        if (!camRaw || typeof window.normalizeCamera !== 'function') return;
-        const key = window.normalizeCamera(camRaw).key;
-        if (!key || !cameraIndex.has(key)) return;
-        closeLightbox();
-        openCameraModal(key);
-      });
-    });
-    lightboxCounter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
-
-    // Instagram 링크: reader 모드 + instagramUrl 있으면 노출
-    if (lightboxInsta) {
-      if (currentLightboxMode === 'reader' && photo.instagramUrl) {
-        lightboxInsta.href = photo.instagramUrl;
-        lightboxInsta.hidden = false;
-      } else {
-        lightboxInsta.hidden = true;
-        lightboxInsta.removeAttribute('href');
-      }
-    }
-    // 즐겨찾기(♡): reader 모드 + submissionId 있을 때만 노출
-    if (lightboxFav) {
-      const subId = photo.submissionId || '';
-      if (currentLightboxMode === 'reader' && subId) {
-        lightboxFav.hidden = false;
-        lightboxFav.dataset.submissionId = subId;
-        const isFav = photoFavIds.has(subId);
-        lightboxFav.classList.toggle('is-fav', isFav);
-        lightboxFav.setAttribute('aria-pressed', String(isFav));
-        lightboxFav.setAttribute('aria-label', isFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
-      } else {
-        lightboxFav.hidden = true;
-        lightboxFav.removeAttribute('data-submission-id');
-      }
-    }
-    lightbox.dataset.mode = currentLightboxMode;
-
-    lightbox.classList.add('open');
-    updateActiveThumb();
-    preloadNeighborPhotos();
-    if (!wasOpen && lightboxClose) lightboxClose.focus();
-  }
-
-  function closeLightbox() {
-    lightbox.classList.remove('open');
-    setLightboxLoading(false);
-    resetLightboxView();
-    if (document.fullscreenElement === lightbox && document.exitFullscreen) {
-      document.exitFullscreen().catch(() => {});
-    }
-    lightboxImg.src = '';
-    // 다음에 다시 열릴 때 모드 명시 안 하면 editorial 기본값으로
-    currentLightboxMode = 'editorial';
-    if (lightboxInsta) {
-      lightboxInsta.hidden = true;
-      lightboxInsta.removeAttribute('href');
-    }
-    if (lightboxFav) {
-      lightboxFav.hidden = true;
-      lightboxFav.removeAttribute('data-submission-id');
-      lightboxFav.classList.remove('is-fav', 'is-busy');
-    }
-    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
-      lastFocusedElement.focus();
-    }
-  }
-
-  // 라이트박스 ♡ 클릭 — 현재 photo 의 submissionId 로 토글
-  async function togglePhotoFav() {
-    if (!lightboxFav || lightboxFav.hidden) return;
-    if (lightboxFav.classList.contains('is-busy')) return;
-    const subId = lightboxFav.dataset.submissionId || '';
-    if (!subId) return;
-    if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
-      return;
-    }
-    const sess = await window.MagDB.auth.getSession();
-    if (!sess) {
-      if (!confirm('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return;
-      window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
-      return;
-    }
-    const wasFav = photoFavIds.has(subId);
-    if (wasFav) photoFavIds.delete(subId); else photoFavIds.add(subId);
-    lightboxFav.classList.toggle('is-fav', !wasFav);
-    lightboxFav.setAttribute('aria-pressed', String(!wasFav));
-    lightboxFav.setAttribute('aria-label', !wasFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
-    lightboxFav.classList.add('is-busy');
-    const { error } = await window.MagDB.favorites.toggle('submission', subId, wasFav);
-    lightboxFav.classList.remove('is-busy');
-    if (error) {
-      // 롤백
-      if (wasFav) photoFavIds.add(subId); else photoFavIds.delete(subId);
-      lightboxFav.classList.toggle('is-fav', wasFav);
-      lightboxFav.setAttribute('aria-pressed', String(wasFav));
-      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
-    }
-  }
   async function loadPhotoFavorites() {
     if (!window.MagDB || !window.MagDB.isReady()) return;
     try {
@@ -2150,24 +1885,6 @@
     btn.classList.toggle('is-fav', on);
     btn.setAttribute('aria-pressed', String(on));
     btn.setAttribute('aria-label', on ? '작가 즐겨찾기 해제' : '작가 즐겨찾기 추가');
-  }
-
-  function toggleZoom() {
-    const zoomed = lightbox.classList.toggle('is-zoomed');
-    if (lightboxZoom) {
-      lightboxZoom.textContent = zoomed ? '맞춤' : '확대';
-      lightboxZoom.setAttribute('aria-label', zoomed ? '화면에 맞추기' : '사진 확대');
-    }
-  }
-
-  function toggleFullscreen() {
-    if (!document.fullscreenElement && lightbox.requestFullscreen) {
-      lightbox.requestFullscreen().catch(() => {});
-      return;
-    }
-    if (document.fullscreenElement && document.exitFullscreen) {
-      document.exitFullscreen().catch(() => {});
-    }
   }
 
   // 그리드의 사진 클릭 시 라이트박스 열기 (이벤트 위임)
@@ -2297,7 +2014,7 @@
     if (!photoEl) return;
     const idx = parseInt(photoEl.dataset.photoIndex, 10);
     if (isNaN(idx)) return;
-    showLightbox(idx, 'editorial');
+    filmsLightbox.show(idx, 'editorial');
   });
 
   // displayName / name 으로 filmsData 안에서 일치 항목 찾아 캐니스터 썸네일 경로 반환
@@ -2508,71 +2225,3 @@
       btn.textContent = originalText;
     }
   }
-
-  // 라이트박스 컨트롤
-  lightboxClose.addEventListener('click', closeLightbox);
-  lightboxPrev.addEventListener('click', () => showLightbox(currentLightboxIndex - 1));
-  lightboxNext.addEventListener('click', () => showLightbox(currentLightboxIndex + 1));
-  lightboxImg.addEventListener('click', toggleZoom);
-  if (lightboxZoom) lightboxZoom.addEventListener('click', toggleZoom);
-  if (lightboxFullscreen) lightboxFullscreen.addEventListener('click', toggleFullscreen);
-  if (lightboxFav) lightboxFav.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    togglePhotoFav();
-  });
-  lightboxThumbs.addEventListener('click', (e) => {
-    const thumb = e.target.closest('.lightbox-thumb');
-    if (!thumb) return;
-    const idx = parseInt(thumb.dataset.photoIndex, 10);
-    if (!Number.isNaN(idx)) showLightbox(idx);
-  });
-
-  // 라이트박스 빈 영역 클릭 시 닫기 (이미지/버튼 클릭은 제외)
-  lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox || e.target.classList.contains('lightbox-img-wrap')) {
-      closeLightbox();
-    }
-  });
-
-  // 키보드 — 라이트박스 우선, 그 다음 모달
-  document.addEventListener('keydown', (e) => {
-    if (lightbox.classList.contains('open')) {
-      if (e.key === 'Escape') closeLightbox();
-      else if (e.key === 'ArrowLeft') showLightbox(currentLightboxIndex - 1);
-      else if (e.key === 'ArrowRight') showLightbox(currentLightboxIndex + 1);
-      else if (e.key === 'Home') showLightbox(0);
-      else if (e.key === 'End') { const ps = currentLightboxPhotos(); if (ps.length) showLightbox(ps.length - 1); }
-      else if (e.key === '+' || e.key === '=') toggleZoom();
-      else if (e.key === 'Tab') trapLightboxFocus(e);
-      return;
-    }
-    if (e.key === 'Escape' && modalOverlay.classList.contains('open')) {
-      closeModal();
-    }
-  });
-
-  // 터치 스와이프 — 모바일에서 좌우로 사진 넘기기
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchStartTime = 0;
-
-  lightbox.addEventListener('touchstart', (e) => {
-    if (!lightbox.classList.contains('open')) return;
-    touchStartX = e.changedTouches[0].clientX;
-    touchStartY = e.changedTouches[0].clientY;
-    touchStartTime = Date.now();
-  }, { passive: true });
-
-  lightbox.addEventListener('touchend', (e) => {
-    if (!lightbox.classList.contains('open')) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    const dt = Date.now() - touchStartTime;
-
-    // 최소 스와이프 조건: 50px 이상, 500ms 이내, 가로가 세로보다 큼
-    if (Math.abs(dx) >= 50 && Math.abs(dx) > Math.abs(dy) && dt < 500) {
-      if (dx < 0) showLightbox(currentLightboxIndex + 1);  // 왼쪽 스와이프 → 다음
-      else        showLightbox(currentLightboxIndex - 1);  // 오른쪽 스와이프 → 이전
-    }
-  }, { passive: true });
