@@ -43,6 +43,9 @@
 }
 @media (max-width: 1280px) { .films-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 900px)  { .films-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* 검색 시 brand 직접 매칭(예: "leica" → brand=LEICA) 카드를 카메라 부산물 매칭보다 위로 */
+.films-grid > .film-card { order: 1; }
+.films-grid > .film-card.is-brand-hit { order: 0; }
 .film-card {
   display: block;
   width: 100%;
