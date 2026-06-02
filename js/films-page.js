@@ -28,6 +28,7 @@
     shareCamera: shareCameraLink,
   } = window.FilmsShare;
   const readerRollUi = window.FilmsReaderRollUI;
+  const readerRollData = window.FilmsReaderRollData;
 
   const readerExport = window.FilmsReaderExport.create({
     getFilm: (filmKey) => filmsData[filmKey] || {},
@@ -1043,79 +1044,29 @@
     const submitBtn = modalContent.querySelector('.reader-submit-btn');
     if (!grid) return;
 
-    async function waitForRollRangeApi(timeoutMs = 2500) {
-      if (currentCameras.size > 0) return null;
-      const step = 100;
-      for (let elapsed = 0; elapsed < timeoutMs; elapsed += step) {
-        const api = window.MagDB?.submissions;
-        if (
-          window.MagDB?.isReady?.() &&
-          typeof api?.countApprovedByFilms === 'function' &&
-          typeof api?.listApprovedByFilms === 'function'
-        ) {
-          return api;
-        }
-        await new Promise(r => setTimeout(r, step));
-      }
-      return null;
-    }
-
-    let rangeApi = await waitForRollRangeApi();
-    const aliasSet = new Set(rawAliases.map(normalize));
-    // 정적 구독자 사진(readers.json)이 매칭되는 필름은 Supabase 페이지네이션 대신
-    // 통합 경로(getApprovedSubmissions)로 처리한다. 페이지네이션 API 는 정적
-    // 사진을 모르기 때문에, 그대로 두면 카드 카운트와 모달 롤이 어긋난다.
-    if (rangeApi) {
-      const staticReaders = await getStaticReaders();
-      if (staticReaders.some(s => aliasSet.has(normalize(s.film)))) rangeApi = null;
-    }
-    let fallbackSubmissions = null;
-    let fallbackRollState = null;
-    let rollTotal = 0;
-    let currentNumber = 1;
-    const rollRowsCache = new Map();
-
-    if (rangeApi) {
-      rollTotal = await rangeApi.countApprovedByFilms(rawAliases);
-      currentNumber = Math.max(1, Math.ceil(Math.max(rollTotal, 1) / ROLL_LIMIT));
-    } else {
-      const submissions = await getApprovedSubmissions();
-      fallbackSubmissions = Array.isArray(submissions) ? submissions : [];
-      let matched = fallbackSubmissions.filter(s => aliasSet.has(normalize(s.film)));
-      if (currentCameras.size > 0 && typeof window.normalizeCamera === 'function') {
-        matched = matched.filter(s => currentCameras.has(resolveCanonicalCameraKey(window.normalizeCamera(s.camera).key)));
-      }
-      fallbackRollState = buildReaderRollState(matched);
-      rollTotal = fallbackRollState.total;
-      currentNumber = fallbackRollState.currentNumber;
-      fallbackRollState.rolls.forEach(roll => rollRowsCache.set(roll.number, roll.rows));
-    }
+    const rollSource = await readerRollData.createSource({
+      rawAliases,
+      normalize,
+      rollLimit: ROLL_LIMIT,
+      currentCameras,
+      getStaticReaders,
+      getApprovedSubmissions,
+      buildReaderRollState,
+      resolveCanonicalCameraKey,
+    });
+    const rangeApi = rollSource.rangeApi;
+    const rollTotal = rollSource.rollTotal;
+    const currentNumber = rollSource.currentNumber;
 
     const personKeyOf = contributorKeyOfSubmission;
     const personLabelOf = contributorLabelOfSubmission;
-    const rollMeta = (number) => ({
-      number: Math.max(1, Math.min(Number(number) || currentNumber, currentNumber)),
-      current: Math.max(1, Math.min(Number(number) || currentNumber, currentNumber)) === currentNumber,
-      rows: rollRowsCache.get(Math.max(1, Math.min(Number(number) || currentNumber, currentNumber))) || [],
-    });
-    async function rollRowsByNumber(number) {
-      const safeNumber = Math.max(1, Math.min(Number(number) || currentNumber, currentNumber));
-      if (rollRowsCache.has(safeNumber)) return rollRowsCache.get(safeNumber);
-      if (!rangeApi) return [];
-      const from = (safeNumber - 1) * ROLL_LIMIT;
-      const rows = await rangeApi.listApprovedByFilms(rawAliases, {
-        from,
-        to: from + ROLL_LIMIT - 1,
-        ascending: true,
-      });
-      rollRowsCache.set(safeNumber, Array.isArray(rows) ? rows : []);
-      return rollRowsCache.get(safeNumber);
-    }
+    const rollMeta = (number) => rollSource.rollMeta(number);
+    const rollRowsByNumber = (number) => rollSource.rollRowsByNumber(number);
     const rollIntroText = (roll) => readerRollUi.rollIntroText({ roll, rollTotal, rollLimit: ROLL_LIMIT, isFeatured });
     let activeRoll = currentNumber;
     let activePerson = 'all';
     let archiveOpen = false;
-    let rollRows = rollRowsCache.get(activeRoll) || [];
+    let rollRows = rollSource.cachedRows(activeRoll);
     let visible = rollRows;
     let selectionMode = false;
     let rollLoadToken = 0;
@@ -1130,15 +1081,8 @@
       return match?.canonical || filmName || 'Unknown Film';
     };
 
-    let contributorSubmissionsPromise = null;
     async function submissionsForPerson(personKey) {
-      if (!fallbackSubmissions) {
-        if (!contributorSubmissionsPromise) contributorSubmissionsPromise = getApprovedSubmissions();
-        fallbackSubmissions = await contributorSubmissionsPromise;
-      }
-      return (fallbackSubmissions || [])
-        .filter(sub => personKeyOf(sub) === personKey)
-        .slice(0, 120);
+      return rollSource.submissionsForPerson(personKey, personKeyOf);
     }
 
     const exportKeyOf = (sub) => readerRollUi.exportKeyOf(sub, { personKeyOf });
@@ -1456,8 +1400,8 @@
           return;
         }
         const key = photo.dataset.personKey;
-        const all = fallbackSubmissions
-          ? fallbackSubmissions.filter(sub => personKeyOf(sub) === key).slice(0, 120)
+        const all = rollSource.fallbackSubmissions
+          ? rollSource.fallbackSubmissions.filter(sub => personKeyOf(sub) === key).slice(0, 120)
           : [];
         const filmName = photo.dataset.filmName;
         const group = all.filter(sub => filmLabelOf(sub.film) === filmName);
