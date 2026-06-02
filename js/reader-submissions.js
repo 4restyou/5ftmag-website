@@ -1,4 +1,4 @@
-// 5ft.mag Reader's Roll 직접 제출 위젯
+// 5ft magazine Reader's Roll 직접 제출 위젯
 // 사용법:
 //   <button data-action="open-submission">내 사진 올리기</button>
 //   <script src="js/db-client.js"></script>
@@ -496,7 +496,7 @@
         </label>
         <label class="rs-checkbox">
           <input type="checkbox" name="consent" required />
-          <span>이 사진의 저작권은 본인에게 있으며, 5ft.mag 사이트 / SNS / 종이 매거진 게재에 동의합니다. <em>*</em></span>
+          <span>이 사진의 저작권은 본인에게 있으며, 5ft magazine 사이트 / SNS / 종이 매거진 게재에 동의합니다. <em>*</em></span>
         </label>
         <div class="rs-actions">
           <button type="button" class="rs-btn-link" data-action="rs-close">취소</button>

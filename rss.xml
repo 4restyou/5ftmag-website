@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
-    <title>5ft.mag | 필름 사진 매거진</title>
+    <title>5ft magazine | 필름 사진 매거진</title>
     <link>https://www.5ftmag.com</link>
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
     <lastBuildDate>Tue, 02 Jun 2026 01:26:39 GMT</lastBuildDate>
-    <generator>5ft.mag</generator>
+    <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
-      <title>5ft.mag</title>
+      <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
     <item>
@@ -162,7 +162,7 @@
       <link>https://www.5ftmag.com/stories/08.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/08.html</guid>
       <pubDate>Fri, 20 Dec 2024 00:00:00 GMT</pubDate>
-      <description>5ft.mag Vol.01에 참여한 노애경, 박순렬, 장형수 작가의 대표 사진과 작업노트 일부를 따라가 보는 짧은 소개.</description>
+      <description>5ft magazine Vol.01에 참여한 노애경, 박순렬, 장형수 작가의 대표 사진과 작업노트 일부를 따라가 보는 짧은 소개.</description>
       <category>PHOTO</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
     </item>
@@ -180,7 +180,7 @@
       <link>https://www.5ftmag.com/stories/06.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/06.html</guid>
       <pubDate>Mon, 16 Dec 2024 00:00:00 GMT</pubDate>
-      <description>5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.</description>
+      <description>5ft magazine Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.</description>
       <category>GOODS</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
     </item>
@@ -225,7 +225,7 @@
       <link>https://www.5ftmag.com/stories/01.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/01.html</guid>
       <pubDate>Fri, 15 Nov 2024 00:00:00 GMT</pubDate>
-      <description>E-book 22권을 내고 1년을 다시 준비했다. 마침내 종이 위에 새겨진 5ft.mag 정식 창간호. 그 안에 무엇이 담겼는지 살짝 들여다본다.</description>
+      <description>E-book 22권을 내고 1년을 다시 준비했다. 마침내 종이 위에 새겨진 5ft magazine 정식 창간호. 그 안에 무엇이 담겼는지 살짝 들여다본다.</description>
       <category>EDITORIAL</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
     </item>

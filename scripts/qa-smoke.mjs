@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 5ft.mag 배포 전 스모크 QA
+ * 5ft magazine 배포 전 스모크 QA
  * - 주요 JS/MJS 문법 검사
  * - data/*.json 파싱 검사
  * - 공개 대상 핵심 파일 존재 검사

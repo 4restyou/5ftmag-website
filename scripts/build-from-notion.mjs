@@ -1,4 +1,4 @@
-// 노션 → 5ft.mag 사이트 빌드 스크립트
+// 노션 → 5ft magazine 사이트 빌드 스크립트
 // Stories, News, Films, Readers 4개 DB를 읽어와 JSON/HTML 생성
 
 import { Client } from '@notionhq/client';
@@ -320,7 +320,7 @@ async function buildReaders() {
 
 (async () => {
   const start = Date.now();
-  console.log('🚀 5ft.mag 빌드 시작');
+  console.log('🚀 5ft magazine 빌드 시작');
   if (DRY_RUN) console.log('   (dry-run 모드 — 파일을 쓰지 않습니다)');
 
   let hadError = false;
