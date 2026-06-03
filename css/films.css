@@ -1190,9 +1190,9 @@
   border-color: var(--text);
 }
 .library-filter-chip.is-active {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
 }
 .library-filter-count {
   font-size: 11px;
@@ -1203,8 +1203,8 @@
   font-weight: var(--fw-heading);
 }
 .library-filter-chip.is-active .library-filter-count {
-  background: rgba(255, 255, 255, 0.16);
-  color: var(--bg);
+  background: rgba(0, 0, 0, 0.12);
+  color: var(--accent-text);
 }
 
 /* ════════════════════════════

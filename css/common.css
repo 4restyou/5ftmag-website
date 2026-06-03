@@ -20,6 +20,9 @@ body {
   letter-spacing: var(--ls-default);
   transition: background .25s, color .25s;
   -webkit-font-smoothing: antialiased;
+  /* 모바일에서 어떤 자식이 viewport 폭 초과해도 가로 스크롤이 생기지 않게.
+     overflow-x:hidden 은 position:sticky 와 충돌이 있어서 overflow-x:clip 사용. */
+  overflow-x: clip;
 }
 
 a {
@@ -1061,3 +1064,21 @@ textarea:focus-visible {
    Safari 18+ / Chrome 111+ 만 동작, 미지원 브라우저는 그대로 (progressive enhancement). */
 @view-transition { navigation: auto; }
 
+
+/* ════════════════════════════════════════════════
+   Input :focus ring — 마우스 클릭 / 모바일 터치 포함
+   focus-visible 글로벌 ring 은 키보드 사용자만 보였음. input/textarea/select 는
+   마우스 / 터치로도 포커스 위치 명확히 보이게 :focus 까지 ring 확장. */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* 버튼 disabled 글로벌 — 클릭 가능한 모양과 즉시 분간 */
+button[disabled],
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
