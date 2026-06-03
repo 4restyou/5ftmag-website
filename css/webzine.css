@@ -1,7 +1,8 @@
 /* 5ft.mag 웹진 — 분류(시즌)별 한 줄(코버플로우). 책 한 권이 옆으로 회전해 책등↔표지로
    돌고(단일 큐보이드), 고르면 그 줄 안에서 표지로 돌아서며 슬롯이 늘어나 이웃을 밀어내고
    옆에 정보가 뜬다. 스와이프하면 역회전으로 다시 책등으로 접힌다. 다크 톤 고정. 오리지널. */
-#themeBtn { display: none; }
+/* 다크 강제라 토글이 무의미하지만, 슬롯은 유지해서 다른 페이지와 아이콘 위치 점프 방지 */
+#themeBtn { visibility: hidden; pointer-events: none; }
 html {
   --wz-mark: url("../img/symbol-w.svg");
   --paper: url("../img/textures/paper-gray.webp");
