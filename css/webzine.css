@@ -203,24 +203,24 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
    webzine.html 은 강제 dark theme + header { background:var(--wz-bg) } 라
    user theme 이 light 면 메뉴 / mobile-nav 가 다크 헤더 위에 흰 박스로 떠서 어색하거나,
    토큰 충돌로 텍스트가 묻혀 안 보이는 사례 발생. 웹진 페이지 한정 다크 톤 강제. */
-body:has(.wz-stage) .nav-account-menu {
+body.webzine-page .nav-account-menu {
   background: #1a1a1a;
   border-color: #303030;
   color: #f0f0f0;
 }
-body:has(.wz-stage) .nav-account-menu a,
-body:has(.wz-stage) .nav-account-menu button {
+body.webzine-page .nav-account-menu a,
+body.webzine-page .nav-account-menu button {
   color: #f0f0f0;
 }
-body:has(.wz-stage) .nav-account-menu a:hover,
-body:has(.wz-stage) .nav-account-menu button:hover {
+body.webzine-page .nav-account-menu a:hover,
+body.webzine-page .nav-account-menu button:hover {
   background: rgba(255, 255, 255, 0.08);
 }
-body:has(.wz-stage) .mobile-nav {
+body.webzine-page .mobile-nav {
   background: #0e0c10;
   border-bottom-color: #303030;
 }
-body:has(.wz-stage) .mobile-nav a {
+body.webzine-page .mobile-nav a {
   color: #f0f0f0;
   border-bottom-color: #1f1d24;
 }
