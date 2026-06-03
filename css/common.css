@@ -20,6 +20,9 @@ body {
   letter-spacing: var(--ls-default);
   transition: background .25s, color .25s;
   -webkit-font-smoothing: antialiased;
+  /* 모바일에서 어떤 자식이 viewport 폭 초과해도 가로 스크롤이 생기지 않게.
+     overflow-x:hidden 은 position:sticky 와 충돌이 있어서 overflow-x:clip 사용. */
+  overflow-x: clip;
 }
 
 a {
