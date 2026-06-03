@@ -214,6 +214,7 @@ header {
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-left: 4px;
 }
 
 /* ────────── 알림 종 + 뱃지 + 드롭다운 ────────── */
