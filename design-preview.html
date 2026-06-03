@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>디자인 시안 미리보기 | 5ft magazine</title>
+  <meta name="description" content="컴포넌트 상태 명확화 디자인 시안 (내부 검토용).">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="shortcut icon" href="img/favicon/favicon.ico">
+
+  <script src="./js/theme-init.js"></script>
+  <link rel="stylesheet" href="./pretendard.css" />
+  <link rel="stylesheet" href="./css/tokens.css?v=20260526-fontscale">
+  <link rel="stylesheet" href="./css/common.css?v=20260602-touch44">
+
+  <style>
+    /* ── 시안 페이지 전용 레이아웃 (본체 영향 없음) ── */
+    .preview-wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .preview-intro {
+      margin-bottom: 40px;
+    }
+    .preview-intro h1 {
+      font-size: clamp(22px, 3vw, 32px);
+      margin-bottom: 12px;
+    }
+    .preview-intro p {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+    .preview-section {
+      margin: 56px 0;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .preview-section h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .preview-section .why {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 640px) {
+      .preview-grid { grid-template-columns: 1fr; }
+    }
+    .preview-cell {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      background: var(--bg);
+    }
+    .preview-cell h3 {
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .preview-cell h3.is-after {
+      color: var(--text);
+    }
+    .preview-demo {
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+    .preview-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+    .preview-toggle {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--bg);
+      cursor: pointer;
+    }
+
+    /* ════════════════════════════════════════════════
+       시안 1: .filter-chip 활성 상태 강화
+       현재: 활성 시 배경 = var(--text), 글자 = var(--bg) — 이미 좋음 (보더만 변경 X 였음, 재검토)
+       제안: 활성 시 추가로 ✓ 마이크로 표식 / shadow 로 명확화
+       ════════════════════════════════════════════════ */
+    /* 현재 (사이트 stories.css / labs.css 기준 재현) */
+    .demo-chip-current {
+      display: inline-block;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .demo-chip-current.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+    /* 제안: 활성 상태에 좌측 ✓ 인디케이터 + 가벼운 inner ring */
+    .demo-chip-after {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .demo-chip-after.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+      box-shadow: inset 0 0 0 2px var(--bg), 0 0 0 1px var(--text);
+    }
+    .demo-chip-after.active::before {
+      content: "✓";
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    /* ════════════════════════════════════════════════
+       시안 2: input :focus ring 통일
+       현재: 페이지마다 border-color: var(--text) 정도
+       제안: focus 시 outline 대신 box-shadow ring (모바일 가시성 큼)
+       ════════════════════════════════════════════════ */
+    .demo-input-base {
+      width: 100%;
+      max-width: 320px;
+      padding: 10px 14px;
+      font-size: 16px; /* iOS 자동확대 방지 */
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      outline: none;
+    }
+    .demo-input-current:focus {
+      border-color: var(--text);
+    }
+    .demo-input-after:focus {
+      border-color: var(--text);
+      box-shadow: 0 0 0 3px rgba(127, 127, 127, 0.25);
+    }
+
+    /* ════════════════════════════════════════════════
+       시안 3: 버튼 :disabled 명확화
+       현재: 일부 페이지만 opacity 처리, 대부분은 클릭 가능한 모양 유지
+       제안: opacity .5 + cursor:not-allowed + 색상 약화
+       ════════════════════════════════════════════════ */
+    .demo-btn {
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.04em;
+      border: 1px solid var(--text);
+      background: var(--text);
+      color: var(--bg);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .demo-btn:hover { opacity: .85; }
+    .demo-btn-current[disabled] {
+      /* 현재 — 그냥 disabled (브라우저 기본) */
+      pointer-events: none;
+    }
+    .demo-btn-after[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+      background: var(--text-muted);
+      border-color: transparent;
+    }
+
+    /* ════════════════════════════════════════════════
+       시안 4: 스켈레톤 shimmer 애니메이션
+       현재: 정적 회색 블록만 (사이트 index.html 의 .skeleton)
+       제안: 좌→우 shimmer (prefers-reduced-motion 자동 무효)
+       ════════════════════════════════════════════════ */
+    .demo-skel {
+      display: block;
+      height: 18px;
+      width: 200px;
+      background: rgba(127, 127, 127, 0.18);
+      border-radius: 3px;
+    }
+    .demo-skel + .demo-skel { margin-top: 10px; }
+    .demo-skel-after {
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-skel-after::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.35) 50%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+      animation: shimmer 1.4s ease-in-out infinite;
+    }
+    [data-theme="dark"] .demo-skel-after::after {
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 100%
+      );
+    }
+    @keyframes shimmer {
+      100% { transform: translateX(100%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .demo-skel-after::after { animation: none; }
+    }
+
+    /* ════════════════════════════════════════════════
+       시안 5: text-muted 대비 강화 (옵션)
+       현재: rgba(0,0,0,0.65) — WCAG AA 4.5:1 경계선
+       제안: rgba(0,0,0,0.72) — 안전 마진 확보
+       ════════════════════════════════════════════════ */
+    .demo-meta-current {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.65);
+    }
+    .demo-meta-after {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.72);
+    }
+    [data-theme="dark"] .demo-meta-current { color: rgba(255, 255, 255, 0.65); }
+    [data-theme="dark"] .demo-meta-after   { color: rgba(255, 255, 255, 0.78); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="stories.html">Articles</a></li>
+      <li><a href="films.html">Films</a></li>
+      <li><a href="webzine.html">Webzine</a></li>
+      <li><a href="labs.html">Labs</a></li>
+      <li><a href="market.html">Market</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+    </div>
+  </div>
+</header>
+
+<main class="preview-wrap">
+
+  <div class="preview-intro">
+    <h1>디자인 시안 미리보기</h1>
+    <p>
+      디자인 점수 87 → 88~89 진입을 위한 컴포넌트 상태 명확화 시안. 본체 사이트는 안 건드린 별도 페이지.
+      각 항목 왼쪽 <strong>현재</strong> / 오른쪽 <strong>제안</strong> 비교. 우측 상단 ☽ 로 다크 모드 토글.
+      마음에 드는 항목만 본체 적용 PR 로 분리해서 진행.
+    </p>
+  </div>
+
+  <!-- ════════════════════ 시안 1 ════════════════════ -->
+  <section class="preview-section">
+    <h2>1. 필터 칩 활성 상태 강화</h2>
+    <p class="why">
+      현재도 활성 시 배경·색 반전이 적용돼 보여요. 다만 활성/비활성 구분이 사진이 많은 컨텐츠 사이에서 가끔 묻혀요.
+      <strong>제안</strong>: 좌측 ✓ 마이크로 표식 + inner ring 으로 시각 무게 +1.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재</h3>
+        <div class="preview-demo">
+          <span class="demo-chip-current">전체</span>
+          <span class="demo-chip-current active">컬러</span>
+          <span class="demo-chip-current">흑백</span>
+          <span class="demo-chip-current">슬라이드</span>
+        </div>
+        <p class="preview-note">활성 표시: 배경 채움 + 색 반전.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안</h3>
+        <div class="preview-demo">
+          <span class="demo-chip-after">전체</span>
+          <span class="demo-chip-after active">컬러</span>
+          <span class="demo-chip-after">흑백</span>
+          <span class="demo-chip-after">슬라이드</span>
+        </div>
+        <p class="preview-note">활성 표시: 배경 채움 + ✓ 표식 + inner ring 으로 강조.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 시안 2 ════════════════════ -->
+  <section class="preview-section">
+    <h2>2. Input focus ring 통일</h2>
+    <p class="why">
+      현재는 페이지마다 input :focus 가 border-color 만 살짝 진해지는 정도라 모바일에서 잘 안 보여요.
+      <strong>제안</strong>: focus 시 border + 외곽 box-shadow ring 으로 키보드 사용자 / 모바일 양쪽 가시성 +.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재</h3>
+        <div class="preview-demo">
+          <input type="text" class="demo-input-base demo-input-current" placeholder="검색어 입력…" />
+        </div>
+        <p class="preview-note">포커스 시 border 색만 진해짐. 미세함.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안</h3>
+        <div class="preview-demo">
+          <input type="text" class="demo-input-base demo-input-after" placeholder="검색어 입력…" />
+        </div>
+        <p class="preview-note">포커스 시 외곽 ring 으로 명확. WCAG focus visible 충족.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 시안 3 ════════════════════ -->
+  <section class="preview-section">
+    <h2>3. 버튼 disabled 상태 명확화</h2>
+    <p class="why">
+      현재 disabled 버튼이 일부 페이지에서 클릭 가능한 모양 그대로 유지돼 사용자가 무반응에 당황해요.
+      <strong>제안</strong>: opacity 0.4 + cursor:not-allowed + 색 약화로 즉시 분간.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재</h3>
+        <div class="preview-demo">
+          <button type="button" class="demo-btn demo-btn-current">제출</button>
+          <button type="button" class="demo-btn demo-btn-current" disabled>제출</button>
+        </div>
+        <p class="preview-note">disabled 가 평소와 차이 거의 없음.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안</h3>
+        <div class="preview-demo">
+          <button type="button" class="demo-btn demo-btn-after">제출</button>
+          <button type="button" class="demo-btn demo-btn-after" disabled>제출</button>
+        </div>
+        <p class="preview-note">disabled 가 즉시 분간. 커서도 not-allowed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 시안 4 ════════════════════ -->
+  <section class="preview-section">
+    <h2>4. 스켈레톤 shimmer</h2>
+    <p class="why">
+      현재 스켈레톤은 정적 회색 블록. 로딩이 멈춘 건지 진행 중인 건지 헷갈려요.
+      <strong>제안</strong>: 좌→우 shimmer 로 "지금 받고 있어요" 신호. prefers-reduced-motion 자동 비활성.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재</h3>
+        <div class="preview-demo" style="flex-direction:column;align-items:flex-start;">
+          <span class="demo-skel" style="width:75%"></span>
+          <span class="demo-skel" style="width:55%"></span>
+          <span class="demo-skel" style="width:40%"></span>
+        </div>
+        <p class="preview-note">정적. 멈춘 것처럼 보일 수 있음.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안</h3>
+        <div class="preview-demo" style="flex-direction:column;align-items:flex-start;">
+          <span class="demo-skel demo-skel-after" style="width:75%"></span>
+          <span class="demo-skel demo-skel-after" style="width:55%"></span>
+          <span class="demo-skel demo-skel-after" style="width:40%"></span>
+        </div>
+        <p class="preview-note">좌→우 shimmer. 로딩 진행감.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 시안 5 ════════════════════ -->
+  <section class="preview-section">
+    <h2>5. 메타 텍스트 대비 보강 (옵션)</h2>
+    <p class="why">
+      현재 <code>--text-muted</code> = rgba(0,0,0,0.65) 가 흰 배경 작은 폰트에서 WCAG AA 4.5:1 경계선이에요.
+      <strong>제안</strong>: 0.72 (다크모드 0.78) 로 살짝 진하게. 시각 차이는 미세하지만 명도 대비 안전 마진 확보.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재</h3>
+        <div class="preview-demo">
+          <p class="demo-meta-current">2026.06.01 · 박순렬 · 5분 읽기 · Comments 12</p>
+        </div>
+        <p class="preview-note">rgba 0.65.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안</h3>
+        <div class="preview-demo">
+          <p class="demo-meta-after">2026.06.01 · 박순렬 · 5분 읽기 · Comments 12</p>
+        </div>
+        <p class="preview-note">rgba 0.72 (다크모드 0.78).</p>
+      </div>
+    </div>
+  </section>
+
+  <button type="button" class="preview-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">다크 / 라이트 토글</button>
+
+</main>
+
+<footer style="padding:24px 20px;text-align:center;font-size:12px;color:var(--text-muted);">
+  내부 검토용 시안 페이지 · noindex
+</footer>
+
+<script src="./js/util.js?v=20260602-normalize"></script>
+<script src="./js/site-common.js?v=20260531-search"></script>
+
+</body>
+</html>
