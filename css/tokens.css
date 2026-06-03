@@ -165,3 +165,46 @@
     --fs-title:   18px;
   }
 }
+
+/* ════════════════════════════════════════════════
+   디자인 시스템 확장 토큰 (PR design-system)
+   기존 토큰은 그대로 두고 위계가 더 필요한 곳에 별칭/추가 토큰을 둔다.
+   기존 코드 영향 0. 새 컴포넌트/페이지에서 점진적으로 사용.
+   ════════════════════════════════════════════════ */
+:root {
+  /* Surface 3 단계 — 페이지 / 섹션 / 카드(모달) */
+  --surface-0:  var(--bg);
+  --surface-1:  var(--bg-sub);
+  --surface-2:  #ededea;
+
+  /* Text 3 단계 — 제목 / 본문·메타 / placeholder·hint */
+  --text-1:     var(--text);
+  --text-2:     var(--text-muted);
+  --text-3:     rgba(0, 0, 0, 0.55);
+
+  /* Border 2 종 — 카드/구분 (soft) / input·강한 분리 (strong) */
+  --border-soft:   var(--border);
+  --border-strong: #d0d0cc;
+
+  /* Modular Scale 1.25 — 매거진 본문/제목 일관 비율
+     기존 --fs-display / --fs-title / --fs-body 는 유지, 새 글에서 점진적 사용 */
+  --fs-h1:    32px;
+  --fs-h2:    24px;
+  --fs-h3:    19px;
+  --fs-lead:  17px;
+  --fs-body-r: 16px;  /* readable body */
+  --fs-meta-r: 13px;
+  --fs-micro: 11px;
+
+  /* line-height — 위계별 정교화 */
+  --lh-h1:    1.15;
+  --lh-h2:    1.2;
+  --lh-h3:    1.25;
+  --lh-lead:  1.55;
+  --lh-read:  1.7;   /* 본문 한국어 매거진 호흡 */
+}
+[data-theme="dark"] {
+  --surface-2:     #232323;
+  --text-3:        rgba(240, 240, 240, 0.55);
+  --border-strong: #383838;
+}
