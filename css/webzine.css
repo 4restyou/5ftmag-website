@@ -89,13 +89,16 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-book-btn { position: absolute; inset: 0; background: none; border: none; padding: 0; margin: 0; cursor: pointer; perspective: 1500px; }
 .wz-book-btn:focus-visible { outline: none; }
 .wz-book3d {
-  --bx: calc((var(--st) - var(--cw2)) / 2); --by: 90deg; --bs: .9;
+  --bx: calc((var(--st) - var(--cw2)) / 2); --by: 90deg; --bs: .9; --bz: 0px;
   position: absolute; top: 0; left: 0; width: var(--cw2); height: var(--h);
-  transform-style: preserve-3d; transform: translate3d(var(--bx), 0, 0) rotateY(var(--by)) scale(var(--bs));
+  transform-style: preserve-3d; transform: translate3d(var(--bx), 0, var(--bz)) rotateY(var(--by)) scale(var(--bs));
   transition: transform .54s var(--wz-ease); will-change: transform;
 }
 .wz-slot.is-center .wz-book3d { --bs: 1; }
-.wz-slot.is-open .wz-book3d { --bx: 0; --by: -8deg; --bs: 1; }
+/* 선택된 책: 회전 강화 + 살짝 크게 + 시선 쪽으로 튀어나오기.
+   transform 만으로 강조 — filter 는 preserve-3d 컨테이너에 적용하면 3D 가 평면화돼 큐보이드가 깨짐. */
+.wz-slot.is-open .wz-book3d { --bx: 0; --by: -14deg; --bs: 1.05; --bz: 24px; }
+.wz-slot.is-open { z-index: 2; }
 
 .wz-book3d .f-front { width: var(--cw2); height: var(--h); transform: translateZ(calc(var(--st) / 2)); background: var(--spine); }
 .wz-book3d .f-front img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; }
