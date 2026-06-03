@@ -1249,10 +1249,12 @@
     bar.className = 'announcement-bar';
     bar.setAttribute('role', 'status');
     bar.innerHTML = `
-      <div class="announcement-bar-track" aria-live="polite">
-        <span class="announcement-bar-text"></span>
+      <div class="announcement-bar-inner">
+        <div class="announcement-bar-track" aria-live="polite">
+          <span class="announcement-bar-text"></span>
+        </div>
+        <button type="button" class="announcement-bar-close" aria-label="공지 닫기">×</button>
       </div>
-      <button type="button" class="announcement-bar-close" aria-label="공지 닫기">×</button>
     `;
     bar.querySelector('.announcement-bar-text').textContent = data.body;
     header.insertAdjacentElement('afterend', bar);

@@ -789,21 +789,23 @@ footer {
    site-common.js 가 활성 공지가 있을 때만 주입.
    ════════════════════════════════════════════════ */
 .announcement-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: var(--header-max-w, 1200px);
-  margin: 0 auto;
-  padding: 10px 24px;
   background: var(--bg-sub);
   border-bottom: 1px solid var(--border);
   font-size: 13px;
   color: var(--text);
-  overflow: hidden;
   transition: opacity .2s, transform .2s;
 }
 .announcement-bar.is-closing { opacity: 0; transform: translateY(-4px); }
+.announcement-bar-inner {
+  position: relative;
+  max-width: var(--header-max-w, 1200px);
+  margin: 0 auto;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
 .announcement-bar-track {
   flex: 1;
   min-width: 0;
@@ -848,10 +850,11 @@ footer {
 [data-theme="dark"] .announcement-bar-close:hover { background: rgba(255,255,255,0.06); }
 @media (prefers-reduced-motion: reduce) {
   .announcement-bar-text { animation: none; padding-left: 0; }
-  .announcement-bar { justify-content: center; }
+  .announcement-bar-inner { justify-content: center; }
 }
 @media (max-width: 640px) {
-  .announcement-bar { padding: 8px 16px; font-size: 12px; }
+  .announcement-bar-inner { padding: 8px 16px; }
+  .announcement-bar { font-size: 12px; }
 }
 
 /* ════════════════════════════════════════════════
