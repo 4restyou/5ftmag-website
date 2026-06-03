@@ -8,7 +8,7 @@
   --bg:           #ffffff;
   --bg-sub:       #f4f4f4;
   --text:         #000000;
-  --text-muted:   rgba(0, 0, 0, 0.65);
+  --text-muted:   rgba(0, 0, 0, 0.72);
   --border:       #e0e0e0;
 
   /* 매거진 정체성 컬러 */
@@ -114,7 +114,7 @@
   --bg:           #0c0c0c;
   --bg-sub:       #181818;
   --text:         #f0f0f0;
-  --text-muted:   rgba(240, 240, 240, 0.7);
+  --text-muted:   rgba(240, 240, 240, 0.78);
   --border:       #282828;
 
   /* semantic 컬러 — 다크 배경 위에서 가독성 + 톤 다운 */
