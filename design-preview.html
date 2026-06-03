@@ -104,8 +104,8 @@
 
     /* ════════════════════════════════════════════════
        시안 1: .filter-chip 활성 상태 강화
-       현재: 활성 시 배경 = var(--text), 글자 = var(--bg) — 이미 좋음 (보더만 변경 X 였음, 재검토)
-       제안: 활성 시 추가로 ✓ 마이크로 표식 / shadow 로 명확화
+       현재: 활성 시 배경 = var(--text), 글자 = var(--bg) — 검정 채움
+       제안: 활성 시 포인트 컬러(--accent: #FFE600) 채움 — 매거진 정체성과 일치, 시각 신호 강함
        ════════════════════════════════════════════════ */
     /* 현재 (사이트 stories.css / labs.css 기준 재현) */
     .demo-chip-current {
@@ -126,11 +126,9 @@
       color: var(--bg);
       border-color: var(--text);
     }
-    /* 제안: 활성 상태에 좌측 ✓ 인디케이터 + 가벼운 inner ring */
+    /* 제안: 활성 시 포인트 노란색 (--accent) 채움 + accent-text 검정 글자 */
     .demo-chip-after {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      display: inline-block;
       padding: 8px 18px;
       font-size: 14px;
       font-weight: var(--fw-heading);
@@ -143,15 +141,9 @@
       transition: all .15s;
     }
     .demo-chip-after.active {
-      background: var(--text);
-      color: var(--bg);
-      border-color: var(--text);
-      box-shadow: inset 0 0 0 2px var(--bg), 0 0 0 1px var(--text);
-    }
-    .demo-chip-after.active::before {
-      content: "✓";
-      font-size: 11px;
-      line-height: 1;
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
     }
 
     /* ════════════════════════════════════════════════
@@ -303,10 +295,11 @@
 
   <!-- ════════════════════ 시안 1 ════════════════════ -->
   <section class="preview-section">
-    <h2>1. 필터 칩 활성 상태 강화</h2>
+    <h2>1. 필터 칩 활성 상태 — 포인트 컬러</h2>
     <p class="why">
-      현재도 활성 시 배경·색 반전이 적용돼 보여요. 다만 활성/비활성 구분이 사진이 많은 컨텐츠 사이에서 가끔 묻혀요.
-      <strong>제안</strong>: 좌측 ✓ 마이크로 표식 + inner ring 으로 시각 무게 +1.
+      현재 활성 시 검정 채움. 사진 많은 컨텐츠 사이에서 묻힐 수 있어요.
+      <strong>제안</strong>: 활성 시 매거진 포인트 컬러 <code>--accent: #FFE600</code> 채움 + 검정 글자.
+      시각 신호도 강하고 매거진 정체성과도 일치.
     </p>
     <div class="preview-grid">
       <div class="preview-cell">
@@ -327,7 +320,7 @@
           <span class="demo-chip-after">흑백</span>
           <span class="demo-chip-after">슬라이드</span>
         </div>
-        <p class="preview-note">활성 표시: 배경 채움 + ✓ 표식 + inner ring 으로 강조.</p>
+        <p class="preview-note">활성 표시: 포인트 노란 채움 + 검정 글자. 차분하면서 시선 잡힘.</p>
       </div>
     </div>
   </section>
