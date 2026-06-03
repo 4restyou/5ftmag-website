@@ -9,13 +9,15 @@
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260603-states2">
-  <link rel="stylesheet" href="./css/common.css?v=20260603-states2">
+  <link rel="stylesheet" href="./css/common.css?v=20260603-navgap">
   <link rel="stylesheet" href="./css/webzine.css?v=20260603-themeslot">
   <style>
     /* 진짜 원인: header { z-index: 300 } 가 stacking context 라 그 안의
        메뉴는 부모 300 안에 갇혀, .wz-veil(2000) 아래로 paint 됨.
-       해결: header 자체 z-index 를 veil 위로 올림. 색 강제는 다크톤 유지. */
-    body.webzine-page header { z-index: 2100; }
+       해결: site header 만 veil 위로. (`> header` 로 직계만 — wz-intro
+       도 <header> 라서 일반 selector 면 같이 매치, DOM 뒤라 site header
+       위로 paint 돼 메뉴 가림.) 색 강제는 다크톤 유지. */
+    body.webzine-page > header { z-index: 2100; }
     body.webzine-page .nav-account-menu { background: #1a1a1a !important; border-color: #303030 !important; color: #f0f0f0 !important; }
     body.webzine-page .nav-account-menu a, body.webzine-page .nav-account-menu button { color: #f0f0f0 !important; }
     body.webzine-page .nav-account-menu a:hover, body.webzine-page .nav-account-menu button:hover { background: rgba(255,255,255,0.08) !important; }
