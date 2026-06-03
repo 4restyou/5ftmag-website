@@ -67,9 +67,9 @@
 }
 .filter-chip:hover { border-color: var(--text); }
 .filter-chip.active {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
 }
 
 /* ── 인트로 (films 문단 + 오른쪽 안내 박스) ── */

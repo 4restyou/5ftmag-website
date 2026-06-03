@@ -1528,8 +1528,9 @@ body.modal-open { overflow: hidden; }
   .next-issue-block .ni-title { font-size: 20px; }
   .next-issue-block .ni-desc { font-size: 12px; }
   .newsletter-bar { flex-direction: column; align-items: flex-start; }
-  .nl-form { width: 100%; }
-  .nl-form input { flex: 1; width: auto; }
+  .nl-form { width: 100%; flex-direction: column; gap: 10px; }
+  .nl-form input { flex: none; width: 100%; min-width: 0; }
+  .nl-form button { width: 100%; }
   .hero-about, .belief, .how-section, .contrib-section { padding: 48px 20px; }
   .hero-title { font-size: 32px; }
   .belief-quote { font-size: 22px; }

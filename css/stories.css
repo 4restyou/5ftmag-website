@@ -206,9 +206,9 @@
   border-color: var(--text);
 }
 .filter-chip.active {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
 }
 
 /* ── 아티클 그리드 (반응형 자동 확장) ──
