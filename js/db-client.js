@@ -1350,9 +1350,59 @@
     },
   };
 
+  const announcements = {
+    // 현재 활성(시간 범위 내) 공지 1개 — 가장 최근 created_at.
+    // RLS 가 already 활성·시간 범위만 노출하므로 한 번 더 limit 1.
+    async current() {
+      const c = client(); if (!c) return { data: null, error: null };
+      const { data, error } = await c
+        .from('announcements')
+        .select('id, body, starts_at, ends_at')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return { data: data || null, error };
+    },
+    // 관리: 전체 공지 (예약/지난/비활성 포함).
+    async listAll() {
+      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
+      const { data, error } = await c
+        .from('announcements')
+        .select('id, body, starts_at, ends_at, is_active, created_at')
+        .order('created_at', { ascending: false });
+      return { data: data || [], error };
+    },
+    async create({ body, starts_at, ends_at }) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const clean = String(body || '').trim();
+      if (!clean || clean.length > 500) return { error: { message: 'body 1~500자' } };
+      const uid = (await c.auth.getUser()).data?.user?.id || null;
+      const row = { body: clean, created_by: uid };
+      if (starts_at) row.starts_at = starts_at;
+      if (ends_at) row.ends_at = ends_at;
+      const { error } = await c.from('announcements').insert(row);
+      return { error };
+    },
+    async update(id, fields) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const patch = {};
+      if (typeof fields.body === 'string') patch.body = fields.body.trim();
+      if ('starts_at' in fields) patch.starts_at = fields.starts_at || null;
+      if ('ends_at' in fields) patch.ends_at = fields.ends_at || null;
+      if (typeof fields.is_active === 'boolean') patch.is_active = fields.is_active;
+      const { error } = await c.from('announcements').update(patch).eq('id', id);
+      return { error };
+    },
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { error } = await c.from('announcements').delete().eq('id', id);
+      return { error };
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements,
   };
 })();

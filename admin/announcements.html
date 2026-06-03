@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="light">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>웹진 관리 | 5ft magazine Admin</title>
+  <title>공지 관리 | 5ft magazine</title>
   <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="shortcut icon" href="../img/favicon/favicon.ico">
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css?v=20260603-states2">
   <link rel="stylesheet" href="../css/common.css?v=20260603-announce">
@@ -29,36 +29,36 @@
     .gate p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
     .gate-btn { font: inherit; font-weight: var(--fw-heading); font-size: 14px; padding: 12px 24px; background: var(--text); color: var(--bg); border: none; border-radius: var(--btn-radius); cursor: pointer; }
     main { max-width: 980px; margin: 0 auto; padding: 24px; }
-    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-    .toolbar .count { color: var(--text-muted); font-size: 13px; }
-    .toolbar .primary-btn { margin-left: auto; font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: var(--btn-radius); border: none; background: var(--text); color: var(--bg); cursor: pointer; }
-    table.wz-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .wz-table th, .wz-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .wz-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
-    .wz-table .col-title { font-weight: var(--fw-heading); }
-    .wz-table .col-actions { text-align: right; white-space: nowrap; }
-    .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; border-radius: 2px; }
-    .badge.live { background: #052e16; color: #86efac; }
-    .row-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); cursor: pointer; margin-left: 6px; }
-    .row-btn:hover { border-color: var(--text); }
-    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
-    .empty { padding: 32px; text-align: center; color: var(--text-muted); }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-start; justify-content: center; z-index: 1000; padding: 40px 16px; overflow-y: auto; }
-    .modal.open { display: flex; }
-    .modal-box { background: var(--bg); border-radius: 6px; max-width: 560px; width: 100%; padding: 24px; }
-    .modal-box h2 { margin: 0 0 16px; font-size: 18px; font-weight: var(--fw-heading); }
+    .panel { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 6px; padding: 20px; margin-bottom: 24px; }
+    .panel h2 { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: 0.04em; margin: 0 0 14px; }
     .form-row { display: grid; grid-template-columns: 110px 1fr; gap: 8px 14px; align-items: start; margin-bottom: 12px; }
     .form-row label { font-size: 13px; color: var(--text-muted); padding-top: 6px; }
-    .form-row input[type=text], .form-row input[type=number], .form-row textarea { font: inherit; font-size: 14px; padding: 8px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); width: 100%; }
-    .form-row textarea { min-height: 72px; resize: vertical; }
+    .form-row textarea, .form-row input[type=datetime-local] { font: inherit; font-size: 14px; padding: 8px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); width: 100%; }
+    .form-row textarea { min-height: 64px; resize: vertical; }
     .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
     .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: var(--btn-radius); cursor: pointer; }
-    .form-actions .cancel { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
     .form-actions .save { background: var(--text); color: var(--bg); border: none; }
     .form-actions .save:disabled { opacity: 0.55; cursor: progress; }
     .form-msg { font-size: 12px; color: var(--text-muted); margin-top: 10px; min-height: 1em; }
     .form-msg.error { color: #b91c1c; }
+    .form-msg.ok { color: #14532d; }
+    [data-theme="dark"] .form-msg.ok { color: #86efac; }
+    table.adm-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .adm-table th, .adm-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .adm-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .adm-table .col-body { line-height: 1.5; }
+    .adm-table .col-time { white-space: nowrap; font-size: 12px; color: var(--text-muted); }
+    .adm-table .col-actions { text-align: right; white-space: nowrap; }
+    .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; border-radius: 2px; }
+    .badge.live { background: #052e16; color: #86efac; }
+    .badge.scheduled { background: #1e3a8a; color: #bfdbfe; }
+    .badge.expired { background: var(--bg-sub); color: var(--text-muted); }
+    .badge.inactive { background: #7f1d1d; color: #fecaca; }
+    .row-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); cursor: pointer; margin-left: 6px; }
+    .row-btn:hover { border-color: var(--text); }
+    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+    .empty { padding: 32px; text-align: center; color: var(--text-muted); }
     @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -96,19 +96,19 @@
 <div class="admin-header">
   <a class="admin-back" href="../index.html">← 5ft magazine 으로</a>
   <div class="admin-title-row">
-    <h1 class="admin-title">웹진 관리</h1>
+    <h1 class="admin-title">공지 관리</h1>
     <span class="admin-user" id="adminUser">불러오는 중…</span>
   </div>
   <nav class="admin-subnav" aria-label="편집부 페이지">
     <a href="submissions.html" class="admin-subnav-link">투고 검토</a>
     <a href="market-reports.html" class="admin-subnav-link">매물 신고</a>
     <a href="comments.html" class="admin-subnav-link">댓글</a>
-    <a href="announcements.html" class="admin-subnav-link">공지</a>
+    <a href="announcements.html" class="admin-subnav-link is-current">공지</a>
     <a href="camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
     <a href="films.html" class="admin-subnav-link">필름 카탈로그</a>
     <a href="labs.html" class="admin-subnav-link">현상소</a>
     <a href="repairs.html" class="admin-subnav-link">수리실</a>
-    <a href="webzine.html" class="admin-subnav-link is-current">웹진</a>
+    <a href="webzine.html" class="admin-subnav-link">웹진</a>
     <a href="analytics.html" class="admin-subnav-link">통계</a>
   </nav>
 </div>
@@ -120,87 +120,54 @@
 </div>
 
 <main id="app" hidden>
-  <div class="toolbar">
-    <span class="count" id="count">·</span>
-    <button type="button" class="primary-btn" id="newBtn">+ 새 웹진</button>
-  </div>
-  <table class="wz-table">
-    <thead>
-      <tr><th>제목</th><th>호</th><th>분류</th><th>상태</th><th>정렬</th><th></th></tr>
-    </thead>
-    <tbody id="tbody">
-      <tr><td colspan="6" class="empty">불러오는 중…</td></tr>
-    </tbody>
-  </table>
-</main>
-
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal-box">
-    <h2 id="modalTitle">새 웹진</h2>
-    <form id="wzForm">
-      <input type="hidden" id="f-id" value="" />
+  <div class="panel">
+    <h2>새 공지 등록</h2>
+    <form id="newForm">
       <div class="form-row">
-        <label for="f-title">제목 *</label>
-        <input type="text" id="f-title" required placeholder="5ft magazine Vol.01" />
-      </div>
-      <div class="form-row">
-        <label for="f-issue">호 라벨</label>
-        <input type="text" id="f-issue" placeholder="Vol.01" />
-      </div>
-      <div class="form-row">
-        <label for="f-category">분류</label>
+        <label for="f-body">본문 *</label>
         <div>
-          <input type="text" id="f-category" placeholder="시즌 1" />
-          <div class="hint">같은 분류끼리 한 줄(책장)로 묶여 표시돼요. 비우면 기본 줄에 들어갑니다.</div>
+          <textarea id="f-body" required maxlength="500" placeholder="공지 내용을 입력하세요. (최대 500자)"></textarea>
+          <div class="hint">사이트 상단에 마퀴(좌→우 흐르기) 배너로 표시돼요.</div>
         </div>
       </div>
       <div class="form-row">
-        <label for="f-desc">소개</label>
-        <textarea id="f-desc" placeholder="쇼케이스에 들어갈 짧은 소개 문구"></textarea>
-      </div>
-      <div class="form-row">
-        <label for="f-slug">slug *</label>
+        <label for="f-starts">시작</label>
         <div>
-          <input type="text" id="f-slug" required placeholder="vol-01" />
-          <div class="hint">URL 식별자(영문·숫자·하이픈). 비우면 제목에서 자동 생성.</div>
+          <input type="datetime-local" id="f-starts" />
+          <div class="hint">비우면 즉시 시작. 미래 시각을 넣으면 그 때부터 표시 (예약).</div>
         </div>
       </div>
       <div class="form-row">
-        <label for="f-sort">정렬</label>
-        <input type="number" id="f-sort" value="0" />
-      </div>
-      <div class="form-row">
-        <label for="f-cover">표지 이미지</label>
+        <label for="f-ends">종료</label>
         <div>
-          <input type="file" id="f-cover" accept="image/jpeg,image/png,image/webp" />
-          <div class="hint" id="cover-hint"></div>
+          <input type="datetime-local" id="f-ends" />
+          <div class="hint">비우면 무기한 (수동 비활성화 또는 삭제 전까지).</div>
         </div>
       </div>
-      <div class="form-row">
-        <label for="f-pdf">PDF</label>
-        <div>
-          <input type="file" id="f-pdf" accept="application/pdf" />
-          <div class="hint" id="pdf-hint">웹용으로 최적화한 PDF 권장(최대 60MB).</div>
-        </div>
-      </div>
-      <div class="form-row">
-        <label for="f-pub">발행</label>
-        <div><label style="display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--text)"><input type="checkbox" id="f-pub" /> 공개(체크 시 사이트에 노출)</label></div>
+      <div class="form-actions">
+        <button type="submit" class="save" id="saveBtn">등록</button>
       </div>
       <div class="form-msg" id="formMsg"></div>
-      <div class="form-actions">
-        <button type="button" class="cancel" id="cancelBtn">취소</button>
-        <button type="submit" class="save" id="saveBtn">저장</button>
-      </div>
     </form>
   </div>
-</div>
+
+  <div class="panel" style="padding: 0; overflow: hidden;">
+    <table class="adm-table">
+      <thead>
+        <tr><th>상태</th><th>본문</th><th>시작</th><th>종료</th><th></th></tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5" class="empty">불러오는 중…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db-client.js?v=20260603-announce"></script>
 <script src="../js/util.js?v=20260602-normalize"></script>
-  <script src="../js/site-common.js?v=20260603-announce"></script>
-<script src="../js/admin-webzine-page.js?v=20260528-cat"></script>
+<script src="../js/site-common.js?v=20260603-announce"></script>
+<script src="../js/admin-announcements-page.js?v=20260603-announce"></script>
 
 </body>
 </html>
