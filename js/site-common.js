@@ -1232,6 +1232,12 @@
     } catch {}
   }
   async function setupAnnouncementBar() {
+    // MagDB / supabase 가 늦게 로드되는 페이지(index.html 처럼 site-common.js
+    // 가 db-client.js 보다 먼저 defer 로 선언된 경우) 대비 polling.
+    for (let i = 0; i < 50; i++) {
+      if (window.MagDB && window.MagDB.announcements && window.MagDB.isReady && window.MagDB.isReady()) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
     if (!window.MagDB || !window.MagDB.announcements) return;
     const { data } = await window.MagDB.announcements.current();
     if (!data) return;
