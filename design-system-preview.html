@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>디자인 시스템 시안 | 5ft magazine</title>
+  <meta name="description" content="타이포·컬러·에디토리얼 위계 시스템 시안 (내부 검토용).">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <link rel="shortcut icon" href="img/favicon/favicon.ico">
+
+  <script src="./js/theme-init.js"></script>
+  <link rel="stylesheet" href="./pretendard.css" />
+  <link rel="stylesheet" href="./css/tokens.css?v=20260603-states">
+  <link rel="stylesheet" href="./css/common.css?v=20260603-overflow">
+
+  <style>
+    /* ── 시안 페이지 공통 ── */
+    .preview-wrap { max-width: 1080px; margin: 0 auto; padding: 40px 20px 80px; }
+    .preview-intro h1 { font-size: clamp(22px, 3vw, 32px); margin-bottom: 12px; }
+    .preview-intro p { font-size: 14px; line-height: 1.65; color: var(--text-muted); }
+    .preview-section { margin: 56px 0; padding-top: 32px; border-top: 1px solid var(--border); }
+    .preview-section > h2 { font-size: 22px; margin-bottom: 8px; }
+    .preview-section > .why { font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 28px; }
+    .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 640px) { .preview-grid { grid-template-columns: 1fr; } }
+    .preview-cell { border: 1px solid var(--border); border-radius: 8px; padding: 24px; background: var(--bg); }
+    .preview-cell h3 { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 20px; }
+    .preview-cell h3.is-after { color: var(--text); }
+    .preview-note { margin-top: 14px; font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+    .preview-toggle { display: inline-block; margin-top: 24px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; color: var(--text); background: var(--bg); cursor: pointer; }
+    code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 0.85em; padding: 1px 4px; background: var(--bg-sub); border-radius: 2px; }
+
+    /* ════════════════════════════════════════════════
+       시안 A · 타이포그래피 시스템
+       현재: h2 큼 + body 19px + meta 14px 식의 정성적 단계
+       제안: Modular Scale 1.25 — 명확한 비율 (32 / 24 / 19 / 16 / 13)
+       ════════════════════════════════════════════════ */
+    .type-current h1 { font-size: 36px; line-height: 1.2; margin-bottom: 8px; }
+    .type-current h2 { font-size: 22px; line-height: 1.2; margin-bottom: 6px; }
+    .type-current h3 { font-size: 17px; line-height: 1.2; margin-bottom: 8px; }
+    .type-current .lead { font-size: 19px; line-height: 1.55; color: var(--text-muted); margin-bottom: 14px; }
+    .type-current .body { font-size: 19px; line-height: 1.2; margin-bottom: 8px; }
+    .type-current .meta { font-size: 14px; color: var(--text-muted); }
+
+    /* 제안: Modular Scale 1.25 + line-height 정교화 */
+    .type-after h1 { font-size: 32px; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .type-after h2 { font-size: 24px; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 10px; }
+    .type-after h3 { font-size: 19px; line-height: 1.25; margin-bottom: 10px; }
+    .type-after .lead { font-size: 17px; line-height: 1.55; color: var(--text); margin-bottom: 14px; font-weight: 500; }
+    .type-after .body { font-size: 16px; line-height: 1.65; margin-bottom: 10px; }
+    .type-after .meta { font-size: 13px; line-height: 1.5; color: var(--text-muted); letter-spacing: 0.02em; }
+
+    .type-scale { display: grid; grid-template-columns: 80px 1fr; gap: 8px 14px; font-family: monospace; font-size: 12px; align-items: center; }
+    .type-scale .label { color: var(--text-muted); }
+
+    /* ════════════════════════════════════════════════
+       시안 B · 컬러 시스템 (Semantic + Surface 계층)
+       현재: text / text-muted / bg / bg-sub / border / accent — 6개
+       제안: 위계 더 명확. surface 3단계, text 3단계, semantic state
+       ════════════════════════════════════════════════ */
+    .swatch { display: grid; grid-template-columns: 120px 1fr 100px; gap: 12px; align-items: center; padding: 8px 0; font-size: 12px; }
+    .swatch-chip { width: 100%; height: 32px; border-radius: 4px; border: 1px solid var(--border); }
+    .swatch .name { font-weight: var(--fw-heading); }
+    .swatch .val { font-family: monospace; color: var(--text-muted); text-align: right; font-size: 11px; }
+
+    /* 현재 컬러 */
+    .swatch-current-text     { background: var(--text); }
+    .swatch-current-text-muted { background: var(--text-muted); }
+    .swatch-current-bg       { background: var(--bg); }
+    .swatch-current-bg-sub   { background: var(--bg-sub); }
+    .swatch-current-border   { background: var(--border); }
+    .swatch-current-accent   { background: var(--accent); }
+
+    /* 제안 컬러 (추가 토큰만 — 실제 적용 시 tokens.css 에 정의) */
+    [data-theme="light"] .swatch-after-text-1     { background: rgba(0, 0, 0, 1); }
+    [data-theme="light"] .swatch-after-text-2     { background: rgba(0, 0, 0, 0.72); }
+    [data-theme="light"] .swatch-after-text-3     { background: rgba(0, 0, 0, 0.55); }
+    [data-theme="light"] .swatch-after-surface-0  { background: #ffffff; }
+    [data-theme="light"] .swatch-after-surface-1  { background: #f7f7f5; }
+    [data-theme="light"] .swatch-after-surface-2  { background: #ededea; }
+    [data-theme="light"] .swatch-after-border-strong { background: #d0d0cc; }
+    [data-theme="light"] .swatch-after-border-soft   { background: #ededea; }
+    [data-theme="light"] .swatch-after-accent     { background: #FFE600; }
+    [data-theme="light"] .swatch-after-success    { background: #1f8a4d; }
+    [data-theme="light"] .swatch-after-danger     { background: #c43a3a; }
+
+    [data-theme="dark"] .swatch-after-text-1     { background: rgba(240, 240, 240, 1); }
+    [data-theme="dark"] .swatch-after-text-2     { background: rgba(240, 240, 240, 0.78); }
+    [data-theme="dark"] .swatch-after-text-3     { background: rgba(240, 240, 240, 0.55); }
+    [data-theme="dark"] .swatch-after-surface-0  { background: #0c0c0c; }
+    [data-theme="dark"] .swatch-after-surface-1  { background: #161616; }
+    [data-theme="dark"] .swatch-after-surface-2  { background: #232323; }
+    [data-theme="dark"] .swatch-after-border-strong { background: #383838; }
+    [data-theme="dark"] .swatch-after-border-soft   { background: #232323; }
+    [data-theme="dark"] .swatch-after-accent     { background: #FFE600; }
+    [data-theme="dark"] .swatch-after-success    { background: #2ea862; }
+    [data-theme="dark"] .swatch-after-danger     { background: #e15d5d; }
+
+    /* ════════════════════════════════════════════════
+       시안 C · 에디토리얼 시각 위계
+       Kicker, Lead, Dropcap, Pull-quote 매거진 4 요소
+       ════════════════════════════════════════════════ */
+    .ed-mock { max-width: 540px; line-height: 1.6; }
+
+    /* 현재 톤 (단순 본문) */
+    .ed-current .kicker { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .ed-current h1 { font-size: 24px; line-height: 1.2; margin-bottom: 8px; }
+    .ed-current .byline { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
+    .ed-current .body { font-size: 16px; line-height: 1.65; margin-bottom: 14px; }
+    .ed-current .quote { font-size: 16px; color: var(--text-muted); font-style: italic; border-left: 3px solid var(--border); padding-left: 14px; margin: 18px 0; }
+
+    /* 제안: kicker 정체성·dropcap·lead·pull-quote 풀세트 */
+    .ed-after .kicker {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--fw-heading);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-text);
+      background: var(--accent);
+      padding: 3px 8px;
+      border-radius: 2px;
+      margin-bottom: 14px;
+    }
+    .ed-after h1 {
+      font-size: 32px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .ed-after .byline {
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ed-after .lead {
+      font-size: 19px;
+      line-height: 1.55;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .ed-after .body { font-size: 16px; line-height: 1.7; margin-bottom: 16px; }
+    .ed-after .body:first-of-type::first-letter {
+      font-size: 3.6em;
+      float: left;
+      line-height: 0.92;
+      padding: 4px 10px 0 0;
+      font-weight: var(--fw-heading);
+      color: var(--text);
+    }
+    .ed-after .pull-quote {
+      font-family: var(--font);
+      font-size: 22px;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+      font-weight: var(--fw-heading);
+      color: var(--text);
+      margin: 28px 0;
+      padding: 18px 0 18px 18px;
+      border-left: 3px solid var(--accent);
+    }
+    .ed-after .pull-quote::before { content: "" "; font-size: 1.2em; opacity: 0.4; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="site-logo"><img src="./img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="./img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="stories.html">Articles</a></li>
+      <li><a href="films.html">Films</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+    </div>
+  </div>
+</header>
+
+<main class="preview-wrap">
+
+  <div class="preview-intro">
+    <h1>디자인 시스템 시안</h1>
+    <p>
+      디자인 점수 87 → 90+ 진입을 위한 시스템 단위 제안. 본체 안 건드린 noindex 페이지.
+      A 타이포 / B 컬러 / C 에디토리얼 — 세 큰 틀. 우상단 ☽ 로 다크 모드 토글.
+      통과한 시안만 본체 적용 PR 로 분리.
+    </p>
+  </div>
+
+  <!-- ════════════════════ 시안 A : 타이포 ════════════════════ -->
+  <section class="preview-section">
+    <h2>A. 타이포그래피 시스템 (Modular Scale 1.25)</h2>
+    <p class="why">
+      현재 사이즈는 정성적 결정 (h1 36 / h2 22 / body 19 / meta 14). 비율 일관성 없음.
+      <strong>제안</strong>: 1.25 비율 modular scale (32 / 24 / 19 / 16 / 13). line-height 도 위계별
+      정교화 (heading 1.15~1.25, body 1.65~1.7). 매거진 가독성 + 시각 리듬 ↑.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재</h3>
+        <div class="type-current">
+          <h1>제목 — Heading 1</h1>
+          <h2>서브 제목 — Heading 2</h2>
+          <h3>소제목 — Heading 3</h3>
+          <p class="lead">도입부. 글을 시작하며 분위기를 잡는 한 두 문장의 리드 텍스트입니다.</p>
+          <p class="body">본문은 19px 입니다. 한국어 가독성을 위해 word-break: keep-all 과 line-height 조정이 필요해요. 가끔 줄간이 좁아 답답한 느낌을 줍니다.</p>
+          <p class="meta">2026.06.01 · 박순렬 · Comments 12</p>
+        </div>
+        <p class="preview-note">사이즈 비율: 36/22/17/19/14 — 일관 X.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안</h3>
+        <div class="type-after">
+          <h1>제목 — Heading 1</h1>
+          <h2>서브 제목 — Heading 2</h2>
+          <h3>소제목 — Heading 3</h3>
+          <p class="lead">도입부. 글을 시작하며 분위기를 잡는 한 두 문장의 리드 텍스트입니다.</p>
+          <p class="body">본문은 16px 입니다. line-height 1.65 로 한국어 가독성 안정. 매거진처럼 호흡감 있는 문단.</p>
+          <p class="meta">2026.06.01 · 박순렬 · Comments 12</p>
+        </div>
+        <p class="preview-note">사이즈 비율: 32/24/19/16/13 — modular scale 1.25 일관.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 28px; padding: 20px; background: var(--bg-sub); border-radius: 8px;">
+      <h3 style="font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;">제안 스케일</h3>
+      <div class="type-scale">
+        <span class="label">h1</span>     <span>32px · 1.15 · -0.02em</span>
+        <span class="label">h2</span>     <span>24px · 1.2 · -0.01em</span>
+        <span class="label">h3</span>     <span>19px · 1.25</span>
+        <span class="label">lead</span>   <span>17px · 1.55 · weight 500</span>
+        <span class="label">body</span>   <span>16px · 1.65</span>
+        <span class="label">meta</span>   <span>13px · 1.5 · letter +0.02em</span>
+        <span class="label">micro</span>  <span>11px · 1.4 · letter +0.06em</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 시안 B : 컬러 ════════════════════ -->
+  <section class="preview-section">
+    <h2>B. 컬러 시스템 (Surface 계층 + Semantic 추가)</h2>
+    <p class="why">
+      현재 토큰 6개 (text / text-muted / bg / bg-sub / border / accent). 위계 표현 한계.
+      <strong>제안</strong>: text 3 단계, surface 3 단계, border 2 종, semantic state (success / danger) 추가.
+      매거진 카드·모달·툴팁의 깊이감 명확.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재 (6 토큰)</h3>
+        <div class="swatch"><span class="name">text</span><span class="swatch-chip swatch-current-text"></span><span class="val">#000</span></div>
+        <div class="swatch"><span class="name">text-muted</span><span class="swatch-chip swatch-current-text-muted"></span><span class="val">0.72α</span></div>
+        <div class="swatch"><span class="name">bg</span><span class="swatch-chip swatch-current-bg"></span><span class="val">#fff</span></div>
+        <div class="swatch"><span class="name">bg-sub</span><span class="swatch-chip swatch-current-bg-sub"></span><span class="val">#f4f4f4</span></div>
+        <div class="swatch"><span class="name">border</span><span class="swatch-chip swatch-current-border"></span><span class="val">#e0e0e0</span></div>
+        <div class="swatch"><span class="name">accent</span><span class="swatch-chip swatch-current-accent"></span><span class="val">#FFE600</span></div>
+        <p class="preview-note">위계 두 단계 (bg / bg-sub). 매거진 카드 위 카드 같은 3 단계 표현 불가.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안 (11 토큰)</h3>
+        <div class="swatch"><span class="name">text-1</span><span class="swatch-chip swatch-after-text-1"></span><span class="val">제목</span></div>
+        <div class="swatch"><span class="name">text-2</span><span class="swatch-chip swatch-after-text-2"></span><span class="val">본문 + 메타</span></div>
+        <div class="swatch"><span class="name">text-3</span><span class="swatch-chip swatch-after-text-3"></span><span class="val">placeholder</span></div>
+        <div class="swatch"><span class="name">surface-0</span><span class="swatch-chip swatch-after-surface-0"></span><span class="val">페이지 bg</span></div>
+        <div class="swatch"><span class="name">surface-1</span><span class="swatch-chip swatch-after-surface-1"></span><span class="val">섹션 bg</span></div>
+        <div class="swatch"><span class="name">surface-2</span><span class="swatch-chip swatch-after-surface-2"></span><span class="val">카드/모달</span></div>
+        <div class="swatch"><span class="name">border-soft</span><span class="swatch-chip swatch-after-border-soft"></span><span class="val">구분선</span></div>
+        <div class="swatch"><span class="name">border-strong</span><span class="swatch-chip swatch-after-border-strong"></span><span class="val">input</span></div>
+        <div class="swatch"><span class="name">accent</span><span class="swatch-chip swatch-after-accent"></span><span class="val">매거진 포인트</span></div>
+        <div class="swatch"><span class="name">success</span><span class="swatch-chip swatch-after-success"></span><span class="val">알림 ✓</span></div>
+        <div class="swatch"><span class="name">danger</span><span class="swatch-chip swatch-after-danger"></span><span class="val">에러</span></div>
+        <p class="preview-note">surface 3 단계로 카드 in 카드 표현. semantic state 통일 (현재는 hex 박혀 있음).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 시안 C : 에디토리얼 ════════════════════ -->
+  <section class="preview-section">
+    <h2>C. 에디토리얼 시각 위계</h2>
+    <p class="why">
+      현재 글 페이지는 본문 위주의 평면 구성. 매거진 정체성을 시각적으로 드러내는 요소 (kicker / lead / dropcap / pull-quote) 가 부재.
+      <strong>제안</strong>: 4 가지 매거진 컴포넌트로 글의 호흡 + 시각 리듬 + 매거진 톤 강화.
+    </p>
+    <div class="preview-grid">
+      <div class="preview-cell">
+        <h3>현재</h3>
+        <article class="ed-mock ed-current">
+          <span class="kicker">essay · vol.02</span>
+          <h1>한 롤의 길이로 담는 마음</h1>
+          <p class="byline">박순렬 · 2026.06.01</p>
+          <p class="body">필름 한 롤은 정확히 36 컷. 한 달의 일상, 한 도시의 인상, 한 사람의 표정을 그 안에 담는다. 디지털은 무한히 찍을 수 있지만, 36 컷은 우리에게 선택을 강요한다. 그 강요가 사진가의 시선을 만든다.</p>
+          <p class="quote">36 컷 안에서 우리는 더 분명해진다.</p>
+          <p class="body">이번 호에서는 다섯 명의 사진가가 한 롤씩을 우리에게 보냈다. 같은 주제, 다른 시선. 같은 한 롤, 다른 36 가지 결정.</p>
+        </article>
+        <p class="preview-note">정보는 있으나 매거진다운 시각 위계 약함. 본문이 균질.</p>
+      </div>
+      <div class="preview-cell">
+        <h3 class="is-after">제안</h3>
+        <article class="ed-mock ed-after">
+          <span class="kicker">essay · vol.02</span>
+          <h1>한 롤의 길이로 담는 마음</h1>
+          <p class="byline">박순렬 · 2026.06.01 · 5분 읽기</p>
+          <p class="lead">필름 한 롤은 정확히 36 컷. 그 제한이 만들어내는 시선이 있다.</p>
+          <p class="body">필름 한 롤은 정확히 36 컷이다. 한 달의 일상, 한 도시의 인상, 한 사람의 표정을 그 안에 담는다. 디지털은 무한히 찍을 수 있지만, 36 컷은 우리에게 선택을 강요한다. 그 강요가 사진가의 시선을 만든다.</p>
+          <blockquote class="pull-quote">36 컷 안에서 우리는 더 분명해진다.</blockquote>
+          <p class="body">이번 호에서는 다섯 명의 사진가가 한 롤씩을 우리에게 보냈다. 같은 주제, 다른 시선. 같은 한 롤, 다른 36 가지 결정.</p>
+        </article>
+        <p class="preview-note">kicker 노란 라벨 / lead 굵은 도입부 / dropcap 본문 첫 글자 / pull-quote 노란 라인 강조 인용구.</p>
+      </div>
+    </div>
+  </section>
+
+  <button type="button" class="preview-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">다크 / 라이트 토글</button>
+
+</main>
+
+<footer style="padding:24px 20px;text-align:center;font-size:12px;color:var(--text-muted);">
+  내부 검토용 시안 페이지 · noindex
+</footer>
+
+<script src="./js/util.js?v=20260602-normalize"></script>
+<script src="./js/site-common.js?v=20260531-search"></script>
+
+</body>
+</html>
