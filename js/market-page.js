@@ -14,6 +14,7 @@ const STATE = {
   rows: [],
   filter: 'all',
   search: '',
+  hideSold: true,      // true: 판매중·예약중만 / false: 전체 (판매완료 포함)
   detailId: null,
   galleryIndex: 0,
   editId: null,        // 수정 모드일 때 listing id
@@ -119,8 +120,12 @@ async function loadList() {
 function renderFilterChips() {
   const bar = $('marketFilter');
   if (!bar) return;
-  const counts = { all: STATE.rows.length };
-  for (const r of STATE.rows) counts[r.category] = (counts[r.category] || 0) + 1;
+  // hideSold 활성 시 sold 매물은 카운트에서도 제외 — 칩 숫자와 그리드 결과 일치
+  const visibleRows = STATE.hideSold
+    ? STATE.rows.filter(r => r.status !== 'sold')
+    : STATE.rows;
+  const counts = { all: visibleRows.length };
+  for (const r of visibleRows) counts[r.category] = (counts[r.category] || 0) + 1;
   bar.innerHTML = CATEGORIES
     .filter(c => c.key === 'all' || counts[c.key])
     .map(c => `
@@ -138,9 +143,18 @@ function renderFilterChips() {
   });
 }
 
+function renderStatusToggle() {
+  const btn = $('marketStatusToggle');
+  if (!btn) return;
+  const labelEl = btn.querySelector('.market-status-toggle-label');
+  btn.setAttribute('aria-pressed', STATE.hideSold ? 'true' : 'false');
+  if (labelEl) labelEl.textContent = STATE.hideSold ? '판매중만' : '전체 보기';
+}
+
 function applyFilters() {
   const q = STATE.search.trim().toLowerCase();
   return STATE.rows.filter(r => {
+    if (STATE.hideSold && r.status === 'sold') return false;
     if (STATE.filter !== 'all' && r.category !== STATE.filter) return false;
     if (q) {
       const hay = (r.title + ' ' + (r.description || '') + ' ' + (r.location || '')).toLowerCase();
@@ -864,6 +878,13 @@ $('marketSearch').addEventListener('input', (e) => {
   STATE.search = e.target.value;
   renderGrid();
 });
+$('marketStatusToggle')?.addEventListener('click', () => {
+  STATE.hideSold = !STATE.hideSold;
+  renderStatusToggle();
+  renderFilterChips();
+  renderGrid();
+});
+renderStatusToggle();
 $('marketGrid').addEventListener('click', (e) => {
   if (!e.target.closest('[data-action="retry-market"]')) return;
   loadList();

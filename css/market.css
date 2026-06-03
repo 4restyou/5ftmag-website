@@ -103,6 +103,59 @@
   width: 100%;                  /* 모바일 기본 — 한 줄 차지 */
   margin-left: 0;
 }
+
+/* ── 2행: 카테고리 가로 스크롤 + 상태 토글 ── */
+.market-secondary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 24px;
+}
+.market-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  white-space: nowrap;
+  /* 오른쪽 끝 살짝 페이드 — 더 있다는 신호 */
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+}
+.market-filter::-webkit-scrollbar { display: none; }
+.market-secondary .market-category-chip { flex: 0 0 auto; }
+
+.market-status-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--chip-radius);
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.market-status-toggle:hover { color: var(--text); border-color: var(--text); }
+.market-status-toggle[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+@media (max-width: 640px) {
+  .market-secondary { gap: 8px; }
+  .market-status-toggle { padding: 7px 12px; font-size: 12px; }
+}
 .market-category-chip {
   display: inline-flex;
   align-items: center;
