@@ -13,6 +13,7 @@ alter table public.user_notifications
     'submission_approved',
     'submission_rejected',
     'submission_deleted',
+    'submission_pending_editor',
     'listing_hidden',
     'listing_restored',
     'comment_reply'
