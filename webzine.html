@@ -11,6 +11,14 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260603-states2">
   <link rel="stylesheet" href="./css/common.css?v=20260603-states2">
   <link rel="stylesheet" href="./css/webzine.css?v=20260603-bodyclass">
+  <style>
+    /* 메뉴 묻힘 hot-fix — 캐시 충돌 대비 inline 으로 다크 톤 강제 */
+    body.webzine-page .nav-account-menu { background: #1a1a1a !important; border-color: #303030 !important; color: #f0f0f0 !important; }
+    body.webzine-page .nav-account-menu a, body.webzine-page .nav-account-menu button { color: #f0f0f0 !important; }
+    body.webzine-page .nav-account-menu a:hover, body.webzine-page .nav-account-menu button:hover { background: rgba(255,255,255,0.08) !important; }
+    body.webzine-page .mobile-nav { background: #0e0c10 !important; border-bottom-color: #303030 !important; }
+    body.webzine-page .mobile-nav a { color: #f0f0f0 !important; border-bottom-color: #1f1d24 !important; }
+  </style>
   <script>try{if((localStorage.getItem('5ftTheme')||'light')==='dark')document.documentElement.style.setProperty('--wz-veil-bg','#0c0c0c');}catch(e){}</script>
 </head>
 <body class="webzine-page">
