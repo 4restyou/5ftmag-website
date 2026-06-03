@@ -1231,6 +1231,13 @@
       localStorage.setItem(DISMISS_KEY, JSON.stringify(arr));
     } catch {}
   }
+  // 본문에서 `**굵게**` 만 <strong> 으로. 다른 HTML 은 모두 escape (XSS 방지).
+  function renderAnnouncementBody(raw) {
+    const escaped = String(raw || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    return escaped.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+  }
   async function setupAnnouncementBar() {
     // MagDB / supabase 가 늦게 로드되는 페이지(index.html 처럼 site-common.js
     // 가 db-client.js 보다 먼저 defer 로 선언된 경우) 대비 polling.
@@ -1256,7 +1263,7 @@
         <button type="button" class="announcement-bar-close" aria-label="공지 닫기">×</button>
       </div>
     `;
-    bar.querySelector('.announcement-bar-text').textContent = data.body;
+    bar.querySelector('.announcement-bar-text').innerHTML = renderAnnouncementBody(data.body);
     header.insertAdjacentElement('afterend', bar);
 
     // 텍스트가 트랙보다 짧으면 마퀴 비활성 (가운데 정렬로 보임)
