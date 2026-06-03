@@ -8,6 +8,34 @@
   const root = document.getElementById('wzSeasons');
   if (!root) return;
 
+  // ── Lenis smooth scroll (Darkroom Engineering) ──
+  // 책장(.wz-shelf) 사이를 부드럽게 훑는 영화관 / 미술관 결로 매거진 톤 강화.
+  // prefers-reduced-motion 사용자는 native scroll 유지.
+  const _reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let lenis = null;
+  if (!_reducedMotion && window.Lenis) {
+    try {
+      lenis = new window.Lenis({
+        duration: 1.1,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        smoothTouch: false, // 모바일 momentum scroll 은 native 가 익숙
+      });
+      const _raf = (time) => { lenis.raf(time); requestAnimationFrame(_raf); };
+      requestAnimationFrame(_raf);
+    } catch (_) { lenis = null; }
+  }
+  // 공용 smooth-scroll helper. Lenis 있으면 lenis.scrollTo, 없으면 native fallback.
+  function smoothScrollIntoView(el, opts = {}) {
+    if (!el) return;
+    if (lenis) {
+      const offset = (opts.block === 'start') ? 0 : -80; // sticky header 보정
+      lenis.scrollTo(el, { offset });
+    } else {
+      el.scrollIntoView({ behavior: 'auto', block: opts.block || 'nearest', inline: 'nearest' });
+    }
+  }
+
   function db() { return window.MagDB; }
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   const FALLBACK = ['#7a3b52', '#3f5a78', '#6b5036', '#4a6b4f', '#5a4a78', '#8a4a32'];
@@ -207,7 +235,7 @@
       const topLimit = 72;
       const bottomLimit = window.innerHeight - 24;
       if (rect.top < topLimit || rect.bottom > bottomLimit) {
-        slot.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+        smoothScrollIntoView(slot);
       }
     });
   }
