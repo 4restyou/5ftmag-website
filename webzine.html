@@ -10,15 +10,16 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260603-states2">
   <link rel="stylesheet" href="./css/common.css?v=20260603-states2">
-  <link rel="stylesheet" href="./css/webzine.css?v=20260603-bodyclass">
+  <link rel="stylesheet" href="./css/webzine.css?v=20260603-themeslot">
   <style>
-    /* 메뉴 묻힘 hot-fix — 캐시 충돌 대비 inline 으로 다크 톤 + z-index 강제.
-       .wz-veil 가 z-index:2000 (페이드 인/아웃용) 이라 메뉴(1100) 가 paint 단계에서
-       그 아래로 깔려 시각적으로 가려졌음. 메뉴 z-index 를 veil 위로 올려 해결. */
-    body.webzine-page .nav-account-menu { background: #1a1a1a !important; border-color: #303030 !important; color: #f0f0f0 !important; z-index: 2100 !important; }
+    /* 진짜 원인: header { z-index: 300 } 가 stacking context 라 그 안의
+       메뉴는 부모 300 안에 갇혀, .wz-veil(2000) 아래로 paint 됨.
+       해결: header 자체 z-index 를 veil 위로 올림. 색 강제는 다크톤 유지. */
+    body.webzine-page header { z-index: 2100; }
+    body.webzine-page .nav-account-menu { background: #1a1a1a !important; border-color: #303030 !important; color: #f0f0f0 !important; }
     body.webzine-page .nav-account-menu a, body.webzine-page .nav-account-menu button { color: #f0f0f0 !important; }
     body.webzine-page .nav-account-menu a:hover, body.webzine-page .nav-account-menu button:hover { background: rgba(255,255,255,0.08) !important; }
-    body.webzine-page .mobile-nav { background: #0e0c10 !important; border-bottom-color: #303030 !important; position: relative; z-index: 2100; }
+    body.webzine-page .mobile-nav { background: #0e0c10 !important; border-bottom-color: #303030 !important; }
     body.webzine-page .mobile-nav a { color: #f0f0f0 !important; border-bottom-color: #1f1d24 !important; }
   </style>
   <script>try{if((localStorage.getItem('5ftTheme')||'light')==='dark')document.documentElement.style.setProperty('--wz-veil-bg','#0c0c0c');}catch(e){}</script>
