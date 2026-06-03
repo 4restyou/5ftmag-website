@@ -785,6 +785,76 @@ footer {
 }
 
 /* ════════════════════════════════════════════════
+   공지 배너 — header 바로 아래, 마퀴 좌→우, 닫기 X.
+   site-common.js 가 활성 공지가 있을 때만 주입.
+   ════════════════════════════════════════════════ */
+.announcement-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: var(--header-max-w, 1200px);
+  margin: 0 auto;
+  padding: 10px 24px;
+  background: var(--bg-sub);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  transition: opacity .2s, transform .2s;
+}
+.announcement-bar.is-closing { opacity: 0; transform: translateY(-4px); }
+.announcement-bar-track {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+.announcement-bar-text {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 100%;
+  animation: announcement-marquee linear infinite;
+  will-change: transform;
+}
+.announcement-bar.is-static .announcement-bar-text {
+  padding-left: 0;
+  animation: none;
+  display: block;
+  text-align: center;
+}
+@keyframes announcement-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+.announcement-bar:hover .announcement-bar-text { animation-play-state: paused; }
+.announcement-bar-close {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: color .15s, background .15s;
+}
+.announcement-bar-close:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+[data-theme="dark"] .announcement-bar-close:hover { background: rgba(255,255,255,0.06); }
+@media (prefers-reduced-motion: reduce) {
+  .announcement-bar-text { animation: none; padding-left: 0; }
+  .announcement-bar { justify-content: center; }
+}
+@media (max-width: 640px) {
+  .announcement-bar { padding: 8px 16px; font-size: 12px; }
+}
+
+/* ════════════════════════════════════════════════
    글 읽기 진행바 (article 페이지에서만 JS 가 주입)
    ════════════════════════════════════════════════ */
 .reading-progress {

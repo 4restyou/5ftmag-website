@@ -725,19 +725,3 @@
     }, { passive: true });
   }
 
-  // 첫 방문 안내 띠 — localStorage 플래그가 없을 때만 노출, 닫기 클릭 시 플래그 저장.
-  // (한국 매거진 톤을 해치지 않게 차분한 한 줄, 닫으면 다시 안 보임.)
-  const INTRO_FLAG = '5ft_intro_dismissed_v1';
-  const introStrip = document.getElementById('introStrip');
-  const introClose = document.getElementById('introStripClose');
-  if (introStrip && introClose) {
-    try {
-      if (!localStorage.getItem(INTRO_FLAG)) {
-        introStrip.hidden = false;
-      }
-    } catch (_) { /* localStorage 비활성 환경은 그냥 무시 */ }
-    introClose.addEventListener('click', () => {
-      introStrip.hidden = true;
-      try { localStorage.setItem(INTRO_FLAG, '1'); } catch (_) {}
-    });
-  }

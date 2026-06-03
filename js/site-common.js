@@ -456,6 +456,9 @@
     initScrollReveal();
     initReadingProgress();
 
+    // 공지 배너 (admin 페이지 제외)
+    if (!/\/admin\//.test(location.pathname)) setupAnnouncementBar();
+
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');
     const mobileNav = document.getElementById('mobileNav');
@@ -1209,6 +1212,62 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
     update();
+  }
+
+  // ════════════════════════════════════════════════
+  // 공지 배너 — 활성 공지가 있으면 헤더 아래 마퀴로 표시.
+  // localStorage 에 dismiss 한 ID 가 있으면 표시하지 않는다.
+  // ════════════════════════════════════════════════
+  const DISMISS_KEY = '5ftDismissedAnnouncements';
+  function getDismissed() {
+    try { return new Set(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]')); }
+    catch { return new Set(); }
+  }
+  function addDismissed(id) {
+    try {
+      const s = getDismissed(); s.add(id);
+      // 누적 방지: 최근 50개만 보관
+      const arr = Array.from(s).slice(-50);
+      localStorage.setItem(DISMISS_KEY, JSON.stringify(arr));
+    } catch {}
+  }
+  async function setupAnnouncementBar() {
+    if (!window.MagDB || !window.MagDB.announcements) return;
+    const { data } = await window.MagDB.announcements.current();
+    if (!data) return;
+    if (getDismissed().has(data.id)) return;
+    const header = document.querySelector('body > header');
+    if (!header) return;
+
+    const bar = document.createElement('div');
+    bar.className = 'announcement-bar';
+    bar.setAttribute('role', 'status');
+    bar.innerHTML = `
+      <div class="announcement-bar-track" aria-live="polite">
+        <span class="announcement-bar-text"></span>
+      </div>
+      <button type="button" class="announcement-bar-close" aria-label="공지 닫기">×</button>
+    `;
+    bar.querySelector('.announcement-bar-text').textContent = data.body;
+    header.insertAdjacentElement('afterend', bar);
+
+    // 텍스트가 트랙보다 짧으면 마퀴 비활성 (가운데 정렬로 보임)
+    requestAnimationFrame(() => {
+      const text = bar.querySelector('.announcement-bar-text');
+      const track = bar.querySelector('.announcement-bar-track');
+      if (text.offsetWidth <= track.offsetWidth) bar.classList.add('is-static');
+      else {
+        // 텍스트 길이에 비례한 duration (느린 속도, 픽셀당 약 25ms)
+        const distance = text.offsetWidth + track.offsetWidth;
+        text.style.animationDuration = Math.max(12, distance / 40) + 's';
+      }
+    });
+
+    bar.querySelector('.announcement-bar-close').addEventListener('click', () => {
+      addDismissed(data.id);
+      bar.classList.add('is-closing');
+      setTimeout(() => bar.remove(), 220);
+    });
   }
 
 
