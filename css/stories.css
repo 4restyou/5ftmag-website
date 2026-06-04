@@ -143,6 +143,11 @@
 .month-filter:hover { border-color: var(--text); }
 
 @media (max-width: 640px) {
+  /* 모바일: 상단 페이지네이션 숨김. 다음 페이지 이동 시점은 끝까지 스크롤한 뒤라
+     하단만으로 충분. 상단은 첫 글 카드를 viewport 아래로 밀어 first impression
+     만 깎임. */
+  .pagination-bar--top { display: none; }
+
   .articles-controls {
     padding: 14px 20px;
     gap: 10px;
