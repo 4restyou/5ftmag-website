@@ -91,4 +91,17 @@ describe('Labs Naver map integration', () => {
     expect(js).toContain("requestAnimationFrame(() => map.setCenter(pos));");
     expect(js).toContain('setTimeout(() => map.setCenter(pos), 120);');
   });
+
+  it('shows compact pricing details in list view cards but hides them in map view cards', () => {
+    const js = read('js/labs-page.js');
+    const css = read('css/labs.css');
+    expect(js).toContain('function labCardSummary(lab)');
+    expect(js).toContain('function repairCardSummary(shop)');
+    expect(js).toContain('${labCardSummary(lab)}');
+    expect(js).toContain('${repairCardSummary(s)}');
+    expect(js).toContain('135 기준');
+    expect(css).toContain('.lab-card-summary');
+    expect(css).toContain('html.labs-view-map .lab-card-summary');
+    expect(css).toContain('display: none;');
+  });
 });

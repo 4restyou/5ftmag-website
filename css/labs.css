@@ -153,29 +153,37 @@
 .labs-view-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   margin-left: auto;
   padding: 3px;
-  border: 1px solid var(--border);
-  border-radius: var(--field-radius);
+  border: 0;
+  border-radius: 999px;
   background: var(--bg-sub);
+  flex-shrink: 0;
 }
 .labs-view-btn {
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: transparent;
   appearance: none;
   border: 0;
-  border-radius: calc(var(--field-radius) - 3px);
-  padding: 7px 13px;
-  background: transparent;
-  color: var(--text-muted);
-  font: inherit;
-  font-size: 13px;
-  font-weight: var(--fw-heading);
+  border-radius: 999px;
+  padding: 6px 16px;
   cursor: pointer;
+  transition: color .15s, background .15s, box-shadow .15s;
 }
 .labs-view-btn:hover { color: var(--text); }
 .labs-view-btn.is-active {
   background: var(--text);
   color: var(--bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.labs-view-btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 /* ── 지도 ── */
@@ -267,6 +275,9 @@ html.labs-view-map .lab-card-head .lab-name {
 html.labs-view-map .lab-card-head .lab-region {
   display: none;
 }
+html.labs-view-map .lab-card-summary {
+  display: none;
+}
 .labs-empty {
   grid-column: 1 / -1;
   text-align: center;
@@ -290,7 +301,7 @@ html.labs-view-map .lab-card-head .lab-region {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 10px;
+  gap: 9px 10px;
   width: 100%;
   padding: 18px 20px;
   background: none;
@@ -315,6 +326,25 @@ html.labs-view-map .lab-card-head .lab-region {
   letter-spacing: var(--ls-default);
 }
 .lab-card-head .lab-region { flex: 0 0 auto; }
+.lab-card-summary {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 9px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.lab-card-summary strong {
+  color: var(--text);
+  font-weight: var(--fw-heading);
+}
+.lab-card-summary-note {
+  color: var(--text-muted);
+  opacity: 0.78;
+}
 .lab-card-chevron {
   flex: 0 0 auto;
   font-size: 16px;
@@ -543,8 +573,8 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
   .intro { padding: 28px 20px 20px; }
   .labs-map-section { padding: 16px 20px 0; }
   .labs-map { height: 300px; }
-  .labs-view-toggle { order: 3; width: 100%; margin-left: 0; }
-  .labs-view-btn { flex: 1 1 0; padding: 8px 10px; }
+  .labs-view-toggle { order: 3; margin-left: 0; }
+  .labs-view-btn { padding: 6px 16px; }
   html.labs-view-map .labs-map { height: 64vh; min-height: 420px; }
   html.labs-view-map .labs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filter-chip { padding: 6px 14px; font-size: 12px; }

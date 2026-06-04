@@ -268,6 +268,30 @@
       .map(([k, v]) => `<span class="lab-price"><span class="lab-price-k">${k}</span> ${escapeHtml(won(v))}</span>`)
       .join('')}<span class="lab-price-note">135 기본 기준</span></div>`;
   }
+  function labCardSummary(lab) {
+    const p = lab?.prices || {};
+    const items = [
+      ['컬러', p.color && p.color['135'] && p.color['135'].basic],
+      ['흑백', p.bw && p.bw['135'] && p.bw['135'].basic],
+      ['슬라이드', p.slide && p.slide['135'] && p.slide['135'].basic],
+      ['영화용', p.cinema && p.cinema['135'] && p.cinema['135'].basic],
+    ].filter(([, v]) => v != null && v !== '');
+    if (items.length) {
+      return `<span class="lab-card-summary">${items
+        .map(([k, v]) => `<span>${escapeHtml(k)} <strong>${escapeHtml(won(v))}</strong></span>`)
+        .join('')}<span class="lab-card-summary-note">135 기준</span></span>`;
+    }
+    const fallback = [lab.scanRes && `기본 스캔 ${lab.scanRes}`, lab.features]
+      .filter(Boolean)
+      .join(' · ');
+    return fallback ? `<span class="lab-card-summary">${escapeHtml(fallback)}</span>` : '';
+  }
+  function repairCardSummary(shop) {
+    const summary = [shop.specialty, shop.contact]
+      .filter(Boolean)
+      .join(' · ');
+    return summary ? `<span class="lab-card-summary">${escapeHtml(summary)}</span>` : '';
+  }
 
   function labCard(lab) {
     const slug = itemSlug(lab);
@@ -277,6 +301,7 @@
           <span class="lab-name">${escapeHtml(lab.name)}</span>
           <span class="lab-region">${escapeHtml(lab.region || '')}</span>
           <span class="lab-card-chevron" aria-hidden="true">›</span>
+          ${labCardSummary(lab)}
         </button>
       </article>`;
   }
@@ -289,6 +314,7 @@
           <span class="lab-name">${escapeHtml(s.name)}</span>
           <span class="lab-region">${escapeHtml(s.region || '')}</span>
           <span class="lab-card-chevron" aria-hidden="true">›</span>
+          ${repairCardSummary(s)}
         </button>
       </article>`;
   }
@@ -708,8 +734,18 @@
   }
 
   if (viewToggleEl) {
+    viewToggleEl.addEventListener('click', (e) => {
+      const button = e.target.closest('[data-view]');
+      if (!button || !viewToggleEl.contains(button)) return;
+      e.preventDefault();
+      setView(button.dataset.view);
+    });
     viewToggleEl.querySelectorAll('[data-view]').forEach((b) => {
-      b.addEventListener('click', () => setView(b.dataset.view));
+      b.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        setView(b.dataset.view);
+      });
     });
   }
 
