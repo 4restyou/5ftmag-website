@@ -480,7 +480,17 @@
       mapEl.classList.add('labs-modal-map-empty');
       mapEl.innerHTML = `<span class="labs-modal-map-msg">지도 표시 실패 (${reason})</span>`;
     };
-    if (!window.naver || !naver.maps) { showEmpty('SDK 미로드'); return; }
+    if (!window.naver || !naver.maps) {
+      showEmpty('SDK 미로드 — 응답 확인 중...');
+      try {
+        const r = await fetch('https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=uu78cn9rbi&submodules=geocoder', { method: 'GET', mode: 'cors' });
+        const reason = r.headers.get('x-deny-reason') || '';
+        showEmpty(`SDK ${r.status} ${reason || r.statusText}`);
+      } catch (e) {
+        showEmpty('SDK fetch 실패 ' + (e?.message || e));
+      }
+      return;
+    }
     // 좌표 source 우선순위: 1) item.lat/lng (DB·정적 JSON), 2) 메인 지도 geocode 캐시(markerBySlug),
     // 3) item.address 직접 geocode (admin 등록 후 좌표 없는 lab 대응).
     let lat = Number(item.lat);
