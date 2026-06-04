@@ -160,7 +160,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 }
 
 /* ── 책 읽기(flipbook 리더) ── */
-.wz-reader { position: fixed; inset: 0; z-index: 1300; background: #0b0a0d; display: flex; flex-direction: column; }
+.wz-reader { position: fixed; inset: 0; z-index: 2200; background: #0b0a0d; display: flex; flex-direction: column; }
 .wz-reader-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 18px; border-bottom: 1px solid rgba(255, 255, 255, .08); color: #fff; }
 .wz-reader-title { font-size: 14px; font-weight: var(--fw-heading); opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wz-reader-tools { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
