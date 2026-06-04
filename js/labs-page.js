@@ -444,6 +444,7 @@
           <h2 id="labsModalTitle" class="labs-modal-name"></h2>
           <span class="lab-region labs-modal-region"></span>
         </div>
+        <div class="labs-modal-map" aria-label="위치 미니맵" hidden></div>
         <div class="labs-modal-body"></div>
         <div class="labs-modal-actions">
           <button type="button" class="lab-share-btn" data-share-modal>공유</button>
@@ -457,6 +458,41 @@
     });
     return modal;
   }
+  // 모달 미니맵 — 모달 열릴 때 새로 만들고 닫힐 때 즉시 파괴 (메모리 회수)
+  let modalMap = null;
+  let modalMapMarker = null;
+  function destroyModalMap() {
+    if (modalMapMarker) { modalMapMarker.setMap(null); modalMapMarker = null; }
+    if (modalMap && modalMap.destroy) { modalMap.destroy(); }
+    modalMap = null;
+  }
+  function setupModalMap(item, slug, modal) {
+    const mapEl = modal.querySelector('.labs-modal-map');
+    if (!mapEl) return;
+    if (!window.naver || !naver.maps) { mapEl.hidden = true; return; }
+    // 좌표 source: item.lat/lng 우선, 없으면 메인 지도 geocode 캐시(markerBySlug) 재사용.
+    let lat = Number(item.lat);
+    let lng = Number(item.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      const entry = markerBySlug.get(slug);
+      if (entry && entry.marker) {
+        const pos = entry.marker.getPosition();
+        lat = pos.lat(); lng = pos.lng();
+      }
+    }
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) { mapEl.hidden = true; return; }
+    mapEl.hidden = false;
+    destroyModalMap();
+    // 모달 transition 후 size 측정되도록 다음 frame 에서 생성.
+    requestAnimationFrame(() => {
+      const center = new naver.maps.LatLng(lat, lng);
+      modalMap = new naver.maps.Map(mapEl, {
+        center, zoom: 16, minZoom: 12,
+        zoomControl: false, scaleControl: false, mapDataControl: false,
+      });
+      modalMapMarker = new naver.maps.Marker({ position: center, map: modalMap, title: item.name });
+    });
+  }
   function openModal(slug, opts) {
     const item = findItemBySlug(slug);
     if (!item) return;
@@ -468,6 +504,7 @@
     modal.hidden = false;
     document.documentElement.classList.add('labs-modal-open');
     focusMarkerBySlug(slug);
+    setupModalMap(item, slug, modal);
     updateUrlLab(slug);
     // 닫기 버튼에 포커스 (스크린리더 + Esc 대응)
     const closeBtn = modal.querySelector('.labs-modal-close');
@@ -478,6 +515,7 @@
     if (!modal || modal.hidden) return;
     modal.hidden = true;
     document.documentElement.classList.remove('labs-modal-open');
+    destroyModalMap();
     updateUrlLab(null);
   }
   async function shareCard(slug) {
