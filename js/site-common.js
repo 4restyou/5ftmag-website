@@ -224,8 +224,12 @@
 
   window.addEventListener('unhandledrejection', function (event) {
     const reason = event.reason;
+    const msg = reason?.message || String(reason || '');
+    // CSS @view-transition 활성 시 페이지 이동 중 다음 navigation 이 진행 중 transition 을
+    // skip/abort 시키는 건 정상. promise 가 reject 되지만 진짜 에러가 아니라서 로깅 제외.
+    if (/Transition was (skipped|aborted)|Skipping view transition/i.test(msg)) return;
     recordClientError({
-      message: reason?.message || String(reason || 'Unhandled promise rejection'),
+      message: msg || 'Unhandled promise rejection',
       source: 'unhandledrejection',
       stack: reason?.stack || '',
     });
@@ -456,8 +460,11 @@
     initScrollReveal();
     initReadingProgress();
 
-    // 공지 배너 (admin 페이지 제외)
-    if (!/\/admin\//.test(location.pathname)) setupAnnouncementBar();
+    // 공지 배너 + 인앱 브라우저 안내 (admin 페이지 제외)
+    if (!/\/admin\//.test(location.pathname)) {
+      setupAnnouncementBar();
+      setupInAppBrowserNotice();
+    }
 
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');
@@ -1280,6 +1287,38 @@
 
     bar.querySelector('.announcement-bar-close').addEventListener('click', () => {
       addDismissed(data.id);
+      bar.classList.add('is-closing');
+      setTimeout(() => bar.remove(), 220);
+    });
+  }
+
+  // ════════════════════════════════════════════════
+  // 인앱 브라우저 안내 — Naver / KakaoTalk / Instagram / Facebook / Line / Daum / Band 등
+  // 인앱 웹뷰에서 Google OAuth 가 차단되므로 외부 브라우저 사용 안내.
+  // 한 번 닫으면 localStorage 에 기록해 다시 안 뜸.
+  // ════════════════════════════════════════════════
+  const INAPP_DISMISS_KEY = '5ftInAppNoticeDismissed';
+  function isInAppBrowser() {
+    const ua = navigator.userAgent || '';
+    return /NAVER|KAKAOTALK|Instagram|FBAN|FBAV|Line\/|Daum|BAND|Twitter/i.test(ua);
+  }
+  function setupInAppBrowserNotice() {
+    if (!isInAppBrowser()) return;
+    try { if (localStorage.getItem(INAPP_DISMISS_KEY) === '1') return; } catch {}
+    const header = document.querySelector('body > header');
+    if (!header) return;
+    const bar = document.createElement('div');
+    bar.className = 'inapp-notice-bar';
+    bar.setAttribute('role', 'status');
+    bar.innerHTML = `
+      <div class="inapp-notice-inner">
+        <span class="inapp-notice-text"><strong>Google 로그인이 차단되었나요?</strong> 인앱 브라우저에선 Google 정책상 차단돼요. 우측 메뉴(⋮ 또는 ⋯) → <strong>Chrome · Safari 등 외부 브라우저로 열기</strong>를 눌러주세요.</span>
+        <button type="button" class="inapp-notice-close" aria-label="안내 닫기">×</button>
+      </div>
+    `;
+    header.insertAdjacentElement('afterend', bar);
+    bar.querySelector('.inapp-notice-close').addEventListener('click', () => {
+      try { localStorage.setItem(INAPP_DISMISS_KEY, '1'); } catch {}
       bar.classList.add('is-closing');
       setTimeout(() => bar.remove(), 220);
     });

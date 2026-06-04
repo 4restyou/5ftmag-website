@@ -858,6 +858,54 @@ footer {
 }
 
 /* ════════════════════════════════════════════════
+   인앱 브라우저 안내 — Naver / Kakao / Instagram / FB / Line / Daum / Band 등
+   에서 진입 시 site-common.js 가 헤더 아래 노란 띠로 주입. 닫기 누르면
+   localStorage 에 dismiss 기록.
+   ════════════════════════════════════════════════ */
+.inapp-notice-bar {
+  background: #fff8e1;
+  border-bottom: 1px solid #f7d774;
+  font-size: 13px;
+  color: #4a3a07;
+  transition: opacity .2s, transform .2s;
+}
+.inapp-notice-bar.is-closing { opacity: 0; transform: translateY(-4px); }
+.inapp-notice-inner {
+  max-width: var(--header-max-w, 1200px);
+  margin: 0 auto;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.inapp-notice-text { flex: 1; line-height: 1.5; }
+.inapp-notice-text strong { font-weight: var(--fw-heading); }
+.inapp-notice-close {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #8a6d10;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: color .15s, background .15s;
+}
+.inapp-notice-close:hover { color: #4a3a07; background: rgba(0,0,0,0.06); }
+[data-theme="dark"] .inapp-notice-bar { background: #2a2410; border-bottom-color: #6b5a1a; color: #f5e6a3; }
+[data-theme="dark"] .inapp-notice-close { color: #d4b75e; }
+[data-theme="dark"] .inapp-notice-close:hover { color: #f5e6a3; background: rgba(255,255,255,0.06); }
+@media (max-width: 640px) {
+  .inapp-notice-inner { padding: 8px 16px; }
+  .inapp-notice-bar { font-size: 12px; }
+}
+
+/* ════════════════════════════════════════════════
    글 읽기 진행바 (article 페이지에서만 JS 가 주입)
    ════════════════════════════════════════════════ */
 .reading-progress {
