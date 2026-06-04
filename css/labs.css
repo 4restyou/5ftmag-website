@@ -374,14 +374,14 @@
 /* 모달 열린 동안 본문 스크롤 잠금 */
 html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
 @media (max-width: 640px) {
-  .labs-modal { padding: 0; align-items: flex-end; }
+  .labs-modal { padding: 16px; }
   .labs-modal-box {
     max-width: 100%;
-    max-height: 90vh;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: calc(100vh - 32px);
     padding: 24px 20px 20px;
   }
   .labs-modal-name { font-size: 19px; }
+  .labs-modal-map { height: 180px; }
 }
 .lab-region {
   flex-shrink: 0;
