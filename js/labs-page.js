@@ -468,11 +468,12 @@
     if (modalMap && modalMap.destroy) { modalMap.destroy(); }
     modalMap = null;
   }
-  function setupModalMap(item, slug, modal) {
+  async function setupModalMap(item, slug, modal) {
     const mapEl = modal.querySelector('.labs-modal-map');
     if (!mapEl) return;
     if (!window.naver || !naver.maps) { mapEl.hidden = true; return; }
-    // 좌표 source: item.lat/lng 우선, 없으면 메인 지도 geocode 캐시(markerBySlug) 재사용.
+    // 좌표 source 우선순위: 1) item.lat/lng (DB·정적 JSON), 2) 메인 지도 geocode 캐시(markerBySlug),
+    // 3) item.address 직접 geocode (admin 등록 후 좌표 없는 lab 대응).
     let lat = Number(item.lat);
     let lng = Number(item.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
@@ -481,6 +482,10 @@
         const pos = entry.marker.getPosition();
         lat = pos.lat(); lng = pos.lng();
       }
+    }
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      const coord = await geocodeAddress(item.address);
+      if (coord) { lat = coord.lat; lng = coord.lng; }
     }
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) { mapEl.hidden = true; return; }
     mapEl.hidden = false;
