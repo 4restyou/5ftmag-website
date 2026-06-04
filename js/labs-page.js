@@ -126,8 +126,25 @@
         if (!hasCoord(s)) return false;
         if (normalizeLookup(s.name) !== labName || normalizeLookup(s.region) !== labRegion) return false;
         return !lab.address || !s.address || addressCompatible(lab.address, s.address);
-      });
+    });
     return match ? { ...lab, lat: match.lat, lng: match.lng } : lab;
+  }
+  function looksLikeSameLab(a, b) {
+    const aName = normalizeLookup(a?.name);
+    const bName = normalizeLookup(b?.name);
+    const aRegion = normalizeLookup(a?.region);
+    const bRegion = normalizeLookup(b?.region);
+    if (aRegion && bRegion && aRegion !== bRegion) return false;
+    if (addressCompatible(a?.address, b?.address)) return true;
+    return !!aName && !!bName && (aName === bName || aName.includes(bName) || bName.includes(aName));
+  }
+  function mergeStaticOnlyLabs(labs, staticLabs) {
+    if (!Array.isArray(staticLabs) || !staticLabs.length) return labs;
+    const merged = [...labs];
+    staticLabs.forEach((staticLab) => {
+      if (!merged.some((lab) => looksLikeSameLab(lab, staticLab))) merged.push(staticLab);
+    });
+    return merged;
   }
   async function loadLabs() {
     // 원본 = Supabase labs 테이블. 실패 시 정적 data/labs.json 으로 폴백.
@@ -135,7 +152,8 @@
     try {
       const rows = await window.MagDB?.labs?.list?.();
       if (Array.isArray(rows) && rows.length) {
-        return rows.map(rowToLab).map((lab) => enrichLabWithStaticCoord(lab, staticLabs));
+        const labs = rows.map(rowToLab).map((lab) => enrichLabWithStaticCoord(lab, staticLabs));
+        return mergeStaticOnlyLabs(labs, staticLabs);
       }
     } catch (_) { /* 폴백으로 진행 */ }
     return staticLabs;

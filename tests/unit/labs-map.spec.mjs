@@ -39,8 +39,15 @@ describe('Labs Naver map integration', () => {
   it('backfills missing Supabase coordinates from static Labs data', () => {
     const js = read('js/labs-page.js');
     expect(js).toContain('function enrichLabWithStaticCoord');
-    expect(js).toContain('return rows.map(rowToLab).map((lab) => enrichLabWithStaticCoord(lab, staticLabs));');
+    expect(js).toContain('return mergeStaticOnlyLabs(labs, staticLabs);');
     expect(js).toContain('addressCompatible(lab.address, s.address)');
+  });
+
+  it('keeps static-only Labs entries when the live table is missing rows', () => {
+    const js = read('js/labs-page.js');
+    expect(js).toContain('function mergeStaticOnlyLabs');
+    expect(js).toContain('if (!merged.some((lab) => looksLikeSameLab(lab, staticLab))) merged.push(staticLab);');
+    expect(js).toContain('function looksLikeSameLab');
   });
 
   it('separates card modal behavior from map marker behavior', () => {
