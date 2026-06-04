@@ -66,6 +66,19 @@
     if (v == null || v === '') return null;
     return typeof v === 'number' ? `${v.toLocaleString('ko-KR')}원` : String(v);
   }
+  function slugify(s) {
+    return String(s || '').toLowerCase()
+      .replace(/[^a-z0-9가-힣\s-]/g, '')
+      .replace(/\s+/g, '-').replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+  function itemSlug(item) {
+    // name + region 으로 고유성 확보 (같은 이름이 지역 달리 있을 수 있음).
+    return slugify(`${item.name}-${item.region || ''}`);
+  }
+  // 슬러그 → { marker, item } 매핑. updateMarkers 에서 채움.
+  const markerBySlug = new Map();
+  let deepLinkApplied = false;
 
   // 테이블 row(컬럼명) → 현상소 카드가 쓰는 형태(scan_res → scanRes 만 다름).
   function rowToLab(r) {
@@ -201,6 +214,7 @@
   }
 
   function labCard(lab) {
+    const slug = itemSlug(lab);
     const mapHref = lab.address
       ? `https://map.naver.com/p/search/${encodeURIComponent(lab.address)}`
       : null;
@@ -208,20 +222,27 @@
     if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">지도에서 보기 ↗</a>`);
     if (lab.url) links.push(`<a href="${escapeAttr(lab.url)}" target="_blank" rel="noopener" class="lab-link">홈페이지·SNS ↗</a>`);
     return `
-      <article class="lab-card" data-reveal>
-        <div class="lab-card-head">
+      <article class="lab-card" data-slug="${escapeAttr(slug)}" data-reveal>
+        <button type="button" class="lab-card-head" aria-expanded="false" aria-controls="lab-detail-${escapeAttr(slug)}">
           <h3 class="lab-name">${escapeHtml(lab.name)}</h3>
           <span class="lab-region">${escapeHtml(lab.region || '')}</span>
+          <span class="lab-card-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="lab-card-detail" id="lab-detail-${escapeAttr(slug)}" hidden>
+          ${lab.address ? `<p class="lab-addr">${escapeHtml(lab.address)}</p>` : ''}
+          ${priceChips(lab.prices)}
+          ${lab.scanRes ? `<p class="lab-meta">기본 스캔 ${escapeHtml(lab.scanRes)}</p>` : ''}
+          ${lab.features ? `<p class="lab-features">${escapeHtml(lab.features)}</p>` : ''}
+          ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
+          <div class="lab-card-actions">
+            <button type="button" class="lab-share-btn" data-share aria-label="이 현상소 링크 복사">공유</button>
+          </div>
         </div>
-        ${lab.address ? `<p class="lab-addr">${escapeHtml(lab.address)}</p>` : ''}
-        ${priceChips(lab.prices)}
-        ${lab.scanRes ? `<p class="lab-meta">기본 스캔 ${escapeHtml(lab.scanRes)}</p>` : ''}
-        ${lab.features ? `<p class="lab-features">${escapeHtml(lab.features)}</p>` : ''}
-        ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
       </article>`;
   }
 
   function repairCard(s) {
+    const slug = itemSlug(s);
     const mapHref = s.address
       ? `https://map.naver.com/p/search/${encodeURIComponent(s.address)}`
       : null;
@@ -229,16 +250,22 @@
     if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">지도에서 보기 ↗</a>`);
     if (s.url) links.push(`<a href="${escapeAttr(s.url)}" target="_blank" rel="noopener" class="lab-link">홈페이지·SNS ↗</a>`);
     return `
-      <article class="lab-card" data-reveal>
-        <div class="lab-card-head">
+      <article class="lab-card" data-slug="${escapeAttr(slug)}" data-reveal>
+        <button type="button" class="lab-card-head" aria-expanded="false" aria-controls="lab-detail-${escapeAttr(slug)}">
           <h3 class="lab-name">${escapeHtml(s.name)}</h3>
           <span class="lab-region">${escapeHtml(s.region || '')}</span>
+          <span class="lab-card-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="lab-card-detail" id="lab-detail-${escapeAttr(slug)}" hidden>
+          ${s.address ? `<p class="lab-addr">${escapeHtml(s.address)}</p>` : ''}
+          ${s.specialty ? `<p class="lab-meta">전문 ${escapeHtml(s.specialty)}</p>` : ''}
+          ${s.contact ? `<p class="lab-meta">연락처 ${escapeHtml(s.contact)}</p>` : ''}
+          ${s.description ? `<p class="lab-features">${escapeHtml(s.description)}</p>` : ''}
+          ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
+          <div class="lab-card-actions">
+            <button type="button" class="lab-share-btn" data-share aria-label="이 수리실 링크 복사">공유</button>
+          </div>
         </div>
-        ${s.address ? `<p class="lab-addr">${escapeHtml(s.address)}</p>` : ''}
-        ${s.specialty ? `<p class="lab-meta">전문 ${escapeHtml(s.specialty)}</p>` : ''}
-        ${s.contact ? `<p class="lab-meta">연락처 ${escapeHtml(s.contact)}</p>` : ''}
-        ${s.description ? `<p class="lab-features">${escapeHtml(s.description)}</p>` : ''}
-        ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
       </article>`;
   }
 
@@ -317,6 +344,7 @@
     const token = ++renderToken;
     markers.forEach((m) => m.setMap(null));
     markers = [];
+    markerBySlug.clear();
     if (infoWindow) infoWindow.close();
     const bounds = new naver.maps.LatLngBounds();
     let count = 0;
@@ -331,6 +359,7 @@
         infoWindow.open(map, marker);
       });
       markers.push(marker);
+      markerBySlug.set(itemSlug(item), { marker, item });
       bounds.extend(pos);
       count++;
     }
@@ -368,7 +397,107 @@
       ? renderGrouped(shown)
       : sortByName(shown).map(card).join('');
     updateMoreButton(capped ? filtered.length : 0);
+    // 첫 렌더 후 URL 의 ?lab=slug 가 있으면 해당 카드 자동 펼침.
+    if (!deepLinkApplied) tryApplyDeepLink();
   }
+
+  // ── 카드 토글 / 공유 / deep link ──
+  function closeAllCards() {
+    listEl.querySelectorAll('.lab-card.is-open').forEach(c => {
+      const d = c.querySelector('.lab-card-detail');
+      const h = c.querySelector('.lab-card-head');
+      if (d) d.hidden = true;
+      if (h) h.setAttribute('aria-expanded', 'false');
+      c.classList.remove('is-open');
+    });
+  }
+  function focusMarkerBySlug(slug) {
+    if (!mapReady || !map || !infoWindow) return;
+    const entry = markerBySlug.get(slug);
+    if (!entry) return;
+    map.panTo(entry.marker.getPosition());
+    if (map.getZoom() < 15) map.setZoom(15);
+    infoWindow.setContent(infoContent(entry.item));
+    infoWindow.open(map, entry.marker);
+  }
+  function updateUrlLab(slug) {
+    try {
+      const u = new URL(location.href);
+      if (slug) u.searchParams.set('lab', slug);
+      else u.searchParams.delete('lab');
+      history.replaceState(null, '', u.toString());
+    } catch {}
+  }
+  function openCard(card, opts) {
+    if (!card) return;
+    closeAllCards();
+    const detail = card.querySelector('.lab-card-detail');
+    const head = card.querySelector('.lab-card-head');
+    if (!detail || !head) return;
+    detail.hidden = false;
+    head.setAttribute('aria-expanded', 'true');
+    card.classList.add('is-open');
+    const slug = card.dataset.slug;
+    if (slug) {
+      focusMarkerBySlug(slug);
+      updateUrlLab(slug);
+    }
+    if (opts && opts.scroll) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function toggleCard(card) {
+    if (!card) return;
+    if (card.classList.contains('is-open')) {
+      closeAllCards();
+      updateUrlLab(null);
+    } else {
+      openCard(card, {});
+    }
+  }
+  async function shareCard(slug) {
+    if (!slug) return;
+    const u = new URL(location.href);
+    u.searchParams.set('lab', slug);
+    const url = u.toString();
+    try {
+      await navigator.clipboard.writeText(url);
+      showLabsToast('링크가 복사됐어요');
+    } catch {
+      prompt('아래 링크를 복사하세요', url);
+    }
+  }
+  function showLabsToast(msg) {
+    let t = document.getElementById('labsToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'labsToast';
+      t.className = 'labs-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('is-show');
+    clearTimeout(showLabsToast._tid);
+    showLabsToast._tid = setTimeout(() => t.classList.remove('is-show'), 1800);
+  }
+  function tryApplyDeepLink() {
+    const slug = new URL(location.href).searchParams.get('lab');
+    if (!slug) { deepLinkApplied = true; return; }
+    const card = listEl.querySelector(`.lab-card[data-slug="${slug.replace(/"/g, '\\"')}"]`);
+    if (!card) return; // 다음 렌더에서 다시 시도 (탭 전환 후 등)
+    deepLinkApplied = true;
+    openCard(card, { scroll: true });
+  }
+  listEl.addEventListener('click', (e) => {
+    const shareBtn = e.target.closest('[data-share]');
+    if (shareBtn) {
+      const card = shareBtn.closest('.lab-card');
+      shareCard(card?.dataset.slug);
+      return;
+    }
+    const head = e.target.closest('.lab-card-head');
+    if (head) {
+      toggleCard(head.closest('.lab-card'));
+    }
+  });
 
   if (searchEl) {
     searchEl.addEventListener('input', () => {
