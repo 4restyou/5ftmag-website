@@ -216,12 +216,82 @@
               transform var(--duration-fast) var(--easing);
 }
 .lab-card:hover { border-color: var(--text); }
+.lab-card.is-open { border-color: var(--text); }
+/* head 가 버튼으로 바뀜 — 클릭하면 detail 토글. */
 .lab-card-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 }
+.lab-card-head:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.lab-card-chevron {
+  margin-left: 4px;
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: transform .2s var(--easing);
+}
+.lab-card.is-open .lab-card-chevron { transform: rotate(180deg); }
+.lab-card-detail {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+.lab-card-detail[hidden] { display: none; }
+.lab-card-detail > p:first-child,
+.lab-card-detail > .lab-prices:first-child { margin-top: 0; }
+.lab-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+.lab-share-btn {
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  padding: 6px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.lab-share-btn:hover { color: var(--text); border-color: var(--text); }
+/* 클립보드 복사 토스트 — 화면 하단 가운데. */
+.labs-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translate(-50%, 12px);
+  padding: 10px 18px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  z-index: 1500;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+}
+.labs-toast.is-show { opacity: 1; transform: translate(-50%, 0); }
 .lab-name {
   font-size: 18px;
   font-weight: var(--fw-heading);
