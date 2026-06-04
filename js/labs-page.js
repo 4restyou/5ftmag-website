@@ -471,7 +471,16 @@
   async function setupModalMap(item, slug, modal) {
     const mapEl = modal.querySelector('.labs-modal-map');
     if (!mapEl) return;
-    if (!window.naver || !naver.maps) { mapEl.hidden = true; return; }
+    destroyModalMap();
+    mapEl.hidden = false;
+    mapEl.innerHTML = '';
+    mapEl.classList.remove('labs-modal-map-empty');
+    const showEmpty = (reason) => {
+      console.warn('[labs] modal map skip:', reason, item.name, item.address);
+      mapEl.classList.add('labs-modal-map-empty');
+      mapEl.innerHTML = `<span class="labs-modal-map-msg">지도 표시 실패 (${reason})</span>`;
+    };
+    if (!window.naver || !naver.maps) { showEmpty('SDK 미로드'); return; }
     // 좌표 source 우선순위: 1) item.lat/lng (DB·정적 JSON), 2) 메인 지도 geocode 캐시(markerBySlug),
     // 3) item.address 직접 geocode (admin 등록 후 좌표 없는 lab 대응).
     let lat = Number(item.lat);
@@ -487,17 +496,19 @@
       const coord = await geocodeAddress(item.address);
       if (coord) { lat = coord.lat; lng = coord.lng; }
     }
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) { mapEl.hidden = true; return; }
-    mapEl.hidden = false;
-    destroyModalMap();
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) { showEmpty('좌표 없음'); return; }
     // 모달 transition 후 size 측정되도록 다음 frame 에서 생성.
     requestAnimationFrame(() => {
-      const center = new naver.maps.LatLng(lat, lng);
-      modalMap = new naver.maps.Map(mapEl, {
-        center, zoom: 16, minZoom: 12,
-        zoomControl: false, scaleControl: false, mapDataControl: false,
-      });
-      modalMapMarker = new naver.maps.Marker({ position: center, map: modalMap, title: item.name });
+      try {
+        const center = new naver.maps.LatLng(lat, lng);
+        modalMap = new naver.maps.Map(mapEl, {
+          center, zoom: 16, minZoom: 12,
+          zoomControl: false, scaleControl: false, mapDataControl: false,
+        });
+        modalMapMarker = new naver.maps.Marker({ position: center, map: modalMap, title: item.name });
+      } catch (e) {
+        showEmpty('생성 오류 ' + (e?.message || e));
+      }
     });
   }
   function openModal(slug, opts) {

@@ -362,6 +362,17 @@
   border: 1px solid var(--border);
 }
 .labs-modal-map[hidden] { display: none; }
+.labs-modal-map.labs-modal-map-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  min-height: 56px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.labs-modal-map-msg { text-align: center; line-height: 1.4; }
 .labs-modal-body > p:first-child,
 .labs-modal-body > .lab-prices:first-child { margin-top: 0; }
 .labs-modal-actions {
