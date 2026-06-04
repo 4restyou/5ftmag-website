@@ -80,7 +80,16 @@
     return String(s || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
   }
   function hasCoord(item) {
-    return Number.isFinite(Number(item?.lat)) && Number.isFinite(Number(item?.lng));
+    return isValidCoord({ lat: Number(item?.lat), lng: Number(item?.lng) });
+  }
+  function isValidCoord(coord) {
+    const lat = Number(coord?.lat);
+    const lng = Number(coord?.lng);
+    // 국내 현상소·수리실 목록이므로 한국 주변 좌표만 허용한다.
+    // 예전 브라우저 캐시에 뒤집힌 좌표가 남아 있으면 모달과 메인 지도 모두 바다로 튄다.
+    return Number.isFinite(lat) && Number.isFinite(lng)
+      && lat >= 30 && lat <= 39
+      && lng >= 124 && lng <= 132;
   }
   function addressCompatible(a, b) {
     const aa = normalizeLookup(a);
@@ -365,7 +374,7 @@
   // ── 좌표 해석 ──
   // DB/정적 JSON 의 lat/lng 를 우선 사용하고, 좌표가 없는 새 항목만 주소 geocode 로 보완한다.
   // 캐시는 주소 키라, admin 에서 주소만 고치면 다음 방문에 자동 반영.
-  const GEO_CACHE_KEY = '5ft-labs-geo-v1';
+  const GEO_CACHE_KEY = '5ft-labs-geo-v2';
   let geoCache;
   try { geoCache = JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); } catch (_) { geoCache = {}; }
   function saveGeoCache() { try { localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(geoCache)); } catch (_) {} }
@@ -373,7 +382,8 @@
   function geocodeAddress(address) {
     return new Promise((resolve) => {
       if (!address) { resolve(null); return; }
-      if (geoCache[address]) { resolve(geoCache[address]); return; }
+      if (isValidCoord(geoCache[address])) { resolve(geoCache[address]); return; }
+      if (geoCache[address]) { delete geoCache[address]; saveGeoCache(); }
       if (!window.naver || !naver.maps || !naver.maps.Service) { resolve(null); return; }
       let done = false;
       const timer = setTimeout(() => { if (!done) { done = true; resolve(null); } }, 4000);
@@ -384,6 +394,7 @@
           const a = status === naver.maps.Service.Status.OK && res && res.v2 && res.v2.addresses && res.v2.addresses[0];
           if (!a) { resolve(null); return; }
           const coord = { lat: Number(a.y), lng: Number(a.x) };
+          if (!isValidCoord(coord)) { resolve(null); return; }
           geoCache[address] = coord; saveGeoCache();
           resolve(coord);
         });
@@ -393,7 +404,7 @@
   async function resolveItemCoord(item) {
     const lat = Number(item?.lat);
     const lng = Number(item?.lng);
-    if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+    if (isValidCoord({ lat, lng })) return { lat, lng };
     return geocodeAddress(item?.address);
   }
 
@@ -411,6 +422,7 @@
       const coord = await resolveItemCoord(item);
       if (token !== renderToken) return; // 더 최신 렌더가 시작됨 → 중단
       if (!coord) continue;
+      if (!isValidCoord(coord)) continue;
       const pos = new naver.maps.LatLng(coord.lat, coord.lng);
       const marker = new naver.maps.Marker({ position: pos, map, title: item.name });
       const slug = itemSlug(item);
@@ -540,20 +552,17 @@
     if (!window.naver || !naver.maps) { showEmpty('SDK 미로드'); return; }
     // 좌표 source 우선순위: 1) item.lat/lng (DB·정적 JSON), 2) 메인 지도 geocode 캐시(markerBySlug),
     // 3) item.address 직접 geocode (admin 등록 후 좌표 없는 lab 대응).
-    let lat = Number(item.lat);
-    let lng = Number(item.lng);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    let coord = await resolveItemCoord(item);
+    let lat = Number(coord?.lat);
+    let lng = Number(coord?.lng);
+    if (!isValidCoord({ lat, lng })) {
       const entry = markerBySlug.get(slug);
       if (entry && entry.marker) {
         const pos = entry.marker.getPosition();
         lat = pos.lat(); lng = pos.lng();
       }
     }
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      const coord = await geocodeAddress(item.address);
-      if (coord) { lat = coord.lat; lng = coord.lng; }
-    }
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) { showEmpty('좌표 없음'); return; }
+    if (!isValidCoord({ lat, lng })) { showEmpty('좌표 없음'); return; }
     // 모달 transition 후 size 측정되도록 다음 frame 에서 생성.
     requestAnimationFrame(() => {
       try {

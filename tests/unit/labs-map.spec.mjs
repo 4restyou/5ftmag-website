@@ -36,6 +36,15 @@ describe('Labs Naver map integration', () => {
     expect(js).toContain('const coord = await resolveItemCoord(item);');
   });
 
+  it('rejects stale or swapped geocode coordinates before drawing maps', () => {
+    const js = read('js/labs-page.js');
+    expect(js).toContain("const GEO_CACHE_KEY = '5ft-labs-geo-v2';");
+    expect(js).toContain('function isValidCoord');
+    expect(js).toContain('lat >= 30 && lat <= 39');
+    expect(js).toContain('lng >= 124 && lng <= 132');
+    expect(js).toContain('if (geoCache[address]) { delete geoCache[address]; saveGeoCache(); }');
+  });
+
   it('backfills missing Supabase coordinates from static Labs data', () => {
     const js = read('js/labs-page.js');
     expect(js).toContain('function enrichLabWithStaticCoord');
