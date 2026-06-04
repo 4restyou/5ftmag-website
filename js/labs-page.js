@@ -76,8 +76,20 @@
     // name + region 으로 고유성 확보 (같은 이름이 지역 달리 있을 수 있음).
     return slugify(`${item.name}-${item.region || ''}`);
   }
+  function normalizeLookup(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+  }
+  function hasCoord(item) {
+    return Number.isFinite(Number(item?.lat)) && Number.isFinite(Number(item?.lng));
+  }
+  function addressCompatible(a, b) {
+    const aa = normalizeLookup(a);
+    const bb = normalizeLookup(b);
+    return !!aa && !!bb && (aa === bb || aa.includes(bb) || bb.includes(aa));
+  }
   // 슬러그 → { marker, item } 매핑. updateMarkers 에서 채움.
   const markerBySlug = new Map();
+  let activeMapSlug = null;
   let deepLinkApplied = false;
 
   // 테이블 row(컬럼명) → 현상소 카드가 쓰는 형태(scan_res → scanRes 만 다름).
@@ -95,14 +107,38 @@
     };
   }
 
+  let staticLabsPromise = null;
+  async function loadStaticLabs() {
+    if (!staticLabsPromise) {
+      staticLabsPromise = fetch('/data/labs.json')
+        .then((res) => res.json())
+        .then((res) => Array.isArray(res.labs) ? res.labs : [])
+        .catch(() => []);
+    }
+    return staticLabsPromise;
+  }
+  function enrichLabWithStaticCoord(lab, staticLabs) {
+    if (hasCoord(lab) || !Array.isArray(staticLabs) || !staticLabs.length) return lab;
+    const labName = normalizeLookup(lab.name);
+    const labRegion = normalizeLookup(lab.region);
+    const match = staticLabs.find((s) => hasCoord(s) && addressCompatible(lab.address, s.address))
+      || staticLabs.find((s) => {
+        if (!hasCoord(s)) return false;
+        if (normalizeLookup(s.name) !== labName || normalizeLookup(s.region) !== labRegion) return false;
+        return !lab.address || !s.address || addressCompatible(lab.address, s.address);
+      });
+    return match ? { ...lab, lat: match.lat, lng: match.lng } : lab;
+  }
   async function loadLabs() {
     // 원본 = Supabase labs 테이블. 실패 시 정적 data/labs.json 으로 폴백.
+    const staticLabs = await loadStaticLabs();
     try {
       const rows = await window.MagDB?.labs?.list?.();
-      if (Array.isArray(rows) && rows.length) return rows.map(rowToLab);
+      if (Array.isArray(rows) && rows.length) {
+        return rows.map(rowToLab).map((lab) => enrichLabWithStaticCoord(lab, staticLabs));
+      }
     } catch (_) { /* 폴백으로 진행 */ }
-    const res = await (await fetch('/data/labs.json')).json();
-    return Array.isArray(res.labs) ? res.labs : [];
+    return staticLabs;
   }
 
   async function loadRepairs() {
@@ -306,10 +342,12 @@
   }
 
   function infoContent(item) {
+    const slug = itemSlug(item);
     const naverMap = item.address
       ? `https://map.naver.com/p/search/${encodeURIComponent(item.address)}`
       : null;
     const links = [];
+    links.push(`<button type="button" class="labs-map-info-button" data-labs-map-detail="${escapeAttr(slug)}">자세히</button>`);
     if (naverMap) links.push(`<a href="${escapeAttr(naverMap)}" target="_blank" rel="noopener">길찾기 ↗</a>`);
     if (item.url) links.push(`<a href="${escapeAttr(item.url)}" target="_blank" rel="noopener">홈페이지 ↗</a>`);
     return `<div class="labs-map-info">
@@ -370,12 +408,13 @@
       if (!coord) continue;
       const pos = new naver.maps.LatLng(coord.lat, coord.lng);
       const marker = new naver.maps.Marker({ position: pos, map, title: item.name });
+      const slug = itemSlug(item);
       naver.maps.Event.addListener(marker, 'click', () => {
-        infoWindow.setContent(infoContent(item));
-        infoWindow.open(map, marker);
+        if (activeMapSlug === slug) { openModal(slug); return; }
+        focusMarkerBySlug(slug);
       });
       markers.push(marker);
-      markerBySlug.set(itemSlug(item), { marker, item });
+      markerBySlug.set(slug, { marker, item });
       bounds.extend(pos);
       count++;
     }
@@ -421,14 +460,17 @@
   function findItemBySlug(slug) {
     return data.find(it => itemSlug(it) === slug) || null;
   }
-  function focusMarkerBySlug(slug) {
+  function focusMarkerBySlug(slug, opts = {}) {
     if (!mapReady || !map || !infoWindow) return;
     const entry = markerBySlug.get(slug);
     if (!entry) return;
     map.panTo(entry.marker.getPosition());
     if (map.getZoom() < 15) map.setZoom(15);
-    infoWindow.setContent(infoContent(entry.item));
-    infoWindow.open(map, entry.marker);
+    if (opts.openInfo !== false) {
+      activeMapSlug = slug;
+      infoWindow.setContent(infoContent(entry.item));
+      infoWindow.open(map, entry.marker);
+    }
   }
   function updateUrlLab(slug) {
     try {
@@ -529,9 +571,11 @@
     modal.querySelector('.labs-modal-name').textContent = item.name || '';
     modal.querySelector('.labs-modal-region').textContent = item.region || '';
     modal.querySelector('.labs-modal-body').innerHTML = detailHtml(item);
+    if (infoWindow) infoWindow.close();
+    activeMapSlug = null;
     modal.hidden = false;
     document.documentElement.classList.add('labs-modal-open');
-    focusMarkerBySlug(slug);
+    if (opts?.focusMap) focusMarkerBySlug(slug);
     setupModalMap(item, slug, modal);
     updateUrlLab(slug);
     // 닫기 버튼에 포커스 (스크린리더 + Esc 대응)
@@ -583,6 +627,11 @@
     if (!head) return;
     const card = head.closest('.lab-card');
     if (card?.dataset.slug) openModal(card.dataset.slug);
+  });
+  document.addEventListener('click', (e) => {
+    const detail = e.target.closest('[data-labs-map-detail]');
+    if (!detail) return;
+    openModal(detail.getAttribute('data-labs-map-detail'));
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();

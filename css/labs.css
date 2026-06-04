@@ -177,8 +177,19 @@
 }
 .labs-map-info strong { font-size: 14px; font-weight: var(--fw-heading); }
 .labs-map-info-addr { color: #555; }
-.labs-map-info-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
-.labs-map-info-links a { color: #1452c8; border-bottom: 1px solid currentColor; font-weight: var(--fw-heading); }
+.labs-map-info-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 4px; }
+.labs-map-info-links a,
+.labs-map-info-button {
+  appearance: none;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding: 0;
+  background: transparent;
+  color: #1452c8;
+  font: inherit;
+  font-weight: var(--fw-heading);
+  cursor: pointer;
+}
 
 .labs-section {
   padding: 24px 40px 80px;

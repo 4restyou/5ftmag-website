@@ -35,4 +35,18 @@ describe('Labs Naver map integration', () => {
     expect(js).toContain('Number(item?.lng)');
     expect(js).toContain('const coord = await resolveItemCoord(item);');
   });
+
+  it('backfills missing Supabase coordinates from static Labs data', () => {
+    const js = read('js/labs-page.js');
+    expect(js).toContain('function enrichLabWithStaticCoord');
+    expect(js).toContain('return rows.map(rowToLab).map((lab) => enrichLabWithStaticCoord(lab, staticLabs));');
+    expect(js).toContain('addressCompatible(lab.address, s.address)');
+  });
+
+  it('separates card modal behavior from map marker behavior', () => {
+    const js = read('js/labs-page.js');
+    expect(js).toContain('data-labs-map-detail');
+    expect(js).toContain('if (activeMapSlug === slug) { openModal(slug); return; }');
+    expect(js).toContain('if (opts?.focusMap) focusMarkerBySlug(slug);');
+  });
 });
