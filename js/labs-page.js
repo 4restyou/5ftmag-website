@@ -45,7 +45,7 @@
   let data = [];
   let region = 'all';
   let query = '';
-  let sort = 'name'; // 기본 = 가나다·ABC(이름순) | region = 지역별 구분
+  let sort = 'region'; // 기본 = 지역별 구분 | name = 가나다·ABC(이름순)
 
   // 모바일에서 목록이 길어 스크롤 피로가 크므로, 필터·검색이 없을 때만 처음 일부만
   // 보여주고 "더 보기" 로 확장한다. (films 라이브러리와 동일 패턴)
