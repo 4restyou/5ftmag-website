@@ -288,9 +288,13 @@
       return;
     }
     // 도메인·키 인증 실패 시에도 빈 회색 박스 대신 영역을 접는다.
-    window.navermap_authFailure = function () {
+    window.addEventListener('labs:naver-map-auth-failed', () => {
       if (section) section.hidden = true;
-    };
+    });
+    if (window.__labsNaverMapAuthFailed) {
+      if (section) section.hidden = true;
+      return;
+    }
     map = new naver.maps.Map(el, {
       center: new naver.maps.LatLng(36.5, 127.8),
       zoom: 7,
@@ -315,8 +319,8 @@
     </div>`;
   }
 
-  // ── 주소 → 좌표 (브라우저 즉석 변환 + localStorage 캐시) ──
-  // 좌표를 데이터로 저장하지 않고, 지도 표시 때 주소를 변환한다.
+  // ── 좌표 해석 ──
+  // DB/정적 JSON 의 lat/lng 를 우선 사용하고, 좌표가 없는 새 항목만 주소 geocode 로 보완한다.
   // 캐시는 주소 키라, admin 에서 주소만 고치면 다음 방문에 자동 반영.
   const GEO_CACHE_KEY = '5ft-labs-geo-v1';
   let geoCache;
@@ -343,6 +347,12 @@
       } catch (_) { if (!done) { done = true; clearTimeout(timer); resolve(null); } }
     });
   }
+  async function resolveItemCoord(item) {
+    const lat = Number(item?.lat);
+    const lng = Number(item?.lng);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+    return geocodeAddress(item?.address);
+  }
 
   let renderToken = 0;
   async function updateMarkers(shown) {
@@ -355,7 +365,7 @@
     const bounds = new naver.maps.LatLngBounds();
     let count = 0;
     for (const item of shown) {
-      const coord = await geocodeAddress(item.address);
+      const coord = await resolveItemCoord(item);
       if (token !== renderToken) return; // 더 최신 렌더가 시작됨 → 중단
       if (!coord) continue;
       const pos = new naver.maps.LatLng(coord.lat, coord.lng);
