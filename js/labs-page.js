@@ -12,7 +12,6 @@
   const searchEl = document.getElementById('labsSearch');
   const countEl = document.getElementById('labsCount');
   const tabsEl = document.querySelector('.labs-tabs');
-  const sortEl = document.getElementById('labsSort');
   const introEl = document.getElementById('labsIntro');
   const viewToggleEl = document.querySelector('.labs-view-toggle');
   const mapSectionEl = document.getElementById('labsMapSection');
@@ -48,7 +47,6 @@
   let data = [];
   let region = 'all';
   let query = '';
-  let sort = 'region'; // 기본 = 지역별 구분 | name = 가나다·ABC(이름순)
   let view = 'list';
 
   // 모바일에서 목록이 길어 스크롤 피로가 크므로, 필터·검색이 없을 때만 처음 일부만
@@ -235,7 +233,6 @@
 
   // 방문자 정렬.
   const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ko');
-  function sortByName(arr) { return arr.slice().sort(byName); }
 
   // 지역순: 지역별로 묶어 구분 헤더와 함께 렌더. REGION_ORDER 우선, 그 외는 가나다,
   // 지역 없는 항목은 '기타'로 맨 끝. 각 지역 안은 이름순.
@@ -499,9 +496,7 @@
     // 모바일 + 필터·검색 없을 때만 처음 일부만 렌더. 지도 마커는 전체(filtered) 유지.
     const capped = isMobileLabs() && region === 'all' && !query;
     const shown = capped ? filtered.slice(0, mobileVisible) : filtered;
-    listEl.innerHTML = sort === 'region'
-      ? renderGrouped(shown)
-      : sortByName(shown).map(card).join('');
+    listEl.innerHTML = renderGrouped(shown);
     updateMoreButton(capped ? filtered.length : 0);
     // 첫 렌더 후 URL 의 ?lab=slug 가 있으면 해당 카드 자동 펼침.
     if (!deepLinkApplied) tryApplyDeepLink();
@@ -692,13 +687,6 @@
     searchEl.addEventListener('input', () => {
       query = searchEl.value.trim().toLowerCase();
       mobileVisible = MOBILE_INITIAL;
-      apply();
-    });
-  }
-
-  if (sortEl) {
-    sortEl.addEventListener('change', () => {
-      sort = sortEl.value;
       apply();
     });
   }
