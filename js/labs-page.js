@@ -86,6 +86,8 @@
       name: r.name || '',
       region: r.region ?? null,
       address: r.address ?? null,
+      lat: r.lat ?? null,
+      lng: r.lng ?? null,
       scanRes: r.scan_res ?? null,
       features: r.features ?? null,
       url: r.url ?? null,
