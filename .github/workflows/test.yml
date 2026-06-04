@@ -57,3 +57,13 @@ jobs:
       - name: 스모크 테스트
         if: steps.changes.outputs.run_tests == 'true'
         run: npm test
+      - name: 실패 시 결과물 업로드 (스크린샷·trace·비디오·HTML 리포트)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+          if-no-files-found: ignore
