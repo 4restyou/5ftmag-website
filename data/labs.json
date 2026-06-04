@@ -1,57 +1,57 @@
 {
-  "source": "필름 현상소_Update_07.11.xlsx",
+  "source": "supabase:public.labs",
   "type": "film-lab",
-  "count": 88,
+  "count": 92,
   "labs": [
     {
-      "name": "갤러리 사진관",
+      "name": "갤러리사진관",
       "region": "서울",
       "address": "서울 강남구 삼성로 642 삼성빌딩 1층",
-      "lat": 37.5174072,
-      "lng": 127.0513431,
+      "lat": null,
+      "lng": null,
       "scanRes": "2250*1500",
-      "features": "기본 스캔 1500×2250, 고해상 옵션(최대 3600×5400). 스캔 단독 1롤 3,000원, 현상 추가 롤당 4,000원.",
+      "features": "고해상 옵션(최대 3600×5400). \n스캔 단독 1롤 3,000원, 현상 추가 롤당 4,000원.",
       "url": "https://www.instagram.com/gallery_studio_official/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 9000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 11000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 11000,
-            "high": null
+            "high": null,
+            "basic": 11000
           },
           "135": {
-            "basic": 11000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 11000,
-            "high": null
-          },
-          "135": {
-            "basic": 11000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 12000,
-            "high": null
+            "high": null,
+            "basic": 11000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 9000
+          },
+          "135": {
+            "high": 11000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 11000
+          },
+          "135": {
+            "high": null,
+            "basic": 11000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 12000
+          }
         }
       }
     },
@@ -59,155 +59,103 @@
       "name": "고래사진관",
       "region": "서울",
       "address": "서울 중구 마른내로2길 31 3층",
-      "lat": 37.5630981,
-      "lng": 126.9915303,
+      "lat": null,
+      "lng": null,
       "scanRes": "3000*2000",
       "features": "현상·스캔권 판매, 자가 스캔 가능.",
       "url": "https://www.slowlens.net/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 7000,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 8000,
-            "high": null
+            "high": 11000,
+            "basic": 8000
           },
           "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 10000,
-            "high": null
-          },
-          "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 7000,
-            "high": null
+            "high": 11000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 10000,
+            "basic": 7000
+          },
+          "135": {
+            "high": 9000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 10000
+          },
+          "135": {
+            "high": 13000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": 8000,
+            "basic": 7000
+          }
         }
       }
     },
     {
-      "name": "낙성대",
+      "name": "낙성대사진관",
       "region": "서울",
-      "address": "서울 관악구 남부순환로 1916",
-      "lat": 37.4773652,
-      "lng": 126.9620855,
+      "address": "서울 관악구 봉천로 582 2층",
+      "lat": null,
+      "lng": null,
       "scanRes": "1800*1200",
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
-        }
-      }
-    },
-    {
-      "name": "다크룸 포토매틱",
-      "region": "서울",
-      "address": "서울 강남구 압구정로4길 27-2 지하 1층 다크룸",
-      "lat": 37.5215141,
-      "lng": 127.0210161,
-      "scanRes": "1500*1000",
-      "features": "자가 현상 가능.",
-      "url": "https://www.photomatic.co.kr/",
-      "prices": {
+        },
         "color": {
           "120": {
-            "basic": 9000,
-            "high": 11000
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 4000,
-            "high": 6000
-          }
-        },
-        "bw": {
-          "120": {
-            "basic": 10000,
-            "high": 12000
-          },
-          "135": {
-            "basic": 6000,
-            "high": 8000
+            "high": null,
+            "basic": 6000
           }
         },
         "slide": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
-        },
-        "etc": {
-          "110": null,
-          "aps": null
         }
       }
     },
@@ -215,51 +163,51 @@
       "name": "다크룸서울",
       "region": "서울",
       "address": "서울 마포구 어울마당로5길 26 2층",
-      "lat": 37.5494793,
-      "lng": 126.9192301,
+      "lat": null,
+      "lng": null,
       "scanRes": null,
       "features": null,
       "url": "https://blog.naver.com/darkroom_seoul",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -267,51 +215,51 @@
       "name": "달의바다",
       "region": "경기",
       "address": "경기 부천시 원미구 장말로 173 지층",
-      "lat": 37.4934374,
-      "lng": 126.7611696,
+      "lat": null,
+      "lng": null,
       "scanRes": null,
-      "features": "사진 스튜디오 겸 현상소. 흑백 암실 인화 원데이 클래스 운영.",
+      "features": "사진 스튜디오 겸 현상소.\n흑백 암실 인화 원데이 클래스 운영",
       "url": "https://pf.kakao.com/_bxcqPn",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 9000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 9000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -325,253 +273,253 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
     {
       "name": "망우삼림",
       "region": "서울",
-      "address": "서울 중구 을지로 108 3층",
-      "lat": 37.5660565,
-      "lng": 126.9899735,
+      "address": "서울 중구 을지로 108 3층, 4층",
+      "lat": null,
+      "lng": null,
       "scanRes": "2735*1830",
       "features": null,
       "url": "https://www.instagram.com/mangwoosamlim/?hl=ko",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": 13000,
+            "basic": 10000
           },
           "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 14000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": null
+            "high": 13000,
+            "basic": 9000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 10000,
+            "basic": 8000
+          },
+          "135": {
+            "high": 10000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 18000,
+            "basic": 15000
+          },
+          "135": {
+            "high": 17000,
+            "basic": 14000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 10000
+          }
         }
       }
     },
     {
-      "name": "명광 스튜디오",
+      "name": "명광스튜디오",
       "region": "서울",
-      "address": "서울 서초구 논현로17길 4 백마빌딩",
-      "lat": 37.4765566,
-      "lng": 127.0453643,
+      "address": "서울 서초구 논현로17길 4 백마빌딩 2층",
+      "lat": null,
+      "lng": null,
       "scanRes": null,
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
     {
-      "name": "미림 사진관",
+      "name": "미림사진관",
       "region": "서울",
       "address": "서울 광진구 광나루로24길 21 1층 (건국대학교 옛정문앞)",
-      "lat": 37.5454878,
-      "lng": 127.0766791,
+      "lat": null,
+      "lng": null,
       "scanRes": "2700*1800",
-      "features": null,
-      "url": "https://ieteve.modoo.at",
+      "features": "현금계산 및 계좌이체시 고화질로 스캔",
+      "url": "https://blog.naver.com/ieteve",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 14000
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 10000
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 20000
+          },
+          "135": {
+            "high": null,
+            "basic": 16000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 11000
+          }
         }
       }
     },
     {
       "name": "보다봄",
       "region": "서울",
-      "address": "서울 중구 수표로 1",
-      "lat": 37.5614704,
-      "lng": 126.9903691,
+      "address": "서울 중구 수표로 1 소피아하우스빌딩 4층",
+      "lat": null,
+      "lng": null,
       "scanRes": null,
       "features": "이마콘 X5 드럼 스캔, 흑백 전용액 현상, 프리미엄 현상, 밀착 인화 가능.",
       "url": "http://www.bodabom.com/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 8000,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 10000,
-            "high": null
+            "high": null,
+            "basic": 10000
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 16000,
-            "high": 10000
-          },
-          "135": {
-            "basic": 16000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": 20000,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 8000
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 10000,
+            "basic": 16000
+          },
+          "135": {
+            "high": null,
+            "basic": 16000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -579,155 +527,51 @@
       "name": "부광사진관",
       "region": "울산",
       "address": "울산 남구 왕생로66번길 30 1층",
-      "lat": 35.5397755,
-      "lng": 129.3343408,
+      "lat": null,
+      "lng": null,
       "scanRes": null,
       "features": "필름 현상·스캔(현상만·스캔만 개별 가능). 증명사진 스튜디오 겸업.",
       "url": "https://www.instagram.com/bk_photo_film/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
-        }
-      }
-    },
-    {
-      "name": "서초사진관",
-      "region": "서울",
-      "address": "서울 서초구 반포대로10길 35 신영Gwell상가 8호",
-      "lat": 37.4843201,
-      "lng": 127.0136633,
-      "scanRes": null,
-      "features": null,
-      "url": null,
-      "prices": {
+        },
         "color": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 7000,
-            "high": null
-          }
-        },
-        "bw": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 8000
           }
         },
         "slide": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "cinema": {
           "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
-        },
-        "etc": {
-          "110": null,
-          "aps": null
-        }
-      }
-    },
-    {
-      "name": "선릉사진관",
-      "region": "서울",
-      "address": "서울 강남구 테헤란로 327 빅토리아오피스텔 지하1층 5호",
-      "lat": 37.5044278,
-      "lng": 127.047249,
-      "scanRes": null,
-      "features": null,
-      "url": null,
-      "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "bw": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "etc": {
-          "110": null,
-          "aps": null
         }
       }
     },
@@ -735,51 +579,51 @@
       "name": "세하포토랩",
       "region": "대구",
       "address": "대구 북구 팔달로35길 4 3층",
-      "lat": 35.8889044,
-      "lng": 128.5696389,
-      "scanRes": null,
+      "lat": null,
+      "lng": null,
+      "scanRes": "3024*2005",
       "features": "C-41·ECN-2·흑백 필름 현상·스캔. 고해상 스캔 추가 5,000원. 120 흑백 TIFF 스캔.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 7000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 12000,
-            "high": null
+            "high": null,
+            "basic": 12000
           },
           "135": {
-            "basic": 8000,
-            "high": 10000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": 12000
+            "high": 10000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 7000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": 12000,
+            "basic": 10000
+          }
         }
       }
     },
@@ -793,45 +637,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -845,45 +689,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -897,45 +741,45 @@
       "features": "노리츠·후지 스캐너 선택 가능.",
       "url": "https://www.instagram.com/sscolor_film/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 10000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 10000
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -943,51 +787,51 @@
       "name": "에이티사진관",
       "region": "울산",
       "address": "울산 중구 새즈믄해거리 40",
-      "lat": 35.5566122,
-      "lng": 129.3203973,
+      "lat": null,
+      "lng": null,
       "scanRes": null,
       "features": "흑백 필름 현상, 습판 사진(예약제). 증명사진 스튜디오 겸업.",
       "url": "https://instagram.com/a.t_hyunkussi",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 5000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1001,45 +845,45 @@
       "features": "필름 카메라 전문 판매점, 매장 겸 현상소.",
       "url": "https://www.allycamera.com/filmlab_price",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 6000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 6000
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1053,45 +897,45 @@
       "features": null,
       "url": "https://ynfilm.co.kr",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 8000,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 8000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 11000,
-            "high": null
+            "high": null,
+            "basic": 11000
           },
           "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 11000,
-            "high": null
-          },
-          "135": {
-            "basic": 14000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": null
+            "high": null,
+            "basic": 9000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 8000
+          },
+          "135": {
+            "high": 8000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 11000
+          },
+          "135": {
+            "high": null,
+            "basic": 14000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 10000
+          }
         }
       }
     },
@@ -1105,45 +949,45 @@
       "features": "컬러·흑백·슬라이드·영화용(ECN-2) 현상·스캔, 화질(기본·고해상) 선택. 중형 필름 미취급.",
       "url": "http://instagram.com/ox.film",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 9000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": 13000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 13000,
-            "high": 16000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": 14000
+            "high": 13000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 9000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 16000,
+            "basic": 13000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": 14000,
+            "basic": 10000
+          }
         }
       }
     },
@@ -1157,45 +1001,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 8000,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
         }
       }
     },
@@ -1209,45 +1053,45 @@
       "features": null,
       "url": "https://www.instagram.com/wknd_film/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 7000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 7000
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1261,45 +1105,45 @@
       "features": null,
       "url": "http://www.instagram.com/eroomphotos/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 4000,
-            "high": 8000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 12000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 8000,
+            "basic": 4000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1307,51 +1151,51 @@
       "name": "인스튜디오",
       "region": "서울",
       "address": "서울 중구 서소문로 111 삼령빌딩 201호",
-      "lat": 37.5631115,
-      "lng": 126.9733938,
+      "lat": null,
+      "lng": null,
       "scanRes": "2728*1830",
-      "features": "필름 스캔 전문. 135 1롤 5,000원(2롤 이상 4,000원), 120 1롤 7,000원.",
+      "features": "135 2롤 이상 4,000원",
       "url": "https://www.instagram.com/filmscanstudioin",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 7000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 15000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 11000,
-            "high": null
+            "high": null,
+            "basic": 11000
           },
           "135": {
-            "basic": 10000,
-            "high": 20000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 11000,
-            "high": null
-          },
-          "135": {
-            "basic": 10000,
-            "high": 20000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": 20000
+            "high": 20000,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 7000
+          },
+          "135": {
+            "high": 15000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 11000
+          },
+          "135": {
+            "high": 20000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": 20000,
+            "basic": 10000
+          }
         }
       }
     },
@@ -1365,45 +1209,45 @@
       "features": "컬러 네거티브 선불 4롤 16,000원(1년) 또는 개별 5,500원. 화질 3단계 선택, 현상만·스트립 스캔 별도.",
       "url": "http://www.instagram.com/film_135_36",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 9000,
-            "high": 13000
-          },
-          "135": {
-            "basic": 5500,
-            "high": 10000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 12000,
-            "high": 16000
+            "high": 16000,
+            "basic": 12000
           },
           "135": {
-            "basic": 10000,
-            "high": 14000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 12000,
-            "high": 16000
-          },
-          "135": {
-            "basic": 10000,
-            "high": 14000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 16000,
-            "high": null
+            "high": 14000,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 13000,
+            "basic": 9000
+          },
+          "135": {
+            "high": 10000,
+            "basic": 5500
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 16000,
+            "basic": 12000
+          },
+          "135": {
+            "high": 14000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 16000
+          }
         }
       }
     },
@@ -1417,45 +1261,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1469,45 +1313,45 @@
       "features": "표시 가격은 노리츠 기준. 후지 스캐너는 4,000·6,000·9,000원. APS 퍼포레이션까지 스캔 가능.",
       "url": "https://www.instagram.com/joongangcolor/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 8000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 12000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 10000,
-            "high": null
+            "high": null,
+            "basic": 10000
           },
           "135": {
-            "basic": 8000,
-            "high": 17000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 12000,
-            "high": null
-          },
-          "135": {
-            "basic": 14000,
-            "high": 21000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": null
+            "high": 17000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": 10000,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 8000
+          },
+          "135": {
+            "high": 12000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 12000
+          },
+          "135": {
+            "high": 21000,
+            "basic": 14000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 10000
+          }
         }
       }
     },
@@ -1521,45 +1365,45 @@
       "features": "최저 화질(1512×1002) 등급은 제외.",
       "url": "http://www.instagram.com/cheonggye_film",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 6000,
-            "high": 8000
-          },
-          "135": {
-            "basic": 3000,
-            "high": 8000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 8000,
-            "high": 10000
+            "high": 10000,
+            "basic": 8000
           },
           "135": {
-            "basic": 8000,
-            "high": 10000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 10000,
-            "high": 12000
-          },
-          "135": {
-            "basic": 10000,
-            "high": 12000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 8000,
-            "high": 10000
+            "high": 10000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 8000,
+            "basic": 6000
+          },
+          "135": {
+            "high": 8000,
+            "basic": 3000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 12000,
+            "basic": 10000
+          },
+          "135": {
+            "high": 12000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": 10000,
+            "basic": 8000
+          }
         }
       }
     },
@@ -1573,45 +1417,45 @@
       "features": null,
       "url": "http://instagram.com/chumizza",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 7000,
-            "high": 9000
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 10000,
-            "high": 12000
+            "high": 12000,
+            "basic": 10000
           },
           "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 11000,
-            "high": 13000
-          },
-          "135": {
-            "basic": 11000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 11000,
-            "high": null
+            "high": null,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 9000,
+            "basic": 7000
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 13000,
+            "basic": 11000
+          },
+          "135": {
+            "high": null,
+            "basic": 11000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 11000
+          }
         }
       }
     },
@@ -1625,45 +1469,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": 9000,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 9000
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1677,45 +1521,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 10000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 10000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1729,45 +1573,45 @@
       "features": "중형 필름은 규격별 차등. 6×4.5 12,000원, 6×6 10,000원, 6×7 9,000원(컬러 기준). 흑백 +2,000원, 슬라이드 +3,000원.",
       "url": "http://www.timephoto.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": "별도 표기",
-            "high": "별도 표기"
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": "별도 표기",
-            "high": "별도 표기"
+            "high": "별도 표기",
+            "basic": "별도 표기"
           },
           "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": "별도 표기",
-            "high": "별도 표기"
-          },
-          "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 9000
           }
         },
         "etc": {
           "110": null,
           "aps": "7000 원 / 10000 원"
+        },
+        "color": {
+          "120": {
+            "high": "별도 표기",
+            "basic": "별도 표기"
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": "별도 표기",
+            "basic": "별도 표기"
+          },
+          "135": {
+            "high": null,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1781,45 +1625,45 @@
       "features": "증명·프로필·가족 사진 스튜디오 겸 현상소. 35mm 컬러·흑백 현상·스캔.",
       "url": "https://tag1studio.com",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1833,45 +1677,45 @@
       "features": "영화용 필름 현상에 C-41 사용(ECN-2 아님).",
       "url": "http://www.instagram.com/palettefilmlab",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": 8000
-          },
-          "135": {
-            "basic": 5000,
-            "high": 7000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": 13000
+            "high": 13000,
+            "basic": null
           },
           "135": {
-            "basic": 9000,
-            "high": 11000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": 13000
-          },
-          "135": {
-            "basic": 7000,
-            "high": 12000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": 12000
+            "high": 11000,
+            "basic": 9000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 8000,
+            "basic": null
+          },
+          "135": {
+            "high": 7000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 13000,
+            "basic": null
+          },
+          "135": {
+            "high": 12000,
+            "basic": 7000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": 12000,
+            "basic": 10000
+          }
         }
       }
     },
@@ -1885,45 +1729,45 @@
       "features": "APS·110·127·126·220·620·820·Minox 현상 가능.",
       "url": "https://www.fotomaru.com",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 9000,
-            "high": 17000
-          },
-          "135": {
-            "basic": 7000,
-            "high": 11000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 11000,
-            "high": 19000
+            "high": 19000,
+            "basic": 11000
           },
           "135": {
-            "basic": 10000,
-            "high": 14000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 11000,
-            "high": 19000
-          },
-          "135": {
-            "basic": null,
-            "high": 14000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 14000,
-            "high": 20000
+            "high": 14000,
+            "basic": 10000
           }
         },
         "etc": {
           "110": "19000 원 / 32000 원",
           "aps": 10000
+        },
+        "color": {
+          "120": {
+            "high": 17000,
+            "basic": 9000
+          },
+          "135": {
+            "high": 11000,
+            "basic": 7000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 19000,
+            "basic": 11000
+          },
+          "135": {
+            "high": 14000,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": 20000,
+            "basic": 14000
+          }
         }
       }
     },
@@ -1937,45 +1781,45 @@
       "features": "중형 필름 스캔 일시 중단.",
       "url": "http://www.photowith.net/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 4000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 9500,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 9000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 4000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 9500
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -1989,45 +1833,45 @@
       "features": "네이버 스마트스토어 입점.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 4000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 4000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2041,45 +1885,45 @@
       "features": "필름 컷 수에 따라 가격 차등.",
       "url": "https://www.photopia.co.kr/main.asp",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 7200,
-            "high": null
-          },
-          "135": {
-            "basic": 8300,
-            "high": 11200
-          }
-        },
         "bw": {
           "120": {
-            "basic": 13200,
-            "high": null
+            "high": null,
+            "basic": 13200
           },
           "135": {
-            "basic": 14000,
-            "high": 18800
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 16000,
-            "high": null
-          },
-          "135": {
-            "basic": 17300,
-            "high": 24300
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 18800,
+            "basic": 14000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 7200
+          },
+          "135": {
+            "high": 11200,
+            "basic": 8300
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 16000
+          },
+          "135": {
+            "high": 24300,
+            "basic": 17300
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2093,45 +1937,45 @@
       "features": null,
       "url": "http://www.picker-seoul.com",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2145,45 +1989,45 @@
       "features": "컬러·흑백 현상+스캔(M·L 화질 선택), 스캔 단독 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8500,
-            "high": 11500
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 11500,
-            "high": 14500
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 14500,
+            "basic": 11500
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 11500,
+            "basic": 8500
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2197,45 +2041,45 @@
       "features": "컬러·흑백 현상+스캔(M·L 화질 선택), 스캔 단독 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8500,
-            "high": 11500
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 11500,
-            "high": 14500
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 14500,
+            "basic": 11500
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 11500,
+            "basic": 8500
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2249,45 +2093,45 @@
       "features": "카드 결제 시 1,000원 추가.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 7000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 7000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2301,45 +2145,45 @@
       "features": "컬러 네거티브 외 표시 가격은 현상만(스캔 미포함).",
       "url": "http://www.photopan.co.kr",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 3000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 18000
-          }
-        },
         "bw": {
           "120": {
-            "basic": 6000,
-            "high": null
+            "high": null,
+            "basic": 6000
           },
           "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 9000,
-            "high": null
-          },
-          "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 6000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 3000
+          },
+          "135": {
+            "high": 18000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 9000
+          },
+          "135": {
+            "high": null,
+            "basic": 9000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2353,45 +2197,45 @@
       "features": "APS 필름 현상 가능.",
       "url": "https://blog.naver.com/hp1996",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 8000,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 8000
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2405,45 +2249,45 @@
       "features": "흑백 전용 현상소. 현상 6,000원, 스캔 4,000원, 현상+스캔 10,000원. 4×5 현상·밀착 인화 가능.",
       "url": "https://blog.naver.com/bnw_film",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 6000,
-            "high": null
+            "high": null,
+            "basic": 6000
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2457,45 +2301,45 @@
       "features": "컬러 현상 5,000원(3롤 13,000), 고화질 스캔 옵션, 흑백 현상+스캔 12,000원. 증명사진 스튜디오 겸업.",
       "url": "https://www.instagram.com/hdh_studio/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 9000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 12000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 12000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 9000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2509,45 +2353,45 @@
       "features": "후지 스캐너 기본, 2,000원 추가 시 노리츠 스캐너 선택 가능.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 8000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 8000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2561,45 +2405,45 @@
       "features": "암실 체험 가능.",
       "url": "https://blog.naver.com/cameraxphoto",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 6000,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 12000,
-            "high": null
+            "high": null,
+            "basic": 12000
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 6000
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2613,45 +2457,45 @@
       "features": "노리츠 스캐너 사용, 흑백 외주 현상.",
       "url": "https://nkodak.modoo.at/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 4000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 6000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 4000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2665,45 +2509,45 @@
       "features": "흑백은 XP2 한정 현상 가능.",
       "url": "https://www.filmparadise.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 12000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 6000,
-            "high": 12000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 12000,
+            "basic": 6000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 12000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2717,45 +2561,45 @@
       "features": "노리츠 스캐너 사용. 6~10롤 롤당 5,500원, 11롤 이상 롤당 5,000원.",
       "url": "https://blog.naver.com/lbstudio",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 11500,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 15000,
-            "high": null
+            "high": null,
+            "basic": 15000
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 11500
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2769,45 +2613,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 7000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 7000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2821,45 +2665,45 @@
       "features": "우편 접수. 컬러 네거티브는 스캔가에 현상비 포함, 흑백·슬라이드는 별도 현상. APS 가능.",
       "url": "http://yatapphoto.co.kr",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 5000,
-            "high": null
-          },
-          "135": {
-            "basic": 3000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 11000,
-            "high": null
+            "high": null,
+            "basic": 11000
           },
           "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 5000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 9000
           }
         },
         "etc": {
           "110": null,
           "aps": 5000
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 5000
+          },
+          "135": {
+            "high": null,
+            "basic": 3000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 5000
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2873,45 +2717,45 @@
       "features": null,
       "url": "http://www.morancolor.com/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 12000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 8000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 11000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 16000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 11000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 12000
+          },
+          "135": {
+            "high": 8000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 16000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2925,45 +2769,45 @@
       "features": "컬러 네거티브 10롤 현상 시 1롤 무료(스탬프 적립).",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -2977,45 +2821,45 @@
       "features": null,
       "url": "https://photonics.modoo.at",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3029,45 +2873,45 @@
       "features": null,
       "url": "http://storefarm.naver.com/superphoto",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3081,45 +2925,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": 4000,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 4000
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3133,45 +2977,45 @@
       "features": "필름과 USB를 함께 보내면 스캔 파일을 그 USB에 담아 반송.",
       "url": "http://www.the35mm.com/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 5000,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 10000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 11000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 11000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 5000
+          },
+          "135": {
+            "high": 10000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3185,45 +3029,45 @@
       "features": "전 공정 수작업. 표시 가격은 스캔이 아닌 밀착 인화 기준이며, 스캔은 135 2,500원·120 3,000원.",
       "url": "http://solist.alltheway.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 6000,
-            "high": null
-          },
-          "135": {
-            "basic": 5500,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 5000,
-            "high": null
+            "high": null,
+            "basic": 5000
           },
           "135": {
-            "basic": 4500,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 4500
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 6000
+          },
+          "135": {
+            "high": null,
+            "basic": 5500
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3237,45 +3081,45 @@
       "features": "이마콘 848 드럼 스캔, 노리츠 스캐너. 흑백·슬라이드는 5MB·18MB·60MB 화질 제공(표시 가격은 5MB·18MB 기준).",
       "url": "http://www.photomagic.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 6000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 10000,
-            "high": 30000
+            "high": 30000,
+            "basic": 10000
           },
           "135": {
-            "basic": 10000,
-            "high": 30000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 10000,
-            "high": 30000
-          },
-          "135": {
-            "basic": 10000,
-            "high": 30000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 30000,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 6000
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 30000,
+            "basic": 10000
+          },
+          "135": {
+            "high": 30000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3289,45 +3133,45 @@
       "features": "필름 현상·스캔, 필름 카메라 판매·무료 대여.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3341,45 +3185,45 @@
       "features": "필름 현상·스캔, 필름 카메라 판매·무료 대여.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3393,45 +3237,45 @@
       "features": "재재상회·재재프로젝트로도 운영. 현재 공사로 휴업, 가을 현상 재개 예정.",
       "url": "http://www.seokjustudio.com/develop.html",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 11000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": 11000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3445,45 +3289,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3497,45 +3341,45 @@
       "features": "프로젝트88 운영. 대구 중구 서성로 31-14 2층 무인 접수처 운영.",
       "url": "http://project88.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3549,45 +3393,45 @@
       "features": null,
       "url": "https://blog.naver.com/wjdgml9489",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3601,45 +3445,45 @@
       "features": "스캐너 선택 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": 9000
-          },
-          "135": {
-            "basic": 5000,
-            "high": 9000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": 12000
+            "high": 12000,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": 14000
-          },
-          "135": {
-            "basic": 10000,
-            "high": 14000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 12000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 9000,
+            "basic": null
+          },
+          "135": {
+            "high": 9000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 14000,
+            "basic": null
+          },
+          "135": {
+            "high": 14000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3653,45 +3497,45 @@
       "features": "바라보다사진관 운영, 필름 접수는 네이버 스토어. 영화용 필름 판매.",
       "url": "https://smartstore.naver.com/gyeongju_film",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 10000,
-            "high": null
+            "high": null,
+            "basic": 10000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 10000
+          }
         }
       }
     },
@@ -3705,45 +3549,45 @@
       "features": "매주 월·수·금 현상.",
       "url": "https://www.instagram.com/heemang_photo/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3757,45 +3601,45 @@
       "features": null,
       "url": "https://www.instagram.com/silgae_1000/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3809,45 +3653,45 @@
       "features": "창원 유일의 현상소, 월·수·금 현상.",
       "url": "http://blog.naver.com/gdcolor",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 10000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 16000,
-            "high": 20000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 16000,
-            "high": 20000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 20000,
+            "basic": 16000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 10000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 20000,
+            "basic": 16000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3861,45 +3705,45 @@
       "features": null,
       "url": "http://211.49.171.149/index.html",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3913,45 +3757,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -3965,45 +3809,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 9000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 9000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4017,45 +3861,45 @@
       "features": "구 한암 스튜디오.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 7000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 7000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4069,45 +3913,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4121,45 +3965,45 @@
       "features": "포토클래식으로도 운영.",
       "url": "https://www.photoclassic.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4173,45 +4017,45 @@
       "features": "흑백 필름 전문 사진관, 암실 교육 가능.",
       "url": "https://blog.naver.com/aggeee",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 8000,
-            "high": null
-          },
-          "135": {
-            "basic": 7000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 9000,
-            "high": null
+            "high": null,
+            "basic": 9000
           },
           "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 8000,
-            "high": null
+            "high": null,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 8000
+          },
+          "135": {
+            "high": null,
+            "basic": 7000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
         }
       }
     },
@@ -4225,45 +4069,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4277,45 +4121,45 @@
       "features": "전주 외주 현상. 현상비 8,000원, 이메일 전송비 5,000원.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 13000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 13000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4329,45 +4173,45 @@
       "features": "매직포토가 베르베르 스튜디오로 통합.",
       "url": "https://blog.naver.com/olive21cc",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 10000,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": 7000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 10000
+          },
+          "135": {
+            "high": 7000,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4381,45 +4225,45 @@
       "features": "필름로그·심다 책방이 함께 운영하는 드롭 포인트. 심다 책방에 필름을 맡기면 현상 가능, 옆에 자판기 운영.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": 9000
-          },
-          "135": {
-            "basic": 5000,
-            "high": 9000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": 12000
+            "high": 12000,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": 14000
-          },
-          "135": {
-            "basic": 10000,
-            "high": 14000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 12000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 9000,
+            "basic": null
+          },
+          "135": {
+            "high": 9000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 14000,
+            "basic": null
+          },
+          "135": {
+            "high": 14000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4433,45 +4277,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 10000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4485,45 +4329,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 20000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 20000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4537,45 +4381,45 @@
       "features": "필름로그·안드로메다가 함께 운영하는 드롭 포인트. 안드로메다에 필름을 맡기면 현상 가능, 옆에 자판기 운영.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": 9000
-          },
-          "135": {
-            "basic": 5000,
-            "high": 9000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": 12000
+            "high": 12000,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": 14000
-          },
-          "135": {
-            "basic": 10000,
-            "high": 14000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 12000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 9000,
+            "basic": null
+          },
+          "135": {
+            "high": 9000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 14000,
+            "basic": null
+          },
+          "135": {
+            "high": 14000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4589,45 +4433,45 @@
       "features": "노리츠 스캐너 사용.",
       "url": "https://blog.naver.com/7047717",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 7000,
-            "high": null
-          },
-          "135": {
-            "basic": 5000,
-            "high": 6000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 7000
+          },
+          "135": {
+            "high": 6000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4641,45 +4485,45 @@
       "features": "컬러·흑백 필름 현상·스캔, 화질(저·중·고) 선택. 사진 인화 서비스.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": 13000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": 13000,
-            "high": 17000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 17000,
+            "basic": 13000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": 13000,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4693,45 +4537,45 @@
       "features": null,
       "url": "https://blog.naver.com/ganzi6611",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4745,45 +4589,45 @@
       "features": "영화용 필름 현상·스캔 가능.",
       "url": "https://blog.naver.com/mhg1109",
       "prices": {
-        "color": {
-          "120": {
-            "basic": 5500,
-            "high": null
-          },
-          "135": {
-            "basic": 4500,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": 7000,
-            "high": null
+            "high": null,
+            "basic": 7000
           },
           "135": {
-            "basic": 6500,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": 10000,
-            "high": null
-          },
-          "135": {
-            "basic": 10000,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": 6000,
-            "high": null
+            "high": null,
+            "basic": 6500
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": 5500
+          },
+          "135": {
+            "high": null,
+            "basic": 4500
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": 10000
+          },
+          "135": {
+            "high": null,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
         }
       }
     },
@@ -4797,45 +4641,45 @@
       "features": "범일동 일대 필름 현상 대행.",
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 6000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 6000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4849,45 +4693,45 @@
       "features": null,
       "url": null,
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": 8000,
-            "high": null
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           },
           "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": null
-          },
-          "135": {
-            "basic": null,
-            "high": null
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": null,
+            "basic": null
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": 8000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": null,
+            "basic": null
+          },
+          "135": {
+            "high": null,
+            "basic": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     },
@@ -4901,45 +4745,45 @@
       "features": "스캐너 선택 가능, 필름로그 연계 현상소.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
-        "color": {
-          "120": {
-            "basic": null,
-            "high": 9000
-          },
-          "135": {
-            "basic": 5000,
-            "high": 9000
-          }
-        },
         "bw": {
           "120": {
-            "basic": null,
-            "high": 12000
+            "high": 12000,
+            "basic": null
           },
           "135": {
-            "basic": 8000,
-            "high": 12000
-          }
-        },
-        "slide": {
-          "120": {
-            "basic": null,
-            "high": 14000
-          },
-          "135": {
-            "basic": 10000,
-            "high": 14000
-          }
-        },
-        "cinema": {
-          "135": {
-            "basic": null,
-            "high": null
+            "high": 12000,
+            "basic": 8000
           }
         },
         "etc": {
           "110": null,
           "aps": null
+        },
+        "color": {
+          "120": {
+            "high": 9000,
+            "basic": null
+          },
+          "135": {
+            "high": 9000,
+            "basic": 5000
+          }
+        },
+        "slide": {
+          "120": {
+            "high": 14000,
+            "basic": null
+          },
+          "135": {
+            "high": 14000,
+            "basic": 10000
+          }
+        },
+        "cinema": {
+          "135": {
+            "high": null,
+            "basic": null
+          }
         }
       }
     }

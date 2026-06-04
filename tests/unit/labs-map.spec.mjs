@@ -39,15 +39,21 @@ describe('Labs Naver map integration', () => {
   it('backfills missing Supabase coordinates from static Labs data', () => {
     const js = read('js/labs-page.js');
     expect(js).toContain('function enrichLabWithStaticCoord');
-    expect(js).toContain('return mergeStaticOnlyLabs(labs, staticLabs);');
+    expect(js).toContain('return rows.map(rowToLab).map((lab) => enrichLabWithStaticCoord(lab, staticLabs));');
     expect(js).toContain('addressCompatible(lab.address, s.address)');
   });
 
-  it('keeps static-only Labs entries when the live table is missing rows', () => {
+  it('does not merge static-only Labs entries over the live 92-entry source', () => {
     const js = read('js/labs-page.js');
-    expect(js).toContain('function mergeStaticOnlyLabs');
-    expect(js).toContain('if (!merged.some((lab) => looksLikeSameLab(lab, staticLab))) merged.push(staticLab);');
-    expect(js).toContain('function looksLikeSameLab');
+    expect(js).not.toContain('function mergeStaticOnlyLabs');
+    expect(js).not.toContain('function looksLikeSameLab');
+  });
+
+  it('clears the search query when switching Labs tabs', () => {
+    const js = read('js/labs-page.js');
+    expect(js).toContain('const tabChanged = next !== tab;');
+    expect(js).toContain("query = '';");
+    expect(js).toContain("if (searchEl) searchEl.value = '';");
   });
 
   it('separates card modal behavior from map marker behavior', () => {
