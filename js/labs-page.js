@@ -14,6 +14,9 @@
   const tabsEl = document.querySelector('.labs-tabs');
   const sortEl = document.getElementById('labsSort');
   const introEl = document.getElementById('labsIntro');
+  const viewToggleEl = document.querySelector('.labs-view-toggle');
+  const mapSectionEl = document.getElementById('labsMapSection');
+  const listSectionEl = document.getElementById('main');
   if (!listEl) return;
 
   let map = null;
@@ -46,6 +49,7 @@
   let region = 'all';
   let query = '';
   let sort = 'region'; // 기본 = 지역별 구분 | name = 가나다·ABC(이름순)
+  let view = 'list';
 
   // 모바일에서 목록이 길어 스크롤 피로가 크므로, 필터·검색이 없을 때만 처음 일부만
   // 보여주고 "더 보기" 로 확장한다. (films 라이브러리와 동일 패턴)
@@ -331,18 +335,18 @@
 
   function initMap() {
     const el = document.getElementById('labsMap');
-    const section = document.getElementById('labsMapSection');
     // SDK 로드 실패(오프라인·차단) 시 지도 영역을 숨기고 리스트만 유지한다.
     if (!el || !window.naver || !naver.maps) {
-      if (section) section.hidden = true;
+      if (mapSectionEl) mapSectionEl.hidden = true;
       return;
     }
     // 도메인·키 인증 실패 시에도 빈 회색 박스 대신 영역을 접는다.
     window.addEventListener('labs:naver-map-auth-failed', () => {
-      if (section) section.hidden = true;
+      if (mapSectionEl) mapSectionEl.hidden = true;
+      setView('list');
     });
     if (window.__labsNaverMapAuthFailed) {
-      if (section) section.hidden = true;
+      if (mapSectionEl) mapSectionEl.hidden = true;
       return;
     }
     map = new naver.maps.Map(el, {
@@ -409,8 +413,11 @@
   }
 
   let renderToken = 0;
+  function currentFiltered() {
+    return data.filter(matches);
+  }
   async function updateMarkers(shown) {
-    if (!mapReady || !map) return;
+    if (!mapReady || !map || view !== 'map') return;
     const token = ++renderToken;
     markers.forEach((m) => m.setMap(null));
     markers = [];
@@ -454,9 +461,10 @@
   }
 
   function apply() {
-    const filtered = data.filter(matches);
+    const filtered = currentFiltered();
     if (countEl) countEl.textContent = `${filtered.length}곳`;
-    updateMarkers(filtered);
+    if (view === 'map') updateMarkers(filtered);
+    else if (infoWindow) infoWindow.close();
     if (!filtered.length) {
       listEl.innerHTML = `<div class="labs-empty">${TAB[tab].empty}</div>`;
       updateMoreButton(0);
@@ -481,12 +489,15 @@
     if (!mapReady || !map || !infoWindow) return;
     const entry = markerBySlug.get(slug);
     if (!entry) return;
-    map.panTo(entry.marker.getPosition());
+    const pos = entry.marker.getPosition();
     if (map.getZoom() < 15) map.setZoom(15);
+    map.setCenter(pos);
     if (opts.openInfo !== false) {
       activeMapSlug = slug;
       infoWindow.setContent(infoContent(entry.item));
       infoWindow.open(map, entry.marker);
+      requestAnimationFrame(() => map.setCenter(pos));
+      setTimeout(() => map.setCenter(pos), 120);
     }
   }
   function updateUrlLab(slug) {
@@ -666,6 +677,42 @@
     });
   }
 
+  function setView(next) {
+    if (next !== 'map') next = 'list';
+    if (next === 'map' && window.__labsNaverMapAuthFailed) next = 'list';
+    view = next;
+    document.documentElement.classList.toggle('labs-view-map', view === 'map');
+    document.documentElement.classList.toggle('labs-view-list', view === 'list');
+    if (viewToggleEl) {
+      viewToggleEl.querySelectorAll('[data-view]').forEach((b) => {
+        const on = b.dataset.view === view;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+    if (mapSectionEl) mapSectionEl.hidden = view !== 'map';
+    if (listSectionEl) listSectionEl.setAttribute('aria-label', view === 'map' ? '현재 지도 결과 목록' : '현상소·수리실 목록');
+    if (view === 'map') {
+      if (!mapReady) initMap();
+      if (!mapReady) { setView('list'); return; }
+      if (mapReady && map) {
+        requestAnimationFrame(() => {
+          try { naver.maps.Event.trigger(map, 'resize'); } catch (_) {}
+          updateMarkers(currentFiltered());
+        });
+      }
+    } else if (infoWindow) {
+      infoWindow.close();
+      activeMapSlug = null;
+    }
+  }
+
+  if (viewToggleEl) {
+    viewToggleEl.querySelectorAll('[data-view]').forEach((b) => {
+      b.addEventListener('click', () => setView(b.dataset.view));
+    });
+  }
+
   if (tabsEl) {
     tabsEl.querySelectorAll('.labs-tab').forEach((b) => {
       b.addEventListener('click', () => setTab(b.dataset.tab));
@@ -680,6 +727,6 @@
     });
   }
 
-  initMap();
+  setView('list');
   setTab('labs');
 })();

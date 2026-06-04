@@ -149,10 +149,40 @@
   padding: 8px 20px 0;
 }
 
+/* ── 리스트 / 지도 보기 전환 ── */
+.labs-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--field-radius);
+  background: var(--bg-sub);
+}
+.labs-view-btn {
+  appearance: none;
+  border: 0;
+  border-radius: calc(var(--field-radius) - 3px);
+  padding: 7px 13px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  cursor: pointer;
+}
+.labs-view-btn:hover { color: var(--text); }
+.labs-view-btn.is-active {
+  background: var(--text);
+  color: var(--bg);
+}
+
 /* ── 지도 ── */
 .labs-map-section {
   padding: 24px 40px 0;
 }
+.labs-map-section[hidden] { display: none; }
 .labs-map-wrap {
   position: relative;
   border: 1px solid var(--border);
@@ -207,6 +237,35 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+}
+html.labs-view-map .labs-map {
+  height: min(62vh, 680px);
+  min-height: 460px;
+}
+html.labs-view-map .labs-section {
+  padding-top: 16px;
+}
+html.labs-view-map .labs-list {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+html.labs-view-map .labs-region-divider {
+  margin: 10px 0 0;
+  padding-bottom: 6px;
+  font-size: 13px;
+}
+html.labs-view-map .lab-card {
+  border-radius: 6px;
+}
+html.labs-view-map .lab-card-head {
+  padding: 11px 12px;
+  gap: 7px;
+}
+html.labs-view-map .lab-card-head .lab-name {
+  font-size: 14px;
+}
+html.labs-view-map .lab-card-head .lab-region {
+  display: none;
 }
 .labs-empty {
   grid-column: 1 / -1;
@@ -484,17 +543,24 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
   .intro { padding: 28px 20px 20px; }
   .labs-map-section { padding: 16px 20px 0; }
   .labs-map { height: 300px; }
+  .labs-view-toggle { order: 3; width: 100%; margin-left: 0; }
+  .labs-view-btn { flex: 1 1 0; padding: 8px 10px; }
+  html.labs-view-map .labs-map { height: 64vh; min-height: 420px; }
+  html.labs-view-map .labs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filter-chip { padding: 6px 14px; font-size: 12px; }
 }
 
 @media (max-width: 1280px) {
   .labs-list { grid-template-columns: repeat(3, 1fr); }
+  html.labs-view-map .labs-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 880px) {
   .labs-list { grid-template-columns: repeat(2, 1fr); }
+  html.labs-view-map .labs-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .intro { flex-direction: column; gap: 16px; }
   .labs-safety { flex: 0 0 auto; width: auto; align-self: stretch; }
 }
 @media (max-width: 540px) {
   .labs-list { grid-template-columns: 1fr; }
+  html.labs-view-map .labs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

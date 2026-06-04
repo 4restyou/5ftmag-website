@@ -35,10 +35,11 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260603-states2">
   <link rel="stylesheet" href="./css/common.css?v=20260604-inapp">
-  <link rel="stylesheet" href="./css/labs.css?v=20260604-labsgeo">
+  <link rel="stylesheet" href="./css/labs.css?v=20260604-labsview">
   <style>
-    .labs-tabs { display: flex; align-items: center; gap: 8px; padding: 20px 40px 0; }
+    .labs-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 20px 40px 0; }
     .labs-sort { margin-left: auto; font: inherit; font-size: 14px; font-weight: var(--fw-heading); padding: 8px 32px 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--text); cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+    .labs-view-toggle + .labs-sort { margin-left: 0; }
     .labs-sort:hover { border-color: var(--text); }
     .labs-region-divider { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 18px 0 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em; color: var(--text); }
     .labs-region-divider:first-child { margin-top: 0; }
@@ -101,6 +102,10 @@
 <div class="labs-tabs" role="tablist" aria-label="현상소·수리실 전환">
   <button type="button" class="labs-tab is-active" data-tab="labs" role="tab" aria-selected="true">현상소</button>
   <button type="button" class="labs-tab" data-tab="repairs" role="tab" aria-selected="false">수리실</button>
+  <div class="labs-view-toggle" role="tablist" aria-label="보기 방식">
+    <button type="button" class="labs-view-btn is-active" data-view="list" role="tab" aria-selected="true">리스트</button>
+    <button type="button" class="labs-view-btn" data-view="map" role="tab" aria-selected="false">지도</button>
+  </div>
   <select id="labsSort" class="labs-sort" aria-label="정렬 기준">
     <option value="region">지역순</option>
     <option value="name">이름순</option>
@@ -121,7 +126,7 @@
 <div class="labs-count" id="labsCount"></div>
 
 <!-- ════════ 지도 ════════ -->
-<div class="labs-map-section" id="labsMapSection">
+<div class="labs-map-section" id="labsMapSection" hidden>
   <div class="labs-map-wrap">
     <div id="labsMap" class="labs-map" role="application" aria-label="현상소 위치 지도"></div>
   </div>
@@ -188,6 +193,6 @@
   };
 </script>
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=uu78cn9rbi&submodules=geocoder" referrerpolicy="origin"></script>
-<script src="./js/labs-page.js?v=20260604-labsgeo"></script>
+<script src="./js/labs-page.js?v=20260604-labsview"></script>
 </body>
 </html>

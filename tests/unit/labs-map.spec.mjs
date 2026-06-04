@@ -71,4 +71,24 @@ describe('Labs Naver map integration', () => {
     expect(js).toContain('if (activeMapSlug === slug) { openModal(slug); return; }');
     expect(js).toContain('if (opts?.focusMap) focusMarkerBySlug(slug);');
   });
+
+  it('defaults to list view and initializes the map only when map view is selected', () => {
+    const html = read('labs.html');
+    const js = read('js/labs-page.js');
+    expect(html).toContain('data-view="list"');
+    expect(html).toContain('data-view="map"');
+    expect(html).toContain('id="labsMapSection" hidden');
+    expect(js).toContain("let view = 'list';");
+    expect(js).toContain("function setView(next)");
+    expect(js).toContain("if (!mapReady) initMap();");
+    expect(js).toContain("setView('list');");
+  });
+
+  it('recenters the selected marker after opening its map info window', () => {
+    const js = read('js/labs-page.js');
+    expect(js).toContain('const pos = entry.marker.getPosition();');
+    expect(js).toContain('map.setCenter(pos);');
+    expect(js).toContain("requestAnimationFrame(() => map.setCenter(pos));");
+    expect(js).toContain('setTimeout(() => map.setCenter(pos), 120);');
+  });
 });
