@@ -1,5 +1,19 @@
 [
   {
+    "id": "jun-2026-exhibitions",
+    "title": "2026 / 6, 이달의 사진 전시",
+    "category": "essay",
+    "categoryLabel": "EXHIBITION",
+    "author": "5ft.mag 편집부",
+    "date": "2026-06-06",
+    "issue": "",
+    "thumbnail": "img/stories/jun-2026-exhibitions/comeback-home.webp",
+    "excerpt": "한 달 안에 닫히는 일곱, 여름까지 가는 다섯, 그리고 5년 만에 돌아온 서울사진축제 〈컴백홈〉. 6월 첫 주말이 가장 분주하다. 일정과 동선까지 한자리에.",
+    "page": "stories/jun-2026-exhibitions.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "verita-200d-fuji-bw",
     "title": "확장하는 코닥, 정리하는 후지. 2026 봄의 필름 풍경",
     "category": "essay",
