@@ -2369,21 +2369,7 @@
   scrollbar-width: none;
 }
 .library-photos-chips::-webkit-scrollbar { display: none; }
-.library-photos-chips .filter-chip { flex-shrink: 0; }
-.library-chip-count {
-  margin-left: 6px;
-  padding: 1px 6px;
-  font-size: 11px;
-  letter-spacing: 0;
-  color: var(--text-muted);
-  background: var(--bg-sub);
-  border-radius: 999px;
-  font-weight: var(--fw-heading);
-}
-.filter-chip.active .library-chip-count {
-  background: rgba(255, 255, 255, 0.16);
-  color: inherit;
-}
+.library-photos-chips .library-filter-chip { flex-shrink: 0; }
 .library-photos-bar {
   display: flex;
   align-items: center;
