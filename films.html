@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260604-inapp">
   <link rel="stylesheet" href="./css/comments.css?v=20260602-iosfocus">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260602-iosfocus">
-  <link rel="stylesheet" href="./css/films.css?v=20260606-photofilter">
+  <link rel="stylesheet" href="./css/films.css?v=20260606-chipstyle">
 </head>
 <body>
 
@@ -207,11 +207,11 @@
         <input type="search" class="library-search" id="libraryPhotosSearch" placeholder="필름·브랜드·ISO·카메라·작가·SNS로 검색" aria-label="사진 검색" autocomplete="off" />
       </label>
       <div class="library-photos-chips" id="libraryPhotosChips" role="tablist" aria-label="필름 종류 필터">
-        <button type="button" class="filter-chip active" data-cat="all" role="tab" aria-selected="true">전체 <span class="library-chip-count" data-count="all">0</span></button>
-        <button type="button" class="filter-chip" data-cat="color" role="tab" aria-selected="false">Color <span class="library-chip-count" data-count="color">0</span></button>
-        <button type="button" class="filter-chip" data-cat="bw" role="tab" aria-selected="false">B&amp;W <span class="library-chip-count" data-count="bw">0</span></button>
-        <button type="button" class="filter-chip" data-cat="slide" role="tab" aria-selected="false">Slide <span class="library-chip-count" data-count="slide">0</span></button>
-        <button type="button" class="filter-chip" data-cat="cinema" role="tab" aria-selected="false">Cinema <span class="library-chip-count" data-count="cinema">0</span></button>
+        <button type="button" class="library-filter-chip is-active" data-cat="all" role="tab" aria-selected="true">전체 <span class="library-filter-count" data-count="all">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="color" role="tab" aria-selected="false">Color <span class="library-filter-count" data-count="color">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="bw" role="tab" aria-selected="false">B&amp;W <span class="library-filter-count" data-count="bw">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="slide" role="tab" aria-selected="false">Slide <span class="library-filter-count" data-count="slide">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="cinema" role="tab" aria-selected="false">Cinema <span class="library-filter-count" data-count="cinema">0</span></button>
       </div>
     </div>
     <div class="library-photos-bar">
@@ -328,7 +328,7 @@
 <script src="./js/films-reader-export.js?v=20260602-modules"></script>
 <script src="./js/films-reader-roll-ui.js?v=20260602-modules"></script>
 <script src="./js/films-reader-roll-data.js?v=20260602-modules"></script>
-<script src="./js/films-page.js?v=20260606-photofilter"></script>
+<script src="./js/films-page.js?v=20260606-chipstyle"></script>
 <script src="./js/films-propose.js?v=20260602-propose" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>

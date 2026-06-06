@@ -1554,7 +1554,7 @@
 
   function updateChipCounts(counts) {
     if (!libraryPhotosChipsEl) return;
-    libraryPhotosChipsEl.querySelectorAll('.library-chip-count').forEach(el => {
+    libraryPhotosChipsEl.querySelectorAll('.library-filter-count').forEach(el => {
       const k = el.dataset.count;
       el.textContent = (counts[k] || 0).toLocaleString('ko-KR');
     });
@@ -1667,14 +1667,14 @@
   }
   if (libraryPhotosChipsEl) {
     libraryPhotosChipsEl.addEventListener('click', (e) => {
-      const chip = e.target.closest('.filter-chip');
+      const chip = e.target.closest('.library-filter-chip');
       if (!chip) return;
       const cat = chip.dataset.cat || 'all';
       if (cat === photosCategory) return;
       photosCategory = cat;
-      libraryPhotosChipsEl.querySelectorAll('.filter-chip').forEach(c => {
+      libraryPhotosChipsEl.querySelectorAll('.library-filter-chip').forEach(c => {
         const on = c === chip;
-        c.classList.toggle('active', on);
+        c.classList.toggle('is-active', on);
         c.setAttribute('aria-selected', on ? 'true' : 'false');
       });
       applyPhotosFilter({ reshuffle: false });
