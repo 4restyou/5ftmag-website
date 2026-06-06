@@ -2294,12 +2294,25 @@
   border-bottom-color: var(--text);
 }
 
+/* ── head 액션·토글 한 줄 정렬 (액션 좌측, 토글 우측 끝) ── */
+.library-head-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.library-head-bar .library-head-actions {
+  margin-top: 0;
+}
+
 /* ── 라이브러리 보기 토글 (필름별 / 사진별) ── */
 .library-view-toggle {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  margin-top: 12px;
+  margin-left: auto;
   padding: 3px;
   border: 0;
   border-radius: 999px;
@@ -2396,10 +2409,63 @@
   display: block;
   transition: transform .25s var(--easing);
 }
-.library-photo-card:hover img { transform: scale(1.04); }
+.library-photo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  opacity: 0;
+  transition: opacity .2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.library-photo-info {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  z-index: 2;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease;
+  text-align: left;
+  pointer-events: none;
+}
+.library-photo-info .library-photo-author {
+  display: block;
+  font-size: 16px;
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default);
+  line-height: 1.15;
+}
+.library-photo-info .library-photo-film {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+.library-photo-card:hover::after,
+.library-photo-card:focus-visible::after { opacity: 1; }
+.library-photo-card:hover .library-photo-info,
+.library-photo-card:focus-visible .library-photo-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+.library-photo-card:hover img,
+.library-photo-card:focus-visible img { transform: scale(1.04); }
 .library-photo-card:focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 2px;
+}
+@media (max-width: 720px) {
+  .library-photo-info { left: 8px; right: 8px; bottom: 7px; }
+  .library-photo-info .library-photo-author { font-size: 13px; }
+  .library-photo-info .library-photo-film { font-size: 9px; margin-top: 3px; }
 }
 .library-photos-more-wrap {
   display: flex;

@@ -1475,10 +1475,19 @@
     const html = slice.map((s, i) => {
       const absoluteIndex = start + i;
       const src = escapeAttr(s.image || s.src || '');
-      const author = escapeAttr(s.author || s.submitterName || '');
-      const film  = escapeAttr(s.film || '');
-      return `<button type="button" class="library-photo-card" data-photo-index="${absoluteIndex}" aria-label="${author ? author + ' · ' : ''}${film}">`
+      const authorAttr = escapeAttr(s.author || s.submitterName || '');
+      const filmAttr   = escapeAttr(s.film || '');
+      const authorHtml = escapeHtml(s.author || s.submitterName || '');
+      const filmHtml   = escapeHtml(s.film || '');
+      const infoHtml = (authorHtml || filmHtml)
+        ? `<span class="library-photo-info">`
+          + (authorHtml ? `<span class="library-photo-author">${authorHtml}</span>` : '')
+          + (filmHtml ? `<span class="library-photo-film">${filmHtml}</span>` : '')
+          + `</span>`
+        : '';
+      return `<button type="button" class="library-photo-card" data-photo-index="${absoluteIndex}" aria-label="${authorAttr ? authorAttr + ' · ' : ''}${filmAttr}">`
         + `<img src="${src}" alt="" loading="lazy" />`
+        + infoHtml
         + `</button>`;
     }).join('');
     libraryPhotosGrid.insertAdjacentHTML('beforeend', html);
