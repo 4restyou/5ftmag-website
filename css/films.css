@@ -2347,6 +2347,43 @@
 /* ── 사진별 보기 그리드 ── */
 .library-films-view[hidden],
 .library-photos-view[hidden] { display: none; }
+.library-photos-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 20px 0 0;
+}
+.library-photos-controls .library-search-label {
+  flex: 0 0 clamp(220px, 30vw, 320px);
+}
+.library-photos-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.library-photos-chips::-webkit-scrollbar { display: none; }
+.library-photos-chips .filter-chip { flex-shrink: 0; }
+.library-chip-count {
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--text-muted);
+  background: var(--bg-sub);
+  border-radius: 999px;
+  font-weight: var(--fw-heading);
+}
+.filter-chip.active .library-chip-count {
+  background: rgba(255, 255, 255, 0.16);
+  color: inherit;
+}
 .library-photos-bar {
   display: flex;
   align-items: center;

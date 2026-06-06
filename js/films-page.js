@@ -19,11 +19,16 @@
   const libraryPhotosMoreBtn  = document.getElementById('libraryPhotosMoreBtn');
   const libraryPhotosShuffleBtn = document.getElementById('libraryPhotosShuffle');
   const libraryViewToggleEl = document.querySelector('.library-view-toggle');
+  const libraryPhotosSearchEl = document.getElementById('libraryPhotosSearch');
+  const libraryPhotosChipsEl  = document.getElementById('libraryPhotosChips');
 
   // 사진별 보기 상태
   let libraryView = 'films';           // 'films' | 'photos'
-  let photosShuffled = [];             // 셔플된 submissions 전체
+  let photosPool = [];                 // 원본 풀 (검색·필터 전체)
+  let photosShuffled = [];             // 현재 보이는 (필터된) 셔플 결과
   let photosVisible = 0;               // 현재 렌더된 갯수
+  let photosQuery = '';                // 검색어 (normalized)
+  let photosCategory = 'all';          // 전체 / color / bw / slide / cinema
 
   const {
     escapeAttr,
@@ -1498,22 +1503,95 @@
     }
   }
 
+  // 필름 type 문자열을 4개 카테고리로 매핑
+  function filmTypeCategory(typeStr) {
+    const t = String(typeStr || '').toLowerCase();
+    if (t.includes('color')) return 'color';
+    if (t.includes('black') || t.includes('bw')) return 'bw';
+    if (t.includes('slide')) return 'slide';
+    if (t.includes('tungsten') || t.includes('daylight') || t.includes('cinema')) return 'cinema';
+    return '';
+  }
+
+  // submission 의 film 라벨을 filmsData 안에서 찾아 매칭. displayName/name/aliases 비교.
+  function lookupFilmForSubmission(s) {
+    const label = s && (s.film || s.filmName);
+    if (!label || !filmsData) return null;
+    const target = normalizeFilmLabel(label);
+    if (!target) return null;
+    for (const key of Object.keys(filmsData)) {
+      const f = filmsData[key];
+      if (!f) continue;
+      const cands = [f.displayName, f.name, ...(f.aliases || [])].filter(Boolean);
+      if (cands.some(c => normalizeFilmLabel(c) === target)) return f;
+    }
+    return null;
+  }
+
+  function normalizePhotoSearchHaystack(s) {
+    if (!s) return '';
+    const film = lookupFilmForSubmission(s);
+    const parts = [
+      s.film, s.author, s.submitterName, s.instagram, s.instagramUrl, s.camera, s.caption,
+      film?.brand, film?.displayName, film?.name, film?.iso, film?.type,
+    ];
+    return parts.filter(Boolean).join(' ').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '');
+  }
+
+  function categoryOfSubmission(s) {
+    const film = lookupFilmForSubmission(s);
+    return film ? filmTypeCategory(film.type) : '';
+  }
+
+  function categoryCounts(pool) {
+    const c = { all: pool.length, color: 0, bw: 0, slide: 0, cinema: 0 };
+    for (const s of pool) {
+      const cat = categoryOfSubmission(s);
+      if (c[cat] !== undefined) c[cat]++;
+    }
+    return c;
+  }
+
+  function updateChipCounts(counts) {
+    if (!libraryPhotosChipsEl) return;
+    libraryPhotosChipsEl.querySelectorAll('.library-chip-count').forEach(el => {
+      const k = el.dataset.count;
+      el.textContent = (counts[k] || 0).toLocaleString('ko-KR');
+    });
+  }
+
+  function applyPhotosFilter({ reshuffle = true } = {}) {
+    if (!libraryPhotosGrid) return;
+    let pool = photosPool;
+    if (photosCategory !== 'all') pool = pool.filter(s => categoryOfSubmission(s) === photosCategory);
+    if (photosQuery) pool = pool.filter(s => normalizePhotoSearchHaystack(s).includes(photosQuery));
+    if (reshuffle) photosShuffled = shuffleInPlace(pool.slice());
+    else photosShuffled = pool.slice();
+    photosVisible = 0;
+    libraryPhotosGrid.innerHTML = '';
+    if (photosShuffled.length === 0) {
+      const msg = (photosPool.length === 0)
+        ? '아직 등록된 사진이 없어요.'
+        : '조건에 맞는 사진이 없어요. 검색어나 필터를 바꿔보세요.';
+      libraryPhotosGrid.innerHTML = `<p class="library-photos-empty">${msg}</p>`;
+      if (libraryPhotosCount) libraryPhotosCount.textContent = '0컷';
+      if (libraryPhotosMoreWrap) libraryPhotosMoreWrap.hidden = true;
+      return;
+    }
+    renderLibraryPhotosBatch();
+  }
+
   async function ensurePhotosShuffled({ force = false } = {}) {
     if (!libraryPhotosGrid) return;
-    if (!force && photosShuffled.length > 0) return;
+    if (!force && photosPool.length > 0) {
+      applyPhotosFilter({ reshuffle: true });
+      return;
+    }
     try {
       const submissions = await getApprovedSubmissions();
-      const pool = (submissions || []).filter(s => s && (s.image || s.src));
-      photosShuffled = shuffleInPlace(pool.slice());
-      photosVisible = 0;
-      libraryPhotosGrid.innerHTML = '';
-      if (photosShuffled.length === 0) {
-        libraryPhotosGrid.innerHTML = '<p class="library-photos-empty">아직 등록된 사진이 없어요.</p>';
-        if (libraryPhotosCount) libraryPhotosCount.textContent = '0컷';
-        if (libraryPhotosMoreWrap) libraryPhotosMoreWrap.hidden = true;
-        return;
-      }
-      renderLibraryPhotosBatch();
+      photosPool = (submissions || []).filter(s => s && (s.image || s.src));
+      updateChipCounts(categoryCounts(photosPool));
+      applyPhotosFilter({ reshuffle: true });
     } catch (err) {
       console.warn('[films] photos view 로드 실패:', err);
       if (libraryPhotosCount) libraryPhotosCount.textContent = '사진을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.';
@@ -1571,7 +1649,36 @@
     libraryPhotosMoreBtn.addEventListener('click', () => renderLibraryPhotosBatch());
   }
   if (libraryPhotosShuffleBtn) {
-    libraryPhotosShuffleBtn.addEventListener('click', () => ensurePhotosShuffled({ force: true }));
+    libraryPhotosShuffleBtn.addEventListener('click', () => {
+      if (photosPool.length === 0) ensurePhotosShuffled({ force: true });
+      else applyPhotosFilter({ reshuffle: true });
+    });
+  }
+  if (libraryPhotosSearchEl) {
+    let searchTimer = null;
+    libraryPhotosSearchEl.addEventListener('input', () => {
+      const raw = libraryPhotosSearchEl.value || '';
+      const norm = raw.toLowerCase().replace(/[^a-z0-9가-힣]+/g, '');
+      if (norm === photosQuery) return;
+      photosQuery = norm;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => applyPhotosFilter({ reshuffle: false }), 120);
+    });
+  }
+  if (libraryPhotosChipsEl) {
+    libraryPhotosChipsEl.addEventListener('click', (e) => {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      const cat = chip.dataset.cat || 'all';
+      if (cat === photosCategory) return;
+      photosCategory = cat;
+      libraryPhotosChipsEl.querySelectorAll('.filter-chip').forEach(c => {
+        const on = c === chip;
+        c.classList.toggle('active', on);
+        c.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      applyPhotosFilter({ reshuffle: false });
+    });
   }
   if (libraryPhotosGrid) {
     libraryPhotosGrid.addEventListener('click', (e) => {
