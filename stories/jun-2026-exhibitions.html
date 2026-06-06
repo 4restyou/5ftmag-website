@@ -69,6 +69,9 @@
        가 본문 흰 페이지 위에서 떠다니지 않도록 figure 의 이미지에만 살짝 외곽선을 둔다. */
     .article-body figure img { border: 1px solid rgba(0, 0, 0, 0.08); }
     html[data-theme="dark"] .article-body figure img { border-color: rgba(255, 255, 255, 0.08); }
+    /* 전시 사이 가는 라인 + 마진. h2 바로 다음 첫 figure 에는 라인을 두지 않는다. */
+    .article-body figure { margin-top: 56px; padding-top: 56px; border-top: 1px solid var(--border); }
+    .article-body h2 + figure { margin-top: 0; padding-top: 0; border-top: 0; }
   </style>
 </head>
 <body>
