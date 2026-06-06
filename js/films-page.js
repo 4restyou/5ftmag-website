@@ -5,9 +5,25 @@
   // ════════════════════════════
   let filmsData = {};
   const ROLL_LIMIT = 36;
+  const PHOTOS_PAGE_SIZE = 60; // 사진별 보기에서 한 번에 노출되는 사진 수
 
   const filmsGridFeatured = document.getElementById('filmsGridFeatured');
   const filmsGridLibrary  = document.getElementById('filmsGridLibrary');
+
+  // 사진별 보기 (라이브러리 전환) DOM
+  const libraryFilmsView   = document.getElementById('libraryFilmsView');
+  const libraryPhotosView  = document.getElementById('libraryPhotosView');
+  const libraryPhotosGrid  = document.getElementById('libraryPhotosGrid');
+  const libraryPhotosCount = document.getElementById('libraryPhotosCount');
+  const libraryPhotosMoreWrap = document.getElementById('libraryPhotosMoreWrap');
+  const libraryPhotosMoreBtn  = document.getElementById('libraryPhotosMoreBtn');
+  const libraryPhotosShuffleBtn = document.getElementById('libraryPhotosShuffle');
+  const libraryViewToggleEl = document.querySelector('.library-view-toggle');
+
+  // 사진별 보기 상태
+  let libraryView = 'films';           // 'films' | 'photos'
+  let photosShuffled = [];             // 셔플된 submissions 전체
+  let photosVisible = 0;               // 현재 렌더된 갯수
 
   const {
     escapeAttr,
@@ -1436,3 +1452,130 @@
     }
     return null;
   }
+
+  // ════════════════════════════
+  // 라이브러리 보기 전환 (필름별 / 사진별)
+  //   필름별: 기존 라이브러리 그리드 (filmsGridLibrary) 유지
+  //   사진별: 승인된 submissions 전체를 셔플해서 한 그리드로 노출. 카드 클릭 시 통합 lightbox.
+  // ════════════════════════════
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function renderLibraryPhotosBatch() {
+    if (!libraryPhotosGrid) return;
+    const start = photosVisible;
+    const end = Math.min(start + PHOTOS_PAGE_SIZE, photosShuffled.length);
+    if (start === 0) libraryPhotosGrid.innerHTML = '';
+    const slice = photosShuffled.slice(start, end);
+    const html = slice.map((s, i) => {
+      const absoluteIndex = start + i;
+      const src = escapeAttr(s.image || s.src || '');
+      const author = escapeAttr(s.author || s.submitterName || '');
+      const film  = escapeAttr(s.film || '');
+      return `<button type="button" class="library-photo-card" data-photo-index="${absoluteIndex}" aria-label="${author ? author + ' · ' : ''}${film}">`
+        + `<img src="${src}" alt="" loading="lazy" />`
+        + `</button>`;
+    }).join('');
+    libraryPhotosGrid.insertAdjacentHTML('beforeend', html);
+    photosVisible = end;
+    if (libraryPhotosMoreWrap) libraryPhotosMoreWrap.hidden = photosVisible >= photosShuffled.length;
+    if (libraryPhotosCount) {
+      libraryPhotosCount.textContent = `${photosShuffled.length.toLocaleString('ko-KR')}컷 · ${photosVisible.toLocaleString('ko-KR')}컷 표시 중`;
+    }
+  }
+
+  async function ensurePhotosShuffled({ force = false } = {}) {
+    if (!libraryPhotosGrid) return;
+    if (!force && photosShuffled.length > 0) return;
+    try {
+      const submissions = await getApprovedSubmissions();
+      const pool = (submissions || []).filter(s => s && (s.image || s.src));
+      photosShuffled = shuffleInPlace(pool.slice());
+      photosVisible = 0;
+      libraryPhotosGrid.innerHTML = '';
+      if (photosShuffled.length === 0) {
+        libraryPhotosGrid.innerHTML = '<p class="library-photos-empty">아직 등록된 사진이 없어요.</p>';
+        if (libraryPhotosCount) libraryPhotosCount.textContent = '0컷';
+        if (libraryPhotosMoreWrap) libraryPhotosMoreWrap.hidden = true;
+        return;
+      }
+      renderLibraryPhotosBatch();
+    } catch (err) {
+      console.warn('[films] photos view 로드 실패:', err);
+      if (libraryPhotosCount) libraryPhotosCount.textContent = '사진을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.';
+    }
+  }
+
+  function updateLibraryViewToggleUI() {
+    if (!libraryViewToggleEl) return;
+    libraryViewToggleEl.querySelectorAll('.library-view-btn').forEach(btn => {
+      const on = btn.dataset.view === libraryView;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
+
+  function updateLibraryViewUrl() {
+    try {
+      const u = new URL(location.href);
+      if (libraryView === 'photos') u.searchParams.set('view', 'photos');
+      else u.searchParams.delete('view');
+      history.replaceState(null, '', u.toString());
+    } catch {}
+  }
+
+  async function setLibraryView(next) {
+    if (next !== 'photos') next = 'films';
+    if (next === libraryView) return;
+    libraryView = next;
+    if (libraryFilmsView)  libraryFilmsView.hidden  = (next !== 'films');
+    if (libraryPhotosView) libraryPhotosView.hidden = (next !== 'photos');
+    updateLibraryViewToggleUI();
+    updateLibraryViewUrl();
+    if (next === 'photos') {
+      if (libraryPhotosCount && photosShuffled.length === 0) {
+        libraryPhotosCount.textContent = '불러오는 중…';
+      }
+      await ensurePhotosShuffled();
+    }
+  }
+
+  function openPhotosLightboxAt(index) {
+    if (!filmsLightbox || typeof filmsLightbox.openReader !== 'function') return;
+    const photos = photosShuffled.map(toLightboxReaderPhoto);
+    filmsLightbox.openReader(photos, index);
+  }
+
+  if (libraryViewToggleEl) {
+    libraryViewToggleEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.library-view-btn');
+      if (!btn) return;
+      setLibraryView(btn.dataset.view);
+    });
+  }
+  if (libraryPhotosMoreBtn) {
+    libraryPhotosMoreBtn.addEventListener('click', () => renderLibraryPhotosBatch());
+  }
+  if (libraryPhotosShuffleBtn) {
+    libraryPhotosShuffleBtn.addEventListener('click', () => ensurePhotosShuffled({ force: true }));
+  }
+  if (libraryPhotosGrid) {
+    libraryPhotosGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.library-photo-card');
+      if (!card) return;
+      const idx = parseInt(card.dataset.photoIndex, 10);
+      if (Number.isFinite(idx)) openPhotosLightboxAt(idx);
+    });
+  }
+
+  // 페이지 로드 시 URL ?view=photos 면 사진별 모드 진입
+  try {
+    if (new URL(location.href).searchParams.get('view') === 'photos') {
+      setLibraryView('photos');
+    }
+  } catch {}
