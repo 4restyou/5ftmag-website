@@ -383,9 +383,61 @@
     return String(value || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
+  // JPEG SOI 직후에 EXIF APP1 segment 삽입 — ColorSpace=1 (sRGB) 명시.
+  // 갤럭시 갤러리·SNS 등 일부 뷰어가 색공간 정보 없는 이미지에 자동 톤 변환을
+  // 적용하는 경우가 있어, 명시적 sRGB 태그로 변환 회피 시도. (OS 강제 다크
+  // 변환을 100% 막지는 못함 — 일부 뷰어 한정 효과.)
+  function _buildSrgbExifSegment() {
+    const tiff = new Uint8Array([
+      0x4D, 0x4D, 0x00, 0x2A,                                                  // 'MM', magic 42
+      0x00, 0x00, 0x00, 0x08,                                                  // IFD0 offset = 8
+      0x00, 0x01,                                                              // IFD0: 1 entry
+      0x87, 0x69, 0x00, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x1A,  // ExifIFD pointer = 0x1A
+      0x00, 0x00, 0x00, 0x00,                                                  // next IFD = 0
+      0x00, 0x01,                                                              // ExifIFD: 1 entry
+      0xA0, 0x01, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00,  // ColorSpace=1 (sRGB)
+      0x00, 0x00, 0x00, 0x00,                                                  // next IFD = 0
+    ]);
+    const header = new Uint8Array([0x45, 0x78, 0x69, 0x66, 0x00, 0x00]); // "Exif\0\0"
+    const body = new Uint8Array(header.length + tiff.length);
+    body.set(header);
+    body.set(tiff, header.length);
+    const segLen = 2 + body.length;
+    const seg = new Uint8Array(4 + body.length);
+    seg[0] = 0xFF; seg[1] = 0xE1;
+    seg[2] = (segLen >> 8) & 0xFF;
+    seg[3] = segLen & 0xFF;
+    seg.set(body, 4);
+    return seg;
+  }
+  function _embedSrgbInJpegDataUrl(dataUrl) {
+    try {
+      if (!dataUrl || dataUrl.indexOf('data:image/jpeg') !== 0) return dataUrl;
+      const base64 = dataUrl.split(',')[1] || '';
+      const binStr = atob(base64);
+      const bytes = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+      if (bytes[0] !== 0xFF || bytes[1] !== 0xD8) return dataUrl;
+      // 이미 APP1(EXIF) 가 있으면 건너뜀
+      if (bytes[2] === 0xFF && bytes[3] === 0xE1) return dataUrl;
+      const exif = _buildSrgbExifSegment();
+      const out = new Uint8Array(bytes.length + exif.length);
+      out.set(bytes.subarray(0, 2), 0);
+      out.set(exif, 2);
+      out.set(bytes.subarray(2), 2 + exif.length);
+      // base64 변환 — chunked 로 너무 큰 string 회피
+      let bin = '';
+      const CHUNK = 0x8000;
+      for (let i = 0; i < out.length; i += CHUNK) {
+        bin += String.fromCharCode.apply(null, out.subarray(i, i + CHUNK));
+      }
+      return 'data:image/jpeg;base64,' + btoa(bin);
+    } catch (_) { return dataUrl; }
+  }
+
   function downloadCanvas(canvas, filename) {
     const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/jpeg', 0.92);
+    a.href = _embedSrgbInJpegDataUrl(canvas.toDataURL('image/jpeg', 0.92));
     a.download = filename;
     document.body.appendChild(a);
     a.click();
