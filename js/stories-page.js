@@ -256,7 +256,10 @@
     })
     .catch(err => {
       console.error(err);
-      grid.innerHTML = '<div class="empty-state">글 목록을 불러오지 못했습니다.<br /><small style="opacity:.6">네트워크 상태를 확인한 뒤 새로고침해 주세요. 로컬 파일을 직접 열었다면 <code>http://localhost</code> 환경에서 확인해야 합니다.</small></div>';
+      grid.innerHTML = window.MagState
+        ? window.MagState.error({ title: '글 목록을 불러오지 못했어요.' })
+        : '<div class="empty-state">글 목록을 불러오지 못했습니다.</div>';
+      window.MagState?.bindAction(grid, 'retry', () => location.reload());
     });
 
   function syncCardFavMarks() {

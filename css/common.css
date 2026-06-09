@@ -948,6 +948,61 @@ footer {
   .skeleton { animation: none; }
 }
 
+/* ════════════════════════════════════════════════
+   공통 상태 컴포넌트 — 로딩 / 빈 / 에러 (js/ui-states.js 가 생성).
+   각 페이지 grid 의 innerHTML 에 그대로 삽입된다.
+   ════════════════════════════════════════════════ */
+.mag-state {
+  grid-column: 1 / -1;
+}
+.mag-state--loading {
+  display: grid;
+  grid-template-columns: inherit;
+  gap: inherit;
+}
+.mag-state-skeleton { display: block; }
+.mag-state--empty,
+.mag-state--error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 56px 24px;
+  color: var(--text-muted);
+}
+.mag-state-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: var(--fw-heading);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.mag-state-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 380px;
+}
+.mag-state-btn {
+  margin-top: 4px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.02em;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 9px 20px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.mag-state-btn:hover { border-color: var(--text); background: var(--bg-sub); }
+.mag-state-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
 
 
 /* ════════════════════════════════════════════════

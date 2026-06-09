@@ -92,19 +92,16 @@ function reportMarketUploadFailure(stage, err, meta = {}) {
   console.warn('[market-page] upload failure', safeStage, message);
 }
 function renderMarketLoadError(message) {
-  $('marketGrid').innerHTML = `
-    <div class="market-empty">
-      ${escapeHtml(message || '마켓 데이터를 불러오지 못했습니다.')}
-      <br />
-      <button type="button" class="market-retry-btn" data-action="retry-market">다시 불러오기</button>
-    </div>`;
+  $('marketGrid').innerHTML = window.MagState
+    ? window.MagState.error({ title: message || '마켓 데이터를 불러오지 못했어요.', action: 'retry-market', actionLabel: '다시 불러오기' })
+    : `<div class="market-empty">${escapeHtml(message || '마켓 데이터를 불러오지 못했습니다.')}<br /><button type="button" class="market-retry-btn" data-action="retry-market">다시 불러오기</button></div>`;
 }
 
 // ═════════════════════════════════════════
 // 데이터 로드 + 렌더
 // ═════════════════════════════════════════
 async function loadList() {
-  $('marketGrid').innerHTML = '<div class="market-empty">불러오는 중…</div>';
+  $('marketGrid').innerHTML = window.MagState ? window.MagState.loading({ count: 8, variant: 'square' }) : '<div class="market-empty">불러오는 중…</div>';
   try {
     const rows = await withTimeout(db().market.list({ limit: 500 }), 9000, '마켓 목록');
     STATE.rows = Array.isArray(rows) ? rows : [];
@@ -168,9 +165,30 @@ function renderGrid() {
   const rows = applyFilters();
   const grid = $('marketGrid');
   if (!rows.length) {
-    grid.innerHTML = '<div class="market-empty">' +
-      (STATE.search ? `"${escapeHtml(STATE.search)}"에 맞는 매물이 없습니다. 검색어를 줄이거나 카테고리를 바꿔보세요.` : '아직 올라온 매물이 없습니다. 카메라, 필름, 액세서리를 첫 매물로 올려보세요.') +
-      '</div>';
+    const hasFilter = !!STATE.search || STATE.filter !== 'all' || STATE.hideSold;
+    if (window.MagState) {
+      grid.innerHTML = STATE.search || STATE.filter !== 'all' || STATE.hideSold
+        ? window.MagState.empty({
+            title: '조건에 맞는 매물이 없어요.',
+            desc: '검색어를 줄이거나 카테고리를 바꿔보세요.',
+            actionLabel: hasFilter ? '전체 보기' : '',
+            action: 'reset-market',
+          })
+        : window.MagState.empty({
+            title: '아직 올라온 매물이 없어요.',
+            desc: '카메라, 필름, 액세서리를 첫 매물로 올려보세요.',
+          });
+      if (hasFilter) {
+        window.MagState.bindAction(grid, 'reset-market', () => {
+          STATE.search = ''; STATE.filter = 'all'; STATE.hideSold = false;
+          const si = $('marketSearch'); if (si) si.value = '';
+          renderStatusToggle(); renderFilterChips(); renderGrid();
+        });
+      }
+    } else {
+      grid.innerHTML = '<div class="market-empty">' +
+        (STATE.search ? `"${escapeHtml(STATE.search)}"에 맞는 매물이 없습니다.` : '아직 올라온 매물이 없습니다.') + '</div>';
+    }
     return;
   }
   grid.innerHTML = rows.map(renderCard).join('');
@@ -886,7 +904,7 @@ $('marketStatusToggle')?.addEventListener('click', () => {
 });
 renderStatusToggle();
 $('marketGrid').addEventListener('click', (e) => {
-  if (!e.target.closest('[data-action="retry-market"]')) return;
+  if (!e.target.closest('[data-action="retry-market"], [data-state-action="retry-market"]')) return;
   loadList();
 });
 $('mktDetailModal').addEventListener('click', (e) => {

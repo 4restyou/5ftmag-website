@@ -32,13 +32,13 @@
       intro: '전국 필름 현상소를 한자리에 모았어요. 지역과 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 비교하고 <span class="accent">지도에서 위치까지</span> 확인할 수 있는 목록이에요.',
       placeholder: '현상소·지역·특징으로 검색…',
       empty: '조건에 맞는 현상소가 없습니다. 지역이나 검색어를 바꿔보세요.',
-      loadFail: '현상소 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.',
+      loadFail: '현상소 목록을 불러오지 못했어요.',
     },
     repairs: {
       intro: '전국 카메라 수리실을 모았어요. 라이카·올드카메라·SLR·컴팩트 등 <span class="accent">전문 분야와 지역</span>을 비교할 수 있어요. 주소가 등록된 곳은 지도에서 위치도 확인할 수 있습니다.',
       placeholder: '수리실·지역·전문분야로 검색…',
       empty: '조건에 맞는 수리실이 없습니다. 지역이나 검색어를 바꿔보세요.',
-      loadFail: '수리실 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.',
+      loadFail: '수리실 목록을 불러오지 못했어요.',
     },
   };
 
@@ -181,11 +181,13 @@
     }
     mobileVisible = MOBILE_INITIAL;
     if (!datasets[tab]) {
-      listEl.innerHTML = '<div class="labs-empty">불러오는 중…</div>';
+      listEl.innerHTML = MagState.loading({ count: 8, variant: 'wide' });
       try {
         datasets[tab] = tab === 'labs' ? await loadLabs() : await loadRepairs();
       } catch (_) {
-        listEl.innerHTML = `<div class="labs-empty">${TAB[tab].loadFail}</div>`;
+        const loadingTab = tab;
+        listEl.innerHTML = MagState.error({ title: TAB[tab].loadFail });
+        MagState.bindAction(listEl, 'retry', () => { datasets[loadingTab] = null; setTab(loadingTab); });
         return;
       }
     }
@@ -489,7 +491,22 @@
     if (view === 'map') updateMarkers(filtered);
     else if (infoWindow) infoWindow.close();
     if (!filtered.length) {
-      listEl.innerHTML = `<div class="labs-empty">${TAB[tab].empty}</div>`;
+      const hasFilter = region !== 'all' || !!query;
+      listEl.innerHTML = MagState.empty({
+        title: TAB[tab].empty,
+        actionLabel: hasFilter ? '전체 보기' : '',
+        action: 'reset',
+      });
+      if (hasFilter) {
+        MagState.bindAction(listEl, 'reset', () => {
+          region = 'all';
+          query = '';
+          if (searchEl) searchEl.value = '';
+          mobileVisible = MOBILE_INITIAL;
+          renderFilter();
+          apply();
+        });
+      }
       updateMoreButton(0);
       return;
     }
