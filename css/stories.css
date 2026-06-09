@@ -243,7 +243,7 @@
   transition: opacity .2s, transform var(--duration-fast) var(--easing);
   position: relative;
 }
-.article-card:hover { opacity: 0.78; }
+.article-card:hover { opacity: var(--card-hover-opacity); }
 /* 스크랩 토글 (글 카드 우상단, 라인-only) */
 .article-card-fav {
   position: absolute;

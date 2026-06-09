@@ -107,7 +107,7 @@
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 .post-item:last-child { border-bottom: none; }
-.post-item:hover { opacity: .75; }
+.post-item:hover { opacity: var(--card-hover-opacity); }
 
 .post-img-wrap { padding: 24px 24px 0; }
 .post-img {
@@ -578,7 +578,7 @@ body.modal-open { overflow: hidden; }
   transition: opacity .15s;
 }
 .news-card:last-child { border-bottom: none; }
-.news-card:hover { opacity: .75; }
+.news-card:hover { opacity: var(--card-hover-opacity); }
 .news-thumb {
   width: 90px;
   aspect-ratio: 1 / 1;

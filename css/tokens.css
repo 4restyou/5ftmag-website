@@ -85,6 +85,10 @@
   --radius-xl:   12px;
   --radius-full: 999px;
 
+  /* ────── 카드 공통 ────── */
+  /* 콘텐츠 카드(글·필름·관련글·소식) hover 시 투명도. 기존 .7~.78 로 흩어져 있던 값 수렴. */
+  --card-hover-opacity: 0.78;
+
   /* ────── 그림자 (elevation) ────── */
   --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md:  0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
