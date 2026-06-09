@@ -406,6 +406,13 @@ body {
   fill: var(--text);
 }
 .share-bar .article-fav.is-busy { opacity: 0.55; pointer-events: none; }
+/* 공유 채널 버튼 (카카오스토리·X·네이티브 공유, site-common.js 가 inject) */
+.share-bar .share-channel--native {
+  color: var(--bg);
+  background: var(--text);
+  border-color: var(--text);
+}
+.share-bar .share-channel--native:hover { opacity: 0.85; }
 
 /* ── 다음/이전 글 ── */
 .article-nav {
