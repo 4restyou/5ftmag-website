@@ -202,16 +202,50 @@
       });
     }
 
-    // 결과 카운트 표시 (textContent 사용 — XSS 안전)
-    const countEl = document.getElementById('searchResultsCount');
-    if (currentSearchQuery) {
-      countEl.textContent = `"${currentSearchQuery}" 검색 결과: ${result.length}개`;
-    } else {
-      countEl.textContent = '';
-    }
+    // 결과 메타 표시 — 활성 필터(카테고리·월·검색) 요약 + 건수 + 인라인 초기화.
+    renderResultMeta(result.length);
 
     renderGrid(result);
     syncUrl();
+  }
+
+  // 활성 필터 요약 + 건수 + 인라인 초기화 칩.
+  function renderResultMeta(count) {
+    const countEl = document.getElementById('searchResultsCount');
+    if (!countEl) return;
+    const parts = [];
+    if (currentCategory !== 'all') {
+      const chip = document.querySelector(`.filter-chip[data-category="${currentCategory}"]`);
+      parts.push(chip ? chip.textContent.trim() : currentCategory);
+    }
+    if (currentMonth !== 'all') {
+      const [y, mo] = currentMonth.split('-');
+      parts.push(`${y}년 ${Number(mo)}월`);
+    }
+    if (!parts.length && !currentSearchQuery) { countEl.textContent = ''; return; }
+    countEl.innerHTML = '';
+    if (parts.length) {
+      const seg = document.createElement('span');
+      seg.className = 'result-meta-filter';
+      seg.textContent = parts.join(' · ');
+      countEl.appendChild(seg);
+    }
+    if (currentSearchQuery) {
+      const seg = document.createElement('span');
+      seg.className = 'result-meta-query';
+      seg.textContent = `"${currentSearchQuery}"`;
+      countEl.appendChild(seg);
+    }
+    const cnt = document.createElement('span');
+    cnt.className = 'result-meta-count';
+    cnt.textContent = `${count.toLocaleString('ko-KR')}개`;
+    countEl.appendChild(cnt);
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.className = 'result-meta-reset';
+    reset.textContent = '초기화';
+    reset.addEventListener('click', resetFilters);
+    countEl.appendChild(reset);
   }
 
   // 빈 결과에서 "전체 글 보기" — 카테고리·검색 초기화
