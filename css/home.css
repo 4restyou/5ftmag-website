@@ -147,6 +147,30 @@
   transition: transform .4s ease;
 }
 .post-item:hover .post-img img { transform: scale(1.03); }
+
+/* 세로형 썸네일 (포스터 등) — 같은 이미지를 blur 배경으로 깔고 본 이미지는 contain 으로 전체 노출.
+   home-page.js 의 markPortraitThumbs 가 이미지 비율 보고 .is-portrait 와 --thumb-bg-src 를 세팅. */
+.post-img.is-portrait { isolation: isolate; background: var(--bg-sub, #f0f0f0); }
+.post-img.is-portrait::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--thumb-bg-src);
+  background-size: cover;
+  background-position: center;
+  filter: blur(28px) saturate(1.15) brightness(0.92);
+  transform: scale(1.18);
+  z-index: 0;
+  pointer-events: none;
+}
+.post-img.is-portrait img {
+  position: relative;
+  z-index: 1;
+  object-fit: contain;
+  object-position: center;
+}
+.post-img.is-portrait .post-label { z-index: 2; }
+[data-theme="dark"] .post-img.is-portrait::before { filter: blur(28px) saturate(1.05) brightness(0.6); }
 /* 사진 없는 글 — 타이포그래피 카드 (옅은 노란색 배경) */
 .post-img.text-only {
   background: var(--accent-soft, #FFF399);

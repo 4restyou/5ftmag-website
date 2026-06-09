@@ -95,11 +95,34 @@
             </a>
           `;
         }).join('');
+        markPortraitThumbs(storyList);
       })
       .catch(err => {
         console.error('Stories 로딩 실패:', err);
         storyList.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">글 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.</div>';
       });
+  }
+
+  // 세로형 썸네일(포스터 등)이 cover 로 잘려서 일부만 노출되는 문제를 자동 분기.
+  //  - 가로형: 기존 cover 그대로
+  //  - 세로형: contain 으로 전체 노출 + 같은 이미지의 blur 사본을 배경으로 깔아 letterbox 빈 공간 채움
+  function markPortraitThumbs(scope) {
+    if (!scope) return;
+    const imgs = scope.querySelectorAll('.post-img:not(.text-only) img');
+    imgs.forEach((img) => {
+      const wrap = img.closest('.post-img');
+      if (!wrap) return;
+      const apply = () => {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+        // 5% 마진을 둬 거의 정사각 이미지가 분기에 흔들리지 않게.
+        if (img.naturalHeight > img.naturalWidth * 1.05) {
+          wrap.classList.add('is-portrait');
+          wrap.style.setProperty('--thumb-bg-src', `url("${img.currentSrc || img.src}")`);
+        }
+      };
+      if (img.complete && img.naturalWidth) apply();
+      else img.addEventListener('load', apply, { once: true });
+    });
   }
 
   // ════════════════════════════
