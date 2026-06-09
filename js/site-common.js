@@ -519,6 +519,7 @@
     setupAuthNav();
     setupNotifications();
     setupArticleScrap();
+    setupArticleShare();
     setupFavoritePulse();
     injectFooterLegalLinks();
     injectSkipLink();
@@ -1153,6 +1154,50 @@
     btn.setAttribute('aria-label', on ? '스크랩 해제' : '스크랩 추가');
     const label = btn.querySelector('.article-fav-label');
     if (label) label.textContent = on ? '스크랩됨' : '스크랩';
+  }
+
+  // ════════════════════════════════════════════════
+  // 글 끝 SHARE 영역에 카카오톡·X 공유 버튼 자동 inject.
+  //   기존 "링크 복사" + "Instagram ↗" 옆에 채널 버튼을 더한다.
+  //   카카오 SDK 가 없으므로 카카오는 웹 공유 링크(sharer)로 처리.
+  // ════════════════════════════════════════════════
+  function setupArticleShare() {
+    const shareBar = document.querySelector('.share-bar');
+    if (!shareBar || shareBar.dataset.shareEnhanced === '1') return;
+    shareBar.dataset.shareEnhanced = '1';
+
+    const shareUrl = prettyShareUrl(window.location.href.split('#')[0]);
+    const title = (document.querySelector('.article-title')?.textContent || document.title || '5ft magazine').trim();
+    const enc = encodeURIComponent;
+
+    // 모바일 네이티브 공유 가능하면 "공유" 버튼 하나로 (OS 시트가 카카오·메시지 등 포함)
+    const links = [
+      { key: 'x', label: 'X', href: `https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(shareUrl)}` },
+      { key: 'kakao', label: '카카오스토리', href: `https://story.kakao.com/share?url=${enc(shareUrl)}` },
+    ];
+    const frag = document.createDocumentFragment();
+
+    // 네이티브 공유 (모바일) — navigator.share 지원 시 우선 노출
+    if (navigator.share) {
+      const nativeBtn = document.createElement('button');
+      nativeBtn.type = 'button';
+      nativeBtn.className = 'share-channel share-channel--native';
+      nativeBtn.textContent = '공유하기';
+      nativeBtn.addEventListener('click', () => {
+        navigator.share({ title, url: shareUrl }).catch(() => {});
+      });
+      frag.appendChild(nativeBtn);
+    }
+    links.forEach((l) => {
+      const a = document.createElement('a');
+      a.className = 'share-channel';
+      a.href = l.href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = l.label;
+      frag.appendChild(a);
+    });
+    shareBar.appendChild(frag);
   }
 
   // ════════════════════════════════════════════════

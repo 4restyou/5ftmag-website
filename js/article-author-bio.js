@@ -32,9 +32,21 @@
     const author = authors.find((a) => a.name === authorName);
     if (!author) return;
 
-    const related = stories
-      .filter((s) => s.author === authorName && s.published !== false && s.page !== currentPath)
-      .slice(0, 3);
+    // 1순위: 같은 작가의 다른 글. 부족하면 같은 카테고리 글로 보충 (최신순).
+    const current = stories.find((s) => s.page === currentPath);
+    const sameAuthor = stories
+      .filter((s) => s.author === authorName && s.published !== false && s.page !== currentPath);
+    let related = sameAuthor.slice(0, 3);
+    let relatedFromCategory = false;
+    if (related.length < 3 && current) {
+      const usedPages = new Set(related.map((s) => s.page).concat(currentPath));
+      const sameCategory = stories
+        .filter((s) => s.published !== false && !usedPages.has(s.page)
+          && (s.category === current.category || s.categoryLabel === current.categoryLabel))
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+      if (sameCategory.length) relatedFromCategory = true;
+      related = related.concat(sameCategory).slice(0, 3);
+    }
 
     const bioSection = document.createElement('section');
     bioSection.className = 'article-author-bio';
@@ -49,8 +61,11 @@
     if (related.length > 0) {
       relatedSection = document.createElement('section');
       relatedSection.className = 'related-by-author';
+      const relatedHeader = (sameAuthor.length > 0 && !relatedFromCategory)
+        ? `${escapeText(authorName)}의 다른 글`
+        : '함께 보면 좋은 글';
       relatedSection.innerHTML = `
-        <h4 class="related-header">${escapeText(authorName)}의 다른 글</h4>
+        <h4 class="related-header">${relatedHeader}</h4>
         <div class="related-grid">
           ${related.map((s) => `
             <a class="related-card" href="/${escapeAttr(s.page)}">
