@@ -485,9 +485,42 @@
     if (shouldShow) btn.textContent = `더 보기 (${total - mobileVisible})`;
   }
 
+  function resetLabsFilter() {
+    region = 'all';
+    query = '';
+    if (searchEl) searchEl.value = '';
+    mobileVisible = MOBILE_INITIAL;
+    renderFilter();
+    apply();
+  }
+
+  function renderLabsCount(count) {
+    if (!countEl) return;
+    const hasFilter = region !== 'all' || !!query;
+    if (!hasFilter) { countEl.textContent = `${count}곳`; return; }
+    countEl.innerHTML = '';
+    const parts = [];
+    if (region !== 'all') parts.push(region);
+    if (query) parts.push(`"${query}"`);
+    const seg = document.createElement('span');
+    seg.className = 'labs-count-filter';
+    seg.textContent = parts.join(' · ');
+    countEl.appendChild(seg);
+    const cnt = document.createElement('span');
+    cnt.className = 'labs-count-num';
+    cnt.textContent = `${count}곳`;
+    countEl.appendChild(cnt);
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.className = 'labs-count-reset';
+    reset.textContent = '초기화';
+    reset.addEventListener('click', resetLabsFilter);
+    countEl.appendChild(reset);
+  }
+
   function apply() {
     const filtered = currentFiltered();
-    if (countEl) countEl.textContent = `${filtered.length}곳`;
+    renderLabsCount(filtered.length);
     if (view === 'map') updateMarkers(filtered);
     else if (infoWindow) infoWindow.close();
     if (!filtered.length) {
@@ -498,14 +531,7 @@
         action: 'reset',
       });
       if (hasFilter) {
-        MagState.bindAction(listEl, 'reset', () => {
-          region = 'all';
-          query = '';
-          if (searchEl) searchEl.value = '';
-          mobileVisible = MOBILE_INITIAL;
-          renderFilter();
-          apply();
-        });
+        MagState.bindAction(listEl, 'reset', resetLabsFilter);
       }
       updateMoreButton(0);
       return;
