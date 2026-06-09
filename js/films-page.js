@@ -1570,10 +1570,31 @@
     photosVisible = 0;
     libraryPhotosGrid.innerHTML = '';
     if (photosShuffled.length === 0) {
-      const msg = (photosPool.length === 0)
-        ? '아직 등록된 사진이 없어요.'
-        : '조건에 맞는 사진이 없어요. 검색어나 필터를 바꿔보세요.';
-      libraryPhotosGrid.innerHTML = `<p class="library-photos-empty">${msg}</p>`;
+      const hasFilter = photosCategory !== 'all' || !!photosQuery;
+      const isEmptyPool = photosPool.length === 0;
+      libraryPhotosGrid.innerHTML = window.MagState
+        ? window.MagState.empty({
+            title: isEmptyPool ? '아직 등록된 사진이 없어요.' : '조건에 맞는 사진이 없어요.',
+            desc: isEmptyPool ? '' : '검색어나 필터를 바꿔보세요.',
+            actionLabel: hasFilter ? '전체 보기' : '',
+            action: 'reset',
+          })
+        : '<p class="library-photos-empty">조건에 맞는 사진이 없어요.</p>';
+      if (hasFilter) {
+        window.MagState?.bindAction(libraryPhotosGrid, 'reset', () => {
+          photosCategory = 'all';
+          photosQuery = '';
+          if (libraryPhotosSearchEl) libraryPhotosSearchEl.value = '';
+          if (libraryPhotosChipsEl) {
+            libraryPhotosChipsEl.querySelectorAll('.library-filter-chip').forEach(c => {
+              const on = c.dataset.cat === 'all';
+              c.classList.toggle('is-active', on);
+              c.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+          }
+          applyPhotosFilter({ reshuffle: false });
+        });
+      }
       if (libraryPhotosCount) libraryPhotosCount.textContent = '0컷';
       if (libraryPhotosMoreWrap) libraryPhotosMoreWrap.hidden = true;
       return;
@@ -1587,6 +1608,7 @@
       applyPhotosFilter({ reshuffle: true });
       return;
     }
+    if (window.MagState) libraryPhotosGrid.innerHTML = window.MagState.loading({ count: 10, variant: 'square' });
     try {
       const submissions = await getApprovedSubmissions();
       photosPool = (submissions || []).filter(s => s && (s.image || s.src));
@@ -1594,7 +1616,11 @@
       applyPhotosFilter({ reshuffle: true });
     } catch (err) {
       console.warn('[films] photos view 로드 실패:', err);
-      if (libraryPhotosCount) libraryPhotosCount.textContent = '사진을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.';
+      libraryPhotosGrid.innerHTML = window.MagState
+        ? window.MagState.error({ title: '사진을 불러오지 못했어요.' })
+        : '<p class="library-photos-empty">사진을 불러오지 못했어요.</p>';
+      window.MagState?.bindAction(libraryPhotosGrid, 'retry', () => ensurePhotosShuffled({ force: true }));
+      if (libraryPhotosCount) libraryPhotosCount.textContent = '';
     }
   }
 
