@@ -58,7 +58,7 @@
   font-family: inherit;
   transition: opacity .2s;
 }
-.film-card:hover { opacity: 0.78; }
+.film-card:hover { opacity: var(--card-hover-opacity); }
 
 .film-img {
   width: 100%;
