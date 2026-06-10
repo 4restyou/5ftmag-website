@@ -1,0 +1,54 @@
+/* Admin shell — 편집부 페이지 공통 내비 레이아웃
+   데스크탑(≥960px): .admin-subnav 를 왼쪽 고정 사이드바로 전환
+   모바일(<960px): 가로 스크롤 한 줄 바
+   페이지별 인라인 <style> 보다 뒤에 로드되어 같은 선택자를 덮어쓴다. */
+
+:root { --admin-side-w: 192px; }
+
+@media (max-width: 959px) {
+  .admin-subnav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .admin-subnav::-webkit-scrollbar { display: none; }
+  .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
+}
+
+@media (min-width: 960px) {
+  /* 콘텐츠 전체를 사이드바 폭만큼 밀고, 사이트 헤더만 원위치로 되돌려 풀폭 유지 */
+  body { margin-left: var(--admin-side-w); }
+  body > header { margin-left: calc(-1 * var(--admin-side-w)); }
+
+  .admin-subnav {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    bottom: 0;
+    width: var(--admin-side-w);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 20px 12px 24px;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    overflow-y: auto;
+    z-index: 250;
+  }
+  .admin-subnav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    border-radius: 4px;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .admin-subnav-link:hover { background: var(--bg-sub); color: var(--text); }
+  .admin-subnav-link.is-current {
+    color: var(--text);
+    border-bottom: none;
+    border-left-color: var(--text);
+    background: var(--bg-sub);
+  }
+}
