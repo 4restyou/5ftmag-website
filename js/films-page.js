@@ -37,7 +37,11 @@
     normalizeContributorKey,
     filterCategoryOf,
     isMobileFilms,
+    contributorKeyOfSubmission,
+    contributorLabelOfSubmission,
+    toLightboxReaderPhoto,
   } = window.FilmsUtils;
+  const resolveFilmKey = (input) => window.FilmsUtils.resolveFilmKey(input, filmsData);
   const { renderFilmCard } = window.FilmsCards;
   const {
     routeParam,
@@ -87,26 +91,6 @@
   // 라이브러리 카드의 "원본" 정렬 순서 (좋아요 해제 시 복귀용)
   // 데스크탑·모바일 모두 sortLibrary 알파벳(브랜드→이름 가나다·ABC) 순
   let libraryOriginalOrder = [];
-
-  function contributorKeyOfSubmission(submission = {}) {
-    return normalizeContributorKey(submission.instagram || submission.submitterName || submission.author || '');
-  }
-
-  function contributorLabelOfSubmission(submission = {}) {
-    return submission.submitterName || submission.author || submission.instagram || '이름 없음';
-  }
-
-  function resolveFilmKey(input) {
-    const raw = String(input || '').trim();
-    if (!raw) return '';
-    if (filmsData[raw]) return raw;
-    const q = normalizeFilmLabel(raw);
-    for (const [slug, film] of Object.entries(filmsData || {})) {
-      const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
-      if (aliases.some(alias => normalizeFilmLabel(alias) === q)) return slug;
-    }
-    return '';
-  }
 
   function renderFilmsGrid() {
     const entries = Object.entries(filmsData);
@@ -1001,22 +985,6 @@
   // Reader 사진을 통합 lightbox 로 열기
   //  (editorial 과 동일한 컴포넌트 사용 — zoom / fullscreen / thumb strip)
   // ════════════════════════════
-  function toLightboxReaderPhoto(item = {}) {
-    return {
-      src: item.image || item.src,
-      webp: item.webp || item.image || item.src,
-      author: item.author || item.submitterName || '',
-      instagram: item.instagram || '',
-      film: item.film || '',
-      camera: item.camera || '',
-      caption: item.caption || '',
-      instagramUrl: item.instagramUrl || '',
-      contributorKey: item.contributorKey || contributorKeyOfSubmission(item),
-      submissionId: typeof item.id === 'string' ? item.id.replace(/^sub-/, '') : (item.submissionId || ''),
-      _source: 'reader',
-    };
-  }
-
   function openFilmReaderLightbox(matched, index) {
     filmsLightbox.openReader(matched.map(toLightboxReaderPhoto), index);
   }
