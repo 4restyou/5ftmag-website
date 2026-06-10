@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>편집부 홈 | 5ft magazine</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="shortcut icon" href="../img/favicon/favicon.ico">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css?v=20260603-states2">
+  <link rel="stylesheet" href="../css/common.css?v=20260604-inapp">
+  <script src="../js/theme-init.js"></script>
+  <style>
+    body { background: var(--bg); color: var(--text); }
+    .admin-header { max-width: 980px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .admin-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-subnav { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
+    .admin-user { font-size: 13px; color: var(--text-muted); }
+    .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .gate { max-width: 480px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; margin-bottom: 12px; }
+    .gate p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .gate-btn { font: inherit; font-weight: var(--fw-heading); font-size: 14px; padding: 12px 24px; background: var(--text); color: var(--bg); border: none; border-radius: var(--btn-radius); cursor: pointer; }
+    main { max-width: 980px; margin: 0 auto; padding: 28px 24px 80px; }
+
+    .home-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .home-head h2 { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: 0.04em; margin: 0; }
+    .home-refresh { font: inherit; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.03em; padding: 7px 12px; border-radius: var(--btn-radius); border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; transition: border-color .15s, opacity .15s; }
+    .home-refresh:hover { border-color: var(--text); }
+    .home-refresh[disabled] { cursor: wait; opacity: 0.55; }
+
+    .home-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 40px; }
+    .home-card { display: block; padding: 18px; border-radius: 6px; background: var(--bg-sub); color: var(--text); text-decoration: none; transition: outline-color .15s; outline: 1px solid transparent; }
+    a.home-card:hover { outline-color: var(--text); }
+    .home-card .k { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .home-card .v { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .home-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+    .home-card.is-alert .v { color: var(--text); }
+    .home-card.is-alert { outline-color: var(--text); }
+
+    .home-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .home-link { display: block; padding: 16px 18px; border: 1px solid var(--border); border-radius: 6px; color: var(--text); text-decoration: none; transition: border-color .15s, background .15s; }
+    .home-link:hover { border-color: var(--text); }
+    .home-link .t { font-size: 14px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin-bottom: 4px; }
+    .home-link .d { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+    @media (max-width: 860px) { .home-cards { grid-template-columns: repeat(2, 1fr); } .home-links { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .home-links { grid-template-columns: 1fr; } }
+  </style>
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260610-adminshell">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../webzine.html">Webzine</a></li>
+      <li><a href="../labs.html">Labs</a></li>
+      <li><a href="../market.html">Market</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="../search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../webzine.html">Webzine</a>
+    <a href="../labs.html">Labs</a>
+    <a href="../market.html">Market</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<div class="admin-header">
+  <a class="admin-back" href="../index.html">← 5ft magazine 으로</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">편집부 홈</h1>
+    <span class="admin-user" id="adminUser">불러오는 중…</span>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <a href="/admin/index.html" class="admin-subnav-link is-current">홈</a>
+    <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="/admin/market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="/admin/comments.html" class="admin-subnav-link">댓글</a>
+    <a href="/admin/announcements.html" class="admin-subnav-link">공지</a>
+    <a href="/admin/camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
+    <a href="/admin/films.html" class="admin-subnav-link">필름 카탈로그</a>
+    <a href="/admin/labs.html" class="admin-subnav-link">현상소</a>
+    <a href="/admin/repairs.html" class="admin-subnav-link">수리실</a>
+    <a href="/admin/webzine.html" class="admin-subnav-link">웹진</a>
+    <a href="/admin/analytics.html" class="admin-subnav-link">통계</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+</div>
+
+<main id="app" hidden>
+
+  <div class="home-head">
+    <h2>오늘 처리할 일</h2>
+    <button type="button" class="home-refresh" id="homeRefresh">새로고침</button>
+  </div>
+  <div class="home-cards">
+    <a class="home-card" id="cardPending" href="/admin/submissions.html?status=pending">
+      <div class="k">투고 검토 대기</div>
+      <div class="v" id="vPending" aria-live="polite">·</div>
+      <div class="sub">투고 검토로 이동</div>
+    </a>
+    <a class="home-card" id="cardReports" href="/admin/market-reports.html">
+      <div class="k">매물 신고 대기</div>
+      <div class="v" id="vReports" aria-live="polite">·</div>
+      <div class="sub">매물 신고로 이동</div>
+    </a>
+    <a class="home-card" id="cardErrors" href="/admin/analytics.html#clientErrorsPanel">
+      <div class="k">JS 오류 (24시간)</div>
+      <div class="v" id="vErrors" aria-live="polite">·</div>
+      <div class="sub">통계에서 상세 보기</div>
+    </a>
+    <a class="home-card" href="/admin/analytics.html">
+      <div class="k">오늘 페이지뷰</div>
+      <div class="v" id="vViews" aria-live="polite">·</div>
+      <div class="sub" id="vViewsSub">확인 중…</div>
+    </a>
+  </div>
+
+  <div class="home-head">
+    <h2>바로가기</h2>
+  </div>
+  <div class="home-links">
+    <a class="home-link" href="/admin/submissions.html"><div class="t">투고 검토</div><div class="d">독자 사진 승인·반려, 테마 응모 관리</div></a>
+    <a class="home-link" href="/admin/market-reports.html"><div class="t">매물 신고</div><div class="d">장터 신고 검토, 매물 숨김 처리</div></a>
+    <a class="home-link" href="/admin/comments.html"><div class="t">댓글</div><div class="d">최근 댓글 모니터링, 삭제 처리</div></a>
+    <a class="home-link" href="/admin/announcements.html"><div class="t">공지</div><div class="d">상단 마퀴 배너 등록·예약·종료</div></a>
+    <a class="home-link" href="/admin/camera-brands.html"><div class="t">카메라 브랜드</div><div class="d">카메라 표기 별칭·표시명 정리</div></a>
+    <a class="home-link" href="/admin/films.html"><div class="t">필름 카탈로그</div><div class="d">필름 등록·수정, 썸네일 관리</div></a>
+    <a class="home-link" href="/admin/labs.html"><div class="t">현상소</div><div class="d">현상소 정보·가격·좌표 관리</div></a>
+    <a class="home-link" href="/admin/repairs.html"><div class="t">수리실</div><div class="d">카메라 수리실 정보 관리</div></a>
+    <a class="home-link" href="/admin/webzine.html"><div class="t">웹진</div><div class="d">웹진 호수·콘텐츠 관리</div></a>
+    <a class="home-link" href="/admin/analytics.html"><div class="t">통계</div><div class="d">페이지뷰·업로드·오류 로그 전체 보기</div></a>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/db-client.js?v=20260603-announce"></script>
+<script src="../js/util.js?v=20260602-normalize"></script>
+<script src="../js/site-common.js?v=20260604-inapp"></script>
+<script src="../js/admin-home-page.js?v=20260610-adminshell"></script>
+
+</body>
+</html>
