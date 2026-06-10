@@ -253,6 +253,8 @@
     .sub-btn-reject  { background: #fff; color: #7f1d1d; border: 1px solid #fca5a5; }
     .sub-btn-delete  { background: none; color: var(--text-muted); }
     .sub-btn-delete:hover { color: #7f1d1d; }
+    a.sub-btn-download { display: inline-flex; align-items: center; background: var(--bg); color: var(--text); border: 1px solid var(--border); text-decoration: none; }
+    a.sub-btn-download:hover { border-color: var(--text); opacity: 1; }
 
     .empty-state {
       text-align: center;
@@ -717,6 +719,9 @@ function renderCard(r) {
   const url = publicUrl(r.storage_path);
   const igNorm = (r.instagram || '').replace(/^@/, '');
   const igUrl = igNorm ? `https://instagram.com/${igNorm}` : null;
+  // 다운로드 파일명: 작가 식별자 + 필름 + id 앞 8자리. 파일명에 못 쓰는 문자는 -로.
+  const dlName = ['5ft', igNorm || r.submitter_name || 'reader', r.film || '', String(r.id).slice(0, 8)]
+    .filter(Boolean).join('-').replace(/[^\w.@-]+/g, '-') + '.jpg';
   const themeBadge = r.theme_month ? `<span class="sub-card-status pending" style="margin-left:8px; background:#e0e7ff; color:#3730a3;">테마 ${r.theme_month}</span>` : '';
   const likeCount = STATE.likes.get(String(r.id)) || 0;
   const likeBadge = likeCount > 0
@@ -782,6 +787,7 @@ function renderCard(r) {
           ${STATE.status === 'approved' ? `
             <button type="button" class="sub-btn sub-btn-reject" data-action="reject">반려로 되돌리기</button>
           ` : ''}
+          <a class="sub-btn sub-btn-download" href="${escapeHtml(url)}" download="${escapeHtml(dlName)}">사진 받기</a>
           <button type="button" class="sub-btn sub-btn-delete" data-action="delete">완전 삭제</button>
         </div>
       </div>
