@@ -1,5 +1,19 @@
 [
   {
+    "id": "nishijima",
+    "title": "세 발짝의 거리, 아츠시 니시지마",
+    "category": "essay",
+    "categoryLabel": "PHOTOGRAPHER",
+    "author": "5ft.mag 편집부",
+    "date": "2026-06-10",
+    "issue": "",
+    "thumbnail": "img/stories/nishijima/poor-things-bella.webp",
+    "excerpt": "요르고스 란티모스의 현장을 10년 가까이 기록해 온 스틸 포토그래퍼. 『가여운 것들』 곁에서 그는 디지털 대신 필름 카메라를 들었다.",
+    "page": "stories/nishijima.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "spc-issue02",
     "title": "비오톱 서울 — SPC 사진첩 ISSUE.02",
     "category": "essay",
