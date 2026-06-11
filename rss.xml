@@ -6,13 +6,58 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Tue, 02 Jun 2026 01:26:39 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 11 Jun 2026 16:58:11 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>비오톱 서울 — SPC 사진첩 ISSUE.02</title>
+      <link>https://www.5ftmag.com/stories/spc-issue02.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/spc-issue02.html</guid>
+      <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+      <description>상경 후 코로나의 한가운데에서, 외부인의 시선으로 바라본 서울이라는 비오톱. 김도균의 SPC 사진첩 ISSUE.02.</description>
+      <category>PHOTOBOOK</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Street Photography Club</dc:creator>
+    </item>
+    <item>
+      <title>빛, 먼지, 사람 — SPC 사진첩 ISSUE.03</title>
+      <link>https://www.5ftmag.com/stories/spc-issue03.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/spc-issue03.html</guid>
+      <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+      <description>사건이 아니라 상태. 반복해서 마주친 빛·먼지·사람이 겹치는 순간들을 모은 한 권. 홍민우의 SPC 사진첩 ISSUE.03.</description>
+      <category>PHOTOBOOK</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Street Photography Club</dc:creator>
+    </item>
+    <item>
+      <title>세 발짝의 거리, 아츠시 니시지마</title>
+      <link>https://www.5ftmag.com/stories/nishijima.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/nishijima.html</guid>
+      <pubDate>Wed, 10 Jun 2026 00:00:00 GMT</pubDate>
+      <description>요르고스 란티모스의 현장을 10년 가까이 기록해 온 스틸 포토그래퍼. 『가여운 것들』 곁에서 그는 디지털 대신 필름 카메라를 들었다.</description>
+      <category>PHOTOGRAPHER</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>제4회 후지필름 포토페스타 2026 — 노들섬에 〈사이의 시간〉</title>
+      <link>https://www.5ftmag.com/stories/fpfi-2026.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/fpfi-2026.html</guid>
+      <pubDate>Mon, 08 Jun 2026 00:00:00 GMT</pubDate>
+      <description>시리즈 15명·싱글 20명, 두 갤러리·아홉 날. 6월 노들섬에서 사진의 &apos;잠시 멈춘 시간&apos; 을 본다.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>2026 / 6, 이달의 사진 전시</title>
+      <link>https://www.5ftmag.com/stories/jun-2026-exhibitions.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/jun-2026-exhibitions.html</guid>
+      <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+      <description>한 달 안에 닫히는 일곱, 여름까지 가는 다섯, 그리고 5년 만에 돌아온 서울사진축제 〈컴백홈〉. 6월 첫 주말이 가장 분주하다. 일정과 동선까지 한자리에.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>확장하는 코닥, 정리하는 후지. 2026 봄의 필름 풍경</title>
       <link>https://www.5ftmag.com/stories/verita-200d-fuji-bw.html</link>
@@ -162,7 +207,7 @@
       <link>https://www.5ftmag.com/stories/08.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/08.html</guid>
       <pubDate>Fri, 20 Dec 2024 00:00:00 GMT</pubDate>
-      <description>5ft magazine Vol.01에 참여한 노애경, 박순렬, 장형수 작가의 대표 사진과 작업노트 일부를 따라가 보는 짧은 소개.</description>
+      <description>5ft.mag Vol.01에 참여한 노애경, 박순렬, 장형수 작가의 대표 사진과 작업노트 일부를 따라가 보는 짧은 소개.</description>
       <category>PHOTO</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
     </item>
@@ -180,7 +225,7 @@
       <link>https://www.5ftmag.com/stories/06.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/06.html</guid>
       <pubDate>Mon, 16 Dec 2024 00:00:00 GMT</pubDate>
-      <description>5ft magazine Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.</description>
+      <description>5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.</description>
       <category>GOODS</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
     </item>
@@ -225,7 +270,7 @@
       <link>https://www.5ftmag.com/stories/01.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/01.html</guid>
       <pubDate>Fri, 15 Nov 2024 00:00:00 GMT</pubDate>
-      <description>E-book 22권을 내고 1년을 다시 준비했다. 마침내 종이 위에 새겨진 5ft magazine 정식 창간호. 그 안에 무엇이 담겼는지 살짝 들여다본다.</description>
+      <description>E-book 22권을 내고 1년을 다시 준비했다. 마침내 종이 위에 새겨진 5ft.mag 정식 창간호. 그 안에 무엇이 담겼는지 살짝 들여다본다.</description>
       <category>EDITORIAL</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
     </item>
