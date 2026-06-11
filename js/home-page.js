@@ -36,7 +36,7 @@
     if (dateDiff) return dateDiff;
     const aSpc = spcIssueNumber(a);
     const bSpc = spcIssueNumber(b);
-    if (aSpc != null && bSpc != null) return aSpc - bSpc;
+    if (aSpc != null && bSpc != null) return bSpc - aSpc;
     return 0;
   }
 
