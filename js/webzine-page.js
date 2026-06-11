@@ -253,6 +253,8 @@
     currentRow = rs;
     clearTimeout(seqT);
     const slot = rs.slots[pos];
+    // 이동 거리에 비례해 펼침 시점을 늦춘다 — 먼 책일수록 이동을 더 보여주고 펼쳐야 끊기지 않는다.
+    const openDelay = Math.min(480, 240 + Math.abs(pos - rs.active) * 50);
     if (slot.classList.contains('is-open')) { closeOpen(); return; }   // 펼친 책 다시 클릭 → 닫기
     if (openState) {
       // 다른 책 클릭: 접고 → 그 책으로 이동 → 펼치기
@@ -260,12 +262,12 @@
       runFlip(prev.rs, () => { prev.rs.slots[prev.pos].classList.remove('is-open'); }, 520);
       openState = null;
       runFlip(rs, () => { rs.active = pos; }, 560);
-      seqT = setTimeout(() => openBook(rs, pos), 360);
+      seqT = setTimeout(() => openBook(rs, pos), openDelay);
       return;
     }
     if (pos === rs.active) { openBook(rs, pos); return; }
     runFlip(rs, () => { rs.active = pos; }, 560);
-    seqT = setTimeout(() => openBook(rs, pos), 360);
+    seqT = setTimeout(() => openBook(rs, pos), openDelay);
   }
   function openBook(rs, pos) {
     const slot = rs.slots[pos];
