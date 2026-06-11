@@ -755,19 +755,40 @@
       }
     }
 
-    // 3) 브랜드 매칭 실패 → MODEL_BRAND_HINTS 로 모델로부터 브랜드 추정
-    //    - 3자 이상 키만 prefix 매칭, 1~2자 키는 정확 일치만 (false-positive 차단)
+    // 3) 브랜드 매칭 실패 → 단계별 보정.
+    //    같은 글자라면 (대소문자·띄어쓰기 무관) 항상 같은 brand|key 가 나오는 게 목표.
     if (!brandMatched) {
       const mk = modelKey(rest);
-      outer: for (const hint of MODEL_BRAND_HINTS) {
+
+      // 3-1) 힌트 '정확 일치' 먼저 — canonet 처럼 브랜드명이 포함된 고유 모델명을
+      //      아래 3-2 의 prefix 분리로부터 보호한다 (canonet → canon|canonet 유지).
+      outer1: for (const hint of MODEL_BRAND_HINTS) {
         for (const m of hint.models) {
-          const mNorm = hintModelKey(m);
-          if (!mNorm) continue;
-          const isExact = (mk === mNorm);
-          const isPrefix = (mNorm.length >= 3 && mk.startsWith(mNorm));
-          if (isExact || isPrefix) {
-            brand = hint.brand;
-            break outer;
+          if (mk === hintModelKey(m)) { brand = hint.brand; brandMatched = true; break outer1; }
+        }
+      }
+
+      // 3-2) 공백 없는 브랜드 prefix — 숫자 없는 모델도 분리.
+      //      'nikonf'→nikon|f, 'pentaxmx'→pentax|mx 가 'Nikon F', 'Pentax MX' 와 같은 키가 된다.
+      //      (숫자 있는 경우는 위 2) 에서 이미 처리. 힌트 정확 일치가 우선이라 고유명은 안전.)
+      if (!brandMatched) {
+        for (const [canonical, form] of flat) {
+          if (rest.startsWith(form) && modelKey(rest.slice(form.length)).length >= 1) {
+            rest = rest.slice(form.length).trim();
+            brand = canonical;
+            brandMatched = true;
+            break;
+          }
+        }
+      }
+
+      // 3-3) 힌트 prefix 매칭 — 4자 이상 키만.
+      //      3자 prefix 는 'pen'(올림푸스) 이 'pentax…' 를 가로채는 오인이 있어 좁혔다.
+      if (!brandMatched) {
+        outer2: for (const hint of MODEL_BRAND_HINTS) {
+          for (const m of hint.models) {
+            const mNorm = hintModelKey(m);
+            if (mNorm.length >= 4 && mk.startsWith(mNorm)) { brand = hint.brand; break outer2; }
           }
         }
       }

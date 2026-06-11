@@ -217,7 +217,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260603-announce" defer></script>
-<script src="../js/camera-brands.js?v=20260516-crosscheck" defer></script>
+<script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/util.js?v=20260602-normalize" defer></script>
   <script src="../js/site-common.js?v=20260609-share" defer></script>
 <script>
@@ -249,12 +249,26 @@ function allBrands() {
 function brandSelectHtml(currentBrand, currentDisplay, selfKey) {
   const brands = allBrands();
   const opts = brands.map(b => `<option value="${escapeAttr(b)}"${b === currentBrand ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('');
-  // 병합 대상 select — 자기 자신 제외, 다른 모든 모델 표시 (display · key)
-  const mergeOpts = [...STATE.cameraIndex.entries()]
-    .filter(([k]) => k !== selfKey)
-    .sort((a, b) => (b[1].count - a[1].count) || a[1].display.localeCompare(b[1].display))
-    .map(([k, info]) => `<option value="${escapeAttr(k)}">${escapeHtml(info.display)} · ${escapeHtml(k)}</option>`)
-    .join('');
+  // 병합 대상 select — 자기 자신 제외, 브랜드별 ABC 그룹 (optgroup) → 그룹 안에서 표기 ABC.
+  // 브랜드 없는 모델은 맨 뒤 '브랜드 미지정' 그룹.
+  const byBrand = new Map();
+  for (const [k, info] of STATE.cameraIndex) {
+    if (k === selfKey) continue;
+    const b = info.brand || '';
+    if (!byBrand.has(b)) byBrand.set(b, []);
+    byBrand.get(b).push([k, info]);
+  }
+  const brandKeys = [...byBrand.keys()].sort((a, b) => {
+    if (!a) return 1; if (!b) return -1;   // 미지정은 맨 뒤
+    return a.localeCompare(b, 'en');
+  });
+  const mergeOpts = brandKeys.map(b => {
+    const items = byBrand.get(b)
+      .sort((x, y) => x[1].display.localeCompare(y[1].display, 'en', { sensitivity: 'base' }))
+      .map(([k, info]) => `<option value="${escapeAttr(k)}">${escapeHtml(info.display)} · ${escapeHtml(k)}</option>`)
+      .join('');
+    return `<optgroup label="${escapeAttr(b || '브랜드 미지정')}">${items}</optgroup>`;
+  }).join('');
   return `
     <div class="brand-input-wrap">
       <select class="brand-select" data-role="brand-select">
