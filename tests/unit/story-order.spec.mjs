@@ -19,4 +19,12 @@ describe('story ordering', () => {
       expect(source).toContain('return aSpc - bSpc;');
     }
   });
+
+  it('uses SPC issue badges consistently for the photobook series', () => {
+    const stories = JSON.parse(read('data/stories.json'));
+    for (const issue of ['01', '02', '03']) {
+      const story = stories.find((item) => item.id === `spc-issue${issue}`);
+      expect(story?.issue).toBe(`SPC 사진첩 #${issue}`);
+    }
+  });
 });
