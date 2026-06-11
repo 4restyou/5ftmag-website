@@ -246,7 +246,8 @@ function renderCard(r) {
 //   - shareListing 은 navigator.share 우선, fallback 으로 클립보드 복사
 // ═════════════════════════════════════════
 function listingUrl(id) {
-  return `${location.origin}/market/${encodeURIComponent(id)}`;
+  const path = `/market/${encodeURIComponent(id)}`;
+  return window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
 }
 async function shareListing(id) {
   const row = STATE.rows.find(r => r.id === id) || await db().market.getOne(id).catch(() => null);

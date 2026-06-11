@@ -376,16 +376,20 @@ body {
   color: var(--text-dim); margin-right: 8px;
 }
 .share-bar {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .share-label {
+  flex: 0 0 100%;
   font-size: 12px; font-weight: var(--fw-heading);
   letter-spacing: 0.12em; color: var(--text-muted);
-  margin-right: 8px;
+  margin: 0 0 2px;
 }
 .share-bar a, .share-bar button {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 7px 14px; font-size: 13px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 42px; padding: 0 16px; font-size: 14px;
   font-weight: var(--fw-heading); letter-spacing: var(--ls-default);
   color: var(--text); background: transparent;
   border: 1px solid var(--border); border-radius: var(--btn-radius);
@@ -406,13 +410,22 @@ body {
   fill: var(--text);
 }
 .share-bar .article-fav.is-busy { opacity: 0.55; pointer-events: none; }
-/* 공유 채널 버튼 (카카오스토리·X·네이티브 공유, site-common.js 가 inject) */
+/* 네이티브 공유 버튼 (site-common.js 가 inject) */
 .share-bar .share-channel--native {
   color: var(--bg);
   background: var(--text);
   border-color: var(--text);
 }
 .share-bar .share-channel--native:hover { opacity: 0.85; }
+
+@media (max-width: 640px) {
+  .share-bar { gap: 8px; }
+  .share-bar a, .share-bar button {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+}
 
 /* ── 다음/이전 글 ── */
 .article-nav {

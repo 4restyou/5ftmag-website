@@ -376,11 +376,20 @@
   }
   window.copyTextToClipboard = copyTextToClipboard;
 
+  const PUBLIC_SHARE_ORIGIN = 'https://5ftmag.com';
+  function isInternalShareHost(hostname) {
+    return /(^|\.)5ftmag\.com$/i.test(hostname)
+      || /\.netlify\.app$/i.test(hostname)
+      || hostname === 'localhost'
+      || hostname === '127.0.0.1'
+      || hostname === '::1';
+  }
+
   function prettyShareUrl(input = window.location.href) {
     let url;
     try { url = new URL(input, window.location.origin); }
     catch (_) { return String(input || ''); }
-    if (url.origin !== window.location.origin) return url.toString();
+    if (!isInternalShareHost(url.hostname)) return url.toString();
 
     const cleanPath = url.pathname.replace(/\/index\.html$/i, '/');
     const film = url.searchParams.get('film') || url.searchParams.get('slug');
@@ -389,19 +398,19 @@
     const marketId = url.searchParams.get('id');
 
     if (/\/films\.html$/i.test(cleanPath)) {
-      if (camera) return `${url.origin}/camera/${encodeURIComponent(camera)}`;
-      if (contributor) return `${url.origin}/contributor/${encodeURIComponent(contributor)}`;
-      if (film) return `${url.origin}/film/${encodeURIComponent(film)}`;
-      return `${url.origin}/films`;
+      if (camera) return `${PUBLIC_SHARE_ORIGIN}/camera/${encodeURIComponent(camera)}`;
+      if (contributor) return `${PUBLIC_SHARE_ORIGIN}/contributor/${encodeURIComponent(contributor)}`;
+      if (film) return `${PUBLIC_SHARE_ORIGIN}/film/${encodeURIComponent(film)}`;
+      return `${PUBLIC_SHARE_ORIGIN}/films`;
     }
     if (/\/market\.html$/i.test(cleanPath)) {
-      if (marketId) return `${url.origin}/market/${encodeURIComponent(marketId)}`;
-      return `${url.origin}/market`;
+      if (marketId) return `${PUBLIC_SHARE_ORIGIN}/market/${encodeURIComponent(marketId)}`;
+      return `${PUBLIC_SHARE_ORIGIN}/market`;
     }
 
     const withoutHtml = cleanPath.replace(/\.html$/i, '');
     const query = url.searchParams.toString();
-    return url.origin + withoutHtml + (query ? `?${query}` : '') + url.hash;
+    return PUBLIC_SHARE_ORIGIN + withoutHtml + (query ? `?${query}` : '') + url.hash;
   }
   window.prettyShareUrl = prettyShareUrl;
 
@@ -1157,9 +1166,8 @@
   }
 
   // ════════════════════════════════════════════════
-  // 글 끝 SHARE 영역에 카카오톡·X 공유 버튼 자동 inject.
-  //   기존 "링크 복사" + "Instagram ↗" 옆에 채널 버튼을 더한다.
-  //   카카오 SDK 가 없으므로 카카오는 웹 공유 링크(sharer)로 처리.
+  // 글 끝 SHARE 영역에 네이티브 공유 버튼만 자동 inject.
+  //   링크 복사/Instagram은 HTML에 있고, X·카카오스토리 웹 공유는 UI를 단순화하기 위해 제외한다.
   // ════════════════════════════════════════════════
   function setupArticleShare() {
     const shareBar = document.querySelector('.share-bar');
@@ -1168,13 +1176,6 @@
 
     const shareUrl = prettyShareUrl(window.location.href.split('#')[0]);
     const title = (document.querySelector('.article-title')?.textContent || document.title || '5ft magazine').trim();
-    const enc = encodeURIComponent;
-
-    // 모바일 네이티브 공유 가능하면 "공유" 버튼 하나로 (OS 시트가 카카오·메시지 등 포함)
-    const links = [
-      { key: 'x', label: 'X', href: `https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(shareUrl)}` },
-      { key: 'kakao', label: '카카오스토리', href: `https://story.kakao.com/share?url=${enc(shareUrl)}` },
-    ];
     const frag = document.createDocumentFragment();
 
     // 네이티브 공유 (모바일) — navigator.share 지원 시 우선 노출
@@ -1188,15 +1189,6 @@
       });
       frag.appendChild(nativeBtn);
     }
-    links.forEach((l) => {
-      const a = document.createElement('a');
-      a.className = 'share-channel';
-      a.href = l.href;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = l.label;
-      frag.appendChild(a);
-    });
     shareBar.appendChild(frag);
   }
 

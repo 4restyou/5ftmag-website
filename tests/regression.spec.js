@@ -442,19 +442,41 @@ test('필름스트립 저장 캔버스는 줄 사이에 흰 간격을 둔다', a
 test('공유 링크는 파일 확장자와 query 대신 짧은 경로를 사용한다', async ({ page }) => {
   await page.goto('/');
   const urls = await page.evaluate(() => ({
-    origin: location.origin,
     story: window.prettyShareUrl(`${location.origin}/stories/film-flea-market-s6.html`),
     film: window.prettyShareUrl(`${location.origin}/films.html?film=portra400`),
     camera: window.prettyShareUrl(`${location.origin}/films.html?camera=Leica%20M6`),
     contributor: window.prettyShareUrl(`${location.origin}/films.html?contributor=__botong`),
     market: window.prettyShareUrl(`${location.origin}/market.html?id=abc-123`),
+    netlify: window.prettyShareUrl('https://deploy-preview-12--5ftmag.netlify.app/stories/01.html'),
   }));
 
-  expect(urls.story).toBe(`${urls.origin}/stories/film-flea-market-s6`);
-  expect(urls.film).toBe(`${urls.origin}/film/portra400`);
-  expect(urls.camera).toBe(`${urls.origin}/camera/Leica%20M6`);
-  expect(urls.contributor).toBe(`${urls.origin}/contributor/__botong`);
-  expect(urls.market).toBe(`${urls.origin}/market/abc-123`);
+  expect(urls.story).toBe('https://5ftmag.com/stories/film-flea-market-s6');
+  expect(urls.film).toBe('https://5ftmag.com/film/portra400');
+  expect(urls.camera).toBe('https://5ftmag.com/camera/Leica%20M6');
+  expect(urls.contributor).toBe('https://5ftmag.com/contributor/__botong');
+  expect(urls.market).toBe('https://5ftmag.com/market/abc-123');
+  expect(urls.netlify).toBe('https://5ftmag.com/stories/01');
+});
+
+test('글 공유 영역은 X와 카카오스토리 없이 정돈된 버튼만 보여준다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.MagDB = {
+      isReady: () => true,
+      auth: { getSession: async () => null, onChange: () => {} },
+      favorites: { idsForType: async () => new Set(), toggle: async () => ({ error: null }) },
+    };
+  });
+  await page.goto('/stories/spc-issue03.html');
+  const labels = await page.locator('.share-bar a, .share-bar button').evaluateAll((els) => els.map((el) => el.textContent.trim()));
+  expect(labels).toContain('스크랩');
+  expect(labels).toContain('링크 복사');
+  expect(labels).toContain('Instagram ↗');
+  expect(labels).not.toContain('X');
+  expect(labels).not.toContain('카카오스토리');
 });
 
 test('Webzine 책장 인터랙션은 책을 열고 이동 상태를 정리한다', async ({ page }) => {

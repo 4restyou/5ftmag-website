@@ -313,7 +313,8 @@
     setLikeBtn(btn, !on);
   }
   async function share(it) {
-    const url = `${location.origin}/webzine.html?issue=${encodeURIComponent(it.slug)}`;
+    const path = `/webzine.html?issue=${encodeURIComponent(it.slug)}`;
+    const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     const data = { title: `5ft.mag — ${it.title}`, text: it.title, url };
     if (navigator.share) { try { await navigator.share(data); } catch (_) {} return; }
     try { await navigator.clipboard.writeText(url); window.notify?.('링크를 복사했어요.', 'success'); }

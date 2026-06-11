@@ -727,7 +727,7 @@
     if (!slug) return;
     const u = new URL(location.href);
     u.searchParams.set('lab', slug);
-    const url = u.toString();
+    const url = window.prettyShareUrl ? window.prettyShareUrl(u.toString()) : u.toString();
     try {
       await navigator.clipboard.writeText(url);
       showLabsToast('링크가 복사됐어요');

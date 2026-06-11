@@ -45,7 +45,8 @@
   }
 
   async function shareFilm(filmKey, film) {
-    const url = `${window.location.origin}${prettyFilmPath(filmKey)}`;
+    const path = prettyFilmPath(filmKey);
+    const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     const filmName = film?.displayName || film?.name || filmKey;
     await shareOrCopy({
       title: `${filmName} · 5ft.mag Films`,
@@ -56,7 +57,8 @@
 
   async function shareCamera(key, info) {
     if (!info) return;
-    const url = `${window.location.origin}${prettyCameraPath(key)}`;
+    const path = prettyCameraPath(key);
+    const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     await shareOrCopy({
       title: `${info.display} · 5ft.mag Films`,
       text: `5ft.mag 에서 ${info.display} 으로 찍은 사진 보기`,
