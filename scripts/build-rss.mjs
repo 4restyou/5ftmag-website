@@ -24,6 +24,23 @@ function rfc822(isoDate) {
   return d.toUTCString();
 }
 
+function spcIssueNumber(story) {
+  const hay = `${story.issue || ''} ${story.title || ''}`;
+  const match = hay.match(/(?:ISSUE\.?|#)\s*0?(\d+)/i);
+  return /street photography club/i.test(String(story.author || '')) && match
+    ? Number(match[1])
+    : null;
+}
+
+function compareStories(a, b) {
+  const dateDiff = (b.date || '').localeCompare(a.date || '');
+  if (dateDiff) return dateDiff;
+  const aSpc = spcIssueNumber(a);
+  const bSpc = spcIssueNumber(b);
+  if (aSpc != null && bSpc != null) return aSpc - bSpc;
+  return 0;
+}
+
 async function main() {
   const storiesPath = path.join(ROOT, 'data/stories.json');
   const text = await fs.readFile(storiesPath, 'utf-8');
@@ -32,7 +49,7 @@ async function main() {
   // 게시된 글만, 날짜 내림차순
   const items = stories
     .filter(s => s.published !== false)
-    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    .sort(compareStories);
 
   const buildDate = new Date().toUTCString();
   const itemsXml = items.map(s => `    <item>

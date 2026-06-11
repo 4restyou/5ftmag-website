@@ -32,6 +32,23 @@
     return dateStr.replace(/-/g, '.');
   }
 
+  function spcIssueNumber(story) {
+    const hay = `${story.issue || ''} ${story.title || ''}`;
+    const match = hay.match(/(?:ISSUE\.?|#)\s*0?(\d+)/i);
+    return /street photography club/i.test(String(story.author || '')) && match
+      ? Number(match[1])
+      : null;
+  }
+
+  function compareStories(a, b) {
+    const dateDiff = new Date(b.date) - new Date(a.date);
+    if (dateDiff) return dateDiff;
+    const aSpc = spcIssueNumber(a);
+    const bSpc = spcIssueNumber(b);
+    if (aSpc != null && bSpc != null) return aSpc - bSpc;
+    return 0;
+  }
+
   // 카테고리 라벨 생성 (PHOTO · 박순렬 형태)
   function categoryLabel(story) {
     const label = story.categoryLabel || story.category.toUpperCase();
@@ -272,7 +289,7 @@
       // 발행된 글만, 최신순 정렬
       allStories = data
         .filter(s => s.published !== false)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+        .sort(compareStories);
       populateMonths();
       applyFilters();
       // 스크랩 상태는 DB 준비 후 비동기로 — 카드 렌더 막지 않음

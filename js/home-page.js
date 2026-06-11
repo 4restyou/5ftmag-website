@@ -23,6 +23,23 @@
   const storyList = document.getElementById('storyList');
   const isMobileHome = () => window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
 
+  function spcIssueNumber(story) {
+    const hay = `${story.issue || ''} ${story.title || ''}`;
+    const match = hay.match(/(?:ISSUE\.?|#)\s*0?(\d+)/i);
+    return /street photography club/i.test(String(story.author || '')) && match
+      ? Number(match[1])
+      : null;
+  }
+
+  function compareStories(a, b) {
+    const dateDiff = new Date(b.date) - new Date(a.date);
+    if (dateDiff) return dateDiff;
+    const aSpc = spcIssueNumber(a);
+    const bSpc = spcIssueNumber(b);
+    if (aSpc != null && bSpc != null) return aSpc - bSpc;
+    return 0;
+  }
+
   if (storyList) {
     fetch('data/stories.json')
       .then(res => res.json())
@@ -30,7 +47,7 @@
         // 발행된 글만, 최신순
         const all = data
           .filter(s => s.published !== false)
-          .sort((a, b) => new Date(b.date) - new Date(a.date));
+          .sort(compareStories);
         // 데스크톱은 최신 10장. 모바일은 발행이 느려도 풍성하게 보이도록 최신 3장 +
         // 그 이전 글 중 랜덤 5장을 섞어, 재방문 때마다 묻혀 있던 글이 다시 노출되게 한다.
         let stories;
@@ -137,7 +154,7 @@
         // 발행된 소식만, 최신순, 최대 4개
         const news = data
           .filter(n => n.published !== false)
-          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .sort(compareStories)
           .slice(0, 4);
 
         if (news.length === 0) {
@@ -747,4 +764,3 @@
       }
     }, { passive: true });
   }
-
