@@ -220,6 +220,40 @@
   height: 440px;
   background: var(--surface, var(--bg));
 }
+/* 내 위치 보기 버튼 — 지도 우하단 플로팅. 지도 타일 위라 토큰 대신 고정 흰 배경(다크 모드에서도 지도는 밝음). */
+.labs-my-btn {
+  position: absolute; right: 12px; bottom: 12px; z-index: 10;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; color: #111; border: 1px solid rgba(0, 0, 0, .18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+  cursor: pointer; transition: color .15s, border-color .15s, opacity .15s;
+}
+.labs-my-btn:hover { border-color: #111; }
+.labs-my-btn.is-loading { cursor: progress; opacity: .55; }
+.labs-my-btn.is-loading svg { animation: labsMySpin 1.1s linear infinite; }
+@keyframes labsMySpin { to { transform: rotate(360deg); } }
+/* 내 위치 점 — 파란 점 + 펄스 링. transform/opacity 만 사용. */
+.labs-my-dot { position: relative; display: block; width: 14px; height: 14px; }
+.labs-my-dot::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: #2a6df4; border: 2.5px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .35);
+}
+.labs-my-dot::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: rgba(42, 109, 244, .35);
+  animation: labsMyPulse 2.2s ease-out infinite;
+}
+@keyframes labsMyPulse {
+  0% { transform: scale(1); opacity: .8; }
+  70% { transform: scale(3); opacity: 0; }
+  100% { transform: scale(3); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .labs-my-dot::after { animation: none; opacity: 0; }
+  .labs-my-btn.is-loading svg { animation: none; }
+}
 .labs-map-info {
   display: flex;
   flex-direction: column;

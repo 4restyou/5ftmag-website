@@ -382,6 +382,50 @@
     });
     infoWindow = new naver.maps.InfoWindow({ borderWidth: 1, borderColor: '#111', anchorSize: new naver.maps.Size(10, 10) });
     mapReady = true;
+    setupMyLocation();
+  }
+
+  // ── 내 위치 보기 ──
+  // 브라우저 geolocation 으로 현재 좌표를 받아 지도를 이동하고 파란 점을 찍는다.
+  let myLocationMarker = null;
+  function setupMyLocation() {
+    const btn = document.getElementById('labsMyLocation');
+    if (!btn) return;
+    if (!('geolocation' in navigator)) return;   // 미지원 브라우저는 버튼을 노출하지 않음
+    btn.hidden = false;
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('is-loading')) return;
+      btn.classList.add('is-loading');
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          btn.classList.remove('is-loading');
+          const here = new naver.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+          if (myLocationMarker) {
+            myLocationMarker.setPosition(here);
+          } else {
+            myLocationMarker = new naver.maps.Marker({
+              map,
+              position: here,
+              icon: {
+                content: '<span class="labs-my-dot" aria-hidden="true"></span>',
+                anchor: new naver.maps.Point(7, 7),
+              },
+              zIndex: 200,
+            });
+          }
+          // morph: 중심 이동 + 줌을 한 동작으로 부드럽게
+          map.morph(here, Math.max(map.getZoom(), 13));
+        },
+        (err) => {
+          btn.classList.remove('is-loading');
+          const msg = err && err.code === 1
+            ? '위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해 주세요.'
+            : '현재 위치를 가져오지 못했어요. 잠시 후 다시 시도해 주세요.';
+          window.notify ? window.notify(msg, 'info') : alert(msg);
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    });
   }
 
   function infoContent(item) {

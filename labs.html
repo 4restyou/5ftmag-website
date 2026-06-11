@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
   <link rel="stylesheet" href="./css/common.css?v=20260609-states">
-  <link rel="stylesheet" href="./css/labs.css?v=20260609-meta">
+  <link rel="stylesheet" href="./css/labs.css?v=20260611-mylocation">
   <style>
     .labs-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 20px 40px 0; }
     .labs-region-divider { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 18px 0 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em; color: var(--text); }
@@ -123,6 +123,13 @@
 <div class="labs-map-section" id="labsMapSection" hidden>
   <div class="labs-map-wrap">
     <div id="labsMap" class="labs-map" role="application" aria-label="현상소 위치 지도"></div>
+    <button type="button" class="labs-my-btn" id="labsMyLocation" aria-label="내 위치 보기" title="내 위치 보기" hidden>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="6.5"/>
+        <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>
+        <path d="M12 2.2v3M12 18.8v3M2.2 12h3M18.8 12h3"/>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -188,6 +195,6 @@
   };
 </script>
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=uu78cn9rbi&submodules=geocoder" referrerpolicy="origin" defer></script>
-<script src="./js/labs-page.js?v=20260609-meta" defer></script>
+<script src="./js/labs-page.js?v=20260611-mylocation" defer></script>
 </body>
 </html>
