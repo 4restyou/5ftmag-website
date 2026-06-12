@@ -1,5 +1,19 @@
 [
   {
+    "id": "ilford-football",
+    "title": "골문 앞의 ISO 400, 일포드 풋볼 에디션",
+    "category": "essay",
+    "categoryLabel": "FILM",
+    "author": "5ft.mag 편집부",
+    "date": "2026-06-11",
+    "issue": "",
+    "thumbnail": "img/stories/ilford-football/hero.webp",
+    "excerpt": "월드컵 개막에 맞춰 일포드가 HP5 Plus 와 XP2 Super 풋볼 컬렉터스 에디션을 내놨다. 유제는 그대로, 상자에 Expired Film Club 의 흑백 축구 사진이 입혀졌다.",
+    "page": "stories/ilford-football.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "nishijima",
     "title": "세 발짝의 거리, 아츠시 니시지마",
     "category": "essay",
