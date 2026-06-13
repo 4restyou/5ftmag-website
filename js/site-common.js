@@ -1362,9 +1362,72 @@
   }
 
 
+  // ── PWA service worker 등록 + "PC 화면으로 보기" 토글 ──
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+    navigator.serviceWorker.register('/js/sw.js').catch(err => console.warn('[sw]', err.message));
+  }
+
+  const FORCE_DESKTOP_KEY = '5ft-force-desktop';
+  function isForceDesktop() {
+    try { return localStorage.getItem(FORCE_DESKTOP_KEY) === '1'; } catch { return false; }
+  }
+  function setForceDesktop(on) {
+    try {
+      if (on) localStorage.setItem(FORCE_DESKTOP_KEY, '1');
+      else localStorage.removeItem(FORCE_DESKTOP_KEY);
+    } catch {}
+    // viewport 변경 — PC 화면 시뮬레이션은 viewport scale 만으로는 한계가 있으나
+    // 모바일 분기 (window.MagMobile) 가 이 플래그 보고 모바일 홈 렌더 안 함.
+    document.documentElement.classList.toggle('force-desktop', on);
+    if (on) {
+      // 1100 정도면 데스크탑 레이아웃 거의 다 발동
+      const meta = document.querySelector('meta[name=viewport]');
+      if (meta) meta.setAttribute('content', 'width=1100');
+    } else {
+      const meta = document.querySelector('meta[name=viewport]');
+      if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+    }
+  }
+  // 최초 로드 시 저장된 설정 적용
+  if (isForceDesktop()) setForceDesktop(true);
+
+  // 햄버거 메뉴에 "PC 화면으로 보기" 토글 항목 추가
+  function injectDesktopToggle() {
+    const nav = document.getElementById('mobileNav');
+    if (!nav || nav.querySelector('[data-action="toggle-desktop"]')) return;
+    const a = document.createElement('button');
+    a.type = 'button';
+    a.dataset.action = 'toggle-desktop';
+    a.style.cssText = 'display:block; width:100%; text-align:left; background:none; border:none; padding:14px 20px; font:inherit; color:inherit; cursor:pointer; border-top:1px solid var(--border); margin-top:8px;';
+    a.textContent = isForceDesktop() ? '✓ PC 화면으로 보기' : '☐ PC 화면으로 보기';
+    a.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const next = !isForceDesktop();
+      setForceDesktop(next);
+      a.textContent = next ? '✓ PC 화면으로 보기' : '☐ PC 화면으로 보기';
+      // 모바일 nav 닫고 새로고침해서 레이아웃 다시 잡기
+      setTimeout(() => location.reload(), 120);
+    });
+    nav.appendChild(a);
+  }
+
+  window.MagPwa = {
+    isForceDesktop,
+    setForceDesktop,
+    FORCE_DESKTOP_KEY,
+  };
+
+  function bootPwa() {
+    registerServiceWorker();
+    injectDesktopToggle();
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => { init(); bootPwa(); });
   } else {
     init();
+    bootPwa();
   }
 })();

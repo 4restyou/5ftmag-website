@@ -1,0 +1,19 @@
+{
+  "name": "5ft magazine",
+  "short_name": "5ft.mag",
+  "description": "필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자, 사람과 공간의 이야기.",
+  "lang": "ko-KR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "/img/favicon/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/img/favicon/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/img/favicon/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/img/favicon/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "categories": ["magazines", "photography", "lifestyle"]
+}
