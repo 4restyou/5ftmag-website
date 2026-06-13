@@ -42,6 +42,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260609-states">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260602-iosfocus">
   <link rel="stylesheet" href="./css/home.css?v=20260609-cardtok">
+  <link rel="stylesheet" href="./css/mobile-home.css?v=20260613-mhome">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -94,6 +95,8 @@
   ]
 }
   </script>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
 </head>
 <body>
 
@@ -128,6 +131,23 @@
 </header>
 
 <h1 class="sr-only">5ft magazine — 필름 사진 매거진</h1>
+
+<!-- ════════ 모바일 전용 홈 (640px 이하 + PC 보기 토글 꺼짐) ════════ -->
+<main class="mh-root" id="mhRoot" role="main">
+  <div class="mh-controls">
+    <label class="mh-search">
+      <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input type="search" id="mhSearch" placeholder="필름 검색 (이름·브랜드)" aria-label="필름 검색" autocomplete="off" />
+    </label>
+    <div class="mh-filter" role="tablist" aria-label="필름 유형">
+      <button type="button" class="mh-chip is-active" data-cat="all" role="tab">전체</button>
+      <button type="button" class="mh-chip" data-cat="color" role="tab">컬러</button>
+      <button type="button" class="mh-chip" data-cat="bw" role="tab">흑백</button>
+      <button type="button" class="mh-chip" data-cat="slide" role="tab">슬라이드</button>
+    </div>
+  </div>
+  <div id="mhBody"></div>
+</main>
 
 <!-- ════════ SPLIT LAYOUT ════════ -->
 <div class="split-layout" role="main" id="main">
@@ -327,6 +347,7 @@
 <script src="./js/util.js?v=20260602-normalize" defer></script>
   <script src="./js/site-common.js?v=20260612-shareclean" defer></script>
 <script src="./js/home-page.js?v=20260612-spcnewest" defer></script>
+<script src="./js/mobile-home.js?v=20260613-mhome" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db-client.js?v=20260603-announce" defer></script>
 <!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->
