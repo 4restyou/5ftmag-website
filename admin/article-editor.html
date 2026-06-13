@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../css/tokens.css?v=20260613-editor">
   <link rel="stylesheet" href="../css/common.css?v=20260613-editor">
   <link rel="stylesheet" href="../css/admin-shell.css?v=20260613-editor">
-  <link rel="stylesheet" href="../css/article-editor.css?v=20260613-editor">
+  <link rel="stylesheet" href="../css/article-editor.css?v=20260613-mobile">
   <script src="../js/theme-init.js"></script>
   <style>
     body { background: var(--bg); color: var(--text); }
@@ -95,8 +95,9 @@
 <main id="app" class="ae-wrap" hidden>
 
   <!-- 좌측 메타 패널 -->
-  <aside class="ae-meta" aria-label="기사 메타">
-    <h2>메타 정보</h2>
+  <!-- 좌측 메타 패널 — 모바일에선 details 로 접힘, 데스크탑은 항상 펼침 -->
+  <details class="ae-meta" aria-label="기사 메타" open>
+    <summary><h2 style="margin:0;">메타 정보</h2></summary>
 
     <div class="ae-meta-row">
       <label for="meta-slug">URL slug</label>
@@ -171,7 +172,7 @@
       <label for="meta-excerpt">목록 요약 (excerpt)</label>
       <textarea id="meta-excerpt" placeholder="stories 목록에 노출되는 1~2줄 요약" maxlength="200"></textarea>
     </div>
-  </aside>
+  </details>
 
   <!-- 우측 에디터 -->
   <section class="ae-main">

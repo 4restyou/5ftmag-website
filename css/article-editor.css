@@ -2,7 +2,24 @@
    contenteditable 기반 vanilla 에디터. Pretendard + article.css 그대로 적용. */
 
 .ae-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
-@media (max-width: 960px) { .ae-wrap { grid-template-columns: 1fr; } }
+@media (max-width: 960px) {
+  .ae-wrap { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+  /* 모바일에선 본문 영역을 먼저 노출 (메타 패널이 길어서 본문이 화면 밖으로 밀리는 문제 해결) */
+  .ae-main { order: 1; }
+  .ae-meta { order: 2; position: static !important; }
+  /* 메타 패널을 details 로 접을 수 있게 */
+  .ae-meta summary { cursor: pointer; list-style: none; user-select: none; display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+  .ae-meta summary::-webkit-details-marker { display: none; }
+  .ae-meta summary::after { content: '▾'; font-size: 14px; color: var(--text-muted); transition: transform .2s; }
+  .ae-meta[open] summary::after { transform: rotate(180deg); }
+  .ae-editor { min-height: 50vh; padding: 18px 16px; font-size: 15px; }
+  .ae-toolbar { padding: 8px; gap: 2px; }
+  .ae-tb-btn { font-size: 12px; min-width: 30px; height: 30px; padding: 0 6px; }
+}
+@media (min-width: 961px) {
+  /* 데스크탑은 details 마커 숨김 (항상 펼침) */
+  .ae-meta > summary { display: none; }
+}
 
 /* 좌측 메타 패널 */
 .ae-meta { background: var(--bg-sub); border-radius: 6px; padding: 18px; align-self: start; position: sticky; top: 16px; }
