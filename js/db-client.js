@@ -1400,9 +1400,61 @@
     },
   };
 
+  // ── Article drafts (편집부 에디터 저장소) ──
+  const ARTICLE_MEDIA_BUCKET = 'article-media';
+  const articles = {
+    async listDrafts(limit = 50) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('article_drafts')
+        .select('id, slug, title, status, updated_at, hero_image, category_label')
+        .order('updated_at', { ascending: false })
+        .limit(limit);
+      if (error) { console.warn('[articles.listDrafts]', error.message); return []; }
+      return data || [];
+    },
+    async getDraft(idOrSlug) {
+      const c = client(); if (!c) return null;
+      const isUuid = /^[0-9a-f-]{36}$/i.test(idOrSlug);
+      const q = c.from('article_drafts').select('*');
+      const { data, error } = await (isUuid ? q.eq('id', idOrSlug) : q.eq('slug', idOrSlug)).maybeSingle();
+      if (error) { console.warn('[articles.getDraft]', error.message); return null; }
+      return data;
+    },
+    async upsertDraft(row) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const payload = { ...row };
+      if (!payload.created_by) {
+        try { payload.created_by = (await c.auth.getUser()).data?.user?.id || null; } catch (_) {}
+      }
+      const onConflict = payload.id ? undefined : 'slug';
+      const { data, error } = await c.from('article_drafts')
+        .upsert(payload, { onConflict })
+        .select('id, slug, updated_at')
+        .single();
+      if (error) return { error };
+      return { data };
+    },
+    async removeDraft(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { error } = await c.from('article_drafts').delete().eq('id', id);
+      return { error };
+    },
+    async uploadMedia(path, blob) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.storage.from(ARTICLE_MEDIA_BUCKET).upload(path, blob, {
+        cacheControl: '31536000', upsert: false, contentType: blob.type || 'application/octet-stream',
+      });
+    },
+    publicUrl(path) {
+      const c = client(); if (!c) return '';
+      const { data } = c.storage.from(ARTICLE_MEDIA_BUCKET).getPublicUrl(path);
+      return data?.publicUrl || '';
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles,
   };
 })();
