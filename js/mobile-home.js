@@ -52,7 +52,7 @@
     return `
       <section class="mh-new">
         <div class="mh-new-head">
-          <h2 class="mh-new-title">새 글 (최근 2주)</h2>
+          <h2 class="mh-new-title">새 글 · 최근 2주</h2>
           <a class="mh-new-more" href="/stories.html">전체 보기 →</a>
         </div>
         <div class="mh-new-strip">${cards}</div>
@@ -62,10 +62,11 @@
 
   // ── Films 처리 ──
   function filmThumb(f) {
-    // films-page.js 와 동일 규칙: photos[0] 또는 thumbnail
-    if (f.thumbnail) return f.thumbnail.startsWith('/') ? f.thumbnail : '/' + f.thumbnail.replace(/^\.\//, '');
-    if (Array.isArray(f.photos) && f.photos[0]?.image) return '/' + f.photos[0].image.replace(/^\.\//, '');
-    return '';
+    // films.json 의 실제 필드: canThumbnail (캔 모양 일러스트) > boxThumbnail (박스) > photos[0].src
+    const path = f.canThumbnail || f.boxThumbnail || (Array.isArray(f.photos) && f.photos[0]?.src) || '';
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return '/' + path.replace(/^\.\//, '').replace(/^\//, '');
   }
 
   function filmCardHtml(f) {

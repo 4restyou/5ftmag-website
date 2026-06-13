@@ -1,6 +1,11 @@
 /* 5ft.mag 모바일 전용 홈 — index.html 에서 모바일이고 PC 보기 토글 꺼진 경우에만 적용.
    films Library 중심 브랜드별 가로 row + 상단 신규 글 띠. */
 
+:root {
+  --mh-pad: 18px;            /* 좌우 기본 여백 */
+  --mh-section-gap: 8px;     /* row 사이 빈 줄 */
+}
+
 html.is-mobile-home body > main:not(.mh-root) { display: none; }
 html.is-mobile-home .intro,
 html.is-mobile-home .home-section,
@@ -12,61 +17,62 @@ html.is-mobile-home .links-section,
 html.is-mobile-home .connect-section { display: none !important; }
 
 .mh-root { display: none; }
-html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; }
+html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background: var(--bg); }
 
 /* 상단 검색·필터 */
-.mh-controls { position: sticky; top: var(--header-h, 60px); z-index: 30; background: var(--bg); padding: 10px 14px 8px; border-bottom: 1px solid var(--border); }
-.mh-search { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 999px; }
+.mh-controls { position: sticky; top: var(--header-h, 60px); z-index: 30; background: var(--bg); padding: 12px var(--mh-pad) 10px; border-bottom: 1px solid var(--border); }
+.mh-search { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-sub); }
 .mh-search svg { color: var(--text-muted); flex: 0 0 auto; }
-.mh-search input { flex: 1; border: 0; background: none; font: inherit; color: var(--text); outline: none; padding: 0; min-width: 0; }
-.mh-filter { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.mh-search input { flex: 1; border: 0; background: none; font: inherit; color: var(--text); outline: none; padding: 0; min-width: 0; font-size: 14px; }
+.mh-filter { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
 .mh-filter::-webkit-scrollbar { display: none; }
-.mh-chip { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; cursor: pointer; white-space: nowrap; flex: 0 0 auto; }
+.mh-chip { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 14px; background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; cursor: pointer; white-space: nowrap; flex: 0 0 auto; }
 .mh-chip.is-active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-/* 신규 글 띠 */
-.mh-new { padding: 14px 0 8px; border-bottom: 1px solid var(--border); }
-.mh-new-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 14px 8px; }
-.mh-new-title { font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text); margin: 0; }
+/* 신규 글 띠 — 살짝 다른 배경으로 시각적 구분 강화 */
+.mh-new { padding: 18px 0 6px; background: var(--bg-sub); }
+.mh-new-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 var(--mh-pad) 10px; }
+.mh-new-title { font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin: 0; }
 .mh-new-more { font-size: 12px; color: var(--text-muted); text-decoration: none; }
-.mh-new-strip { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 0 14px 8px; scroll-snap-type: x mandatory; }
+.mh-new-strip { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 18px; scroll-snap-type: x mandatory; }
 .mh-new-strip::-webkit-scrollbar { display: none; }
-.mh-new-card { flex: 0 0 75%; max-width: 270px; scroll-snap-align: start; text-decoration: none; color: var(--text); }
-.mh-new-card .mh-new-thumb { aspect-ratio: 16/10; background: var(--bg-sub); border-radius: 6px; overflow: hidden; margin-bottom: 6px; }
+.mh-new-card { flex: 0 0 78%; max-width: 280px; scroll-snap-align: start; text-decoration: none; color: var(--text); background: var(--bg); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.mh-new-card .mh-new-thumb { aspect-ratio: 16/10; background: var(--border); overflow: hidden; }
 .mh-new-card .mh-new-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mh-new-card .mh-new-meta { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px; }
-.mh-new-card .mh-new-headline { font-size: 14px; font-weight: var(--fw-heading); line-height: 1.35; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mh-new-card .mh-new-meta { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin: 12px 12px 4px; }
+.mh-new-card .mh-new-headline { font-size: 14px; font-weight: var(--fw-heading); line-height: 1.4; letter-spacing: -0.01em; margin: 0 12px 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-/* 브랜드별 row */
-.mh-brand { padding: 14px 0 4px; border-bottom: 1px solid var(--border); }
-.mh-brand-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 14px 8px; }
-.mh-brand-name { font-size: 14px; font-weight: var(--fw-heading); letter-spacing: -0.005em; margin: 0; }
+/* 브랜드별 row — 간격 늘리고 구분 명확하게 */
+.mh-brand { padding: 22px 0 18px; }
+.mh-brand + .mh-brand { border-top: 1px solid var(--border); }
+.mh-brand-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 var(--mh-pad) 12px; }
+.mh-brand-name { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.005em; margin: 0; }
 .mh-brand-count { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.mh-brand-strip { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 0 14px 12px; scroll-snap-type: x proximity; }
+.mh-brand-strip { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 4px; scroll-snap-type: x proximity; }
 .mh-brand-strip::-webkit-scrollbar { display: none; }
-.mh-card { flex: 0 0 110px; scroll-snap-align: start; text-decoration: none; color: var(--text); }
-.mh-card-thumb { width: 110px; height: 110px; background: var(--bg-sub); border-radius: 6px; overflow: hidden; margin-bottom: 6px; position: relative; }
-.mh-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mh-card-name { font-size: 12px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mh-card { flex: 0 0 124px; scroll-snap-align: start; text-decoration: none; color: var(--text); }
+.mh-card-thumb { width: 124px; height: 124px; background: var(--bg-sub); border-radius: 8px; overflow: hidden; margin-bottom: 8px; position: relative; }
+.mh-card-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 6px; box-sizing: border-box; }
+.mh-card-name { font-size: 12px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 0 2px; }
 
 /* 그 외 브랜드 그리드 */
-.mh-others { padding: 16px 14px 24px; border-bottom: 1px solid var(--border); }
-.mh-others-head { font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; margin: 0 0 4px; color: var(--text); }
-.mh-others-sub { font-size: 11px; color: var(--text-muted); margin: 0 0 12px; }
-.mh-others-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.mh-others { padding: 24px var(--mh-pad) 32px; border-top: 1px solid var(--border); background: var(--bg-sub); }
+.mh-others-head { font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 4px; color: var(--text); }
+.mh-others-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 14px; }
+.mh-others-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .mh-others-grid .mh-card { flex: none; }
-.mh-others-grid .mh-card-thumb { width: 100%; height: auto; aspect-ratio: 1; }
+.mh-others-grid .mh-card-thumb { width: 100%; height: auto; aspect-ratio: 1; background: var(--bg); }
 
 /* 검색 결과 그리드 (필터 활성 시) */
-.mh-search-grid { display: none; padding: 14px; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.mh-search-grid { display: none; padding: 18px var(--mh-pad); grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .mh-root.is-searching .mh-search-grid { display: grid; }
 .mh-root.is-searching .mh-brand,
 .mh-root.is-searching .mh-others,
 .mh-root.is-searching .mh-new { display: none; }
 .mh-search-grid .mh-card { flex: none; }
 .mh-search-grid .mh-card-thumb { width: 100%; height: auto; aspect-ratio: 1; }
-.mh-empty { padding: 40px 16px; text-align: center; color: var(--text-muted); font-size: 13px; }
+.mh-empty { padding: 60px var(--mh-pad); text-align: center; color: var(--text-muted); font-size: 13px; }
 
 /* PWA 설치 안내 토스트 */
-.mh-pwa-toast { position: fixed; left: 12px; right: 12px; bottom: 16px; z-index: 1000; background: var(--text); color: var(--bg); padding: 12px 16px; border-radius: 10px; font-size: 13px; line-height: 1.5; box-shadow: 0 8px 24px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 12px; }
-.mh-pwa-toast button { font: inherit; font-size: 12px; background: none; border: 1px solid currentColor; color: inherit; padding: 5px 10px; border-radius: 4px; cursor: pointer; flex: 0 0 auto; }
+.mh-pwa-toast { position: fixed; left: 12px; right: 12px; bottom: 16px; z-index: 1000; background: var(--text); color: var(--bg); padding: 14px 16px; border-radius: 12px; font-size: 13px; line-height: 1.5; box-shadow: 0 8px 24px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 12px; }
+.mh-pwa-toast button { font: inherit; font-size: 12px; background: none; border: 1px solid currentColor; color: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer; flex: 0 0 auto; }
