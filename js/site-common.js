@@ -1471,12 +1471,12 @@
     fab.dataset.action = 'open-submission';
     fab.setAttribute('aria-label', '사진 올리기');
     fab.style.cssText = [
-      'position:fixed', 'right:16px', 'bottom:calc(16px + env(safe-area-inset-bottom, 0px))',
+      'position:fixed', 'right:20px', 'bottom:calc(32px + env(safe-area-inset-bottom, 0px))',
       'z-index:900',
-      'width:56px', 'height:56px', 'border-radius:50%',
-      'border:none', 'background:#111', 'color:#fff', 'cursor:pointer',
+      'width:60px', 'height:60px', 'border-radius:50%',
+      'border:none', 'background:#ffd400', 'color:#111', 'cursor:pointer',
       'display:flex', 'align-items:center', 'justify-content:center',
-      'box-shadow:0 6px 20px rgba(0,0,0,0.28)',
+      'box-shadow:0 8px 24px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.15)',
       'transition:transform .15s, opacity .15s',
     ].join(';');
     fab.innerHTML = `
