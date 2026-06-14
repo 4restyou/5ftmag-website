@@ -4,7 +4,8 @@
 // VAPID 비밀키는 함수 시크릿(VAPID_PRIVATE_KEY) 으로 주입.
 
 // deno-lint-ignore-file no-explicit-any
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// 공급망 보안 — minor 가 아니라 정확한 버전 고정. 업데이트는 의도된 PR 로만.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 import webpush from 'https://esm.sh/web-push@3.6.7';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -58,6 +59,7 @@ Deno.serve(async (req) => {
   const message = JSON.stringify({ title, body, link, tag: link });
   let sent = 0;
   const stale: string[] = [];
+  const alive: string[] = [];
 
   await Promise.all(subs.map(async (s) => {
     try {
@@ -66,6 +68,7 @@ Deno.serve(async (req) => {
         keys: { p256dh: s.p256dh, auth: s.auth },
       }, message);
       sent += 1;
+      alive.push(s.endpoint);
     } catch (e: any) {
       // 404/410 = 구독 만료 → DB 에서 제거
       const status = e?.statusCode || 0;
@@ -75,6 +78,13 @@ Deno.serve(async (req) => {
 
   if (stale.length) {
     await admin.from('push_subscriptions').delete().in('endpoint', stale);
+  }
+  // 정상 발송된 endpoint 는 last_seen_at 갱신 — TTL purge 가 살아있는 구독을 잘못
+  // 정리하지 않게.
+  if (alive.length) {
+    await admin.from('push_subscriptions')
+      .update({ last_seen_at: new Date().toISOString() })
+      .in('endpoint', alive);
   }
 
   return jsonResp({ sent, total: subs.length, pruned: stale.length });
