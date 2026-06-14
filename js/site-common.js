@@ -1413,6 +1413,42 @@
     nav.appendChild(a);
   }
 
+  // PC 강제 모드일 때 우하단에 "모바일 화면으로" 플로팅 버튼 표시.
+  // 데스크탑 헤더에는 햄버거 메뉴가 숨겨져서 토글로 되돌릴 수 없는 문제 해결.
+  function injectMobileBackButton() {
+    if (!isForceDesktop()) return;
+    if (document.getElementById('mhBackToMobile')) return;
+    const btn = document.createElement('button');
+    btn.id = 'mhBackToMobile';
+    btn.type = 'button';
+    btn.textContent = '📱 모바일 화면으로';
+    btn.style.cssText = [
+      'position:fixed', 'right:16px', 'bottom:16px', 'z-index:9999',
+      'font:inherit', 'font-size:13px', 'font-weight:600',
+      'padding:10px 16px', 'border:1px solid #111', 'border-radius:999px',
+      'background:#fff', 'color:#111', 'cursor:pointer',
+      'box-shadow:0 4px 16px rgba(0,0,0,0.18)',
+    ].join(';');
+    btn.addEventListener('click', () => {
+      setForceDesktop(false);
+      location.reload();
+    });
+    document.body.appendChild(btn);
+  }
+
+  // URL 쿼리로도 해제 가능: ?mobile=1 진입 시 강제 해제 + 쿼리 정리
+  function handleMobileQuery() {
+    try {
+      const u = new URL(location.href);
+      if (u.searchParams.get('mobile') === '1' && isForceDesktop()) {
+        setForceDesktop(false);
+        u.searchParams.delete('mobile');
+        history.replaceState(null, '', u.toString());
+        location.reload();
+      }
+    } catch (_) {}
+  }
+
   window.MagPwa = {
     isForceDesktop,
     setForceDesktop,
@@ -1421,7 +1457,9 @@
 
   function bootPwa() {
     registerServiceWorker();
+    handleMobileQuery();
     injectDesktopToggle();
+    injectMobileBackButton();
   }
 
   if (document.readyState === 'loading') {
