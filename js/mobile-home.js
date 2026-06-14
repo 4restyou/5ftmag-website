@@ -371,7 +371,7 @@
         </div>
         ${f.desc ? `<p class="mh-sheet-desc">${esc(f.desc)}</p>` : ''}
         <div class="mh-sheet-photos" id="mhSheetPhotos" aria-busy="true">
-          ${Array.from({ length: 6 }).map(() => '<div class="mh-sheet-photo mh-sheet-photo-skeleton" aria-hidden="true"></div>').join('')}
+          ${Array.from({ length: 9 }).map(() => '<div class="mh-sheet-photo mh-sheet-photo-skeleton" aria-hidden="true"></div>').join('')}
         </div>
         <div class="mh-sheet-cta">
           <button type="button" class="mh-sheet-upload" data-action="open-submission" data-prefill-film="${escAttr(name)}">
@@ -434,7 +434,8 @@
     } catch (_) { rows = []; }
     if (!rows.length) { renderSheetEmpty(container, f); return; }
 
-    const picked = shuffleInPlace(rows.slice()).slice(0, 16);
+    // 9장(3x3) — 시트 한 화면에 CTA 까지 같이 보이는 분량
+    const picked = shuffleInPlace(rows.slice()).slice(0, 9);
     container.removeAttribute('aria-busy');
     container.innerHTML = picked.map((row, i) => `
       <button type="button" class="mh-sheet-photo" data-photo-index="${i}" aria-label="사진 ${i + 1} 크게 보기">
