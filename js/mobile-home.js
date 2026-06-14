@@ -460,9 +460,31 @@
   }
 
   // ─── 사진 라이트박스 (시트 내 사진 탭 시) ───
+  // 메인 사이트 라이트박스(home-page.js) 와 정보 layer 동일하게 구성:
+  //   촬영자 / 필름명 / 카메라 / 캡션 / 카운터 / ♡ / 공유 / 필름·촬영자 보기 링크
+  function submissionIdOf(row) {
+    return typeof row.id === 'string' ? row.id.replace(/^sub-/, '') : '';
+  }
+  function filmSlugByName(name) {
+    if (!name) return '';
+    const needle = String(name).toLowerCase().trim();
+    const hit = STATE.films.find(x =>
+      [x.name, x.displayName, ...(Array.isArray(x.aliases) ? x.aliases : [])]
+        .filter(Boolean).map(n => String(n).toLowerCase().trim()).includes(needle)
+    );
+    return hit ? (hit.slug || hit.id || '') : '';
+  }
+  function contributorKeyOf(row) {
+    return String(row.instagram || row.submitterName || row.author || '').trim().replace(/^@/, '').toLowerCase();
+  }
+
   function openSheetLightbox(rows, startIndex, f) {
     document.getElementById('mhSheetLb')?.remove();
     let cur = startIndex;
+    // 현재 사용자 즐겨찾기 ID 집합 (한 번 로드)
+    let favIds = new Set();
+    let favLoaded = false;
+
     const lb = document.createElement('div');
     lb.id = 'mhSheetLb';
     lb.className = 'mh-sheet-lb';
@@ -473,20 +495,149 @@
       <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-prev" aria-label="이전">‹</button>
       <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-next" aria-label="다음">›</button>
       <div class="mh-sheet-lb-stage"><img alt="" /></div>
-      <div class="mh-sheet-lb-meta"><span class="mh-sheet-lb-author"></span><span class="mh-sheet-lb-counter"></span></div>
+      <div class="mh-sheet-lb-info">
+        <div class="mh-sheet-lb-meta">
+          <span class="mh-sheet-lb-author"></span>
+          <a class="mh-sheet-lb-jump mh-sheet-lb-film"></a>
+          <a class="mh-sheet-lb-jump mh-sheet-lb-camera"></a>
+          <p class="mh-sheet-lb-note" hidden></p>
+          <span class="mh-sheet-lb-counter"></span>
+        </div>
+        <div class="mh-sheet-lb-actions">
+          <button type="button" class="mh-sheet-lb-fav" aria-pressed="false" aria-label="즐겨찾기 추가" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
+              <path stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
+            </svg>
+          </button>
+          <button type="button" class="mh-sheet-lb-share" aria-label="공유" hidden>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>
+            </svg>
+          </button>
+          <a class="mh-sheet-lb-link mh-sheet-lb-filmlink">필름 보기 →</a>
+          <a class="mh-sheet-lb-link mh-sheet-lb-contributor" hidden>촬영자 보기 →</a>
+        </div>
+      </div>
     `;
     document.body.appendChild(lb);
+
     const img = lb.querySelector('img');
     const authorEl = lb.querySelector('.mh-sheet-lb-author');
     const counterEl = lb.querySelector('.mh-sheet-lb-counter');
+    const filmEl = lb.querySelector('.mh-sheet-lb-film');
+    const cameraEl = lb.querySelector('.mh-sheet-lb-camera');
+    const noteEl = lb.querySelector('.mh-sheet-lb-note');
+    const favBtn = lb.querySelector('.mh-sheet-lb-fav');
+    const shareBtn = lb.querySelector('.mh-sheet-lb-share');
+    const filmLinkEl = lb.querySelector('.mh-sheet-lb-filmlink');
+    const contribLinkEl = lb.querySelector('.mh-sheet-lb-contributor');
+
+    if (typeof navigator.share === 'function') shareBtn.hidden = false;
+
+    async function ensureFavIds() {
+      if (favLoaded) return;
+      favLoaded = true;
+      try {
+        if (window.MagDB?.isReady?.() && window.MagDB.favorites?.idsForType) {
+          const sess = await window.MagDB.auth.getSession();
+          if (sess) favIds = await window.MagDB.favorites.idsForType('submission');
+        }
+      } catch (_) {}
+    }
+
     function render() {
       const r = rows[cur];
       img.src = r.image;
       authorEl.textContent = r.author || '';
+
+      const filmName = r.film || (f && (f.displayName || f.name)) || '';
+      const filmSlug = (f?.slug || f?.id) || filmSlugByName(filmName);
+      filmEl.textContent = filmName;
+      filmEl.hidden = !filmName;
+      filmEl.href = filmSlug ? `/films.html?film=${encodeURIComponent(filmSlug)}` : '/films.html';
+
+      cameraEl.textContent = r.camera || '';
+      cameraEl.hidden = !r.camera;
+      cameraEl.href = r.camera ? `/films.html?camera=${encodeURIComponent(r.camera)}` : '/films.html';
+
+      const note = (r.caption || '').trim();
+      noteEl.textContent = note;
+      noteEl.hidden = !note;
+
       counterEl.textContent = `${cur + 1} / ${rows.length}`;
       lb.querySelector('.mh-sheet-lb-prev').disabled = cur === 0;
       lb.querySelector('.mh-sheet-lb-next').disabled = cur === rows.length - 1;
+
+      filmLinkEl.href = filmSlug ? `/films.html?film=${encodeURIComponent(filmSlug)}` : '/films.html';
+
+      const contribKey = contributorKeyOf(r);
+      if (contribKey) {
+        const params = new URLSearchParams({ contributor: contribKey });
+        if (filmSlug) params.set('film', filmSlug);
+        contribLinkEl.href = `/films.html?${params.toString()}`;
+        contribLinkEl.hidden = false;
+      } else {
+        contribLinkEl.hidden = true;
+      }
+
+      // 즐겨찾기 — 로그인 + submission id 있을 때만
+      const subId = submissionIdOf(r);
+      if (!subId) {
+        favBtn.hidden = true;
+      } else {
+        favBtn.hidden = false;
+        favBtn.dataset.submissionId = subId;
+        const isFav = favIds.has(subId);
+        favBtn.classList.toggle('is-fav', isFav);
+        favBtn.setAttribute('aria-pressed', String(isFav));
+        favBtn.setAttribute('aria-label', isFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
+      }
     }
+
+    async function toggleFav() {
+      if (favBtn.hidden || favBtn.classList.contains('is-busy')) return;
+      const subId = favBtn.dataset.submissionId || '';
+      if (!subId) return;
+      if (!window.MagDB?.isReady?.()) { window.notify?.('잠시 후 다시 시도해주세요.', 'info'); return; }
+      const sess = await window.MagDB.auth.getSession();
+      if (!sess) {
+        if (!confirm('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return;
+        window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
+        return;
+      }
+      const wasFav = favIds.has(subId);
+      if (wasFav) favIds.delete(subId); else favIds.add(subId);
+      favBtn.classList.toggle('is-fav', !wasFav);
+      favBtn.setAttribute('aria-pressed', String(!wasFav));
+      favBtn.classList.add('is-busy');
+      const { error } = await window.MagDB.favorites.toggle('submission', subId, wasFav);
+      favBtn.classList.remove('is-busy');
+      if (error) {
+        if (wasFav) favIds.add(subId); else favIds.delete(subId);
+        favBtn.classList.toggle('is-fav', wasFav);
+        favBtn.setAttribute('aria-pressed', String(wasFav));
+        window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
+      }
+    }
+
+    async function shareCurrent() {
+      const r = rows[cur];
+      const filmName = r.film || (f && (f.displayName || f.name)) || '5ft magazine';
+      const filmSlug = (f?.slug || f?.id) || filmSlugByName(filmName);
+      const url = filmSlug
+        ? `https://5ftmag.com/films.html?film=${encodeURIComponent(filmSlug)}`
+        : 'https://5ftmag.com/';
+      const shareUrl = (typeof window.prettyShareUrl === 'function') ? window.prettyShareUrl(url) : url;
+      try { await navigator.share({ title: filmName, url: shareUrl }); } catch (_) {}
+    }
+
+    favBtn.addEventListener('click', toggleFav);
+    shareBtn.addEventListener('click', shareCurrent);
+
+    // 즐겨찾기 ID 로딩 후 한번 더 render (initial 은 favIds 비어있는 상태)
+    ensureFavIds().then(render);
     render();
     requestAnimationFrame(() => lb.classList.add('is-open'));
 
@@ -506,10 +657,9 @@
     lb.querySelector('.mh-sheet-lb-close').addEventListener('click', close);
     lb.querySelector('.mh-sheet-lb-prev').addEventListener('click', prev);
     lb.querySelector('.mh-sheet-lb-next').addEventListener('click', next);
-    lb.querySelector('.mh-sheet-lb-stage').addEventListener('click', (e) => {
-      // 사진 자체 탭 시 닫음
-      if (e.target.tagName === 'IMG' || e.currentTarget === e.target) close();
-    });
+    // 사진 자체 탭은 닫지 않음 (정보 패널과 사진을 같이 보고 싶을 수 있어서) —
+    // 닫기는 ✕ 버튼 / Esc / 배경 탭으로만.
+    lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
 
     // 스와이프 좌/우
     let touchStartX = 0;
