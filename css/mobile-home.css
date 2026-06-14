@@ -45,9 +45,14 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
 /* 브랜드별 row — 간격 늘리고 구분 명확하게 */
 .mh-brand { padding: 22px 0 18px; }
 .mh-brand + .mh-brand { border-top: 1px solid var(--border); }
-.mh-brand-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 var(--mh-pad) 12px; }
-.mh-brand-name { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.005em; margin: 0; }
-.mh-brand-count { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mh-brand-head { display: flex; align-items: center; gap: 10px; padding: 0 var(--mh-pad) 12px; }
+.mh-brand-name { font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.005em; margin: 0; flex: 0 0 auto; }
+.mh-brand-count { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; flex: 1; }
+.mh-brand-fav { flex: 0 0 auto; background: none; border: none; padding: 6px; margin: 0 -6px 0 0; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: color .15s, transform .15s, background .15s; }
+.mh-brand-fav:hover { background: var(--bg-sub); }
+.mh-brand-fav.is-on { color: #e0245e; }
+.mh-brand-fav.is-on:active { transform: scale(1.15); }
+.mh-brand.is-fav .mh-brand-name::before { content: '★ '; color: #e0245e; font-size: 12px; vertical-align: middle; }
 .mh-brand-strip { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 4px; scroll-snap-type: x proximity; }
 .mh-brand-strip::-webkit-scrollbar { display: none; }
 .mh-card { flex: 0 0 124px; scroll-snap-align: start; text-decoration: none; color: var(--text); }
