@@ -1449,6 +1449,48 @@
     } catch (_) {}
   }
 
+  // 모바일 사진 올리기 FAB — films·me·홈에서만 노출.
+  // data-action="open-submission" 클릭 위임은 reader-submissions.js 가 이미 처리.
+  // 로그인 안 한 사용자도 일단 모달 트리거 → 모달 내부에서 로그인 분기.
+  function shouldShowUploadFab() {
+    if (isForceDesktop()) return false;
+    if (!window.matchMedia || !window.matchMedia('(max-width: 640px)').matches) return false;
+    const path = location.pathname;
+    // 모바일 홈 (/) + films 만 — reader-submissions 의존성이 다 로드되는 페이지만 허용
+    if (path === '/' || path === '/index.html') return true;
+    if (/^\/films\.html$/.test(path)) return true;
+    return false;
+  }
+
+  function injectUploadFab() {
+    if (!shouldShowUploadFab()) return;
+    if (document.getElementById('mhUploadFab')) return;
+    const fab = document.createElement('button');
+    fab.id = 'mhUploadFab';
+    fab.type = 'button';
+    fab.dataset.action = 'open-submission';
+    fab.setAttribute('aria-label', '사진 올리기');
+    fab.style.cssText = [
+      'position:fixed', 'right:16px', 'bottom:calc(16px + env(safe-area-inset-bottom, 0px))',
+      'z-index:900',
+      'width:56px', 'height:56px', 'border-radius:50%',
+      'border:none', 'background:#111', 'color:#fff', 'cursor:pointer',
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'box-shadow:0 6px 20px rgba(0,0,0,0.28)',
+      'transition:transform .15s, opacity .15s',
+    ].join(';');
+    fab.innerHTML = `
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/>
+        <circle cx="12" cy="13" r="4"/>
+        <circle cx="18" cy="9" r="0.6" fill="currentColor" stroke="none"/>
+      </svg>
+    `;
+    fab.addEventListener('mouseenter', () => { fab.style.transform = 'scale(1.05)'; });
+    fab.addEventListener('mouseleave', () => { fab.style.transform = 'scale(1)'; });
+    document.body.appendChild(fab);
+  }
+
   window.MagPwa = {
     isForceDesktop,
     setForceDesktop,
@@ -1460,6 +1502,7 @@
     handleMobileQuery();
     injectDesktopToggle();
     injectMobileBackButton();
+    injectUploadFab();
   }
 
   if (document.readyState === 'loading') {
