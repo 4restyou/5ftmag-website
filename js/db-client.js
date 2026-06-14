@@ -1563,9 +1563,63 @@
     },
   };
 
+  // ─── 개인화 동기화 (최근 본 필름 + 좋아요 한 브랜드) ───
+  // 로그인 사용자만 동기. 비로그인은 클라이언트의 localStorage 만 사용.
+  const personalization = {
+    async listRecentFilms(limit = 20) {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      const { data, error } = await c.from('user_recent_films')
+        .select('film_slug, viewed_at')
+        .eq('user_id', uid)
+        .order('viewed_at', { ascending: false })
+        .limit(Math.max(1, Math.min(50, limit)));
+      if (error) return [];
+      return (data || []).map(r => ({ slug: r.film_slug, viewedAt: r.viewed_at }));
+    },
+    async pushRecentFilm(slug) {
+      const c = client(); if (!c) return { error: null };
+      const uid = await userId();
+      if (!uid) return { error: null };
+      const s = String(slug || '').trim();
+      if (!s) return { error: null };
+      return c.from('user_recent_films').upsert({
+        user_id: uid, film_slug: s, viewed_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,film_slug' });
+    },
+    async listFavBrands() {
+      const c = client(); if (!c) return [];
+      const uid = await userId();
+      if (!uid) return [];
+      const { data, error } = await c.from('user_fav_brands')
+        .select('brand').eq('user_id', uid);
+      if (error) return [];
+      return (data || []).map(r => r.brand);
+    },
+    async addFavBrand(brand) {
+      const c = client(); if (!c) return { error: null };
+      const uid = await userId();
+      if (!uid) return { error: null };
+      const b = String(brand || '').trim();
+      if (!b) return { error: null };
+      return c.from('user_fav_brands').upsert({
+        user_id: uid, brand: b,
+      }, { onConflict: 'user_id,brand' });
+    },
+    async removeFavBrand(brand) {
+      const c = client(); if (!c) return { error: null };
+      const uid = await userId();
+      if (!uid) return { error: null };
+      const b = String(brand || '').trim();
+      if (!b) return { error: null };
+      return c.from('user_fav_brands').delete().eq('user_id', uid).eq('brand', b);
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles,
   };
 })();

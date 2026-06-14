@@ -118,8 +118,14 @@
   }
   function toggleFavBrand(brand) {
     const set = getFavBrands();
-    if (set.has(brand)) set.delete(brand); else set.add(brand);
+    const wasFav = set.has(brand);
+    if (wasFav) set.delete(brand); else set.add(brand);
     try { localStorage.setItem(FAV_BRANDS_KEY, JSON.stringify([...set])); } catch {}
+    // 로그인 사용자라면 DB 도 동기화. 실패 무시.
+    try {
+      if (wasFav) window.MagDB?.personalization?.removeFavBrand?.(brand);
+      else window.MagDB?.personalization?.addFavBrand?.(brand);
+    } catch (_) {}
     return set;
   }
 
@@ -315,6 +321,8 @@
     const cur = getRecent().filter(s => s !== slug);
     cur.unshift(slug);
     try { localStorage.setItem(RECENT_KEY, JSON.stringify(cur.slice(0, RECENT_MAX))); } catch {}
+    // 로그인 사용자라면 DB 도 동기화 (디바이스 간 공유). 실패 무시.
+    try { window.MagDB?.personalization?.pushRecentFilm?.(slug); } catch (_) {}
   }
   function recentFilms() {
     const slugs = getRecent();
@@ -822,6 +830,33 @@
   }
 
   // ── 부팅 ──
+  // 로그인 사용자의 DB 개인화를 백그라운드로 가져와서 localStorage 와 merge.
+  // localStorage 가 즉시 반응에 쓰이고, DB 는 디바이스 간 sync 용.
+  async function hydrateFromDb() {
+    if (!window.MagDB?.isReady?.() || !window.MagDB.personalization) return;
+    try {
+      const sess = await window.MagDB.auth.getSession();
+      if (!sess) return;
+      const [dbRecents, dbBrands] = await Promise.all([
+        window.MagDB.personalization.listRecentFilms(RECENT_MAX),
+        window.MagDB.personalization.listFavBrands(),
+      ]);
+      // 최근 본 — DB 가 우선 (디바이스 간 가장 최신 활동을 보여주는 게 자연), localStorage 추가
+      if (Array.isArray(dbRecents) && dbRecents.length) {
+        const dbSlugs = dbRecents.map(r => r.slug);
+        const merged = [...new Set([...dbSlugs, ...getRecent()])].slice(0, RECENT_MAX);
+        try { localStorage.setItem(RECENT_KEY, JSON.stringify(merged)); } catch {}
+      }
+      // 좋아요한 브랜드 — DB 와 localStorage 합집합 (양쪽 다 보존)
+      if (Array.isArray(dbBrands) && dbBrands.length) {
+        const localSet = getFavBrands();
+        const merged = new Set([...dbBrands, ...localSet]);
+        try { localStorage.setItem(FAV_BRANDS_KEY, JSON.stringify([...merged])); } catch {}
+      }
+      render(); // merge 반영
+    } catch (_) {}
+  }
+
   (async function start() {
     bindControls();
     bindStickyShrink();
@@ -833,6 +868,8 @@
     const filmsObj = films && typeof films === 'object' ? films : {};
     STATE.films = Array.isArray(filmsObj) ? filmsObj : Object.entries(filmsObj).map(([slug, f]) => ({ slug, ...f }));
     render();
+    // 로그인 사용자라면 DB 개인화를 백그라운드로 hydrate
+    setTimeout(hydrateFromDb, 200);
     maybeShowOnboarding();
     setTimeout(maybeShowIosPwaPrompt, 1500);
   })();
