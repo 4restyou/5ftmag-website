@@ -15,6 +15,19 @@
   }
 
   if (!document.getElementById('mhRoot')) return;
+
+  // breakpoint 를 실제로 넘나들면 레이아웃 재초기화 (reload).
+  // 모바일 홈과 split-layout 은 DOM/JS 초기화가 완전히 달라 in-place 전환이
+  // 복잡해서, 경계를 넘는 순간에만 한 번 새로고침해 올바른 레이아웃으로 맞춘다.
+  // matchMedia change 는 경계를 넘을 때만 발화하므로 일반 resize 마다 돌지 않는다.
+  if (window.matchMedia) {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
+    const initialMobile = isMobile();
+    const onBreakpoint = () => { if (isMobile() !== initialMobile) location.reload(); };
+    if (mq.addEventListener) mq.addEventListener('change', onBreakpoint);
+    else if (mq.addListener) mq.addListener(onBreakpoint);
+  }
+
   if (!isMobile()) return;
 
   document.documentElement.classList.add('is-mobile-home');
@@ -191,9 +204,25 @@
   function escAttr(s) { return esc(s); }
 
   // ── 본체 렌더 ──
-  const STATE = { films: [], stories: [], query: '', category: 'all' };
+  // view: 'films' (브랜드별) | 'photos' (전체 사진 그리드)
+  const VIEW_KEY = '5ft-mh-view';
+  function getSavedView() {
+    try { return localStorage.getItem(VIEW_KEY) === 'photos' ? 'photos' : 'films'; }
+    catch { return 'films'; }
+  }
+  function saveView(v) {
+    try { localStorage.setItem(VIEW_KEY, v); } catch {}
+  }
+  const STATE = { films: [], stories: [], query: '', category: 'all', view: getSavedView() };
 
   function render() {
+    if (STATE.view === 'photos') {
+      root.querySelector('#mhBody').innerHTML = `<div id="mhPhotoGrid" class="mh-photo-grid" aria-busy="true">${
+        Array.from({ length: 12 }).map(() => '<div class="mh-photo-cell mh-photo-cell-skel"></div>').join('')
+      }</div>`;
+      loadPhotoGrid();
+      return;
+    }
     const newHtml = renderNewStories(STATE.stories);
     const libraryHtml = renderLibrary(STATE.films, STATE.query, STATE.category);
     root.querySelector('#mhBody').innerHTML = newHtml + libraryHtml;
@@ -202,6 +231,22 @@
   function bindControls() {
     const search = root.querySelector('#mhSearch');
     const chips = root.querySelectorAll('.mh-chip');
+    // 저장된 view 반영
+    root.querySelectorAll('.mh-view-btn').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.view === STATE.view);
+      b.setAttribute('aria-selected', String(b.dataset.view === STATE.view));
+    });
+    root.querySelectorAll('.mh-view-btn').forEach(btn => btn.addEventListener('click', () => {
+      const v = btn.dataset.view;
+      if (v === STATE.view) return;
+      STATE.view = v;
+      saveView(v);
+      root.querySelectorAll('.mh-view-btn').forEach(b => {
+        b.classList.toggle('is-active', b === btn);
+        b.setAttribute('aria-selected', String(b === btn));
+      });
+      render();
+    }));
     search.addEventListener('input', () => { STATE.query = search.value; render(); });
     chips.forEach(c => c.addEventListener('click', () => {
       chips.forEach(x => x.classList.remove('is-active'));
@@ -538,6 +583,71 @@
       toast.remove();
     });
     document.body.appendChild(toast);
+  }
+
+  // ─── "사진으로 보기" 모드 ───
+  // 전체 독자 사진 최근순 그리드. 카테고리 필터 + 검색은 그대로 적용
+  // (검색은 사진의 film 이름으로 매칭).
+  let _photoCache = null;
+  async function loadPhotoGrid() {
+    const grid = root.querySelector('#mhPhotoGrid');
+    if (!grid) return;
+    // MagDB 준비 대기
+    let api = null;
+    for (let i = 0; i < 50; i++) {
+      if (window.MagDB?.isReady?.() && window.MagDB.submissions?.listApproved) {
+        api = window.MagDB.submissions; break;
+      }
+      await new Promise(r => setTimeout(r, 80));
+    }
+    if (!api) { grid.innerHTML = '<div class="mh-empty"><p>사진을 불러오지 못했어요.</p></div>'; return; }
+    if (!_photoCache) {
+      try { _photoCache = await api.listApproved(180); }
+      catch { _photoCache = []; }
+    }
+    renderPhotoGrid(_photoCache, grid);
+  }
+
+  // 사진을 STATE.films 의 카테고리 분류와 매칭 (브랜드/이름 정규화 후 동일성 체크)
+  function photoMatchesCategory(row, category) {
+    if (category === 'all') return true;
+    const filmName = String(row.film || '').toLowerCase().trim();
+    if (!filmName) return false;
+    const f = STATE.films.find(x =>
+      [x.name, x.displayName, ...(Array.isArray(x.aliases) ? x.aliases : [])]
+        .filter(Boolean).map(n => String(n).toLowerCase().trim()).includes(filmName)
+    );
+    if (!f) return false;
+    const t = String(f.type || '').toLowerCase();
+    if (category === 'color') return t.includes('color');
+    if (category === 'bw') return t.includes('black') || t.includes('bw') || t.includes('mono');
+    if (category === 'slide') return t.includes('slide') || t.includes('e-6') || t.includes('reversal');
+    if (category === 'cinema') return t.includes('tungsten') || t.includes('daylight') || t.includes('cinema');
+    return true;
+  }
+  function photoMatchesQuery(row, q) {
+    if (!q) return true;
+    const needle = q.trim().toLowerCase();
+    if (!needle) return true;
+    return String(row.film || '').toLowerCase().includes(needle);
+  }
+  function renderPhotoGrid(rows, grid) {
+    const filtered = rows.filter(r => photoMatchesCategory(r, STATE.category) && photoMatchesQuery(r, STATE.query));
+    grid.removeAttribute('aria-busy');
+    if (!filtered.length) {
+      grid.outerHTML = '<div class="mh-empty"><p>조건에 맞는 사진이 없어요.</p></div>';
+      return;
+    }
+    grid.innerHTML = filtered.map((r, i) => `
+      <button type="button" class="mh-photo-cell" data-photo-index="${i}" aria-label="${esc(r.film || '사진')} ${i + 1} 크게 보기">
+        <img src="${esc(r.image)}" alt="" loading="lazy" />
+      </button>
+    `).join('');
+    grid.addEventListener('click', (e) => {
+      const cell = e.target.closest('[data-photo-index]');
+      if (!cell) return;
+      openSheetLightbox(filtered, Number(cell.dataset.photoIndex), null);
+    });
   }
 
   // ── 부팅 ──
