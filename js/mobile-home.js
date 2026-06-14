@@ -289,12 +289,14 @@
   }
 
   // ─── 필름 상세 시트 (모달, 카드 탭 시 열림) ───
+  // 사진은 reader_submissions 에서 해당 필름으로 등록된 것 중 최근 N장에서 랜덤 16장.
+  // 사진 탭 → 인라인 라이트박스 (큰 화면 + swipe).
+  // CTA 둘: "사진 올리기" (yellow primary) + "전체 페이지에서 보기" (outline).
   function openFilmSheet(slug) {
     const f = STATE.films.find(x => (x.slug || x.id) === slug);
     if (!f) return;
     pushRecent(slug);
 
-    // 기존 시트 있으면 제거
     document.getElementById('mhSheet')?.remove();
 
     const name = f.displayName || f.name || '';
@@ -304,11 +306,6 @@
       f.type ? esc(f.type) : '',
       f.format ? esc(f.format) : '',
     ].filter(Boolean).join(' · ');
-    const photosHtml = Array.isArray(f.photos) && f.photos.length
-      ? `<div class="mh-sheet-photos">${f.photos.slice(0, 6).map(p => {
-          const src = p.src ? ('/' + String(p.src).replace(/^\.?\//, '')) : '';
-          return src ? `<div class="mh-sheet-photo"><img src="${escAttr(src)}" alt="" loading="lazy" /></div>` : '';
-        }).join('')}</div>` : '';
 
     const wrap = document.createElement('div');
     wrap.id = 'mhSheet';
@@ -328,12 +325,19 @@
           </div>
         </div>
         ${f.desc ? `<p class="mh-sheet-desc">${esc(f.desc)}</p>` : ''}
-        ${photosHtml}
-        <a class="mh-sheet-go" href="/films.html?film=${encodeURIComponent(slug)}">전체 페이지에서 보기 →</a>
+        <div class="mh-sheet-photos" id="mhSheetPhotos" aria-busy="true">
+          ${Array.from({ length: 6 }).map(() => '<div class="mh-sheet-photo mh-sheet-photo-skeleton" aria-hidden="true"></div>').join('')}
+        </div>
+        <div class="mh-sheet-cta">
+          <button type="button" class="mh-sheet-upload" data-action="open-submission" data-prefill-film="${escAttr(name)}">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            사진 올리기
+          </button>
+          <a class="mh-sheet-go" href="/films.html?film=${encodeURIComponent(slug)}">전체 페이지에서 보기 →</a>
+        </div>
       </div>
     `;
 
-    // 닫기 — backdrop / grip / Escape
     const close = () => {
       wrap.classList.add('is-leaving');
       setTimeout(() => { wrap.remove(); document.documentElement.classList.remove('mh-sheet-open'); }, 220);
@@ -344,11 +348,132 @@
     wrap.querySelector('.mh-sheet-grip').addEventListener('click', close);
     window.addEventListener('keydown', onKey);
 
-    // 아래에서 위로 올라오는 슬라이드
     document.documentElement.classList.add('mh-sheet-open');
     document.body.appendChild(wrap);
     requestAnimationFrame(() => wrap.classList.add('is-open'));
     try { navigator.vibrate?.(8); } catch {}
+
+    // 사진 비동기 로드
+    loadSheetPhotos(f, wrap.querySelector('#mhSheetPhotos'));
+  }
+
+  // ─── 시트 사진 로드 (reader_submissions, 랜덤 16장) ───
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+  function filmAliasList(f) {
+    const names = new Set();
+    [f.name, f.displayName, ...(Array.isArray(f.aliases) ? f.aliases : [])]
+      .filter(Boolean).forEach(n => names.add(String(n)));
+    return [...names];
+  }
+  async function loadSheetPhotos(f, container) {
+    if (!container) return;
+    // MagDB 준비 대기 (안 떠 있을 수 있음)
+    let api = null;
+    for (let i = 0; i < 50; i++) {
+      if (window.MagDB?.isReady?.() && window.MagDB.submissions?.listApprovedByFilms) {
+        api = window.MagDB.submissions; break;
+      }
+      await new Promise(r => setTimeout(r, 80));
+    }
+    if (!api) { renderSheetEmpty(container, f); return; }
+
+    let rows = [];
+    try {
+      rows = await api.listApprovedByFilms(filmAliasList(f), { from: 0, to: 99, ascending: false });
+    } catch (_) { rows = []; }
+    if (!rows.length) { renderSheetEmpty(container, f); return; }
+
+    const picked = shuffleInPlace(rows.slice()).slice(0, 16);
+    container.removeAttribute('aria-busy');
+    container.innerHTML = picked.map((row, i) => `
+      <button type="button" class="mh-sheet-photo" data-photo-index="${i}" aria-label="사진 ${i + 1} 크게 보기">
+        <img src="${escAttr(row.image)}" alt="" loading="lazy" />
+      </button>
+    `).join('');
+    container.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-photo-index]');
+      if (!btn) return;
+      const idx = Number(btn.dataset.photoIndex);
+      openSheetLightbox(picked, idx, f);
+    });
+  }
+  function renderSheetEmpty(container, f) {
+    container.removeAttribute('aria-busy');
+    const name = f.displayName || f.name || '';
+    container.outerHTML = `
+      <div class="mh-sheet-empty">
+        <p>이 필름으로 올라온 사진이 아직 없어요.</p>
+        <button type="button" class="mh-sheet-empty-btn" data-action="open-submission" data-prefill-film="${escAttr(name)}">처음으로 올려보기</button>
+      </div>`;
+  }
+
+  // ─── 사진 라이트박스 (시트 내 사진 탭 시) ───
+  function openSheetLightbox(rows, startIndex, f) {
+    document.getElementById('mhSheetLb')?.remove();
+    let cur = startIndex;
+    const lb = document.createElement('div');
+    lb.id = 'mhSheetLb';
+    lb.className = 'mh-sheet-lb';
+    lb.setAttribute('role', 'dialog');
+    lb.setAttribute('aria-modal', 'true');
+    lb.innerHTML = `
+      <button type="button" class="mh-sheet-lb-close" aria-label="닫기">✕</button>
+      <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-prev" aria-label="이전">‹</button>
+      <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-next" aria-label="다음">›</button>
+      <div class="mh-sheet-lb-stage"><img alt="" /></div>
+      <div class="mh-sheet-lb-meta"><span class="mh-sheet-lb-author"></span><span class="mh-sheet-lb-counter"></span></div>
+    `;
+    document.body.appendChild(lb);
+    const img = lb.querySelector('img');
+    const authorEl = lb.querySelector('.mh-sheet-lb-author');
+    const counterEl = lb.querySelector('.mh-sheet-lb-counter');
+    function render() {
+      const r = rows[cur];
+      img.src = r.image;
+      authorEl.textContent = r.author || '';
+      counterEl.textContent = `${cur + 1} / ${rows.length}`;
+      lb.querySelector('.mh-sheet-lb-prev').disabled = cur === 0;
+      lb.querySelector('.mh-sheet-lb-next').disabled = cur === rows.length - 1;
+    }
+    render();
+    requestAnimationFrame(() => lb.classList.add('is-open'));
+
+    const close = () => {
+      lb.classList.remove('is-open');
+      setTimeout(() => lb.remove(), 180);
+      window.removeEventListener('keydown', onKey);
+    };
+    const prev = () => { if (cur > 0) { cur -= 1; render(); } };
+    const next = () => { if (cur < rows.length - 1) { cur += 1; render(); } };
+    const onKey = (e) => {
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') prev();
+      else if (e.key === 'ArrowRight') next();
+    };
+    window.addEventListener('keydown', onKey);
+    lb.querySelector('.mh-sheet-lb-close').addEventListener('click', close);
+    lb.querySelector('.mh-sheet-lb-prev').addEventListener('click', prev);
+    lb.querySelector('.mh-sheet-lb-next').addEventListener('click', next);
+    lb.querySelector('.mh-sheet-lb-stage').addEventListener('click', (e) => {
+      // 사진 자체 탭 시 닫음
+      if (e.target.tagName === 'IMG' || e.currentTarget === e.target) close();
+    });
+
+    // 스와이프 좌/우
+    let touchStartX = 0;
+    const stage = lb.querySelector('.mh-sheet-lb-stage');
+    stage.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    stage.addEventListener('touchend', (e) => {
+      const dx = (e.changedTouches[0]?.clientX || 0) - touchStartX;
+      if (Math.abs(dx) < 40) return;
+      if (dx > 0) prev(); else next();
+    }, { passive: true });
   }
 
   // 첫 방문 온보딩 — FAB 옆에 짧은 안내 풍선, 한 번 보고 닫으면 다시 안 뜸
