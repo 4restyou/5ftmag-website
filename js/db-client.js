@@ -732,6 +732,89 @@
     },
   };
 
+  // ─── Web Push 구독 ───
+  // VAPID 공개키 — 사용자 식별이 아니라 송신자(이 사이트) 식별용. 공개해도 안전.
+  // 비밀키는 Supabase Edge Function 의 VAPID_PRIVATE_KEY 시크릿으로 보관.
+  const VAPID_PUBLIC_KEY = 'BLhU0vgtc4j93HL00029ljw7XmaZR_eyZdQRcmJ-srWdBr2SC9zB1MAYB7CpoJHgdAWZ0fATvDYRsJm9qvl6lRI';
+
+  function urlBase64ToUint8Array(b64) {
+    const padding = '='.repeat((4 - b64.length % 4) % 4);
+    const base64 = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+  function bufToBase64(buf) {
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  const push = {
+    isSupported() {
+      return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    },
+    async getSubscription() {
+      if (!this.isSupported()) return null;
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) return null;
+      return reg.pushManager.getSubscription();
+    },
+    async subscribe() {
+      if (!this.isSupported()) return { error: { message: '이 브라우저는 푸시 알림을 지원하지 않아요.' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+
+      // 권한 요청
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') return { error: { message: '알림 권한이 거부됐어요.' } };
+
+      // SW 준비 (등록은 site-common.js 에서 함)
+      const reg = await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+      }
+
+      const json = sub.toJSON();
+      const p256dh = json.keys?.p256dh || bufToBase64(sub.getKey('p256dh'));
+      const auth = json.keys?.auth || bufToBase64(sub.getKey('auth'));
+
+      // DB upsert (endpoint UNIQUE — 같은 기기 중복 방지)
+      const { error } = await c.from('push_subscriptions').upsert({
+        user_id: uid,
+        endpoint: sub.endpoint,
+        p256dh,
+        auth,
+        ua: (navigator.userAgent || '').slice(0, 500),
+        last_seen_at: new Date().toISOString(),
+      }, { onConflict: 'endpoint' });
+      if (error) return { error };
+      return { data: { endpoint: sub.endpoint } };
+    },
+    async unsubscribe() {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const sub = await this.getSubscription();
+      if (sub) {
+        try { await c.from('push_subscriptions').delete().eq('endpoint', sub.endpoint); } catch (_) {}
+        try { await sub.unsubscribe(); } catch (_) {}
+      }
+      return { error: null };
+    },
+    async isActive() {
+      if (!this.isSupported()) return false;
+      if (Notification.permission !== 'granted') return false;
+      const sub = await this.getSubscription();
+      return !!sub;
+    },
+  };
+
   // ─── 사용자 알림 (in-app) ───
   const notifications = {
     async list({ limit = 30, unreadOnly = false } = {}) {
@@ -1455,6 +1538,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles,
   };
 })();

@@ -322,6 +322,30 @@ header {
   border-radius: 3px;
 }
 .notif-panel-allread:hover { color: var(--text); background: var(--bg-sub); }
+.notif-panel-push {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-sub);
+  border-bottom: 1px solid var(--border);
+}
+.notif-panel-push[hidden] { display: none; }
+.notif-panel-push-label { font-size: 12px; color: var(--text); }
+.notif-panel-push-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.notif-panel-push-toggle:hover { border-color: var(--text); }
+.notif-panel-push-toggle.is-on { background: var(--text); color: var(--bg); border-color: var(--text); }
+.notif-panel-push-toggle:disabled { opacity: .6; cursor: not-allowed; }
 .notif-panel-list {
   flex: 1;
   overflow-y: auto;

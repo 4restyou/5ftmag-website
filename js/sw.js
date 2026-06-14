@@ -1,6 +1,6 @@
 // 5ft.mag service worker — PWA 기초.
 // 정책: 네트워크 우선, 실패 시 캐시 (HTML 은 stale-while-revalidate).
-// 푸시 알림 핸들러는 후속 PR 에서 추가.
+// 푸시 알림 핸들러 포함.
 
 const CACHE = '5ft-v1';
 const CORE = [
@@ -63,4 +63,62 @@ self.addEventListener('fetch', (e) => {
       return res;
     }).catch(() => caches.match(req))
   );
+});
+
+// ════════════════════════════════════════════════════════════
+// Web Push — send-push edge function 이 보낸 페이로드를 OS 알림으로.
+// payload 구조: { title, body, link, tag }  (모두 옵션)
+// ════════════════════════════════════════════════════════════
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (_) {
+    data = { title: '5ft magazine', body: event.data ? event.data.text() : '' };
+  }
+  const title = data.title || '5ft magazine';
+  const options = {
+    body: data.body || '',
+    icon: '/img/favicon/icon-180.png',
+    badge: '/img/favicon/icon-32.png',
+    tag: data.tag || undefined,
+    data: { link: data.link || '/' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const link = event.notification.data?.link || '/';
+  event.waitUntil((async () => {
+    const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    // 이미 열린 같은 origin 탭이 있으면 focus + 해당 페이지로 이동
+    for (const c of allClients) {
+      if (c.url.startsWith(self.location.origin)) {
+        await c.focus();
+        try { c.navigate(link); } catch (_) {}
+        return;
+      }
+    }
+    // 없으면 새 창
+    if (self.clients.openWindow) await self.clients.openWindow(link);
+  })());
+});
+
+// 브라우저가 구독을 강제로 회수했을 때 (Chromium pushsubscriptionchange).
+// 새 구독을 만들어 endpoint 를 서버에 다시 등록해야 알림이 계속 도착한다.
+// 이 핸들러는 SW 컨텍스트라 fetch 로 직접 등록만 시도하고, 실패 시 다음 사이트 방문 시
+// 클라이언트가 보강한다.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const sub = event.newSubscription || await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: event.oldSubscription?.options?.applicationServerKey,
+      });
+      // 같은 origin client 에게 알려서 DB 갱신을 부탁
+      const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const c of allClients) c.postMessage({ type: 'push-resubscribed', endpoint: sub.endpoint });
+    } catch (_) { /* 다음 방문 때 보강 */ }
+  })());
 });
