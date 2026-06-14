@@ -83,12 +83,13 @@
   function brandFilter(query, category) {
     const q = (query || '').trim().toLowerCase();
     return (f) => {
-      if (f.tier === 'featured') return false;   // 모바일 홈은 Library 만
+      // featured (5ft Issue) 도 브랜드 row 에 함께 노출 — Cinestill 800T 등 대표 필름이 묻히지 않게
       if (category && category !== 'all') {
         const t = String(f.type || '').toLowerCase();
         if (category === 'color' && !t.includes('color')) return false;
-        if (category === 'bw' && !(t.includes('black') || t.includes('bw'))) return false;
-        if (category === 'slide' && !t.includes('slide')) return false;
+        if (category === 'bw' && !(t.includes('black') || t.includes('bw') || t.includes('mono'))) return false;
+        if (category === 'slide' && !(t.includes('slide') || t.includes('e-6') || t.includes('reversal'))) return false;
+        if (category === 'cinema' && !(t.includes('tungsten') || t.includes('daylight') || t.includes('cinema'))) return false;
       }
       if (!q) return true;
       const hay = `${f.brand || ''} ${f.name || ''} ${f.displayName || ''} ${f.aliases?.join(' ') || ''}`.toLowerCase();
