@@ -385,10 +385,12 @@
       </div>
     `;
 
+    let releaseTrap = () => {};
     const close = () => {
       wrap.classList.add('is-leaving');
       setTimeout(() => { wrap.remove(); document.documentElement.classList.remove('mh-sheet-open'); }, 220);
       window.removeEventListener('keydown', onKey);
+      releaseTrap();
     };
     const onKey = (e) => { if (e.key === 'Escape') close(); };
     wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
@@ -399,6 +401,9 @@
     document.body.appendChild(wrap);
     requestAnimationFrame(() => wrap.classList.add('is-open'));
     try { navigator.vibrate?.(8); } catch {}
+
+    // focus trap — 모달 안에 Tab 가둠
+    releaseTrap = window.createFocusTrap?.(wrap) || (() => {});
 
     // 사진 비동기 로드
     loadSheetPhotos(f, wrap.querySelector('#mhSheetPhotos'));
@@ -570,6 +575,8 @@
       noteEl.hidden = !note;
 
       counterEl.textContent = `${cur + 1} / ${rows.length}`;
+      // 스크린리더에 변화 알림
+      try { window.srAnnounce?.(`사진 ${cur + 1}, 총 ${rows.length}장. ${r.author || ''}${r.film ? ', ' + r.film : ''}`.trim()); } catch (_) {}
       lb.querySelector('.mh-sheet-lb-prev').disabled = cur === 0;
       lb.querySelector('.mh-sheet-lb-next').disabled = cur === rows.length - 1;
 
@@ -645,10 +652,14 @@
     render();
     requestAnimationFrame(() => lb.classList.add('is-open'));
 
+    // focus trap — Tab 키가 라이트박스 밖으로 안 나가게
+    const releaseTrap = window.createFocusTrap?.(lb) || (() => {});
+
     const close = () => {
       lb.classList.remove('is-open');
       setTimeout(() => lb.remove(), 180);
       window.removeEventListener('keydown', onKey);
+      releaseTrap();
     };
     const prev = () => { if (cur > 0) { cur -= 1; render(); } };
     const next = () => { if (cur < rows.length - 1) { cur += 1; render(); } };

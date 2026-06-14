@@ -606,9 +606,11 @@
     await loadPhotoFavorites();
   })();
 
+  let releasePhotoLbTrap = () => {};
   function openPhotoLightbox(photos, index) {
     currentPhotos = photos;
     showPhoto(index);
+    releasePhotoLbTrap = window.createFocusTrap?.(photoLightbox) || (() => {});
   }
 
   function syncPhotoLbFav() {
@@ -698,6 +700,7 @@
       photoLbNote.hidden = !note;
     }
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;
+    try { window.srAnnounce?.(`사진 ${index + 1}, 총 ${currentPhotos.length}장. ${p.author || ''}${p.filmName ? ', ' + p.filmName : ''}`.trim()); } catch (_) {}
     syncPhotoLbFav();
 
     if (photoLbLink) {
@@ -719,6 +722,7 @@
   function closePhotoLightbox() {
     photoLightbox.classList.remove('open');
     photoLbImg.removeAttribute('src');
+    releasePhotoLbTrap();
   }
 
   if (photoLbClose) photoLbClose.addEventListener('click', closePhotoLightbox);
