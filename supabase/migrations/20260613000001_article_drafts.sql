@@ -42,20 +42,20 @@ alter table article_drafts enable row level security;
 
 drop policy if exists article_drafts_editor_select on article_drafts;
 create policy article_drafts_editor_select on article_drafts for select to authenticated
-  using (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true));
+  using (exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true));
 
 drop policy if exists article_drafts_editor_insert on article_drafts;
 create policy article_drafts_editor_insert on article_drafts for insert to authenticated
-  with check (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true));
+  with check (exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true));
 
 drop policy if exists article_drafts_editor_update on article_drafts;
 create policy article_drafts_editor_update on article_drafts for update to authenticated
-  using (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true))
-  with check (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true));
+  using (exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true))
+  with check (exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true));
 
 drop policy if exists article_drafts_editor_delete on article_drafts;
 create policy article_drafts_editor_delete on article_drafts for delete to authenticated
-  using (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true));
+  using (exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true));
 
 -- Storage bucket for article media (편집부 업로드)
 insert into storage.buckets (id, name, public)
@@ -69,14 +69,14 @@ create policy article_media_public_read on storage.objects for select to public
 drop policy if exists article_media_editor_insert on storage.objects;
 create policy article_media_editor_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'article-media'
-              and exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true));
+              and exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true));
 
 drop policy if exists article_media_editor_update on storage.objects;
 create policy article_media_editor_update on storage.objects for update to authenticated
   using (bucket_id = 'article-media'
-         and exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true));
+         and exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true));
 
 drop policy if exists article_media_editor_delete on storage.objects;
 create policy article_media_editor_delete on storage.objects for delete to authenticated
   using (bucket_id = 'article-media'
-         and exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_editor = true));
+         and exists (select 1 from profiles where profiles.user_id = auth.uid() and profiles.is_editor = true));
