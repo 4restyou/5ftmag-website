@@ -117,7 +117,18 @@
     // 검색·필터 활성 시 그리드로
     if (query.trim() || category !== 'all') {
       root.classList.add('is-searching');
-      if (!list.length) return `<div class="mh-empty">조건에 맞는 필름이 없어요.</div>`;
+      if (!list.length) {
+        // 다음 행동 제안: 다른 추천 필름 또는 전체로 돌아가기
+        const all = films.filter(f => f.tier !== 'featured');
+        const random = all.length ? all[Math.floor(Math.random() * all.length)] : null;
+        const suggest = random ? `<a class="mh-empty-link" href="/films.html?film=${encodeURIComponent(random.slug)}">${esc(random.displayName || random.name)} 한번 보실래요?</a>` : '';
+        return `
+          <div class="mh-empty">
+            <p>조건에 맞는 필름이 없어요.</p>
+            ${suggest}
+            <button type="button" class="mh-empty-btn" id="mhResetSearch">전체 보기로 돌아가기</button>
+          </div>`;
+      }
       return `<div class="mh-search-grid">${list.map(filmCardHtml).join('')}</div>`;
     }
     root.classList.remove('is-searching');
@@ -205,6 +216,10 @@
       e.preventDefault();
       e.stopPropagation();
       toggleFavBrand(btn.dataset.favBrand);
+      // 햅틱 + 짧은 bounce
+      try { navigator.vibrate?.(10); } catch {}
+      btn.classList.add('is-pulsing');
+      setTimeout(() => btn.classList.remove('is-pulsing'), 300);
       render();
       // 좋아요 토글 후 좋아요한 row 위로 스크롤
       requestAnimationFrame(() => {
@@ -212,6 +227,70 @@
         if (target) target.closest('section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
     });
+    // 빈 상태의 "전체 보기로 돌아가기"
+    root.querySelector('#mhBody').addEventListener('click', (e) => {
+      if (e.target.id !== 'mhResetSearch') return;
+      const all = root.querySelector('.mh-chip[data-cat="all"]');
+      chips.forEach(x => x.classList.remove('is-active'));
+      all?.classList.add('is-active');
+      STATE.category = 'all'; STATE.query = '';
+      search.value = '';
+      render();
+    });
+    // 카드 탭 시 짧은 scale 피드백 (네이티브 톤)
+    root.querySelector('#mhBody').addEventListener('touchstart', (e) => {
+      const card = e.target.closest('.mh-card, .mh-new-card');
+      if (card) card.classList.add('is-pressing');
+    }, { passive: true });
+    root.querySelector('#mhBody').addEventListener('touchend', (e) => {
+      root.querySelectorAll('.is-pressing').forEach(c => c.classList.remove('is-pressing'));
+    }, { passive: true });
+    root.querySelector('#mhBody').addEventListener('touchcancel', () => {
+      root.querySelectorAll('.is-pressing').forEach(c => c.classList.remove('is-pressing'));
+    }, { passive: true });
+  }
+
+  // 첫 방문 온보딩 — FAB 옆에 짧은 안내 풍선, 한 번 보고 닫으면 다시 안 뜸
+  // 스크롤 다운 시 검색바·필터 축소
+  function bindStickyShrink() {
+    let lastY = 0; let raf = null;
+    const onScroll = () => {
+      raf = null;
+      const y = window.scrollY || 0;
+      const goingDown = y > lastY && y > 60;
+      root.classList.toggle('is-condensed', goingDown);
+      lastY = y;
+    };
+    window.addEventListener('scroll', () => {
+      if (raf == null) raf = requestAnimationFrame(onScroll);
+    }, { passive: true });
+  }
+
+  function maybeShowOnboarding() {
+    const KEY = '5ft-mh-onboarded';
+    try { if (localStorage.getItem(KEY) === '1') return; } catch {}
+    setTimeout(() => {
+      const tip = document.createElement('div');
+      tip.className = 'mh-onboard';
+      tip.innerHTML = `
+        <span>여기서 사진을 올려요</span>
+        <button type="button" aria-label="닫기">✕</button>
+      `;
+      tip.querySelector('button').addEventListener('click', () => {
+        try { localStorage.setItem(KEY, '1'); } catch {}
+        tip.classList.add('is-leaving');
+        setTimeout(() => tip.remove(), 200);
+      });
+      document.body.appendChild(tip);
+      // 8초 후 자동 닫힘
+      setTimeout(() => {
+        if (tip.parentNode) {
+          try { localStorage.setItem(KEY, '1'); } catch {}
+          tip.classList.add('is-leaving');
+          setTimeout(() => tip.remove(), 200);
+        }
+      }, 8000);
+    }, 1500);
   }
 
   // ── iOS 사용자에게 "홈 화면에 추가" 안내 (한 번만) ──
@@ -238,6 +317,7 @@
   // ── 부팅 ──
   (async function start() {
     bindControls();
+    bindStickyShrink();
     const [stories, films] = await Promise.all([
       fetchJson('/data/stories.json'),
       fetchJson('/data/films.json'),
@@ -246,6 +326,7 @@
     const filmsObj = films && typeof films === 'object' ? films : {};
     STATE.films = Array.isArray(filmsObj) ? filmsObj : Object.entries(filmsObj).map(([slug, f]) => ({ slug, ...f }));
     render();
+    maybeShowOnboarding();
     setTimeout(maybeShowIosPwaPrompt, 1500);
   })();
 })();
