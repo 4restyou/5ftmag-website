@@ -132,6 +132,38 @@
     startDwellTracker(path);
   }
 
+  // ─── 이벤트 로그 (page_views 외 액션 측정) ───
+  // window.trackEvent('event_name', { 키: 값 })
+  // 이벤트명: [a-z][a-z0-9_]* (DB CHECK 와 동일).
+  // properties: 짧은 JSON. 익명 로그라 실패 무시.
+  // pvShouldSkip() 조건 (개발/봇/어드민) 이면 송신 안 함.
+  function trackEvent(name, properties) {
+    if (pvShouldSkip()) return;
+    if (typeof name !== 'string' || !/^[a-z][a-z0-9_]{0,63}$/.test(name)) return;
+    const body = {
+      event_name: name,
+      path: pvCleanPath().slice(0, 500),
+      session_id: pvSessionId(),
+      ua_family: pvUaFamily(navigator.userAgent || ''),
+      properties: (properties && typeof properties === 'object') ? properties : null,
+    };
+    try {
+      fetch(PV_URL + '/rest/v1/app_events', {
+        method: 'POST',
+        mode: 'cors',
+        keepalive: true,
+        headers: {
+          apikey: PV_KEY,
+          Authorization: 'Bearer ' + PV_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(body),
+      }).catch(function () {});
+    } catch (_) {}
+  }
+  window.trackEvent = trackEvent;
+
   // ─── 클라이언트 에러 로그 (Sentry 미연결 시 최소 운영 감지)
   const ERROR_LOG_MAX_PER_PAGE = 5;
   let errorLogCount = 0;
@@ -1563,6 +1595,7 @@
     `;
     fab.addEventListener('mouseenter', () => { fab.style.transform = 'scale(1.05)'; });
     fab.addEventListener('mouseleave', () => { fab.style.transform = 'scale(1)'; });
+    fab.addEventListener('click', () => { try { trackEvent('fab_clicked', { kind: 'upload' }); } catch (_) {} });
     document.body.appendChild(fab);
   }
 
