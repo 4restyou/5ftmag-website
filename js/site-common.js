@@ -653,6 +653,60 @@
   }
   window.showToast = showToast;
 
+  // ════════════════════════════════════════════════
+  // 접근성 — focus trap + sr 안내
+  //   createFocusTrap(modal): 모달 안에서 Tab 순환. cleanup 함수 반환.
+  //   srAnnounce(text): aria-live="polite" 영역에 메시지 송신.
+  // ════════════════════════════════════════════════
+  const FOCUSABLE_SEL = [
+    'a[href]', 'button:not([disabled])', 'input:not([disabled])',
+    'select:not([disabled])', 'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(',');
+  function focusableIn(modal) {
+    return Array.from(modal.querySelectorAll(FOCUSABLE_SEL))
+      .filter(el => !el.hidden && el.offsetParent !== null);
+  }
+  function createFocusTrap(modal) {
+    if (!modal || modal.dataset.focusTrapped === '1') return () => {};
+    modal.dataset.focusTrapped = '1';
+    const prevFocus = document.activeElement;
+    setTimeout(() => {
+      const items = focusableIn(modal);
+      if (items.length) items[0].focus();
+    }, 0);
+    function onKey(e) {
+      if (e.key !== 'Tab') return;
+      const items = focusableIn(modal);
+      if (!items.length) { e.preventDefault(); return; }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+    modal.addEventListener('keydown', onKey);
+    return function release() {
+      modal.removeEventListener('keydown', onKey);
+      delete modal.dataset.focusTrapped;
+      try { prevFocus?.focus?.(); } catch (_) {}
+    };
+  }
+  window.createFocusTrap = createFocusTrap;
+
+  let _srHost = null;
+  function srAnnounce(text) {
+    if (!_srHost) {
+      _srHost = document.createElement('div');
+      _srHost.setAttribute('aria-live', 'polite');
+      _srHost.setAttribute('aria-atomic', 'true');
+      _srHost.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);';
+      document.body.appendChild(_srHost);
+    }
+    _srHost.textContent = '';
+    setTimeout(() => { _srHost.textContent = String(text || ''); }, 30);
+  }
+  window.srAnnounce = srAnnounce;
+
   // 원본 alert 백업 — 아래 monkey-patch / notify 폴백에서 모두 참조
   const _origAlert = window.alert.bind(window);
 
