@@ -55,7 +55,7 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
 .mh-brand.is-fav .mh-brand-name::before { content: '★ '; color: #e0245e; font-size: 12px; vertical-align: middle; }
 .mh-brand-strip { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 4px; scroll-snap-type: x proximity; }
 .mh-brand-strip::-webkit-scrollbar { display: none; }
-.mh-card { flex: 0 0 124px; scroll-snap-align: start; text-decoration: none; color: var(--text); }
+.mh-card { flex: 0 0 124px; scroll-snap-align: start; text-decoration: none; color: var(--text); background: none; border: none; padding: 0; margin: 0; cursor: pointer; text-align: left; font: inherit; }
 .mh-card-thumb { width: 124px; height: 124px; background: var(--bg-sub); border-radius: 8px; overflow: hidden; margin-bottom: 8px; position: relative; }
 .mh-card-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 6px; box-sizing: border-box; }
 .mh-card-name { font-size: 12px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 0 2px; }
@@ -127,6 +127,55 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
 .mh-root.is-condensed .mh-controls { padding-top: 6px; padding-bottom: 6px; }
 .mh-root.is-condensed .mh-controls .mh-search { padding-top: 6px; padding-bottom: 6px; }
 .mh-root.is-condensed .mh-controls .mh-filter { max-height: 0; margin-top: 0; opacity: 0; pointer-events: none; }
+
+/* ─── 최근 본 row (개인화) ─── */
+.mh-recent .mh-brand-name { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); font-weight: var(--fw-heading); }
+
+/* ─── 필름 상세 시트 (모달) ─── */
+html.mh-sheet-open, html.mh-sheet-open body { overflow: hidden; }
+.mh-sheet-backdrop {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0);
+  transition: background .22s ease-out;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.mh-sheet-backdrop.is-open { background: rgba(0,0,0,.45); }
+.mh-sheet-backdrop.is-leaving { background: rgba(0,0,0,0); }
+.mh-sheet {
+  width: 100%; max-width: 640px; max-height: 88vh;
+  background: var(--bg); color: var(--text);
+  border-radius: 18px 18px 0 0;
+  padding: 12px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform .25s cubic-bezier(.2, .8, .25, 1);
+  box-shadow: 0 -12px 40px rgba(0,0,0,.18);
+}
+.mh-sheet-backdrop.is-open .mh-sheet { transform: translateY(0); }
+.mh-sheet-backdrop.is-leaving .mh-sheet { transform: translateY(100%); }
+.mh-sheet-grip {
+  display: block; width: 44px; height: 4px; margin: 4px auto 14px;
+  border-radius: 2px; background: var(--border); border: none; cursor: pointer; padding: 0;
+}
+.mh-sheet-grip::before { content: ''; display: block; margin: -10px auto -2px; width: 80px; height: 24px; }   /* 터치 영역 확대 */
+.mh-sheet-head { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+.mh-sheet-thumb { flex: 0 0 auto; width: 88px; height: 88px; background: var(--bg-sub); border-radius: 8px; overflow: hidden; padding: 8px; box-sizing: border-box; }
+.mh-sheet-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.mh-sheet-meta { flex: 1; min-width: 0; }
+.mh-sheet-brand { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
+.mh-sheet-name { font-size: 22px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 0 0 6px; line-height: 1.2; }
+.mh-sheet-specs { font-size: 13px; color: var(--text); opacity: .75; }
+.mh-sheet-desc { font-size: 14px; line-height: 1.65; color: var(--text); margin: 0 0 18px; word-break: keep-all; }
+.mh-sheet-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 18px; }
+.mh-sheet-photo { aspect-ratio: 1; background: var(--bg-sub); border-radius: 4px; overflow: hidden; }
+.mh-sheet-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mh-sheet-go {
+  display: block; text-align: center;
+  padding: 14px 18px; border-radius: 999px;
+  background: var(--text); color: var(--bg);
+  font-size: 14px; font-weight: var(--fw-heading);
+  text-decoration: none;
+}
 
 /* ─── 접근성: 색 대비 강화 ─── */
 .mh-card-name { color: var(--text); }

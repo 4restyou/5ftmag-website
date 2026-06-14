@@ -73,10 +73,10 @@
     const slug = f.slug || f.id;
     const name = f.displayName || f.name || '';
     return `
-      <a class="mh-card" href="/films.html?film=${encodeURIComponent(slug)}">
+      <button type="button" class="mh-card" data-film-slug="${escAttr(slug)}" aria-label="${esc(name)} 자세히 보기">
         <div class="mh-card-thumb">${filmThumb(f) ? `<img src="${esc(filmThumb(f))}" alt="" loading="lazy" />` : ''}</div>
         <div class="mh-card-name">${esc(name)}</div>
-      </a>
+      </button>
     `;
   }
 
@@ -184,7 +184,7 @@
       </section>
     ` : '';
 
-    return bigRows.join('') + othersHtml;
+    return renderRecentRow() + bigRows.join('') + othersHtml;
   }
 
   // escAttr 도우미
@@ -237,6 +237,13 @@
       search.value = '';
       render();
     });
+    // 카드 탭 → 모바일 시트
+    root.querySelector('#mhBody').addEventListener('click', (e) => {
+      const card = e.target.closest('[data-film-slug]');
+      if (!card) return;
+      e.preventDefault();
+      openFilmSheet(card.dataset.filmSlug);
+    });
     // 카드 탭 시 짧은 scale 피드백 (네이티브 톤)
     root.querySelector('#mhBody').addEventListener('touchstart', (e) => {
       const card = e.target.closest('.mh-card, .mh-new-card');
@@ -248,6 +255,100 @@
     root.querySelector('#mhBody').addEventListener('touchcancel', () => {
       root.querySelectorAll('.is-pressing').forEach(c => c.classList.remove('is-pressing'));
     }, { passive: true });
+  }
+
+  // ─── 최근 본 필름 (localStorage) ───
+  const RECENT_KEY = '5ft-mh-recent';
+  const RECENT_MAX = 8;
+  function getRecent() {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); }
+    catch { return []; }
+  }
+  function pushRecent(slug) {
+    if (!slug) return;
+    const cur = getRecent().filter(s => s !== slug);
+    cur.unshift(slug);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(cur.slice(0, RECENT_MAX))); } catch {}
+  }
+  function recentFilms() {
+    const slugs = getRecent();
+    const map = new Map(STATE.films.map(f => [f.slug || f.id, f]));
+    return slugs.map(s => map.get(s)).filter(Boolean);
+  }
+  function renderRecentRow() {
+    const list = recentFilms();
+    if (!list.length) return '';
+    return `
+      <section class="mh-brand mh-recent">
+        <div class="mh-brand-head">
+          <h3 class="mh-brand-name">최근 본 필름</h3>
+          <span class="mh-brand-count">${list.length}</span>
+        </div>
+        <div class="mh-brand-strip">${list.map(filmCardHtml).join('')}</div>
+      </section>`;
+  }
+
+  // ─── 필름 상세 시트 (모달, 카드 탭 시 열림) ───
+  function openFilmSheet(slug) {
+    const f = STATE.films.find(x => (x.slug || x.id) === slug);
+    if (!f) return;
+    pushRecent(slug);
+
+    // 기존 시트 있으면 제거
+    document.getElementById('mhSheet')?.remove();
+
+    const name = f.displayName || f.name || '';
+    const thumb = filmThumb(f);
+    const specs = [
+      f.iso ? `ISO ${esc(f.iso)}` : '',
+      f.type ? esc(f.type) : '',
+      f.format ? esc(f.format) : '',
+    ].filter(Boolean).join(' · ');
+    const photosHtml = Array.isArray(f.photos) && f.photos.length
+      ? `<div class="mh-sheet-photos">${f.photos.slice(0, 6).map(p => {
+          const src = p.src ? ('/' + String(p.src).replace(/^\.?\//, '')) : '';
+          return src ? `<div class="mh-sheet-photo"><img src="${escAttr(src)}" alt="" loading="lazy" /></div>` : '';
+        }).join('')}</div>` : '';
+
+    const wrap = document.createElement('div');
+    wrap.id = 'mhSheet';
+    wrap.className = 'mh-sheet-backdrop';
+    wrap.setAttribute('role', 'dialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.setAttribute('aria-label', name);
+    wrap.innerHTML = `
+      <div class="mh-sheet" role="document">
+        <button type="button" class="mh-sheet-grip" aria-label="닫기"></button>
+        <div class="mh-sheet-head">
+          ${thumb ? `<div class="mh-sheet-thumb"><img src="${escAttr(thumb)}" alt="" /></div>` : ''}
+          <div class="mh-sheet-meta">
+            <div class="mh-sheet-brand">${esc((f.brand || '').toUpperCase())}</div>
+            <h2 class="mh-sheet-name">${esc(name)}</h2>
+            ${specs ? `<div class="mh-sheet-specs">${specs}</div>` : ''}
+          </div>
+        </div>
+        ${f.desc ? `<p class="mh-sheet-desc">${esc(f.desc)}</p>` : ''}
+        ${photosHtml}
+        <a class="mh-sheet-go" href="/films.html?film=${encodeURIComponent(slug)}">전체 페이지에서 보기 →</a>
+      </div>
+    `;
+
+    // 닫기 — backdrop / grip / Escape
+    const close = () => {
+      wrap.classList.add('is-leaving');
+      setTimeout(() => { wrap.remove(); document.documentElement.classList.remove('mh-sheet-open'); }, 220);
+      window.removeEventListener('keydown', onKey);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
+    wrap.querySelector('.mh-sheet-grip').addEventListener('click', close);
+    window.addEventListener('keydown', onKey);
+
+    // 아래에서 위로 올라오는 슬라이드
+    document.documentElement.classList.add('mh-sheet-open');
+    document.body.appendChild(wrap);
+    requestAnimationFrame(() => wrap.classList.add('is-open'));
+    try { navigator.vibrate?.(8); } catch {}
   }
 
   // 첫 방문 온보딩 — FAB 옆에 짧은 안내 풍선, 한 번 보고 닫으면 다시 안 뜸
