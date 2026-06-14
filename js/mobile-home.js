@@ -241,6 +241,7 @@
       if (v === STATE.view) return;
       STATE.view = v;
       saveView(v);
+      try { window.trackEvent?.('view_changed', { view: v }); } catch (_) {}
       root.querySelectorAll('.mh-view-btn').forEach(b => {
         b.classList.toggle('is-active', b === btn);
         b.setAttribute('aria-selected', String(b === btn));
@@ -341,6 +342,7 @@
     const f = STATE.films.find(x => (x.slug || x.id) === slug);
     if (!f) return;
     pushRecent(slug);
+    try { window.trackEvent?.('sheet_opened', { slug }); } catch (_) {}
 
     document.getElementById('mhSheet')?.remove();
 
@@ -446,6 +448,7 @@
       const btn = e.target.closest('[data-photo-index]');
       if (!btn) return;
       const idx = Number(btn.dataset.photoIndex);
+      try { window.trackEvent?.('lightbox_opened', { from: 'sheet' }); } catch (_) {}
       openSheetLightbox(picked, idx, f);
     });
   }
@@ -630,6 +633,7 @@
         ? `https://5ftmag.com/films.html?film=${encodeURIComponent(filmSlug)}`
         : 'https://5ftmag.com/';
       const shareUrl = (typeof window.prettyShareUrl === 'function') ? window.prettyShareUrl(url) : url;
+      try { window.trackEvent?.('share_clicked', { kind: 'sheet_lightbox' }); } catch (_) {}
       try { await navigator.share({ title: filmName, url: shareUrl }); } catch (_) {}
     }
 
@@ -797,6 +801,7 @@
     grid.addEventListener('click', (e) => {
       const cell = e.target.closest('[data-photo-index]');
       if (!cell) return;
+      try { window.trackEvent?.('lightbox_opened', { from: 'photos_view' }); } catch (_) {}
       openSheetLightbox(filtered, Number(cell.dataset.photoIndex), null);
     });
   }

@@ -763,31 +763,37 @@
       return reg.pushManager.getSubscription();
     },
     async subscribe() {
-      // 어느 단계에서 실패하든 항상 { error: { message } } 로 반환 (호출부가 await 에서
-      // throw 되어 침묵하지 않게). step 라벨로 어디서 막혔는지 진단 가능.
-      const step = (label, fn) => fn().catch(e => ({ __step: label, error: e }));
+      // 실패는 항상 { error: { message, code } } 형태로 반환 (await throw 로 침묵 안 함).
+      // - prod: 사용자 친화 메시지만
+      // - dev: 단계 라벨 + 원본 메시지 추가 (콘솔에 자세 로깅)
+      const isDev = location.hostname === 'localhost' || /\.netlify\.app$/.test(location.hostname);
+      const fail = (code, friendly, raw) => {
+        if (raw) try { console.warn('[push.subscribe]', code, raw); } catch (_) {}
+        return { error: { code, message: isDev && raw ? `${friendly} (${code}: ${raw.message || raw})` : friendly } };
+      };
       try {
-        if (!this.isSupported()) return { error: { message: '이 브라우저는 푸시 알림을 지원하지 않아요.' } };
-        const c = client(); if (!c) return { error: { message: 'db unavailable' } };
+        if (!this.isSupported()) return fail('unsupported', '이 브라우저는 푸시 알림을 지원하지 않아요.');
+        const c = client(); if (!c) return fail('db_unavailable', '지금 서버와 연결을 만들지 못했어요. 잠시 후 다시 시도해주세요.');
         const uid = await userId();
-        if (!uid) return { error: { message: 'login required' } };
+        if (!uid) return fail('login_required', '로그인이 필요해요.');
 
         const perm = await Notification.requestPermission();
-        if (perm !== 'granted') return { error: { message: `알림 권한이 ${perm} 상태예요.` } };
+        if (perm !== 'granted') return fail('permission_' + perm, '알림 권한이 허용되지 않았어요. 브라우저 설정에서 5ft 알림을 허용해주세요.');
 
-        // navigator.serviceWorker.ready 가 iOS PWA 등에서 영원히 대기하는 경우가 있어
-        // 5초 타임아웃을 둔다. 실패 사유가 침묵 대신 메시지로 나오게.
-        const ready = Promise.race([
-          navigator.serviceWorker.ready,
-          new Promise((_, rej) => setTimeout(() => rej(new Error('SW ready timeout (5s)')), 5000)),
-        ]);
+        // SW 가 페이지 컨트롤할 때까지 대기. iOS PWA 에서 5초 안에 안 되면 사용자 안내.
         let reg;
-        try { reg = await ready; }
-        catch (e) { return { error: { message: `[SW 준비] ${e.message || e}` } }; }
+        try {
+          reg = await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise((_, rej) => setTimeout(() => rej(new Error('SW ready timeout (5s)')), 5000)),
+          ]);
+        } catch (e) {
+          return fail('sw_not_ready', '앱이 아직 준비되지 않았어요. 잠시 후 다시 시도해주세요.', e);
+        }
 
         let sub;
         try { sub = await reg.pushManager.getSubscription(); }
-        catch (e) { return { error: { message: `[getSubscription] ${e.message || e}` } }; }
+        catch (e) { return fail('get_subscription', '구독 정보를 읽지 못했어요.', e); }
 
         if (!sub) {
           try {
@@ -796,7 +802,7 @@
               applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
             });
           } catch (e) {
-            return { error: { message: `[subscribe] ${e.name || ''} ${e.message || e}` } };
+            return fail('push_subscribe', '푸시 구독을 만들지 못했어요. 브라우저 알림 설정을 확인해주세요.', e);
           }
         }
 
@@ -812,11 +818,12 @@
           ua: (navigator.userAgent || '').slice(0, 500),
           last_seen_at: new Date().toISOString(),
         }, { onConflict: 'endpoint' });
-        if (dbErr) return { error: { message: `[DB] ${dbErr.message || dbErr.code || 'insert failed'}` } };
+        if (dbErr) return fail('db_insert', '서버에 구독을 저장하지 못했어요. 잠시 후 다시 시도해주세요.', dbErr);
 
+        try { window.trackEvent?.('push_subscribed'); } catch (_) {}
         return { data: { endpoint: sub.endpoint } };
       } catch (e) {
-        return { error: { message: `[예외] ${e.name || ''} ${e.message || e}` } };
+        return fail('unexpected', '예상치 못한 오류가 발생했어요. 잠시 후 다시 시도해주세요.', e);
       }
     },
     async unsubscribe() {
