@@ -44,12 +44,17 @@
 
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-  function daysAgo(iso) {
-    if (!iso) return 999;
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return 999;
-    return Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24));
-  }
+  // pure 함수들 — js/mh-pure.js 에서 추출 (window.MHPure)
+  // index.html 에서 mh-pure.js 가 mobile-home.js 보다 먼저 로드됨.
+  const P = window.MHPure || {};
+  const daysAgo = P.daysAgo;
+  const shuffleInPlace = P.shuffleInPlace;
+  const filmAliasListPure = P.filmAliasList;
+  const contributorKeyOfPure = P.contributorKeyOf;
+  const brandFilterPure = P.brandFilter;
+  const filmSlugByNamePure = P.filmSlugByName;
+  const photoMatchesCategoryPure = P.photoMatchesCategory;
+  const photoMatchesQueryPure = P.photoMatchesQuery;
 
   // ── 렌더: 신규 글 띠 ──
   function renderNewStories(stories) {
@@ -93,22 +98,8 @@
     `;
   }
 
-  function brandFilter(query, category) {
-    const q = (query || '').trim().toLowerCase();
-    return (f) => {
-      // featured (5ft Issue) 도 브랜드 row 에 함께 노출 — Cinestill 800T 등 대표 필름이 묻히지 않게
-      if (category && category !== 'all') {
-        const t = String(f.type || '').toLowerCase();
-        if (category === 'color' && !t.includes('color')) return false;
-        if (category === 'bw' && !(t.includes('black') || t.includes('bw') || t.includes('mono'))) return false;
-        if (category === 'slide' && !(t.includes('slide') || t.includes('e-6') || t.includes('reversal'))) return false;
-        if (category === 'cinema' && !(t.includes('tungsten') || t.includes('daylight') || t.includes('cinema'))) return false;
-      }
-      if (!q) return true;
-      const hay = `${f.brand || ''} ${f.name || ''} ${f.displayName || ''} ${f.aliases?.join(' ') || ''}`.toLowerCase();
-      return hay.includes(q);
-    };
-  }
+  // featured (5ft Issue) 도 브랜드 row 에 함께 노출 — pure 모듈의 brandFilter 사용.
+  const brandFilter = (query, category) => brandFilterPure(query, category);
 
   // 브랜드 좋아요 (localStorage 기반)
   const FAV_BRANDS_KEY = '5ft-fav-brands';
@@ -418,19 +409,8 @@
   }
 
   // ─── 시트 사진 로드 (reader_submissions, 랜덤 16장) ───
-  function shuffleInPlace(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
-  function filmAliasList(f) {
-    const names = new Set();
-    [f.name, f.displayName, ...(Array.isArray(f.aliases) ? f.aliases : [])]
-      .filter(Boolean).forEach(n => names.add(String(n)));
-    return [...names];
-  }
+  // shuffleInPlace / filmAliasList 는 js/mh-pure.js 에서 가져와 상단에서 const 로 바인딩됨.
+  const filmAliasList = filmAliasListPure;
   async function loadSheetPhotos(f, container) {
     if (!container) return;
     // MagDB 준비 대기 (안 떠 있을 수 있음)
@@ -481,18 +461,9 @@
   function submissionIdOf(row) {
     return typeof row.id === 'string' ? row.id.replace(/^sub-/, '') : '';
   }
-  function filmSlugByName(name) {
-    if (!name) return '';
-    const needle = String(name).toLowerCase().trim();
-    const hit = STATE.films.find(x =>
-      [x.name, x.displayName, ...(Array.isArray(x.aliases) ? x.aliases : [])]
-        .filter(Boolean).map(n => String(n).toLowerCase().trim()).includes(needle)
-    );
-    return hit ? (hit.slug || hit.id || '') : '';
-  }
-  function contributorKeyOf(row) {
-    return String(row.instagram || row.submitterName || row.author || '').trim().replace(/^@/, '').toLowerCase();
-  }
+  // STATE.films 를 cap 한 wrapper — js/mh-pure.js 의 pure 함수에 films 배열 주입.
+  const filmSlugByName = (name) => filmSlugByNamePure(name, STATE.films);
+  const contributorKeyOf = contributorKeyOfPure;
 
   function openSheetLightbox(rows, startIndex, f) {
     document.getElementById('mhSheetLb')?.remove();
@@ -787,28 +758,9 @@
   }
 
   // 사진을 STATE.films 의 카테고리 분류와 매칭 (브랜드/이름 정규화 후 동일성 체크)
-  function photoMatchesCategory(row, category) {
-    if (category === 'all') return true;
-    const filmName = String(row.film || '').toLowerCase().trim();
-    if (!filmName) return false;
-    const f = STATE.films.find(x =>
-      [x.name, x.displayName, ...(Array.isArray(x.aliases) ? x.aliases : [])]
-        .filter(Boolean).map(n => String(n).toLowerCase().trim()).includes(filmName)
-    );
-    if (!f) return false;
-    const t = String(f.type || '').toLowerCase();
-    if (category === 'color') return t.includes('color');
-    if (category === 'bw') return t.includes('black') || t.includes('bw') || t.includes('mono');
-    if (category === 'slide') return t.includes('slide') || t.includes('e-6') || t.includes('reversal');
-    if (category === 'cinema') return t.includes('tungsten') || t.includes('daylight') || t.includes('cinema');
-    return true;
-  }
-  function photoMatchesQuery(row, q) {
-    if (!q) return true;
-    const needle = q.trim().toLowerCase();
-    if (!needle) return true;
-    return String(row.film || '').toLowerCase().includes(needle);
-  }
+  // STATE.films 를 cap 한 wrappers — js/mh-pure.js 의 pure 함수 위임.
+  const photoMatchesCategory = (row, category) => photoMatchesCategoryPure(row, category, STATE.films);
+  const photoMatchesQuery = (row, q) => photoMatchesQueryPure(row, q);
   function renderPhotoGrid(rows, grid) {
     const filtered = rows.filter(r => photoMatchesCategory(r, STATE.category) && photoMatchesQuery(r, STATE.query));
     grid.removeAttribute('aria-busy');
