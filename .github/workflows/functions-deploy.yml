@@ -1,0 +1,38 @@
+name: Supabase Edge Functions
+
+# main 머지 시 supabase/functions/** 변경이 있으면 자동 배포.
+# 필요한 시크릿 (GitHub Settings → Secrets → Actions):
+#   SUPABASE_ACCESS_TOKEN  — supabase CLI 로그인 토큰
+#
+# 함수가 사용하는 런타임 시크릿 (Supabase Dashboard → Edge Functions → Secrets) 은
+# 함수 코드 안 process.env / Deno.env 로 읽음. 별도로 한 번만 설정:
+#   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT, PUSH_DISPATCH_SECRET
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/functions-deploy.yml'
+  workflow_dispatch:
+
+env:
+  SUPABASE_PROJECT_REF: pucpqsfwqouqohwsvmnd
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy send-push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase functions deploy send-push \
+            --project-ref "$SUPABASE_PROJECT_REF" \
+            --no-verify-jwt

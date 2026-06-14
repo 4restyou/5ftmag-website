@@ -948,10 +948,17 @@
         <span class="notif-panel-title">알림</span>
         <button type="button" class="notif-panel-allread" id="notifAllRead">전체 읽음</button>
       </div>
+      <div class="notif-panel-push" id="notifPushRow" hidden>
+        <span class="notif-panel-push-label">기기에 푸시 알림 받기</span>
+        <button type="button" class="notif-panel-push-toggle" id="notifPushToggle" aria-pressed="false">켜기</button>
+      </div>
       <div class="notif-panel-list" id="notifList">
         <div class="notif-panel-empty">불러오는 중…</div>
       </div>`;
     document.body.appendChild(panel);
+
+    // 푸시 토글 — Notification + PushManager 지원 시만 노출
+    setupPushToggle();
 
     function updateBadge(n) {
       const badge = document.getElementById('notifBadge');
@@ -1067,6 +1074,61 @@
         }
       });
     } catch (_) {}
+  }
+
+  // 푸시 알림 켜기/끄기 — 알림 패널 헤더 아래 행
+  async function setupPushToggle() {
+    const row = document.getElementById('notifPushRow');
+    const btn = document.getElementById('notifPushToggle');
+    if (!row || !btn) return;
+    if (!window.MagDB?.push?.isSupported?.()) return;
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+    // iOS 는 PWA(홈 화면 추가) 에서만 푸시 지원 — 일반 Safari 에서는 가려둠
+    const ua = navigator.userAgent || '';
+    const isIos = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const standalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+    if (isIos && !standalone) {
+      row.hidden = false;
+      btn.disabled = true;
+      btn.textContent = 'iOS는 홈 화면 추가 후';
+      btn.setAttribute('aria-disabled', 'true');
+      return;
+    }
+    row.hidden = false;
+
+    async function reflect() {
+      const active = await window.MagDB.push.isActive();
+      btn.textContent = active ? '끄기' : '켜기';
+      btn.setAttribute('aria-pressed', String(active));
+      btn.classList.toggle('is-on', active);
+    }
+    reflect();
+
+    btn.addEventListener('click', async () => {
+      if (btn.classList.contains('is-busy')) return;
+      btn.classList.add('is-busy');
+      const active = await window.MagDB.push.isActive();
+      if (active) {
+        await window.MagDB.push.unsubscribe();
+        window.notify?.('푸시 알림을 껐어요.', 'info');
+      } else {
+        const { error } = await window.MagDB.push.subscribe();
+        if (error) window.notify?.(error.message || '푸시 알림 구독 실패', 'danger');
+        else window.notify?.('푸시 알림을 켰어요.', 'info');
+      }
+      btn.classList.remove('is-busy');
+      reflect();
+    });
+
+    // SW 가 push subscription 을 재발급한 경우 (pushsubscriptionchange) 동기화
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', async (e) => {
+        if (e.data?.type === 'push-resubscribed') {
+          try { await window.MagDB.push.subscribe(); } catch (_) {}
+          reflect();
+        }
+      });
+    }
   }
 
   // ════════════════════════════════════════════════
