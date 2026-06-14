@@ -1107,17 +1107,22 @@
     btn.addEventListener('click', async () => {
       if (btn.classList.contains('is-busy')) return;
       btn.classList.add('is-busy');
-      const active = await window.MagDB.push.isActive();
-      if (active) {
-        await window.MagDB.push.unsubscribe();
-        window.notify?.('푸시 알림을 껐어요.', 'info');
-      } else {
-        const { error } = await window.MagDB.push.subscribe();
-        if (error) window.notify?.(error.message || '푸시 알림 구독 실패', 'danger');
-        else window.notify?.('푸시 알림을 켰어요.', 'info');
+      try {
+        const active = await window.MagDB.push.isActive();
+        if (active) {
+          await window.MagDB.push.unsubscribe();
+          showToast('푸시 알림을 껐어요.', { type: 'info', duration: 2400 });
+        } else {
+          const result = await window.MagDB.push.subscribe();
+          if (result?.error) showToast(result.error.message || '푸시 알림 구독 실패', { type: 'danger', duration: 6000 });
+          else showToast('푸시 알림을 켰어요.', { type: 'info', duration: 2400 });
+        }
+      } catch (e) {
+        showToast(`[핸들러 예외] ${e?.message || e}`, { type: 'danger', duration: 6000 });
+      } finally {
+        btn.classList.remove('is-busy');
+        reflect();
       }
-      btn.classList.remove('is-busy');
-      reflect();
     });
 
     // SW 가 push subscription 을 재발급한 경우 (pushsubscriptionchange) 동기화
