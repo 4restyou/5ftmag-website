@@ -97,6 +97,19 @@
     };
   }
 
+  // 브랜드 좋아요 (localStorage 기반)
+  const FAV_BRANDS_KEY = '5ft-fav-brands';
+  function getFavBrands() {
+    try { return new Set(JSON.parse(localStorage.getItem(FAV_BRANDS_KEY) || '[]')); }
+    catch { return new Set(); }
+  }
+  function toggleFavBrand(brand) {
+    const set = getFavBrands();
+    if (set.has(brand)) set.delete(brand); else set.add(brand);
+    try { localStorage.setItem(FAV_BRANDS_KEY, JSON.stringify([...set])); } catch {}
+    return set;
+  }
+
   function renderLibrary(films, query, category) {
     const filterFn = brandFilter(query, category);
     const list = films.filter(filterFn);
@@ -116,7 +129,14 @@
       if (!byBrand.has(b)) byBrand.set(b, []);
       byBrand.get(b).push(f);
     }
-    const sortedBrands = [...byBrand.entries()].sort((a, b) => a[0].localeCompare(b[0], 'en'));
+    // 정렬: 좋아요한 브랜드 ABC 순 먼저, 그 다음 나머지 ABC 순
+    const favs = getFavBrands();
+    const sortedBrands = [...byBrand.entries()].sort((a, b) => {
+      const aFav = favs.has(a[0]) ? 0 : 1;
+      const bFav = favs.has(b[0]) ? 0 : 1;
+      if (aFav !== bFav) return aFav - bFav;
+      return a[0].localeCompare(b[0], 'en');
+    });
 
     const bigRows = [];
     const smallFilms = [];
@@ -125,11 +145,17 @@
         const cards = items
           .sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || '', 'en', { sensitivity: 'base' }))
           .map(filmCardHtml).join('');
+        const isFav = favs.has(brand);
         bigRows.push(`
-          <section class="mh-brand">
+          <section class="mh-brand${isFav ? ' is-fav' : ''}">
             <div class="mh-brand-head">
               <h3 class="mh-brand-name">${esc(brand)}</h3>
               <span class="mh-brand-count">${items.length}</span>
+              <button type="button" class="mh-brand-fav${isFav ? ' is-on' : ''}" data-fav-brand="${escAttr(brand)}" aria-label="${esc(brand)} 좋아요" aria-pressed="${isFav}">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                  <path d="M12 21s-7-4.5-9.5-9.5C.8 8 2.5 4.5 6 4.5c2 0 3.5 1 4.5 2.5 1-1.5 2.5-2.5 4.5-2.5 3.5 0 5.2 3.5 3.5 7C19 16.5 12 21 12 21z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="${isFav ? 'currentColor' : 'none'}"/>
+                </svg>
+              </button>
             </div>
             <div class="mh-brand-strip">${cards}</div>
           </section>
@@ -150,6 +176,9 @@
     return bigRows.join('') + othersHtml;
   }
 
+  // escAttr 도우미
+  function escAttr(s) { return esc(s); }
+
   // ── 본체 렌더 ──
   const STATE = { films: [], stories: [], query: '', category: 'all' };
 
@@ -169,6 +198,20 @@
       STATE.category = c.dataset.cat;
       render();
     }));
+    // 브랜드 좋아요 클릭 위임
+    root.querySelector('#mhBody').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-fav-brand]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFavBrand(btn.dataset.favBrand);
+      render();
+      // 좋아요 토글 후 좋아요한 row 위로 스크롤
+      requestAnimationFrame(() => {
+        const target = root.querySelector(`[data-fav-brand="${CSS.escape(btn.dataset.favBrand)}"]`);
+        if (target) target.closest('section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
   }
 
   // ── iOS 사용자에게 "홈 화면에 추가" 안내 (한 번만) ──
