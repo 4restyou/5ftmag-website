@@ -953,10 +953,9 @@
       });
     }
 
-    if (!session) return;
     document.documentElement.dataset.notifBound = '1';
 
-    // 종 버튼 inject — theme 버튼 앞
+    // 종 버튼 inject — theme 버튼 앞. 비로그인도 노출해서 알림 시스템 존재를 알린다.
     const themeBtn = document.getElementById('themeBtn');
     const bell = document.createElement('button');
     bell.id = 'notifBell';
@@ -968,7 +967,43 @@
     if (themeBtn) navRight.insertBefore(bell, themeBtn);
     else navRight.appendChild(bell);
 
-    // 드롭다운 패널 (body 끝에 부착)
+    // 비로그인 사용자 — 종을 누르면 로그인 안내 패널만 노출
+    if (!session) {
+      const guestPanel = document.createElement('div');
+      guestPanel.id = 'notifPanel';
+      guestPanel.className = 'notif-panel';
+      guestPanel.setAttribute('role', 'dialog');
+      guestPanel.setAttribute('aria-label', '알림');
+      guestPanel.hidden = true;
+      guestPanel.innerHTML = `
+        <div class="notif-panel-head">
+          <span class="notif-panel-title">알림</span>
+        </div>
+        <div class="notif-panel-guest">
+          <p class="notif-panel-guest-title">로그인하면 알림을 받을 수 있어요</p>
+          <p class="notif-panel-guest-body">댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.</p>
+          <button type="button" class="notif-panel-guest-btn" data-action="auth-login">Google로 로그인</button>
+        </div>`;
+      document.body.appendChild(guestPanel);
+      bell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = guestPanel.hidden;
+        guestPanel.hidden = !open;
+        bell.setAttribute('aria-expanded', String(open));
+      });
+      document.addEventListener('click', (e) => {
+        if (guestPanel.hidden) return;
+        if (guestPanel.contains(e.target) || bell.contains(e.target)) return;
+        guestPanel.hidden = true;
+        bell.setAttribute('aria-expanded', 'false');
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !guestPanel.hidden) { guestPanel.hidden = true; bell.setAttribute('aria-expanded', 'false'); }
+      });
+      return;
+    }
+
+    // 로그인 사용자 — 정식 패널
     const panel = document.createElement('div');
     panel.id = 'notifPanel';
     panel.className = 'notif-panel';
@@ -981,8 +1016,17 @@
         <button type="button" class="notif-panel-allread" id="notifAllRead">전체 읽음</button>
       </div>
       <div class="notif-panel-push" id="notifPushRow" hidden>
-        <span class="notif-panel-push-label">기기에 푸시 알림 받기</span>
-        <button type="button" class="notif-panel-push-toggle" id="notifPushToggle" aria-pressed="false">켜기</button>
+        <div class="notif-panel-push-summary">
+          <span class="notif-panel-push-label">기기에 푸시 알림 받기</span>
+          <button type="button" class="notif-panel-push-toggle" id="notifPushToggle" aria-pressed="false">켜기</button>
+        </div>
+        <div class="notif-panel-push-detail" id="notifPushDetail" hidden>
+          <p class="notif-panel-push-help">댓글 답글 · 사진 승인 · 새 글이 OS 알림으로 와요. 언제든 끌 수 있어요.</p>
+          <div class="notif-panel-push-actions">
+            <button type="button" class="notif-panel-push-confirm" id="notifPushConfirm">지금 켜기</button>
+            <button type="button" class="notif-panel-push-cancel" id="notifPushCancel">나중에</button>
+          </div>
+        </div>
       </div>
       <div class="notif-panel-list" id="notifList">
         <div class="notif-panel-empty">불러오는 중…</div>
@@ -1136,26 +1180,46 @@
     }
     reflect();
 
-    btn.addEventListener('click', async () => {
-      if (btn.classList.contains('is-busy')) return;
+    const detail = document.getElementById('notifPushDetail');
+    const confirmBtn = document.getElementById('notifPushConfirm');
+    const cancelBtn = document.getElementById('notifPushCancel');
+
+    async function doSubscribe() {
       btn.classList.add('is-busy');
       try {
-        const active = await window.MagDB.push.isActive();
-        if (active) {
-          await window.MagDB.push.unsubscribe();
-          showToast('푸시 알림을 껐어요.', { type: 'info', duration: 2400 });
-        } else {
-          const result = await window.MagDB.push.subscribe();
-          if (result?.error) showToast(result.error.message || '푸시 알림 구독 실패', { type: 'danger', duration: 6000 });
-          else showToast('푸시 알림을 켰어요.', { type: 'info', duration: 2400 });
-        }
+        const result = await window.MagDB.push.subscribe();
+        if (result?.error) showToast(result.error.message || '푸시 알림 구독 실패', { type: 'danger', duration: 6000 });
+        else showToast('푸시 알림을 켰어요.', { type: 'info', duration: 2400 });
       } catch (e) {
         showToast(`[핸들러 예외] ${e?.message || e}`, { type: 'danger', duration: 6000 });
       } finally {
         btn.classList.remove('is-busy');
         reflect();
+        if (detail) detail.hidden = true;
       }
+    }
+
+    btn.addEventListener('click', async () => {
+      if (btn.classList.contains('is-busy')) return;
+      const active = await window.MagDB.push.isActive();
+      if (active) {
+        // 켜진 상태 → 즉시 끄기 (확인 없이)
+        btn.classList.add('is-busy');
+        try {
+          await window.MagDB.push.unsubscribe();
+          showToast('푸시 알림을 껐어요.', { type: 'info', duration: 2400 });
+        } finally {
+          btn.classList.remove('is-busy');
+          reflect();
+        }
+        return;
+      }
+      // 켜기 — 즉시 권한 요청 대신 안내 카드 펴기 (contextual opt-in)
+      if (detail) detail.hidden = !detail.hidden;
     });
+
+    if (confirmBtn) confirmBtn.addEventListener('click', doSubscribe);
+    if (cancelBtn) cancelBtn.addEventListener('click', () => { if (detail) detail.hidden = true; });
 
     // SW 가 push subscription 을 재발급한 경우 (pushsubscriptionchange) 동기화
     if ('serviceWorker' in navigator) {
@@ -1563,8 +1627,8 @@
     if (isForceDesktop()) return false;
     if (!window.matchMedia || !window.matchMedia('(max-width: 640px)').matches) return false;
     const path = location.pathname;
-    // 모바일 홈 (/) + films 만 — reader-submissions 의존성이 다 로드되는 페이지만 허용
-    if (path === '/' || path === '/index.html') return true;
+    // films 에서만. 홈은 시트의 "사진 올리기" 버튼과 중복돼 노이즈 + 95% 의 독자
+    // 발견 흐름을 가림. 홈=보기, films=행동(올리기) 진입점으로 분리.
     if (/^\/films\.html$/.test(path)) return true;
     return false;
   }

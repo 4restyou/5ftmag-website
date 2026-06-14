@@ -153,6 +153,9 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
 .mh-root.is-condensed .mh-controls { padding-top: 6px; padding-bottom: 6px; }
 .mh-root.is-condensed .mh-controls .mh-search { padding-top: 6px; padding-bottom: 6px; }
 .mh-root.is-condensed .mh-controls .mh-filter { max-height: 0; margin-top: 0; opacity: 0; pointer-events: none; }
+/* 스크롤 다운 시 보기 토글도 같이 축소 — 한 손 닿는 검색바만 남기는 셈 */
+.mh-controls .mh-view-toggle { transition: max-height .25s ease-out, margin-bottom .2s, opacity .2s; overflow: hidden; max-height: 48px; }
+.mh-root.is-condensed .mh-controls .mh-view-toggle { max-height: 0; margin-bottom: 0; opacity: 0; pointer-events: none; }
 
 /* ─── 최근 본 row (개인화) ─── */
 .mh-recent .mh-brand-name { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); font-weight: var(--fw-heading); }
