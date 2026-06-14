@@ -763,40 +763,61 @@
       return reg.pushManager.getSubscription();
     },
     async subscribe() {
-      if (!this.isSupported()) return { error: { message: '이 브라우저는 푸시 알림을 지원하지 않아요.' } };
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      // 어느 단계에서 실패하든 항상 { error: { message } } 로 반환 (호출부가 await 에서
+      // throw 되어 침묵하지 않게). step 라벨로 어디서 막혔는지 진단 가능.
+      const step = (label, fn) => fn().catch(e => ({ __step: label, error: e }));
+      try {
+        if (!this.isSupported()) return { error: { message: '이 브라우저는 푸시 알림을 지원하지 않아요.' } };
+        const c = client(); if (!c) return { error: { message: 'db unavailable' } };
+        const uid = await userId();
+        if (!uid) return { error: { message: 'login required' } };
 
-      // 권한 요청
-      const perm = await Notification.requestPermission();
-      if (perm !== 'granted') return { error: { message: '알림 권한이 거부됐어요.' } };
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') return { error: { message: `알림 권한이 ${perm} 상태예요.` } };
 
-      // SW 준비 (등록은 site-common.js 에서 함)
-      const reg = await navigator.serviceWorker.ready;
-      let sub = await reg.pushManager.getSubscription();
-      if (!sub) {
-        sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        });
+        // navigator.serviceWorker.ready 가 iOS PWA 등에서 영원히 대기하는 경우가 있어
+        // 5초 타임아웃을 둔다. 실패 사유가 침묵 대신 메시지로 나오게.
+        const ready = Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise((_, rej) => setTimeout(() => rej(new Error('SW ready timeout (5s)')), 5000)),
+        ]);
+        let reg;
+        try { reg = await ready; }
+        catch (e) { return { error: { message: `[SW 준비] ${e.message || e}` } }; }
+
+        let sub;
+        try { sub = await reg.pushManager.getSubscription(); }
+        catch (e) { return { error: { message: `[getSubscription] ${e.message || e}` } }; }
+
+        if (!sub) {
+          try {
+            sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+            });
+          } catch (e) {
+            return { error: { message: `[subscribe] ${e.name || ''} ${e.message || e}` } };
+          }
+        }
+
+        const json = sub.toJSON();
+        const p256dh = json.keys?.p256dh || bufToBase64(sub.getKey('p256dh'));
+        const auth = json.keys?.auth || bufToBase64(sub.getKey('auth'));
+
+        const { error: dbErr } = await c.from('push_subscriptions').upsert({
+          user_id: uid,
+          endpoint: sub.endpoint,
+          p256dh,
+          auth,
+          ua: (navigator.userAgent || '').slice(0, 500),
+          last_seen_at: new Date().toISOString(),
+        }, { onConflict: 'endpoint' });
+        if (dbErr) return { error: { message: `[DB] ${dbErr.message || dbErr.code || 'insert failed'}` } };
+
+        return { data: { endpoint: sub.endpoint } };
+      } catch (e) {
+        return { error: { message: `[예외] ${e.name || ''} ${e.message || e}` } };
       }
-
-      const json = sub.toJSON();
-      const p256dh = json.keys?.p256dh || bufToBase64(sub.getKey('p256dh'));
-      const auth = json.keys?.auth || bufToBase64(sub.getKey('auth'));
-
-      // DB upsert (endpoint UNIQUE — 같은 기기 중복 방지)
-      const { error } = await c.from('push_subscriptions').upsert({
-        user_id: uid,
-        endpoint: sub.endpoint,
-        p256dh,
-        auth,
-        ua: (navigator.userAgent || '').slice(0, 500),
-        last_seen_at: new Date().toISOString(),
-      }, { onConflict: 'endpoint' });
-      if (error) return { error };
-      return { data: { endpoint: sub.endpoint } };
     },
     async unsubscribe() {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
