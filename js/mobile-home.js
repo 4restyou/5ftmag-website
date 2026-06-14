@@ -661,9 +661,13 @@
     lb.querySelector('.mh-sheet-lb-close').addEventListener('click', close);
     lb.querySelector('.mh-sheet-lb-prev').addEventListener('click', prev);
     lb.querySelector('.mh-sheet-lb-next').addEventListener('click', next);
-    // 사진 자체 탭은 닫지 않음 (정보 패널과 사진을 같이 보고 싶을 수 있어서) —
-    // 닫기는 ✕ 버튼 / Esc / 배경 탭으로만.
-    lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
+    // 사진 영역 또는 배경 탭으로 닫기 (라이트박스 기본 직관). 정보 카드(.mh-sheet-lb-info)
+    // 안 탭은 닫지 않음 — 좋아요/공유/링크 등 인터랙션이 있어서.
+    lb.addEventListener('click', (e) => {
+      if (e.target.closest('.mh-sheet-lb-info')) return;
+      if (e.target.closest('.mh-sheet-lb-close, .mh-sheet-lb-nav')) return;
+      close();
+    });
 
     // 스와이프 좌/우
     let touchStartX = 0;
