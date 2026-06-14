@@ -1433,7 +1433,15 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
-    navigator.serviceWorker.register('/js/sw.js').catch(err => console.warn('[sw]', err.message));
+    // /sw.js (사이트 루트) — 스코프가 / 라야 ready 가 모든 페이지에서 resolve.
+    // /js/sw.js 에 두면 스코프가 /js/ 로 잡혀 push.subscribe() 가 영원 대기.
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(err => console.warn('[sw]', err.message));
+    // 옛 /js/sw.js 등록이 남아있으면 정리.
+    navigator.serviceWorker.getRegistrations?.().then(regs => {
+      regs.forEach(r => {
+        if (r.active?.scriptURL?.endsWith('/js/sw.js')) r.unregister().catch(() => {});
+      });
+    }).catch(() => {});
   }
 
   const FORCE_DESKTOP_KEY = '5ft-force-desktop';
