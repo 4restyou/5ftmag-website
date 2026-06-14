@@ -38,8 +38,12 @@
   status = 200
 
 [[redirects]]
+  # /film/<slug> → 정적 OG stub (build-film-og.mjs 가 생성).
+  # stub 이 meta refresh + JS 로 즉시 films.html?film=<slug> 으로 이동시킴.
+  # 소셜 미리보기(카카오/페이스북/트위터)가 stub 의 og:image 를 보게 됨.
+  # 빌드 누락된 신규 slug 도 대비해 force=false (정적 파일 우선).
   from = "/film/:slug"
-  to = "/films.html?film=:slug"
+  to = "/film/:slug.html"
   status = 200
 
 [[redirects]]

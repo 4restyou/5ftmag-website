@@ -31,3 +31,6 @@ playwright-report/
 # Temp
 *.log
 .cache/
+
+# build-film-og.mjs 가 생성하는 OG stub — Netlify 빌드 시점에 생성, 커밋 제외
+/film/
