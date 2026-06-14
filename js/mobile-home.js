@@ -15,6 +15,19 @@
   }
 
   if (!document.getElementById('mhRoot')) return;
+
+  // breakpoint 를 실제로 넘나들면 레이아웃 재초기화 (reload).
+  // 모바일 홈과 split-layout 은 DOM/JS 초기화가 완전히 달라 in-place 전환이
+  // 복잡해서, 경계를 넘는 순간에만 한 번 새로고침해 올바른 레이아웃으로 맞춘다.
+  // matchMedia change 는 경계를 넘을 때만 발화하므로 일반 resize 마다 돌지 않는다.
+  if (window.matchMedia) {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
+    const initialMobile = isMobile();
+    const onBreakpoint = () => { if (isMobile() !== initialMobile) location.reload(); };
+    if (mq.addEventListener) mq.addEventListener('change', onBreakpoint);
+    else if (mq.addListener) mq.addListener(onBreakpoint);
+  }
+
   if (!isMobile()) return;
 
   document.documentElement.classList.add('is-mobile-home');
