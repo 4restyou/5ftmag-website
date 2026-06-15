@@ -2267,7 +2267,7 @@
   display: flex;
   align-items: center;
   gap: 18px;
-  margin-top: 14px;
+  margin-top: 18px;
   flex-wrap: wrap;
 }
 /* head-actions 안에 들어온 mine-link 는 옛 absolute 정렬을 해제하고 같은 라인에 정렬 */
@@ -2294,25 +2294,12 @@
   border-bottom-color: var(--text);
 }
 
-/* ── head 액션·토글 한 줄 정렬 (액션 좌측, 토글 우측 끝) ── */
-.library-head-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
-.library-head-bar .library-head-actions {
-  margin-top: 0;
-}
-
 /* ── 라이브러리 보기 토글 (필름별 / 사진별) ── */
 .library-view-toggle {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  margin-left: auto;
+  margin-top: 20px;
   padding: 3px;
   border: 0;
   border-radius: 999px;
@@ -2342,6 +2329,16 @@
 .library-view-btn:focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .library-view-toggle {
+    width: 100%;
+    max-width: 292px;
+  }
+  .library-view-btn {
+    flex: 1 1 0;
+    padding-inline: 14px;
+  }
 }
 
 /* ── 사진별 보기 그리드 ── */

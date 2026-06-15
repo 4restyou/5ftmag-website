@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
   <link rel="stylesheet" href="./css/comments.css?v=20260602-iosfocus">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260602-iosfocus">
-  <link rel="stylesheet" href="./css/films.css?v=20260615-photoview">
+  <link rel="stylesheet" href="./css/films.css?v=20260615-librarynav">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -101,15 +101,13 @@
   <div class="films-section-head films-section-head-library">
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
-    <div class="library-head-bar">
-      <div class="library-head-actions">
-        <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
-        <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
-      </div>
-      <div class="library-view-toggle" role="tablist" aria-label="라이브러리 보기 방식">
-        <button type="button" class="library-view-btn is-active" data-view="films" role="tab" aria-selected="true">필름별</button>
-        <button type="button" class="library-view-btn" data-view="photos" role="tab" aria-selected="false">사진별</button>
-      </div>
+    <div class="library-view-toggle" role="tablist" aria-label="라이브러리 보기 방식">
+      <button type="button" class="library-view-btn is-active" data-view="films" role="tab" aria-selected="true">필름별</button>
+      <button type="button" class="library-view-btn" data-view="photos" role="tab" aria-selected="false">사진별</button>
+    </div>
+    <div class="library-head-actions">
+      <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
+      <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
     </div>
   </div>
 
