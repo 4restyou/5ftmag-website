@@ -1695,8 +1695,10 @@
     if (isForceDesktop()) return false;
     if (!window.matchMedia || !window.matchMedia('(max-width: 640px)').matches) return false;
     const path = location.pathname;
-    // films 에서만. 홈은 시트의 "사진 올리기" 버튼과 중복돼 노이즈 + 95% 의 독자
-    // 발견 흐름을 가림. 홈=보기, films=행동(올리기) 진입점으로 분리.
+    // 모바일 홈(/) + films.html — 두 곳 모두에서 노출.
+    // 홈은 PR #485 단순화 이후 Articles / Photo 섹션을 숨겨서 readers-cta 의 "내 사진 올리기"
+    // 가 한참 아래에 있다. 모바일에서 빠른 접근을 위해 FAB 유지.
+    if (path === '/' || path === '/index.html') return true;
     if (/^\/films\.html$/.test(path)) return true;
     return false;
   }
