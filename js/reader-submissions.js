@@ -788,6 +788,47 @@
     ].join('|');
   }
 
+  function uploadErrorState({ stage, error, hasUploadedPhoto }) {
+    const msg = String(error?.message || '');
+    const lower = msg.toLowerCase();
+    if (hasUploadedPhoto || stage === 'database') {
+      return {
+        title: '사진 저장은 완료됐어요',
+        detail: '사진 파일은 이미 올라갔습니다. 아래 버튼을 누르면 사진을 다시 보내지 않고 제출 기록만 다시 저장합니다.',
+        button: '제출 기록 다시 저장',
+      };
+    }
+    if (stage === 'auth' || msg.includes('로그인') || msg.includes('세션')) {
+      return {
+        title: '로그인이 필요해요',
+        detail: '로그인이 풀렸거나 권한 확인이 오래 걸렸습니다. 다시 로그인한 뒤 이어서 제출해 주세요.',
+        button: '다시 시도',
+      };
+    }
+    if (stage === 'storage') {
+      const timedOut = msg.includes('시간 초과') || lower.includes('timeout') || msg.includes('네트워크');
+      return {
+        title: timedOut ? '사진 전송 시간이 초과됐어요' : '사진 전송에 실패했어요',
+        detail: timedOut
+          ? '모바일 네트워크가 불안정하면 오래 걸릴 수 있어요. 와이파이나 더 안정적인 환경에서 다시 시도해 주세요.'
+          : '사진을 서버로 보내는 중 문제가 생겼습니다. 입력 내용은 유지되니 다시 시도해 주세요.',
+        button: '사진 다시 보내기',
+      };
+    }
+    if (stage === 'decode' || stage === 'resize' || stage === 'encode') {
+      return {
+        title: '사진 변환에 실패했어요',
+        detail: '이미지를 웹용 크기로 줄이는 중 문제가 생겼습니다. 다른 사진 파일이나 더 작은 파일로 다시 시도해 주세요.',
+        button: '다시 시도',
+      };
+    }
+    return {
+      title: '제출이 중단됐어요',
+      detail: '입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.',
+      button: '검토 요청 보내기',
+    };
+  }
+
   function bindFormHandlers(films) {
     const form = document.getElementById('rs-form');
     if (!form) return;
@@ -932,10 +973,15 @@
         openModal(renderSubmittedConfirm({ author: displaySubmissionAuthor(fields), film: fields.film }));
       } catch (err) {
         if (uploadStage !== 'validate') reportUploadFailure(uploadStage, err, uploadMeta);
-        setUploadStatus('error', '제출이 중단됐어요', '입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.');
+        const errState = uploadErrorState({
+          stage: uploadStage,
+          error: err,
+          hasUploadedPhoto: !!pendingUploadedPhoto,
+        });
+        setUploadStatus('error', errState.title, errState.detail);
         showError(err.message || '제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.');
         submitBtn.disabled = false;
-        submitBtn.textContent = pendingUploadedPhoto ? '제출 기록 다시 저장' : '검토 요청 보내기';
+        submitBtn.textContent = errState.button;
       } finally {
         submitting = false;
         clearSlowUploadHints();

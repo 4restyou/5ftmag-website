@@ -11,6 +11,23 @@
   .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
 }
 
+.admin-user button,
+.gate-btn {
+  border-radius: var(--btn-radius) !important;
+}
+
+.admin-user button {
+  border: 1px solid var(--border) !important;
+  padding: 5px 10px !important;
+  margin-left: 8px;
+  text-decoration: none !important;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.admin-user button:hover {
+  border-color: var(--text) !important;
+  background: var(--bg-sub) !important;
+}
+
 @media (min-width: 960px) {
   /* 콘텐츠 전체를 사이드바 폭만큼 밀고, 사이트 헤더만 원위치로 되돌려 풀폭 유지 */
   body { margin-left: var(--admin-side-w); }

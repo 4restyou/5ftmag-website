@@ -1122,7 +1122,8 @@ test('사진 업로드 실패는 실패 단계를 운영 오류 로그로 남긴
   await page.locator('input[name="consent"]').check();
   await page.locator('#rs-form button[type="submit"]').click();
 
-  await expect(page.locator('#rs-upload-status')).toContainText('제출이 중단됐어요', { timeout: 5000 });
+  await expect(page.locator('#rs-upload-status')).toContainText('사진 전송 시간이 초과됐어요', { timeout: 5000 });
+  await expect(page.locator('#rs-upload-status')).toContainText('네트워크가 불안정', { timeout: 5000 });
   const reports = await page.evaluate(() => window.__reportedClientErrors);
   expect(reports).toHaveLength(1);
   expect(reports[0].message).toContain('[reader-upload:storage]');
