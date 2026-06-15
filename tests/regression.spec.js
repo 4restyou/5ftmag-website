@@ -1141,6 +1141,116 @@ test('사진 업로드 실패는 실패 단계를 운영 오류 로그로 남긴
   expect(reports[0].stack).toContain('user_agent=');
 });
 
+test('사진은 올라갔고 기록 저장만 실패하면 재업로드 없이 저장만 재시도한다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('**/js/image-processor.js*', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: '',
+  }));
+  await page.addInitScript(() => {
+    window.__uploadCount = 0;
+    window.__createCount = 0;
+    window.__removeCount = 0;
+    window.processImageForUpload = async (_file, opts = {}) => {
+      opts.onProgress?.({ stage: 'decode' });
+      opts.onProgress?.({ stage: 'resize', width: 1200, height: 800 });
+      opts.onProgress?.({ stage: 'encode', width: 1200, height: 800 });
+      return { blob: new Blob(['ok'], { type: 'image/jpeg' }), width: 1200, height: 800 };
+    };
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        getUser: async () => ({ id: 'user-1' }),
+        onChange: () => {},
+      },
+      profiles: {
+        getMine: async () => ({ is_editor: false }),
+      },
+      submissions: {
+        uploadPhoto: async () => {
+          window.__uploadCount += 1;
+          return { error: null };
+        },
+        uploadPhotoResumable: async () => ({ error: { message: 'should not use resumable' } }),
+        create: async () => {
+          window.__createCount += 1;
+          if (window.__createCount === 1) return { error: { message: 'db timeout' } };
+          return { error: null };
+        },
+        removePhoto: async () => {
+          window.__removeCount += 1;
+          return { error: null };
+        },
+        listApproved: async () => [],
+      },
+      notifications: {
+        unreadCount: async () => 0,
+        list: async () => [],
+        markAllRead: async () => ({ error: null }),
+      },
+      realtime: {
+        subscribeNotifications: async () => null,
+      },
+      favorites: {
+        idsForType: async () => new Set(),
+        toggle: async () => ({ error: null }),
+      },
+      cameraOverrides: {
+        list: async () => new Map(),
+      },
+    };
+  });
+
+  await page.goto('/');
+  await page.evaluate(() => {
+    window.__reportedClientErrors = [];
+    window.reportClientError = payload => window.__reportedClientErrors.push(payload);
+  });
+  await page.locator('.rs-trigger').first().click();
+  await expect(page.locator('#rs-form')).toBeVisible({ timeout: 5000 });
+
+  await page.locator('input[name="photo"]').setInputFiles({
+    name: 'sample.jpg',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
+      'base64'
+    ),
+  });
+  await page.locator('input[name="submitter_name"]').fill('테스트');
+  await page.locator('#rs-film-trigger').click();
+  await page.locator('.rs-film-option').first().click();
+  await page.locator('input[name="consent"]').check();
+
+  const submit = page.locator('#rs-form button[type="submit"]');
+  await submit.click();
+  await expect(page.locator('#rs-error')).toContainText('사진 재업로드 없이 기록 저장만 다시 시도', { timeout: 5000 });
+  await expect(submit).toHaveText('제출 기록 다시 저장');
+
+  await submit.click();
+  await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
+
+  const result = await page.evaluate(() => ({
+    uploadCount: window.__uploadCount,
+    createCount: window.__createCount,
+    removeCount: window.__removeCount,
+    reports: window.__reportedClientErrors.length,
+  }));
+  expect(result).toEqual({
+    uploadCount: 1,
+    createCount: 2,
+    removeCount: 0,
+    reports: 1,
+  });
+});
+
 test('로그인 복귀 후 사진 업로드 폼을 자동으로 다시 연다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',

@@ -778,10 +778,21 @@
     return fields.submitterName || (igNorm ? '@' + igNorm : '');
   }
 
+  function fileSignature(file) {
+    if (!file) return '';
+    return [
+      file.name || '',
+      file.size || 0,
+      file.type || '',
+      file.lastModified || 0,
+    ].join('|');
+  }
+
   function bindFormHandlers(films) {
     const form = document.getElementById('rs-form');
     if (!form) return;
     let submitting = false;
+    let pendingUploadedPhoto = null;
 
     if (!window.ReaderCameraInput?.bindCameraInput) {
       showError('카메라 입력 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
@@ -807,6 +818,10 @@
       clearSlowUploadHints,
       isAcceptedImage,
     } = uploadUi;
+
+    form.querySelector('input[name="photo"]')?.addEventListener('change', () => {
+      pendingUploadedPhoto = null;
+    });
 
     if (!window.ReaderFilmPicker?.bindFilmPicker) {
       showError('필름 선택 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
@@ -846,27 +861,43 @@
         uploadMeta.fileName = file.name || '';
         uploadMeta.fileType = file.type || '';
         uploadMeta.fileLastModified = file.lastModified || '';
+        const currentFileSignature = fileSignature(file);
         fields = validateAndNormalizeSubmissionFields(fields, films);
 
         if (!window.ReaderUploadFlow?.uploadPhoto) {
           throw new Error('사진 업로드 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
         }
 
-        const uploadResult = await window.ReaderUploadFlow.uploadPhoto({
-          file,
-          db: db(),
-          fmtBytes,
-          readLocalJwtUser,
-          resizeToJpeg,
-          uuid,
-          withNetworkTimeout,
-          uploadMeta,
-          setSubmitText: (text) => { submitBtn.textContent = text; },
-          markProgress,
-        }).catch(err => {
-          showEmergencyHelp(String(err?.message || '').includes('사진 업로드가 완료되지 않았어요'));
-          throw err;
-        });
+        let uploadResult = null;
+        if (pendingUploadedPhoto?.fileSignature === currentFileSignature && pendingUploadedPhoto?.path && pendingUploadedPhoto?.user?.id) {
+          uploadResult = pendingUploadedPhoto;
+          uploadMeta.uploadBytes = pendingUploadedPhoto.uploadBytes || 0;
+          uploadMeta.triedPaths = pendingUploadedPhoto.triedPaths || [pendingUploadedPhoto.path];
+          uploadMeta.lastSuccessfulPath = pendingUploadedPhoto.path;
+          uploadMeta.lastSuccessfulKind = pendingUploadedPhoto.lastSuccessfulKind || 'previous';
+          markProgress('database', '제출 기록 다시 저장 중', '사진은 이미 올라갔어요. 사진 정보만 다시 저장하고 있어요.');
+        } else {
+          uploadResult = await window.ReaderUploadFlow.uploadPhoto({
+            file,
+            db: db(),
+            fmtBytes,
+            readLocalJwtUser,
+            resizeToJpeg,
+            uuid,
+            withNetworkTimeout,
+            uploadMeta,
+            setSubmitText: (text) => { submitBtn.textContent = text; },
+            markProgress,
+          }).catch(err => {
+            showEmergencyHelp(String(err?.message || '').includes('사진 업로드가 완료되지 않았어요'));
+            throw err;
+          });
+          pendingUploadedPhoto = {
+            ...uploadResult,
+            fileSignature: currentFileSignature,
+            lastSuccessfulKind: uploadMeta.lastSuccessfulKind || '',
+          };
+        }
         const { user, path, triedPaths } = uploadResult;
 
         const insertData = buildSubmissionInsertData({ userId: user.id, path, fields });
@@ -878,13 +909,9 @@
           '제출 기록 저장'
         ).catch(err => ({ error: { message: err.message } }));
         if (dbErr) {
-          markProgress('cleanup', '업로드 정리 중', '기록 저장에 실패해 올라간 사진 파일을 정리하고 있어요.');
-          await withNetworkTimeout(
-            db().submissions.removePhoto(path),
-            12000,
-            '실패한 업로드 정리'
-          ).catch(err => console.warn('[reader-submissions] cleanup failed:', err?.message || err));
-          throw new Error('사진은 올라갔지만 제출 기록 저장에 실패했어요. 잠시 뒤 다시 시도해 주세요. (' + dbErr.message + ')');
+          uploadMeta.lastSuccessfulPath = path;
+          uploadMeta.lastSuccessfulKind = uploadMeta.lastSuccessfulKind || pendingUploadedPhoto?.lastSuccessfulKind || 'storage';
+          throw new Error('사진은 올라갔지만 제출 기록 저장에 실패했어요. 입력 내용은 그대로 두고 아래 버튼을 다시 누르면 사진 재업로드 없이 기록 저장만 다시 시도합니다. (' + dbErr.message + ')');
         }
         // 폴백 단계에서 부분 업로드가 남았을 수 있는 이전 path 들 정리
         for (const earlierPath of triedPaths) {
@@ -898,6 +925,7 @@
 
         // 4) 메타 기억
         rememberSubmissionMeta(fields);
+        pendingUploadedPhoto = null;
 
         // 5) 확인 화면
         setUploadStatus('done', '제출 완료', 'Reader’s Roll 검토 큐에 들어갔어요.');
@@ -907,7 +935,7 @@
         setUploadStatus('error', '제출이 중단됐어요', '입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.');
         showError(err.message || '제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.');
         submitBtn.disabled = false;
-        submitBtn.textContent = '검토 요청 보내기';
+        submitBtn.textContent = pendingUploadedPhoto ? '제출 기록 다시 저장' : '검토 요청 보내기';
       } finally {
         submitting = false;
         clearSlowUploadHints();
