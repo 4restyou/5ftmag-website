@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
   <link rel="stylesheet" href="./css/comments.css?v=20260602-iosfocus">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260602-iosfocus">
-  <link rel="stylesheet" href="./css/films.css?v=20260615-librarynav">
+  <link rel="stylesheet" href="./css/films.css?v=20260615-rollops">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -103,7 +103,7 @@
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
     <div class="library-view-toggle" role="tablist" aria-label="라이브러리 보기 방식">
       <button type="button" class="library-view-btn is-active" data-view="films" role="tab" aria-selected="true">필름별</button>
-      <button type="button" class="library-view-btn" data-view="photos" role="tab" aria-selected="false">사진별</button>
+      <button type="button" class="library-view-btn" data-view="photos" role="tab" aria-selected="false">사진 스타일별</button>
     </div>
     <div class="library-head-actions">
       <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
@@ -200,7 +200,7 @@
 
   <div class="library-photos-view" id="libraryPhotosView" hidden>
     <p class="library-photos-guide">
-      사진을 먼저 훑어보는 보기입니다. 검색은 필름·카메라·이름·SNS까지 함께 찾고, 스타일은 사용 필름 기준으로 묶습니다.
+      사진을 먼저 훑어보는 보기입니다. 검색은 필름·카메라·이름·SNS까지 함께 찾고, 스타일은 사용 필름의 성격으로 묶습니다.
     </p>
     <div class="library-photos-controls">
       <label class="library-search-label">
@@ -331,9 +331,9 @@
 <script src="./js/films-catalog-loader.js?v=20260602-modules" defer></script>
 <script src="./js/films-lightbox.js?v=20260602-modules" defer></script>
 <script src="./js/films-reader-export.js?v=20260602-modules" defer></script>
-<script src="./js/films-reader-roll-ui.js?v=20260602-modules" defer></script>
+<script src="./js/films-reader-roll-ui.js?v=20260615-rollops" defer></script>
 <script src="./js/films-reader-roll-data.js?v=20260602-modules" defer></script>
-<script src="./js/films-page.js?v=20260615-photoview" defer></script>
+<script src="./js/films-page.js?v=20260615-rollops" defer></script>
 <script src="./js/films-propose.js?v=20260602-propose" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>

@@ -1376,11 +1376,32 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .reader-roll-view-actions {
   flex: 0 0 auto;
   justify-content: flex-end;
+  align-items: flex-end;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+}
+.reader-control-group {
+  display: flex;
+  min-width: 0;
+}
+.reader-control-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 10px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  white-space: nowrap;
 }
 .reader-roll-switcher {
   display: inline-flex;
@@ -1398,18 +1419,6 @@
 }
 .reader-roll-controls .reader-roll-switcher {
   margin: 0;
-}
-.reader-roll-label {
-  display: inline-flex;
-  align-items: center;
-  min-height: 36px;
-  padding: 0 7px 0 2px;
-  color: rgba(255, 255, 255, 0.48);
-  font-size: 10px;
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.12em;
-  line-height: 1;
-  white-space: nowrap;
 }
 .reader-roll-switcher [hidden] {
   display: none;
@@ -1479,6 +1488,7 @@
 }
 .reader-person-filter {
   display: flex;
+  align-items: center;
   flex-wrap: nowrap;
   gap: 8px;
   margin: 0 0 18px;
@@ -2151,6 +2161,7 @@
   }
   .reader-roll-view-actions {
     justify-content: flex-start;
+    align-items: flex-start;
   }
   .films-section-head-library { margin-top: 64px; }
 }
@@ -2294,7 +2305,7 @@
   border-bottom-color: var(--text);
 }
 
-/* ── 라이브러리 보기 토글 (필름별 / 사진별) ── */
+/* ── 라이브러리 보기 토글 (필름별 / 사진 스타일별) ── */
 .library-view-toggle {
   display: inline-flex;
   align-items: center;
@@ -2316,7 +2327,7 @@
   appearance: none;
   border: 0;
   border-radius: 999px;
-  padding: 6px 18px;
+  padding: 6px 16px;
   cursor: pointer;
   transition: color .15s, background .15s, box-shadow .15s;
 }
@@ -2341,7 +2352,7 @@
   }
 }
 
-/* ── 사진별 보기 그리드 ── */
+/* ── 사진 스타일별 보기 그리드 ── */
 .library-films-view[hidden],
 .library-photos-view[hidden] { display: none; }
 .library-photos-guide {

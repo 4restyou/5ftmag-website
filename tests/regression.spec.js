@@ -1371,7 +1371,7 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
   await page.locator('.film-card[data-film="ultramax"]').first().click();
   await expect.poll(async () => page.evaluate(() => window.__listApprovedLimits.length), { timeout: 5000 }).toBeGreaterThan(0);
   await expect(page.evaluate(() => window.__listApprovedLimits[0])).resolves.toBeNull();
-  await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-label')).toHaveText('ROLL ARCHIVE');
+  await expect(page.locator('#readerRollSwitcher-ultramax .reader-control-label')).toHaveText('롤 보기');
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-roll-toggle')).toContainText('지난 롤 보기');
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('1 / 36 · 3롤', { timeout: 5000 });
   await page.locator('#readerGrid-ultramax .reader-slot.is-filled').first().click();
@@ -2011,6 +2011,8 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
   await expect(page.locator('#clientErrorList')).toContainText('파일 sample.jpg');
   await expect(page.locator('#clientErrorList')).toContainText('시도 3회');
   await expect(page.locator('#clientErrorList')).toContainText('마지막 최소 경로');
+  await expect(page.locator('#clientErrorList')).toContainText('기본·경량·최소 업로드 경로가 모두 실패');
+  await expect(page.locator('#clientErrorList')).toContainText('제출 기록 저장 상태와 저장 권한');
   await expect(page.locator('#opsHealth')).toHaveText('확인 필요');
   await expect(page.locator('#topFilms')).toContainText('Kodak Portra 400');
   await expect(page.locator('#topCameras')).toContainText('Leica M6');

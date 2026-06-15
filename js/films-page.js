@@ -5,12 +5,12 @@
   // ════════════════════════════
   let filmsData = {};
   const ROLL_LIMIT = 36;
-  const PHOTOS_PAGE_SIZE = 60; // 사진별 보기에서 한 번에 노출되는 사진 수
+  const PHOTOS_PAGE_SIZE = 60; // 사진 스타일별 보기에서 한 번에 노출되는 사진 수
 
   const filmsGridFeatured = document.getElementById('filmsGridFeatured');
   const filmsGridLibrary  = document.getElementById('filmsGridLibrary');
 
-  // 사진별 보기 (라이브러리 전환) DOM
+  // 사진 스타일별 보기 (라이브러리 전환) DOM
   const libraryFilmsView   = document.getElementById('libraryFilmsView');
   const libraryPhotosView  = document.getElementById('libraryPhotosView');
   const libraryPhotosGrid  = document.getElementById('libraryPhotosGrid');
@@ -22,7 +22,7 @@
   const libraryPhotosSearchEl = document.getElementById('libraryPhotosSearch');
   const libraryPhotosChipsEl  = document.getElementById('libraryPhotosChips');
 
-  // 사진별 보기 상태
+  // 사진 스타일별 보기 상태
   let libraryView = 'films';           // 'films' | 'photos'
   let photosPool = [];                 // 원본 풀 (검색·필터 전체)
   let photosShuffled = [];             // 현재 보이는 (필터된) 셔플 결과
@@ -505,10 +505,15 @@
         </p>
         <div class="reader-roll-controls">
           <div class="reader-roll-control-main">
-            <div class="reader-roll-switcher" id="readerRollSwitcher-${filmKey}" hidden></div>
-            <div class="reader-person-filter" id="readerPersonFilter-${filmKey}" hidden></div>
+            <div class="reader-control-group reader-control-group-roll">
+              <div class="reader-roll-switcher" id="readerRollSwitcher-${filmKey}" hidden></div>
+            </div>
+            <div class="reader-control-group reader-control-group-person">
+              <div class="reader-person-filter" id="readerPersonFilter-${filmKey}" hidden></div>
+            </div>
           </div>
           <div class="modal-section-actions reader-roll-view-actions">
+            <span class="reader-control-label">보기·저장</span>
             <button type="button" class="modal-view-toggle" data-view-toggle aria-label="기본 그리드로 전환">기본 그리드</button>
             <div class="reader-save-menu" data-reader-save-menu hidden>
               <button type="button" class="modal-view-save" data-save-menu-toggle="reader" data-film-key="${escapeAttr(filmKey)}" aria-expanded="false" aria-label="이미지 저장 방식 선택">이미지로 저장</button>
@@ -1427,9 +1432,9 @@
   }
 
   // ════════════════════════════
-  // 라이브러리 보기 전환 (필름별 / 사진별)
+  // 라이브러리 보기 전환 (필름별 / 사진 스타일별)
   //   필름별: 기존 라이브러리 그리드 (filmsGridLibrary) 유지
-  //   사진별: 승인된 submissions 전체를 셔플해서 한 그리드로 노출. 카드 클릭 시 통합 lightbox.
+  //   사진 스타일별: 승인된 submissions 전체를 셔플해서 한 그리드로 노출. 카드 클릭 시 통합 lightbox.
   // ════════════════════════════
   function shuffleInPlace(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -1683,7 +1688,7 @@
     });
   }
 
-  // 페이지 로드 시 URL ?view=photos 면 사진별 모드 진입
+  // 페이지 로드 시 URL ?view=photos 면 사진 스타일별 모드 진입
   try {
     if (new URL(location.href).searchParams.get('view') === 'photos') {
       setLibraryView('photos');

@@ -579,6 +579,34 @@ function clientUploadDetail(row) {
   return parts.join(' · ');
 }
 
+function clientUploadAction(row, meta) {
+  const data = parseClientErrorStack(row);
+  if (meta.kind !== 'upload') return '';
+  if (meta.stage === 'auth') {
+    return '조치: 로그인 복귀 경로와 모바일 세션 유지 여부를 먼저 확인하세요.';
+  }
+  if (meta.stage === 'database' || meta.stage === 'write') {
+    if (data.last_successful_path) {
+      return '조치: 사진 파일은 올라갔을 수 있습니다. 중복 업로드보다 제출 기록 저장 상태를 먼저 확인하세요.';
+    }
+    return '조치: 제출 기록 저장 상태와 저장 권한, RLS, 필수 입력값 누락 여부를 우선 확인하세요.';
+  }
+  if (meta.stage === 'storage') {
+    const attemptCount = Number(data.attempt_count) || 0;
+    if (attemptCount >= 3) {
+      return '조치: 기본·경량·최소 업로드 경로가 모두 실패했습니다. 모바일 네트워크와 Supabase Storage 상태를 함께 확인하세요.';
+    }
+    return '조치: 파일 용량, 모바일 네트워크, Storage 응답 지연 여부를 확인하세요.';
+  }
+  if (meta.stage === 'decode' || meta.stage === 'resize' || meta.stage === 'encode' || meta.stage === 'image-process') {
+    return '조치: 이미지 파일 형식, HEIC/JPEG 변환, 브라우저 메모리 부족 가능성을 확인하세요.';
+  }
+  if (meta.stage === 'cleanup') {
+    return '조치: 임시 업로드 파일 정리가 실패했을 수 있으니 Storage 잔여 파일을 점검하세요.';
+  }
+  return '조치: 같은 단계의 반복 발생 여부를 보고 재현 환경을 먼저 좁혀보세요.';
+}
+
 function clientUploadSummaries(rows) {
   const map = new Map();
   rows.forEach(row => {
@@ -630,6 +658,7 @@ async function loadClientErrors() {
       const meta = clientErrorMeta(row);
       const loc = [row.source, row.lineno ? `${row.lineno}:${row.colno || 0}` : ''].filter(Boolean).join(' ');
       const uploadDetail = meta.kind === 'upload' ? clientUploadDetail(row) : '';
+      const uploadAction = meta.kind === 'upload' ? clientUploadAction(row, meta) : '';
       return `
         <div class="ops-row">
           <div class="ops-row-main">
@@ -638,6 +667,7 @@ async function loadClientErrors() {
             </div>
             <div class="ops-row-sub">${escapeHtml(row.path || '-')} ${loc ? `· ${escapeHtml(loc)}` : ''}</div>
             ${uploadDetail ? `<div class="ops-row-sub">${escapeHtml(uploadDetail)}</div>` : ''}
+            ${uploadAction ? `<div class="ops-row-action">${escapeHtml(uploadAction)}</div>` : ''}
           </div>
           <div class="ops-row-meta">${escapeHtml(fmtAgoShort(row.ts))}<br>${fmtNum(row.occurrences)}건</div>
         </div>

@@ -87,7 +87,7 @@
     const expanded = archiveOpen || !isViewingCurrent;
     rollSwitcher.hidden = false;
     rollSwitcher.innerHTML = `
-      <span class="reader-roll-label">ROLL ARCHIVE</span>
+      <span class="reader-control-label">롤 보기</span>
       <button type="button" class="reader-roll-toggle${expanded ? ' is-active' : ''}" data-roll-action="${isViewingCurrent ? 'toggle' : 'current'}" aria-expanded="${expanded ? 'true' : 'false'}">
         ${isViewingCurrent ? `지난 롤 보기 <span>${pastNumbers.length}</span>` : `현재 롤로 돌아가기 <span>${currentNumber}</span>`}
       </button>
@@ -110,6 +110,7 @@
     }
     personFilter.hidden = false;
     personFilter.innerHTML = `
+      <span class="reader-control-label">작가 필터</span>
       ${authors.length > 1 ? `<button type="button" class="reader-person-chip${activePerson === 'all' ? ' is-active' : ''}" data-person-key="all">
         ALL <span>${rollRows.length}</span>
       </button>` : ''}

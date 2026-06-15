@@ -11,6 +11,33 @@
   .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
 }
 
+@media (max-width: 720px) {
+  .admin-header { padding-top: 28px !important; }
+  .admin-title-row { align-items: flex-start !important; }
+  .admin-body { padding-top: 20px !important; }
+  .admin-subnav {
+    gap: 16px !important;
+    margin-top: 14px !important;
+    padding-bottom: 2px;
+  }
+  .admin-subnav-link {
+    font-size: 12px !important;
+    letter-spacing: 0.02em !important;
+  }
+  .panel,
+  .card,
+  .ops-panel {
+    border-radius: 6px !important;
+  }
+  .ops-row {
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .ops-row-meta {
+    font-size: 11px !important;
+  }
+}
+
 .admin-user button,
 .gate-btn {
   border-radius: var(--btn-radius) !important;
