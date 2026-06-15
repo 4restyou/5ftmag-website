@@ -847,12 +847,15 @@
   const photoMatchesQuery = (row, q) => photoMatchesQueryPure(row, q);
   function renderPhotoGrid(rows, grid) {
     const filtered = rows.filter(r => photoMatchesCategory(r, STATE.categories) && photoMatchesQuery(r, STATE.query));
+    // 사진으로 보기 모드는 매번 랜덤 순서 — 같은 사진이 늘 위에 안 쌓이게.
+    // shuffleInPlace 는 in-place 라 원본 보존 위해 slice() 사본을 셔플.
+    const shuffled = shuffleInPlace(filtered.slice());
     grid.removeAttribute('aria-busy');
-    if (!filtered.length) {
+    if (!shuffled.length) {
       grid.outerHTML = '<div class="mh-empty"><p>조건에 맞는 사진이 없어요.</p></div>';
       return;
     }
-    grid.innerHTML = filtered.map((r, i) => `
+    grid.innerHTML = shuffled.map((r, i) => `
       <button type="button" class="mh-photo-cell" data-photo-index="${i}" aria-label="${esc(r.film || '사진')} ${i + 1} 크게 보기">
         <img src="${esc(r.image)}" alt="" loading="lazy" />
       </button>
@@ -861,7 +864,8 @@
       const cell = e.target.closest('[data-photo-index]');
       if (!cell) return;
       try { window.trackEvent?.('lightbox_opened', { from: 'photos_view' }); } catch (_) {}
-      openSheetLightbox(filtered, Number(cell.dataset.photoIndex), null);
+      // data-photo-index 가 shuffled 순서라 같은 shuffled 배열로 라이트박스 열기.
+      openSheetLightbox(shuffled, Number(cell.dataset.photoIndex), null);
     });
   }
 
