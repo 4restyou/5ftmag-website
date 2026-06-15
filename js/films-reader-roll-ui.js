@@ -105,19 +105,21 @@
     if (!personFilter) return;
     if (authors.length < 1) {
       personFilter.hidden = true;
+      personFilter.classList.remove('is-single');
       personFilter.innerHTML = '';
       return;
     }
     personFilter.hidden = false;
+    personFilter.classList.toggle('is-single', authors.length === 1);
     personFilter.innerHTML = `
-      <span class="reader-control-label">작가 필터</span>
+      <span class="reader-control-label">${authors.length > 1 ? '작가 필터' : '작가'}</span>
       ${authors.length > 1 ? `<button type="button" class="reader-person-chip${activePerson === 'all' ? ' is-active' : ''}" data-person-key="all">
         ALL <span>${rollRows.length}</span>
       </button>` : ''}
       ${authors.map(([key, info]) => `
         <button type="button" class="reader-person-chip${activePerson === key || authors.length === 1 ? ' is-active' : ''}" data-person-key="${escapeAttr(key)}">
-          ${escapeAttr(info.label)} <span>${info.count}</span>
-          <em class="reader-person-all">전체</em>
+          ${escapeAttr(info.label)} <span>${authors.length === 1 ? `${info.count}컷` : info.count}</span>
+          ${authors.length > 1 ? '<em class="reader-person-all">전체</em>' : ''}
         </button>
       `).join('')}`;
   }

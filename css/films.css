@@ -1504,6 +1504,14 @@
 .reader-roll-controls .reader-person-filter {
   margin: 0;
 }
+.reader-person-filter.is-single {
+  overflow: visible;
+  -webkit-mask-image: none;
+          mask-image: none;
+}
+.reader-person-filter.is-single .reader-person-chip {
+  max-width: 100%;
+}
 .reader-person-chip {
   flex-shrink: 0;
   appearance: none;
