@@ -16,6 +16,16 @@ html.is-mobile-home .news-section,
 html.is-mobile-home .links-section,
 html.is-mobile-home .connect-section { display: none !important; }
 
+/* 모바일 메인은 최대한 심플하게 — Films Library 아래 split-layout 의
+   Articles / News / Photo 섹션은 PC 에서만. 단 readers-cta(사진 올리기 안내) +
+   Partners + 광고 + next-issue 는 그대로 노출.
+   (PC 보기 토글로 .is-mobile-home 클래스가 해제되면 다시 모두 보임) */
+html.is-mobile-home .panel-left,
+html.is-mobile-home #photo > .sub-section-head:has(+ .news-list),
+html.is-mobile-home #photo > .news-list,
+html.is-mobile-home #photo > .sub-section-head--with-toggle,
+html.is-mobile-home #photo > .discover-grid { display: none !important; }
+
 .mh-root { display: none; }
 html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background: var(--bg); }
 

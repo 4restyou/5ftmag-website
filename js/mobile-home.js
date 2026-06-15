@@ -208,14 +208,12 @@
 
   // ── 본체 렌더 ──
   // view: 'films' (브랜드별) | 'photos' (전체 사진 그리드)
+  // 보기 토글 — 항상 "브랜드 필름별" 로 초기화. 5ft 정체성이 필름 매거진이라
+  // 매 방문마다 브랜드 보기로 reset. 세션 내에서 사진 모드로 전환은 가능.
+  // (이전엔 localStorage 에 저장했지만 정체성 강조 위해 제거.)
   const VIEW_KEY = '5ft-mh-view';
-  function getSavedView() {
-    try { return localStorage.getItem(VIEW_KEY) === 'photos' ? 'photos' : 'films'; }
-    catch { return 'films'; }
-  }
-  function saveView(v) {
-    try { localStorage.setItem(VIEW_KEY, v); } catch {}
-  }
+  function getSavedView() { return 'films'; }
+  function saveView(_v) { /* no-op — 매 방문 reset 의도 */ }
   // 카테고리 — 멀티 select Set. 빈 Set 또는 4종 모두 = "전체"
   const CATEGORIES_KEY = '5ft-mh-categories';
   function getSavedCategories() {
