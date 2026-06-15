@@ -120,12 +120,18 @@
     return set;
   }
 
-  function renderLibrary(films, query, category) {
-    const filterFn = brandFilter(query, category);
+  function renderLibrary(films, query, categories) {
+    const filterFn = brandFilter(query, categories);
     const list = films.filter(filterFn);
 
+    // 카테고리 활성 판정: Set/배열이면 비어있지 않고 4종 미만일 때 활성
+    const catActive = (categories && typeof categories === 'object' && (
+      (categories instanceof Set ? categories.size : (Array.isArray(categories) ? categories.length : 0)) > 0 &&
+      (categories instanceof Set ? categories.size : categories.length) < 4
+    ));
+
     // 검색·필터 활성 시 그리드로
-    if (query.trim() || category !== 'all') {
+    if (query.trim() || catActive) {
       root.classList.add('is-searching');
       if (!list.length) {
         // 다음 행동 제안: 다른 추천 필름 또는 전체로 돌아가기
@@ -210,7 +216,19 @@
   function saveView(v) {
     try { localStorage.setItem(VIEW_KEY, v); } catch {}
   }
-  const STATE = { films: [], stories: [], query: '', category: 'all', view: getSavedView() };
+  // 카테고리 — 멀티 select Set. 빈 Set 또는 4종 모두 = "전체"
+  const CATEGORIES_KEY = '5ft-mh-categories';
+  function getSavedCategories() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(CATEGORIES_KEY) || '[]');
+      const valid = ['color', 'bw', 'slide', 'cinema'];
+      return new Set((Array.isArray(arr) ? arr : []).filter(c => valid.includes(c)));
+    } catch { return new Set(); }
+  }
+  function saveCategories(set) {
+    try { localStorage.setItem(CATEGORIES_KEY, JSON.stringify([...set])); } catch {}
+  }
+  const STATE = { films: [], stories: [], query: '', categories: getSavedCategories(), view: getSavedView() };
 
   function render() {
     if (STATE.view === 'photos') {
@@ -221,13 +239,36 @@
       return;
     }
     const newHtml = renderNewStories(STATE.stories);
-    const libraryHtml = renderLibrary(STATE.films, STATE.query, STATE.category);
+    const libraryHtml = renderLibrary(STATE.films, STATE.query, STATE.categories);
     root.querySelector('#mhBody').innerHTML = newHtml + libraryHtml;
+  }
+
+  // 활성 카테고리 개수 (badge 용). 0 또는 4 = 전체 = 표시 안 함.
+  function activeCategoryCount() {
+    const n = STATE.categories.size;
+    return (n === 0 || n === 4) ? 0 : n;
+  }
+  function updateFilterBadge() {
+    const badge = root.querySelector('#mhFilterBadge');
+    if (!badge) return;
+    const n = activeCategoryCount();
+    badge.textContent = String(n);
+    badge.hidden = n === 0;
+  }
+  function syncFilterCheckboxes() {
+    root.querySelectorAll('.mh-filter-list input[type="checkbox"]').forEach(cb => {
+      cb.checked = STATE.categories.has(cb.dataset.cat);
+    });
   }
 
   function bindControls() {
     const search = root.querySelector('#mhSearch');
-    const chips = root.querySelectorAll('.mh-chip');
+    const searchBar = root.querySelector('#mhSearchBar');
+    const searchBtn = root.querySelector('#mhSearchBtn');
+    const searchClose = root.querySelector('#mhSearchClose');
+    const filterBtn = root.querySelector('#mhFilterBtn');
+    const filterSheet = root.querySelector('#mhFilterSheet');
+
     // 저장된 view 반영
     root.querySelectorAll('.mh-view-btn').forEach(b => {
       b.classList.toggle('is-active', b.dataset.view === STATE.view);
@@ -245,13 +286,56 @@
       });
       render();
     }));
+
+    // 검색 — 아이콘 탭 시 오버레이 토글 + 즉시 포커스. 입력은 즉시 반영.
     search.addEventListener('input', () => { STATE.query = search.value; render(); });
-    chips.forEach(c => c.addEventListener('click', () => {
-      chips.forEach(x => x.classList.remove('is-active'));
-      c.classList.add('is-active');
-      STATE.category = c.dataset.cat;
+    if (search.value) STATE.query = search.value;
+    searchBtn?.addEventListener('click', () => {
+      const open = searchBar.hidden;
+      searchBar.hidden = !open;
+      searchBtn.setAttribute('aria-expanded', String(open));
+      if (open) setTimeout(() => search.focus(), 10);
+    });
+    searchClose?.addEventListener('click', () => {
+      searchBar.hidden = true;
+      searchBtn.setAttribute('aria-expanded', 'false');
+      search.value = ''; STATE.query = ''; render();
+    });
+
+    // 필터 sheet — 멀티 select 체크박스, 입력 즉시 반영. 완료 = 닫기, 초기화 = 전부 해제 + 닫기.
+    filterBtn?.addEventListener('click', () => {
+      syncFilterCheckboxes();
+      filterSheet.hidden = false;
+      requestAnimationFrame(() => filterSheet.classList.add('is-open'));
+      try { window.trackEvent?.('filter_opened'); } catch (_) {}
+    });
+    const closeFilter = () => {
+      filterSheet.classList.remove('is-open');
+      setTimeout(() => { filterSheet.hidden = true; }, 200);
+    };
+    filterSheet?.addEventListener('click', (e) => {
+      if (e.target === filterSheet) closeFilter();
+      if (e.target.closest('.mh-sheet-grip')) closeFilter();
+    });
+    root.querySelector('#mhFilterApply')?.addEventListener('click', closeFilter);
+    root.querySelector('#mhFilterReset')?.addEventListener('click', () => {
+      STATE.categories.clear();
+      saveCategories(STATE.categories);
+      syncFilterCheckboxes();
+      updateFilterBadge();
       render();
-    }));
+      closeFilter();
+    });
+    root.querySelectorAll('.mh-filter-list input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (cb.checked) STATE.categories.add(cb.dataset.cat);
+        else STATE.categories.delete(cb.dataset.cat);
+        saveCategories(STATE.categories);
+        updateFilterBadge();
+        render();
+      });
+    });
+    updateFilterBadge();
     // 브랜드 좋아요 클릭 위임
     root.querySelector('#mhBody').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-fav-brand]');
@@ -273,11 +357,13 @@
     // 빈 상태의 "전체 보기로 돌아가기"
     root.querySelector('#mhBody').addEventListener('click', (e) => {
       if (e.target.id !== 'mhResetSearch') return;
-      const all = root.querySelector('.mh-chip[data-cat="all"]');
-      chips.forEach(x => x.classList.remove('is-active'));
-      all?.classList.add('is-active');
-      STATE.category = 'all'; STATE.query = '';
+      STATE.categories.clear();
+      saveCategories(STATE.categories);
+      STATE.query = '';
       search.value = '';
+      if (searchBar) { searchBar.hidden = true; searchBtn?.setAttribute('aria-expanded', 'false'); }
+      syncFilterCheckboxes();
+      updateFilterBadge();
       render();
     });
     // 카드 탭 → 모바일 시트
@@ -762,7 +848,7 @@
   const photoMatchesCategory = (row, category) => photoMatchesCategoryPure(row, category, STATE.films);
   const photoMatchesQuery = (row, q) => photoMatchesQueryPure(row, q);
   function renderPhotoGrid(rows, grid) {
-    const filtered = rows.filter(r => photoMatchesCategory(r, STATE.category) && photoMatchesQuery(r, STATE.query));
+    const filtered = rows.filter(r => photoMatchesCategory(r, STATE.categories) && photoMatchesQuery(r, STATE.query));
     grid.removeAttribute('aria-busy');
     if (!filtered.length) {
       grid.outerHTML = '<div class="mh-empty"><p>조건에 맞는 사진이 없어요.</p></div>';

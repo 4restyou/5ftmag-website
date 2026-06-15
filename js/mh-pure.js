@@ -47,11 +47,24 @@
     return true;
   }
 
-  // 필름 검색·필터 factory — (q, category) 로 (f) => boolean 반환
+  // 멀티 select 카테고리 — Set 또는 배열. 비어있거나 4종 모두 포함이면 "전체" 와 동의.
+  // 하나라도 매칭되면 true (OR 의미).
+  const ALL_CATEGORIES = ['color', 'bw', 'slide', 'cinema'];
+  function categoriesMatchType(categories, t) {
+    const arr = Array.isArray(categories) ? categories : [...(categories || [])];
+    if (arr.length === 0 || arr.length >= ALL_CATEGORIES.length) return true;
+    return arr.some(c => categoryMatchesType(c, t));
+  }
+
+  // 필름 검색·필터 factory — query + category(단일) 또는 categories(set/배열) 둘 다 허용.
+  // 호환: 기존 (query, 'color') 도 동작. 신규 (query, ['color','bw']) / (query, new Set([...])).
   function brandFilter(query, category) {
     const q = (query || '').trim().toLowerCase();
+    const useMulti = Array.isArray(category) || (category && typeof category === 'object' && typeof category.has === 'function');
     return (f) => {
-      if (!categoryMatchesType(category, f?.type)) return false;
+      if (useMulti) {
+        if (!categoriesMatchType(category, f?.type)) return false;
+      } else if (!categoryMatchesType(category, f?.type)) return false;
       if (!q) return true;
       const hay = `${f.brand || ''} ${f.name || ''} ${f.displayName || ''} ${f.aliases?.join(' ') || ''}`.toLowerCase();
       return hay.includes(q);
@@ -75,9 +88,16 @@
 
   function photoMatchesCategory(row, category, films) {
     if (!category || category === 'all') return true;
+    const useMulti = Array.isArray(category) || (category && typeof category === 'object' && typeof category.has === 'function');
+    if (useMulti) {
+      const arr = Array.isArray(category) ? category : [...category];
+      if (arr.length === 0 || arr.length >= ALL_CATEGORIES.length) return true;
+    }
     const f = matchFilmByName(row?.film, films);
     if (!f) return false;
-    return categoryMatchesType(category, f.type);
+    return useMulti
+      ? categoriesMatchType(category, f.type)
+      : categoryMatchesType(category, f.type);
   }
 
   function photoMatchesQuery(row, q) {
@@ -88,7 +108,8 @@
 
   const api = {
     shuffleInPlace, daysAgo, filmAliasList, contributorKeyOf,
-    categoryMatchesType, brandFilter, matchFilmByName, filmSlugByName,
+    categoryMatchesType, categoriesMatchType, ALL_CATEGORIES,
+    brandFilter, matchFilmByName, filmSlugByName,
     photoMatchesCategory, photoMatchesQuery,
   };
 

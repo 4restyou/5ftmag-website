@@ -21,11 +21,13 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
 
 /* 상단 검색·필터 */
 .mh-controls { position: sticky; top: var(--header-h, 60px); z-index: 30; background: var(--bg); padding: 10px var(--mh-pad); border-bottom: 1px solid var(--border); }
+.mh-controls-row { display: flex; align-items: center; gap: 8px; }
 
-/* 보기 방식 토글 (브랜드 필름별 / 사진으로) — segmented control */
+/* 보기 방식 토글 — segmented control. 좌측 flex:1 로 확보 */
 .mh-view-toggle {
   display: flex; background: var(--bg-sub); border-radius: 999px;
-  padding: 3px; margin-bottom: 10px;
+  padding: 3px;
+  flex: 1; min-width: 0;
 }
 .mh-view-btn {
   flex: 1; font: inherit; font-size: 13px; font-weight: var(--fw-heading);
@@ -34,6 +36,94 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
   transition: background .15s, color .15s;
 }
 .mh-view-btn.is-active { background: var(--bg); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+/* 상단 우측 icon 버튼 (검색, 필터) — 헤더 icon-btn 과 결 맞춤 */
+.mh-controls-icon {
+  flex: 0 0 auto; width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--text); border-radius: 8px;
+  position: relative;
+  transition: background .12s;
+}
+.mh-controls-icon:hover { background: var(--bg-sub); }
+.mh-controls-icon:active { transform: scale(0.95); }
+.mh-controls-badge {
+  position: absolute; top: 4px; right: 4px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  background: #ffd400; color: #111;
+  border-radius: 8px; font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
+/* 검색 오버레이 — sticky controls 아래 풀폭 input 으로 펼침 */
+.mh-search-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--bg-sub);
+}
+.mh-search-bar[hidden] { display: none; }
+.mh-search-bar svg { color: var(--text-muted); flex: 0 0 auto; }
+.mh-search-bar input {
+  flex: 1; border: 0; background: none; font: inherit; color: var(--text);
+  outline: none; padding: 0; min-width: 0; font-size: 14px;
+}
+.mh-search-close {
+  flex: 0 0 auto; background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 14px; padding: 4px 8px;
+  border-radius: 4px;
+}
+.mh-search-close:hover { color: var(--text); background: var(--bg); }
+
+/* 필름 유형 필터 sheet — 기존 시트와 같은 모션 */
+.mh-filter-backdrop {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0);
+  transition: background .22s ease-out;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.mh-filter-backdrop[hidden] { display: none; }
+.mh-filter-backdrop.is-open { background: rgba(0,0,0,.45); }
+.mh-filter-sheet {
+  width: 100%; max-width: 640px;
+  background: var(--bg); color: var(--text);
+  border-radius: 18px 18px 0 0;
+  padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(100%);
+  transition: transform .25s cubic-bezier(.2, .8, .25, 1);
+  box-shadow: 0 -12px 40px rgba(0,0,0,.18);
+}
+.mh-filter-backdrop.is-open .mh-filter-sheet { transform: translateY(0); }
+.mh-filter-title { font-size: 16px; font-weight: var(--fw-heading); margin: 6px 0 4px; }
+.mh-filter-hint { font-size: 12px; color: var(--text-muted); margin: 0 0 16px; }
+.mh-filter-list { list-style: none; padding: 0; margin: 0 0 18px; display: flex; flex-direction: column; gap: 2px; }
+.mh-filter-list li { display: block; }
+.mh-filter-list label {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 4px; cursor: pointer;
+  font-size: 15px; color: var(--text);
+}
+.mh-filter-list input[type="checkbox"] {
+  width: 20px; height: 20px; flex: 0 0 auto;
+  accent-color: var(--text);
+}
+.mh-filter-list label:active { background: var(--bg-sub); border-radius: 4px; }
+.mh-filter-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mh-filter-reset, .mh-filter-apply {
+  font: inherit; font-size: 14px; font-weight: var(--fw-heading);
+  padding: 12px 16px; border-radius: 999px; cursor: pointer;
+}
+.mh-filter-reset { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+.mh-filter-reset:hover { border-color: var(--text); }
+.mh-filter-apply { background: var(--text); color: var(--bg); border: none; }
+.mh-filter-apply:active { transform: scale(0.98); }
+
+/* PWA standalone 일 때 — "PC 화면으로 보기" 토글 같은 비-앱 요소 숨김 */
+html.is-standalone-pwa #mhBackToMobile,
+html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-search { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-sub); }
 .mh-search svg { color: var(--text-muted); flex: 0 0 auto; }
 .mh-search input { flex: 1; border: 0; background: none; font: inherit; color: var(--text); outline: none; padding: 0; min-width: 0; font-size: 14px; }
@@ -151,11 +241,8 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
 .mh-controls .mh-search { transition: padding .2s ease-out; }
 .mh-controls .mh-filter { transition: max-height .25s ease-out, margin-top .2s ease-out, opacity .2s ease-out; overflow: hidden; max-height: 60px; }
 .mh-root.is-condensed .mh-controls { padding-top: 6px; padding-bottom: 6px; }
-.mh-root.is-condensed .mh-controls .mh-search { padding-top: 6px; padding-bottom: 6px; }
-.mh-root.is-condensed .mh-controls .mh-filter { max-height: 0; margin-top: 0; opacity: 0; pointer-events: none; }
-/* 스크롤 다운 시 보기 토글도 같이 축소 — 한 손 닿는 검색바만 남기는 셈 */
-.mh-controls .mh-view-toggle { transition: max-height .25s ease-out, margin-bottom .2s, opacity .2s; overflow: hidden; max-height: 48px; }
-.mh-root.is-condensed .mh-controls .mh-view-toggle { max-height: 0; margin-bottom: 0; opacity: 0; pointer-events: none; }
+/* condense 모드 — 검색 오버레이가 열려있어도 자동으로 닫지는 않음 (사용자 의도 존중).
+   상단 한 행이 이미 짧아서 추가 축소는 안 함. */
 
 /* ─── 최근 본 row (개인화) ─── */
 .mh-recent .mh-brand-name { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); font-weight: var(--fw-heading); }
