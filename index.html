@@ -42,7 +42,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260602-iosfocus">
   <link rel="stylesheet" href="./css/home.css?v=20260609-cardtok">
-  <link rel="stylesheet" href="./css/mobile-home.css?v=20260614-lbinfo">
+  <link rel="stylesheet" href="./css/mobile-home.css?v=20260615-chrome">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -135,23 +135,49 @@
 <!-- ════════ 모바일 전용 홈 (640px 이하 + PC 보기 토글 꺼짐) ════════ -->
 <main class="mh-root" id="mhRoot" role="main">
   <div class="mh-controls">
-    <div class="mh-view-toggle" role="tablist" aria-label="보기 방식">
-      <button type="button" class="mh-view-btn is-active" data-view="films" role="tab" aria-selected="true">브랜드 필름별</button>
-      <button type="button" class="mh-view-btn" data-view="photos" role="tab" aria-selected="false">사진으로</button>
+    <div class="mh-controls-row">
+      <div class="mh-view-toggle" role="tablist" aria-label="보기 방식">
+        <button type="button" class="mh-view-btn is-active" data-view="films" role="tab" aria-selected="true">브랜드 필름별</button>
+        <button type="button" class="mh-view-btn" data-view="photos" role="tab" aria-selected="false">사진으로</button>
+      </div>
+      <button type="button" class="mh-controls-icon" id="mhSearchBtn" aria-label="필름 검색" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      </button>
+      <button type="button" class="mh-controls-icon" id="mhFilterBtn" aria-label="필터" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2"/>
+          <line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2"/>
+          <line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="18" r="2"/>
+        </svg>
+        <span class="mh-controls-badge" id="mhFilterBadge" hidden></span>
+      </button>
     </div>
-    <label class="mh-search">
+    <div class="mh-search-bar" id="mhSearchBar" hidden>
       <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       <input type="search" id="mhSearch" placeholder="필름 검색 (이름·브랜드)" aria-label="필름 검색" autocomplete="off" />
-    </label>
-    <div class="mh-filter" role="tablist" aria-label="필름 유형">
-      <button type="button" class="mh-chip is-active" data-cat="all" role="tab">전체</button>
-      <button type="button" class="mh-chip" data-cat="color" role="tab">컬러</button>
-      <button type="button" class="mh-chip" data-cat="bw" role="tab">흑백</button>
-      <button type="button" class="mh-chip" data-cat="slide" role="tab">슬라이드</button>
-      <button type="button" class="mh-chip" data-cat="cinema" role="tab">시네마</button>
+      <button type="button" class="mh-search-close" id="mhSearchClose" aria-label="검색 닫기">✕</button>
     </div>
   </div>
   <div id="mhBody"></div>
+
+  <!-- 필름 유형 필터 — bottom sheet, 멀티 select -->
+  <div class="mh-filter-backdrop" id="mhFilterSheet" hidden role="dialog" aria-modal="true" aria-label="필름 유형 필터">
+    <div class="mh-filter-sheet">
+      <button type="button" class="mh-sheet-grip" aria-label="닫기"></button>
+      <h3 class="mh-filter-title">필름 유형</h3>
+      <p class="mh-filter-hint">여러 개 선택하면 모두 포함됩니다.</p>
+      <ul class="mh-filter-list">
+        <li><label><input type="checkbox" data-cat="color"><span>컬러</span></label></li>
+        <li><label><input type="checkbox" data-cat="bw"><span>흑백</span></label></li>
+        <li><label><input type="checkbox" data-cat="slide"><span>슬라이드</span></label></li>
+        <li><label><input type="checkbox" data-cat="cinema"><span>시네마</span></label></li>
+      </ul>
+      <div class="mh-filter-actions">
+        <button type="button" class="mh-filter-reset" id="mhFilterReset">초기화</button>
+        <button type="button" class="mh-filter-apply" id="mhFilterApply">완료</button>
+      </div>
+    </div>
+  </div>
 </main>
 
 <!-- ════════ SPLIT LAYOUT ════════ -->
@@ -350,10 +376,10 @@
 
 
 <script src="./js/util.js?v=20260602-normalize" defer></script>
-  <script src="./js/site-common.js?v=20260614-a11y" defer></script>
+  <script src="./js/site-common.js?v=20260615-chrome" defer></script>
 <script src="./js/home-page.js?v=20260614-a11y" defer></script>
-<script src="./js/mh-pure.js?v=20260614-mhpure" defer></script>
-<script src="./js/mobile-home.js?v=20260614-mhpure" defer></script>
+<script src="./js/mh-pure.js?v=20260615-chrome" defer></script>
+<script src="./js/mobile-home.js?v=20260615-chrome" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db-client.js?v=20260614-personalize" defer></script>
 <!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->

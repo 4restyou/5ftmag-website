@@ -73,6 +73,27 @@ describe('MHPure.contributorKeyOf', () => {
   });
 });
 
+describe('MHPure.categoriesMatchType (multi-select)', () => {
+  it('빈 Set 은 전체 통과', () => {
+    expect(MH.categoriesMatchType(new Set(), 'color negative')).toBe(true);
+    expect(MH.categoriesMatchType([], 'black and white')).toBe(true);
+  });
+  it('4종 모두 선택은 전체 통과 (= 필터 해제)', () => {
+    expect(MH.categoriesMatchType(['color', 'bw', 'slide', 'cinema'], 'color')).toBe(true);
+    expect(MH.categoriesMatchType(new Set(['color', 'bw', 'slide', 'cinema']), 'anything')).toBe(true);
+  });
+  it('OR 매칭 (둘 다 선택 → 둘 중 하나 만족하면 통과)', () => {
+    const sel = ['color', 'bw'];
+    expect(MH.categoriesMatchType(sel, 'Color Negative')).toBe(true);
+    expect(MH.categoriesMatchType(sel, 'Black & White')).toBe(true);
+    expect(MH.categoriesMatchType(sel, 'Tungsten')).toBe(false);
+  });
+  it('Set 도 동일', () => {
+    expect(MH.categoriesMatchType(new Set(['cinema']), 'Tungsten 800T')).toBe(true);
+    expect(MH.categoriesMatchType(new Set(['cinema']), 'Color')).toBe(false);
+  });
+});
+
 describe('MHPure.categoryMatchesType', () => {
   it('all 은 항상 통과', () => {
     expect(MH.categoryMatchesType('all', '')).toBe(true);
@@ -118,6 +139,13 @@ describe('MHPure.brandFilter', () => {
   it('카테고리 + 쿼리 같이', () => {
     expect(films.filter(MH.brandFilter('800t', 'cinema')).length).toBe(1);
     expect(films.filter(MH.brandFilter('800t', 'color')).length).toBe(0);
+  });
+  it('multi-select 배열로 카테고리 OR 매칭', () => {
+    const sel = ['color', 'cinema'];
+    expect(films.filter(MH.brandFilter('', sel)).map(f => f.name).sort()).toEqual(['800T', 'Portra 400']);
+  });
+  it('multi-select Set 도 동일', () => {
+    expect(films.filter(MH.brandFilter('', new Set(['bw']))).map(f => f.name)).toEqual(['HP5 Plus']);
   });
 });
 

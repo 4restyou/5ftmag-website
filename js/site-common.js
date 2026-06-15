@@ -1619,7 +1619,20 @@
   if (isForceDesktop()) setForceDesktop(true);
 
   // 햄버거 메뉴에 "PC 화면으로 보기" 토글 항목 추가
+  // PWA standalone (홈 화면 추가 후) 감지 — 앱 모드에선 chrome 단순화.
+  function isStandalonePwa() {
+    try {
+      return window.navigator.standalone === true
+        || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    } catch { return false; }
+  }
+  if (isStandalonePwa()) {
+    document.documentElement.classList.add('is-standalone-pwa');
+  }
+
   function injectDesktopToggle() {
+    // PWA standalone (홈 화면 추가) 사용자에겐 의미 없는 토글 — 숨김.
+    if (isStandalonePwa()) return;
     const nav = document.getElementById('mobileNav');
     if (!nav || nav.querySelector('[data-action="toggle-desktop"]')) return;
     const a = document.createElement('button');
@@ -1642,6 +1655,7 @@
   // 데스크탑 헤더에는 햄버거 메뉴가 숨겨져서 토글로 되돌릴 수 없는 문제 해결.
   function injectMobileBackButton() {
     if (!isForceDesktop()) return;
+    if (isStandalonePwa()) return; // PWA 모드면 PC 강제 자체가 안 일어나야 함
     if (document.getElementById('mhBackToMobile')) return;
     const btn = document.createElement('button');
     btn.id = 'mhBackToMobile';
