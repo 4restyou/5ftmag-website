@@ -1,6 +1,8 @@
 /* ════════════════════════════════════════════════════════════
-/* TODO mobile-first 리팩토링 대기 — @media (max-width) → (min-width) 플립. base 가 모바일 값을 갖도록 조정 필요. 회귀 위험 있어 별도 라운드에서 처리. (PoC: comments.css / market.css)*/
    Reader's Roll 직접 제출 위젯
+   TODO mobile-first 리팩토링 대기 — @media (max-width) → (min-width) 플립.
+   base 가 모바일 값을 갖도록 조정 필요. 회귀 위험 있어 별도 라운드에서 처리.
+   (PoC: comments.css / market.css)
    ════════════════════════════════════════════════════════════ */
 
 /* 트리거 버튼 */
@@ -97,58 +99,71 @@
 }
 
 /* 월간 테마 블록 (모달 안) */
+/* 응모 카드 — 압축형. 폼 하단 (consent 직전) 에 위치. 클릭 시 펼침. */
 .rs-theme {
-  background: #fef3c7;
-  border-radius: 4px;
-  padding: 16px 18px;
-  margin-bottom: 20px;
-  display: grid;
-  gap: 8px;
+  background: var(--bg-sub);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 8px 0 12px;
+  overflow: hidden;
 }
-.rs-theme-tag {
-  font-size: 11px;
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #78350f;
+.rs-theme-summary {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
 }
-.rs-theme-title {
-  font-size: 18px;
-  font-weight: var(--fw-heading);
-  color: #1f1f1f;
-  letter-spacing: -0.015em;
+/* 기본 disclosure triangle 숨김 */
+.rs-theme-summary::-webkit-details-marker { display: none; }
+.rs-theme-summary::marker { content: ''; }
+.rs-theme-check-row {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; min-width: 0; cursor: pointer; margin: 0;
+}
+.rs-theme-check-row input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px; height: 18px;
+  accent-color: var(--text);
+  cursor: pointer;
+}
+.rs-theme-line {
+  display: flex; flex-direction: column; gap: 1px;
+  flex: 1; min-width: 0;
+}
+.rs-theme-line-title {
+  font-size: 13px; font-weight: var(--fw-heading);
+  color: var(--text);
+}
+.rs-theme-line-sub {
+  font-size: 11px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rs-theme-chevron {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  transition: transform .18s ease-out;
+}
+.rs-theme[open] .rs-theme-chevron { transform: rotate(180deg); }
+.rs-theme-detail {
+  padding: 0 14px 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
 }
 .rs-theme-desc {
-  font-size: 13px;
-  color: #5f4a1f;
-  line-height: 1.55;
-  margin: 0;
-}
-.rs-theme-check {
-  background: rgba(255,255,255,0.7);
-  font-size: 12px;
-  padding: 10px 12px;
+  font-size: 12px; color: var(--text);
+  opacity: .8; line-height: 1.55; margin: 0;
 }
 .rs-theme-hint {
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11px; line-height: 1.5;
   color: #78350f;
-  background: rgba(255,255,255,0.55);
-  border-radius: 3px;
-  padding: 8px 10px;
-  margin: 0;
+  background: #fef3c7;
+  border-radius: 4px;
+  padding: 7px 10px;
+  margin: 8px 0 12px;
 }
-.rs-theme-hint strong {
-  font-weight: var(--fw-heading);
-}
-[data-theme="dark"] .rs-theme {
-  background: #3a2e0c;
-}
-[data-theme="dark"] .rs-theme-title { color: #fef3c7; }
-[data-theme="dark"] .rs-theme-desc  { color: #d4c08a; }
-[data-theme="dark"] .rs-theme-check { background: rgba(0,0,0,0.25); }
-[data-theme="dark"] .rs-theme-hint  { background: rgba(0,0,0,0.25); color: #fbbf24; }
-[data-theme="dark"] .rs-theme-tag   { color: #fbbf24; }
+.rs-theme-hint strong { font-weight: var(--fw-heading); }
+[data-theme="dark"] .rs-theme-hint { background: #3a2e0c; color: #fbbf24; }
 
 /* 메인 페이지에 노출되는 테마 배너 (작은 카드형) */
 .theme-banner {
