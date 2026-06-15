@@ -394,17 +394,29 @@
     const initialThemeChecked = !!(themeCanonical && initialSelectedName &&
       normalizeFilmName(initialSelectedName) === normalizeFilmName(themeCanonical));
 
+    // 압축 카드 — summary(체크박스 + 한 줄 요약) + 펼침(상세). 위치는 폼 하단(consent 직전).
+    // 클래스 .rs-theme 와 data-theme-canonical, input name=theme_apply, #rs-theme-hint 는
+    // film-picker 의 syncThemeCheckbox 가 셀렉터로 의존하므로 그대로 유지.
+    const themeSubtitle = theme && theme.subtitle ? ` · "${theme.subtitle}"` : '';
     const themeBlock = (theme && theme.active) ? `
-      <div class="rs-theme" data-theme-canonical="${escapeAttr(themeCanonical)}">
-        <span class="rs-theme-tag">${escapeHtml(themeIssue)} 주제</span>
-        <strong class="rs-theme-title">${escapeHtml(theme.title)}${theme.subtitle ? ` <small style="font-weight: var(--fw-all); color: inherit; opacity: 0.78;">— ${escapeHtml(theme.subtitle)}</small>` : ''}</strong>
-        <p class="rs-theme-desc">${escapeHtml(theme.description || '')}${themeFilm}</p>
-        <label class="rs-checkbox rs-theme-check">
-          <input type="checkbox" name="theme_apply" value="${escapeAttr(theme.month)}"${initialThemeChecked ? ' checked' : ''} />
-          <span>이 사진을 <strong>"${escapeHtml(theme.title)}"</strong> 주제 응모로 함께 보내기 — 우수작은 ${escapeHtml(themeIssue)} 종이 매거진 후보가 됩니다.</span>
-        </label>
-        ${themeCanonical ? `<p class="rs-theme-hint" id="rs-theme-hint" hidden>이번 호 응모는 <strong>${escapeHtml(themeCanonical)}</strong> 사진만 함께 보낼 수 있어요.</p>` : ''}
-      </div>
+      <details class="rs-theme rs-theme-compact" data-theme-canonical="${escapeAttr(themeCanonical)}">
+        <summary class="rs-theme-summary">
+          <label class="rs-theme-check-row" onclick="event.stopPropagation()">
+            <input type="checkbox" name="theme_apply" value="${escapeAttr(theme.month)}"${initialThemeChecked ? ' checked' : ''} />
+            <span class="rs-theme-line">
+              <strong class="rs-theme-line-title">${escapeHtml(themeIssue)} 응모 함께 보내기</strong>
+              <small class="rs-theme-line-sub">${themeCanonical ? escapeHtml(themeCanonical) + ' · ' : ''}"${escapeHtml(theme.title)}"</small>
+            </span>
+          </label>
+          <span class="rs-theme-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </span>
+        </summary>
+        <div class="rs-theme-detail">
+          <p class="rs-theme-desc">${escapeHtml(theme.description || '')}${themeSubtitle}${themeFilm}</p>
+        </div>
+      </details>
+      ${themeCanonical ? `<p class="rs-theme-hint" id="rs-theme-hint" hidden>이번 호 응모는 <strong>${escapeHtml(themeCanonical)}</strong> 사진만 함께 보낼 수 있어요.</p>` : ''}
     ` : '';
 
     const groupsHtml = brandKeys.map(brand => `
@@ -429,7 +441,6 @@
     return `
       <h2 id="rs-modal-title" class="rs-title">사진 올리기</h2>
       <p class="rs-desc">한 컷을 보내주세요. 편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).</p>
-      ${themeBlock}
       <form class="rs-form" id="rs-form">
         <label class="rs-field rs-photo-field">
           <span class="rs-label">사진 <em>*</em></span>
@@ -492,6 +503,7 @@
           <span class="rs-label">한 줄 메모 <small>(선택, 200자)</small></span>
           <textarea name="caption" rows="2" maxlength="200" placeholder="이 컷에 얽힌 짧은 이야기"></textarea>
         </label>
+        ${themeBlock}
         <label class="rs-checkbox">
           <input type="checkbox" name="consent" required />
           <span>이 사진의 저작권은 본인에게 있으며, 5ft magazine 사이트 / SNS / 종이 매거진 게재에 동의합니다. <em>*</em></span>
