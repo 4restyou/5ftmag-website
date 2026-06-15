@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
   <link rel="stylesheet" href="./css/comments.css?v=20260602-iosfocus">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260602-iosfocus">
-  <link rel="stylesheet" href="./css/films.css?v=20260615-singleauthor">
+  <link rel="stylesheet" href="./css/films.css?v=20260615-librarytabs">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -102,8 +102,8 @@
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
     <div class="library-view-toggle" role="tablist" aria-label="라이브러리 보기 방식">
-      <button type="button" class="library-view-btn is-active" data-view="films" role="tab" aria-selected="true">필름별</button>
-      <button type="button" class="library-view-btn" data-view="photos" role="tab" aria-selected="false">사진 스타일별</button>
+      <button type="button" class="library-view-btn is-active" data-view="films" role="tab" aria-selected="true">필름으로 보기</button>
+      <button type="button" class="library-view-btn" data-view="photos" role="tab" aria-selected="false">사진으로 보기</button>
     </div>
     <div class="library-head-actions">
       <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
@@ -163,6 +163,7 @@
       </svg>
       <input type="search" class="library-search" id="librarySearch" placeholder="필름·브랜드·ISO·카메라·작가·SNS로 검색" aria-label="필름 라이브러리 검색" autocomplete="off" />
     </label>
+    <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
     <button type="button" class="btn btn-secondary btn-md library-advanced-toggle" id="libraryAdvancedToggle" aria-expanded="false" aria-controls="libraryAdvancedFilters">필터</button>
     <div class="library-controls-right" id="libraryAdvancedFilters">
       <div class="ms-dropdown" id="libraryBrandMS" data-key="brand">
@@ -179,7 +180,6 @@
         </button>
         <div class="ms-dropdown-panel" role="dialog" aria-label="카메라 다중 선택" hidden></div>
       </div>
-      <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
     </div>
   </div>
   <p class="library-empty" id="libraryEmpty" hidden>일치하는 필름이 없습니다. 브랜드명, ISO, 필름명을 줄여서 다시 검색해 보세요.</p>
@@ -200,7 +200,7 @@
 
   <div class="library-photos-view" id="libraryPhotosView" hidden>
     <p class="library-photos-guide">
-      사진을 먼저 훑어보는 보기입니다. 검색은 필름·카메라·이름·SNS까지 함께 찾고, 스타일은 사용 필름의 성격으로 묶습니다.
+      사진을 먼저 훑어보는 보기입니다. 검색은 필름·카메라·이름·SNS까지 함께 찾고, 필터는 사용 필름의 종류로 묶습니다.
     </p>
     <div class="library-photos-controls">
       <label class="library-search-label">
@@ -327,7 +327,7 @@
 <script src="./js/films-utils.js?v=20260610-purehelpers" defer></script>
 <script src="./js/films-cards.js?v=20260523-reveal" defer></script>
 <script src="./js/films-share.js?v=20260612-domain" defer></script>
-<script src="./js/films-library-filters.js?v=20260602-modules" defer></script>
+<script src="./js/films-library-filters.js?v=20260615-librarytabs" defer></script>
 <script src="./js/films-catalog-loader.js?v=20260602-modules" defer></script>
 <script src="./js/films-lightbox.js?v=20260602-modules" defer></script>
 <script src="./js/films-reader-export.js?v=20260602-modules" defer></script>

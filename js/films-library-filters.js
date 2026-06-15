@@ -3,10 +3,10 @@
 
   const FILTER_LABELS = {
     all: '전체',
-    color: 'Color',
-    bw: 'B&W',
-    slide: 'Slide',
-    cinema: 'Cinema',
+    color: '컬러',
+    bw: '흑백',
+    slide: '슬라이드',
+    cinema: '영화용',
   };
   const MOBILE_LIBRARY_INITIAL = 30;
   const MOBILE_LIBRARY_STEP = 30;
