@@ -7,6 +7,7 @@
   "scripts": {
     "validate": "node scripts/validate-assets.mjs",
     "qa": "npm run validate && node scripts/qa-smoke.mjs",
+    "qa:release": "npm run build:rss && npm run build:sitemap && npm run qa",
     "qa:visual": "node scripts/qa-visual.mjs",
     "test": "playwright test",
     "test:ui": "playwright test --ui",

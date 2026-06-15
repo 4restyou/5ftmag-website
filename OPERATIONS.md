@@ -53,8 +53,10 @@ footer 에 링크 inject 됨 (site-common.js). 별도 설정 불필요.
 ## 배포 전 필수 명령
 
 ```bash
-npm run qa
+npm run qa:release
 ```
+
+`npm run qa:release`는 RSS와 sitemap을 먼저 최신 공개 글 기준으로 다시 만든 뒤 `npm run qa`를 실행합니다.
 
 `npm run qa`는 다음을 확인합니다.
 

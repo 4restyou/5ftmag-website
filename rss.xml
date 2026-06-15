@@ -6,7 +6,7 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Thu, 11 Jun 2026 17:16:41 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 15 Jun 2026 01:55:45 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
@@ -30,6 +30,15 @@
       <description>상경 후 코로나의 한가운데에서, 외부인의 시선으로 바라본 서울이라는 비오톱. 김도균의 SPC 사진첩 ISSUE.02.</description>
       <category>PHOTOBOOK</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Street Photography Club</dc:creator>
+    </item>
+    <item>
+      <title>골문 앞의 ISO 400, 일포드 풋볼 에디션</title>
+      <link>https://www.5ftmag.com/stories/ilford-football.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/ilford-football.html</guid>
+      <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+      <description>월드컵 개막에 맞춰 일포드가 HP5 Plus 와 XP2 Super 풋볼 컬렉터스 에디션을 내놨다. 유제는 그대로, 상자에 Expired Film Club 의 흑백 축구 사진이 입혀졌다.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
     </item>
     <item>
       <title>세 발짝의 거리, 아츠시 니시지마</title>
