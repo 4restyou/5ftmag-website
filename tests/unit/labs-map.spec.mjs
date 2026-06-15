@@ -92,7 +92,7 @@ describe('Labs Naver map integration', () => {
     expect(js).toContain('setTimeout(() => map.setCenter(pos), 120);');
   });
 
-  it('shows compact pricing details in list view cards but hides them in map view cards', () => {
+  it('shows compact pricing details in list view cards and keeps map view focused on the map', () => {
     const js = read('js/labs-page.js');
     const css = read('css/labs.css');
     expect(js).toContain('function labCardSummary(lab)');
@@ -101,7 +101,7 @@ describe('Labs Naver map integration', () => {
     expect(js).toContain('${repairCardSummary(s)}');
     expect(js).toContain('135 기준');
     expect(css).toContain('.lab-card-summary');
-    expect(css).toContain('html.labs-view-map .lab-card-summary');
+    expect(css).toContain('html.labs-view-map .labs-section');
     expect(css).toContain('display: none;');
   });
 });

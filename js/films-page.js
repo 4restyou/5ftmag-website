@@ -1474,10 +1474,10 @@
   // 필름 type 문자열을 4개 카테고리로 매핑
   function filmTypeCategory(typeStr) {
     const t = String(typeStr || '').toLowerCase();
+    if (t.includes('tungsten') || t.includes('daylight') || t.includes('cinema') || t.includes('motion')) return 'cinema';
+    if (t.includes('slide') || t.includes('e-6')) return 'slide';
+    if (t.includes('black') || t.includes('white') || t.includes('b&w') || t.includes('bw')) return 'bw';
     if (t.includes('color')) return 'color';
-    if (t.includes('black') || t.includes('bw')) return 'bw';
-    if (t.includes('slide')) return 'slide';
-    if (t.includes('tungsten') || t.includes('daylight') || t.includes('cinema')) return 'cinema';
     return '';
   }
 

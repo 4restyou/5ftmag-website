@@ -303,31 +303,6 @@ html.labs-view-map .labs-map {
   min-height: 460px;
 }
 html.labs-view-map .labs-section {
-  padding-top: 16px;
-}
-html.labs-view-map .labs-list {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-}
-html.labs-view-map .labs-region-divider {
-  margin: 10px 0 0;
-  padding-bottom: 6px;
-  font-size: 13px;
-}
-html.labs-view-map .lab-card {
-  border-radius: 6px;
-}
-html.labs-view-map .lab-card-head {
-  padding: 11px 12px;
-  gap: 7px;
-}
-html.labs-view-map .lab-card-head .lab-name {
-  font-size: 14px;
-}
-html.labs-view-map .lab-card-head .lab-region {
-  display: none;
-}
-html.labs-view-map .lab-card-summary {
   display: none;
 }
 .labs-empty {

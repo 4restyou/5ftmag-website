@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
   <link rel="stylesheet" href="./css/comments.css?v=20260602-iosfocus">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260602-iosfocus">
-  <link rel="stylesheet" href="./css/films.css?v=20260609-cardtok">
+  <link rel="stylesheet" href="./css/films.css?v=20260615-photoview">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -201,20 +201,23 @@
   </div><!-- /.library-films-view -->
 
   <div class="library-photos-view" id="libraryPhotosView" hidden>
+    <p class="library-photos-guide">
+      사진을 먼저 훑어보는 보기입니다. 검색은 필름·카메라·이름·SNS까지 함께 찾고, 스타일은 사용 필름 기준으로 묶습니다.
+    </p>
     <div class="library-photos-controls">
       <label class="library-search-label">
         <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
           <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/>
           <line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
-        <input type="search" class="library-search" id="libraryPhotosSearch" placeholder="필름·브랜드·ISO·카메라·작가·SNS로 검색" aria-label="사진 검색" autocomplete="off" />
+        <input type="search" class="library-search" id="libraryPhotosSearch" placeholder="필름·카메라·이름·SNS로 사진 검색" aria-label="사진 검색" autocomplete="off" />
       </label>
-      <div class="library-photos-chips" id="libraryPhotosChips" role="tablist" aria-label="필름 종류 필터">
+      <div class="library-photos-chips" id="libraryPhotosChips" role="tablist" aria-label="사진 스타일 필터">
         <button type="button" class="library-filter-chip is-active" data-cat="all" role="tab" aria-selected="true">전체 <span class="library-filter-count" data-count="all">0</span></button>
-        <button type="button" class="library-filter-chip" data-cat="color" role="tab" aria-selected="false">Color <span class="library-filter-count" data-count="color">0</span></button>
-        <button type="button" class="library-filter-chip" data-cat="bw" role="tab" aria-selected="false">B&amp;W <span class="library-filter-count" data-count="bw">0</span></button>
-        <button type="button" class="library-filter-chip" data-cat="slide" role="tab" aria-selected="false">Slide <span class="library-filter-count" data-count="slide">0</span></button>
-        <button type="button" class="library-filter-chip" data-cat="cinema" role="tab" aria-selected="false">Cinema <span class="library-filter-count" data-count="cinema">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="color" role="tab" aria-selected="false">컬러 <span class="library-filter-count" data-count="color">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="bw" role="tab" aria-selected="false">흑백 <span class="library-filter-count" data-count="bw">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="slide" role="tab" aria-selected="false">슬라이드 <span class="library-filter-count" data-count="slide">0</span></button>
+        <button type="button" class="library-filter-chip" data-cat="cinema" role="tab" aria-selected="false">영화용 <span class="library-filter-count" data-count="cinema">0</span></button>
       </div>
     </div>
     <div class="library-photos-bar">
@@ -332,7 +335,7 @@
 <script src="./js/films-reader-export.js?v=20260602-modules" defer></script>
 <script src="./js/films-reader-roll-ui.js?v=20260602-modules" defer></script>
 <script src="./js/films-reader-roll-data.js?v=20260602-modules" defer></script>
-<script src="./js/films-page.js?v=20260610-purehelpers" defer></script>
+<script src="./js/films-page.js?v=20260615-photoview" defer></script>
 <script src="./js/films-propose.js?v=20260602-propose" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>
