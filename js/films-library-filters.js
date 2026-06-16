@@ -394,6 +394,32 @@
         input.dataset.librarySearchBound = '1';
       }
 
+      const searchBar = document.getElementById('librarySearchBar');
+      const searchBtn = document.getElementById('librarySearchBtn');
+      const searchClose = document.getElementById('librarySearchClose');
+      if (searchBtn && !searchBtn.dataset.librarySearchToggleBound) {
+        searchBtn.addEventListener('click', () => {
+          const open = searchBar.hidden;
+          searchBar.hidden = !open;
+          searchBtn.setAttribute('aria-expanded', String(open));
+          if (open) setTimeout(() => input?.focus(), 10);
+        });
+        searchBtn.dataset.librarySearchToggleBound = '1';
+      }
+      if (searchClose && !searchClose.dataset.librarySearchCloseBound) {
+        searchClose.addEventListener('click', () => {
+          searchBar.hidden = true;
+          searchBtn?.setAttribute('aria-expanded', 'false');
+          if (input) {
+            input.value = '';
+            currentSearch = '';
+            resetMobileLimit();
+            apply();
+          }
+        });
+        searchClose.dataset.librarySearchCloseBound = '1';
+      }
+
       const advancedBtn = document.getElementById('libraryAdvancedToggle');
       const panel = document.getElementById('libraryAdvancedFilters');
       if (advancedBtn && panel && !advancedBtn.dataset.libraryAdvancedBound) {

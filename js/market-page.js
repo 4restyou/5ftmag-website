@@ -893,7 +893,22 @@ async function onSubmit(e) {
 // 이벤트 바인딩
 // ═════════════════════════════════════════
 $('marketNewBtn').addEventListener('click', () => openForm());
-$('marketSearch').addEventListener('input', (e) => {
+const _mktSearchBar = $('marketSearchBar');
+const _mktSearchBtn = $('marketSearchBtn');
+const _mktSearchInput = $('marketSearch');
+const _mktSearchClose = $('marketSearchClose');
+_mktSearchBtn?.addEventListener('click', () => {
+  const open = _mktSearchBar.hidden;
+  _mktSearchBar.hidden = !open;
+  _mktSearchBtn.setAttribute('aria-expanded', String(open));
+  if (open) setTimeout(() => _mktSearchInput.focus(), 10);
+});
+_mktSearchClose?.addEventListener('click', () => {
+  _mktSearchBar.hidden = true;
+  _mktSearchBtn?.setAttribute('aria-expanded', 'false');
+  _mktSearchInput.value = ''; STATE.search = ''; renderGrid();
+});
+_mktSearchInput.addEventListener('input', (e) => {
   STATE.search = e.target.value;
   renderGrid();
 });

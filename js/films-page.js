@@ -1664,6 +1664,24 @@
       searchTimer = setTimeout(() => applyPhotosFilter({ reshuffle: false }), 120);
     });
   }
+  const photosSearchBar = document.getElementById('libraryPhotosSearchBar');
+  const photosSearchBtn = document.getElementById('libraryPhotosSearchBtn');
+  const photosSearchClose = document.getElementById('libraryPhotosSearchClose');
+  photosSearchBtn?.addEventListener('click', () => {
+    const open = photosSearchBar.hidden;
+    photosSearchBar.hidden = !open;
+    photosSearchBtn.setAttribute('aria-expanded', String(open));
+    if (open) setTimeout(() => libraryPhotosSearchEl?.focus(), 10);
+  });
+  photosSearchClose?.addEventListener('click', () => {
+    photosSearchBar.hidden = true;
+    photosSearchBtn?.setAttribute('aria-expanded', 'false');
+    if (libraryPhotosSearchEl) {
+      libraryPhotosSearchEl.value = '';
+      photosQuery = '';
+      applyPhotosFilter({ reshuffle: false });
+    }
+  });
   if (libraryPhotosChipsEl) {
     libraryPhotosChipsEl.addEventListener('click', (e) => {
       const chip = e.target.closest('.library-filter-chip');

@@ -68,32 +68,12 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
-  margin: 0 0 28px;
+  gap: 12px;
+  margin: 0 0 16px;
 }
-.market-search-label {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 240px;
-  max-width: 420px;
-  padding: 10px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--field-radius);
-  background: var(--bg);
-  transition: border-color .15s;
-}
-.market-search-label:focus-within { border-color: var(--text); }
-.market-search-label svg { flex: none; color: var(--text-muted); }
-.market-search {
-  flex: 1; min-width: 0;
-  border: none; outline: none;
-  background: transparent; color: var(--text);
-  font: inherit; font-size: 14px;
-}
-.market-search::placeholder { color: var(--text-muted); }
+.market-controls .market-new-btn { margin-left: auto; }
+.market-controls + .ft-search-bar { margin: 0 0 16px; }
+/* .market-search 시각 정의는 css/ui-controls.css 의 .ft-search-bar 로 통일 */
 
 .market-controls-right {
   display: flex;
