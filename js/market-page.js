@@ -126,9 +126,9 @@ function renderFilterChips() {
   bar.innerHTML = CATEGORIES
     .filter(c => c.key === 'all' || counts[c.key])
     .map(c => `
-      <button type="button" class="market-category-chip${c.key === STATE.filter ? ' is-active' : ''}"
+      <button type="button" class="ft-chip market-category-chip${c.key === STATE.filter ? ' is-active' : ''}"
               data-cat="${escapeAttr(c.key)}" role="tab" aria-selected="${c.key === STATE.filter}">
-        ${escapeHtml(c.label)}<span class="market-category-count">${counts[c.key] || 0}</span>
+        ${escapeHtml(c.label)}<span class="ft-chip-count market-category-count">${counts[c.key] || 0}</span>
       </button>
     `).join('');
   bar.querySelectorAll('.market-category-chip').forEach(chip => {

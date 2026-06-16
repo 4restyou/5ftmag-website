@@ -37,6 +37,63 @@
 }
 [data-theme="dark"] .ft-toggle-btn.is-active { box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
 
+/* ── Chip (선택형 pill, 카테고리·태그·지역 등) ── */
+.ft-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.ft-chip:hover { border-color: var(--text); }
+.ft-chip.is-active,
+.ft-chip.active,
+.ft-chip[aria-selected="true"] {
+  background: #ffd400;
+  color: #111;
+  border-color: #ffd400;
+}
+.ft-chip-count,
+.ft-chip .labs-chip-count,
+.ft-chip .library-filter-count {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--bg-sub);
+  color: var(--text-muted);
+  padding: 1px 8px;
+  border-radius: 999px;
+  line-height: 1.4;
+}
+.ft-chip.is-active .ft-chip-count,
+.ft-chip.active .ft-chip-count,
+.ft-chip[aria-selected="true"] .ft-chip-count,
+.ft-chip.is-active .labs-chip-count,
+.ft-chip.active .labs-chip-count,
+.ft-chip.is-active .library-filter-count,
+.ft-chip[aria-selected="true"] .library-filter-count {
+  background: rgba(0,0,0,0.12);
+  color: #111;
+}
+.ft-chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.ft-chip-row::-webkit-scrollbar { display: none; }
+
 /* ── Icon button (검색·필터·기타 single-action) ── */
 .ft-icon-btn {
   position: relative;

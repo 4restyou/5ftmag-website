@@ -50,27 +50,9 @@
           mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
 }
 .filter-bar::-webkit-scrollbar { display: none; }
-.filter-chip {
-  display: inline-block;
-  flex-shrink: 0;
-  white-space: nowrap;
-  padding: 8px 18px;
-  font-size: var(--fs-meta);
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.04em;
-  color: var(--text);
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--chip-radius);
-  cursor: pointer;
-  transition: all .15s;
-}
-.filter-chip:hover { border-color: var(--text); }
-.filter-chip.active {
-  background: var(--accent);
-  color: var(--accent-text);
-  border-color: var(--accent);
-}
+/* .filter-chip 의 시각은 ui-controls.css 의 .ft-chip 으로 통일 (labs-page.js 가
+   .ft-chip 클래스를 동적으로 함께 부여). 페이지 한정 letter-spacing 만 유지. */
+.filter-chip { letter-spacing: 0.04em; }
 
 /* ── 인트로 (films 문단 + 오른쪽 안내 박스) ── */
 .intro {
