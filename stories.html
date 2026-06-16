@@ -36,7 +36,8 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
-  <link rel="stylesheet" href="./css/stories.css?v=20260609-meta">
+  <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
+  <link rel="stylesheet" href="./css/stories.css?v=20260616-uichip">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -96,17 +97,17 @@
     </svg>
     <button class="search-clear" id="searchClear" aria-label="검색어 지우기">✕</button>
   </div>
-  <div class="filter-bar">
-    <button class="filter-chip active" data-category="all">All</button>
-    <button class="filter-chip" data-category="photo">Photo</button>
-    <button class="filter-chip" data-category="essay">Essay</button>
-    <button class="filter-chip" data-category="film">Film</button>
-    <button class="filter-chip" data-category="camera">Camera</button>
-    <button class="filter-chip" data-category="interview">Interview</button>
-    <button class="filter-chip" data-category="goods">Goods</button>
-    <button class="filter-chip" data-category="exhibition">Exhibition</button>
-    <button class="filter-chip" data-category="illustration">Illustration</button>
-    <button class="filter-chip" data-category="editorial">Editorial</button>
+  <div class="filter-bar ft-chip-row">
+    <button class="ft-chip filter-chip is-active active" data-category="all">All</button>
+    <button class="ft-chip filter-chip" data-category="photo">Photo</button>
+    <button class="ft-chip filter-chip" data-category="essay">Essay</button>
+    <button class="ft-chip filter-chip" data-category="film">Film</button>
+    <button class="ft-chip filter-chip" data-category="camera">Camera</button>
+    <button class="ft-chip filter-chip" data-category="interview">Interview</button>
+    <button class="ft-chip filter-chip" data-category="goods">Goods</button>
+    <button class="ft-chip filter-chip" data-category="exhibition">Exhibition</button>
+    <button class="ft-chip filter-chip" data-category="illustration">Illustration</button>
+    <button class="ft-chip filter-chip" data-category="editorial">Editorial</button>
   </div>
   <select id="monthFilter" class="month-filter" aria-label="월별 보기">
     <option value="all">전체 기간</option>

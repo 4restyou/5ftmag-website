@@ -207,7 +207,7 @@
     if (!filterEl) return;
     const regions = regionsInOrder();
     const chip = (key, label, n) =>
-      `<button type="button" class="filter-chip${key === region ? ' active' : ''}" data-region="${escapeAttr(key)}">${escapeHtml(label)}<span class="labs-chip-count">${n}</span></button>`;
+      `<button type="button" class="ft-chip filter-chip${key === region ? ' active' : ''}" data-region="${escapeAttr(key)}">${escapeHtml(label)}<span class="ft-chip-count labs-chip-count">${n}</span></button>`;
     let html = chip('all', '전체', data.length);
     for (const r of regions) html += chip(r, r, data.filter((l) => l.region === r).length);
     filterEl.innerHTML = html;

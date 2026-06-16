@@ -156,38 +156,9 @@
   .market-secondary { gap: 8px; }
   .market-status-toggle { padding: 7px 12px; font-size: 12px; }
 }
-.market-category-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  background: var(--bg);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--chip-radius);
-  font: inherit;
-  font-size: 13px;
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: color .15s, border-color .15s, background .15s;
-}
-.market-category-chip:hover { color: var(--text); border-color: var(--text); }
-.market-category-chip.is-active {
-  background: var(--text); color: var(--bg); border-color: var(--text);
-}
-.market-category-count {
-  display: inline-block;
-  background: var(--bg-sub);
-  color: var(--text-muted);
-  font-size: 11px;
-  padding: 1px 7px;
-  border-radius: var(--badge-radius);
-  font-weight: var(--fw-heading);
-}
-.market-category-chip.is-active .market-category-count {
-  background: rgba(255,255,255,0.16); color: var(--bg);
-}
+/* .market-category-chip / .market-category-count 의 시각은 ui-controls.css 의
+   .ft-chip / .ft-chip-count 로 통일. 페이지 한정 letter-spacing 만 유지. */
+.market-category-chip { letter-spacing: 0.04em; }
 
 .market-new-btn {
   display: inline-flex;
