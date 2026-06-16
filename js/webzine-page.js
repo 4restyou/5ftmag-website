@@ -52,6 +52,13 @@
   let suppressClick = false;     // 마우스 드래그로 넘긴 직후의 클릭(책 펼치기) 억제
   let moveT = null;
 
+  if (!_reducedMotion) {
+    window.addEventListener('pointermove', (e) => {
+      document.documentElement.style.setProperty('--wz-pointer-x', `${Math.round((e.clientX / window.innerWidth) * 100)}%`);
+      document.documentElement.style.setProperty('--wz-pointer-y', `${Math.round((e.clientY / window.innerHeight) * 100)}%`);
+    }, { passive: true });
+  }
+
   function rgbToHsl(r, g, b) {
     r /= 255; g /= 255; b /= 255;
     const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
@@ -155,6 +162,7 @@
 
   function layout(rs) {
     const s = rs.slots[rs.active]; if (!s) return;
+    updateAtmosphere(rs);
     rs.trackEl.style.transform = `translate3d(${rs.flowEl.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)}px, 0, 0)`;
     rs.slots.forEach((slot, pos) => {
       const d = pos - rs.active, ad = Math.abs(d);
@@ -178,6 +186,15 @@
     const prev = rs.flowEl.querySelector('.wz-prev'), next = rs.flowEl.querySelector('.wz-next');
     if (prev) prev.disabled = rs.active <= 0;
     if (next) next.disabled = rs.active >= rs.slots.length - 1;
+  }
+  function updateAtmosphere(rs) {
+    const slot = rs?.slots?.[rs.active];
+    if (!slot) return;
+    const i = Number(slot.dataset.i);
+    const c = palette[i];
+    if (!c) return;
+    document.documentElement.style.setProperty('--wz-active-spine', c.spine);
+    document.documentElement.style.setProperty('--wz-active-text', c.text);
   }
   function markMoving(rs, ms = 620) {
     if (!rs?.flowEl) return;
@@ -467,6 +484,7 @@
         if (b3) { b3.style.setProperty('--spine', c.spine); b3.style.setProperty('--spine-text', c.text); }
         // 표지 박스를 이미지 실제 비율(폭=높이×비율)에 맞춰 좌우 잘림 없이 표시
         if (slot && c.aspect && isFinite(c.aspect)) slot.style.setProperty('--cw2', `calc(var(--h) * ${c.aspect.toFixed(4)})`);
+        rows.forEach(updateAtmosphere);
         if (openState && openState.i === i) follow(openState.rs);
       });
     });

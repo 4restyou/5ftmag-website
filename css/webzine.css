@@ -9,11 +9,43 @@ html {
   --wz-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --wz-bg: radial-gradient(120% 70% at 50% 0%, #211c25 0%, #151219 48%, #100e13 100%) fixed;
   --wz-ease: cubic-bezier(.22, .61, .27, 1);
+  --wz-active-spine: #7a3b52;
+  --wz-active-text: #ffffff;
+  --wz-pointer-x: 50%;
+  --wz-pointer-y: 24%;
   /* 꺼낼 때: 목표를 살짝 지나쳤다가 자리 잡는 물성. 꽂을 때는 기본 ease 로 단정하게. */
   --wz-ease-out: cubic-bezier(.3, 1.18, .35, 1);
 }
 /* 헤더·본문·푸터를 하나의 갤러리 배경으로 연결(고정 배경이라 seam 없음) */
 body { background: var(--wz-bg); color: #fff; overflow-x: hidden; }
+body.webzine-page::before,
+body.webzine-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+body.webzine-page::before {
+  background:
+    radial-gradient(48% 36% at var(--wz-pointer-x) var(--wz-pointer-y), color-mix(in srgb, var(--wz-active-spine) 34%, transparent), transparent 68%),
+    radial-gradient(75% 44% at 50% -10%, rgba(255, 255, 255, .08), transparent 70%),
+    var(--wz-grain);
+  background-size: auto, auto, 150px 150px;
+  mix-blend-mode: screen;
+  opacity: .42;
+}
+body.webzine-page::after {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, .3), transparent 20%, transparent 80%, rgba(0, 0, 0, .28)),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, .18) 100%);
+  opacity: .72;
+}
+body.webzine-page .wz-stage,
+body.webzine-page > footer {
+  position: relative;
+  z-index: 1;
+}
 
 /* 페이지 진입 veil: 밝은 화면에서 다크로 스르륵 들어오게 한다.
    색은 직전 페이지(사이트 테마)에 맞춰 head 스크립트가 정한다(기본 흰색). */
@@ -120,7 +152,31 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 
 .wz-book3d .f-front { width: var(--cw2); height: var(--h); transform: translateZ(calc(var(--st) / 2)); background: var(--spine); }
 .wz-book3d .f-front img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; }
-.wz-book3d .f-front::after { content: ""; position: absolute; inset: 0; background: var(--paper) center / cover; mix-blend-mode: multiply; opacity: .22; pointer-events: none; }
+.wz-book3d .f-front::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  z-index: 2;
+  background:
+    radial-gradient(38% 34% at var(--wz-pointer-x) var(--wz-pointer-y), rgba(255, 255, 255, .32), transparent 64%),
+    linear-gradient(108deg, transparent 0 34%, rgba(255, 255, 255, .42) 44%, transparent 55% 100%),
+    repeating-linear-gradient(95deg, rgba(255, 255, 255, .12) 0 1px, transparent 1px 10px);
+  mix-blend-mode: screen;
+  opacity: .13;
+  transform: translate3d(-16%, 0, 0) rotate(1deg);
+  transition: opacity .38s var(--wz-ease), transform .74s var(--wz-ease-out);
+  pointer-events: none;
+}
+.wz-book3d .f-front::after { content: ""; position: absolute; inset: 0; z-index: 3; background: var(--paper) center / cover; mix-blend-mode: multiply; opacity: .22; pointer-events: none; }
+.wz-slot.is-center .f-front::before { opacity: .28; transform: translate3d(-5%, 0, 0) rotate(1deg); }
+.wz-slot.is-open .f-front::before {
+  opacity: .44;
+  animation: wzCoverFoil 2.7s ease-in-out infinite alternate;
+}
+@keyframes wzCoverFoil {
+  from { transform: translate3d(-18%, -2%, 0) rotate(1deg); }
+  to { transform: translate3d(18%, 2%, 0) rotate(1deg); }
+}
 .wz-book3d .f-front .wz-f-text { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 14px; color: #fff; font-weight: var(--fw-heading); text-align: center; }
 .wz-book3d .f-spine {
   width: var(--st); height: var(--h); transform: rotateY(-90deg) translateZ(calc(var(--cw2) / 2));
@@ -128,6 +184,24 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   background-color: var(--spine); background-size: cover, 150px 150px, auto; background-blend-mode: soft-light, soft-light, normal;
   color: var(--spine-text); box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, .6), inset 7px 0 12px -8px rgba(255, 255, 255, .3);
   display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 14px; padding: 24px 0 20px;
+}
+.wz-book3d .f-spine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 0 15%, rgba(255, 255, 255, .22) 32%, transparent 48% 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .08) 0 1px, transparent 1px 5px);
+  mix-blend-mode: screen;
+  opacity: .08;
+  transform: translateY(-18%);
+  transition: opacity .32s var(--wz-ease), transform .62s var(--wz-ease-out);
+  pointer-events: none;
+}
+.wz-slot.is-center .f-spine::after,
+.wz-slot:hover .f-spine::after {
+  opacity: .25;
+  transform: translateY(6%);
 }
 .wz-book3d .f-edge { width: var(--st); height: var(--h); transform: rotateY(90deg) translateZ(calc(var(--cw2) / 2)); --pg-dir: to bottom; }
 .wz-book3d .f-top { width: var(--cw2); height: var(--st); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); --pg-dir: to right; }
