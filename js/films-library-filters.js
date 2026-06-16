@@ -93,9 +93,9 @@
       filterBar.innerHTML = order
         .filter(key => counts[key])
         .map(key => `
-          <button type="button" class="library-filter-chip${key === currentFilter ? ' is-active' : ''}"
+          <button type="button" class="ft-chip library-filter-chip${key === currentFilter ? ' is-active' : ''}"
                   data-filter="${key}" role="tab" aria-selected="${key === currentFilter}">
-            ${FILTER_LABELS[key]}<span class="library-filter-count">${counts[key]}</span>
+            ${FILTER_LABELS[key]}<span class="ft-chip-count library-filter-count">${counts[key]}</span>
           </button>
         `).join('');
       filterBar.querySelectorAll('.library-filter-chip').forEach(chip => {
