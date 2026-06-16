@@ -984,15 +984,8 @@
   display: flex;
 }
 
-/* .library-advanced-toggle 는 .ft-icon-btn 시각을 사용. 활성 시 우상단 dot 만 추가. */
-.library-advanced-toggle.has-active::after {
-  content: '';
-  position: absolute;
-  top: 6px; right: 6px;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #ffd400;
-}
+/* .library-advanced-toggle 는 .ft-icon-btn 시각을 사용. 활성 시 카운트는
+   .ft-icon-btn-badge (노란 동그라미) 가 표시 (films-library-filters.js 에서 주입). */
 
 .library-filter {
   display: flex;
