@@ -272,10 +272,15 @@
   function openBook(rs, pos) {
     const slot = rs.slots[pos];
     runFlip(rs, () => {
-      if (openState) { openState.rs.slots[openState.pos].classList.remove('is-open'); openState = null; }
+      if (openState) {
+        detachCoverTilt(openState.rs.slots[openState.pos]);
+        openState.rs.slots[openState.pos].classList.remove('is-open');
+        openState = null;
+      }
       slot.classList.add('is-open');
       rs.active = pos;
       openState = { rs, pos, i: Number(slot.dataset.i) };
+      attachCoverTilt(slot);
     }, 620);
     settleSlotIntoView(slot);
   }
@@ -283,10 +288,55 @@
     clearTimeout(seqT);
     if (!openState) return;
     const { rs, pos } = openState;
+    detachCoverTilt(rs.slots[pos]);
     runFlip(rs, () => {
       rs.slots[pos].classList.remove('is-open');
       openState = null;
     }, 560);
+  }
+
+  // ─── 표지 mouse-tilt — 마우스 위치에 따라 표지가 살짝 기울고 떠오름.
+  // hover 가능 환경에서만 활성 (터치 기기는 적용 안 됨).
+  const HOVERABLE = window.matchMedia?.('(hover: hover)')?.matches !== false;
+  const TILT_MAX = 7;   // ±deg
+  const TILT_LIFT = 12; // px
+  function attachCoverTilt(slot) {
+    if (!HOVERABLE) return;
+    const btn = slot.querySelector('.wz-book-btn');
+    const book = slot.querySelector('.wz-book3d');
+    if (!btn || !book) return;
+    // 펼침 애니메이션(.62s) 끝난 뒤 fast transition 으로 전환해 cursor 추종이 부드럽게.
+    const readyT = setTimeout(() => slot.classList.add('is-tilt-ready'), 640);
+    function onMove(e) {
+      const rect = book.getBoundingClientRect();
+      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;   // -1..+1
+      const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+      // y(위쪽이 - 라서 rotateX 양수 = 앞으로 숙임). 마우스가 위쪽이면 책이 위로 살짝 기울게 → ny * -TILT_MAX.
+      book.style.setProperty('--ty', `${(nx * TILT_MAX).toFixed(2)}deg`);
+      book.style.setProperty('--tx', `${(-ny * TILT_MAX).toFixed(2)}deg`);
+      book.style.setProperty('--lift', `${TILT_LIFT}px`);
+    }
+    function onLeave() {
+      book.style.setProperty('--tx', '0deg');
+      book.style.setProperty('--ty', '0deg');
+      book.style.setProperty('--lift', '0px');
+    }
+    btn.addEventListener('mousemove', onMove);
+    btn.addEventListener('mouseleave', onLeave);
+    slot._tiltCleanup = () => {
+      clearTimeout(readyT);
+      btn.removeEventListener('mousemove', onMove);
+      btn.removeEventListener('mouseleave', onLeave);
+      slot.classList.remove('is-tilt-ready');
+      onLeave();
+    };
+  }
+  function detachCoverTilt(slot) {
+    if (!slot) return;
+    if (typeof slot._tiltCleanup === 'function') {
+      slot._tiltCleanup();
+      slot._tiltCleanup = null;
+    }
   }
   function nav(rs, d) {
     currentRow = rs;

@@ -106,8 +106,11 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-book-btn:focus-visible { outline: none; }
 .wz-book3d {
   --by: 90deg; --bs: .9; --bz: 0px;
+  /* 마우스 위치 따라 흔들리는 양 (펼친 책에만 의미) — 기본 0 */
+  --tx: 0deg; --ty: 0deg; --lift: 0px;
   position: absolute; top: 0; left: 0; width: var(--cw2); height: var(--h);
-  transform-style: preserve-3d; transform: translate3d(var(--bx), 0, var(--bz)) rotateY(var(--by)) scale(var(--bs));
+  transform-style: preserve-3d;
+  transform: translate3d(var(--bx), 0, calc(var(--bz) + var(--lift))) rotateY(var(--by)) rotateY(var(--ty)) rotateX(var(--tx)) scale(var(--bs));
   /* 꽂거나 각도만 바뀔 때: 짧고 단정하게 */
   transition: transform .48s var(--wz-ease); will-change: transform;
 }
@@ -116,6 +119,8 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
    transform 만으로 강조 (filter 는 preserve-3d 컨테이너에 적용하면 3D 가 평면화돼 큐보이드가 깨짐).
    꺼낼 때는 overshoot ease 로 목표 각도를 살짝 지나쳤다가 자리 잡는다. */
 .wz-slot.is-open .wz-book3d { --by: -14deg; --bs: 1.05; --bz: 24px; transition: transform .62s var(--wz-ease-out); }
+/* 펼침 애니메이션이 끝난 뒤 마우스 트래킹용 짧은 transition 으로 전환. JS 가 .is-tilt-ready 부여. */
+.wz-slot.is-open.is-tilt-ready .wz-book3d { transition: transform .18s ease-out; }
 .wz-slot.is-open { z-index: 2; }
 
 .wz-book3d .f-front { width: var(--cw2); height: var(--h); transform: translateZ(calc(var(--st) / 2)); background: var(--spine); }
