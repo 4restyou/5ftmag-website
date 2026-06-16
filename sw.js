@@ -1,8 +1,12 @@
 // 5ft.mag service worker — PWA 기초.
-// 정책: 네트워크 우선, 실패 시 캐시 (HTML 은 stale-while-revalidate).
+// 정책:
+//   - HTML: network-first (3초 타임아웃) + 실패 시 캐시 fallback
+//     배포 직후 즉시 새 HTML 받게. stale-while-revalidate 의 "2번 새로고침 후 갱신"
+//     UX 결함 해소. 오프라인 시는 캐시로 그대로 동작.
+//   - 정적 자산 (JS/CSS/이미지): 네트워크 우선 + 캐시 fallback (캐시 키로 버스트됨)
 // 푸시 알림 핸들러 포함.
 
-const CACHE = '5ft-v1';
+const CACHE = '5ft-v2-network-first';
 const CORE = [
   '/',
   '/index.html',
@@ -27,7 +31,15 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// 정적 자산은 네트워크 우선, HTML 은 stale-while-revalidate, 외부는 패스.
+// network-first 의 타임아웃 — 느린 네트워크라도 3초 안에 안 오면 캐시 fallback.
+function fetchWithTimeout(req, ms) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('sw timeout')), ms);
+    fetch(req).then(res => { clearTimeout(t); resolve(res); })
+              .catch(err => { clearTimeout(t); reject(err); });
+  });
+}
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -39,21 +51,25 @@ self.addEventListener('fetch', (e) => {
   const isHtml = req.headers.get('accept')?.includes('text/html') || url.pathname.endsWith('.html') || url.pathname === '/';
 
   if (isHtml) {
-    // stale-while-revalidate
-    e.respondWith(
-      caches.open(CACHE).then(async (c) => {
-        const cached = await c.match(req);
-        const fetchPromise = fetch(req).then((res) => {
-          if (res && res.ok) c.put(req, res.clone());
-          return res;
-        }).catch(() => cached);
-        return cached || fetchPromise;
-      })
-    );
+    // network-first — 새 배포는 즉시 반영, 네트워크 끊겼을 때만 캐시.
+    e.respondWith((async () => {
+      try {
+        const res = await fetchWithTimeout(req, 3000);
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => null);
+        }
+        return res;
+      } catch (_) {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        throw new Error('network failed and no cache');
+      }
+    })());
     return;
   }
 
-  // 기타 정적: 네트워크 우선
+  // 기타 정적: 네트워크 우선 + 캐시 fallback
   e.respondWith(
     fetch(req).then((res) => {
       if (res && res.ok) {
