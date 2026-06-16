@@ -1180,43 +1180,8 @@
   .ms-dropdown-btn { width: 100%; }
   .ms-dropdown-panel { width: 100%; max-width: none; }
 }
-.library-filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  background: var(--bg);
-  color: var(--text-muted);
-  border: 1px solid var(--ctrl-border);
-  border-radius: var(--chip-radius);
-  font: inherit;
-  font-size: 13px;
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition: color .15s, border-color .15s, background .15s;
-}
-.library-filter-chip:hover {
-  color: var(--text);
-  border-color: var(--text);
-}
-.library-filter-chip.is-active {
-  background: var(--accent);
-  color: var(--accent-text);
-  border-color: var(--accent);
-}
-.library-filter-count {
-  font-size: 11px;
-  padding: 1px 7px;
-  border-radius: 2px;
-  background: var(--bg-sub);
-  color: var(--text-muted);
-  font-weight: var(--fw-heading);
-}
-.library-filter-chip.is-active .library-filter-count {
-  background: rgba(0, 0, 0, 0.12);
-  color: var(--accent-text);
-}
+/* .library-filter-chip / .library-filter-count 시각 스타일은 css/ui-controls.css 의
+   .ft-chip / .ft-chip-count 로 통일됨 (레이아웃 오버라이드만 아래 유지) */
 
 /* ════════════════════════════
    섹션 헤드 (5ft Issue / Library)
