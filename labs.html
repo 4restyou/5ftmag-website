@@ -36,16 +36,15 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
-  <link rel="stylesheet" href="./css/labs.css?v=20260615-mapfocus">
+  <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
+  <link rel="stylesheet" href="./css/labs.css?v=20260616-uitoggle">
   <style>
-    .labs-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 20px 40px 0; }
+    .labs-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 20px 40px 0; }
     .labs-region-divider { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 18px 0 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em; color: var(--text); }
     .labs-region-divider:first-child { margin-top: 0; }
     .labs-region-divider .labs-region-divider-count { font-size: 12px; font-weight: 400; color: var(--text-muted); }
     @media (max-width: 640px) { .labs-tabs { padding: 14px 20px 0; } .labs-region-divider { font-size: 15px; margin-top: 14px; } }
-    .labs-tab { font: inherit; font-size: 15px; font-weight: var(--fw-heading); letter-spacing: -0.01em; padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--text-muted); cursor: pointer; transition: color .15s, border-color .15s, background .15s; }
-    .labs-tab:hover { color: var(--text); border-color: var(--text); }
-    .labs-tab.is-active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    /* .labs-tab / .labs-view-btn 의 시각은 ui-controls.css 의 .ft-toggle-btn 사용. */
   </style>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
@@ -99,12 +98,14 @@
 </div>
 
 <!-- ════════ 탭 (현상소 / 수리실) ════════ -->
-<div class="labs-tabs" role="tablist" aria-label="현상소·수리실 전환">
-  <button type="button" class="labs-tab is-active" data-tab="labs" role="tab" aria-selected="true">현상소</button>
-  <button type="button" class="labs-tab" data-tab="repairs" role="tab" aria-selected="false">수리실</button>
-  <div class="labs-view-toggle" role="tablist" aria-label="보기 방식">
-    <button type="button" class="labs-view-btn is-active" data-view="list" role="tab" aria-selected="true">리스트</button>
-    <button type="button" class="labs-view-btn" data-view="map" role="tab" aria-selected="false">지도</button>
+<div class="labs-tabs">
+  <div class="ft-toggle labs-tabs-main" role="tablist" aria-label="현상소·수리실 전환">
+    <button type="button" class="ft-toggle-btn labs-tab is-active" data-tab="labs" role="tab" aria-selected="true">현상소</button>
+    <button type="button" class="ft-toggle-btn labs-tab" data-tab="repairs" role="tab" aria-selected="false">수리실</button>
+  </div>
+  <div class="ft-toggle labs-view-toggle" role="tablist" aria-label="보기 방식">
+    <button type="button" class="ft-toggle-btn labs-view-btn is-active" data-view="list" role="tab" aria-selected="true">리스트</button>
+    <button type="button" class="ft-toggle-btn labs-view-btn" data-view="map" role="tab" aria-selected="false">지도</button>
   </div>
 </div>
 
