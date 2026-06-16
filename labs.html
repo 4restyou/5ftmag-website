@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/labs.css?v=20260616-uisearch">
+  <link rel="stylesheet" href="./css/labs.css?v=20260616-uipack">
   <style>
     .labs-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 20px 40px 0; }
     .labs-region-divider { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 18px 0 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em; color: var(--text); }
@@ -111,10 +111,10 @@
 
 <!-- ════════ 검색 + 지역 필터 ════════ -->
 <div class="labs-controls">
+  <div class="filter-bar" id="labsFilter" role="tablist" aria-label="지역 필터"></div>
   <button type="button" class="ft-icon-btn" id="labsSearchBtn" aria-label="현상소 검색" aria-expanded="false">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
   </button>
-  <div class="filter-bar" id="labsFilter" role="tablist" aria-label="지역 필터"></div>
 </div>
 <div class="ft-search-bar labs-search-bar" id="labsSearchBar" hidden>
   <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
