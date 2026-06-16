@@ -394,20 +394,25 @@
     const initialThemeChecked = !!(themeCanonical && initialSelectedName &&
       normalizeFilmName(initialSelectedName) === normalizeFilmName(themeCanonical));
 
-    // 압축 카드 — summary(체크박스 + 한 줄 요약) + 펼침(상세). 위치는 폼 하단(consent 직전).
-    // 클래스 .rs-theme 와 data-theme-canonical, input name=theme_apply, #rs-theme-hint 는
-    // film-picker 의 syncThemeCheckbox 가 셀렉터로 의존하므로 그대로 유지.
+    // 응모 안내 카드 — info-only. 동의 체크박스 하나로 모든 동의를 받고, 응모는
+    // 필름이 테마 캐노니컬과 일치할 때 자동 포함.
+    // 클래스 .rs-theme / data-theme-canonical / #rs-theme-hint 는 film-picker 의
+    // syncThemeCheckbox 가 셀렉터로 의존하므로 그대로 유지.
+    // 응모 값은 hidden input(name="theme_apply") 으로, JS 가 film 일치 시 value 채움.
     const themeSubtitle = theme && theme.subtitle ? ` · "${theme.subtitle}"` : '';
     const themeBlock = (theme && theme.active) ? `
       <details class="rs-theme rs-theme-compact" data-theme-canonical="${escapeAttr(themeCanonical)}">
         <summary class="rs-theme-summary">
-          <label class="rs-theme-check-row" onclick="event.stopPropagation()">
-            <input type="checkbox" name="theme_apply" value="${escapeAttr(theme.month)}"${initialThemeChecked ? ' checked' : ''} />
+          <span class="rs-theme-status" data-theme-month="${escapeAttr(theme.month)}">
+            <span class="rs-theme-status-icon" aria-hidden="true">
+              <svg class="rs-theme-status-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+              <svg class="rs-theme-status-on" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            </span>
             <span class="rs-theme-line">
-              <strong class="rs-theme-line-title">${escapeHtml(themeIssue)} 응모 함께 보내기</strong>
+              <strong class="rs-theme-line-title">${escapeHtml(themeIssue)} 응모 자동 포함</strong>
               <small class="rs-theme-line-sub">${themeCanonical ? escapeHtml(themeCanonical) + ' · ' : ''}"${escapeHtml(theme.title)}"</small>
             </span>
-          </label>
+          </span>
           <span class="rs-theme-chevron" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </span>
@@ -415,8 +420,9 @@
         <div class="rs-theme-detail">
           <p class="rs-theme-desc">${escapeHtml(theme.description || '')}${themeSubtitle}${themeFilm}</p>
         </div>
+        <input type="hidden" name="theme_apply" value="${initialThemeChecked ? escapeAttr(theme.month) : ''}" />
       </details>
-      ${themeCanonical ? `<p class="rs-theme-hint" id="rs-theme-hint" hidden>이번 호 응모는 <strong>${escapeHtml(themeCanonical)}</strong> 사진만 함께 보낼 수 있어요.</p>` : ''}
+      ${themeCanonical ? `<p class="rs-theme-hint" id="rs-theme-hint" hidden>이번 호 응모는 <strong>${escapeHtml(themeCanonical)}</strong> 사진을 골랐을 때 자동 포함돼요.</p>` : ''}
     ` : '';
 
     const groupsHtml = brandKeys.map(brand => `
@@ -506,7 +512,7 @@
         ${themeBlock}
         <label class="rs-checkbox">
           <input type="checkbox" name="consent" required />
-          <span>이 사진의 저작권은 본인에게 있으며, 5ft magazine 사이트 / SNS / 종이 매거진 게재에 동의합니다. <em>*</em></span>
+          <span>이 사진의 저작권은 본인에게 있으며, 5ft magazine 사이트 / SNS / 종이 매거진 게재에 동의합니다. <em>*</em>${theme && theme.active ? `<small class="rs-consent-note">• 주제 필름(${escapeHtml(themeCanonical || theme.title)})과 일치하면 다음 호 응모에도 자동 포함됩니다.</small>` : ''}</span>
         </label>
         <div class="rs-actions">
           <button type="button" class="rs-btn-link" data-action="rs-close">취소</button>
