@@ -777,6 +777,25 @@
       apply();
     });
   }
+  const searchBar = document.getElementById('labsSearchBar');
+  const searchBtn = document.getElementById('labsSearchBtn');
+  const searchClose = document.getElementById('labsSearchClose');
+  searchBtn?.addEventListener('click', () => {
+    const open = searchBar.hidden;
+    searchBar.hidden = !open;
+    searchBtn.setAttribute('aria-expanded', String(open));
+    if (open) setTimeout(() => searchEl?.focus(), 10);
+  });
+  searchClose?.addEventListener('click', () => {
+    searchBar.hidden = true;
+    searchBtn?.setAttribute('aria-expanded', 'false');
+    if (searchEl) {
+      searchEl.value = '';
+      query = '';
+      mobileVisible = MOBILE_INITIAL;
+      apply();
+    }
+  });
 
   function setView(next) {
     if (next !== 'map') next = 'list';

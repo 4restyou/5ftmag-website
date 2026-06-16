@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
   <link rel="stylesheet" href="./css/common.css?v=20260614-push">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/market.css?v=20260616-uichip">
+  <link rel="stylesheet" href="./css/market.css?v=20260616-uisearch">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -73,17 +73,18 @@
 
 <section class="market-section" role="main" id="main">
   <div class="market-controls">
-    <label class="market-search-label">
-      <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
-        <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/>
-        <line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-      <input type="search" class="market-search" id="marketSearch" placeholder="제목·설명으로 검색" aria-label="매물 검색" autocomplete="off" />
-    </label>
+    <button type="button" class="ft-icon-btn" id="marketSearchBtn" aria-label="매물 검색" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+    </button>
     <button type="button" class="market-new-btn" id="marketNewBtn">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       매물 올리기
     </button>
+  </div>
+  <div class="ft-search-bar" id="marketSearchBar" hidden>
+    <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <input type="search" id="marketSearch" placeholder="제목·설명으로 검색" aria-label="매물 검색" autocomplete="off" />
+    <button type="button" class="ft-search-close" id="marketSearchClose" aria-label="검색 닫기">✕</button>
   </div>
   <div class="market-secondary">
     <div class="market-filter" id="marketFilter" role="tablist" aria-label="카테고리"></div>
@@ -157,7 +158,7 @@
 <script src="./js/util.js?v=20260602-normalize" defer></script>
 <script src="./js/ui-states.js?v=20260609-states" defer></script>
   <script src="./js/site-common.js?v=20260615-fabback" defer></script>
-<script src="./js/market-page.js?v=20260616-uichip" defer></script>
+<script src="./js/market-page.js?v=20260616-uisearch" defer></script>
 
 </body>
 </html>
