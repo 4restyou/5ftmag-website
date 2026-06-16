@@ -99,13 +99,23 @@
 }
 
 /* 월간 테마 블록 (모달 안) */
-/* 응모 카드 — 압축형. 폼 하단 (consent 직전) 에 위치. 클릭 시 펼침. */
+/* 응모 안내 카드 — info-only. 필름이 테마와 일치하면 .is-theme-matched 부여.
+   체크박스가 아니라 자동 포함 안내라 클릭 가능 영역은 펼침/접힘만. */
 .rs-theme {
   background: var(--bg-sub);
   border: 1px solid var(--border);
   border-radius: 6px;
   margin: 8px 0 12px;
   overflow: hidden;
+  transition: background .18s, border-color .18s;
+}
+.rs-theme.is-theme-matched {
+  background: #fef3c7;
+  border-color: #f5d77d;
+}
+[data-theme="dark"] .rs-theme.is-theme-matched {
+  background: #3a2e0c;
+  border-color: #5a4a1a;
 }
 .rs-theme-summary {
   display: flex; align-items: center; gap: 10px;
@@ -116,16 +126,20 @@
 /* 기본 disclosure triangle 숨김 */
 .rs-theme-summary::-webkit-details-marker { display: none; }
 .rs-theme-summary::marker { content: ''; }
-.rs-theme-check-row {
+.rs-theme-status {
   display: flex; align-items: center; gap: 10px;
-  flex: 1; min-width: 0; cursor: pointer; margin: 0;
+  flex: 1; min-width: 0;
 }
-.rs-theme-check-row input[type="checkbox"] {
-  flex: 0 0 auto;
-  width: 18px; height: 18px;
-  accent-color: var(--text);
-  cursor: pointer;
+.rs-theme-status-icon {
+  flex: 0 0 auto; width: 18px; height: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
 }
+.rs-theme-status-icon .rs-theme-status-on { display: none; }
+.rs-theme.is-theme-matched .rs-theme-status-icon { color: #b45309; }
+.rs-theme.is-theme-matched .rs-theme-status-icon .rs-theme-status-off { display: none; }
+.rs-theme.is-theme-matched .rs-theme-status-icon .rs-theme-status-on { display: inline; }
+[data-theme="dark"] .rs-theme.is-theme-matched .rs-theme-status-icon { color: #fbbf24; }
 .rs-theme-line {
   display: flex; flex-direction: column; gap: 1px;
   flex: 1; min-width: 0;
@@ -164,6 +178,15 @@
 }
 .rs-theme-hint strong { font-weight: var(--fw-heading); }
 [data-theme="dark"] .rs-theme-hint { background: #3a2e0c; color: #fbbf24; }
+
+/* 동의 박스 안의 응모 자동 포함 안내 — 별행에 옅게 */
+.rs-consent-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
 
 /* 메인 페이지에 노출되는 테마 배너 (작은 카드형) */
 .theme-banner {

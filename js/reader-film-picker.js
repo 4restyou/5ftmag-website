@@ -13,7 +13,11 @@
     const trigger = document.getElementById('rs-film-trigger');
     const selectedLabel = document.getElementById('rs-film-selected');
     const themeRoot = document.querySelector('.rs-theme');
-    const themeCheckbox = themeRoot?.querySelector('input[name="theme_apply"]') || null;
+    // theme_apply 는 이제 hidden input — 필름 일치 시 value 채우고, 아닐 때 비움.
+    // (이전엔 checkbox 였지만 응모 자동 포함 으로 단일 동의 모델로 전환.)
+    const themeInput = themeRoot?.querySelector('input[name="theme_apply"]') || null;
+    const themeStatus = themeRoot?.querySelector('.rs-theme-status') || null;
+    const themeMonth = themeStatus?.dataset?.themeMonth || themeInput?.defaultValue || '';
     const themeHint = document.getElementById('rs-theme-hint');
     const themeCanonical = themeRoot?.dataset?.themeCanonical || '';
     const dropdown = document.getElementById('rs-film-dropdown');
@@ -32,9 +36,9 @@
     }
 
     function syncThemeCheckbox(filmName) {
-      if (!themeCheckbox) return;
       const match = filmMatchesTheme(filmName);
-      themeCheckbox.checked = match;
+      if (themeInput) themeInput.value = match ? themeMonth : '';
+      if (themeRoot) themeRoot.classList.toggle('is-theme-matched', match);
       if (themeHint) themeHint.hidden = match || !filmName;
     }
 
