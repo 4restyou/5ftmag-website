@@ -1,0 +1,176 @@
+/* 5ft.mag UI control atoms — 모든 페이지에서 같은 모양/동작을 쓰기 위한 공통 부품.
+   ════════════════════════════════════════════════════════════════════════════
+   • .ft-toggle / .ft-toggle-btn   — 2~3 옵션 segmented pill (메인의 .mh-view-toggle 패턴)
+   • .ft-icon-btn                  — 38×38 정사각 아이콘 버튼 (검색·필터·정렬 등)
+   • .ft-icon-btn-badge            — 활성 카운트 (노란 동그라미)
+   • .ft-search-bar                — 아이콘 → slide-down 풀폭 검색 input
+   • .ft-filter-sheet-*            — 하단 슬라이드 시트 (멀티 select 체크박스)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Segmented toggle (브랜드 / 사진으로 같은 binary or 3-way 선택) ── */
+.ft-toggle {
+  display: inline-flex;
+  background: var(--bg-sub);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 0;
+}
+.ft-toggle-btn {
+  flex: 1 1 auto;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.ft-toggle-btn:hover { color: var(--text); }
+.ft-toggle-btn.is-active {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .ft-toggle-btn.is-active { box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+
+/* ── Icon button (검색·필터·기타 single-action) ── */
+.ft-icon-btn {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  border-radius: 8px;
+  transition: background .12s;
+}
+.ft-icon-btn:hover { background: var(--bg-sub); }
+.ft-icon-btn:active { transform: scale(0.95); }
+.ft-icon-btn-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  background: #ffd400; color: #111;
+  border-radius: 8px; font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
+/* ── 컨트롤 행 (토글 + 아이콘 버튼들) ── */
+.ft-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ft-controls-row > .ft-toggle { flex: 1 1 auto; min-width: 0; }
+
+/* ── 검색 바 (아이콘 → 펼침) ── */
+.ft-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-sub);
+}
+.ft-search-bar[hidden] { display: none; }
+.ft-search-bar svg { color: var(--text-muted); flex: 0 0 auto; }
+.ft-search-bar input {
+  flex: 1;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;  /* iOS Safari 자동 확대 방지 */
+  color: var(--text);
+  outline: none;
+  padding: 0;
+  min-width: 0;
+}
+.ft-search-close {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.ft-search-close:hover { color: var(--text); background: var(--bg); }
+
+/* ── Filter bottom sheet ── */
+.ft-filter-backdrop {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0);
+  transition: background .22s ease-out;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.ft-filter-backdrop[hidden] { display: none; }
+.ft-filter-backdrop.is-open { background: rgba(0,0,0,.45); }
+.ft-filter-sheet {
+  width: 100%; max-width: 640px;
+  background: var(--bg); color: var(--text);
+  border-radius: 18px 18px 0 0;
+  padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(100%);
+  transition: transform .25s cubic-bezier(.2, .8, .25, 1);
+  box-shadow: 0 -12px 40px rgba(0,0,0,.18);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.ft-filter-backdrop.is-open .ft-filter-sheet { transform: translateY(0); }
+.ft-filter-sheet .mh-sheet-grip,
+.ft-filter-sheet .ft-sheet-grip {
+  display: block; width: 44px; height: 4px; margin: 4px auto 14px;
+  border-radius: 2px; background: var(--border);
+  border: none; cursor: pointer; padding: 0;
+}
+.ft-filter-title { font-size: 16px; font-weight: var(--fw-heading); margin: 6px 0 4px; }
+.ft-filter-hint { font-size: 12px; color: var(--text-muted); margin: 0 0 16px; }
+.ft-filter-section { margin-bottom: 18px; }
+.ft-filter-section-label {
+  display: block;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.ft-filter-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.ft-filter-list label {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 4px; cursor: pointer;
+  font-size: 15px; color: var(--text);
+}
+.ft-filter-list input[type="checkbox"] {
+  width: 20px; height: 20px; flex: 0 0 auto;
+  accent-color: var(--text);
+}
+.ft-filter-list label:active { background: var(--bg-sub); border-radius: 4px; }
+.ft-filter-list-count {
+  margin-left: auto;
+  font-size: 12px; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.ft-filter-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ft-filter-reset, .ft-filter-apply {
+  font: inherit; font-size: 14px; font-weight: var(--fw-heading);
+  padding: 12px 16px; border-radius: 999px; cursor: pointer;
+}
+.ft-filter-reset {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+}
+.ft-filter-reset:hover { border-color: var(--text); }
+.ft-filter-apply {
+  background: var(--text); color: var(--bg); border: none;
+}
+.ft-filter-apply:active { transform: scale(0.98); }

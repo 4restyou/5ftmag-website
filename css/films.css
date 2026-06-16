@@ -2324,51 +2324,12 @@
   border-bottom-color: var(--text);
 }
 
-/* ── 라이브러리 보기 토글 (필름별 / 사진 스타일별) ── */
-.library-view-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-top: 20px;
-  padding: 3px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--bg-sub);
-  flex-shrink: 0;
-}
-.library-view-btn {
-  font: inherit;
-  font-size: 12px;
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  background: transparent;
-  appearance: none;
-  border: 0;
-  border-radius: 999px;
-  padding: 6px 16px;
-  cursor: pointer;
-  transition: color .15s, background .15s, box-shadow .15s;
-}
-.library-view-btn:hover { color: var(--text); }
-.library-view-btn.is-active {
-  background: var(--text);
-  color: var(--bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-.library-view-btn:focus-visible {
-  outline: 2px solid var(--text);
-  outline-offset: 2px;
-}
+/* 라이브러리 보기 토글: ui-controls.css 의 .ft-toggle / .ft-toggle-btn 사용.
+   films 페이지 한정 placement 만 조정. */
+.library-view-toggle { margin-top: 20px; }
+.library-view-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 @media (max-width: 640px) {
-  .library-view-toggle {
-    width: 100%;
-    max-width: 292px;
-  }
-  .library-view-btn {
-    flex: 1 1 0;
-    padding-inline: 14px;
-  }
+  .library-view-toggle { width: 100%; max-width: 292px; display: flex; }
 }
 
 /* ── 사진 스타일별 보기 그리드 ── */
