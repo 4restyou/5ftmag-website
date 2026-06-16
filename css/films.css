@@ -926,15 +926,31 @@
    ════════════════════════════ */
 .library-controls {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: flex-start;
-  margin: 0 0 28px;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 20px;
 }
-/* .library-search 시각 정의는 css/ui-controls.css 의 .ft-search-bar 로 통일.
-   films.html 의 검색 바는 .library-controls / .library-photos-controls 아래에 따로 배치된다. */
-.library-search-bar { margin: 8px 0 14px; }
+.library-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.library-controls-row > .library-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+}
+.library-controls-row > .library-filter::-webkit-scrollbar { display: none; }
+.library-controls-row .ft-chip { flex: 0 0 auto; }
+/* .library-search 시각 정의는 css/ui-controls.css 의 .ft-search-bar 로 통일. */
+.library-search-bar { margin: 0 0 12px; }
 
 .library-empty {
   margin: 0 0 24px;
@@ -958,34 +974,31 @@
 }
 
 .library-controls-right {
-  display: flex;
+  display: none;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
-  justify-content: flex-end;
-  margin-left: auto;
+  gap: 12px;
   min-width: 0;
 }
-
-.library-advanced-toggle {
-  display: none;
-  min-height: 40px;
-  padding-inline: 14px;
+.library-controls-right.is-open {
+  display: flex;
 }
 
-.library-advanced-toggle.has-active {
-  border-color: var(--text);
-  background: var(--text);
-  color: var(--bg);
+/* .library-advanced-toggle 는 .ft-icon-btn 시각을 사용. 활성 시 우상단 dot 만 추가. */
+.library-advanced-toggle.has-active::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #ffd400;
 }
 
 .library-filter {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
   margin: 0;
   min-width: 0;
-  flex: 0 1 auto;
 }
 /* 라이브러리 다중 선택 dropdown — 브랜드 / 카메라 */
 .ms-dropdown {
@@ -1109,22 +1122,10 @@
 .ms-dropdown-option .ms-opt-meta { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
 .ms-dropdown-empty { padding: 12px 14px; color: var(--text-muted); font-size: 12px; }
 @media (max-width: 640px) {
-  .library-controls { flex-direction: column; align-items: stretch; gap: 12px; }
-  .library-controls-right { justify-content: flex-start; gap: 12px; flex-wrap: wrap; }
-  .library-photos-controls {
+  .library-controls-right.is-open {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
-  }
-  .library-advanced-toggle {
-    display: flex;
-    width: 100%;
-  }
-  .library-controls-right {
-    display: none;
-  }
-  .library-controls-right.is-open {
-    display: flex;
+    gap: 10px;
   }
   .ms-dropdown { width: 100%; }
   .ms-dropdown-btn { width: 100%; }
@@ -2175,19 +2176,6 @@
     font-size: 11px;
     align-self: end;
   }
-  .library-controls-right,
-  .library-filter {
-    width: 100%;
-  }
-  .library-filter {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .library-filter-chip {
-    flex: 0 0 auto;
-  }
   .library-more-wrap:not([hidden]) {
     display: flex;
   }
@@ -2262,34 +2250,24 @@
 .library-photos-controls {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  justify-content: flex-start;
+  gap: 8px;
   margin: 16px 0 0;
 }
 .library-photos-chips {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
 }
 .library-photos-chips::-webkit-scrollbar { display: none; }
 .library-photos-chips .library-filter-chip { flex-shrink: 0; }
-@media (max-width: 640px) {
-  .library-photos-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  .library-photos-chips {
-    width: 100%;
-  }
-}
 .library-photos-bar {
   display: flex;
   align-items: center;
