@@ -59,7 +59,17 @@
       const panel = document.getElementById('libraryAdvancedFilters');
       if (!btn || !panel) return;
       const count = activeAdvancedFilterCount();
-      btn.textContent = count > 0 ? `필터 ${count}` : '필터';
+      let badge = btn.querySelector('.ft-icon-btn-badge');
+      if (count > 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'ft-icon-btn-badge';
+          btn.appendChild(badge);
+        }
+        badge.textContent = String(count);
+      } else if (badge) {
+        badge.remove();
+      }
       btn.classList.toggle('has-active', count > 0);
       if (count > 0 && isMobileFilms()) {
         panel.classList.add('is-open');
