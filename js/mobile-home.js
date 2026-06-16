@@ -897,12 +897,25 @@
     } catch (_) {}
   }
 
+  // films 카탈로그 — DB 우선 + 정적 JSON fallback/보강 (films.html 과 동일 경로).
+  // admin 에서 추가한 신규 필름이 다음 빌드 전에도 모바일 홈에 즉시 보이게.
+  async function loadFilmsCatalog() {
+    if (window.FilmsCatalogLoader?.load) {
+      try {
+        const cat = await window.FilmsCatalogLoader.load({ staticPath: '/data/films.json' });
+        return cat?.data || {};
+      } catch (_) {}
+    }
+    // loader 미로드 시 정적 JSON 만 사용
+    return (await fetchJson('/data/films.json')) || {};
+  }
+
   (async function start() {
     bindControls();
     bindStickyShrink();
     const [stories, films] = await Promise.all([
       fetchJson('/data/stories.json'),
-      fetchJson('/data/films.json'),
+      loadFilmsCatalog(),
     ]);
     STATE.stories = Array.isArray(stories) ? stories : [];
     const filmsObj = films && typeof films === 'object' ? films : {};
