@@ -415,7 +415,7 @@
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-mobilefix">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -490,6 +490,9 @@
     <span class="admin-tabs-spacer"></span>
     <button type="button" class="admin-filter-chip" id="likeSort" aria-pressed="false" title="종이 매거진 우수작 선정 보조용 — 편집부에만 보입니다">좋아요 순</button>
     <button type="button" class="admin-filter-chip" id="themeFilter" aria-pressed="false">테마 응모만</button>
+  </div>
+  <div class="admin-select-row" id="selectAllRow" hidden>
+    <label><input type="checkbox" id="selectAll" /> <span id="selectAllLabel">보이는 사진 전체 선택</span></label>
   </div>
   <div class="admin-bulk-bar" id="bulkBar" hidden role="region" aria-label="선택한 사진 일괄 처리">
     <span class="bulk-count" id="bulkCount">0건 선택</span>
@@ -636,6 +639,7 @@ async function loadList() {
     STATE.rows = slice;
     $('list').innerHTML = slice.map(renderCard).join('');
     bindCardActions();
+  updateSelectAllState();
     renderPagination(totalAll, totalPages);
     return;
   }
@@ -665,6 +669,7 @@ async function loadList() {
   }
   $('list').innerHTML = STATE.rows.map(renderCard).join('');
   bindCardActions();
+  updateSelectAllState();
   renderPagination(total, totalPages);
 }
 
@@ -896,6 +901,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     // 탭 바뀌면 선택 비우기 — 다른 탭 항목이 섞이지 않게
     STATE.selected.clear();
     updateBulkBar();
+    updateSelectAllRow();
     loadList();
   });
 });
@@ -907,7 +913,57 @@ function updateBulkBar() {
   const n = STATE.selected.size;
   bar.hidden = n === 0;
   $('bulkCount').textContent = `${n}건 선택`;
+  updateSelectAllState();
 }
+
+// pending 탭에서만 "전체 선택" 행을 노출.
+function updateSelectAllRow() {
+  const row = $('selectAllRow');
+  if (!row) return;
+  row.hidden = STATE.status !== 'pending';
+  updateSelectAllState();
+}
+
+// selectAll 체크박스의 상태 동기화 — 현재 보이는 카드 대비 선택된 비율.
+//  0건: unchecked
+//  일부: indeterminate
+//  전체: checked
+function updateSelectAllState() {
+  const all = $('selectAll');
+  if (!all) return;
+  const visible = document.querySelectorAll('[data-bulk-check]');
+  const total = visible.length;
+  if (!total) {
+    all.checked = false; all.indeterminate = false;
+    $('selectAllLabel').textContent = '보이는 사진 전체 선택';
+    return;
+  }
+  let on = 0;
+  visible.forEach(c => { if (STATE.selected.has(c.dataset.bulkCheck)) on++; });
+  all.checked = on === total;
+  all.indeterminate = on > 0 && on < total;
+  $('selectAllLabel').textContent = on === 0
+    ? `보이는 사진 ${total}건 전체 선택`
+    : on === total
+      ? `${total}건 모두 선택됨`
+      : `${on} / ${total} 선택됨`;
+}
+
+$('selectAll')?.addEventListener('change', (e) => {
+  const visible = document.querySelectorAll('[data-bulk-check]');
+  if (e.target.checked) {
+    visible.forEach(c => {
+      STATE.selected.add(c.dataset.bulkCheck);
+      c.checked = true;
+    });
+  } else {
+    visible.forEach(c => {
+      STATE.selected.delete(c.dataset.bulkCheck);
+      c.checked = false;
+    });
+  }
+  updateBulkBar();
+});
 
 async function bulkApply(action) {
   if (!STATE.selected.size) return;
@@ -1020,6 +1076,7 @@ async function loadReportBadge() {
   // (loadList 가 먼저 끝나면 모든 카드에 "라이브러리에 없는 필름" 으로 잘못 표시됨)
   await loadFilms();
   await Promise.all([loadCounts(), loadLikes(), loadList(), loadReportBadge()]);
+  updateSelectAllRow();
 })();
 </script>
 
