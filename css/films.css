@@ -200,6 +200,38 @@
   outline: none;
 }
 
+/* "이 필름으로 쓴 글 N" 배지 — 카드 안에서 spec 과 cta 사이에 한 줄로 들어간다.
+   stories.html?film=slug 로 필터 진입. */
+.film-articles-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  color: var(--text-muted);
+  letter-spacing: var(--ls-default);
+  padding: 3px 8px;
+  margin: 2px 0 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-sub);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .12s, border-color .12s, background .12s;
+}
+.film-articles-link::before {
+  content: '✎';
+  font-size: 10px;
+  line-height: 1;
+}
+.film-articles-link:hover,
+.film-articles-link:focus-visible {
+  color: var(--text);
+  border-color: var(--text);
+  outline: none;
+}
+
 /* ════════════════════════════
    MODAL (사진 갤러리)
 ════════════════════════════ */
@@ -973,15 +1005,22 @@
   padding: 10px 18px;
 }
 
+/* 데스크톱: 고급 필터 패널 항상 노출 (브랜드·카메라 multi-select 즉시 사용)
+   모바일: 기본 숨김 + 필터 아이콘 클릭 시 .is-open 으로 펼침 */
 .library-controls-right {
-  display: none;
+  display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
   min-width: 0;
 }
-.library-controls-right.is-open {
-  display: flex;
+@media (max-width: 640px) {
+  .library-controls-right { display: none; }
+  .library-controls-right.is-open { display: flex; }
+}
+/* 데스크톱에선 필터 아이콘이 굳이 필요 없음 (패널 항상 보임) — 모바일에서만 노출 */
+@media (min-width: 641px) {
+  .library-advanced-toggle { display: none !important; }
 }
 
 /* .library-advanced-toggle 는 .ft-icon-btn 시각을 사용. 활성 시 카운트는

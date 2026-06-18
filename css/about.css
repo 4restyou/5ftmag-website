@@ -93,6 +93,61 @@
   line-height: 1.6; margin-top: auto;
 }
 
+/* ════════ 참여하기 ════════ */
+.join-section {
+  padding: 80px 32px;
+  border-top: 1px solid var(--border);
+}
+.join-header {
+  max-width: 1200px; margin: 0 auto 40px;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+}
+.join-header h2 {
+  font-size: var(--fs-display); font-weight: var(--fw-heading);
+  letter-spacing: -0.03em; line-height: 1.1;
+}
+.join-header p {
+  font-size: var(--fs-body); color: var(--text-muted);
+  max-width: 560px;
+}
+.join-grid {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+}
+.join-card {
+  background: var(--bg-sub); padding: 28px 24px;
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 12px;
+  min-height: 240px;
+  text-decoration: none; color: inherit;
+  transition: border-color .15s, transform .15s, background .15s;
+}
+.join-card:hover {
+  border-color: var(--text);
+  transform: translateY(-2px);
+  background: var(--bg);
+}
+.join-num {
+  font-size: 28px; font-weight: var(--fw-heading);
+  color: var(--accent); letter-spacing: -0.02em; line-height: 1;
+}
+.join-card h3 {
+  font-size: 17px; font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default); line-height: 1.2;
+  color: var(--text);
+}
+.join-card p {
+  font-size: 13.5px; color: var(--text-muted);
+  line-height: 1.6;
+  flex: 1 1 auto;
+}
+.join-cta {
+  font-size: 13px; font-weight: var(--fw-heading);
+  color: var(--text);
+  letter-spacing: var(--ls-default);
+}
+
 /* ── CONTRIBUTORS ── */
 .contrib-section {
   padding: 80px 32px;
@@ -379,6 +434,7 @@ a.contrib-handle:hover { color: var(--text); }
   .hero-title { font-size: 40px; }
   .belief-quote { font-size: 28px; }
   .how-grid { grid-template-columns: repeat(2, 1fr); }
+  .join-grid { grid-template-columns: repeat(2, 1fr); }
   .contrib-grid { grid-template-columns: repeat(2, 1fr); }
   .partners-section-grid { grid-template-columns: repeat(2, 1fr); }
   .partners-section-grid .partner-block:last-child { grid-column: 1 / -1; }
@@ -389,10 +445,11 @@ a.contrib-handle:hover { color: var(--text); }
   .cta-title { font-size: 32px; }
 }
 @media (max-width: 560px) {
-  .hero-about, .belief, .how-section, .contrib-section, .partners-section { padding: 56px 20px; }
+  .hero-about, .belief, .how-section, .join-section, .contrib-section, .partners-section { padding: 56px 20px; }
   .hero-title { font-size: 32px; }
   .belief-quote { font-size: 22px; }
   .how-grid { grid-template-columns: 1fr; }
+  .join-grid { grid-template-columns: 1fr; }
   .contrib-grid { grid-template-columns: 1fr; }
   .contrib-mini-grid { grid-template-columns: 1fr; padding: 0 20px; }
   .contrib-subheader { padding: 0 20px; }

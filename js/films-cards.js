@@ -81,6 +81,14 @@
         </svg>
       </span>`;
 
+    // "이 필름으로 쓴 글 N" 배지 — options.articleCounts[slug] > 0 일 때만 노출.
+    // stories.json 의 films 배열을 stories ↔ films 크로스링크의 데이터 소스로 사용.
+    // <a> 를 <button> 안에 못 넣으니 span+data-action 으로 처리 (favorite 패턴과 동일).
+    const articleCount = options.articleCounts?.[slug] || 0;
+    const articleBadge = articleCount > 0
+      ? `<span class="film-articles-link" role="link" tabindex="0" data-action="film-articles" data-film-slug="${escapeAttr(slug)}" aria-label="이 필름으로 쓴 글 ${articleCount}개 보기">이 필름으로 쓴 글 ${articleCount}</span>`
+      : '';
+
     return `
       <button class="film-card${tierClass}" data-reveal data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-brand="${escapeAttr(film.brand || '')}" data-search="${escapeAttr(searchTokens)}">
         <div class="film-img">
@@ -92,6 +100,7 @@
         <span class="film-brand">${escapeAttr(film.brand)}</span>
         <h2 class="film-name">${escapeAttr(film.name)}</h2>
         <p class="film-spec"><span class="film-spec-main">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)}</span><span class="film-spec-format">${escapeAttr(film.format)}</span></p>
+        ${articleBadge}
         ${ctaHtml}
       </button>`;
   }

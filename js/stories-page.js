@@ -162,6 +162,8 @@
   let currentCategory = _urlParams.get('cat') || 'all';
   let currentSearchQuery = (_urlParams.get('q') || '').trim();
   let currentMonth = _urlParams.get('m') || 'all'; // 'all' | 'YYYY-MM'
+  let currentFilmSlug = _urlParams.get('film') || '';  // films.html 카드 -> "이 필름으로 쓴 글" 진입
+  let filmDisplayBySlug = {};  // slug -> "Brand Name" 라벨, films.json 에서 비동기 로드
 
   // 글 날짜에서 월 목록(YYYY-MM)을 뽑아 최신순으로 select 채우기
   function populateMonths() {
@@ -187,16 +189,22 @@
     if (currentCategory && currentCategory !== 'all') params.set('cat', currentCategory);
     if (currentMonth && currentMonth !== 'all') params.set('m', currentMonth);
     if (currentSearchQuery) params.set('q', currentSearchQuery);
+    if (currentFilmSlug) params.set('film', currentFilmSlug);
     if (currentPage > 1) params.set('page', String(currentPage));
     const qs = params.toString();
     history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : ''));
   }
 
-  // 통합 필터링 (카테고리 + 검색)
+  // 통합 필터링 (카테고리 + 검색 + 필름)
   function applyFilters() {
     let result = currentCategory === 'all'
       ? allStories
       : allStories.filter(s => storyFilterKey(s) === currentCategory);
+
+    // 필름 필터 — stories.json 의 films 배열에 특정 slug 가 들어있는 글만
+    if (currentFilmSlug) {
+      result = result.filter(s => Array.isArray(s.films) && s.films.includes(currentFilmSlug));
+    }
 
     // 월 필터
     if (currentMonth !== 'all') {
@@ -239,6 +247,9 @@
       const [y, mo] = currentMonth.split('-');
       parts.push(`${y}년 ${Number(mo)}월`);
     }
+    if (currentFilmSlug) {
+      parts.push(filmDisplayBySlug[currentFilmSlug] || currentFilmSlug);
+    }
     if (!parts.length && !currentSearchQuery) { countEl.textContent = ''; return; }
     countEl.innerHTML = '';
     if (parts.length) {
@@ -265,11 +276,12 @@
     countEl.appendChild(reset);
   }
 
-  // 빈 결과에서 "전체 글 보기" — 카테고리·검색 초기화
+  // 빈 결과에서 "전체 글 보기" — 카테고리·검색·필름 초기화
   function resetFilters() {
     currentCategory = 'all';
     currentSearchQuery = '';
     currentMonth = 'all';
+    currentFilmSlug = '';
     currentPage = 1;
     const si = document.getElementById('searchInput');
     if (si) si.value = '';
@@ -280,6 +292,22 @@
   }
 
   // JSON 로딩
+  // 필름 필터로 진입한 경우 films.json 도 같이 로드 — meta 라벨에 필름 이름을 노출.
+  // 실패해도 슬러그 자체로 폴백.
+  if (currentFilmSlug) {
+    fetch('data/films.json')
+      .then(res => res.ok ? res.json() : {})
+      .then(films => {
+        for (const [slug, f] of Object.entries(films || {})) {
+          filmDisplayBySlug[slug] = f.displayName || `${f.brand || ''} ${f.name || ''}`.trim() || slug;
+        }
+        // films 가 stories 보다 먼저 도착했을 수 있으니 메타 다시 그려준다.
+        const countEl = document.getElementById('searchResultsCount');
+        if (countEl && allStories.length) applyFilters();
+      })
+      .catch(() => {});
+  }
+
   fetch('data/stories.json')
     .then(res => {
       if (!res.ok) throw new Error('데이터를 불러올 수 없습니다.');
