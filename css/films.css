@@ -1175,14 +1175,22 @@
   position: relative;
 }
 .films-section-head-library {
-  /* 텍스트 가독성은 720px 로 제한하되, 상단 구분선은 섹션 전체 폭으로 — title/sub 만 max-width */
+  /* Library 가 첫 섹션 — 상단 구분선/큰 마진 필요 없음 */
+  max-width: none;
+}
+.films-section-head-library .films-section-title,
+.films-section-head-library .films-section-sub {
+  max-width: 720px;
+}
+/* 5ft Issue 섹션은 Library 아래로 옮김 — 두 섹션 사이 시각적 구분선은 이쪽에 둔다 */
+.films-section-head-issue {
   max-width: none;
   margin-top: 88px;
   padding-top: 36px;
   border-top: 1px solid var(--border);
 }
-.films-section-head-library .films-section-title,
-.films-section-head-library .films-section-sub {
+.films-section-head-issue .films-section-title,
+.films-section-head-issue .films-section-sub {
   max-width: 720px;
 }
 .library-mine-link {
@@ -2130,7 +2138,7 @@
     justify-content: flex-start;
     align-items: flex-start;
   }
-  .films-section-head-library { margin-top: 64px; }
+  .films-section-head-issue { margin-top: 64px; }
 }
 @media (max-width: 640px) {
   .reader-grid { grid-template-columns: repeat(3, 1fr); }

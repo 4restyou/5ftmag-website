@@ -92,12 +92,31 @@
     .cam-group-row .cam-group-count { float: right; font-weight: 400; letter-spacing: 0; text-transform: none; }
 
     @media (max-width: 600px) {
+      /* 테이블이 display: table 인 채로 두면 자식의 긴 텍스트 (긴 카메라 이름의
+         <option>) 가 자동 폭으로 잡혀 viewport 밖으로 튀어나간다.
+         table / tbody / tr / td 모두 block 으로 내려서 항상 부모 폭에 맞추도록 강제. */
+      .cam-table { display: block; width: 100%; max-width: 100%; }
       .cam-table thead { display: none; }
-      .cam-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
-      .cam-table td { display: block; border: none; padding: 4px 0; }
+      .cam-table tbody { display: block; width: 100%; }
+      .cam-table tbody tr {
+        display: block; padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        width: 100%; box-sizing: border-box;
+      }
+      .cam-table td {
+        display: block; border: none; padding: 4px 0;
+        width: 100%; max-width: 100%; box-sizing: border-box;
+      }
       /* 모바일에선 각 input/select 가 한 줄을 통째로 차지 — 가로 overflow 방지 */
-      .brand-input-wrap { flex-wrap: wrap; margin-top: 6px; }
-      .brand-input-wrap > * { flex: 1 1 100%; }
+      .brand-input-wrap {
+        flex-wrap: wrap; margin-top: 6px;
+        width: 100%; max-width: 100%; box-sizing: border-box; min-width: 0;
+      }
+      .brand-input-wrap > * {
+        flex: 1 1 100%;
+        width: 100%; max-width: 100%; min-width: 0;
+        box-sizing: border-box;
+      }
     }
     .admin-subnav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .admin-subnav::-webkit-scrollbar { display: none; }

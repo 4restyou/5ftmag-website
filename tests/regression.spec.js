@@ -1382,7 +1382,7 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
   });
 
   await page.goto('/films.html');
-  await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await page.locator('#filmsGridFeatured .film-card[data-film="ultramax"]').click();
   await expect.poll(async () => page.evaluate(() => window.__listApprovedLimits.length), { timeout: 5000 }).toBeGreaterThan(0);
   await expect(page.evaluate(() => window.__listApprovedLimits[0])).resolves.toBeNull();
   await expect(page.locator('#readerRollSwitcher-ultramax .reader-control-label')).toHaveText('롤 보기');
@@ -1469,7 +1469,7 @@ test('Reader Roll 모달은 필요한 롤 범위만 가져온다', async ({ page
   });
 
   await page.goto('/films.html');
-  await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await page.locator('#filmsGridFeatured .film-card[data-film="ultramax"]').click();
   await expect(page.locator('#readerRollCounter-ultramax')).toContainText('8 / 36 · 3롤', { timeout: 5000 });
   await expect(page.locator('.modal-section-reader .modal-section-head [data-save-menu-toggle]')).toHaveCount(0);
   await expect(page.locator('.reader-roll-controls [data-save-menu-toggle="reader"][data-film-key="ultramax"]')).toBeVisible();
@@ -1554,7 +1554,7 @@ test('Reader 라이트박스에서 사진 좋아요와 작가 모아보기가 �
   });
 
   await page.goto('/films.html');
-  await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await page.locator('#filmsGridFeatured .film-card[data-film="ultramax"]').click();
   await page.locator('#readerGrid-ultramax .reader-slot.is-filled').first().click();
 
   const fav = page.locator('#lightbox.open #lightboxFav');
@@ -1660,7 +1660,7 @@ test('Reader Roll 선택 저장은 고른 사진만 저장 대상으로 보낸�
   });
 
   await page.goto('/films.html');
-  await page.locator('.film-card[data-film="ultramax"]').first().click();
+  await page.locator('#filmsGridFeatured .film-card[data-film="ultramax"]').click();
   await expect(page.locator('#readerGrid-ultramax .reader-slot.is-filled')).toHaveCount(4);
   await page.evaluate(() => {
     window.__selectedSave = null;
