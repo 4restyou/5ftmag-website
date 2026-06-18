@@ -246,13 +246,20 @@
 
 /* ════════════════════════════════════════════════════════════
    모바일 카탈로그 테이블 — td 가 block 으로 펼쳐질 때 컬럼 라벨 노출
-   td[data-label] 패턴: JS 렌더 시 data-label 속성 부여하면 자동으로 라벨이 보임
+   td[data-label] 패턴: JS 렌더 시 data-label 속성 부여하면 자동으로 라벨이 보임.
+   films/labs/repairs 는 자체 mobile media query 로 td 를 block 으로 만든다.
+   webzine (.wz-table) 은 그 규칙이 없어 여기서 같이 챙겨준다.
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 700px) {
+  .wz-table thead { display: none; }
+  .wz-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .wz-table td { display: block; border: none; padding: 4px 0; }
+  .wz-table .col-actions { text-align: left; }
+
   .films-table td[data-label]::before,
   .labs-table td[data-label]::before,
   .wz-table td[data-label]::before {
-    content: attr(data-label) ':\\00a0';
+    content: attr(data-label) ": ";
     display: inline-block;
     min-width: 64px;
     font-size: 11px;
