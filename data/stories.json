@@ -25,7 +25,11 @@
     "excerpt": "월드컵 개막에 맞춰 일포드가 HP5 Plus 와 XP2 Super 풋볼 컬렉터스 에디션을 내놨다. 유제는 그대로, 상자에 Expired Film Club 의 흑백 축구 사진이 입혀졌다.",
     "page": "stories/ilford-football.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "hp5plus",
+      "xp2super"
+    ]
   },
   {
     "id": "nishijima",
@@ -109,7 +113,11 @@
     "excerpt": "한쪽에선 코닥이 VERITA 200D 를 새로 풀었고, 다른 한쪽에선 후지필름의 흑백 라인이 정리된다는 이야기가 빠르게 번졌다. 두 사건이 같은 결론에 닿는 이유.",
     "page": "stories/verita-200d-fuji-bw.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "acros2",
+      "acros1"
+    ]
   },
   {
     "id": "fred-herzog",
@@ -165,7 +173,18 @@
     "excerpt": "Portra 가 Ektacolor Pro 로, T-Max 가 Ektapan 으로 이름을 바꿔 다시 나왔다. 이름만 바뀐 게 아니라, 14년 만에 코닥이 자기 필름을 자기 손으로 팔게 된 신호다.",
     "page": "stories/kodak-rebrand.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "kodacolor100",
+      "kodacolor200",
+      "portra160",
+      "portra400",
+      "portra800",
+      "tmax100",
+      "tmax400",
+      "tmaxp3200",
+      "gold200"
+    ]
   },
   {
     "id": "spc-issue01",
@@ -207,7 +226,15 @@
     "excerpt": "Lucky가 컬러를 되돌리고, Shanghai는 흑백을 이어가고, Reflx Lab은 시네필름을 가정용으로 옮긴다. 중국 필름 생태계의 세 풍경.",
     "page": "stories/ch-revival.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "luckycolor200",
+      "luckyshd100",
+      "luckyshd400",
+      "gp3100",
+      "reflxlab800t",
+      "reflxlab250d"
+    ]
   },
   {
     "id": "17",
@@ -294,7 +321,14 @@
     "excerpt": "디지털의 무결점에는 '감정'이 없다. 〈캐롤〉의 16mm 겨울 공기부터 〈오펜하이머〉의 묵직한 흑백 IMAX까지, 필름이 빛으로 새긴 10편의 시네마. Vol.02 〈Feature〉에서 다룬 영화 중 다섯 편을 먼저 만나본다.",
     "page": "stories/11.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "lomocolor800",
+      "portra160",
+      "gold200",
+      "cinestill800t",
+      "cinestillxx"
+    ]
   },
   {
     "id": "10",
@@ -308,7 +342,10 @@
     "excerpt": "두 번째 이야기. 시네스틸 800T가 펼치는, 당신의 공간 — 그 장르는 무엇인가. 노애경, 박순렬, 장형수 작가의 사진과 신노구치 작가 인터뷰까지 — Vol.02 콘텐츠 전체 미리보기.",
     "page": "stories/10.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "cinestill800t"
+    ]
   },
   {
     "id": "09",
@@ -434,6 +471,9 @@
     "excerpt": "E-book 22권을 내고 1년을 다시 준비했다. 마침내 종이 위에 새겨진 5ft.mag 정식 창간호. 그 안에 무엇이 담겼는지 살짝 들여다본다.",
     "page": "stories/01.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "ultramax"
+    ]
   }
 ]
