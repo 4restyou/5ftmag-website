@@ -201,14 +201,14 @@ function render() {
     const hideLabel = hidden ? '복원' : '숨김';
     return `
       <tr${hidden ? ' style="opacity:.55"' : ''}>
-        <td>
+        <td data-label="필름">
           <div class="col-display">${escapeHtml(display)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
           <div class="col-slug">${escapeHtml(f.slug)}</div>
         </td>
-        <td class="col-meta">${escapeHtml(spec)}</td>
-        <td><span class="badge ${f.tier === 'featured' ? 'featured' : ''}">${escapeHtml(f.tier || 'library')}</span></td>
-        <td class="col-meta">${readerCount}</td>
-        <td class="col-actions">
+        <td class="col-meta" data-label="스펙">${escapeHtml(spec)}</td>
+        <td data-label="등급"><span class="badge ${f.tier === 'featured' ? 'featured' : ''}">${escapeHtml(f.tier || 'library')}</span></td>
+        <td class="col-meta" data-label="컷">${readerCount}</td>
+        <td class="col-actions" data-label="actions">
           <button type="button" class="row-btn" data-edit="${escapeAttr(f.slug)}">수정</button>
           <button type="button" class="row-btn" data-toggle-hidden="${escapeAttr(f.slug)}" data-current-hidden="${hidden}">${hideLabel}</button>
           <button type="button" class="row-btn danger" data-delete="${escapeAttr(f.slug)}">삭제</button>
@@ -278,6 +278,32 @@ function openForm(slug) {
     $('f-tier').value = 'library';
     setCanThumbPreview('');
   }
+  // 삭제 버튼은 기존 항목 수정 시에만 노출
+  const deleteBtn = $('deleteBtn');
+  if (deleteBtn) deleteBtn.hidden = !slug;
+  // slug 입력 변화에 즉시 중복 검사 안내
+  validateSlugLive();
+}
+
+function validateSlugLive() {
+  const warn = $('slugWarn');
+  if (!warn) return;
+  const slugEl = $('f-slug');
+  const value = (slugEl?.value || '').trim().toLowerCase();
+  if (!value) { warn.textContent = ''; warn.classList.remove('is-error'); return; }
+  if (!/^[a-z0-9-]+$/.test(value)) {
+    warn.textContent = '소문자·숫자·하이픈(-) 만 사용 가능해요.';
+    warn.classList.add('is-error');
+    return;
+  }
+  const duplicate = STATE.films.some(f => f.slug === value && f.slug !== STATE.editingSlug);
+  if (duplicate) {
+    warn.textContent = '이미 사용 중인 slug 예요. 다른 이름을 골라주세요.';
+    warn.classList.add('is-error');
+  } else {
+    warn.textContent = '';
+    warn.classList.remove('is-error');
+  }
 }
 
 function setCanThumbPreview(url) {
@@ -321,6 +347,13 @@ $('newBtn').addEventListener('click', () => openForm(null));
 $('cancelBtn').addEventListener('click', closeForm);
 $('modal').addEventListener('click', (e) => {
   if (e.target === $('modal')) closeForm();
+});
+// slug 입력 즉시 검증 — 중복·문자 제한
+$('f-slug').addEventListener('input', validateSlugLive);
+// 모달의 [삭제] 버튼 — 기존 행 삭제 로직 재사용
+$('deleteBtn')?.addEventListener('click', () => {
+  if (!STATE.editingSlug) return;
+  deleteFilm(STATE.editingSlug);
 });
 
 $('filmForm').addEventListener('submit', async (e) => {
@@ -400,6 +433,8 @@ async function deleteFilm(slug) {
   }
   window.notify?.(`"${label}" 을 삭제했어요.`, 'info');
   STATE.films = STATE.films.filter(x => x.slug !== slug);
+  // 모달에서 호출됐으면 모달도 닫아준다
+  if (STATE.editingSlug === slug) closeForm();
   render();
 }
 

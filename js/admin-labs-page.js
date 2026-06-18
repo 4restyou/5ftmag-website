@@ -95,13 +95,13 @@ function render() {
     const c135 = l.prices?.color?.['135']?.basic;
     return `
       <tr${hidden ? ' style="opacity:.55"' : ''}>
-        <td>
+        <td data-label="이름">
           <div class="col-name">${escapeHtml(l.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
         </td>
-        <td class="col-meta">${escapeHtml(l.region || '')}</td>
-        <td class="col-meta">${escapeHtml(l.address || '')}</td>
-        <td class="col-meta">${fmt(c135)}</td>
-        <td class="col-actions">
+        <td class="col-meta" data-label="지역">${escapeHtml(l.region || '')}</td>
+        <td class="col-meta" data-label="주소">${escapeHtml(l.address || '')}</td>
+        <td class="col-meta" data-label="C-135">${fmt(c135)}</td>
+        <td class="col-actions" data-label="actions">
           <button type="button" class="row-btn" data-edit="${escapeAttr(l.id)}">수정</button>
           <button type="button" class="row-btn" data-hide="${escapeAttr(l.id)}" data-cur="${hidden}">${hidden ? '복원' : '숨김'}</button>
           <button type="button" class="row-btn danger" data-del="${escapeAttr(l.id)}">삭제</button>
@@ -176,6 +176,8 @@ function openForm(id) {
     $('f-id').value = '';
     fillPrices({});
   }
+  const deleteBtn = $('deleteBtn');
+  if (deleteBtn) deleteBtn.hidden = !id;
 }
 
 function closeForm() {
@@ -186,6 +188,10 @@ function closeForm() {
 
 $('newBtn').addEventListener('click', () => openForm(null));
 $('cancelBtn').addEventListener('click', closeForm);
+$('deleteBtn')?.addEventListener('click', () => {
+  if (!STATE.editingId) return;
+  removeLab(STATE.editingId);
+});
 $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeForm(); });
 
 $('labForm').addEventListener('submit', async (e) => {
@@ -233,6 +239,7 @@ async function removeLab(id) {
   if (error) { window.notify?.('삭제 실패: ' + (error.message || ''), 'danger'); return; }
   window.notify?.(`"${label}" 을 삭제했어요.`, 'info');
   STATE.labs = STATE.labs.filter(x => x.id !== id);
+  if (STATE.editingId === id) closeForm();
   render();
 }
 

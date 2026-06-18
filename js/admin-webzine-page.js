@@ -55,12 +55,12 @@ function render() {
   if (!STATE.issues.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">아직 등록된 웹진이 없습니다.</td></tr>'; return; }
   tbody.innerHTML = STATE.issues.map(it => `
     <tr data-id="${escapeHtml(it.id)}">
-      <td class="col-title">${escapeHtml(it.title)}</td>
-      <td>${escapeHtml(it.issue_label || '')}</td>
-      <td>${escapeHtml(it.category || '')}</td>
-      <td>${it.published ? '<span class="badge live">공개</span>' : '<span class="badge">비공개</span>'}</td>
-      <td>${Number(it.sort_order) || 0}</td>
-      <td class="col-actions">
+      <td class="col-title" data-label="제목">${escapeHtml(it.title)}</td>
+      <td data-label="호">${escapeHtml(it.issue_label || '')}</td>
+      <td data-label="분류">${escapeHtml(it.category || '')}</td>
+      <td data-label="상태">${it.published ? '<span class="badge live">공개</span>' : '<span class="badge">비공개</span>'}</td>
+      <td data-label="정렬">${Number(it.sort_order) || 0}</td>
+      <td class="col-actions" data-label="actions">
         <button type="button" class="row-btn" data-act="edit">수정</button>
         <button type="button" class="row-btn" data-act="toggle">${it.published ? '비공개로' : '공개'}</button>
         <button type="button" class="row-btn danger" data-act="del">삭제</button>
@@ -104,12 +104,46 @@ function openModal(issue) {
   $('cover-hint').textContent = issue?.cover_path ? '현재 표지 있음 (새 파일 선택 시 교체)' : '';
   $('pdf-hint').textContent = issue?.pdf_path ? '현재 PDF 있음 (새 파일 선택 시 교체)' : '웹용으로 최적화한 PDF 권장(최대 60MB).';
   $('formMsg').textContent = ''; $('formMsg').classList.remove('error');
+  const deleteBtn = $('deleteBtn');
+  if (deleteBtn) deleteBtn.hidden = !issue;
   $('modal').classList.add('open');
+  validateSlugLive();
 }
-function closeModal() { $('modal').classList.remove('open'); }
+function closeModal() { $('modal').classList.remove('open'); STATE.editingId = null; }
 $('newBtn').addEventListener('click', () => openModal(null));
 $('cancelBtn').addEventListener('click', closeModal);
 $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
+$('f-slug').addEventListener('input', validateSlugLive);
+$('deleteBtn')?.addEventListener('click', async () => {
+  if (!STATE.editingId) return;
+  const issue = STATE.issues.find(x => String(x.id) === String(STATE.editingId));
+  if (!issue) return;
+  if (!confirm(`"${issue.title}" 을(를) 삭제할까요? (목록에서만 제거되며 업로드 파일은 남습니다)`)) return;
+  const { error } = await withWriteTimeout(db().webzine.remove(issue.id));
+  if (error) { alert('삭제 실패: ' + error.message); return; }
+  closeModal();
+  await reload();
+});
+
+function validateSlugLive() {
+  const warn = $('slugWarn');
+  if (!warn) return;
+  const value = ($('f-slug')?.value || '').trim().toLowerCase();
+  if (!value) { warn.textContent = ''; warn.classList.remove('is-error'); return; }
+  if (!/^[a-z0-9-]+$/.test(value)) {
+    warn.textContent = '소문자·숫자·하이픈(-) 만 사용 가능해요.';
+    warn.classList.add('is-error');
+    return;
+  }
+  const duplicate = STATE.issues.some(x => x.slug === value && String(x.id) !== String(STATE.editingId));
+  if (duplicate) {
+    warn.textContent = '이미 사용 중인 slug 예요.';
+    warn.classList.add('is-error');
+  } else {
+    warn.textContent = '';
+    warn.classList.remove('is-error');
+  }
+}
 
 function setMsg(text, isError) { const m = $('formMsg'); m.textContent = text || ''; m.classList.toggle('error', !!isError); }
 
