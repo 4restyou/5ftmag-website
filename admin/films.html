@@ -50,9 +50,7 @@
     .films-table .col-actions { text-align: right; white-space: nowrap; }
     .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; }
     .badge.featured { background: var(--text); color: var(--bg); }
-    .row-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: border-color .15s; margin-left: 6px; }
-    .row-btn:hover { border-color: var(--text); }
-    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+    /* .row-btn / .form-actions 시각 정의는 css/admin-shell.css 에서 공유 */
 
     .empty { padding: 32px; text-align: center; color: var(--text-muted); }
 
@@ -71,11 +69,6 @@
     }
     .form-row textarea { min-height: 80px; resize: vertical; font-family: inherit; }
     .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-    .form-actions .cancel { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-    .form-actions .save { background: var(--text); color: var(--bg); border: none; }
-    .form-actions .save:disabled { opacity: 0.55; cursor: progress; }
 
     @media (max-width: 700px) {
       .films-table thead { display: none; }
@@ -108,7 +101,7 @@
     .thumb-clear { font: inherit; font-size: 12px; padding: 4px 10px; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: var(--text); cursor: pointer; opacity: .75; }
     .thumb-clear:hover { opacity: 1; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260615-opshints">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-adminpolish">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -150,17 +143,20 @@
     <span class="admin-user" id="adminUser">불러오는 중…</span>
   </div>
   <nav class="admin-subnav" aria-label="편집부 페이지">
+    <span class="admin-subnav-group">운영</span>
     <a href="/admin/index.html" class="admin-subnav-link">홈</a>
     <a href="/admin/article-editor.html" class="admin-subnav-link">기사 작성</a>
     <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
     <a href="/admin/market-reports.html" class="admin-subnav-link">매물 신고</a>
     <a href="/admin/comments.html" class="admin-subnav-link">댓글</a>
     <a href="/admin/announcements.html" class="admin-subnav-link">공지</a>
+    <span class="admin-subnav-group">카탈로그</span>
     <a href="/admin/camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
     <a href="/admin/films.html" class="admin-subnav-link is-current">필름 카탈로그</a>
     <a href="/admin/labs.html" class="admin-subnav-link">현상소</a>
     <a href="/admin/repairs.html" class="admin-subnav-link">수리실</a>
     <a href="/admin/webzine.html" class="admin-subnav-link">웹진</a>
+    <span class="admin-subnav-group">분석</span>
     <a href="/admin/analytics.html" class="admin-subnav-link">통계</a>
   </nav>
 </div>
@@ -169,6 +165,7 @@
   <h2>편집부 전용</h2>
   <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
   <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+  <p class="gate-back"><a href="/">← 5ft magazine 으로 돌아가기</a></p>
 </div>
 
 <main id="app" hidden>
@@ -218,6 +215,7 @@
         <div>
           <input type="text" id="f-slug" name="slug" required pattern="[a-z0-9-]+" />
           <div class="hint">소문자 · 숫자 · 하이픈만. 한 번 정하면 URL 에 그대로 노출되니 신중히.</div>
+          <div class="form-row-warn" id="slugWarn"></div>
         </div>
       </div>
       <div class="form-row">
@@ -279,6 +277,7 @@
         </div>
       </div>
       <div class="form-actions">
+        <button type="button" class="delete" id="deleteBtn" hidden>삭제</button>
         <button type="button" class="cancel" id="cancelBtn">취소</button>
         <button type="submit" class="save" id="saveBtn">저장</button>
       </div>
@@ -290,7 +289,7 @@
 <script src="../js/db-client.js?v=20260614-personalize" defer></script>
 <script src="../js/util.js?v=20260602-normalize" defer></script>
   <script src="../js/site-common.js?v=20260615-fabback" defer></script>
-<script src="../js/admin-films-page.js?v=20260618-uxpack2" defer></script>
+<script src="../js/admin-films-page.js?v=20260618-adminpolish" defer></script>
 
 </body>
 </html>

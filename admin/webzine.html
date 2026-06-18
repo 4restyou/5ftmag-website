@@ -40,9 +40,7 @@
     .wz-table .col-actions { text-align: right; white-space: nowrap; }
     .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; border-radius: 2px; }
     .badge.live { background: #052e16; color: #86efac; }
-    .row-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); cursor: pointer; margin-left: 6px; }
-    .row-btn:hover { border-color: var(--text); }
-    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+    /* .row-btn / .form-actions 시각 정의는 css/admin-shell.css 에서 공유 */
     .empty { padding: 32px; text-align: center; color: var(--text-muted); }
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-start; justify-content: center; z-index: 1000; padding: 40px 16px; overflow-y: auto; }
     .modal.open { display: flex; }
@@ -53,16 +51,11 @@
     .form-row input[type=text], .form-row input[type=number], .form-row textarea { font: inherit; font-size: 14px; padding: 8px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--btn-radius); width: 100%; }
     .form-row textarea { min-height: 72px; resize: vertical; }
     .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: var(--btn-radius); cursor: pointer; }
-    .form-actions .cancel { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-    .form-actions .save { background: var(--text); color: var(--bg); border: none; }
-    .form-actions .save:disabled { opacity: 0.55; cursor: progress; }
     .form-msg { font-size: 12px; color: var(--text-muted); margin-top: 10px; min-height: 1em; }
     .form-msg.error { color: #b91c1c; }
     @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260615-opshints">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-adminpolish">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -104,17 +97,20 @@
     <span class="admin-user" id="adminUser">불러오는 중…</span>
   </div>
   <nav class="admin-subnav" aria-label="편집부 페이지">
+    <span class="admin-subnav-group">운영</span>
     <a href="/admin/index.html" class="admin-subnav-link">홈</a>
     <a href="/admin/article-editor.html" class="admin-subnav-link">기사 작성</a>
     <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
     <a href="/admin/market-reports.html" class="admin-subnav-link">매물 신고</a>
     <a href="/admin/comments.html" class="admin-subnav-link">댓글</a>
     <a href="/admin/announcements.html" class="admin-subnav-link">공지</a>
+    <span class="admin-subnav-group">카탈로그</span>
     <a href="/admin/camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
     <a href="/admin/films.html" class="admin-subnav-link">필름 카탈로그</a>
     <a href="/admin/labs.html" class="admin-subnav-link">현상소</a>
     <a href="/admin/repairs.html" class="admin-subnav-link">수리실</a>
     <a href="/admin/webzine.html" class="admin-subnav-link is-current">웹진</a>
+    <span class="admin-subnav-group">분석</span>
     <a href="/admin/analytics.html" class="admin-subnav-link">통계</a>
   </nav>
 </div>
@@ -123,6 +119,7 @@
   <h2>편집부 전용</h2>
   <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
   <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+  <p class="gate-back"><a href="/">← 5ft magazine 으로 돌아가기</a></p>
 </div>
 
 <main id="app" hidden>
@@ -169,6 +166,7 @@
         <div>
           <input type="text" id="f-slug" required placeholder="vol-01" />
           <div class="hint">URL 식별자(영문·숫자·하이픈). 비우면 제목에서 자동 생성.</div>
+          <div class="form-row-warn" id="slugWarn"></div>
         </div>
       </div>
       <div class="form-row">
@@ -195,6 +193,7 @@
       </div>
       <div class="form-msg" id="formMsg"></div>
       <div class="form-actions">
+        <button type="button" class="delete" id="deleteBtn" hidden>삭제</button>
         <button type="button" class="cancel" id="cancelBtn">취소</button>
         <button type="submit" class="save" id="saveBtn">저장</button>
       </div>
@@ -206,7 +205,7 @@
 <script src="../js/db-client.js?v=20260614-personalize" defer></script>
 <script src="../js/util.js?v=20260602-normalize" defer></script>
   <script src="../js/site-common.js?v=20260615-fabback" defer></script>
-<script src="../js/admin-webzine-page.js?v=20260616-tilt" defer></script>
+<script src="../js/admin-webzine-page.js?v=20260618-adminpolish" defer></script>
 
 </body>
 </html>

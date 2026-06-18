@@ -43,6 +43,140 @@
   border-radius: var(--btn-radius) !important;
 }
 
+/* 권한 없음 / 미로그인 게이트 — "메인으로" 링크 보강 */
+.gate-back {
+  margin-top: 20px;
+  font-size: 13px;
+}
+.gate-back a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.gate-back a:hover { color: var(--text); text-decoration: underline; }
+
+/* ════════════════════════════════════════════════════════════
+   공용 폼 액션 / 행 액션 — 페이지별 인라인 <style> 중복 제거
+   films / labs / repairs / webzine 모달 + 카탈로그 행 버튼 공통.
+   ════════════════════════════════════════════════════════════ */
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.form-actions button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  padding: 8px 16px;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+}
+.form-actions .cancel {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.form-actions .cancel:hover { border-color: var(--text); }
+.form-actions .save {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+}
+.form-actions .save:disabled { opacity: 0.55; cursor: progress; }
+/* 삭제 버튼은 좌측, 빨강 위계 — 저장과 시각적으로 분리되도록 spacer 가 가운데 차지 */
+.form-actions .delete {
+  background: var(--bg);
+  color: #b91c1c;
+  border: 1px solid var(--border);
+  margin-right: auto;
+}
+.form-actions .delete:hover { border-color: #b91c1c; background: rgba(185, 28, 28, 0.06); }
+.form-actions .delete[hidden] { display: none; }
+
+/* 행 단위 액션 — 카탈로그 테이블의 수정/삭제 등 */
+.row-btn {
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  padding: 6px 12px;
+  border-radius: var(--btn-radius);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+  margin-left: 6px;
+}
+.row-btn:first-child { margin-left: 0; }
+.row-btn:hover { border-color: var(--text); }
+.row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+
+/* slug 중복·검증 인라인 메시지 — input 아래 작은 회색·빨강 한 줄 */
+.form-row-warn {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.form-row-warn.is-error { color: #b91c1c; }
+
+/* ════════════════════════════════════════════════════════════
+   subnav 그룹 구분선 — 운영 / 카탈로그 / 분석 시각 분리
+   데스크톱 사이드바: subgroup 라벨 + 위 여백
+   모바일 가로 스크롤: 가는 세로 구분선
+   ════════════════════════════════════════════════════════════ */
+.admin-subnav-group {
+  font-size: 10px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 14px 10px 4px;
+  display: block;
+  flex: 0 0 auto;
+}
+.admin-subnav-group:first-child { padding-top: 0; }
+@media (max-width: 959px) {
+  /* 모바일 가로 스크롤 바에선 라벨 자체 숨기고, 그 자리에 세로 구분선만 */
+  .admin-subnav-group {
+    padding: 0 4px;
+    color: transparent;
+    width: 1px;
+    overflow: hidden;
+    border-left: 1px solid var(--border);
+    height: 14px;
+    align-self: center;
+  }
+  .admin-subnav-group:first-child { display: none; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   모바일 카탈로그 테이블 — td 가 block 으로 펼쳐질 때 컬럼 라벨 노출
+   td[data-label] 패턴: JS 렌더 시 data-label 속성 부여하면 자동으로 라벨이 보임
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+  .films-table td[data-label]::before,
+  .labs-table td[data-label]::before,
+  .wz-table td[data-label]::before {
+    content: attr(data-label) ':\\00a0';
+    display: inline-block;
+    min-width: 64px;
+    font-size: 11px;
+    font-weight: var(--fw-heading);
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+  /* td 안에 단독 버튼만 있는 행은 라벨 불필요 */
+  .films-table td[data-label="actions"]::before,
+  .labs-table td[data-label="actions"]::before,
+  .wz-table td[data-label="actions"]::before { content: none; }
+}
+
 .admin-user button {
   border: 1px solid var(--border) !important;
   padding: 5px 10px !important;

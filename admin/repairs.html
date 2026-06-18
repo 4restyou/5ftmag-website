@@ -49,9 +49,7 @@
     .labs-table .col-meta { font-size: 12px; color: var(--text-muted); }
     .labs-table .col-actions { text-align: right; white-space: nowrap; }
     .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; border-radius: 2px; }
-    .row-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: border-color .15s; margin-left: 6px; }
-    .row-btn:hover { border-color: var(--text); }
-    .row-btn.danger:hover { color: #b91c1c; border-color: #fca5a5; }
+    /* .row-btn / .form-actions 시각 정의는 css/admin-shell.css 에서 공유 */
     .empty { padding: 32px; text-align: center; color: var(--text-muted); }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-start; justify-content: center; z-index: 1000; padding: 40px 16px; overflow-y: auto; }
@@ -68,12 +66,6 @@
     .form-row textarea { min-height: 80px; resize: vertical; }
     .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-    .form-actions .cancel { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-    .form-actions .save { background: var(--text); color: var(--bg); border: none; }
-    .form-actions .save:disabled { opacity: 0.55; cursor: progress; }
-
     @media (max-width: 700px) {
       .labs-table thead { display: none; }
       .labs-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
@@ -85,7 +77,7 @@
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260615-opshints">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-adminpolish">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -127,17 +119,20 @@
     <div class="admin-user" id="adminUser"></div>
   </div>
   <nav class="admin-subnav" aria-label="편집부 페이지">
+    <span class="admin-subnav-group">운영</span>
     <a href="/admin/index.html" class="admin-subnav-link">홈</a>
     <a href="/admin/article-editor.html" class="admin-subnav-link">기사 작성</a>
     <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
     <a href="/admin/market-reports.html" class="admin-subnav-link">매물 신고</a>
     <a href="/admin/comments.html" class="admin-subnav-link">댓글</a>
     <a href="/admin/announcements.html" class="admin-subnav-link">공지</a>
+    <span class="admin-subnav-group">카탈로그</span>
     <a href="/admin/camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
     <a href="/admin/films.html" class="admin-subnav-link">필름 카탈로그</a>
     <a href="/admin/labs.html" class="admin-subnav-link">현상소</a>
     <a href="/admin/repairs.html" class="admin-subnav-link is-current">수리실</a>
     <a href="/admin/webzine.html" class="admin-subnav-link">웹진</a>
+    <span class="admin-subnav-group">분석</span>
     <a href="/admin/analytics.html" class="admin-subnav-link">통계</a>
   </nav>
 </div>
@@ -146,6 +141,7 @@
   <h2>편집부 전용</h2>
   <p>편집부 권한이 있는 계정으로 로그인해야 이 페이지를 볼 수 있어요.</p>
   <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+  <p class="gate-back"><a href="/">← 5ft magazine 으로 돌아가기</a></p>
 </div>
 
 <main id="app" hidden>
@@ -176,6 +172,7 @@
       <div class="form-row"><label for="f-contact">연락처</label><div><input type="text" id="f-contact" placeholder="전화·문자·카톡·인스타 등" /><div class="hint">전화번호, 문자 상담, 카카오톡, 인스타 DM 등 자유롭게.</div></div></div>
       <div class="form-row"><label for="f-description">설명</label><textarea id="f-description" placeholder="특징, 대기·비용, 카드결제·AS 여부 등"></textarea></div>
       <div class="form-actions">
+        <button type="button" class="delete" id="deleteBtn" hidden>삭제</button>
         <button type="button" class="cancel" id="cancelBtn">취소</button>
         <button type="submit" class="save" id="saveBtn">저장</button>
       </div>
@@ -290,12 +287,12 @@ function render() {
     const hidden = !!s.is_hidden;
     return `
       <tr${hidden ? ' style="opacity:.55"' : ''}>
-        <td>
+        <td data-label="이름">
           <div class="col-name">${escapeHtml(s.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
         </td>
-        <td class="col-meta">${escapeHtml(s.region || '')}</td>
-        <td class="col-meta">${escapeHtml(s.specialty || '')}</td>
-        <td class="col-actions">
+        <td class="col-meta" data-label="지역">${escapeHtml(s.region || '')}</td>
+        <td class="col-meta" data-label="전문분야">${escapeHtml(s.specialty || '')}</td>
+        <td class="col-actions" data-label="actions">
           <button type="button" class="row-btn" data-edit="${escapeAttr(s.id)}">수정</button>
           <button type="button" class="row-btn" data-hide="${escapeAttr(s.id)}" data-cur="${hidden}">${hidden ? '복원' : '숨김'}</button>
           <button type="button" class="row-btn danger" data-del="${escapeAttr(s.id)}">삭제</button>
@@ -338,6 +335,8 @@ function openForm(id) {
     $('shopForm').reset();
     $('f-id').value = '';
   }
+  const deleteBtn = $('deleteBtn');
+  if (deleteBtn) deleteBtn.hidden = !id;
 }
 
 function closeForm() {
@@ -348,6 +347,10 @@ function closeForm() {
 
 $('newBtn').addEventListener('click', () => openForm(null));
 $('cancelBtn').addEventListener('click', closeForm);
+$('deleteBtn')?.addEventListener('click', () => {
+  if (!STATE.editingId) return;
+  removeShop(STATE.editingId);
+});
 $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeForm(); });
 
 $('shopForm').addEventListener('submit', async (e) => {
@@ -396,6 +399,7 @@ async function removeShop(id) {
   if (!confirm(`'${s?.name || ''}' 수리실을 삭제할까요? 되돌릴 수 없어요.`)) return;
   const { error } = await withWriteTimeout(db().repairs.remove(id));
   if (error) { window.notify?.('삭제 실패: ' + (error.message || ''), 'danger'); return; }
+  if (STATE.editingId === id) closeForm();
   await reload();
 }
 
