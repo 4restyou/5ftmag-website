@@ -126,14 +126,6 @@
           toggleFilmFav(fav);
           return;
         }
-        const articleLink = e.target.closest('.film-articles-link');
-        if (articleLink) {
-          e.preventDefault();
-          e.stopPropagation();
-          const slug = articleLink.dataset.filmSlug;
-          if (slug) window.location.href = `stories.html?film=${encodeURIComponent(slug)}`;
-          return;
-        }
         if (e.target.closest('.film-cta-action')) return;
         openModal(card.dataset.film, { source: card.closest('#filmsGridLibrary') ? 'library' : 'issue' });
       });
@@ -576,11 +568,18 @@
       ? `<span>Photographers <strong>${escapeAttr(photographers.join(', '))}</strong></span>`
       : '';
 
+    // "이 필름으로 쓴 글 N" 줄 — desc 아래, 메타 위. 글이 1개 이상일 때만.
+    const articleCount = articleCountsByFilm[filmKey] || 0;
+    const articleLine = articleCount > 0
+      ? `<a class="modal-articles-link" href="stories.html?film=${encodeURIComponent(filmKey)}">이 필름으로 쓴 글 ${articleCount}편 →</a>`
+      : '';
+
     modalContent.innerHTML = `
       <div class="modal-header">
         <span class="modal-brand">${escapeAttr(data.brand || '')}</span>
         <h2 class="modal-name">${escapeAttr(data.displayName || data.name || '')}</h2>
         <p class="modal-desc">${escapeAttr(data.desc || '')}</p>
+        ${articleLine}
         <div class="modal-meta">
           <span>ISO <strong>${escapeAttr(data.iso || '')}</strong></span>
           <span>Type <strong>${escapeAttr(data.type || '')}</strong></span>
