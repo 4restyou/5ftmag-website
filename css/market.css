@@ -4,14 +4,10 @@
 
 /* 인트로 — films/labs 와 동일: 문단 + 오른쪽 안내 박스 */
 .market-intro {
-  display: flex;
-  align-items: flex-start;
-  gap: 28px;
   padding: 40px 40px 24px;
   border-bottom: 1px solid var(--border);
 }
 .market-intro-inner {
-  flex: 1 1 auto;
   max-width: 720px;
 }
 .market-intro-inner p {
@@ -27,37 +23,46 @@
   color: var(--accent-text);
   padding: 0 6px;
 }
+@media (max-width: 880px) {
+  .market-intro { padding: 28px 24px 12px; }
+}
+/* 거래 전 확인사항 — details 로 접어두고, 펼치면 회색 박스로 노출 */
 .market-safety {
-  flex: 0 0 auto;
-  width: 640px;
-  max-width: 100%;
-  padding: 14px 16px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.market-safety > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.02em;
+  color: var(--text);
+  list-style: none;
+  user-select: none;
+}
+.market-safety > summary::-webkit-details-marker { display: none; }
+.market-safety > summary::before {
+  content: '▸';
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: transform .15s;
+  display: inline-block;
+}
+.market-safety[open] > summary::before { transform: rotate(90deg); }
+.market-safety ul {
+  margin: 10px 0 0;
+  padding: 12px 16px 12px 32px;
   border: 1px solid var(--border);
   background: var(--bg-sub);
-  color: var(--text);
   border-radius: 6px;
-}
-@media (max-width: 880px) {
-  .market-intro { flex-direction: column; gap: 16px; padding: 28px 24px 12px; }
-  .market-safety { flex: 0 0 auto; width: auto; align-self: stretch; }
-}
-.market-safety strong {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: var(--fw-heading);
-  letter-spacing: 0.04em;
-}
-.market-safety ul {
   display: grid;
   gap: 5px;
-  margin: 0;
-  padding-left: 18px;
 }
 .market-safety li {
-  color: var(--text-muted);
   line-height: 1.6;
-  font-size: 13px;
 }
 
 .market-section {

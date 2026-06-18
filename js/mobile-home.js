@@ -723,6 +723,14 @@
       setTimeout(() => lb.remove(), 180);
       window.removeEventListener('keydown', onKey);
       releaseTrap();
+      // 마지막으로 본 사진 자리로 스크롤 복귀 — 그리드에서 그 위치를 다시 찾기 쉽게.
+      // 그리드는 랜덤 순서라 한번 닫고 나서 어디 있었는지 잃기 쉬워서 보강.
+      const cell = document.querySelector(`[data-photo-index="${cur}"]`);
+      if (cell) {
+        const rect = cell.getBoundingClientRect();
+        const inView = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        if (!inView) cell.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
     };
     const prev = () => { if (cur > 0) { cur -= 1; render(); } };
     const next = () => { if (cur < rows.length - 1) { cur += 1; render(); } };

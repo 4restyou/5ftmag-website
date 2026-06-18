@@ -857,6 +857,9 @@
     });
   }
 
-  setView('list');
+  // 모바일에선 지도가 더 강력한 디스커버리이므로 기본을 'map' 으로.
+  // 데스크톱은 리스트가 정공법 (한눈에 가격·정보 비교).
+  const defaultView = window.matchMedia('(max-width: 640px)').matches ? 'map' : 'list';
+  setView(defaultView);
   setTab('labs');
 })();

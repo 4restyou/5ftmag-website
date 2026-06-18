@@ -4,6 +4,9 @@
   // 필름 데이터: data/films.json에서 로딩 + 그리드 렌더링
   // ════════════════════════════
   let filmsData = {};
+  // 필름별 글 수 — stories.json 의 films 배열을 한 번 훑어서 집계.
+  // 카드 렌더 시 "이 필름으로 쓴 글 N" 배지로 사용.
+  let articleCountsByFilm = {};
   const ROLL_LIMIT = 36;
   const PHOTOS_PAGE_SIZE = 60; // 사진 스타일별 보기에서 한 번에 노출되는 사진 수
 
@@ -103,7 +106,7 @@
     // 좋아요 해제 시 카드를 이 자리로 돌려보내기 위해 원본 순서 저장
     libraryOriginalOrder = libraryAll.map(([slug]) => slug);
 
-    const cardOptions = { filmFavSlugs, rollLimit: ROLL_LIMIT };
+    const cardOptions = { filmFavSlugs, rollLimit: ROLL_LIMIT, articleCounts: articleCountsByFilm };
     filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f, 'featured-grid', cardOptions)).join('');
     filmsGridLibrary.innerHTML  = libraryAll.map(([slug, f]) => renderFilmCard(slug, f, 'library-grid', cardOptions)).join('');
 
@@ -121,6 +124,14 @@
           e.preventDefault();
           e.stopPropagation();
           toggleFilmFav(fav);
+          return;
+        }
+        const articleLink = e.target.closest('.film-articles-link');
+        if (articleLink) {
+          e.preventDefault();
+          e.stopPropagation();
+          const slug = articleLink.dataset.filmSlug;
+          if (slug) window.location.href = `stories.html?film=${encodeURIComponent(slug)}`;
           return;
         }
         if (e.target.closest('.film-cta-action')) return;
@@ -230,10 +241,31 @@
     }
   }
 
+  // 필름별 글 수 사전 집계 (films-page 부팅 전에 백그라운드로). 실패해도 카드는 그냥 배지 없이 나옴.
+  async function loadArticleCountsByFilm() {
+    try {
+      const res = await fetch('/data/stories.json', { credentials: 'same-origin' });
+      if (!res.ok) return;
+      const arr = await res.json();
+      const counts = {};
+      for (const story of arr) {
+        if (!story?.published) continue;
+        const films = Array.isArray(story.films) ? story.films : [];
+        for (const slug of films) {
+          counts[slug] = (counts[slug] || 0) + 1;
+        }
+      }
+      articleCountsByFilm = counts;
+    } catch (_) { /* 조용히 무시 */ }
+  }
+
   // 필름 카탈로그 — DB 우선, 정적 data/films.json fallback 및 보강.
   (async () => {
     try {
-      const catalog = await window.FilmsCatalogLoader.load();
+      const [catalog] = await Promise.all([
+        window.FilmsCatalogLoader.load(),
+        loadArticleCountsByFilm(),
+      ]);
       filmsData = catalog.data;
       renderFilmsGrid();
       updateReaderCounts();
