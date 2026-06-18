@@ -510,7 +510,7 @@ test('Webzine 책장 인터랙션은 책을 열고 이동 상태를 정리한다
     };
   });
 
-  await page.goto('/webzine.html');
+  await page.goto('/books.html');
   await expect(page.locator('.wz-slot')).toHaveCount(3);
   await expect(page.locator('.wz-slot.is-center .wz-book3d')).toHaveCSS('--by', '74deg');
   await page.locator('.wz-book-btn').first().click();

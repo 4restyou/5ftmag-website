@@ -81,7 +81,7 @@
   function setHtml(html) { results.innerHTML = html; }
 
   function renderHint() {
-    setHtml('<p class="search-hint">키워드 한 줄이면 글·필름·웹진·현상소·매물을 한꺼번에 찾아요.</p>');
+    setHtml('<p class="search-hint">키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요.</p>');
   }
 
   function renderEmpty(q) {
@@ -118,10 +118,10 @@
     const cover = w.cover_path && db() && db().webzine
       ? `<div class="sc-thumb sc-thumb--cover"><img src="${esc(db().webzine.publicUrl(w.cover_path))}" alt="" loading="lazy" /></div>`
       : '';
-    return `<a class="search-card" href="webzine.html">
+    return `<a class="search-card" href="books.html">
       ${cover}
       <div class="sc-body">
-        <div class="sc-kicker">${esc(w.category || 'WEBZINE')}${w.issue_label ? ' · ' + esc(w.issue_label) : ''}</div>
+        <div class="sc-kicker">${esc(w.category || 'BOOKS')}${w.issue_label ? ' · ' + esc(w.issue_label) : ''}</div>
         <div class="sc-title">${highlight(w.title || '', q)}</div>
         ${w.description ? `<div class="sc-meta">${esc(String(w.description).slice(0, 80))}${String(w.description).length > 80 ? '…' : ''}</div>` : ''}
       </div>
@@ -241,7 +241,7 @@
     const sections = [
       { label: 'Articles', items: stories, all: 'stories.html?q=' + encodeURIComponent(q), card: (x) => cardArticle(x.item, q) },
       { label: 'Films',    items: films,   all: 'films.html',                              card: (x) => cardFilm(x.item, q) },
-      { label: 'Webzine',  items: webzine, all: 'webzine.html',                            card: (x) => cardWebzine(x.item, q) },
+      { label: 'Books',    items: webzine, all: 'books.html',                              card: (x) => cardWebzine(x.item, q) },
       { label: 'Labs',     items: labs,    all: 'labs.html',                               card: (x) => cardLab(x.item, q) },
       { label: 'Market',   items: market,  all: 'market.html',                             card: (x) => cardMarket(x.item, q) },
     ];

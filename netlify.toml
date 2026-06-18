@@ -10,6 +10,19 @@
   to = "/films.html"
   status = 200
 
+# Webzine 페이지가 Books 로 이름 변경. 옛 URL 로 들어오는 외부 링크·검색 결과를 308 로 영구 이전.
+[[redirects]]
+  from = "/webzine.html"
+  to = "/books.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/webzine"
+  to = "/books.html"
+  status = 301
+  force = true
+
 # 카카오/인앱 브라우저가 예전 HTML 캐시를 들고 /film/:slug 같은 짧은 URL에서
 # 상대 asset 경로를 요청해도 CSS/JS/이미지가 깨지지 않도록 루트 asset으로 보정한다.
 [[redirects]]
