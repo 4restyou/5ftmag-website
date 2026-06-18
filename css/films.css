@@ -200,38 +200,6 @@
   outline: none;
 }
 
-/* "이 필름으로 쓴 글 N" 배지 — 카드 안에서 spec 과 cta 사이에 한 줄로 들어간다.
-   stories.html?film=slug 로 필터 진입. */
-.film-articles-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: var(--fw-heading);
-  color: var(--text-muted);
-  letter-spacing: var(--ls-default);
-  padding: 3px 8px;
-  margin: 2px 0 0;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg-sub);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: color .12s, border-color .12s, background .12s;
-}
-.film-articles-link::before {
-  content: '✎';
-  font-size: 10px;
-  line-height: 1;
-}
-.film-articles-link:hover,
-.film-articles-link:focus-visible {
-  color: var(--text);
-  border-color: var(--text);
-  outline: none;
-}
-
 /* ════════════════════════════
    MODAL (사진 갤러리)
 ════════════════════════════ */
@@ -332,6 +300,25 @@
   color: rgba(255, 255, 255, 0.75);
   margin-bottom: 24px;
 }
+/* "이 필름으로 쓴 글 N편" — desc 와 meta 사이 한 줄.
+   stories.html?film=slug 로 진입해서 그 필름이 다뤄진 글만 필터링. */
+.modal-articles-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: var(--ls-default);
+  text-decoration: none;
+  margin: -8px 0 24px;
+  transition: color .12s;
+}
+.modal-articles-link:hover,
+.modal-articles-link:focus-visible {
+  color: #fff;
+  outline: none;
+}
 .modal-meta {
   display: flex;
   gap: 32px;
@@ -375,25 +362,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 28px;
+  min-height: 36px;
   box-sizing: border-box;
   line-height: 1;
   font: inherit;
   font-size: 11px;
   font-weight: var(--fw-heading);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   padding: 0 14px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.85);
-  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.24);
+  color: rgba(255,255,255,0.7);
+  border-radius: var(--chip-radius);
   cursor: pointer;
-  transition: background .15s, border-color .15s;
+  transition: background .15s, border-color .15s, color .15s;
 }
 .modal-view-toggle:hover {
-  background: rgba(255,255,255,0.18);
-  border-color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,255,255,0.4);
   color: #fff;
 }
 .reader-save-menu {
@@ -1331,38 +1317,44 @@
   max-width: 560px;
   margin: -10px 0 22px;
 }
+/* Reader's Roll 컨트롤 3종 — 롤 보기 / 작가 / 보기·저장 을 같은 시각 패턴으로.
+   박스(border/bg) 처리 제거. 라벨 + chip 들을 inline 으로, 그룹 사이 큰 gap.
+   한 행에 다 안 들어가면 가로 스크롤 (우측 페이드로 더 있음 표시). */
 .reader-roll-controls {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
+  align-items: center;
+  gap: 20px;
   margin: 0 0 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
 }
+.reader-roll-controls::-webkit-scrollbar { display: none; }
 .reader-roll-control-main {
-  flex: 1 1 auto;
-  min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.reader-roll-view-actions {
-  flex: 0 0 auto;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.045);
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
 }
 .reader-control-group {
   display: flex;
-  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.reader-roll-view-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  margin-left: 0;  /* .modal-section-actions 의 margin-left: auto 무효화 */
 }
 .reader-control-label {
   display: inline-flex;
   align-items: center;
-  min-height: 30px;
-  flex: 0 0 auto;
   color: rgba(255, 255, 255, 0.46);
   font-size: 10px;
   font-weight: var(--fw-heading);
@@ -1372,20 +1364,11 @@
 }
 .reader-roll-switcher {
   display: inline-flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 0 16px;
-  padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.055);
-  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.18);
 }
-.reader-roll-controls .reader-roll-switcher {
-  margin: 0;
+.reader-roll-switcher [hidden] {
+  display: none;
 }
 .reader-roll-switcher [hidden] {
   display: none;
@@ -1454,23 +1437,13 @@
   color: rgba(0, 0, 0, 0.64);
 }
 .reader-person-filter {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   flex-wrap: nowrap;
   gap: 8px;
-  margin: 0 0 18px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  /* 우측 edge 살짝 페이드 — 더 있음을 시각적으로 암시 */
-  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
-          mask-image: linear-gradient(to right, black 0, black calc(100% - 28px), transparent 100%);
-}
-.reader-person-filter::-webkit-scrollbar { display: none; }
-.reader-roll-controls .reader-person-filter {
   margin: 0;
 }
+.reader-person-filter::-webkit-scrollbar { display: none; }
 .reader-person-filter.is-single {
   overflow: visible;
   -webkit-mask-image: none;
@@ -2106,18 +2079,19 @@
   opacity: 0.5;
   cursor: wait;
 }
-/* 헤더용 — 옆 .modal-view-toggle 과 정확히 같은 박스 사이즈로 통일 */
+/* 헤더용 — 옆 .modal-view-toggle 과 정확히 같은 박스 사이즈로 통일 (chip 36px) */
 .modal-view-save {
-  height: 28px;
+  min-height: 36px;
   box-sizing: border-box;
   font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   line-height: 1;
   padding: 0 14px;
   gap: 6px;
-  border-radius: 999px;
-  border-color: rgba(255, 255, 255, 0.18);
+  border-radius: var(--chip-radius);
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.7);
 }
 .modal-view-save::before {
   width: 11px;
@@ -2130,13 +2104,24 @@
   .reader-contributor-grid { grid-template-columns: repeat(4, 1fr); }
   .reader-contributor-head { align-items: flex-start; flex-direction: column; }
   .reader-contributor-actions { justify-content: flex-start; }
+  /* 모바일에선 .reader-roll-controls 를 column 으로 — 좁은 화면에서 한 줄에
+     3 그룹을 다 우겨넣으면 view-actions 가 위쪽 그룹을 덮어 클릭이 안 됨.
+     overflow-x 효과는 desktop 만 유지. */
   .reader-roll-controls {
     flex-direction: column;
     align-items: stretch;
+    overflow-x: visible;
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+  .reader-roll-control-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
   .reader-roll-view-actions {
-    justify-content: flex-start;
-    align-items: flex-start;
+    align-self: flex-start;
+    flex-wrap: wrap;
   }
   .films-section-head-issue { margin-top: 64px; }
 }
