@@ -86,7 +86,7 @@
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-adminpolish">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-adminreview">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -159,6 +159,14 @@
     <button type="button" class="admin-tab" data-status="resolved">처리됨 <span class="count" id="cnt-resolved">·</span></button>
     <button type="button" class="admin-tab" data-status="dismissed">기각 <span class="count" id="cnt-dismissed">·</span></button>
   </div>
+  <div class="admin-bulk-bar" id="bulkBar" hidden role="region" aria-label="선택한 신고 일괄 처리">
+    <span class="bulk-count" id="bulkCount">0건 선택</span>
+    <div class="bulk-actions">
+      <button type="button" data-bulk="resolve">일괄 처리 완료</button>
+      <button type="button" data-bulk="dismiss">일괄 기각</button>
+      <button type="button" data-bulk="clear" class="muted">선택 해제</button>
+    </div>
+  </div>
   <div class="admin-list" id="list">
     <div class="empty-state">불러오는 중…</div>
   </div>
@@ -180,6 +188,7 @@ const STATE = {
   rows: [],
   listingCache: new Map(),
   counts: { pending: 0, resolved: 0, dismissed: 0 },
+  selected: new Set(), // bulk 처리용 — 선택된 report id 집합
 };
 
 function $(id) { return document.getElementById(id); }
@@ -286,8 +295,13 @@ function renderCard(r) {
   const author = listing?.display_name || (listing?.user_id ? listing.user_id.slice(0,8) + '…' : '-');
   const listingLink = listing ? `<a href="../market.html?id=${encodeURIComponent(r.listing_id)}" target="_blank" rel="noopener">매물 보기 ↗</a>` : '';
 
+  // 대기 탭에서만 일괄 처리 체크박스 노출
+  const checkbox = STATE.status === 'pending'
+    ? `<label class="admin-card-check"><input type="checkbox" data-bulk-check="${escapeAttr(r.id)}" ${STATE.selected.has(String(r.id)) ? 'checked' : ''} /></label>`
+    : '';
   return `
     <div class="rep-card" data-id="${escapeAttr(r.id)}" data-listing-id="${escapeAttr(r.listing_id)}">
+      ${checkbox}
       ${thumbHtml}
       <div class="rep-meta">
         <div><span class="rep-status ${escapeAttr(r.status)}">${escapeHtml(r.status)}</span></div>
@@ -332,6 +346,14 @@ function bindCardActions() {
     card.querySelector('[data-zoom]')?.addEventListener('click', (e) => {
       $('imgZoomTarget').src = e.currentTarget.dataset.zoom;
       $('imgZoom').classList.add('open');
+    });
+
+    card.querySelector('[data-bulk-check]')?.addEventListener('change', (e) => {
+      e.stopPropagation();
+      const rid = String(reportId);
+      if (e.target.checked) STATE.selected.add(rid);
+      else STATE.selected.delete(rid);
+      updateBulkBar();
     });
 
     card.querySelectorAll('[data-action]').forEach(btn => {
@@ -384,8 +406,55 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     STATE.status = tab.dataset.status;
+    STATE.selected.clear();
+    updateBulkBar();
     loadList();
   });
+});
+
+// ── 일괄 처리 ──
+function updateBulkBar() {
+  const bar = $('bulkBar');
+  if (!bar) return;
+  const n = STATE.selected.size;
+  bar.hidden = n === 0;
+  $('bulkCount').textContent = `${n}건 선택`;
+}
+
+async function bulkApply(action) {
+  if (!STATE.selected.size) return;
+  const ids = Array.from(STATE.selected);
+  const verbMap = { resolve: '처리 완료', dismiss: '기각' };
+  const verb = verbMap[action];
+  if (!verb) return;
+  const note = prompt(`${ids.length}건을 한꺼번에 ${verb}합니다.\n공통 처리 노트 (선택)`, '');
+  if (note === null) return;
+  const bar = $('bulkBar');
+  bar.querySelectorAll('button').forEach(b => b.disabled = true);
+  const status = action === 'resolve' ? 'resolved' : 'dismissed';
+  let ok = 0, fail = 0;
+  for (const id of ids) {
+    const { error } = await db().market.adminPatchReport(id, { status, resolver_note: note || null });
+    if (error) fail++; else ok++;
+  }
+  bar.querySelectorAll('button').forEach(b => b.disabled = false);
+  STATE.selected.clear();
+  updateBulkBar();
+  window.notify?.(`${verb} 완료: ${ok}건${fail ? ` · 실패 ${fail}건` : ''}`, fail ? 'danger' : 'info');
+  await Promise.all([loadCounts(), loadList()]);
+}
+
+$('bulkBar')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-bulk]');
+  if (!btn) return;
+  const a = btn.dataset.bulk;
+  if (a === 'clear') {
+    STATE.selected.clear();
+    updateBulkBar();
+    document.querySelectorAll('[data-bulk-check]:checked').forEach(c => c.checked = false);
+  } else if (a === 'resolve' || a === 'dismiss') {
+    bulkApply(a);
+  }
 });
 
 $('imgZoom').addEventListener('click', () => {
