@@ -2104,7 +2104,25 @@
   .reader-contributor-grid { grid-template-columns: repeat(4, 1fr); }
   .reader-contributor-head { align-items: flex-start; flex-direction: column; }
   .reader-contributor-actions { justify-content: flex-start; }
-  /* .reader-roll-controls 는 모바일에서도 한 줄 + 가로 스크롤 유지 (overflow-x: auto). */
+  /* 모바일에선 .reader-roll-controls 를 column 으로 — 좁은 화면에서 한 줄에
+     3 그룹을 다 우겨넣으면 view-actions 가 위쪽 그룹을 덮어 클릭이 안 됨.
+     overflow-x 효과는 desktop 만 유지. */
+  .reader-roll-controls {
+    flex-direction: column;
+    align-items: stretch;
+    overflow-x: visible;
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+  .reader-roll-control-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .reader-roll-view-actions {
+    align-self: flex-start;
+    flex-wrap: wrap;
+  }
   .films-section-head-issue { margin-top: 64px; }
 }
 @media (max-width: 640px) {
