@@ -43,6 +43,97 @@
   border-radius: var(--btn-radius) !important;
 }
 
+/* ════════════════════════════════════════════════════════════
+   일괄 처리 바 — 검토 페이지(submissions / market-reports)
+   체크박스로 여러 행 선택 후 한 번에 승인·반려·기각 등 처리.
+   상단 sticky 로 떠 있고, 선택 0건이면 hidden.
+   ════════════════════════════════════════════════════════════ */
+.admin-bulk-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  flex-wrap: wrap;
+}
+.admin-bulk-bar[hidden] { display: none; }
+.admin-bulk-bar .bulk-count {
+  letter-spacing: 0.02em;
+}
+.admin-bulk-bar .bulk-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.admin-bulk-bar .bulk-actions button {
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--bg);
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.admin-bulk-bar .bulk-actions button:hover { opacity: 0.85; }
+.admin-bulk-bar .bulk-actions button.danger { color: #b91c1c; }
+.admin-bulk-bar .bulk-actions button.muted {
+  background: transparent;
+  color: var(--bg);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* 카드 체크박스 — sub-card / rep-card 좌상단에 살짝 띄움 */
+.admin-card-check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.admin-card-check input { margin: 0; cursor: pointer; }
+.sub-card, .rep-card { position: relative; }
+
+/* 모바일 검토 페이지 — 버튼 크게, 1열 그대로 유지 */
+@media (max-width: 720px) {
+  .sub-btn, .rep-btn {
+    padding: 12px 18px !important;
+    font-size: 14px !important;
+    flex: 1 1 auto;
+    min-width: 100px;
+  }
+  .sub-card-actions, .rep-actions {
+    gap: 8px;
+  }
+  .admin-card-check {
+    /* 모바일에선 좀 더 크게 — 손가락 친화적 */
+    top: 10px;
+    left: 10px;
+    padding: 8px;
+  }
+  .admin-card-check input {
+    width: 18px;
+    height: 18px;
+  }
+}
+
 /* 권한 없음 / 미로그인 게이트 — "메인으로" 링크 보강 */
 .gate-back {
   margin-top: 20px;
