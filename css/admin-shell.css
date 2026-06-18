@@ -111,6 +111,36 @@
 .admin-card-check input { margin: 0; cursor: pointer; }
 .sub-card, .rep-card { position: relative; }
 
+/* "전체 선택" 행 — 탭 아래에 카드 그리드 위로 노출.
+   체크박스 하나 클릭으로 현재 페이지의 보이는 카드 전체 선택/해제. */
+.admin-select-row {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.admin-select-row[hidden] { display: none; }
+.admin-select-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.admin-select-row input[type="checkbox"] {
+  width: 18px; height: 18px;
+  accent-color: var(--text);
+  cursor: pointer;
+}
+.admin-select-row label:hover { color: var(--text); }
+@media (max-width: 720px) {
+  .admin-select-row { padding: 12px 16px 0; }
+}
+
 /* 모바일 검토 페이지 — 버튼 크게, 1열 그대로 유지 */
 @media (max-width: 720px) {
   .sub-btn, .rep-btn {

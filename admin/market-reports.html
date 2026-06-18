@@ -86,7 +86,7 @@
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-mobilefix">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -158,6 +158,9 @@
     <button type="button" class="admin-tab active" data-status="pending">대기 <span class="count" id="cnt-pending">·</span></button>
     <button type="button" class="admin-tab" data-status="resolved">처리됨 <span class="count" id="cnt-resolved">·</span></button>
     <button type="button" class="admin-tab" data-status="dismissed">기각 <span class="count" id="cnt-dismissed">·</span></button>
+  </div>
+  <div class="admin-select-row" id="selectAllRow" hidden>
+    <label><input type="checkbox" id="selectAll" /> <span id="selectAllLabel">보이는 신고 전체 선택</span></label>
   </div>
   <div class="admin-bulk-bar" id="bulkBar" hidden role="region" aria-label="선택한 신고 일괄 처리">
     <span class="bulk-count" id="bulkCount">0건 선택</span>
@@ -271,6 +274,7 @@ async function fetchListing(id) {
 function renderList() {
   $('list').innerHTML = STATE.rows.map(renderCard).join('');
   bindCardActions();
+  updateSelectAllState();
 }
 
 function renderCard(r) {
@@ -408,6 +412,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     STATE.status = tab.dataset.status;
     STATE.selected.clear();
     updateBulkBar();
+    updateSelectAllRow();
     loadList();
   });
 });
@@ -419,7 +424,53 @@ function updateBulkBar() {
   const n = STATE.selected.size;
   bar.hidden = n === 0;
   $('bulkCount').textContent = `${n}건 선택`;
+  updateSelectAllState();
 }
+
+// pending 탭에서만 "전체 선택" 행을 노출.
+function updateSelectAllRow() {
+  const row = $('selectAllRow');
+  if (!row) return;
+  row.hidden = STATE.status !== 'pending';
+  updateSelectAllState();
+}
+
+function updateSelectAllState() {
+  const all = $('selectAll');
+  if (!all) return;
+  const visible = document.querySelectorAll('[data-bulk-check]');
+  const total = visible.length;
+  if (!total) {
+    all.checked = false; all.indeterminate = false;
+    $('selectAllLabel').textContent = '보이는 신고 전체 선택';
+    return;
+  }
+  let on = 0;
+  visible.forEach(c => { if (STATE.selected.has(c.dataset.bulkCheck)) on++; });
+  all.checked = on === total;
+  all.indeterminate = on > 0 && on < total;
+  $('selectAllLabel').textContent = on === 0
+    ? `보이는 신고 ${total}건 전체 선택`
+    : on === total
+      ? `${total}건 모두 선택됨`
+      : `${on} / ${total} 선택됨`;
+}
+
+$('selectAll')?.addEventListener('change', (e) => {
+  const visible = document.querySelectorAll('[data-bulk-check]');
+  if (e.target.checked) {
+    visible.forEach(c => {
+      STATE.selected.add(c.dataset.bulkCheck);
+      c.checked = true;
+    });
+  } else {
+    visible.forEach(c => {
+      STATE.selected.delete(c.dataset.bulkCheck);
+      c.checked = false;
+    });
+  }
+  updateBulkBar();
+});
 
 async function bulkApply(action) {
   if (!STATE.selected.size) return;
@@ -472,6 +523,7 @@ $('imgZoom').addEventListener('click', () => {
   $('gate').hidden = true;
   $('app').hidden = false;
   await Promise.all([loadCounts(), loadList()]);
+  updateSelectAllRow();
 })();
 </script>
 
