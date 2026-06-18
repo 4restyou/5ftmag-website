@@ -511,7 +511,7 @@ async function loadFavWebzine() {
   const favs = await db().favorites.list('webzine');
   if (favs.length === 0) {
     STATE.favWebzine = [];
-    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 웹진이 없어요.<br /><a class="me-empty-cta" href="webzine.html">웹진 보러 가기 →</a></div>`;
+    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 책이 없어요.<br /><a class="me-empty-cta" href="books.html">책 보러 가기 →</a></div>`;
     return;
   }
   let list = [];
@@ -524,7 +524,7 @@ async function loadFavWebzine() {
 function renderFavWebzine() {
   const items = STATE.favWebzine || [];
   if (items.length === 0) {
-    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 웹진이 없어요.<br /><a class="me-empty-cta" href="webzine.html">웹진 보러 가기 →</a></div>`;
+    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 책이 없어요.<br /><a class="me-empty-cta" href="books.html">책 보러 가기 →</a></div>`;
     return;
   }
   $('favWebzineGrid').innerHTML = items.map(it => {

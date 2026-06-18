@@ -142,7 +142,7 @@ function header(prefix = '') {
     <ul class="main-nav">
       <li><a href="${prefix}stories.html">Articles</a></li>
       <li><a href="${prefix}films.html">Films</a></li>
-      <li><a href="${prefix}webzine.html">Webzine</a></li>
+      <li><a href="${prefix}books.html">Books</a></li>
       <li><a href="${prefix}labs.html">Labs</a></li>
       <li><a href="${prefix}market.html">Market</a></li>
       <li><a href="${prefix}about.html">About</a></li>
@@ -157,7 +157,7 @@ function header(prefix = '') {
   <nav class="mobile-nav" id="mobileNav">
     <a href="${prefix}stories.html">Articles</a>
     <a href="${prefix}films.html">Films</a>
-    <a href="${prefix}webzine.html">Webzine</a>
+    <a href="${prefix}books.html">Books</a>
     <a href="${prefix}labs.html">Labs</a>
     <a href="${prefix}market.html">Market</a>
     <a href="${prefix}about.html">About</a>
