@@ -1760,6 +1760,21 @@
         .is('read_at', null);
       return count || 0;
     },
+    // 본인 메시지 수정 (회원: 자기 발신, 편집부: 편집부 발신)
+    async edit(id, body) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const text = String(body || '').trim();
+      if (!text) return { error: { message: 'empty' } };
+      if (text.length > 2000) return { error: { message: 'too long' } };
+      const { error } = await c.rpc('edit_message', { p_id: id, p_body: text });
+      return { error };
+    },
+    // 편집부 전용 soft delete
+    async remove(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { error } = await c.rpc('delete_message', { p_id: id });
+      return { error };
+    },
   };
 
   window.MagDB = {
