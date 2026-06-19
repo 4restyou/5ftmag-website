@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>기사 목록 | 5ft magazine Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css?v=20260613-editor">
+  <link rel="stylesheet" href="../css/common.css?v=20260614-push">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <script src="../js/theme-init.js"></script>
+  <style>
+    body { background: var(--bg); color: var(--text); }
+    .admin-header { max-width: 1200px; margin: 0 auto; padding: 40px 24px 24px; border-bottom: 1px solid var(--border); }
+    .admin-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 24px; }
+    .admin-back:hover { color: var(--text); }
+    .admin-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .admin-title { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; margin: 0; }
+    .admin-subnav { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 18px; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.04em; }
+    .admin-subnav-link { color: var(--text-muted); text-decoration: none; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+    .admin-subnav-link:hover { color: var(--text); }
+    .admin-subnav-link.is-current { color: var(--text); border-bottom-color: var(--text); }
+    .admin-subnav-group { color: var(--text-muted); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; align-self: center; }
+    .admin-user { font-size: 13px; color: var(--text-muted); }
+    .admin-user button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .gate { max-width: 480px; margin: 80px auto; padding: 40px 24px; text-align: center; }
+    .gate h2 { font-size: 22px; margin-bottom: 12px; }
+    .gate p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .gate-btn { font: inherit; font-weight: var(--fw-heading); font-size: 14px; padding: 12px 24px; background: var(--text); color: var(--bg); border: none; border-radius: var(--btn-radius); cursor: pointer; }
+
+    /* List wrap */
+    .articles-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .articles-toolbar {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      margin-bottom: 16px; padding: 12px 14px;
+      background: var(--surface-alt, rgba(0,0,0,0.03)); border: 1px solid var(--border); border-radius: 12px;
+    }
+    .articles-toolbar input[type="search"] {
+      flex: 1 1 220px; min-width: 0;
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text); font: inherit; font-size: 14px;
+    }
+    .articles-toolbar select {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text); font: inherit; font-size: 13px;
+    }
+    .articles-toolbar .pill-btn {
+      font: inherit; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.06em;
+      padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px;
+      background: transparent; color: var(--text-muted); cursor: pointer;
+    }
+    .articles-toolbar .pill-btn.is-active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .articles-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+    .articles-list { display: flex; flex-direction: column; gap: 8px; }
+    .article-row {
+      display: grid;
+      grid-template-columns: 64px 1fr auto auto auto auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface, var(--bg));
+      transition: background .15s, border-color .15s;
+    }
+    .article-row.is-hidden { opacity: 0.55; }
+    .article-row.is-busy { opacity: 0.55; pointer-events: none; }
+    .article-thumb {
+      width: 64px; height: 64px;
+      border-radius: 6px; background: var(--border);
+      background-size: cover; background-position: center;
+      flex-shrink: 0;
+    }
+    .article-thumb.is-empty {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: var(--text-muted);
+    }
+    .article-meta { min-width: 0; }
+    .article-title-line {
+      font-size: 15px; font-weight: var(--fw-heading); margin: 0 0 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .article-title-line a { color: inherit; text-decoration: none; }
+    .article-title-line a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .article-sub {
+      font-size: 12px; color: var(--text-muted);
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .article-sub .dot { display: inline-block; width: 2px; height: 2px; border-radius: 50%; background: currentColor; align-self: center; }
+    .article-badge {
+      font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.12em;
+      padding: 4px 8px; border-radius: 4px; background: var(--border); color: var(--text);
+    }
+    .article-author-chip { font-size: 11px; color: var(--text-muted); }
+    .article-date-chip { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .article-actions { display: flex; gap: 8px; align-items: center; }
+    .article-link-btn {
+      font: inherit; font-size: 11px; padding: 6px 10px;
+      background: transparent; color: var(--text-muted);
+      border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
+      text-decoration: none;
+    }
+    .article-link-btn:hover { color: var(--text); border-color: var(--text); }
+
+    /* Toggle switch */
+    .pub-toggle {
+      position: relative; display: inline-flex; align-items: center;
+      gap: 8px; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.04em;
+      cursor: pointer; user-select: none;
+    }
+    .pub-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+    .pub-toggle-track {
+      width: 36px; height: 20px; border-radius: 999px;
+      background: var(--border); position: relative; transition: background .15s;
+    }
+    .pub-toggle-track::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #fff; transition: transform .15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .pub-toggle input:checked + .pub-toggle-track { background: #16a34a; }
+    .pub-toggle input:checked + .pub-toggle-track::after { transform: translateX(16px); }
+    .pub-toggle-label { color: var(--text-muted); min-width: 32px; }
+    .pub-toggle input:checked ~ .pub-toggle-label { color: var(--text); }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 10px 18px; background: var(--text); color: var(--bg);
+      border-radius: 8px; font-size: 13px; font-weight: var(--fw-heading);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2); z-index: 100;
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    }
+    .toast.is-show { opacity: 1; transform: translateX(-50%) translateY(-4px); pointer-events: auto; }
+    .toast.is-error { background: #b91c1c; color: #fff; }
+
+    @media (max-width: 720px) {
+      .article-row {
+        grid-template-columns: 48px 1fr auto;
+        gap: 10px;
+        padding: 10px 12px;
+      }
+      .article-thumb { width: 48px; height: 48px; }
+      .article-badge, .article-author-chip, .article-date-chip, .article-link-btn { display: none; }
+      .article-sub { font-size: 11px; }
+      .pub-toggle-label { display: none; }
+    }
+
+    /* PAT modal — minimal */
+    .ae-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .ae-modal.is-open { display: flex; }
+    .ae-modal-card {
+      background: var(--bg); padding: 24px;
+      border-radius: 12px; max-width: 420px; width: 90%;
+      border: 1px solid var(--border);
+    }
+    .ae-modal-card h3 { margin: 0 0 8px; font-size: 18px; }
+    .ae-modal-card p { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin: 0 0 16px; }
+    .ae-modal-card input {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text); font: inherit; font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .ae-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .ae-modal-actions button {
+      font: inherit; font-size: 13px; padding: 8px 16px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: transparent; color: var(--text); cursor: pointer;
+    }
+    .ae-modal-actions button.ae-primary {
+      background: var(--text); color: var(--bg); border-color: var(--text);
+    }
+  </style>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../books.html">Books</a></li>
+      <li><a href="../labs.html">Labs</a></li>
+      <li><a href="../market.html">Market</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="../search.html" class="icon-btn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../books.html">Books</a>
+    <a href="../labs.html">Labs</a>
+    <a href="../market.html">Market</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<div class="admin-header">
+  <a class="admin-back" href="../index.html">← 5ft magazine 으로</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">기사 목록</h1>
+    <span class="admin-user" id="adminUser">불러오는 중…</span>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <span class="admin-subnav-group">운영</span>
+    <a href="/admin/index.html" class="admin-subnav-link">홈</a>
+    <a href="/admin/article-editor.html" class="admin-subnav-link">기사 작성</a>
+    <a href="/admin/articles.html" class="admin-subnav-link is-current">기사 목록</a>
+    <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="/admin/market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="/admin/comments.html" class="admin-subnav-link">댓글</a>
+    <a href="/admin/announcements.html" class="admin-subnav-link">공지</a>
+    <span class="admin-subnav-group">카탈로그</span>
+    <a href="/admin/camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
+    <a href="/admin/films.html" class="admin-subnav-link">필름 카탈로그</a>
+    <a href="/admin/labs.html" class="admin-subnav-link">현상소</a>
+    <a href="/admin/repairs.html" class="admin-subnav-link">수리실</a>
+    <a href="/admin/webzine.html" class="admin-subnav-link">웹진</a>
+    <span class="admin-subnav-group">분석</span>
+    <a href="/admin/analytics.html" class="admin-subnav-link">통계</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+  <p class="gate-back"><a href="/">← 5ft magazine 으로 돌아가기</a></p>
+</div>
+
+<main id="app" class="articles-wrap" hidden>
+  <div class="articles-toolbar">
+    <input type="search" id="searchInput" placeholder="제목·작성자·slug 검색" autocomplete="off" />
+    <button type="button" class="pill-btn is-active" data-filter="all">전체</button>
+    <button type="button" class="pill-btn" data-filter="published">공개</button>
+    <button type="button" class="pill-btn" data-filter="hidden">비공개</button>
+    <select id="categorySelect">
+      <option value="">전체 카테고리</option>
+    </select>
+    <span class="articles-count" id="articlesCount">불러오는 중…</span>
+  </div>
+
+  <div class="articles-list" id="articlesList"></div>
+</main>
+
+<div id="patModal" class="ae-modal" role="dialog" aria-labelledby="patModalTitle">
+  <div class="ae-modal-card">
+    <h3 id="patModalTitle">GitHub Personal Access Token</h3>
+    <p>이 기기에만 저장됩니다 (localStorage). repo 권한이 필요해요. <a href="https://github.com/settings/tokens/new?scopes=repo&description=5ft.mag%20admin" target="_blank" rel="noopener">토큰 발급 ↗</a></p>
+    <input id="patInput" type="password" placeholder="ghp_..." autocomplete="off" />
+    <div class="ae-modal-actions">
+      <button type="button" id="patCancel">취소</button>
+      <button type="button" id="patApply" class="ae-primary">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="../js/db-client.js?v=20260614-personalize" defer></script>
+<script src="../js/admin-articles-page.js?v=20260619-pubtoggle" defer></script>
+
+</body>
+</html>
