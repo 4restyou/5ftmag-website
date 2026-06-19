@@ -1318,25 +1318,20 @@
   margin: -10px 0 22px;
 }
 /* Reader's Roll 컨트롤 3종 — 롤 보기 / 작가 / 보기·저장 을 같은 시각 패턴으로.
-   박스(border/bg) 처리 제거. 라벨 + chip 들을 inline 으로, 그룹 사이 큰 gap.
-   한 행에 다 안 들어가면 가로 스크롤 (우측 페이드로 더 있음 표시). */
+   레이아웃: 롤 보기 (왼쪽 고정) + 작가 필터 (가운데, 좁아지면 내부 가로 스크롤)
+   + 보기·저장 (오른쪽 고정). 컨테이너 자체는 스크롤하지 않고 작가 필터만 스크롤 →
+   보기·저장 버튼이 오른쪽 페이드 안으로 밀려들어가 겹쳐 보이던 문제 해결. */
 .reader-roll-controls {
   display: flex;
   align-items: center;
   gap: 20px;
   margin: 0 0 18px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
 }
-.reader-roll-controls::-webkit-scrollbar { display: none; }
 .reader-roll-control-main {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 .reader-control-group {
@@ -1344,6 +1339,27 @@
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+}
+.reader-control-group-person {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.reader-control-group-person .reader-person-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+}
+.reader-control-group-person .reader-person-filter::-webkit-scrollbar { display: none; }
+.reader-control-group-person .reader-person-filter.is-single {
+  flex: 0 0 auto;
+  overflow: visible;
+  -webkit-mask-image: none;
+          mask-image: none;
 }
 .reader-roll-view-actions {
   display: flex;
@@ -2105,14 +2121,10 @@
   .reader-contributor-head { align-items: flex-start; flex-direction: column; }
   .reader-contributor-actions { justify-content: flex-start; }
   /* 모바일에선 .reader-roll-controls 를 column 으로 — 좁은 화면에서 한 줄에
-     3 그룹을 다 우겨넣으면 view-actions 가 위쪽 그룹을 덮어 클릭이 안 됨.
-     overflow-x 효과는 desktop 만 유지. */
+     3 그룹을 다 우겨넣으면 view-actions 가 위쪽 그룹을 덮어 클릭이 안 됨. */
   .reader-roll-controls {
     flex-direction: column;
     align-items: stretch;
-    overflow-x: visible;
-    -webkit-mask-image: none;
-            mask-image: none;
   }
   .reader-roll-control-main {
     flex-direction: column;
