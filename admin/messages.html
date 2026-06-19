@@ -43,6 +43,11 @@
       color: var(--text-muted); text-transform: uppercase;
       display: flex; align-items: center; justify-content: space-between;
     }
+    .msg-threads-count {
+      font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.04em;
+      color: var(--text-muted); margin-left: 4px; text-transform: none;
+    }
+    .msg-threads-count:empty { display: none; }
     .msg-threads-list { flex: 1; overflow-y: auto; }
     .msg-thread-item {
       display: block; width: 100%; padding: 12px 14px;
@@ -262,7 +267,7 @@
 <main id="app" class="msg-wrap" hidden>
   <aside class="msg-threads">
     <div class="msg-threads-head">
-      <span>회원 스레드</span>
+      <span>회원 스레드 <span id="threadsTotal" class="msg-threads-count"></span></span>
       <button type="button" id="newMsgBtn" class="msg-new-btn">+ 새 메시지</button>
     </div>
     <div class="msg-threads-list" id="threadsList">
@@ -303,7 +308,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260619-msg3" defer></script>
-<script src="../js/admin-messages-page.js?v=20260619-search" defer></script>
+<script src="../js/admin-messages-page.js?v=20260619-totalfix" defer></script>
 
 </body>
 </html>
