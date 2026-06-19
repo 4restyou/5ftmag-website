@@ -116,15 +116,79 @@
     }
     const html = STATE.messages.map((m) => {
       const side = m.from_editor ? 'msg-bubble-from-editor' : 'msg-bubble-from-user';
+      if (m.deleted_at) {
+        return `
+          <div class="msg-row ${m.from_editor ? 'is-mine' : 'is-theirs'}">
+            <div class="msg-bubble msg-bubble-deleted">삭제된 메시지입니다.</div>
+          </div>
+        `;
+      }
+      const editedMark = m.edited_at ? `<span class="msg-edited">수정됨</span>` : '';
+      const readMark = m.from_editor && m.read_at ? `<span class="msg-read">읽음</span>` : '';
+      const actions = [];
+      if (m.from_editor) actions.push(`<button type="button" class="msg-action" data-action="edit-msg">수정</button>`);
+      actions.push(`<button type="button" class="msg-action msg-action-danger" data-action="delete-msg">삭제</button>`);
       return `
-        <div class="msg-bubble ${side}">
-          ${esc(m.body)}
-          <span class="msg-bubble-meta">${esc(fmtTime(m.created_at))}</span>
+        <div class="msg-row ${m.from_editor ? 'is-mine' : 'is-theirs'}" data-msg-id="${esc(m.id)}">
+          <div class="msg-bubble ${side}" data-body="${esc(m.body)}">${esc(m.body)}</div>
+          <div class="msg-foot">
+            <span class="msg-time">${esc(fmtTime(m.created_at))}</span>
+            ${editedMark}
+            ${readMark}
+            ${actions.join('')}
+          </div>
         </div>
       `;
     }).join('');
     $('viewList').innerHTML = html;
     $('viewList').scrollTop = $('viewList').scrollHeight;
+    document.querySelectorAll('#viewList [data-action="edit-msg"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const row = btn.closest('.msg-row');
+        if (row) startEditMessage(row.dataset.msgId);
+      });
+    });
+    document.querySelectorAll('#viewList [data-action="delete-msg"]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('.msg-row');
+        if (!row) return;
+        if (!confirm('이 메시지를 삭제할까요? (회원에게도 "삭제된 메시지" 로 표시됩니다)')) return;
+        const res = await db().messages.remove(row.dataset.msgId);
+        if (res?.error) { alert('삭제 실패: ' + res.error.message); return; }
+        STATE.messages = await db().messages.list(STATE.currentUserId);
+        renderMessages();
+        await loadThreads();
+      });
+    });
+  }
+
+  function startEditMessage(messageId) {
+    const row = document.querySelector(`#viewList .msg-row[data-msg-id="${cssEsc(messageId)}"]`);
+    if (!row) return;
+    const bubble = row.querySelector('.msg-bubble');
+    const current = bubble.dataset.body || bubble.textContent;
+    const inputId = `editAdminInput-${messageId}`;
+    bubble.innerHTML = `
+      <textarea id="${inputId}" class="msg-edit-input" maxlength="2000">${esc(current)}</textarea>
+      <div class="msg-edit-actions">
+        <button type="button" class="msg-action" data-action="cancel-edit">취소</button>
+        <button type="button" class="msg-action msg-action-primary" data-action="save-edit">저장</button>
+      </div>
+    `;
+    const input = document.getElementById(inputId);
+    if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+    bubble.querySelector('[data-action="cancel-edit"]').addEventListener('click', async () => {
+      STATE.messages = await db().messages.list(STATE.currentUserId);
+      renderMessages();
+    });
+    bubble.querySelector('[data-action="save-edit"]').addEventListener('click', async () => {
+      const next = input.value.trim();
+      if (!next) return;
+      const res = await db().messages.edit(messageId, next);
+      if (res?.error) { alert('수정 실패: ' + res.error.message); return; }
+      STATE.messages = await db().messages.list(STATE.currentUserId);
+      renderMessages();
+    });
   }
 
   async function send() {

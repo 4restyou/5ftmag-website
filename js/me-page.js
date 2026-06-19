@@ -791,6 +791,27 @@ async function loadMessages() {
   $('messagesList').innerHTML = '<div class="me-msg-empty">불러오는 중…</div>';
   STATE.messages = await db().messages.list();
   renderMessages();
+  startMessagesPolling();
+}
+
+// 같은 분 안에 보낸 같은 발신자 메시지는 시간 라벨을 첫 버블에만 표시.
+function fmtTimeShort(iso) {
+  const d = new Date(iso);
+  const today = new Date();
+  const sameDay = d.getFullYear() === today.getFullYear()
+    && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+  const yest = new Date(today); yest.setDate(yest.getDate() - 1);
+  const isYest = d.getFullYear() === yest.getFullYear()
+    && d.getMonth() === yest.getMonth() && d.getDate() === yest.getDate();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  if (sameDay) return `${hh}:${mm}`;
+  if (isYest)  return `어제 ${hh}:${mm}`;
+  return `${d.getMonth() + 1}/${d.getDate()} ${hh}:${mm}`;
+}
+function bucketKey(iso, fromEditor) {
+  const d = new Date(iso);
+  return `${fromEditor ? 'e' : 'u'}-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}-${d.getMinutes()}`;
 }
 
 function renderMessages() {
@@ -799,20 +820,91 @@ function renderMessages() {
     $('messagesList').innerHTML = '<div class="me-msg-empty">아직 주고받은 메시지가 없습니다. 편집부에 처음 인사를 보내보세요.</div>';
     return;
   }
-  const html = list.map(m => {
+  let lastKey = null;
+  const html = list.map((m, i) => {
     const mine = !m.from_editor;
     const side = mine ? 'me-msg-bubble-mine' : 'me-msg-bubble-theirs';
-    const meta = mine ? fmtDate(m.created_at) : `편집부 · ${fmtDate(m.created_at)}`;
+    const key = bucketKey(m.created_at, m.from_editor);
+    const showTime = key !== lastKey || (i === list.length - 1);
+    lastKey = key;
+    if (m.deleted_at) {
+      return `
+        <div class="me-msg-row ${mine ? 'is-mine' : 'is-theirs'}">
+          <div class="me-msg-bubble me-msg-bubble-deleted">삭제된 메시지입니다.</div>
+        </div>
+      `;
+    }
+    const editedMark = m.edited_at ? `<span class="me-msg-edited">수정됨</span>` : '';
+    const readMark = mine && m.read_at ? `<span class="me-msg-read">읽음</span>` : '';
+    const senderLabel = mine ? '' : `<span class="me-msg-sender">편집부</span>`;
+    const timeStamp = showTime
+      ? `<span class="me-msg-time">${escapeHtml(fmtTimeShort(m.created_at))}</span>`
+      : '';
     return `
-      <div class="me-msg-bubble ${side}">
-        ${escapeHtml(m.body)}
-        <span class="me-msg-bubble-meta">${escapeHtml(meta)}</span>
+      <div class="me-msg-row ${mine ? 'is-mine' : 'is-theirs'}" data-msg-id="${escapeAttr(m.id)}">
+        ${senderLabel}
+        <div class="me-msg-bubble ${side}" data-body="${escapeAttr(m.body)}">${escapeHtml(m.body)}</div>
+        <div class="me-msg-foot">
+          ${timeStamp}
+          ${editedMark}
+          ${readMark}
+          ${mine ? `<button type="button" class="me-msg-action" data-action="edit-msg">수정</button>` : ''}
+        </div>
       </div>
     `;
   }).join('');
   $('messagesList').innerHTML = html;
   $('messagesList').scrollTop = $('messagesList').scrollHeight;
+  document.querySelectorAll('#messagesList [data-action="edit-msg"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const row = btn.closest('.me-msg-row');
+      if (row) startEditMessage(row.dataset.msgId);
+    });
+  });
 }
+
+let pollTimerMessages = null;
+function startMessagesPolling() {
+  if (pollTimerMessages) clearInterval(pollTimerMessages);
+  pollTimerMessages = setInterval(async () => {
+    if (document.hidden || STATE.section !== 'messages') return;
+    const fresh = await db().messages.list();
+    // 변화 있을 때만 재렌더
+    const prev = STATE.messages || [];
+    if (fresh.length !== prev.length || JSON.stringify(fresh.map(x => [x.id, x.body, x.read_at, x.edited_at, x.deleted_at])) !== JSON.stringify(prev.map(x => [x.id, x.body, x.read_at, x.edited_at, x.deleted_at]))) {
+      STATE.messages = fresh;
+      renderMessages();
+      await markMessagesRead();
+    }
+  }, 15000);
+}
+
+function startEditMessage(messageId) {
+  const row = document.querySelector(`.me-msg-row[data-msg-id="${cssEscape(messageId)}"]`);
+  if (!row) return;
+  const bubble = row.querySelector('.me-msg-bubble');
+  const current = bubble.dataset.body || bubble.textContent;
+  const inputId = `editInput-${messageId}`;
+  bubble.innerHTML = `
+    <textarea id="${inputId}" class="me-msg-edit-input" maxlength="2000">${escapeHtml(current)}</textarea>
+    <div class="me-msg-edit-actions">
+      <button type="button" class="me-msg-action" data-action="cancel-edit">취소</button>
+      <button type="button" class="me-msg-action me-msg-action-primary" data-action="save-edit">저장</button>
+    </div>
+  `;
+  const input = document.getElementById(inputId);
+  if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+  bubble.querySelector('[data-action="cancel-edit"]').addEventListener('click', () => loadMessages());
+  bubble.querySelector('[data-action="save-edit"]').addEventListener('click', async () => {
+    const next = input.value.trim();
+    if (!next) return;
+    const res = await db().messages.edit(messageId, next);
+    if (res?.error) { alert('수정 실패: ' + res.error.message); return; }
+    await loadMessages();
+  });
+}
+
+function cssEscape(s) { return String(s).replace(/["\\]/g, '\\$&'); }
 
 async function markMessagesRead() {
   if (!STATE.messages || STATE.messages.length === 0) return;
