@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css?v=20260609-cardtok">
   <link rel="stylesheet" href="css/common.css?v=20260614-push">
-  <link rel="stylesheet" href="css/me.css?v=20260615-opsux">
+  <link rel="stylesheet" href="css/me.css?v=20260619-msg">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -67,6 +67,7 @@
     <button type="button" class="me-pagetab active" data-section="photos">사진</button>
     <button type="button" class="me-pagetab" data-section="market">매물</button>
     <button type="button" class="me-pagetab" data-section="notifs">알림 <span class="me-pagetab-badge" id="notifsBadge" hidden></span></button>
+    <button type="button" class="me-pagetab" data-section="messages">메시지 <span class="me-pagetab-badge" id="messagesBadge" hidden></span></button>
     <button type="button" class="me-pagetab" data-section="my-comments">내 댓글</button>
     <button type="button" class="me-pagetab" data-section="my-proposals">내 제안</button>
     <button type="button" class="me-pagetab" data-section="fav-photos">좋아한 사진</button>
@@ -106,6 +107,21 @@
     </div>
     <div class="me-list" id="notifsList">
       <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
+
+  <!-- ─── 메시지 섹션 ─── -->
+  <section id="section-messages" hidden>
+    <div class="me-msg-intro">편집부에 보내는 메시지입니다. 영업시간 외엔 답장이 늦을 수 있어요.</div>
+    <div class="me-msg-list" id="messagesList">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+    <div class="me-msg-compose">
+      <textarea id="messageBody" placeholder="메시지를 입력하세요 (최대 2000자, Ctrl/Cmd + Enter 로 전송)" maxlength="2000"></textarea>
+      <div class="me-msg-compose-foot">
+        <span class="me-msg-compose-count" id="messageCount">0</span>
+        <button type="button" id="messageSend" class="me-btn">보내기</button>
+      </div>
     </div>
   </section>
 
@@ -162,10 +178,10 @@
 <div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db-client.js?v=20260614-personalize" defer></script>
+<script src="./js/db-client.js?v=20260619-msg" defer></script>
 <script src="./js/util.js?v=20260602-normalize" defer></script>
-  <script src="./js/site-common.js?v=20260615-fabback" defer></script>
-<script src="./js/me-page.js?v=20260616-books" defer></script>
+  <script src="./js/site-common.js?v=20260619-msg" defer></script>
+<script src="./js/me-page.js?v=20260619-msg" defer></script>
 
 </body>
 </html>

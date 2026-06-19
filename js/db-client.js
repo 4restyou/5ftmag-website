@@ -1617,9 +1617,84 @@
     },
   };
 
+  // ─── 메시지 (회원 ↔ 편집부 양방향) ───
+  // 회원: 자기 스레드만 보고 쓸 수 있음. from_editor 는 항상 false.
+  // 편집부: 모든 스레드 보고 쓸 수 있음. from_editor 는 항상 true.
+  const messages = {
+    // 회원이 자기 스레드의 메시지 시간순으로 가져옴 (admin 도 같은 호출 가능, p_user_id 명시)
+    async list(targetUserId, { limit = 200 } = {}) {
+      const c = client(); if (!c) return [];
+      const uid = targetUserId || (await userId());
+      if (!uid) return [];
+      const { data, error } = await c.from('messages').select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: true })
+        .limit(limit);
+      if (error) { console.warn('[messages.list]', error.message); return []; }
+      return data || [];
+    },
+    // 회원이 보냄
+    async send(body) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'login required' } };
+      const text = String(body || '').trim();
+      if (!text) return { error: { message: 'empty' } };
+      if (text.length > 2000) return { error: { message: 'too long' } };
+      return c.from('messages').insert({ user_id: uid, from_editor: false, body: text });
+    },
+    // 편집부가 특정 회원에게 보냄
+    async sendAsEditor(targetUserId, body) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const text = String(body || '').trim();
+      if (!text) return { error: { message: 'empty' } };
+      if (text.length > 2000) return { error: { message: 'too long' } };
+      return c.from('messages').insert({ user_id: targetUserId, from_editor: true, body: text });
+    },
+    // 회원: 자기 받은 메시지 (편집부가 보낸 것) 읽음 처리.
+    // 편집부: targetUserId 의 회원이 보낸 메시지 읽음 처리.
+    async markRead(targetUserId) {
+      const c = client(); if (!c) return 0;
+      const uid = targetUserId || (await userId());
+      if (!uid) return 0;
+      const { data, error } = await c.rpc('mark_messages_read', { p_user_id: uid });
+      if (error) { console.warn('[messages.markRead]', error.message); return 0; }
+      return data || 0;
+    },
+    // 회원: 자기 안읽음 카운트 (편집부가 보낸 것 중)
+    async unreadCount() {
+      const c = client(); if (!c) return 0;
+      const uid = await userId();
+      if (!uid) return 0;
+      const { count } = await c.from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', uid)
+        .eq('from_editor', true)
+        .is('read_at', null);
+      return count || 0;
+    },
+    // 편집부 인박스: 회원별 스레드 목록 (마지막 메시지 / 안읽음 카운트 포함)
+    async listThreads() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('message_threads').select('*')
+        .order('last_at', { ascending: false });
+      if (error) { console.warn('[messages.listThreads]', error.message); return []; }
+      return data || [];
+    },
+    // 편집부 인박스: 회원이 보낸 메시지 중 전체 안읽음 카운트 (헤더 배지용)
+    async unreadCountForAdmin() {
+      const c = client(); if (!c) return 0;
+      const { count } = await c.from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('from_editor', false)
+        .is('read_at', null);
+      return count || 0;
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages,
   };
 })();

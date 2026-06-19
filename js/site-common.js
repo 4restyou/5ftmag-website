@@ -1104,7 +1104,22 @@
       }
     }
     async function refreshBadge() {
-      try { updateBadge(await window.MagDB.notifications.unreadCount()); } catch (_) {}
+      try {
+        // 헤더 배지에는 알림 + 편집부 메시지 안읽음 카운트를 합쳐 표시.
+        // 회원에게도 편집부에게도 같은 종 아이콘 하나로 통합 안내.
+        const [n, m] = await Promise.all([
+          window.MagDB.notifications.unreadCount().catch(() => 0),
+          // 편집부면 회원이 보낸 미응답 메시지 카운트, 회원이면 편집부가 보낸 미확인 카운트.
+          (async () => {
+            try {
+              const prof = await window.MagDB.profiles.getMine();
+              if (prof?.is_editor) return await window.MagDB.messages.unreadCountForAdmin();
+              return await window.MagDB.messages.unreadCount();
+            } catch (_) { return 0; }
+          })(),
+        ]);
+        updateBadge((n || 0) + (m || 0));
+      } catch (_) {}
     }
     function fmtAgo(iso) {
       const d = new Date(iso);
