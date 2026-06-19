@@ -1,5 +1,20 @@
 [
   {
+    "id": "lll-film-project",
+    "title": "렌즈를 복각하던 회사가, 이번엔 필름을 만든다",
+    "category": "essay",
+    "categoryLabel": "FILM",
+    "author": "5ft.mag 편집부",
+    "date": "2026-06-18",
+    "issue": "",
+    "thumbnail": "img/stories/lll-film-project/coating-line.webp",
+    "excerpt": "라이카 빈티지 렌즈를 1:1 복각해온 중국 라이트렌즈랩이 2025년 초에 필름 제조 계획을 발표했다. 1년 반이 지난 지금, 처방·코팅 장비·QC 라인까지 모두 사내에서 만드는 흐름이 어디까지 왔는지 정리.",
+    "page": "stories/lll-film-project.html",
+    "published": true,
+    "manual": true,
+    "films": []
+  },
+  {
     "id": "brisnap-01",
     "title": "브리스냅 필름헛소리 01 — 필름사진 찍는 이유",
     "category": "essay",
