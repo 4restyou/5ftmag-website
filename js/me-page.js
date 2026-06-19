@@ -10,6 +10,8 @@ const STATE = {
   marketRows: [],
   // notifications & 내 댓글
   notifs: null,
+  messages: null,
+  sendingMessage: false,
   myComments: null,
   myProposals: null,
   // favorites
@@ -349,6 +351,7 @@ function switchSection(sec) {
   $('section-photos').hidden           = sec !== 'photos';
   $('section-market').hidden           = sec !== 'market';
   $('section-notifs').hidden           = sec !== 'notifs';
+  $('section-messages').hidden         = sec !== 'messages';
   $('section-my-comments').hidden      = sec !== 'my-comments';
   $('section-my-proposals').hidden     = sec !== 'my-proposals';
   $('section-fav-photos').hidden       = sec !== 'fav-photos';
@@ -358,6 +361,7 @@ function switchSection(sec) {
   $('section-fav-articles').hidden     = sec !== 'fav-articles';
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
   if (sec === 'notifs'            && STATE.notifs           === null) loadNotifs();
+  if (sec === 'messages'          && STATE.messages         === null) loadMessages();
   if (sec === 'my-comments'       && STATE.myComments       === null) loadMyComments();
   if (sec === 'my-proposals'      && STATE.myProposals      === null) loadMyProposals();
   if (sec === 'fav-photos'        && STATE.favPhotos        === null) loadFavPhotos();
@@ -367,6 +371,7 @@ function switchSection(sec) {
   if (sec === 'fav-articles'      && STATE.favArticles      === null) loadFavArticles();
   // 알림 탭에 들어왔으면 안 읽은 건 자동으로 읽음 처리(뱃지 즉시 0 으로)
   if (sec === 'notifs') markNotifsRead();
+  if (sec === 'messages') markMessagesRead();
   // URL hash 동기화
   try { history.replaceState(null, '', '#' + sec); } catch (_) {}
 }
@@ -780,6 +785,95 @@ $('notifsMarkAll')?.addEventListener('click', async () => {
 });
 
 // ═════════════════════════════════════════
+// 메시지 (회원 ↔ 편집부)
+// ═════════════════════════════════════════
+async function loadMessages() {
+  $('messagesList').innerHTML = '<div class="me-msg-empty">불러오는 중…</div>';
+  STATE.messages = await db().messages.list();
+  renderMessages();
+}
+
+function renderMessages() {
+  const list = STATE.messages || [];
+  if (!list.length) {
+    $('messagesList').innerHTML = '<div class="me-msg-empty">아직 주고받은 메시지가 없습니다. 편집부에 처음 인사를 보내보세요.</div>';
+    return;
+  }
+  const html = list.map(m => {
+    const mine = !m.from_editor;
+    const side = mine ? 'me-msg-bubble-mine' : 'me-msg-bubble-theirs';
+    const meta = mine ? fmtDate(m.created_at) : `편집부 · ${fmtDate(m.created_at)}`;
+    return `
+      <div class="me-msg-bubble ${side}">
+        ${escapeHtml(m.body)}
+        <span class="me-msg-bubble-meta">${escapeHtml(meta)}</span>
+      </div>
+    `;
+  }).join('');
+  $('messagesList').innerHTML = html;
+  $('messagesList').scrollTop = $('messagesList').scrollHeight;
+}
+
+async function markMessagesRead() {
+  if (!STATE.messages || STATE.messages.length === 0) return;
+  const hasUnread = STATE.messages.some(m => m.from_editor && !m.read_at);
+  if (!hasUnread) return;
+  const marked = await db().messages.markRead();
+  if (marked > 0) {
+    STATE.messages = STATE.messages.map(m => (m.from_editor && !m.read_at) ? { ...m, read_at: new Date().toISOString() } : m);
+    await refreshMessagesBadge();
+  }
+}
+
+async function refreshMessagesBadge() {
+  const badge = $('messagesBadge');
+  if (!badge) return;
+  let unread = 0;
+  try { unread = await db().messages.unreadCount(); } catch (_) {}
+  if (unread > 0) {
+    badge.textContent = String(unread);
+    badge.hidden = false;
+  } else {
+    badge.textContent = '';
+    badge.hidden = true;
+  }
+}
+
+async function sendMessage() {
+  if (STATE.sendingMessage) return;
+  const body = $('messageBody').value.trim();
+  if (!body) return;
+  STATE.sendingMessage = true;
+  $('messageSend').disabled = true;
+  try {
+    const res = await db().messages.send(body);
+    if (res.error) throw new Error(res.error.message || 'send failed');
+    $('messageBody').value = '';
+    $('messageCount').textContent = '0';
+    STATE.messages = await db().messages.list();
+    renderMessages();
+  } catch (err) {
+    console.error(err);
+    alert('전송 실패: ' + (err.message || '알 수 없는 오류'));
+  } finally {
+    STATE.sendingMessage = false;
+    $('messageSend').disabled = false;
+  }
+}
+
+$('messageBody')?.addEventListener('input', (e) => {
+  const el = $('messageCount');
+  if (el) el.textContent = String(e.target.value.length);
+});
+$('messageBody')?.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+$('messageSend')?.addEventListener('click', sendMessage);
+
+// ═════════════════════════════════════════
 // 내 댓글
 // ═════════════════════════════════════════
 async function loadMyComments() {
@@ -877,10 +971,11 @@ function renderMyProposals() {
   $('gate').hidden = true;
   $('app').hidden = false;
   await loadPhotos();
-  // 초기 알림 뱃지 (다른 탭에서도 보이게)
+  // 초기 알림 / 메시지 뱃지 (다른 탭에서도 보이게)
   refreshNotifsBadge();
+  refreshMessagesBadge();
   // URL hash 로 초기 탭 결정
-  const validSections = ['photos', 'market', 'notifs', 'my-comments', 'my-proposals', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
+  const validSections = ['photos', 'market', 'notifs', 'messages', 'my-comments', 'my-proposals', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
   const hashSection = (location.hash || '').replace(/^#/, '');
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);
