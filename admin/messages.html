@@ -126,6 +126,65 @@
       .msg-threads { max-height: 320px; }
       .msg-view { max-height: 60vh; }
     }
+
+    /* 새 메시지 버튼 + 모달 */
+    .msg-new-btn {
+      font: inherit; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.04em;
+      padding: 5px 10px; border: 1px solid var(--text); border-radius: 999px;
+      background: transparent; color: var(--text); cursor: pointer; text-transform: none;
+    }
+    .msg-new-btn:hover { background: var(--text); color: var(--bg); }
+
+    .nm-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 8vh 16px; z-index: 200;
+    }
+    .nm-overlay.is-open { display: flex; }
+    .nm-card {
+      background: var(--bg); width: 100%; max-width: 480px;
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px; display: flex; flex-direction: column; gap: 14px;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .nm-card h3 { margin: 0; font-size: 16px; font-weight: var(--fw-heading); }
+    .nm-card input, .nm-card textarea {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 10px;
+      background: var(--bg); color: var(--text); font: inherit; font-size: 14px;
+      box-sizing: border-box;
+    }
+    .nm-card textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
+    .nm-results { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+    .nm-result-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: transparent; cursor: pointer; font: inherit; text-align: left;
+      color: var(--text); transition: background .15s, border-color .15s;
+    }
+    .nm-result-item:hover { background: var(--bg-sub); }
+    .nm-result-item.is-selected { background: var(--bg-sub); border-color: var(--text); }
+    .nm-result-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--border) center/cover no-repeat;
+      flex-shrink: 0;
+    }
+    .nm-result-name { font-size: 14px; font-weight: var(--fw-heading); }
+    .nm-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px; }
+    .nm-foot {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .nm-foot-count { font-size: 11px; color: var(--text-muted); }
+    .nm-foot-actions { display: flex; gap: 8px; }
+    .nm-foot-actions button {
+      font: inherit; font-size: 13px; padding: 8px 14px;
+      border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--border); background: transparent; color: var(--text);
+    }
+    .nm-foot-actions button.nm-primary {
+      background: var(--text); color: var(--bg); border-color: var(--text);
+    }
+    .nm-foot-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
@@ -199,7 +258,7 @@
   <aside class="msg-threads">
     <div class="msg-threads-head">
       <span>회원 스레드</span>
-      <span id="threadsTotal"></span>
+      <button type="button" id="newMsgBtn" class="msg-new-btn">+ 새 메시지</button>
     </div>
     <div class="msg-threads-list" id="threadsList">
       <div class="msg-thread-empty">불러오는 중…</div>
@@ -221,9 +280,25 @@
   </section>
 </main>
 
+<div id="newMsgOverlay" class="nm-overlay" role="dialog" aria-modal="true" aria-labelledby="nmTitle">
+  <div class="nm-card">
+    <h3 id="nmTitle">새 메시지</h3>
+    <input id="nmSearch" type="search" placeholder="회원 이름으로 검색" autocomplete="off" />
+    <div class="nm-results" id="nmResults"></div>
+    <textarea id="nmBody" placeholder="메시지 내용 (최대 2000자, Ctrl/Cmd + Enter 로 전송)" maxlength="2000"></textarea>
+    <div class="nm-foot">
+      <span class="nm-foot-count" id="nmCount">0</span>
+      <div class="nm-foot-actions">
+        <button type="button" id="nmCancel">취소</button>
+        <button type="button" id="nmSend" class="nm-primary" disabled>보내기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="../js/db-client.js?v=20260619-messages" defer></script>
-<script src="../js/admin-messages-page.js?v=20260619-init" defer></script>
+<script src="../js/db-client.js?v=20260619-msg2" defer></script>
+<script src="../js/admin-messages-page.js?v=20260619-newmsg" defer></script>
 
 </body>
 </html>
