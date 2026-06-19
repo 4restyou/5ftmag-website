@@ -21,10 +21,11 @@ alter table public.messages enable row level security;
 create policy "messages_select_self" on public.messages
   for select using (auth.uid() = user_id);
 
--- 편집부: 모든 row select
+-- 편집부: 모든 row select.
+-- profiles 의 PK 가 user_id 이므로 (id 아님) where user_id = auth.uid() 패턴 사용.
 create policy "messages_select_editor" on public.messages
   for select using (
-    exists (select 1 from public.profiles where id = auth.uid() and is_editor)
+    exists (select 1 from public.profiles where user_id = auth.uid() and is_editor = true)
   );
 
 -- 회원: 자기 메시지만 insert (from_editor=false 강제)
@@ -37,7 +38,7 @@ create policy "messages_insert_self" on public.messages
 create policy "messages_insert_editor" on public.messages
   for insert with check (
     from_editor = true
-    and exists (select 1 from public.profiles where id = auth.uid() and is_editor)
+    and exists (select 1 from public.profiles where user_id = auth.uid() and is_editor = true)
   );
 
 -- read_at 업데이트는 RPC 로만 (column-level RLS 회피).
@@ -53,7 +54,7 @@ declare
   v_count integer;
 begin
   if v_uid is null then raise exception 'auth required'; end if;
-  select coalesce(is_editor, false) into v_is_editor from public.profiles where id = v_uid;
+  select coalesce(is_editor, false) into v_is_editor from public.profiles where user_id = v_uid;
   if v_uid = p_user_id then
     -- 회원이 자기 받은 메시지 (편집부가 보낸 것) 읽음 처리
     update public.messages set read_at = now()
@@ -88,7 +89,7 @@ select
   count(*) filter (where m.from_editor = false and m.read_at is null) as unread_for_admin,
   count(*) filter (where m.from_editor = true and m.read_at is null) as unread_for_user
 from public.messages m
-left join public.profiles_public p on p.id = m.user_id
+left join public.profiles_public p on p.user_id = m.user_id
 group by m.user_id, p.display_name, p.avatar_url;
 
 grant select on public.message_threads to authenticated;
