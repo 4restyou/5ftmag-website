@@ -186,17 +186,74 @@
       return data || null;
     },
     // 편집부가 메시지 보낼 회원을 찾을 때.
-    // display_name 부분 일치, 최대 20명.
+    // display_name (Google 계정 이름), 사진 등록 시 입력한 작가명 (submitter_name),
+    // 사진 등록 시 입력한 IG 핸들 (instagram) 셋 다 검색. 매칭된 필드는 hints[] 로 같이 반환.
     async search(query) {
       const c = client(); if (!c) return [];
       const q = String(query || '').trim();
       if (q.length < 1) return [];
-      const { data, error } = await c.from('profiles_public')
+      const like = `%${q}%`;
+
+      const profileQ = c.from('profiles_public')
         .select('user_id, display_name, avatar_url')
-        .ilike('display_name', `%${q}%`)
+        .ilike('display_name', like)
         .limit(20);
-      if (error) { console.warn('[profiles.search]', error.message); return []; }
-      return data || [];
+
+      const submissionQ = c.from('reader_submissions')
+        .select('user_id, submitter_name, instagram')
+        .or(`submitter_name.ilike.${like},instagram.ilike.${like}`)
+        .limit(60);
+
+      const [profRes, subRes] = await Promise.all([profileQ, submissionQ]);
+      if (profRes.error) console.warn('[profiles.search]', profRes.error.message);
+      if (subRes.error)  console.warn('[profiles.search:submissions]', subRes.error.message);
+
+      const results = new Map();
+      for (const p of (profRes.data || [])) {
+        if (!p.user_id) continue;
+        results.set(p.user_id, {
+          user_id: p.user_id,
+          display_name: p.display_name,
+          avatar_url: p.avatar_url,
+          hints: ['이름'],
+        });
+      }
+
+      // submission 의 user_id 중 results 에 없는 것 → profile 조회 (display_name 채우려고)
+      const missingUids = [...new Set((subRes.data || [])
+        .map(s => s.user_id)
+        .filter(uid => uid && !results.has(uid)))];
+      if (missingUids.length > 0) {
+        const { data: extraProfiles } = await c.from('profiles_public')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', missingUids);
+        for (const p of (extraProfiles || [])) {
+          results.set(p.user_id, {
+            user_id: p.user_id,
+            display_name: p.display_name,
+            avatar_url: p.avatar_url,
+            hints: [],
+          });
+        }
+      }
+
+      const ql = q.toLowerCase();
+      for (const s of (subRes.data || [])) {
+        if (!s.user_id) continue;
+        const r = results.get(s.user_id);
+        if (!r) continue;
+        if (s.submitter_name && s.submitter_name.toLowerCase().includes(ql)) {
+          const hint = `사진 등록명 "${s.submitter_name}"`;
+          if (!r.hints.includes(hint)) r.hints.push(hint);
+        }
+        if (s.instagram && s.instagram.toLowerCase().includes(ql)) {
+          const ig = s.instagram.startsWith('@') ? s.instagram : '@' + s.instagram;
+          const hint = `IG ${ig}`;
+          if (!r.hints.includes(hint)) r.hints.push(hint);
+        }
+      }
+
+      return [...results.values()].slice(0, 20);
     },
   };
 
