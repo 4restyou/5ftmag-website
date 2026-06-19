@@ -175,6 +175,108 @@
     }, 30000);
   }
 
+  // ── 새 메시지 모달 (편집부 발신) ──
+  let nmSearchTimer = null;
+  const NM_STATE = { selectedUserId: null, sending: false, results: [] };
+
+  function openNewMsg() {
+    NM_STATE.selectedUserId = null;
+    NM_STATE.results = [];
+    $('nmSearch').value = '';
+    $('nmBody').value = '';
+    $('nmCount').textContent = '0';
+    $('nmResults').innerHTML = '<div class="nm-empty">위 검색창에 회원 이름을 입력하세요.</div>';
+    $('nmSend').disabled = true;
+    $('newMsgOverlay').classList.add('is-open');
+    setTimeout(() => $('nmSearch').focus(), 50);
+  }
+  function closeNewMsg() {
+    $('newMsgOverlay').classList.remove('is-open');
+  }
+  function updateNmSendEnabled() {
+    $('nmSend').disabled = !NM_STATE.selectedUserId || !$('nmBody').value.trim() || NM_STATE.sending;
+  }
+  function renderNmResults() {
+    if (!NM_STATE.results.length) {
+      $('nmResults').innerHTML = '<div class="nm-empty">검색 결과 없음.</div>';
+      return;
+    }
+    $('nmResults').innerHTML = NM_STATE.results.map((p) => {
+      const sel = p.user_id === NM_STATE.selectedUserId ? ' is-selected' : '';
+      const avatar = p.avatar_url
+        ? `<div class="nm-result-avatar" style="background-image:url('${esc(p.avatar_url)}')"></div>`
+        : `<div class="nm-result-avatar"></div>`;
+      return `
+        <button type="button" class="nm-result-item${sel}" data-user-id="${esc(p.user_id)}">
+          ${avatar}
+          <span class="nm-result-name">${esc(p.display_name || '익명 회원')}</span>
+        </button>
+      `;
+    }).join('');
+    document.querySelectorAll('.nm-result-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        NM_STATE.selectedUserId = btn.dataset.userId;
+        renderNmResults();
+        updateNmSendEnabled();
+      });
+    });
+  }
+  async function nmSearch(q) {
+    NM_STATE.results = await db().profiles.search(q);
+    renderNmResults();
+  }
+  async function nmSend() {
+    if (NM_STATE.sending) return;
+    const userId = NM_STATE.selectedUserId;
+    const body = $('nmBody').value.trim();
+    if (!userId || !body) return;
+    NM_STATE.sending = true;
+    updateNmSendEnabled();
+    try {
+      const res = await db().messages.sendAsEditor(userId, body);
+      if (res.error) throw new Error(res.error.message || 'send failed');
+      closeNewMsg();
+      await loadThreads();
+      await openThread(userId);
+    } catch (err) {
+      console.error(err);
+      alert('전송 실패: ' + (err.message || '알 수 없는 오류'));
+    } finally {
+      NM_STATE.sending = false;
+      updateNmSendEnabled();
+    }
+  }
+
+  $('newMsgBtn').addEventListener('click', openNewMsg);
+  $('nmCancel').addEventListener('click', closeNewMsg);
+  $('nmSend').addEventListener('click', nmSend);
+  $('newMsgOverlay').addEventListener('click', (e) => {
+    if (e.target === $('newMsgOverlay')) closeNewMsg();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('newMsgOverlay').classList.contains('is-open')) closeNewMsg();
+  });
+  $('nmSearch').addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    if (nmSearchTimer) clearTimeout(nmSearchTimer);
+    if (!q) {
+      NM_STATE.results = [];
+      $('nmResults').innerHTML = '<div class="nm-empty">위 검색창에 회원 이름을 입력하세요.</div>';
+      return;
+    }
+    nmSearchTimer = setTimeout(() => nmSearch(q), 250);
+  });
+  $('nmBody').addEventListener('input', (e) => {
+    $('nmCount').textContent = String(e.target.value.length);
+    updateNmSendEnabled();
+  });
+  $('nmBody').addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      nmSend();
+    }
+  });
+
   (async function start() {
     if (!(await checkAccess())) return;
     $('app').hidden = false;

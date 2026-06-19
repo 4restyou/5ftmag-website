@@ -185,6 +185,19 @@
         .maybeSingle();
       return data || null;
     },
+    // 편집부가 메시지 보낼 회원을 찾을 때.
+    // display_name 부분 일치, 최대 20명.
+    async search(query) {
+      const c = client(); if (!c) return [];
+      const q = String(query || '').trim();
+      if (q.length < 1) return [];
+      const { data, error } = await c.from('profiles_public')
+        .select('user_id, display_name, avatar_url')
+        .ilike('display_name', `%${q}%`)
+        .limit(20);
+      if (error) { console.warn('[profiles.search]', error.message); return []; }
+      return data || [];
+    },
   };
 
   // ─── 댓글 (read via view, write via base table) ───
