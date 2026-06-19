@@ -63,7 +63,8 @@
 
   function renderThreads() {
     const list = STATE.threads;
-    $('threadsTotal').textContent = list.length ? `${list.length}명` : '';
+    const totalEl = $('threadsTotal');
+    if (totalEl) totalEl.textContent = list.length ? `${list.length}명` : '';
     if (!list.length) {
       $('threadsList').innerHTML = '<div class="msg-thread-empty">아직 도착한 메시지가 없습니다.</div>';
       return;
