@@ -206,10 +206,16 @@
       const avatar = p.avatar_url
         ? `<div class="nm-result-avatar" style="background-image:url('${esc(p.avatar_url)}')"></div>`
         : `<div class="nm-result-avatar"></div>`;
+      const hintsHtml = (p.hints && p.hints.length)
+        ? `<span class="nm-result-hints">${p.hints.map(h => esc(h)).join(' · ')}</span>`
+        : '';
       return `
         <button type="button" class="nm-result-item${sel}" data-user-id="${esc(p.user_id)}">
           ${avatar}
-          <span class="nm-result-name">${esc(p.display_name || '익명 회원')}</span>
+          <div class="nm-result-text">
+            <span class="nm-result-name">${esc(p.display_name || '익명 회원')}</span>
+            ${hintsHtml}
+          </div>
         </button>
       `;
     }).join('');

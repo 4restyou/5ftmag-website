@@ -169,7 +169,12 @@
       background: var(--border) center/cover no-repeat;
       flex-shrink: 0;
     }
+    .nm-result-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
     .nm-result-name { font-size: 14px; font-weight: var(--fw-heading); }
+    .nm-result-hints {
+      font-size: 11px; color: var(--text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     .nm-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px; }
     .nm-foot {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -297,8 +302,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="../js/db-client.js?v=20260619-msg2" defer></script>
-<script src="../js/admin-messages-page.js?v=20260619-newmsg" defer></script>
+<script src="../js/db-client.js?v=20260619-msg3" defer></script>
+<script src="../js/admin-messages-page.js?v=20260619-search" defer></script>
 
 </body>
 </html>
