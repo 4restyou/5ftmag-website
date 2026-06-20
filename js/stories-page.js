@@ -316,7 +316,7 @@
     .then(data => {
       // 발행된 글만, 최신순 정렬
       allStories = data
-        .filter(s => s.published !== false)
+        .filter(window.MagUtil.isPublishedContent)
         .sort(compareStories);
       populateMonths();
       applyFilters();

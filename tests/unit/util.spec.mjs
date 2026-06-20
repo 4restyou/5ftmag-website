@@ -90,9 +90,9 @@ describe('window.MagUtil.normalizeFilmLabel', () => {
 });
 
 describe('window.MagUtil shape', () => {
-  it('exposes escapeHtml, escapeAttr, normalizeFilmLabel', () => {
+  it('exposes the shared browser utilities', () => {
     expect(Object.keys(window.MagUtil).sort()).toEqual(
-      ['escapeAttr', 'escapeHtml', 'normalizeFilmLabel']
+      ['escapeAttr', 'escapeHtml', 'isPublishedContent', 'normalizeFilmLabel', 'seoulTodayIso']
     );
   });
 

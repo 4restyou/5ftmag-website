@@ -241,7 +241,7 @@
       const arr = await res.json();
       const counts = {};
       for (const story of arr) {
-        if (!story?.published) continue;
+        if (!window.MagUtil.isPublishedContent(story)) continue;
         const films = Array.isArray(story.films) ? story.films : [];
         for (const slug of films) {
           counts[slug] = (counts[slug] || 0) + 1;

@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm ci || npm install
+      - run: npm ci
       - name: 자산 참조 검증
         run: npm run validate
       - name: Vitest 단위 테스트

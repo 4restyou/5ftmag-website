@@ -665,7 +665,7 @@ async function loadFavArticles() {
   const byId = new Map((STATE.storiesData || []).map(s => [s.id, s]));
   STATE.favArticles = favs
     .map(f => ({ id: f.target_id, story: byId.get(f.target_id) }))
-    .filter(x => x.story && x.story.published !== false);
+    .filter(x => window.MagUtil.isPublishedContent(x.story));
   renderFavArticles();
 }
 

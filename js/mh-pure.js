@@ -6,12 +6,35 @@
 
 (function () {
   // 배열을 in-place Fisher-Yates 셔플
-  function shuffleInPlace(arr) {
+  function shuffleInPlace(arr, random = Math.random) {
     for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  }
+
+  // 추천 필름: 이미지가 있고 최근 본 목록과 겹치지 않는 필름 중,
+  // 실제 사진이 연결된 항목을 우선 무작위 선택한다.
+  function pickRecommendedFilms(films, recentSlugs, limit = 3, random = Math.random) {
+    const recent = new Set(Array.isArray(recentSlugs) ? recentSlugs : []);
+    const available = (Array.isArray(films) ? films : []).filter((film) => {
+      const slug = film?.slug || film?.id;
+      const hasThumb = film?.canThumbnail || film?.boxThumbnail || film?.photos?.some?.((photo) => photo?.src);
+      return slug && hasThumb && !recent.has(slug);
+    });
+    const preferred = shuffleInPlace(
+      available.filter((film) => film.photos?.some?.((photo) => photo?.src)).slice(), random,
+    );
+    const selected = preferred.slice(0, limit);
+    const selectedSlugs = new Set(selected.map((film) => film.slug || film.id));
+    if (selected.length < limit) {
+      const fallback = shuffleInPlace(
+        available.filter((film) => !selectedSlugs.has(film.slug || film.id)).slice(), random,
+      );
+      selected.push(...fallback.slice(0, limit - selected.length));
+    }
+    return selected;
   }
 
   // ISO 날짜 → 며칠 전 (실패 시 999)
@@ -107,7 +130,7 @@
   }
 
   const api = {
-    shuffleInPlace, daysAgo, filmAliasList, contributorKeyOf,
+    shuffleInPlace, pickRecommendedFilms, daysAgo, filmAliasList, contributorKeyOf,
     categoryMatchesType, categoriesMatchType, ALL_CATEGORIES,
     brandFilter, matchFilmByName, filmSlugByName,
     photoMatchesCategory, photoMatchesQuery,

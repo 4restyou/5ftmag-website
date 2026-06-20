@@ -7,6 +7,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isPublishedContent } from './story-visibility.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = resolve(dirname(__filename), '..');
@@ -200,7 +201,7 @@ function storyCard(story, prefix = '') {
 }
 
 const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'))
-  .filter((story) => story && story.published !== false && story.author)
+  .filter((story) => isPublishedContent(story) && story.author)
   .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
 
 const authors = new Map();

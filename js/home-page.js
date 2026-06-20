@@ -1,7 +1,7 @@
 
   // ════════════════════════════
   // XSS 가드: 동적 HTML 삽입 시 사용자/외부 입력은 반드시 escapeHtml/escapeAttr
-  // (Notion 데이터도 일관성 위해 동일 적용 — 편집자 계정 탈취 대비)
+  // 외부 데이터도 일관성 있게 검증한다 — 편집자 계정 탈취 대비.
   // ════════════════════════════
   const escapeHtml = window.MagUtil.escapeHtml;
   const escapeAttr = window.MagUtil.escapeAttr;
@@ -46,7 +46,7 @@
       .then(data => {
         // 발행된 글만, 최신순
         const all = data
-          .filter(s => s.published !== false)
+          .filter(window.MagUtil.isPublishedContent)
           .sort(compareStories);
         // 데스크톱은 최신 10장. 모바일은 발행이 느려도 풍성하게 보이도록 최신 3장 +
         // 그 이전 글 중 랜덤 5장을 섞어, 재방문 때마다 묻혀 있던 글이 다시 노출되게 한다.
@@ -153,7 +153,7 @@
       .then(data => {
         // 발행된 소식만, 최신순, 최대 4개
         const news = data
-          .filter(n => n.published !== false)
+          .filter(window.MagUtil.isPublishedContent)
           .sort(compareStories)
           .slice(0, 4);
 
@@ -202,6 +202,7 @@
           <h2 class="ni-title">${escapeStr(theme.title || '')}</h2>
           ${theme.subtitle ? `<p class="ni-sub">${escapeStr(theme.subtitle)}</p>` : ''}
           <p class="ni-desc">${escapeStr(theme.description || '')}</p>
+          ${theme.submissionNote ? `<p class="ni-desc">${escapeStr(theme.submissionNote)}</p>` : ''}
           ${theme.film ? `<p class="ni-film">메인 필름 · ${escapeStr(theme.film)}</p>` : ''}
           <button type="button" class="ni-cta" data-action="open-submission">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>

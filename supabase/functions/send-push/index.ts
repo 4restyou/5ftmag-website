@@ -29,14 +29,25 @@ function jsonResp(body: unknown, status = 200) {
   });
 }
 
+function internalLink(value: unknown) {
+  const raw = String(value || '/').trim();
+  if (!raw.startsWith('/') || raw.startsWith('//')) return '/';
+  try {
+    const parsed = new URL(raw, 'https://www.5ftmag.com');
+    if (parsed.origin !== 'https://www.5ftmag.com') return '/';
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`.slice(0, 300);
+  } catch {
+    return '/';
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return jsonResp({ error: 'method' }, 405);
 
-  // 공유 시크릿 체크 — 함수 URL 이 노출돼도 임의 호출 차단
-  if (DISPATCH_SECRET) {
-    const got = req.headers.get('x-dispatch-secret') || '';
-    if (got !== DISPATCH_SECRET) return jsonResp({ error: 'forbidden' }, 403);
-  }
+  // 공유 시크릿이 빠진 배포는 알림을 보내지 않는다. 공개 함수이므로 반드시 fail-closed.
+  if (!DISPATCH_SECRET) return jsonResp({ error: 'dispatch unavailable' }, 503);
+  const got = req.headers.get('x-dispatch-secret') || '';
+  if (got !== DISPATCH_SECRET) return jsonResp({ error: 'forbidden' }, 403);
 
   let payload: any;
   try { payload = await req.json(); }
@@ -45,7 +56,7 @@ Deno.serve(async (req) => {
   const userId = String(payload.user_id || '');
   const title = String(payload.title || '5ft magazine').slice(0, 120);
   const body = String(payload.body || '').slice(0, 500);
-  const link = String(payload.link || '/').slice(0, 300);
+  const link = internalLink(payload.link);
   if (!userId) return jsonResp({ error: 'user_id required' }, 400);
 
   const { data: subs, error } = await admin

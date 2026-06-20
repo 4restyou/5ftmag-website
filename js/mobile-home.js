@@ -2,12 +2,11 @@
 
 // 5ft.mag 모바일 전용 홈 — index.html 에서만 동작.
 // 모바일 (640px 이하) + PC 보기 토글 꺼진 경우 .is-mobile-home 클래스 부여 후 렌더.
-// 신규 글 띠 (최근 2주) + Films Library 브랜드별 가로 row (ABC 순, 임계 3+) + 그 외 브랜드 그리드.
+// 신규 글 + 사진이 있는 추천 필름 + 최근 본 필름 + 현재 호 참여 안내.
 
 (function () {
   const MOBILE_MAX = 640;
   const NEW_DAYS = 14;
-  const BIG_BRAND_MIN = 3;   // 3개 이상은 독립 row, 미만은 "그 외 브랜드"
 
   function isMobile() {
     if (window.MagPwa && window.MagPwa.isForceDesktop()) return false;
@@ -49,6 +48,7 @@
   const P = window.MHPure || {};
   const daysAgo = P.daysAgo;
   const shuffleInPlace = P.shuffleInPlace;
+  const pickRecommendedFilms = P.pickRecommendedFilms;
   const filmAliasListPure = P.filmAliasList;
   const contributorKeyOfPure = P.contributorKeyOf;
   const brandFilterPure = P.brandFilter;
@@ -58,7 +58,7 @@
 
   // ── 렌더: 신규 글 띠 ──
   function renderNewStories(stories) {
-    const fresh = stories.filter(s => s.published !== false && daysAgo(s.date) <= NEW_DAYS);
+    const fresh = stories.filter(s => window.MagUtil.isPublishedContent(s) && daysAgo(s.date) <= NEW_DAYS);
     if (!fresh.length) return '';
     const cards = fresh.slice(0, 12).map(s => `
       <a class="mh-new-card" href="/${esc(s.page)}">
@@ -101,25 +101,6 @@
   // featured (5ft Issue) 도 브랜드 row 에 함께 노출 — pure 모듈의 brandFilter 사용.
   const brandFilter = (query, category) => brandFilterPure(query, category);
 
-  // 브랜드 좋아요 (localStorage 기반)
-  const FAV_BRANDS_KEY = '5ft-fav-brands';
-  function getFavBrands() {
-    try { return new Set(JSON.parse(localStorage.getItem(FAV_BRANDS_KEY) || '[]')); }
-    catch { return new Set(); }
-  }
-  function toggleFavBrand(brand) {
-    const set = getFavBrands();
-    const wasFav = set.has(brand);
-    if (wasFav) set.delete(brand); else set.add(brand);
-    try { localStorage.setItem(FAV_BRANDS_KEY, JSON.stringify([...set])); } catch {}
-    // 로그인 사용자라면 DB 도 동기화. 실패 무시.
-    try {
-      if (wasFav) window.MagDB?.personalization?.removeFavBrand?.(brand);
-      else window.MagDB?.personalization?.addFavBrand?.(brand);
-    } catch (_) {}
-    return set;
-  }
-
   function renderLibrary(films, query, categories) {
     const filterFn = brandFilter(query, categories);
     const list = films.filter(filterFn);
@@ -149,58 +130,7 @@
     }
     root.classList.remove('is-searching');
 
-    // 브랜드별 그룹화
-    const byBrand = new Map();
-    for (const f of list) {
-      const b = (f.brand || '기타').toUpperCase();
-      if (!byBrand.has(b)) byBrand.set(b, []);
-      byBrand.get(b).push(f);
-    }
-    // 정렬: 좋아요한 브랜드 ABC 순 먼저, 그 다음 나머지 ABC 순
-    const favs = getFavBrands();
-    const sortedBrands = [...byBrand.entries()].sort((a, b) => {
-      const aFav = favs.has(a[0]) ? 0 : 1;
-      const bFav = favs.has(b[0]) ? 0 : 1;
-      if (aFav !== bFav) return aFav - bFav;
-      return a[0].localeCompare(b[0], 'en');
-    });
-
-    const bigRows = [];
-    const smallFilms = [];
-    for (const [brand, items] of sortedBrands) {
-      if (items.length >= BIG_BRAND_MIN) {
-        const cards = items
-          .sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || '', 'en', { sensitivity: 'base' }))
-          .map(filmCardHtml).join('');
-        const isFav = favs.has(brand);
-        bigRows.push(`
-          <section class="mh-brand${isFav ? ' is-fav' : ''}">
-            <div class="mh-brand-head">
-              <h3 class="mh-brand-name">${esc(brand)}</h3>
-              <span class="mh-brand-count">${items.length}</span>
-              <button type="button" class="mh-brand-fav${isFav ? ' is-on' : ''}" data-fav-brand="${escAttr(brand)}" aria-label="${esc(brand)} 좋아요" aria-pressed="${isFav}">
-                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="${isFav ? 'currentColor' : 'none'}"/>
-                </svg>
-              </button>
-            </div>
-            <div class="mh-brand-strip">${cards}</div>
-          </section>
-        `);
-      } else {
-        smallFilms.push(...items);
-      }
-    }
-    const smallSorted = smallFilms.sort((a, b) => (a.brand || '').localeCompare(b.brand || '', 'en'));
-    const othersHtml = smallSorted.length ? `
-      <section class="mh-others">
-        <h3 class="mh-others-head">그 외 브랜드</h3>
-        <p class="mh-others-sub">한두 가지 필름만 나온 브랜드들이에요.</p>
-        <div class="mh-others-grid">${smallSorted.map(filmCardHtml).join('')}</div>
-      </section>
-    ` : '';
-
-    return renderRecentRow() + bigRows.join('') + othersHtml;
+    return renderRecommendations() + renderRecentRow() + renderThemeBlock();
   }
 
   // escAttr 도우미
@@ -226,7 +156,10 @@
   function saveCategories(set) {
     try { localStorage.setItem(CATEGORIES_KEY, JSON.stringify([...set])); } catch {}
   }
-  const STATE = { films: [], stories: [], query: '', categories: getSavedCategories(), view: getSavedView() };
+  const STATE = {
+    films: [], stories: [], theme: null, recommendations: [],
+    query: '', categories: getSavedCategories(), view: getSavedView(),
+  };
 
   function render() {
     if (STATE.view === 'photos') {
@@ -334,24 +267,6 @@
       });
     });
     updateFilterBadge();
-    // 브랜드 좋아요 클릭 위임
-    root.querySelector('#mhBody').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-fav-brand]');
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      toggleFavBrand(btn.dataset.favBrand);
-      // 햅틱 + 짧은 bounce
-      try { navigator.vibrate?.(10); } catch {}
-      btn.classList.add('is-pulsing');
-      setTimeout(() => btn.classList.remove('is-pulsing'), 300);
-      render();
-      // 좋아요 토글 후 좋아요한 row 위로 스크롤
-      requestAnimationFrame(() => {
-        const target = root.querySelector(`[data-fav-brand="${CSS.escape(btn.dataset.favBrand)}"]`);
-        if (target) target.closest('section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
-    });
     // 빈 상태의 "전체 보기로 돌아가기"
     root.querySelector('#mhBody').addEventListener('click', (e) => {
       if (e.target.id !== 'mhResetSearch') return;
@@ -398,22 +313,65 @@
     try { localStorage.setItem(RECENT_KEY, JSON.stringify(cur.slice(0, RECENT_MAX))); } catch {}
     // 로그인 사용자라면 DB 도 동기화 (디바이스 간 공유). 실패 무시.
     try { window.MagDB?.personalization?.pushRecentFilm?.(slug); } catch (_) {}
+    chooseRecommendations();
+    render();
   }
   function recentFilms() {
     const slugs = getRecent();
     const map = new Map(STATE.films.map(f => [f.slug || f.id, f]));
     return slugs.map(s => map.get(s)).filter(Boolean);
   }
+
+  function chooseRecommendations() {
+    STATE.recommendations = pickRecommendedFilms(STATE.films, getRecent(), 3);
+  }
+
+  function compactFilmGrid(films) {
+    return `<div class="mh-compact-grid">${films.map(filmCardHtml).join('')}</div>`;
+  }
+
+  function renderRecommendations() {
+    if (!STATE.recommendations.length) return '';
+    return `
+      <section class="mh-compact-section mh-recommended">
+        <div class="mh-compact-head">
+          <h2>추천 필름</h2>
+          <span>사진이 있는 필름 중 랜덤</span>
+        </div>
+        ${compactFilmGrid(STATE.recommendations)}
+        <a class="mh-all-films" href="/films.html">${STATE.films.length}종 필름 전체 보기</a>
+      </section>`;
+  }
+
   function renderRecentRow() {
-    const list = recentFilms();
+    const list = recentFilms().slice(0, 3);
     if (!list.length) return '';
     return `
-      <section class="mh-brand mh-recent">
-        <div class="mh-brand-head">
-          <h3 class="mh-brand-name">최근 본 필름</h3>
-          <span class="mh-brand-count">${list.length}</span>
+      <section class="mh-compact-section mh-recent">
+        <div class="mh-compact-head">
+          <h2>최근 본 필름</h2>
+          <span>${recentFilms().length}개 기록</span>
         </div>
-        <div class="mh-brand-strip">${list.map(filmCardHtml).join('')}</div>
+        ${compactFilmGrid(list)}
+      </section>`;
+  }
+
+  function renderThemeBlock() {
+    const theme = STATE.theme;
+    if (!theme?.active) return '';
+    const issue = theme.issue || theme.month || '다음 호';
+    return `
+      <section class="mh-theme">
+        <span class="mh-theme-tag">5FT MAGAZINE · ${esc(issue)}</span>
+        <h2>${esc(theme.title || '')}</h2>
+        ${theme.subtitle ? `<p class="mh-theme-sub">${esc(theme.subtitle)}</p>` : ''}
+        ${theme.description ? `<p class="mh-theme-desc">${esc(theme.description)}</p>` : ''}
+        ${theme.film ? `<span class="mh-theme-film">메인 필름 · ${esc(theme.film)}</span>` : ''}
+        ${theme.submissionNote ? `<p class="mh-theme-reward">${esc(theme.submissionNote)}</p>` : ''}
+        <div class="mh-theme-actions">
+          <button type="button" class="rs-trigger" data-action="open-submission">${esc(issue)} 응모하기</button>
+          <a href="/books.html">지난 호 보기·구매</a>
+        </div>
       </section>`;
   }
 
@@ -885,22 +843,14 @@
     try {
       const sess = await window.MagDB.auth.getSession();
       if (!sess) return;
-      const [dbRecents, dbBrands] = await Promise.all([
-        window.MagDB.personalization.listRecentFilms(RECENT_MAX),
-        window.MagDB.personalization.listFavBrands(),
-      ]);
+      const dbRecents = await window.MagDB.personalization.listRecentFilms(RECENT_MAX);
       // 최근 본 — DB 가 우선 (디바이스 간 가장 최신 활동을 보여주는 게 자연), localStorage 추가
       if (Array.isArray(dbRecents) && dbRecents.length) {
         const dbSlugs = dbRecents.map(r => r.slug);
         const merged = [...new Set([...dbSlugs, ...getRecent()])].slice(0, RECENT_MAX);
         try { localStorage.setItem(RECENT_KEY, JSON.stringify(merged)); } catch {}
       }
-      // 좋아요한 브랜드 — DB 와 localStorage 합집합 (양쪽 다 보존)
-      if (Array.isArray(dbBrands) && dbBrands.length) {
-        const localSet = getFavBrands();
-        const merged = new Set([...dbBrands, ...localSet]);
-        try { localStorage.setItem(FAV_BRANDS_KEY, JSON.stringify([...merged])); } catch {}
-      }
+      chooseRecommendations();
       render(); // merge 반영
     } catch (_) {}
   }
@@ -921,13 +871,16 @@
   (async function start() {
     bindControls();
     bindStickyShrink();
-    const [stories, films] = await Promise.all([
+    const [stories, films, theme] = await Promise.all([
       fetchJson('/data/stories.json'),
       loadFilmsCatalog(),
+      fetchJson('/data/current-theme.json'),
     ]);
     STATE.stories = Array.isArray(stories) ? stories : [];
     const filmsObj = films && typeof films === 'object' ? films : {};
     STATE.films = Array.isArray(filmsObj) ? filmsObj : Object.entries(filmsObj).map(([slug, f]) => ({ slug, ...f }));
+    STATE.theme = theme;
+    chooseRecommendations();
     render();
     // 로그인 사용자라면 DB 개인화를 백그라운드로 hydrate
     setTimeout(hydrateFromDb, 200);

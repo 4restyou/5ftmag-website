@@ -2,8 +2,8 @@
   {
     "name": "5ft.mag 편집부",
     "slug": "5ftmag",
-    "note": "필름 매거진 5ft.mag의 기획과 편집을 맡습니다.",
-    "count": 10,
+    "note": "필름 매거진 5ft magazine의 기획과 편집을 맡습니다.",
+    "count": 16,
     "page": "authors/5ftmag.html",
     "externalLinks": [
       {
@@ -52,6 +52,34 @@
     ]
   },
   {
+    "name": "Street Photography Club",
+    "slug": "street-photography-club",
+    "note": "스트리트 포토를 좋아하는 사람들의 모임. 자체 사진첩 시리즈를 발행하고 5ft magazine 매거진을 유통합니다.",
+    "count": 3,
+    "page": "authors/street-photography-club.html",
+    "externalLinks": [
+      {
+        "type": "shop",
+        "url": "https://smartstore.naver.com/film_socialclub",
+        "label": "Shop"
+      }
+    ]
+  },
+  {
+    "name": "Brisnap TV",
+    "slug": "brisnap-tv",
+    "note": "필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널입니다.",
+    "count": 2,
+    "page": "authors/brisnap-tv.html",
+    "externalLinks": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/@BRISNAPTV",
+        "label": "@BRISNAPTV"
+      }
+    ]
+  },
+  {
     "name": "강혜원 (앨리카메라 대표)",
     "slug": "kang-hyewon",
     "note": "앨리카메라를 운영하며 빈티지 카메라와 렌즈를 소개합니다.",
@@ -90,20 +118,6 @@
     "externalLinks": []
   },
   {
-    "name": "Brisnap TV",
-    "slug": "brisnap-tv",
-    "note": "필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널입니다.",
-    "count": 1,
-    "page": "authors/brisnap-tv.html",
-    "externalLinks": [
-      {
-        "type": "youtube",
-        "url": "https://www.youtube.com/@BRISNAPTV",
-        "label": "@BRISNAPTV"
-      }
-    ]
-  },
-  {
     "name": "Shin Noguchi",
     "slug": "shin-noguchi",
     "note": "일상의 낯선 순간을 거리에서 포착하는 일본의 스트리트 포토그래퍼입니다.",
@@ -119,20 +133,6 @@
         "type": "instagram",
         "url": "https://instagram.com/shinnoguchiphotos",
         "label": "@shinnoguchiphotos"
-      }
-    ]
-  },
-  {
-    "name": "Street Photography Club",
-    "slug": "street-photography-club",
-    "note": "스트리트 포토를 좋아하는 사람들의 모임. 자체 사진첩 시리즈를 발행하고 5ft.mag 매거진을 유통합니다.",
-    "count": 1,
-    "page": "authors/street-photography-club.html",
-    "externalLinks": [
-      {
-        "type": "shop",
-        "url": "https://smartstore.naver.com/film_socialclub",
-        "label": "Shop"
       }
     ]
   }

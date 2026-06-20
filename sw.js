@@ -93,19 +93,30 @@ self.addEventListener('push', (event) => {
     data = { title: '5ft magazine', body: event.data ? event.data.text() : '' };
   }
   const title = data.title || '5ft magazine';
+  const link = normalizeNotificationLink(data.link);
   const options = {
     body: data.body || '',
     icon: '/img/favicon/icon-180.png',
     badge: '/img/favicon/icon-32.png',
-    tag: data.tag || undefined,
-    data: { link: data.link || '/' },
+    tag: link,
+    data: { link },
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+function normalizeNotificationLink(value) {
+  try {
+    const url = new URL(String(value || '/'), self.location.origin);
+    if (url.origin !== self.location.origin) return '/';
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch (_) {
+    return '/';
+  }
+}
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const link = event.notification.data?.link || '/';
+  const link = normalizeNotificationLink(event.notification.data?.link);
   event.waitUntil((async () => {
     const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     // 이미 열린 같은 origin 탭이 있으면 focus + 해당 페이지로 이동
