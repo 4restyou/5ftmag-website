@@ -11,7 +11,7 @@
 //   4. 이미지 업로드 → image-processor 로 1600px webp 변환 → Supabase Storage
 //   5. PR 만들기 → buildArticleHtml() 로 정적 HTML 생성 → GitHub API 로 push
 //
-// GitHub PAT 는 localStorage('5ft-gh-pat') 에 저장. repo scope 필요.
+// GitHub PAT 는 sessionStorage('5ft-gh-pat') 에 저장. 탭을 닫으면 삭제됨.
 
 (function () {
   const REPO = '4restyou/5ftmag-website';
@@ -592,8 +592,10 @@ ${bodyHtml}
   }
 
   // ── GitHub PAT ──
-  function getPat() { return localStorage.getItem(PAT_KEY) || ''; }
-  function setPat(v) { if (v) localStorage.setItem(PAT_KEY, v); else localStorage.removeItem(PAT_KEY); }
+  // 과거 영구 저장 토큰은 즉시 제거하고 현재 탭 세션에서만 유지한다.
+  try { localStorage.removeItem(PAT_KEY); } catch {}
+  function getPat() { return sessionStorage.getItem(PAT_KEY) || ''; }
+  function setPat(v) { if (v) sessionStorage.setItem(PAT_KEY, v); else sessionStorage.removeItem(PAT_KEY); }
 
   function openPatModal() {
     $('pat-input').value = getPat();

@@ -32,6 +32,28 @@ describe('MHPure.shuffleInPlace', () => {
   });
 });
 
+describe('MHPure.pickRecommendedFilms', () => {
+  const films = [
+    { slug: 'photo-a', canThumbnail: 'a.webp', photos: [{ src: 'a.jpg' }] },
+    { slug: 'photo-b', canThumbnail: 'b.webp', photos: [{ src: 'b.jpg' }] },
+    { slug: 'photo-c', canThumbnail: 'c.webp', photos: [{ src: 'c.jpg' }] },
+    { slug: 'plain', canThumbnail: 'plain.webp', photos: [] },
+    { slug: 'no-image', photos: [] },
+  ];
+
+  it('사진 연결 필름을 우선하고 최근 본 필름을 제외한다', () => {
+    const picked = MH.pickRecommendedFilms(films, ['photo-a'], 3, () => 0.5);
+    expect(picked.map((film) => film.slug)).toEqual(expect.arrayContaining(['photo-b', 'photo-c']));
+    expect(picked.map((film) => film.slug)).not.toContain('photo-a');
+    expect(picked.map((film) => film.slug)).not.toContain('no-image');
+  });
+
+  it('사진 연결 후보가 부족하면 이미지가 있는 일반 필름으로 채운다', () => {
+    const picked = MH.pickRecommendedFilms(films, ['photo-a', 'photo-b'], 2, () => 0.5);
+    expect(picked.map((film) => film.slug)).toEqual(expect.arrayContaining(['photo-c', 'plain']));
+  });
+});
+
 describe('MHPure.daysAgo', () => {
   it('returns 0 for now', () => {
     const now = new Date('2026-06-14T12:00:00Z').getTime();

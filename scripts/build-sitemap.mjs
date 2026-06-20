@@ -6,6 +6,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isPublishedContent } from './story-visibility.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = resolve(dirname(__filename), '..');
@@ -45,7 +46,7 @@ addUrl(urls, '/legal/copyright.html', { changefreq: 'yearly', priority: '0.3' })
 
 const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
 for (const story of stories) {
-  if (!story || story.published === false || !story.page) continue;
+  if (!isPublishedContent(story) || !story.page) continue;
   addUrl(urls, `/${story.page}`, {
     lastmod: story.date || undefined,
     changefreq: 'yearly',

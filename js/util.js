@@ -28,9 +28,28 @@
     return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
   }
 
+  function seoulTodayIso(date) {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(date || new Date());
+    const byType = Object.fromEntries(parts.map(function (part) { return [part.type, part.value]; }));
+    return `${byType.year}-${byType.month}-${byType.day}`;
+  }
+
+  // published=true 여도 한국 시간 기준 게시일 전에는 공개 화면에 노출하지 않는다.
+  function isPublishedContent(item, todayIso) {
+    if (!item || item.published === false) return false;
+    const date = String(item.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return true;
+    const today = typeof todayIso === 'string' ? todayIso : seoulTodayIso();
+    return date <= today;
+  }
+
   window.MagUtil = Object.freeze({
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     normalizeFilmLabel: normalizeFilmLabel,
+    seoulTodayIso: seoulTodayIso,
+    isPublishedContent: isPublishedContent,
   });
 })();

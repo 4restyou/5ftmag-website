@@ -1,7 +1,7 @@
 // admin/articles.html 백엔드
 // data/stories.json 의 published 플래그를 GitHub API 로 토글한다.
 // 동선: 토글 클릭 → main 브랜치의 stories.json 가져옴 → 해당 entry published 뒤집고 → main 에 commit (직접).
-// 토큰: 기존 article-editor 와 같은 localStorage 키 ('5ft-gh-pat') 공유.
+// 토큰: 기존 article-editor 와 같은 sessionStorage 키 ('5ft-gh-pat') 공유.
 
 (function () {
   'use strict';
@@ -54,8 +54,10 @@
   }
 
   // ── GitHub PAT ──
-  const getPat = () => localStorage.getItem(PAT_KEY) || '';
-  const setPat = (v) => v ? localStorage.setItem(PAT_KEY, v) : localStorage.removeItem(PAT_KEY);
+  // 과거 영구 저장 토큰은 즉시 제거하고 현재 탭 세션에서만 유지한다.
+  try { localStorage.removeItem(PAT_KEY); } catch {}
+  const getPat = () => sessionStorage.getItem(PAT_KEY) || '';
+  const setPat = (v) => v ? sessionStorage.setItem(PAT_KEY, v) : sessionStorage.removeItem(PAT_KEY);
 
   function openPatModal() {
     $('patInput').value = getPat();

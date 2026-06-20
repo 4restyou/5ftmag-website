@@ -168,7 +168,7 @@
 
     // 도메인별 점수 매기기. weight 는 사용자 검색 의도에 맞춰 제목 > 부제목 > 본문 순.
     const stories = (storiesArr || [])
-      .filter((a) => a && a.published !== false)
+      .filter(window.MagUtil.isPublishedContent)
       .map((a) => ({
         item: a,
         score: scoreMatch(tokens, [

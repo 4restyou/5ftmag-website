@@ -4,6 +4,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isPublishedContent } from './story-visibility.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -48,7 +49,7 @@ async function main() {
 
   // 게시된 글만, 날짜 내림차순
   const items = stories
-    .filter(s => s.published !== false)
+    .filter(isPublishedContent)
     .sort(compareStories);
 
   const buildDate = new Date().toUTCString();

@@ -203,12 +203,18 @@
     const CURRENT_CATEGORY = '{{CATEGORY}}';
     const CURRENT_AUTHOR = '{{AUTHOR}}';
     const MAX_RELATED = 3;
+    const isPublishedContent = (story) => {
+      if (!story || story.published === false) return false;
+      const date = String(story.date || '');
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return true;
+      return date <= new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+    };
 
     fetch('../data/stories.json')
       .then(res => res.json())
       .then(stories => {
         const candidates = stories
-          .filter(s => s.published !== false && s.id !== CURRENT_ID);
+          .filter(s => isPublishedContent(s) && s.id !== CURRENT_ID);
 
         const scored = candidates.map(s => {
           let score = 0;
@@ -261,7 +267,7 @@
   })();
 </script>
 
-<script src="../js/util.js?v=20260602-normalize" defer></script>
+<script src="../js/util.js?v=20260620-schedule" defer></script>
   <script src="../js/site-common.js?v=20260620-editdel" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260620-anncfix" defer></script>

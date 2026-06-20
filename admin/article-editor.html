@@ -266,7 +266,7 @@
 <div id="pat-modal" class="ae-modal" role="dialog" aria-labelledby="pat-modal-title">
   <div class="ae-modal-card">
     <h3 id="pat-modal-title">GitHub Personal Access Token</h3>
-    <p>이 기기에만 저장됩니다 (localStorage). repo 권한이 필요해요. <a href="https://github.com/settings/tokens/new?scopes=repo&description=5ft.mag%20admin" target="_blank" rel="noopener">토큰 발급 ↗</a></p>
+    <p>토큰은 현재 탭에서만 유지되며, 탭을 닫으면 삭제됩니다. repo 권한이 필요해요. <a href="https://github.com/settings/tokens/new?scopes=repo&description=5ft.mag%20admin" target="_blank" rel="noopener">토큰 발급 ↗</a></p>
     <input id="pat-input" type="password" placeholder="ghp_..." autocomplete="off" />
     <div class="ae-modal-actions">
       <button type="button" id="pat-cancel">취소</button>
@@ -277,10 +277,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260620-anncfix" defer></script>
-<script src="../js/util.js?v=20260602-normalize" defer></script>
+<script src="../js/util.js?v=20260620-schedule" defer></script>
 <script src="../js/image-processor.js?v=20260520-mobileupload" defer></script>
 <script src="../js/site-common.js?v=20260620-editdel" defer></script>
-<script src="../js/admin-article-editor-page.js?v=20260613-editor" defer></script>
+<script src="../js/admin-article-editor-page.js?v=20260620-sessionpat" defer></script>
 
 </body>
 </html>

@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isPublishedContent } from './story-visibility.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = resolve(dirname(__filename), '..');
@@ -95,7 +96,7 @@ for (const story of stories) {
     seenIds.add(story.id);
   }
   check(story.page && existsSync(join(ROOT, story.page)), `Published story page missing: ${story.id || story.title} -> ${story.page}`);
-  if (story.page) {
+  if (story.page && isPublishedContent(story)) {
     const storyUrl = `https://www.5ftmag.com/${story.page}`;
     check(rssXml.includes(storyUrl), `Published story missing from rss.xml: ${story.id || story.title} -> ${story.page}`);
     check(sitemapXml.includes(storyUrl), `Published story missing from sitemap.xml: ${story.id || story.title} -> ${story.page}`);
