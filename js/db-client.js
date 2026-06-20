@@ -1533,12 +1533,19 @@
 
   const announcements = {
     // 현재 활성(시간 범위 내) 공지 1개 — 가장 최근 created_at.
-    // RLS 가 already 활성·시간 범위만 노출하므로 한 번 더 limit 1.
+    // RLS 가 비편집부 사용자에겐 시간 범위만 노출하지만, 편집부 사용자에겐
+    // 편집부 정책이 OR 로 묶여 모든 행이 보인다 — 그래서 편집부가 사이트
+    // 헤더에서 만료된 배너를 계속 보게 된다. 클라이언트에서도 한 번 더
+    // 명시적으로 starts_at / ends_at / is_active 를 거른다.
     async current() {
       const c = client(); if (!c) return { data: null, error: null };
+      const nowIso = new Date().toISOString();
       const { data, error } = await c
         .from('announcements')
         .select('id, body, starts_at, ends_at')
+        .eq('is_active', true)
+        .lte('starts_at', nowIso)
+        .or(`ends_at.is.null,ends_at.gte.${nowIso}`)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
