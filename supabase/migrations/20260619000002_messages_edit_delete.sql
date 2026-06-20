@@ -3,8 +3,8 @@
 -- 삭제: 편집부만 (모더레이션). soft delete (deleted_at 표시).
 
 alter table public.messages
-  add column edited_at timestamptz,
-  add column deleted_at timestamptz;
+  add column if not exists edited_at timestamptz,
+  add column if not exists deleted_at timestamptz;
 
 -- 본인 메시지 수정 RPC
 create or replace function public.edit_message(p_id uuid, p_body text)

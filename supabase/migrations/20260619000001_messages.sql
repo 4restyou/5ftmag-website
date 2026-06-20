@@ -2,7 +2,7 @@
 -- 논리 모델: 회원 1명 ↔ 편집부 (집단) = 1 스레드.
 -- 편집부 어느 누구든 같은 user_id 의 스레드에 글을 쓸 수 있고, 회원은 자기 스레드만 본다.
 
-create table public.messages (
+create table if not exists public.messages (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   from_editor boolean not null,
@@ -11,30 +11,43 @@ create table public.messages (
   read_at timestamptz
 );
 
-create index messages_user_created_idx on public.messages (user_id, created_at desc);
-create index messages_unread_user_idx on public.messages (user_id) where read_at is null and from_editor = true;
-create index messages_unread_admin_idx on public.messages (user_id) where read_at is null and from_editor = false;
+-- 운영 DB에 테이블이 먼저 생성된 경우에도 마이그레이션 이력을 안전하게 복구한다.
+-- 기존 데이터와 컬럼은 유지하고, 빠진 기본 컬럼만 보충한다.
+alter table public.messages add column if not exists id uuid default gen_random_uuid();
+alter table public.messages add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table public.messages add column if not exists from_editor boolean;
+alter table public.messages add column if not exists body text;
+alter table public.messages add column if not exists created_at timestamptz default now();
+alter table public.messages add column if not exists read_at timestamptz;
+
+create index if not exists messages_user_created_idx on public.messages (user_id, created_at desc);
+create index if not exists messages_unread_user_idx on public.messages (user_id) where read_at is null and from_editor = true;
+create index if not exists messages_unread_admin_idx on public.messages (user_id) where read_at is null and from_editor = false;
 
 alter table public.messages enable row level security;
 
 -- 회원: 자기 user_id row 만 select
+drop policy if exists "messages_select_self" on public.messages;
 create policy "messages_select_self" on public.messages
   for select using (auth.uid() = user_id);
 
 -- 편집부: 모든 row select.
 -- profiles 의 PK 가 user_id 이므로 (id 아님) where user_id = auth.uid() 패턴 사용.
+drop policy if exists "messages_select_editor" on public.messages;
 create policy "messages_select_editor" on public.messages
   for select using (
     exists (select 1 from public.profiles where user_id = auth.uid() and is_editor = true)
   );
 
 -- 회원: 자기 메시지만 insert (from_editor=false 강제)
+drop policy if exists "messages_insert_self" on public.messages;
 create policy "messages_insert_self" on public.messages
   for insert with check (
     auth.uid() = user_id and from_editor = false
   );
 
 -- 편집부: 누구든 user 에게 insert (from_editor=true 강제)
+drop policy if exists "messages_insert_editor" on public.messages;
 create policy "messages_insert_editor" on public.messages
   for insert with check (
     from_editor = true
