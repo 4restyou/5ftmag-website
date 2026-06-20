@@ -20,6 +20,19 @@ PR 생성 후 CI(`validate`) 통과하면 **사용자가 "배포하지 마" / "P
 - 머지 방식: **squash** (커밋 메시지 = PR 제목 + ` (#NN)`)
 - main 에 직접 커밋 금지. 모든 작업은 새 브랜치 `claude/<feature-or-fix-slug>` 에서 진행 → PR → squash 머지
 
+## 인프라 / DB 환경 (주의)
+
+DB 관련 작업 전에 반드시 인지. 자세한 진단·할 일은 `docs/maintenance.md`.
+
+- **Supabase 워크스페이스가 둘이고 스키마가 다르다.**
+  - workroom: `profiles_public` 뷰 + `profiles.is_editor` 존재.
+  - production: `profiles` 에 `id`(PK)/`role`('admin'|'user'), `is_editor`·`profiles_public` **없을 수 있음**.
+  - SQL 을 실행할 땐 **어느 워크스페이스인지 먼저 확인**. prod 에서 테스트.
+- **편집부 권한 체크는 스키마 확정 전까지 단정하지 말 것.** `is_editor` 와 `role='admin'` 두 패턴이 혼재.
+- **`db-deploy.yml` 은 `SUPABASE_ACCESS_TOKEN` 시크릿에 의존.** 만료되면 마이그레이션 자동 적용이 조용히 실패한다 (`Unauthorized`). 마이그레이션 머지 후엔 db-deploy 워크플로우 성공 여부를 확인하고, 실패면 Studio SQL Editor 에 직접 적용 + 시크릿 갱신 안내.
+- **마이그레이션 폴더가 prod 스키마의 완전한 원본이 아니다.** `comments`/`likes`/`market_listings`/`profiles_public` 등은 prod 에 있으나 `supabase/migrations/**` 에 정의가 없다. 레포만으로 DB 재현 불가. `node scripts/db-audit.mjs` 로 현황 확인.
+- 마이그레이션은 **재실행 안전(replay-safe)** 하게 작성 (`if not exists`, `create or replace`, `drop policy if exists`).
+
 ## 글쓰기 규칙
 
 - 제목 / 본문에 em-dash (`—`) 사용 금지. 마침표·쉼표·괄호로 풀어쓴다.
