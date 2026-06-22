@@ -41,7 +41,7 @@
   }
 
   if (storyList) {
-    fetch('data/stories.json')
+    fetch('data/stories.json', { cache: 'no-cache' })
       .then(res => res.json())
       .then(data => {
         // 발행된 글만, 최신순
@@ -148,7 +148,7 @@
   const newsList = document.getElementById('newsList');
 
   if (newsList) {
-    fetch('data/news.json')
+    fetch('data/news.json', { cache: 'no-cache' })
       .then(res => res.json())
       .then(data => {
         // 발행된 소식만, 최신순, 최대 4개
