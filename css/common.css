@@ -1327,7 +1327,7 @@ kbd, .kbd {
   vertical-align: middle;
 }
 
-/* 헤더 돋보기 아이콘 옆에 inject 되는 단축키 힌트 — 데스크탑에서만 노출. */
+/* 헤더 돋보기 아이콘 옆에 inject 되는 단축키 힌트 — hover / focus 시에만 노출 (데스크탑). */
 .icon-btn .kbd-hint {
   position: absolute;
   right: -2px;
@@ -1346,10 +1346,11 @@ kbd, .kbd {
   display: inline-flex;
   align-items: center;
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 0;
   transition: opacity .15s;
 }
-.icon-btn:hover .kbd-hint { opacity: 1; }
+.icon-btn:hover .kbd-hint,
+.icon-btn:focus-visible .kbd-hint { opacity: 1; }
 .icon-btn { position: relative; }
 @media (max-width: 720px) {
   .icon-btn .kbd-hint { display: none; }
