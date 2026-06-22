@@ -1355,3 +1355,54 @@ kbd, .kbd {
 @media (max-width: 720px) {
   .icon-btn .kbd-hint { display: none; }
 }
+
+/* ──────────── Origin Button (포인터 원점 fill) — vanilla port ──────────── */
+/* shadcn `edwinvakayil/origin-button` 패턴: 호버한 지점에서 원 (cover diameter)
+   이 scale 0 → 1 로 확장. 5ft 에선 React/motion 없이 CSS 변수 + pseudo + 작은
+   JS helper (site-common.js 의 bindShineButtons) 로 재현.
+
+   사용: <button class="btn-shine">…</button>
+   기본 fill 은 --accent (노란). 노란 버튼에 적용하면 --btn-shine-fill 을 다른
+   색으로 오버라이드. text 도 --btn-shine-text 로 같이 바꿀 수 있다. */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* 컨텐츠가 fill 위로 올라가도록 stacking 컨텍스트 + z-index 보장. */
+}
+.btn-shine > * { position: relative; z-index: 1; }
+.btn-shine::before {
+  content: '';
+  position: absolute;
+  left: var(--ox, 50%);
+  top: var(--oy, 50%);
+  width: var(--shine-size, 220%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--btn-shine-fill, var(--accent, #FFE600));
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+.btn-shine:hover::before,
+.btn-shine:focus-visible::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+.btn-shine:hover,
+.btn-shine:focus-visible {
+  color: var(--btn-shine-text, var(--accent-text, #111));
+}
+.btn-shine:active { transform: scale(0.985); }
+/* 모션 비활성 사용자 배려 — 즉시 표시, 애니메이션 X */
+@media (prefers-reduced-motion: reduce) {
+  .btn-shine, .btn-shine::before { transition: none; }
+}
+
+/* 이미 노란색 (--accent) 인 버튼은 hover 시 검정으로 채움 */
+.btn-shine.btn-shine-dark {
+  --btn-shine-fill: var(--text, #111);
+  --btn-shine-text: var(--bg, #fff);
+}

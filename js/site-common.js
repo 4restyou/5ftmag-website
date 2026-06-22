@@ -526,6 +526,34 @@
     });
   }
 
+  // ════════════════════════════════════════════════
+  // Origin Button (radial reveal) — 포인터 좌표 트래커
+  //   .btn-shine 위에서 포인터가 들어오거나 누를 때 그 지점을 CSS 변수
+  //   --ox / --oy 로 세팅 → CSS ::before 가 거기서 scale 0 → 1 로 확장.
+  //   capture phase 라 동적으로 추가된 버튼도 같이 잡힌다 (한 번만 바인딩).
+  // ════════════════════════════════════════════════
+  function bindShineButtons() {
+    if (document.documentElement.dataset.shineBound === '1') return;
+    document.documentElement.dataset.shineBound = '1';
+    function update(e) {
+      const btn = e.target && e.target.closest && e.target.closest('.btn-shine');
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      btn.style.setProperty('--ox', (e.clientX - r.left) + 'px');
+      btn.style.setProperty('--oy', (e.clientY - r.top) + 'px');
+    }
+    document.addEventListener('pointerenter', update, true);
+    document.addEventListener('pointermove', update, true);
+    document.addEventListener('pointerdown', update, true);
+    // 키보드 focus 진입 시는 가운데에서 시작
+    document.addEventListener('focusin', (e) => {
+      const btn = e.target && e.target.closest && e.target.closest('.btn-shine');
+      if (!btn) return;
+      btn.style.setProperty('--ox', '50%');
+      btn.style.setProperty('--oy', '50%');
+    }, true);
+  }
+
   function init() {
     // 테마: head에서 이미 적용됐지만, 안전하게 재확인
     if (!document.documentElement.dataset.theme) {
@@ -541,6 +569,9 @@
 
     // 전체 검색 단축키 (⌘K / Ctrl+K) — cmdk 결을 살짝.
     setupGlobalSearchShortcut();
+
+    // .btn-shine 의 포인터 원점 좌표 트래커 — Origin Button radial reveal.
+    bindShineButtons();
 
     // 공지 배너 + 인앱 브라우저 안내 (admin 페이지 제외)
     if (!/\/admin\//.test(location.pathname)) {
