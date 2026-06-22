@@ -1652,6 +1652,8 @@
     libraryView = next;
     if (libraryFilmsView)  libraryFilmsView.hidden  = (next !== 'films');
     if (libraryPhotosView) libraryPhotosView.hidden = (next !== 'photos');
+    const section = document.querySelector('.films-section[data-library-view]');
+    if (section) section.setAttribute('data-library-view', next);
     updateLibraryViewToggleUI();
     updateLibraryViewUrl();
     if (next === 'photos') {
