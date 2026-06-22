@@ -394,7 +394,7 @@ body {
   color: var(--text); background: transparent;
   border: 1px solid var(--border); border-radius: var(--btn-radius);
   cursor: pointer; font-family: var(--font);
-  transition: all .15s;
+  transition: border-color .15s, color .15s, background .15s;
 }
 .share-bar a:hover, .share-bar button:hover {
   border-color: var(--text);
