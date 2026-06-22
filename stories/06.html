@@ -73,13 +73,15 @@
     </script>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
 </head>
 <body>
 
 <!-- ════════ HEADER ════════ -->
 <header>
   <div class="header-inner">
-    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <a href="../index.html" class="site-logo"><img decoding="async" src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     <ul class="main-nav">
       <li><a href="../stories.html" class="current">Articles</a></li>
       <li><a href="../films.html">Films</a></li>
@@ -128,7 +130,7 @@
   <figure class="article-hero">
     <picture>
       <source srcset="../img/stories/06/goods-name-card.webp" type="image/webp">
-      <img src="../img/stories/06/goods-name-card.jpg" alt="5ft magazine 창간호 구매 굿즈인 노출표 카드" loading="eager" />
+      <img decoding="async" fetchpriority="high" src="../img/stories/06/goods-name-card.jpg" alt="5ft magazine 창간호 구매 굿즈인 노출표 카드" loading="eager" />
     </picture>
   </figure>
 
@@ -147,7 +149,7 @@
     <figure>
       <picture>
         <source srcset="../img/stories/06/goods-name-card.webp" type="image/webp">
-        <img src="../img/stories/06/goods-name-card.jpg" alt="오피트매거진 로고와 사진촬영 노출표가 인쇄된 카드" loading="lazy" />
+        <img decoding="async" src="../img/stories/06/goods-name-card.jpg" alt="오피트매거진 로고와 사진촬영 노출표가 인쇄된 카드" loading="lazy" />
       </picture>
       <figcaption>앞면에는 오피트매거진 로고, 뒷면에는 사진촬영 노출표를 담았습니다.</figcaption>
     </figure>
@@ -161,7 +163,7 @@
     <figure>
       <picture>
         <source srcset="../img/stories/06/goods-sticker-mockup.webp" type="image/webp">
-        <img src="../img/stories/06/goods-sticker-mockup.jpg" alt="노트북 위에 붙인 5ft magazine 필름 박스 스티커" loading="lazy" />
+        <img decoding="async" src="../img/stories/06/goods-sticker-mockup.jpg" alt="노트북 위에 붙인 5ft magazine 필름 박스 스티커" loading="lazy" />
       </picture>
       <figcaption>Kodak UltraMax 400 필름 박스와 5ft magazine 로고 스티커.</figcaption>
     </figure>
@@ -209,24 +211,24 @@
 <div class="footer-partners">
   <span class="footer-partners-label">PARTNERS</span>
   <a href="https://www.4rest.net" target="_blank" rel="noopener" class="footer-partner">
-    <img src="../img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
-    <img src="../img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
+    <img decoding="async" src="../img/logo-4rest-b.svg" alt="4rest" class="logo-light" />
+    <img decoding="async" src="../img/logo-4rest-w.svg" alt="4rest" class="logo-dark" />
   </a>
   <a href="https://instagram.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
-    <img src="../img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
-    <img src="../img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
+    <img decoding="async" src="../img/logo-fsc-b.svg" alt="Film Social Club" class="logo-light" />
+    <img decoding="async" src="../img/logo-fsc-w.svg" alt="Film Social Club" class="logo-dark" />
   </a>
   <a href="https://www.youtube.com/@BRISNAPTV" target="_blank" rel="noopener" class="footer-partner">
-    <img src="../img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
-    <img src="../img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
+    <img decoding="async" src="../img/logo-bri-b.svg" alt="BRISNAP TV" class="logo-light" />
+    <img decoding="async" src="../img/logo-bri-w.svg" alt="BRISNAP TV" class="logo-dark" />
   </a>
   <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="footer-partner">
-    <img src="../img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
-    <img src="../img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
+    <img decoding="async" src="../img/logo-spc-b.svg" alt="Street Photography Club" class="logo-light" />
+    <img decoding="async" src="../img/logo-spc-w.svg" alt="Street Photography Club" class="logo-dark" />
   </a>
   <a href="https://aaaaanuyh93.imweb.me/main" target="_blank" rel="noopener" class="footer-partner">
-    <img src="../img/logo-kimhyuna-lockup.svg" alt="김현아" class="logo-light" />
-    <img src="../img/logo-kimhyuna-lockup.svg" alt="김현아" class="logo-dark" />
+    <img decoding="async" src="../img/logo-kimhyuna-lockup.svg" alt="김현아" class="logo-light" />
+    <img decoding="async" src="../img/logo-kimhyuna-lockup.svg" alt="김현아" class="logo-dark" />
   </a>
 </div>
 
@@ -288,7 +290,7 @@
             imgBlock = `<div class="related-img">
               <picture>
                 <source srcset="../${webp}" type="image/webp">
-                <img src="../${s.thumbnail}" loading="lazy" alt="${s.title}" />
+                <img decoding="async" src="../${s.thumbnail}" loading="lazy" alt="${s.title}" />
               </picture>
             </div>`;
           } else {

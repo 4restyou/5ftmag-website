@@ -89,12 +89,14 @@
   <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
 </head>
 <body>
 
 <header>
   <div class="header-inner">
-    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <a href="../index.html" class="site-logo"><img decoding="async" src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     <ul class="main-nav">
       <li><a href="../stories.html">Articles</a></li>
       <li><a href="../films.html">Films</a></li>
@@ -177,7 +179,7 @@
   </div>
 </div>
 
-<div class="img-zoom" id="imgZoom"><img id="imgZoomTarget" alt="" /></div>
+<div class="img-zoom" id="imgZoom"><img decoding="async" id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260620-anncfix" defer></script>
@@ -293,7 +295,7 @@ function renderCard(r) {
   const thumbHtml = isDeleted
     ? `<div class="rep-thumb is-missing">${statusBadge}</div>`
     : thumbUrl
-      ? `<div class="rep-thumb" data-zoom="${escapeAttr(thumbUrl)}"><img src="${escapeAttr(thumbUrl)}" alt="" />${statusBadge}</div>`
+      ? `<div class="rep-thumb" data-zoom="${escapeAttr(thumbUrl)}"><img decoding="async" src="${escapeAttr(thumbUrl)}" alt="" />${statusBadge}</div>`
       : `<div class="rep-thumb is-missing">${statusBadge}</div>`;
 
   const title = listing?.title || '(삭제된 매물)';
