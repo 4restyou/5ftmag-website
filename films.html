@@ -37,11 +37,11 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
-  <link rel="stylesheet" href="./css/common.css?v=20260622-polish">
+  <link rel="stylesheet" href="./css/common.css?v=20260622-libtb">
   <link rel="stylesheet" href="./css/comments.css?v=20260622-polish">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260616-themeauto">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/films.css?v=20260619-chiprow">
+  <link rel="stylesheet" href="./css/films.css?v=20260622-libtb">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -90,17 +90,13 @@
 </div>
 
 <!-- ════════ 필름 그리드 (데이터 기반) ════════ -->
-<div class="films-section" role="main" id="main">
+<div class="films-section" role="main" id="main" data-library-view="films">
   <div class="films-section-head films-section-head-library">
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
     <div class="ft-toggle library-view-toggle" role="tablist" aria-label="라이브러리 보기 방식">
       <button type="button" class="ft-toggle-btn library-view-btn is-active" data-view="films" role="tab" aria-selected="true">브랜드 필름별</button>
       <button type="button" class="ft-toggle-btn library-view-btn" data-view="photos" role="tab" aria-selected="false">사진으로</button>
-    </div>
-    <div class="library-head-actions">
-      <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
-      <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
     </div>
   </div>
 
@@ -147,14 +143,51 @@
       </form>
     </div>
   </div>
-  <div class="library-films-view" id="libraryFilmsView">
-  <div class="library-controls">
-    <div class="library-controls-row">
-      <div class="library-filter" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
-      <button type="button" class="ft-icon-btn" id="librarySearchBtn" aria-label="필름 라이브러리 검색" aria-expanded="false">
+  <!-- 통합 툴바 — 액션 + 카운트 + 필터 + 검색을 한 줄로 -->
+  <div class="library-toolbar">
+    <div class="library-toolbar-left">
+      <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
+      <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
+      <button type="button" class="library-photos-shuffle library-toolbar-photos-only" id="libraryPhotosShuffle" aria-label="다시 섞기">
+        <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+          <path d="M3 5h3l2 3M3 15h3l2-3M14 5h3l-3-3M14 5l-2 3M14 15h3l-3 3M14 15l-2-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>섞기</span>
+      </button>
+      <p class="library-photos-count library-toolbar-photos-only" id="libraryPhotosCount">불러오는 중…</p>
+    </div>
+    <div class="library-toolbar-right">
+      <div class="library-toolbar-films-only library-toolbar-ms" id="libraryAdvancedFilters">
+        <div class="ms-dropdown" id="libraryBrandMS" data-key="brand">
+          <button type="button" class="ms-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+            <span class="ms-dropdown-label">브랜드 전체</span>
+            <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="ms-dropdown-panel" role="dialog" aria-label="브랜드 다중 선택" hidden></div>
+        </div>
+        <div class="ms-dropdown" id="libraryCameraMS" data-key="camera">
+          <button type="button" class="ms-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+            <span class="ms-dropdown-label">카메라 전체</span>
+            <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="ms-dropdown-panel" role="dialog" aria-label="카메라 다중 선택" hidden></div>
+        </div>
+      </div>
+      <div class="library-filter library-toolbar-films-only" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
+      <div class="library-photos-chips library-toolbar-photos-only" id="libraryPhotosChips" role="tablist" aria-label="사진 스타일 필터">
+        <button type="button" class="ft-chip library-filter-chip is-active" data-cat="all" role="tab" aria-selected="true">전체 <span class="ft-chip-count library-filter-count" data-count="all">0</span></button>
+        <button type="button" class="ft-chip library-filter-chip" data-cat="color" role="tab" aria-selected="false">컬러 <span class="ft-chip-count library-filter-count" data-count="color">0</span></button>
+        <button type="button" class="ft-chip library-filter-chip" data-cat="bw" role="tab" aria-selected="false">흑백 <span class="ft-chip-count library-filter-count" data-count="bw">0</span></button>
+        <button type="button" class="ft-chip library-filter-chip" data-cat="slide" role="tab" aria-selected="false">슬라이드 <span class="ft-chip-count library-filter-count" data-count="slide">0</span></button>
+        <button type="button" class="ft-chip library-filter-chip" data-cat="cinema" role="tab" aria-selected="false">영화용 <span class="ft-chip-count library-filter-count" data-count="cinema">0</span></button>
+      </div>
+      <button type="button" class="ft-icon-btn library-toolbar-films-only" id="librarySearchBtn" aria-label="필름 라이브러리 검색" aria-expanded="false">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
       </button>
-      <button type="button" class="ft-icon-btn library-advanced-toggle" id="libraryAdvancedToggle" aria-expanded="false" aria-controls="libraryAdvancedFilters" aria-label="고급 필터" title="고급 필터">
+      <button type="button" class="ft-icon-btn library-toolbar-photos-only" id="libraryPhotosSearchBtn" aria-label="사진 검색" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      </button>
+      <button type="button" class="ft-icon-btn library-advanced-toggle library-toolbar-films-only" id="libraryAdvancedToggle" aria-expanded="false" aria-controls="libraryAdvancedFilters" aria-label="고급 필터" title="고급 필터">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2"/>
           <line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2"/>
@@ -162,23 +195,9 @@
         </svg>
       </button>
     </div>
-    <div class="library-controls-right" id="libraryAdvancedFilters">
-      <div class="ms-dropdown" id="libraryBrandMS" data-key="brand">
-        <button type="button" class="ms-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-          <span class="ms-dropdown-label">브랜드 전체</span>
-          <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="ms-dropdown-panel" role="dialog" aria-label="브랜드 다중 선택" hidden></div>
-      </div>
-      <div class="ms-dropdown" id="libraryCameraMS" data-key="camera">
-        <button type="button" class="ms-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-          <span class="ms-dropdown-label">카메라 전체</span>
-          <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="ms-dropdown-panel" role="dialog" aria-label="카메라 다중 선택" hidden></div>
-      </div>
-    </div>
   </div>
+
+  <div class="library-films-view" id="libraryFilmsView">
   <div class="ft-search-bar library-search-bar" id="librarySearchBar" hidden>
     <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     <input type="search" id="librarySearch" placeholder="필름·브랜드·ISO·카메라·작가·SNS로 검색" aria-label="필름 라이브러리 검색" autocomplete="off" />
@@ -201,34 +220,10 @@
   </div><!-- /.library-films-view -->
 
   <div class="library-photos-view" id="libraryPhotosView" hidden>
-    <p class="library-photos-guide">
-      사진을 먼저 훑어보는 보기입니다. 검색은 필름·카메라·이름·SNS까지 함께 찾고, 필터는 사용 필름의 종류로 묶습니다.
-    </p>
-    <div class="library-photos-controls">
-      <div class="library-photos-chips" id="libraryPhotosChips" role="tablist" aria-label="사진 스타일 필터">
-        <button type="button" class="ft-chip library-filter-chip is-active" data-cat="all" role="tab" aria-selected="true">전체 <span class="ft-chip-count library-filter-count" data-count="all">0</span></button>
-        <button type="button" class="ft-chip library-filter-chip" data-cat="color" role="tab" aria-selected="false">컬러 <span class="ft-chip-count library-filter-count" data-count="color">0</span></button>
-        <button type="button" class="ft-chip library-filter-chip" data-cat="bw" role="tab" aria-selected="false">흑백 <span class="ft-chip-count library-filter-count" data-count="bw">0</span></button>
-        <button type="button" class="ft-chip library-filter-chip" data-cat="slide" role="tab" aria-selected="false">슬라이드 <span class="ft-chip-count library-filter-count" data-count="slide">0</span></button>
-        <button type="button" class="ft-chip library-filter-chip" data-cat="cinema" role="tab" aria-selected="false">영화용 <span class="ft-chip-count library-filter-count" data-count="cinema">0</span></button>
-      </div>
-      <button type="button" class="ft-icon-btn" id="libraryPhotosSearchBtn" aria-label="사진 검색" aria-expanded="false">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
-      </button>
-    </div>
     <div class="ft-search-bar library-search-bar" id="libraryPhotosSearchBar" hidden>
       <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="13.5" y1="13.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       <input type="search" id="libraryPhotosSearch" placeholder="필름·카메라·이름·SNS로 사진 검색" aria-label="사진 검색" autocomplete="off" />
       <button type="button" class="ft-search-close" id="libraryPhotosSearchClose" aria-label="검색 닫기">✕</button>
-    </div>
-    <div class="library-photos-bar">
-      <p class="library-photos-count" id="libraryPhotosCount">불러오는 중…</p>
-      <button type="button" class="library-photos-shuffle" id="libraryPhotosShuffle" aria-label="다시 섞기">
-        <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
-          <path d="M3 5h3l2 3M3 15h3l2-3M14 5h3l-3-3M14 5l-2 3M14 15h3l-3 3M14 15l-2-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>섞기</span>
-      </button>
     </div>
     <div class="library-photos-grid" id="libraryPhotosGrid" aria-label="독자 사진"></div>
     <div class="library-photos-more-wrap" id="libraryPhotosMoreWrap" hidden>
@@ -347,7 +342,7 @@
 <script src="./js/films-reader-export.js?v=20260602-modules" defer></script>
 <script src="./js/films-reader-roll-ui.js?v=20260615-singleauthor" defer></script>
 <script src="./js/films-reader-roll-data.js?v=20260602-modules" defer></script>
-<script src="./js/films-page.js?v=20260620-schedule" defer></script>
+<script src="./js/films-page.js?v=20260622-libtb" defer></script>
 <script src="./js/films-propose.js?v=20260602-propose" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>

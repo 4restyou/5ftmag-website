@@ -940,23 +940,46 @@
 }
 
 /* ════════════════════════════
-   Library 컨트롤 (검색 + 필터 칩)
+   Library 통합 툴바 — 액션 + 카운트 + 필터 + 검색 한 줄
+   (브랜드뷰/사진뷰 공용; data-library-view 로 내부 토글)
    ════════════════════════════ */
-.library-controls {
+.library-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0 0 20px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 22px 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
 }
-.library-controls-row {
+.library-toolbar-left,
+.library-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.library-toolbar-right { gap: 10px; }
+.library-toolbar-count { margin: 0; }
+.library-toolbar-ms {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
-.library-controls-row > .library-filter {
-  flex: 1 1 auto;
+/* 뷰별 토글 — films-section[data-library-view] 가 source of truth */
+[data-library-view="films"]  .library-toolbar-photos-only { display: none !important; }
+[data-library-view="photos"] .library-toolbar-films-only  { display: none !important; }
+
+/* films 뷰의 chip 필터 (전체/컬러/흑백/...) — 가로 스크롤 가능 */
+.library-toolbar-right > .library-filter {
+  flex: 0 1 auto;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
@@ -965,8 +988,8 @@
   -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
           mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
 }
-.library-controls-row > .library-filter::-webkit-scrollbar { display: none; }
-.library-controls-row .ft-chip { flex: 0 0 auto; }
+.library-toolbar-right > .library-filter::-webkit-scrollbar { display: none; }
+.library-toolbar-right .ft-chip { flex: 0 0 auto; }
 /* .library-search 시각 정의는 css/ui-controls.css 의 .ft-search-bar 로 통일. */
 .library-search-bar { margin: 0 0 12px; }
 
@@ -991,18 +1014,18 @@
   padding: 10px 18px;
 }
 
-/* 데스크톱: 고급 필터 패널 항상 노출 (브랜드·카메라 multi-select 즉시 사용)
-   모바일: 기본 숨김 + 필터 아이콘 클릭 시 .is-open 으로 펼침 */
-.library-controls-right {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  min-width: 0;
-}
+/* 데스크톱: 브랜드/카메라 multi-select 항상 노출 (툴바 안에서 즉시 사용)
+   모바일: 기본 숨김 + 필터 아이콘 클릭 시 .is-open 으로 펼침 (full-width column) */
 @media (max-width: 640px) {
-  .library-controls-right { display: none; }
-  .library-controls-right.is-open { display: flex; }
+  .library-toolbar-ms { display: none; }
+  .library-toolbar-ms.is-open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    flex-basis: 100%;
+  }
 }
 /* 데스크톱에선 필터 아이콘이 굳이 필요 없음 (패널 항상 보임) — 모바일에서만 노출 */
 @media (min-width: 641px) {
@@ -1140,11 +1163,6 @@
 .ms-dropdown-option .ms-opt-meta { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
 .ms-dropdown-empty { padding: 12px 14px; color: var(--text-muted); font-size: 12px; }
 @media (max-width: 640px) {
-  .library-controls-right.is-open {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
   .ms-dropdown { width: 100%; }
   .ms-dropdown-btn { width: 100%; }
   .ms-dropdown-panel { width: 100%; max-width: none; }
@@ -1180,9 +1198,6 @@
   max-width: 720px;
 }
 .library-mine-link {
-  position: absolute;
-  right: 0;
-  bottom: 4px;
   font-size: 13px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.04em;
@@ -1194,9 +1209,6 @@
 .library-mine-link:hover {
   color: var(--text);
   border-bottom-color: var(--text);
-}
-@media (max-width: 720px) {
-  .library-mine-link { position: static; display: inline-block; margin-top: 8px; }
 }
 .films-section-title {
   font-size: 32px;
@@ -2284,17 +2296,12 @@
   line-height: 1.65;
   word-break: keep-all;
 }
-.library-photos-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 16px 0 0;
-}
+/* 사진뷰 칩: 툴바 안에서 가로 스크롤 가능하게 */
 .library-photos-chips {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -2305,15 +2312,6 @@
 }
 .library-photos-chips::-webkit-scrollbar { display: none; }
 .library-photos-chips .library-filter-chip { flex-shrink: 0; }
-.library-photos-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 20px 0 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
 .library-photos-count {
   margin: 0;
   font-size: 13px;

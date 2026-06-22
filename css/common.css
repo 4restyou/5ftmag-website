@@ -1366,16 +1366,6 @@ kbd, .kbd {
 :where(h1, h2, h3) { text-wrap: balance; }
 :where(p) { text-wrap: pretty; }
 
-/* 사진 콘텐츠에 미세한 outline 1px — 흰 배경/검은 배경에서도 가장자리가 자연스럽게.
-   <picture> 안의 <img> 또는 <figure> 안의 <img> 만 적용 → 로고/SVG 아이콘은 영향 없음.
-   skill 가이드: 라이트는 순흑, 다크는 순백, tinted neutral 금지. */
-:where(picture > img, figure img) {
-  outline: 1px solid rgba(0, 0, 0, 0.1);
-  outline-offset: -1px;
-}
-[data-theme="dark"] :where(picture > img, figure img) {
-  outline-color: rgba(255, 255, 255, 0.1);
-}
 
 /* 동적으로 갱신되는 숫자에 tabular-nums — layout shift 방지.
    클래스/태그로 흔히 표시되는 경우만. */
