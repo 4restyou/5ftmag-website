@@ -973,7 +973,7 @@
 [data-library-view="films"]  .library-toolbar-photos-only { display: none !important; }
 [data-library-view="photos"] .library-toolbar-films-only  { display: none !important; }
 
-/* films 뷰의 chip 필터 (전체/컬러/흑백/...) — 가로 스크롤 가능 */
+/* films 뷰의 chip 필터 (전체/컬러/흑백/...) — 칩 개수 고정이라 fade 없이 */
 .library-toolbar-right > .library-filter {
   flex: 0 1 auto;
   min-width: 0;
@@ -985,8 +985,6 @@
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
 }
 .library-toolbar-right > .library-filter::-webkit-scrollbar { display: none; }
 .library-toolbar-right .ft-chip { flex: 0 0 auto; }
@@ -2296,7 +2294,7 @@
   line-height: 1.65;
   word-break: keep-all;
 }
-/* 사진뷰 칩: 툴바 안에서 가로 스크롤 가능하게 */
+/* 사진뷰 칩: 칩 개수 고정 (전체/컬러/흑백/슬라이드/영화용 5개) — fade 없이 */
 .library-photos-chips {
   display: flex;
   align-items: center;
@@ -2307,8 +2305,6 @@
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-          mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
 }
 .library-photos-chips::-webkit-scrollbar { display: none; }
 .library-photos-chips .library-filter-chip { flex-shrink: 0; }
