@@ -44,6 +44,20 @@
     "films": []
   },
   {
+    "id": "brisnap-02",
+    "title": "브리스냅 필름헛소리 02 — 보물찾기 같은 필름 중고카메라 구매",
+    "category": "essay",
+    "categoryLabel": "ESSAY",
+    "author": "Brisnap TV",
+    "date": "2026-06-22",
+    "issue": "",
+    "thumbnail": "img/stories/brisnap-02/hero-winery.webp",
+    "excerpt": "호주 시골 할아버지의 슬라이드, 70년 묵은 코닥 브라우니 안의 필름, 게라지 세일에서 건진 한 뭉치. 필름카메라 중고거래에서 만난 세 번의 시간여행.",
+    "page": "stories/brisnap-02.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "brisnap-01",
     "title": "브리스냅 필름헛소리 01 — 필름사진 찍는 이유",
     "category": "essay",
