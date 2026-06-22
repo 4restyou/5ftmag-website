@@ -58,7 +58,10 @@
 
   // ── 렌더: 신규 글 띠 ──
   function renderNewStories(stories) {
-    const fresh = stories.filter(s => window.MagUtil.isPublishedContent(s) && daysAgo(s.date) <= NEW_DAYS);
+    const fresh = stories
+      .filter(s => window.MagUtil.isPublishedContent(s) && daysAgo(s.date) <= NEW_DAYS)
+      .slice()
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
     if (!fresh.length) return '';
     const cards = fresh.slice(0, 12).map(s => `
       <a class="mh-new-card" href="/${esc(s.page)}">
