@@ -104,12 +104,14 @@
   <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
 </head>
 <body>
 
 <header>
   <div class="header-inner">
-    <a href="../index.html" class="site-logo"><img src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <a href="../index.html" class="site-logo"><img decoding="async" src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     <ul class="main-nav">
       <li><a href="../stories.html">Articles</a></li>
       <li><a href="../films.html">Films</a></li>
@@ -269,7 +271,7 @@
       <div class="form-row">
         <label for="f-canThumbFile">캐니스터 썸네일</label>
         <div class="thumb-uploader">
-          <img id="f-canThumbPreview" alt="" hidden />
+          <img decoding="async" id="f-canThumbPreview" alt="" hidden />
           <input type="hidden" id="f-canThumbnail" name="canThumbnail" />
           <div class="thumb-uploader-actions">
             <input type="file" id="f-canThumbFile" accept="image/webp,image/png,image/jpeg" />
