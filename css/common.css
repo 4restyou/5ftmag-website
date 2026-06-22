@@ -1304,3 +1304,53 @@ button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ──────────── ⌘K / kbd 칩 (cmdk 결, 최소) ──────────── */
+/* 일반 본문에서 단축키 표시 시 사용. <kbd>X</kbd> 또는 .kbd 클래스. */
+kbd, .kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--border, rgba(127,127,127,.32));
+  border-radius: 4px;
+  background: var(--bg-sub, rgba(127,127,127,.08));
+  color: var(--text-muted, rgba(127,127,127,.85));
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  font-weight: var(--fw-heading, 600);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* 헤더 돋보기 아이콘 옆에 inject 되는 단축키 힌트 — 데스크탑에서만 노출. */
+.icon-btn .kbd-hint {
+  position: absolute;
+  right: -2px;
+  bottom: -4px;
+  padding: 0 4px;
+  height: 14px;
+  border: 1px solid var(--border, rgba(127,127,127,.32));
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text-muted, rgba(127,127,127,.85));
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: var(--fw-heading, 600);
+  letter-spacing: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity .15s;
+}
+.icon-btn:hover .kbd-hint { opacity: 1; }
+.icon-btn { position: relative; }
+@media (max-width: 720px) {
+  .icon-btn .kbd-hint { display: none; }
+}

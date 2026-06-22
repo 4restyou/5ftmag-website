@@ -17,8 +17,8 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
-  <link rel="stylesheet" href="./css/common.css?v=20260614-push">
-  <link rel="stylesheet" href="./css/search.css?v=20260531-init">
+  <link rel="stylesheet" href="./css/common.css?v=20260621-cmdk">
+  <link rel="stylesheet" href="./css/search.css?v=20260621-cmdk">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -54,14 +54,21 @@
 </header>
 
 <main class="search-page" id="main">
-  <h1 class="search-title">전체 검색</h1>
+  <div class="search-head">
+    <h1 class="search-title">전체 검색</h1>
+    <div class="search-density" role="tablist" aria-label="결과 보기 방식">
+      <button type="button" class="search-density-btn is-active" data-density="grid" role="tab" aria-selected="true">그리드</button>
+      <button type="button" class="search-density-btn" data-density="list" role="tab" aria-selected="false">리스트</button>
+    </div>
+  </div>
   <form id="searchForm" class="search-form" role="search">
     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
     <input type="search" id="searchQ" name="q" placeholder="제목, 작가, 키워드, 필름 이름…" aria-label="검색어" autocomplete="off" />
+    <kbd class="search-form-kbd" aria-hidden="true" id="searchKbdHint">⌘K</kbd>
     <button type="submit" class="search-submit">검색</button>
   </form>
   <div id="searchResults" aria-live="polite">
-    <p class="search-hint">키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요.</p>
+    <p class="search-hint">키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요. <kbd>↑</kbd> <kbd>↓</kbd> 로 이동, <kbd>Enter</kbd> 로 열기.</p>
   </div>
 </main>
 
@@ -81,8 +88,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db-client.js?v=20260620-anncfix" defer></script>
 <script src="./js/util.js?v=20260620-schedule" defer></script>
-  <script src="./js/site-common.js?v=20260620-editdel" defer></script>
-<script src="./js/search-page.js?v=20260620-schedule" defer></script>
+  <script src="./js/site-common.js?v=20260621-cmdk" defer></script>
+<script src="./js/search-page.js?v=20260621-cmdk" defer></script>
 
 </body>
 </html>
