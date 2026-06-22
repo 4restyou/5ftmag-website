@@ -488,6 +488,44 @@
   // ════════════════════════════════════════════════
   // 초기화
   // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════
+  // 전체 검색 단축키 (⌘K / Ctrl+K) — cmdk 결만 살짝.
+  //   - 어디서든 ⌘K 누르면 /search.html 로 이동 (이미 거기면 input 포커스).
+  //   - 입력창에 있을 땐 ESC 로 빠져나가도록 살짝 도움 — 단축키만 글로벌, 인터셉트는 최소.
+  //   - 헤더의 #headerSearchBtn 옆에 작은 ⌘K kbd 칩을 inject (있을 때만, 한 번만).
+  // ════════════════════════════════════════════════
+  function setupGlobalSearchShortcut() {
+    if (document.documentElement.dataset.searchShortcutBound === '1') return;
+    document.documentElement.dataset.searchShortcutBound = '1';
+
+    const isMac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
+    const onSearchPage = /\/search\.html$/.test(location.pathname);
+
+    // 키 칩 inject — 헤더 돋보기 아이콘 옆에. 데스크탑에서만 노출 (모바일은 헤더 좁음).
+    const btn = document.getElementById('headerSearchBtn');
+    if (btn && !btn.querySelector('.kbd-hint')) {
+      const kbd = document.createElement('span');
+      kbd.className = 'kbd-hint';
+      kbd.setAttribute('aria-hidden', 'true');
+      kbd.textContent = isMac ? '⌘K' : 'Ctrl K';
+      btn.appendChild(kbd);
+      btn.setAttribute('aria-keyshortcuts', isMac ? 'Meta+K' : 'Control+K');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      // ⌘K (Mac) / Ctrl+K — 입력 중인 textarea/contenteditable 에서도 가로챈다.
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        if (onSearchPage) {
+          const input = document.getElementById('searchQ');
+          if (input) { input.focus(); input.select(); }
+        } else {
+          location.href = '/search.html';
+        }
+      }
+    });
+  }
+
   function init() {
     // 테마: head에서 이미 적용됐지만, 안전하게 재확인
     if (!document.documentElement.dataset.theme) {
@@ -500,6 +538,9 @@
     // 스크롤 등장 + 글 읽기 진행바
     initScrollReveal();
     initReadingProgress();
+
+    // 전체 검색 단축키 (⌘K / Ctrl+K) — cmdk 결을 살짝.
+    setupGlobalSearchShortcut();
 
     // 공지 배너 + 인앱 브라우저 안내 (admin 페이지 제외)
     if (!/\/admin\//.test(location.pathname)) {

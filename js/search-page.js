@@ -2,6 +2,9 @@
 // 정적 JSON(data/stories.json, data/films.json) + Supabase(webzine/labs/market) 병렬 조회 후
 // 클라이언트에서 점수 기반 매칭. 도메인별로 필드 가중치 (제목 > 부제 > 본문) +
 // exact / prefix / includes 단계별 점수. 점수 0 이면 비매칭, 점수순으로 정렬해 노출.
+//
+// shadcn/cmdk 결을 가볍게 차용: 입력 즉시 필터 (150ms debounce), 키보드 ↑/↓ Enter,
+// density 그리드/리스트 토글 (localStorage 기억).
 (function () {
   'use strict';
 
@@ -9,6 +12,10 @@
   const input   = $('searchQ');
   const form    = $('searchForm');
   const results = $('searchResults');
+
+  const DENSITY_KEY = '5ft-search-density';
+  let density = localStorage.getItem(DENSITY_KEY) || 'grid';
+  if (density !== 'grid' && density !== 'list') density = 'grid';
 
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
@@ -250,6 +257,7 @@
     if (total === 0) { renderEmpty(q); return; }
 
     const PER = 8;
+    const gridCls = density === 'list' ? 'search-grid search-grid--list' : 'search-grid';
     const html = sections
       .filter((s) => s.items.length > 0)
       .map((s) => {
@@ -258,12 +266,13 @@
           : '';
         return `<section class="search-section">
           <h2 class="search-section-head">${s.label} <span class="search-count">${s.items.length}</span></h2>
-          <div class="search-grid">${s.items.slice(0, PER).map(s.card).join('')}</div>
+          <div class="${gridCls}">${s.items.slice(0, PER).map(s.card).join('')}</div>
           ${more}
         </section>`;
       }).join('');
 
     setHtml(`<p class="search-summary">"${esc(q)}" 검색 결과 총 <strong>${total}건</strong></p>` + html);
+    resetFocus();
   }
 
   // db-client 준비 대기 (최대 3초). 정적 JSON 은 그동안에도 조회 가능하므로
@@ -277,14 +286,87 @@
     return false;
   }
 
+  // ── 키보드 네비게이션 ──
+  // 결과 카드를 ↑/↓ 로 옮기고 Enter 로 진입. 검색 입력에 포커스가 있어도 동작.
+  let focusedIdx = -1;
+  function resetFocus() { focusedIdx = -1; updateFocusedCard(); }
+  function getCards() { return Array.from(results.querySelectorAll('.search-card')); }
+  function updateFocusedCard() {
+    const cards = getCards();
+    cards.forEach((c, i) => c.classList.toggle('is-focused', i === focusedIdx));
+    if (focusedIdx >= 0 && cards[focusedIdx]) {
+      cards[focusedIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+  function moveFocus(delta) {
+    const cards = getCards();
+    if (!cards.length) return;
+    focusedIdx = (focusedIdx + delta + cards.length) % cards.length;
+    updateFocusedCard();
+  }
+  function activateFocused() {
+    const cards = getCards();
+    const target = cards[focusedIdx];
+    if (target && target.href) location.href = target.href;
+  }
+
+  // ── 라이브 필터 (debounce) ──
+  let liveTimer = null;
+  const LIVE_MS = 150;
+  function scheduleLive() {
+    if (liveTimer) clearTimeout(liveTimer);
+    liveTimer = setTimeout(() => {
+      const q = input.value.trim();
+      syncUrl(q);
+      searchAll(q);
+    }, LIVE_MS);
+  }
+
+  input.addEventListener('input', scheduleLive);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveFocus(+1); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); moveFocus(-1); }
+    else if (e.key === 'Enter' && focusedIdx >= 0) { e.preventDefault(); activateFocused(); }
+  });
+  // 결과 영역에서도 화살표/Enter 가 동작 (입력 포커스 안 갔을 때 키보드만으로 이동).
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target?.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveFocus(+1); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); moveFocus(-1); }
+    else if (e.key === 'Enter' && focusedIdx >= 0) { e.preventDefault(); activateFocused(); }
+  });
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (liveTimer) { clearTimeout(liveTimer); liveTimer = null; }
     const q = input.value.trim();
     syncUrl(q);
     searchAll(q);
   });
 
+  // ── density 토글 (그리드 / 리스트) ──
+  function applyDensity() {
+    document.querySelectorAll('.search-density-btn').forEach((b) => {
+      const on = b.dataset.density === density;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', String(on));
+    });
+    // 이미 그려진 결과에도 즉시 반영
+    results.querySelectorAll('.search-grid').forEach((g) => {
+      g.classList.toggle('search-grid--list', density === 'list');
+    });
+  }
+  document.querySelectorAll('.search-density-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      density = btn.dataset.density === 'list' ? 'list' : 'grid';
+      localStorage.setItem(DENSITY_KEY, density);
+      applyDensity();
+    });
+  });
+
   (async function init() {
+    applyDensity();
     const initialQ = (new URLSearchParams(location.search).get('q') || '').trim();
     if (initialQ) {
       input.value = initialQ;
