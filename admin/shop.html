@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Shop 관리 | 5ft magazine Admin</title>
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
+  <link rel="stylesheet" href="../pretendard.css" />
+  <link rel="stylesheet" href="../css/tokens.css?v=20260609-cardtok">
+  <link rel="stylesheet" href="../css/common.css?v=20260622-libtb">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <script src="../js/theme-init.js"></script>
+  <style>
+    body { background: var(--bg); color: var(--text); }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .toolbar .filter { font: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); min-width: 220px; }
+    .toolbar .count { color: var(--text-muted); font-size: 13px; }
+    .toolbar .primary-btn { margin-left: auto; font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; border: none; background: var(--text); color: var(--bg); cursor: pointer; }
+    .toolbar .primary-btn:hover { opacity: 0.85; }
+
+    table.shop-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .shop-table th, .shop-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .shop-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .shop-table .col-thumb { width: 56px; }
+    .shop-table .col-thumb img { width: 48px; height: 48px; object-fit: cover; background: var(--bg-sub); border-radius: 4px; display: block; }
+    .shop-table .col-title { font-weight: var(--fw-heading); }
+    .shop-table .col-slug { font-size: 12px; color: var(--text-muted); font-family: ui-monospace, monospace; }
+    .shop-table .col-price { font-variant-numeric: tabular-nums; text-align: right; }
+    .shop-table .col-actions { text-align: right; white-space: nowrap; }
+    .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; }
+    .badge.unpub { background: var(--bg-sub); color: var(--text-muted); }
+    .badge.pub { background: var(--text); color: var(--bg); }
+    .badge.soldout { background: #ffe5e5; color: #c00; }
+    [data-theme="dark"] .badge.soldout { background: #4a1f1f; color: #ff7a7a; }
+
+    .empty { padding: 32px; text-align: center; color: var(--text-muted); }
+
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-start; justify-content: center; z-index: 1000; padding: 40px 16px; overflow-y: auto; }
+    .modal.open { display: flex; }
+    .modal-box { background: var(--bg); border-radius: 6px; max-width: 760px; width: 100%; padding: 24px; }
+    .modal-box h2 { margin: 0 0 16px; font-size: 18px; font-weight: var(--fw-heading); }
+    .form-row { display: grid; grid-template-columns: 140px 1fr; gap: 8px 14px; align-items: start; margin-bottom: 12px; }
+    .form-row label { font-size: 13px; color: var(--text-muted); padding-top: 8px; }
+    .form-row input, .form-row textarea, .form-row select {
+      font: inherit; font-size: 14px; padding: 8px 10px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px;
+      width: 100%;
+    }
+    .form-row textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+    .form-row .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .form-row.check { grid-template-columns: 140px 1fr; align-items: center; }
+    .form-row.check input[type=checkbox] { width: auto; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+    .form-actions .save { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .form-actions .del { color: #c00; border-color: #c00; margin-right: auto; }
+    [data-theme="dark"] .form-actions .del { color: #ff7a7a; border-color: #ff7a7a; }
+
+    @media (max-width: 700px) {
+      .shop-table thead { display: none; }
+      .shop-table tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      .shop-table td { display: block; border: none; padding: 4px 0; }
+      .shop-table .col-actions { text-align: left; }
+      .shop-table .col-thumb { display: inline-block; vertical-align: middle; margin-right: 12px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+    .admin-subnav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  </style>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo"><img decoding="async" src="../img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="../img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="../stories.html">Articles</a></li>
+      <li><a href="../films.html">Films</a></li>
+      <li><a href="../books.html">Books</a></li>
+      <li><a href="../labs.html">Labs</a></li>
+      <li><a href="../market.html">Market</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="../search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="../stories.html">Articles</a>
+    <a href="../films.html">Films</a>
+    <a href="../books.html">Books</a>
+    <a href="../labs.html">Labs</a>
+    <a href="../market.html">Market</a>
+    <a href="../about.html">About</a>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+  </nav>
+</header>
+
+<div class="admin-header">
+  <a class="admin-back" href="../index.html">← 5ft magazine 으로</a>
+  <div class="admin-title-row">
+    <h1 class="admin-title">Shop 관리</h1>
+    <span class="admin-user" id="adminUser">불러오는 중…</span>
+  </div>
+  <nav class="admin-subnav" aria-label="편집부 페이지">
+    <span class="admin-subnav-group">운영</span>
+    <a href="/admin/index.html" class="admin-subnav-link">홈</a>
+    <a href="/admin/article-editor.html" class="admin-subnav-link">기사 작성</a>
+    <a href="/admin/articles.html" class="admin-subnav-link">기사 목록</a>
+    <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
+    <a href="/admin/market-reports.html" class="admin-subnav-link">매물 신고</a>
+    <a href="/admin/messages.html" class="admin-subnav-link">메시지</a>
+    <a href="/admin/comments.html" class="admin-subnav-link">댓글</a>
+    <a href="/admin/announcements.html" class="admin-subnav-link">공지</a>
+    <span class="admin-subnav-group">카탈로그</span>
+    <a href="/admin/camera-brands.html" class="admin-subnav-link">카메라 브랜드</a>
+    <a href="/admin/films.html" class="admin-subnav-link">필름 카탈로그</a>
+    <a href="/admin/labs.html" class="admin-subnav-link">현상소</a>
+    <a href="/admin/repairs.html" class="admin-subnav-link">수리실</a>
+    <a href="/admin/webzine.html" class="admin-subnav-link">웹진</a>
+    <a href="/admin/shop.html" class="admin-subnav-link is-current">Shop</a>
+    <span class="admin-subnav-group">분석</span>
+    <a href="/admin/analytics.html" class="admin-subnav-link">통계</a>
+  </nav>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>편집부 전용</h2>
+  <p>이 페이지는 5ft.mag 편집부 권한이 있는 계정만 접근할 수 있어요.</p>
+  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
+  <p class="gate-back"><a href="/">← 5ft magazine 으로 돌아가기</a></p>
+</div>
+
+<main id="app" hidden>
+  <div class="toolbar">
+    <input type="search" class="filter" id="filter" placeholder="제목·slug 로 필터" aria-label="상품 필터" autocomplete="off" />
+    <select class="filter" id="catFilter" aria-label="카테고리">
+      <option value="all">전체 카테고리</option>
+      <option value="film">필름</option>
+      <option value="camera">카메라</option>
+      <option value="goods">굿즈</option>
+      <option value="book">책</option>
+    </select>
+    <span class="count" id="count">·</span>
+    <button type="button" class="primary-btn" id="newBtn">+ 새 상품</button>
+  </div>
+  <p class="section-help" style="font-size:12px; color:var(--text-muted); margin: 0 0 18px; line-height:1.6;">
+    저장 즉시 DB 반영. 정적 <code>data/shop.json</code> 은 다음 사이트 빌드(Netlify 자동)에 동기화돼요.
+    결제·재고·정산은 <strong>Smart Store</strong> 가 처리하고, 여기선 노출과 deep link 만 관리합니다.
+    Smart Store 의 가격이 바뀌면 여기 가격도 손으로 맞춰주세요.
+  </p>
+
+  <table class="shop-table">
+    <thead>
+      <tr>
+        <th class="col-thumb"></th>
+        <th>상품</th>
+        <th>카테고리</th>
+        <th class="col-price">가격</th>
+        <th>상태</th>
+        <th class="col-actions"></th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty" hidden>등록된 상품이 없어요. "+ 새 상품" 으로 첫 항목을 추가하세요.</div>
+</main>
+
+<!-- 폼 모달 -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2 id="modalTitle">새 상품</h2>
+    <form id="form">
+      <div class="form-row">
+        <label>slug *</label>
+        <div>
+          <input type="text" name="slug" required maxlength="80" placeholder="kodak-portra-400" />
+          <div class="hint">영문 소문자·숫자·하이픈. 저장 후 수정 안 됨 (URL 의 일부).</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>제목 *</label>
+        <input type="text" name="title" required maxlength="200" placeholder="Kodak Portra 400 (5롤 팩)" />
+      </div>
+      <div class="form-row">
+        <label>카테고리 *</label>
+        <select name="category" required>
+          <option value="goods">굿즈</option>
+          <option value="film">필름</option>
+          <option value="camera">카메라</option>
+          <option value="book">책</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>가격 (원)</label>
+        <input type="number" name="price" min="0" step="100" placeholder="135000" />
+      </div>
+      <div class="form-row">
+        <label>정가 (원)</label>
+        <div>
+          <input type="number" name="original_price" min="0" step="100" placeholder="(옵션 — 할인 표시할 때)" />
+          <div class="hint">정가 > 가격 일 때 카드에 취소선 정가가 함께 표시됩니다.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>한 줄 설명</label>
+        <input type="text" name="excerpt" maxlength="200" placeholder="카드에 함께 보일 짧은 설명 (선택)" />
+      </div>
+      <div class="form-row">
+        <label>상세 설명</label>
+        <textarea name="description" placeholder="상품 상세. 줄바꿈 그대로 표시됨."></textarea>
+      </div>
+      <div class="form-row">
+        <label>이미지 URL</label>
+        <div>
+          <textarea name="images" placeholder="한 줄에 한 개. 첫 번째가 카드 썸네일.
+예) https://www.5ftmag.com/img/shop/portra400-1.jpg"></textarea>
+          <div class="hint">Smart Store 상품 이미지 URL 을 복사해와도 되고, /img/shop/ 경로에 직접 올린 파일을 써도 됨.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Smart Store URL *</label>
+        <div>
+          <input type="url" name="smart_store_url" placeholder="https://smartstore.naver.com/film_socialclub/products/12345" />
+          <div class="hint">"구매하기" 버튼이 새 탭에서 여는 deep link. Smart Store 상품 페이지 주소 그대로.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>정렬 우선순위</label>
+        <div>
+          <input type="number" name="sort_order" step="1" value="0" />
+          <div class="hint">작을수록 앞. 같으면 등록일 최신순.</div>
+        </div>
+      </div>
+      <div class="form-row check">
+        <label>발행</label>
+        <div><input type="checkbox" name="published" /> <span style="font-size:13px; color:var(--text-muted);">체크하면 공개 화면에 노출</span></div>
+      </div>
+      <div class="form-row check">
+        <label>판매 중</label>
+        <div><input type="checkbox" name="available" checked /> <span style="font-size:13px; color:var(--text-muted);">해제하면 카드에 "품절" 오버레이 + 구매 버튼 비활성</span></div>
+      </div>
+      <p class="form-msg" id="formMsg" aria-live="polite" style="font-size:13px; color:#c00; min-height:18px;"></p>
+      <div class="form-actions">
+        <button type="button" class="del" id="delBtn" hidden>삭제</button>
+        <button type="button" id="cancelBtn">취소</button>
+        <button type="submit" class="save">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/util.js?v=20260620-schedule" defer></script>
+<script src="../js/site-common.js?v=20260615-chrome" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="../js/db-client.js?v=20260622-shop" defer></script>
+<script src="../js/admin-shop-page.js?v=20260622-shop" defer></script>
+</body>
+</html>
