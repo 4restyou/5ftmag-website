@@ -1784,9 +1784,59 @@
     },
   };
 
+  // ════════════════════════════════════════
+  // shop_products — 자체 상품 카탈로그 (Smart Store deep link 매핑)
+  // ════════════════════════════════════════
+  const shop = {
+    // 발행된 상품만 (공개 화면용). 정적 data/shop.json 으로 빌드되므로
+    // 일반적으로 직접 호출은 admin 미리보기 / 운영 진단 정도.
+    async listPublished() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('shop_products')
+        .select('*')
+        .eq('published', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) { console.warn('[shop.listPublished]', error.message); return []; }
+      return data || [];
+    },
+    // 편집부 — 전체 (미발행 포함)
+    async listAll() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('shop_products')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) { console.warn('[shop.listAll]', error.message); return []; }
+      return data || [];
+    },
+    async get(slug) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.from('shop_products')
+        .select('*').eq('slug', slug).maybeSingle();
+      if (error) { console.warn('[shop.get]', error.message); return null; }
+      return data;
+    },
+    async upsert(row) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const onConflict = row.id ? undefined : 'slug';
+      const { data, error } = await c.from('shop_products')
+        .upsert(row, { onConflict })
+        .select('id, slug')
+        .single();
+      if (error) return { error };
+      return { data };
+    },
+    async remove(slug) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { error } = await c.from('shop_products').delete().eq('slug', slug);
+      return { error };
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages, shop,
   };
 })();

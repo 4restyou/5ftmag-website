@@ -16,12 +16,13 @@
     "db:audit": "node scripts/db-audit.mjs",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
-    "build": "node scripts/build-films.mjs && node scripts/build-labs.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs && node scripts/build-film-og.mjs",
+    "build": "node scripts/build-films.mjs && node scripts/build-labs.mjs && node scripts/build-shop.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs && node scripts/build-film-og.mjs",
     "build:rss": "node scripts/build-rss.mjs",
     "build:authors": "node scripts/build-authors.mjs",
     "build:sitemap": "node scripts/build-sitemap.mjs",
     "build:films": "node scripts/build-films.mjs",
-    "build:labs": "node scripts/build-labs.mjs"
+    "build:labs": "node scripts/build-labs.mjs",
+    "build:shop": "node scripts/build-shop.mjs"
   },
   "engines": {
     "node": ">=18"
