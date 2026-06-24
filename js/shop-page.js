@@ -36,8 +36,20 @@
     }
   }
 
+  // protocol 없는 URL 자동 보정 (예: phinf.pstatic.net/... → https://phinf.pstatic.net/...)
+  function normalizeImageUrl(u) {
+    const s = String(u || '').trim();
+    if (!s) return '';
+    if (/^https?:\/\//i.test(s)) return s;
+    if (s.startsWith('//')) return 'https:' + s;
+    if (s.startsWith('/')) return s;  // 사이트 내부 경로 (예: /img/shop/...)
+    // bare host (예: phinf.pstatic.net/...) — https:// 보정
+    return 'https://' + s;
+  }
+
   function productCard(p) {
-    const img = (p.images && p.images[0]) || '';
+    const rawImg = (p.images && p.images[0]) || '';
+    const img = normalizeImageUrl(rawImg);
     const thumb = img
       ? `<img decoding="async" src="${escapeAttr(img)}" alt="${escapeAttr(p.title)}" loading="lazy" />`
       : '';
@@ -46,6 +58,9 @@
       : `<span class="shop-card-price">${escapeHtml(fmtPrice(p.price))}</span>`;
     const soldOut = p.available === false
       ? '<span class="shop-card-soldout">품절</span>'
+      : '';
+    const excerpt = p.excerpt
+      ? `<p class="shop-card-excerpt">${escapeHtml(p.excerpt)}</p>`
       : '';
     return `
       <button type="button" class="shop-card" data-slug="${escapeAttr(p.slug)}">
@@ -56,6 +71,7 @@
         </div>
         <div class="shop-card-body">
           <h3 class="shop-card-title">${escapeHtml(p.title)}</h3>
+          ${excerpt}
           <div class="shop-card-price-row">${priceLine}</div>
         </div>
       </button>
@@ -94,7 +110,7 @@
 
   function openModal(p) {
     const imgs = (p.images || []).map(src => `
-      <div class="shop-modal-img"><img decoding="async" src="${escapeAttr(src)}" alt="${escapeAttr(p.title)}" loading="lazy" /></div>
+      <div class="shop-modal-img"><img decoding="async" src="${escapeAttr(normalizeImageUrl(src))}" alt="${escapeAttr(p.title)}" loading="lazy" /></div>
     `).join('');
     const priceLine = (p.originalPrice && p.originalPrice > p.price)
       ? `<span class="shop-card-price-original">${escapeHtml(fmtPrice(p.originalPrice))}</span> <strong class="shop-modal-price">${escapeHtml(fmtPrice(p.price))}</strong>`
