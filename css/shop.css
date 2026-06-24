@@ -287,4 +287,13 @@
   color: var(--text-muted);
   margin: 0;
   text-align: center;
+  line-height: 1.5;
+}
+.shop-modal-note strong {
+  color: var(--text);
+  font-weight: var(--fw-heading);
+}
+.shop-modal-checked {
+  font-size: 11px;
+  opacity: 0.7;
 }

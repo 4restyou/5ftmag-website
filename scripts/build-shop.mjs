@@ -35,6 +35,7 @@ export function rowToJson(r) {
     smartStoreUrl: r.smart_store_url || '',
     available: r.available !== false,
     sortOrder: Number(r.sort_order) || 0,
+    updatedAt: r.updated_at || null,
   };
 }
 

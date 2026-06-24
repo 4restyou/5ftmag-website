@@ -116,6 +116,10 @@
         ${p.excerpt ? `<p class="shop-modal-excerpt">${escapeHtml(p.excerpt)}</p>` : ''}
         ${description}
         ${buyButton}
+        <p class="shop-modal-note">
+          <strong>재고·가격은 Smart Store 에서 최종 확인해 주세요.</strong> 사이트 정보와 다를 수 있습니다.
+          ${p.updatedAt ? `<br><span class="shop-modal-checked">(마지막 확인: ${escapeHtml(lastCheckedHtml(p.updatedAt))})</span>` : ''}
+        </p>
         <p class="shop-modal-note">결제·배송·환불은 Naver Smart Store 에서 진행됩니다.</p>
       </div>
     `;
@@ -166,7 +170,19 @@
       smartStoreUrl: r.smart_store_url || '',
       available: r.available !== false,
       sortOrder: Number(r.sort_order) || 0,
+      updatedAt: r.updated_at || r.updatedAt || null,
     };
+  }
+
+  // "마지막 확인" 표시. updated_at 이 너무 오래되면 안내 강도 높임.
+  function lastCheckedHtml(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const Y = d.getFullYear();
+    const M = String(d.getMonth() + 1).padStart(2, '0');
+    const D = String(d.getDate()).padStart(2, '0');
+    return `${Y}.${M}.${D}`;
   }
 
   async function waitForDB(maxMs = 2500) {
