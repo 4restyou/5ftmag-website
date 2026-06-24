@@ -116,6 +116,10 @@
         ${p.excerpt ? `<p class="shop-modal-excerpt">${escapeHtml(p.excerpt)}</p>` : ''}
         ${description}
         ${buyButton}
+        <p class="shop-modal-note">
+          <strong>재고·가격은 Smart Store 에서 최종 확인해 주세요.</strong> 사이트 정보와 다를 수 있습니다.
+          ${p.updatedAt ? `<br><span class="shop-modal-checked">(마지막 확인: ${escapeHtml(lastCheckedHtml(p.updatedAt))})</span>` : ''}
+        </p>
         <p class="shop-modal-note">결제·배송·환불은 Naver Smart Store 에서 진행됩니다.</p>
       </div>
     `;
@@ -152,15 +156,74 @@
     if (p) openModal(p);
   });
 
-  fetch('data/shop.json', { cache: 'no-cache' })
-    .then(res => res.json())
+  // DB row → camelCase 형태 (build-shop.mjs 의 rowToJson 와 동일)
+  function rowToJson(r) {
+    return {
+      slug: r.slug,
+      title: r.title || '',
+      category: r.category || 'goods',
+      price: Number(r.price) || 0,
+      originalPrice: r.original_price ?? null,
+      excerpt: r.excerpt || '',
+      description: r.description || '',
+      images: Array.isArray(r.images) ? r.images : [],
+      smartStoreUrl: r.smart_store_url || '',
+      available: r.available !== false,
+      sortOrder: Number(r.sort_order) || 0,
+      updatedAt: r.updated_at || r.updatedAt || null,
+    };
+  }
+
+  // "마지막 확인" 표시. updated_at 이 너무 오래되면 안내 강도 높임.
+  function lastCheckedHtml(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const Y = d.getFullYear();
+    const M = String(d.getMonth() + 1).padStart(2, '0');
+    const D = String(d.getDate()).padStart(2, '0');
+    return `${Y}.${M}.${D}`;
+  }
+
+  async function waitForDB(maxMs = 2500) {
+    const start = Date.now();
+    while (Date.now() - start < maxMs) {
+      if (window.MagDB && window.MagDB.isReady && window.MagDB.isReady() && window.MagDB.shop) return true;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    return false;
+  }
+
+  // DB 우선 — admin 에서 등록·수정한 게 즉시 반영. 실패 시 정적 JSON 폴백.
+  // 정적 data/shop.json 은 Netlify 빌드시 함께 갱신되긴 하지만 어디까지나
+  // SEO / 오프라인 / DB 다운 시 대비용.
+  async function loadProducts() {
+    if (await waitForDB()) {
+      try {
+        const rows = await window.MagDB.shop.listPublished();
+        if (Array.isArray(rows)) return rows.map(rowToJson);
+      } catch (e) {
+        console.warn('[shop] DB fetch 실패, 정적 JSON 으로 폴백:', e);
+      }
+    }
+    try {
+      const res = await fetch('data/shop.json', { cache: 'no-cache' });
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      console.warn('[shop] 정적 JSON 도 실패:', e);
+      return [];
+    }
+  }
+
+  loadProducts()
     .then(data => {
-      STATE.products = Array.isArray(data) ? data : [];
+      STATE.products = data;
       updateChipCounts();
       applyFilter();
     })
     .catch(err => {
-      console.error('[shop] fetch 실패:', err);
+      console.error('[shop] load 실패:', err);
       empty.hidden = false;
       empty.textContent = '상품을 불러오지 못했어요. 잠시 후 새로고침 해주세요.';
     });

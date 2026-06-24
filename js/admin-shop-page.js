@@ -149,9 +149,13 @@ function closeForm() {
 async function saveForm(e) {
   e.preventDefault();
   const f = e.target;
-  const slug = f.slug.value.trim();
+  // 정규화: NFKC (전각 → 반각), 유니코드 dash 통일, invisible char 제거, 소문자
+  let slug = f.slug.value.normalize('NFKC').toLowerCase()
+    .replace(/[‐-―−]/g, '-')         // hyphen·en·em·minus → '-'
+    .replace(/[​-‍﻿ \s]/g, ''); // zero-width / nbsp / 일반 공백 제거
+  if (slug !== f.slug.value) f.slug.value = slug;   // 사용자에게도 보여줌
   if (!/^[a-z0-9-]+$/.test(slug)) {
-    $('formMsg').textContent = 'slug 는 영문 소문자·숫자·하이픈만 사용하세요.';
+    $('formMsg').textContent = `slug "${slug || '(빈 값)'}" 에 못 쓰는 문자가 있어요. 영문 소문자·숫자·하이픈만 사용.`;
     return;
   }
   const images = f.images.value.split('\n').map(s => s.trim()).filter(Boolean);
