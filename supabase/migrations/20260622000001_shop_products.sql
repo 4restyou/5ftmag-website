@@ -41,44 +41,25 @@ drop policy if exists "shop_products_select_public" on public.shop_products;
 create policy "shop_products_select_public" on public.shop_products
   for select using (published = true);
 
--- 편집부 전체 조회 — 미발행 상품도 admin 에서 보려면 필요
--- profiles 스키마가 워크스페이스마다 다르므로 (is_editor / role='admin' 혼재)
--- 두 패턴 모두 허용.
+-- 편집부 전체 조회 (미발행 상품도 admin 에서 보려면 필요) + 쓰기.
+-- 다른 마이그레이션과 동일한 패턴: profiles.user_id + is_editor.
+-- (이전 시도에서 profiles.id 로 잘못 썼다가 prod 의 컬럼명 불일치로 실패)
 drop policy if exists "shop_products_select_editor" on public.shop_products;
 create policy "shop_products_select_editor" on public.shop_products
   for select using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and (
-          coalesce((to_jsonb(profiles)->>'is_editor')::boolean, false) = true
-          or coalesce((to_jsonb(profiles)->>'role'), '') = 'admin'
-        )
-    )
+    exists (select 1 from public.profiles
+            where profiles.user_id = auth.uid() and profiles.is_editor = true)
   );
 
--- 편집부 쓰기 (insert / update / delete)
 drop policy if exists "shop_products_write_editor" on public.shop_products;
 create policy "shop_products_write_editor" on public.shop_products
   for all using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and (
-          coalesce((to_jsonb(profiles)->>'is_editor')::boolean, false) = true
-          or coalesce((to_jsonb(profiles)->>'role'), '') = 'admin'
-        )
-    )
+    exists (select 1 from public.profiles
+            where profiles.user_id = auth.uid() and profiles.is_editor = true)
   )
   with check (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and (
-          coalesce((to_jsonb(profiles)->>'is_editor')::boolean, false) = true
-          or coalesce((to_jsonb(profiles)->>'role'), '') = 'admin'
-        )
-    )
+    exists (select 1 from public.profiles
+            where profiles.user_id = auth.uid() and profiles.is_editor = true)
   );
 
 -- updated_at 자동 갱신
