@@ -26,6 +26,57 @@
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
+.shop-store-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--text-dim, var(--border));
+  padding-bottom: 2px;
+  transition: color .15s, border-color .15s;
+}
+.shop-store-link:hover {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+.shop-store-arrow {
+  font-size: 11px;
+}
+
+.shop-more-cta {
+  margin: 48px auto 0;
+  padding: 32px 24px;
+  max-width: 720px;
+  text-align: center;
+  background: var(--bg-sub);
+  border-radius: 6px;
+}
+.shop-more-cta-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+.shop-more-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: #03c75a;
+  color: #fff !important;
+  font-weight: var(--fw-heading);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.shop-more-cta-btn:hover { opacity: 0.9; }
 
 .shop-toolbar {
   display: flex;
