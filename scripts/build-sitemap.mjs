@@ -37,6 +37,7 @@ addUrl(urls, '/films.html', { changefreq: 'monthly', priority: '0.8' });
 addUrl(urls, '/books.html', { changefreq: 'monthly', priority: '0.7' });
 addUrl(urls, '/labs.html', { changefreq: 'monthly', priority: '0.7' });
 addUrl(urls, '/market.html', { changefreq: 'weekly', priority: '0.7' });
+addUrl(urls, '/shop.html', { changefreq: 'weekly', priority: '0.8' });
 addUrl(urls, '/search.html', { changefreq: 'monthly', priority: '0.6' });
 addUrl(urls, '/authors.html', { changefreq: 'monthly', priority: '0.7' });
 addUrl(urls, '/about.html', { changefreq: 'monthly', priority: '0.6' });

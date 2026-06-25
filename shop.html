@@ -6,8 +6,6 @@
   <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shop | 5ft magazine</title>
-  <!-- 구독자 오픈 전까지 비공개. 검수 끝나면 이 줄 제거 + sitemap 등록 + nav 의 외부 Smart Store 링크를 /shop.html 로 전환. -->
-  <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="5ft magazine 이 고른 필름·카메라·굿즈. 결제는 Naver Smart Store 에서 진행됩니다.">
   <link rel="canonical" href="https://www.5ftmag.com/shop.html">
 
@@ -34,7 +32,7 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
   <link rel="stylesheet" href="./css/common.css?v=20260622-libtb">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/shop.css?v=20260622-cardrich">
+  <link rel="stylesheet" href="./css/shop.css?v=20260622-launch">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -52,7 +50,7 @@
       <li><a href="labs.html">Labs</a></li>
       <li><a href="market.html">Market</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
+      <li><a href="shop.html" class="current">Shop</a></li>
     </ul>
     <div class="nav-right">
       <a href="search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
@@ -67,7 +65,7 @@
     <a href="labs.html">Labs</a>
     <a href="market.html">Market</a>
     <a href="about.html">About</a>
-    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="shop.html">Shop</a>
   </nav>
 </header>
 
@@ -75,6 +73,7 @@
   <div class="shop-head">
     <h1 class="shop-title">Shop</h1>
     <p class="shop-sub">5ft magazine 이 고른 필름·카메라·굿즈. 결제는 Naver Smart Store 에서 진행됩니다.</p>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="shop-store-link">Smart Store 전체 카탈로그 보기 <span class="shop-store-arrow">↗</span></a>
   </div>
 
   <div class="shop-toolbar">
@@ -90,6 +89,14 @@
   <p class="shop-empty" id="shopEmpty" hidden>아직 등록된 상품이 없어요. 편집부가 곧 채워 넣습니다.</p>
 
   <div class="shop-grid" id="shopGrid" aria-label="상품 목록"></div>
+
+  <!-- 더 많은 상품: Smart Store 전체 카탈로그 -->
+  <aside class="shop-more-cta">
+    <p class="shop-more-cta-text">5ft 카탈로그에 없는 상품은 Smart Store 에서.</p>
+    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="shop-more-cta-btn">
+      Smart Store 에서 전체 보기 <span class="shop-store-arrow">↗</span>
+    </a>
+  </aside>
 </main>
 
 <!-- 상세 modal -->
@@ -118,6 +125,6 @@
 <script src="./js/site-common.js?v=20260615-chrome" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db-client.js?v=20260622-shoplive" defer></script>
-<script src="./js/shop-page.js?v=20260622-cardrich" defer></script>
+<script src="./js/shop-page.js?v=20260622-launch" defer></script>
 </body>
 </html>
