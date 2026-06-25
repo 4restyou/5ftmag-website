@@ -357,6 +357,19 @@
       color: var(--text);
       border-color: var(--text);
     }
+    .film-open-btn {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      background: var(--text);
+      color: var(--bg);
+      border-radius: 3px;
+      text-decoration: none;
+      transition: opacity .15s;
+    }
+    .film-open-btn:hover { opacity: 0.85; }
     .film-match {
       display: flex;
       align-items: center;
@@ -815,6 +828,15 @@ function getFilmMatchHint(filmText) {
   </div>`;
 }
 
+// 매칭된 필름의 라이브러리 링크 ('../films.html?film={slug}'). 매칭 없으면 ''.
+function getFilmOpenLink(filmText) {
+  if (!filmText || typeof window.findFilmMatch !== 'function') return '';
+  const match = window.findFilmMatch(filmText, STATE.films);
+  if (!match || !match.slug) return '';
+  const href = `../films.html?film=${encodeURIComponent(match.slug)}`;
+  return `<a class="film-open-btn" href="${href}" target="_blank" rel="noopener" title="라이브러리에서 이 필름 페이지 보기">필름 보기 ↗</a>`;
+}
+
 function renderCard(r) {
   const url = publicUrl(r.storage_path);
   const igNorm = (r.instagram || '').replace(/^@/, '');
@@ -863,6 +885,7 @@ function renderCard(r) {
           <span class="v">
             <span class="film-current">${escapeHtml(r.film || '-')}</span>
             <button class="film-edit-btn" data-action="edit-film" data-film="${escapeHtml(r.film || '')}">직접 수정</button>
+            ${getFilmOpenLink(r.film)}
             ${filmMatchHint}
           </span>
         </div>
