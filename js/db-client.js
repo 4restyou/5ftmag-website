@@ -568,19 +568,40 @@
   };
 
   // ─── 편집부 검토 — RLS 가 권한 검증 ───
+  // 응모 검토 — 필터 (query 텍스트 + month YYYY-MM) 공통 적용 헬퍼
+  function applyReviewFilters(q, opts) {
+    if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+    if (opts.query) {
+      // submitter_name / instagram / film 셋 중 하나라도 부분일치
+      const safe = String(opts.query).replace(/[%,\\]/g, ' ').trim();
+      if (safe) {
+        const pat = `%${safe}%`;
+        q = q.or(`submitter_name.ilike.${pat},instagram.ilike.${pat},film.ilike.${pat}`);
+      }
+    }
+    if (opts.month && /^\d{4}-\d{2}$/.test(opts.month)) {
+      const [Y, M] = opts.month.split('-').map(Number);
+      const start = `${opts.month}-01T00:00:00`;
+      const nextM = M === 12 ? `${Y + 1}-01` : `${Y}-${String(M + 1).padStart(2, '0')}`;
+      const end = `${nextM}-01T00:00:00`;
+      q = q.gte('created_at', start).lt('created_at', end);
+    }
+    return q;
+  }
+
   const review = {
     async count(status, opts = {}) {
       const c = client(); if (!c) return 0;
       let q = c.from('reader_submissions')
         .select('id', { count: 'exact', head: true }).eq('status', status);
-      if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+      q = applyReviewFilters(q, opts);
       const { count } = await q;
       return count || 0;
     },
     async list(status, from, to, opts = {}) {
       const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
       let q = c.from('reader_submissions').select('*').eq('status', status);
-      if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+      q = applyReviewFilters(q, opts);
       return q.order('created_at', { ascending: status === 'pending' }).range(from, to);
     },
     async patch(id, patch) {
@@ -607,7 +628,7 @@
     async listAll(status, opts = {}) {
       const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
       let q = c.from('reader_submissions').select('*').eq('status', status);
-      if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+      q = applyReviewFilters(q, opts);
       return q.order('created_at', { ascending: false }).limit(2000);
     },
   };
