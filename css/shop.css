@@ -159,17 +159,31 @@
   background: rgba(0, 0, 0, 0.7);
   color: #fff;
 }
+/* 품절 — 카드는 그대로 두되 시각적으로만 차별화 (상품 존재 정보 보존) */
 .shop-card-soldout {
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  font-size: 14px;
+  top: 10px; right: 10px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 10px;
   font-weight: var(--fw-heading);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 2px;
+}
+.shop-card.is-soldout .shop-card-thumb img {
+  filter: grayscale(1);
+  opacity: 0.7;
+  transition: filter .2s, opacity .2s;
+}
+.shop-card.is-soldout:hover .shop-card-thumb img {
+  opacity: 0.85;
+}
+.shop-card.is-soldout .shop-card-title,
+.shop-card.is-soldout .shop-card-price,
+.shop-card.is-soldout .shop-card-price-original {
+  color: var(--text-muted);
 }
 .shop-card-body {
   padding: 0;
