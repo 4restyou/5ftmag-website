@@ -111,7 +111,9 @@
   }
 
   function openModal(p) {
-    const imgs = (p.images || []).map(src => `
+    // 대표사진(첫 장) 은 카드에 이미 보이니 모달에선 제외, 추가 사진만 노출
+    const additionalImgs = (p.images || []).slice(1);
+    const imgs = additionalImgs.map(src => `
       <div class="shop-modal-img"><img decoding="async" src="${escapeAttr(normalizeImageUrl(src))}" alt="${escapeAttr(p.title)}" loading="lazy" /></div>
     `).join('');
     const priceLine = (p.originalPrice && p.originalPrice > p.price)
@@ -125,8 +127,9 @@
       ? `<div class="shop-modal-desc">${escapeHtml(p.description).replace(/\n/g, '<br>')}</div>`
       : '';
 
+    modalPanel.classList.toggle('has-images', !!imgs);
     modalPanel.innerHTML = `
-      <div class="shop-modal-images">${imgs || '<div class="shop-modal-img shop-modal-img-empty"></div>'}</div>
+      ${imgs ? `<div class="shop-modal-images">${imgs}</div>` : ''}
       <div class="shop-modal-info">
         <span class="shop-modal-cat">${escapeHtml(categoryLabel(p.category))}</span>
         <h2 class="shop-modal-title" id="shopModalTitle">${escapeHtml(p.title)}</h2>

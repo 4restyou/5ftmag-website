@@ -269,16 +269,21 @@
 .shop-modal-panel {
   background: var(--bg);
   color: var(--text);
-  max-width: 960px;
+  max-width: 640px;  /* 정보만 있을 때 좁게 */
   width: 100%;
   border-radius: 6px;
+  display: block;
+  overflow: hidden;
+}
+.shop-modal-panel.has-images {
+  /* 추가 사진 있을 때만 2열 (좌: 갤러리, 우: 정보) */
+  max-width: 960px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  overflow: hidden;
 }
 @media (max-width: 720px) {
-  .shop-modal-panel { grid-template-columns: 1fr; }
+  .shop-modal-panel.has-images { grid-template-columns: 1fr; }
 }
 
 .shop-modal-images {
