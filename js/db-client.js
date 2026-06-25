@@ -1832,6 +1832,15 @@
       const { error } = await c.from('shop_products').delete().eq('slug', slug);
       return { error };
     },
+    // 순서 batch 변경 — updates: [{ slug, sort_order }, ...]
+    async updateSortOrder(updates) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const results = await Promise.all(updates.map(u =>
+        c.from('shop_products').update({ sort_order: u.sort_order }).eq('slug', u.slug)
+      ));
+      const err = results.map(r => r.error).filter(Boolean)[0];
+      return err ? { error: err } : { data: results.length };
+    },
   };
 
   window.MagDB = {
