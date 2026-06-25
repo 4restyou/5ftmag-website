@@ -122,6 +122,42 @@
       background: var(--text);
       color: var(--bg);
     }
+    /* 승인됨/반려됨 탭 전용 — 검색 + 월별 필터 */
+    .admin-history-filters {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      background: var(--bg-sub);
+      border-radius: 4px;
+    }
+    .admin-history-filters input[type=search],
+    .admin-history-filters select {
+      font: inherit;
+      font-size: 13px;
+      padding: 7px 10px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .admin-history-filters input[type=search] {
+      flex: 1 1 240px;
+      min-width: 200px;
+    }
+    .admin-history-filters select { min-width: 130px; }
+    .history-reset {
+      font: inherit; font-size: 12px;
+      padding: 6px 10px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .history-reset:hover { color: var(--text); border-color: var(--border); }
     /* 테마만 보기 토글 — status 탭 옆 */
     .admin-tabs-spacer { flex: 1; }
     .admin-filter-chip {
@@ -496,6 +532,14 @@
     <button type="button" class="admin-filter-chip" id="likeSort" aria-pressed="false" title="종이 매거진 우수작 선정 보조용 — 편집부에만 보입니다">좋아요 순</button>
     <button type="button" class="admin-filter-chip" id="themeFilter" aria-pressed="false">테마 응모만</button>
   </div>
+  <!-- 승인됨/반려됨 탭 전용 검색·날짜 필터 -->
+  <div class="admin-history-filters" id="historyFilters" hidden>
+    <input type="search" id="historyQuery" placeholder="응모자·인스타·필름 으로 검색" aria-label="응모 검색" autocomplete="off" />
+    <select id="historyMonth" aria-label="월별 보기">
+      <option value="all">전체 기간</option>
+    </select>
+    <button type="button" class="history-reset" id="historyReset" hidden>초기화</button>
+  </div>
   <div class="admin-select-row" id="selectAllRow" hidden>
     <label><input type="checkbox" id="selectAll" /> <span id="selectAllLabel">보이는 사진 전체 선택</span></label>
   </div>
@@ -516,7 +560,7 @@
 <div class="img-zoom" id="imgZoom"><img decoding="async" id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="../js/db-client.js?v=20260620-anncfix" defer></script>
+<script src="../js/db-client.js?v=20260625-revfilter" defer></script>
 <script src="../js/image-processor.js?v=20260520-mobileupload" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20260602-camera-ui" defer></script>
@@ -542,6 +586,9 @@ const STATE = {
   likes: new Map(), // submission_id → like_count
   allRows: [],      // 좋아요 순 모드일 때 status 전체를 한 번 끌어와 정렬한 결과
   selected: new Set(), // bulk 처리용 — 선택된 submission id 집합
+  query: '',        // 응모자·필름 텍스트 검색 (승인됨/반려됨 만)
+  month: 'all',     // 'all' | 'YYYY-MM' — created_at 월별 필터 (승인됨/반려됨 만)
+  filteredCount: null, // 필터 적용 시 총 갯수 (페이지네이션용)
 };
 
 const PAGE_SIZE = 10;
@@ -604,6 +651,24 @@ async function loadCounts() {
   }
 }
 
+function isHistoryStatus() {
+  return STATE.status === 'approved' || STATE.status === 'rejected';
+}
+
+function isHistoryFilterActive() {
+  return isHistoryStatus() && ((STATE.query && STATE.query.trim()) || (STATE.month && STATE.month !== 'all'));
+}
+
+// review.list/count 에 넘길 opts 빌더 — themeOnly 와 (승인됨/반려됨에서만) query/month 합침
+function buildReviewOpts() {
+  const opts = { themeOnly: STATE.themeOnly };
+  if (isHistoryStatus()) {
+    if (STATE.query && STATE.query.trim()) opts.query = STATE.query.trim();
+    if (STATE.month && STATE.month !== 'all') opts.month = STATE.month;
+  }
+  return opts;
+}
+
 async function loadLikes() {
   STATE.likes = await db().review.adminLikeCounts();
 }
@@ -615,7 +680,7 @@ async function loadList() {
 
   // ── 좋아요 순 모드 ── status 안의 모든 row 한 번에 끌어와 정렬 후 클라이언트 페이지네이션
   if (STATE.likeSort) {
-    const { data, error } = await db().review.listAll(STATE.status, { themeOnly: STATE.themeOnly });
+    const { data, error } = await db().review.listAll(STATE.status, buildReviewOpts());
     if (error) {
       $('list').innerHTML = `<div class="empty-state">검토 큐를 불러오지 못했습니다.<br><small>${escapeHtml(error.message)}</small></div>`;
       return;
@@ -650,14 +715,23 @@ async function loadList() {
   }
 
   // ── 기본 모드 (서버 페이지네이션, 시간순) ──
-  const total = STATE.counts[STATE.status] || 0;
+  // 필터 적용 시엔 별도 count 쿼리로 페이지 수 계산 (themeOnly 의 STATE.counts 와 다름)
+  const opts = buildReviewOpts();
+  let total;
+  if (isHistoryFilterActive()) {
+    total = await db().review.count(STATE.status, opts);
+    STATE.filteredCount = total;
+  } else {
+    total = STATE.counts[STATE.status] || 0;
+    STATE.filteredCount = null;
+  }
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   if (STATE.page > totalPages) STATE.page = totalPages;
   if (STATE.page < 1) STATE.page = 1;
   const from = (STATE.page - 1) * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
 
-  const { data, error } = await db().review.list(STATE.status, from, to, { themeOnly: STATE.themeOnly });
+  const { data, error } = await db().review.list(STATE.status, from, to, opts);
 
   if (error) {
     $('list').innerHTML = `<div class="empty-state">검토 큐를 불러오지 못했습니다. 새로고침 후에도 반복되면 DB 권한을 확인해 주세요.<br><small>${escapeHtml(error.message)}</small></div>`;
@@ -907,9 +981,68 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     STATE.selected.clear();
     updateBulkBar();
     updateSelectAllRow();
+    updateHistoryFiltersVisibility();
     loadList();
   });
 });
+
+// ── 승인됨/반려됨 전용 검색 + 월별 필터 ──
+function updateHistoryFiltersVisibility() {
+  const wrap = $('historyFilters');
+  if (!wrap) return;
+  wrap.hidden = !isHistoryStatus();
+}
+
+function populateMonthOptions() {
+  const sel = $('historyMonth');
+  if (!sel) return;
+  // 최근 24개월. 가벼운 고정 윈도우 (DB 별도 조회 안 함).
+  const now = new Date();
+  const opts = ['<option value="all">전체 기간</option>'];
+  for (let i = 0; i < 24; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const Y = d.getFullYear();
+    const M = String(d.getMonth() + 1).padStart(2, '0');
+    opts.push(`<option value="${Y}-${M}">${Y}년 ${Number(M)}월</option>`);
+  }
+  sel.innerHTML = opts.join('');
+}
+populateMonthOptions();
+
+function updateHistoryResetVisibility() {
+  const btn = $('historyReset');
+  if (!btn) return;
+  btn.hidden = !((STATE.query && STATE.query.trim()) || (STATE.month && STATE.month !== 'all'));
+}
+
+let _qTimer = null;
+$('historyQuery').addEventListener('input', (e) => {
+  const v = e.target.value;
+  clearTimeout(_qTimer);
+  _qTimer = setTimeout(() => {
+    if (STATE.query === v) return;
+    STATE.query = v;
+    STATE.page = 1;
+    updateHistoryResetVisibility();
+    loadList();
+  }, 250);
+});
+$('historyMonth').addEventListener('change', (e) => {
+  STATE.month = e.target.value;
+  STATE.page = 1;
+  updateHistoryResetVisibility();
+  loadList();
+});
+$('historyReset').addEventListener('click', () => {
+  STATE.query = '';
+  STATE.month = 'all';
+  $('historyQuery').value = '';
+  $('historyMonth').value = 'all';
+  STATE.page = 1;
+  updateHistoryResetVisibility();
+  loadList();
+});
+updateHistoryFiltersVisibility();
 
 // ── 일괄 처리 ──
 function updateBulkBar() {
