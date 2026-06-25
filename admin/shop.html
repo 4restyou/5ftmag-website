@@ -31,6 +31,15 @@
     .shop-table .col-slug { font-size: 12px; color: var(--text-muted); font-family: ui-monospace, monospace; }
     .shop-table .col-price { font-variant-numeric: tabular-nums; text-align: right; }
     .shop-table .col-actions { text-align: right; white-space: nowrap; }
+    .shop-table tr[draggable] { cursor: grab; }
+    .shop-table tr.dragging { opacity: 0.4; cursor: grabbing; }
+    .shop-table tr.drag-over-before td { box-shadow: inset 0 2px 0 var(--text); }
+    .shop-table tr.drag-over-after td { box-shadow: inset 0 -2px 0 var(--text); }
+    .drag-handle { font: inherit; padding: 4px 6px; background: transparent; border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted); cursor: grab; line-height: 1; user-select: none; }
+    .drag-handle:hover { color: var(--text); border-color: var(--text); }
+    .drag-handle:active { cursor: grabbing; }
+    .drag-handle[disabled] { opacity: 0.3; cursor: not-allowed; }
+    .drag-hint { font-size: 11px; color: var(--text-muted); margin: 4px 0 0; }
     .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; }
     .badge.unpub { background: var(--bg-sub); color: var(--text-muted); }
     .badge.pub { background: var(--text); color: var(--bg); }
@@ -264,7 +273,7 @@
 <script src="../js/util.js?v=20260620-schedule" defer></script>
 <script src="../js/site-common.js?v=20260615-chrome" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="../js/db-client.js?v=20260622-shop" defer></script>
-<script src="../js/admin-shop-page.js?v=20260622-slugfix" defer></script>
+<script src="../js/db-client.js?v=20260625-reorder" defer></script>
+<script src="../js/admin-shop-page.js?v=20260625-reorder" defer></script>
 </body>
 </html>

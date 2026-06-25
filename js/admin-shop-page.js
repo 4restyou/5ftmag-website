@@ -87,6 +87,10 @@ function render() {
   }
   empty.hidden = true;
 
+  // 순서 변경은 전체 보기 + 검색어 없을 때만 가능 (필터 중엔 의미 모호)
+  const canDrag = STATE.filter.trim() === '' && STATE.cat === 'all';
+  // 기존 hint 제거 (매번 render 마다 깨끗이)
+  document.querySelectorAll('.drag-hint').forEach(el => el.remove());
   tbody.innerHTML = filtered.map(r => {
     const thumb = (Array.isArray(r.images) && r.images[0])
       ? `<img src="${escapeAttr(r.images[0])}" alt="" loading="lazy" />`
@@ -97,8 +101,12 @@ function render() {
         : '<span class="badge unpub">초안</span>',
       r.available === false ? '<span class="badge soldout">품절</span>' : '',
     ].filter(Boolean).join(' ');
+    const dragAttr = canDrag ? 'draggable="true"' : '';
+    const dragBtn = canDrag
+      ? `<button type="button" class="drag-handle" title="드래그해서 순서 변경" aria-label="순서 변경 핸들">⋮⋮</button>`
+      : `<button type="button" class="drag-handle" disabled title="전체 보기에서만 순서 변경 가능">⋮⋮</button>`;
     return `
-      <tr data-slug="${escapeAttr(r.slug)}">
+      <tr data-slug="${escapeAttr(r.slug)}" ${dragAttr}>
         <td class="col-thumb">${thumb}</td>
         <td>
           <div class="col-title">${escapeHtml(r.title)}</div>
@@ -108,11 +116,18 @@ function render() {
         <td class="col-price">${escapeHtml(fmtPrice(r.price))}</td>
         <td>${statusBadges}</td>
         <td class="col-actions">
+          ${dragBtn}
           <button type="button" class="row-btn" data-action="edit" data-slug="${escapeAttr(r.slug)}">편집</button>
         </td>
       </tr>
     `;
   }).join('');
+  if (!canDrag) {
+    const hint = document.createElement('p');
+    hint.className = 'drag-hint';
+    hint.textContent = '※ 순서 변경은 필터·검색 해제 후 가능합니다.';
+    tbody.parentElement.parentElement.appendChild(hint);
+  }
 }
 
 // ────────── 폼 ──────────
@@ -213,6 +228,78 @@ async function deleteRow() {
   await reload();
 }
 
+// ────────── Drag & Drop 순서 변경 ──────────
+let dragSrcSlug = null;
+
+function clearDragOver() {
+  document.querySelectorAll('.shop-table tr.drag-over-before, .shop-table tr.drag-over-after')
+    .forEach(el => el.classList.remove('drag-over-before', 'drag-over-after'));
+}
+
+async function applyReorder(srcSlug, targetSlug, before) {
+  // STATE.rows 안에서 src 를 target 의 앞 (before=true) 또는 뒤로 이동.
+  const src = STATE.rows.find(r => r.slug === srcSlug);
+  const target = STATE.rows.find(r => r.slug === targetSlug);
+  if (!src || !target || src.slug === target.slug) return;
+  const without = STATE.rows.filter(r => r.slug !== srcSlug);
+  const targetIdx = without.findIndex(r => r.slug === targetSlug);
+  const insertIdx = before ? targetIdx : targetIdx + 1;
+  without.splice(insertIdx, 0, src);
+  STATE.rows = without;
+  // 새 sort_order: 10 간격
+  const updates = STATE.rows.map((r, i) => {
+    const newOrder = (i + 1) * 10;
+    r.sort_order = newOrder;
+    return { slug: r.slug, sort_order: newOrder };
+  });
+  render();  // 낙관적 렌더
+  const { error } = await db().shop.updateSortOrder(updates);
+  if (error) {
+    alert('순서 저장 실패: ' + (error.message || '알 수 없음') + '\n새로고침해서 실제 상태 확인하세요.');
+    await reload();
+  }
+}
+
+function bindDrag() {
+  const tbody = $('rows');
+  tbody.addEventListener('dragstart', (e) => {
+    const tr = e.target.closest('tr[draggable]');
+    if (!tr) return;
+    dragSrcSlug = tr.dataset.slug;
+    tr.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragSrcSlug);
+  });
+  tbody.addEventListener('dragend', (e) => {
+    const tr = e.target.closest('tr[draggable]');
+    if (tr) tr.classList.remove('dragging');
+    clearDragOver();
+    dragSrcSlug = null;
+  });
+  tbody.addEventListener('dragover', (e) => {
+    const tr = e.target.closest('tr[draggable]');
+    if (!tr || !dragSrcSlug || tr.dataset.slug === dragSrcSlug) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    clearDragOver();
+    const rect = tr.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+    tr.classList.add(before ? 'drag-over-before' : 'drag-over-after');
+  });
+  tbody.addEventListener('drop', (e) => {
+    const tr = e.target.closest('tr[draggable]');
+    if (!tr || !dragSrcSlug || tr.dataset.slug === dragSrcSlug) return;
+    e.preventDefault();
+    const rect = tr.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+    const srcSlug = dragSrcSlug;
+    const targetSlug = tr.dataset.slug;
+    dragSrcSlug = null;
+    clearDragOver();
+    applyReorder(srcSlug, targetSlug, before);
+  });
+}
+
 // ────────── 이벤트 ──────────
 $('newBtn').addEventListener('click', () => openForm(null));
 $('cancelBtn').addEventListener('click', closeForm);
@@ -236,5 +323,6 @@ $('rows').addEventListener('click', (e) => {
   const ok = await checkAccess();
   if (!ok) return;
   $('app').hidden = false;
+  bindDrag();
   await reload();
 })();
