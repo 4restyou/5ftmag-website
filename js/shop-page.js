@@ -110,6 +110,44 @@
     });
   }
 
+  // 토스트
+  function flashToast(msg) {
+    let t = document.querySelector('.shop-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.className = 'shop-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('is-show');
+    clearTimeout(t._hideTimer);
+    t._hideTimer = setTimeout(() => t.classList.remove('is-show'), 2200);
+  }
+
+  function shareUrlFor(slug) {
+    const u = new URL(window.location.href);
+    u.searchParams.set('p', slug);
+    u.hash = '';
+    return u.toString();
+  }
+
+  async function shareProduct(p) {
+    const url = shareUrlFor(p.slug);
+    const shareData = { title: `${p.title} | 5ft magazine Shop`, text: p.excerpt || '', url };
+    try {
+      if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch (_) { /* 사용자 취소·실패 → 클립보드 fallback */ }
+    try {
+      await navigator.clipboard.writeText(url);
+      flashToast('링크 복사됨');
+    } catch (_) {
+      flashToast(url);
+    }
+  }
+
   function openModal(p) {
     const imgs = (p.images || []).map(src => `
       <div class="shop-modal-img"><img decoding="async" src="${escapeAttr(normalizeImageUrl(src))}" alt="${escapeAttr(p.title)}" loading="lazy" /></div>
@@ -133,7 +171,16 @@
         <div class="shop-modal-price-row">${priceLine}</div>
         ${p.excerpt ? `<p class="shop-modal-excerpt">${escapeHtml(p.excerpt)}</p>` : ''}
         ${description}
-        ${buyButton}
+        <div class="shop-modal-actions">
+          ${buyButton}
+          <button type="button" class="shop-share-btn" data-action="share-product" data-slug="${escapeAttr(p.slug)}" aria-label="이 상품 공유">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            공유
+          </button>
+        </div>
         <p class="shop-modal-note">
           <strong>재고·가격은 Smart Store 에서 최종 확인해 주세요.</strong> 사이트 정보와 다를 수 있습니다.
           ${p.updatedAt ? `<br><span class="shop-modal-checked">(마지막 확인: ${escapeHtml(lastCheckedHtml(p.updatedAt))})</span>` : ''}
@@ -143,12 +190,34 @@
     `;
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set('p', p.slug);
+      history.replaceState({ shopSlug: p.slug }, '', u.toString());
+    } catch (_) {}
   }
 
   function closeModal() {
     modal.hidden = true;
     document.body.style.overflow = '';
+    try {
+      const u = new URL(window.location.href);
+      if (u.searchParams.has('p')) {
+        u.searchParams.delete('p');
+        history.replaceState({}, '', u.toString());
+      }
+    } catch (_) {}
   }
+
+  // 모달 안 공유 버튼 위임
+  modal.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action="share-product"]');
+    if (btn) {
+      const slug = btn.dataset.slug;
+      const p = STATE.products.find(x => x.slug === slug);
+      if (p) shareProduct(p);
+    }
+  });
 
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
@@ -239,6 +308,14 @@
       STATE.products = data;
       updateChipCounts();
       applyFilter();
+      // ?p={slug} 로 진입 시 해당 상품 자동 모달
+      try {
+        const slug = new URL(window.location.href).searchParams.get('p');
+        if (slug) {
+          const p = STATE.products.find(x => x.slug === slug);
+          if (p) openModal(p);
+        }
+      } catch (_) {}
     })
     .catch(err => {
       console.error('[shop] load 실패:', err);
