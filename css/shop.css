@@ -269,16 +269,21 @@
 .shop-modal-panel {
   background: var(--bg);
   color: var(--text);
-  max-width: 960px;
+  max-width: 640px;  /* 정보만 있을 때 좁게 */
   width: 100%;
   border-radius: 6px;
+  display: block;
+  overflow: hidden;
+}
+.shop-modal-panel.has-images {
+  /* 추가 사진 있을 때만 2열 (좌: 갤러리, 우: 정보) */
+  max-width: 960px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  overflow: hidden;
 }
 @media (max-width: 720px) {
-  .shop-modal-panel { grid-template-columns: 1fr; }
+  .shop-modal-panel.has-images { grid-template-columns: 1fr; }
 }
 
 .shop-modal-images {
@@ -344,6 +349,60 @@
   color: var(--text);
   word-break: keep-all;
   overflow-wrap: anywhere;
+}
+
+.shop-modal-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+.shop-modal-actions .shop-buy-btn {
+  flex: 1 1 auto;
+  margin-top: 0;
+}
+.shop-share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 18px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: border-color .15s, background .15s;
+}
+.shop-share-btn:hover {
+  border-color: var(--text);
+  background: var(--bg-sub);
+}
+
+.shop-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  padding: 10px 18px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2000;
+  transition: opacity .15s, transform .15s;
+}
+.shop-toast.is-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .shop-buy-btn {
