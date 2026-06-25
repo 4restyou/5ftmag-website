@@ -217,12 +217,15 @@
 }
 .shop-card-price-row {
   font-size: 15px;
+  line-height: 1.4;
+  color: var(--text);
   display: flex;
   align-items: baseline;
   gap: 8px;
   margin-top: auto;
 }
 .shop-card-price {
+  color: var(--text);
   font-weight: var(--fw-heading);
   font-variant-numeric: tabular-nums;
 }
