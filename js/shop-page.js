@@ -56,14 +56,16 @@
     const priceLine = (p.originalPrice && p.originalPrice > p.price)
       ? `<span class="shop-card-price-original">${escapeHtml(fmtPrice(p.originalPrice))}</span> <span class="shop-card-price">${escapeHtml(fmtPrice(p.price))}</span>`
       : `<span class="shop-card-price">${escapeHtml(fmtPrice(p.price))}</span>`;
-    const soldOut = p.available === false
+    const isSoldOut = p.available === false;
+    const soldOut = isSoldOut
       ? '<span class="shop-card-soldout">품절</span>'
       : '';
     const excerpt = p.excerpt
       ? `<p class="shop-card-excerpt">${escapeHtml(p.excerpt)}</p>`
       : '';
+    const cardClass = isSoldOut ? 'shop-card is-soldout' : 'shop-card';
     return `
-      <button type="button" class="shop-card" data-slug="${escapeAttr(p.slug)}">
+      <button type="button" class="${cardClass}" data-slug="${escapeAttr(p.slug)}">
         <div class="shop-card-thumb">
           ${thumb}
           <span class="shop-card-cat">${escapeHtml(categoryLabel(p.category))}</span>
