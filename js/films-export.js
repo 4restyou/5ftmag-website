@@ -331,7 +331,7 @@
 
     let textRightX = width - pad;
     if (filmThumb) {
-      const canImg = await loadCanvasImage(filmThumb);
+      const canImg = await loadCanvasImage(filmThumb, true);
       const thumbH = Math.round(headerH * 0.88);
       const thumbW = canImg
         ? Math.round(canImg.width * (thumbH / canImg.height))
