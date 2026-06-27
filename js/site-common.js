@@ -1022,37 +1022,12 @@
   function bellIconSvg() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18a2 2 0 0 0 4 0"/></svg>';
   }
-  async function setupNotifications() {
+  // 종 버튼만 헤더에 보장 — DB·로그인 준비와 무관하게 항상 노출.
+  function injectNotifBell() {
     const navRight = document.querySelector('.nav-right');
-    if (!navRight) return;
-    if (document.documentElement.dataset.notifBound === '1') return;
-
-    // db-client 준비 + 로그인 여부 확인
-    for (let i = 0; i < 60; i++) {
-      if (window.MagDB && window.MagDB.isReady()) break;
-      await new Promise(r => setTimeout(r, 50));
-    }
-    if (!window.MagDB || !window.MagDB.isReady()) return;
-    let session = null;
-    try { session = await window.MagDB.auth.getSession(); } catch (_) {}
-
-    // auth 변화 시 다시 호출되도록 — onChange 한 번만 바인딩
-    if (typeof window.MagDB.auth.onChange === 'function' && !document.documentElement.dataset.notifAuthBound) {
-      document.documentElement.dataset.notifAuthBound = '1';
-      window.MagDB.auth.onChange((_event, _next) => {
-        // 로그인 상태 변경 시 종 inject/remove 재시도
-        const btn = document.getElementById('notifBell');
-        if (btn) btn.remove();
-        const panel = document.getElementById('notifPanel');
-        if (panel) panel.remove();
-        document.documentElement.dataset.notifBound = '';
-        setupNotifications();
-      });
-    }
-
-    document.documentElement.dataset.notifBound = '1';
-
-    // 종 버튼 inject — theme 버튼 앞. 비로그인도 노출해서 알림 시스템 존재를 알린다.
+    if (!navRight) return null;
+    const existing = document.getElementById('notifBell');
+    if (existing) return existing;
     const themeBtn = document.getElementById('themeBtn');
     const bell = document.createElement('button');
     bell.id = 'notifBell';
@@ -1063,8 +1038,40 @@
     bell.innerHTML = bellIconSvg() + '<span class="notif-badge" id="notifBadge" hidden></span>';
     if (themeBtn) navRight.insertBefore(bell, themeBtn);
     else navRight.appendChild(bell);
+    return bell;
+  }
 
-    // 비로그인 사용자 — 종을 누르면 로그인 안내 패널만 노출
+  async function setupNotifications() {
+    const navRight = document.querySelector('.nav-right');
+    if (!navRight) return;
+    // 종은 항상 먼저 띄운다(아래 DB 대기·세션 확인과 무관하게).
+    const bell = injectNotifBell();
+    if (!bell) return;
+    if (document.documentElement.dataset.notifBound === '1') return;
+
+    // db-client 준비 대기 (종은 이미 떠 있음)
+    for (let i = 0; i < 60; i++) {
+      if (window.MagDB && window.MagDB.isReady()) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    const ready = !!(window.MagDB && window.MagDB.isReady());
+    let session = null;
+    if (ready) { try { session = await window.MagDB.auth.getSession(); } catch (_) {} }
+
+    // auth 변화 시 패널만 다시 구성 — 종 자체는 유지. onChange 한 번만 바인딩.
+    if (ready && typeof window.MagDB.auth.onChange === 'function' && !document.documentElement.dataset.notifAuthBound) {
+      document.documentElement.dataset.notifAuthBound = '1';
+      window.MagDB.auth.onChange((_event, _next) => {
+        const panel = document.getElementById('notifPanel');
+        if (panel) panel.remove();
+        document.documentElement.dataset.notifBound = '';
+        setupNotifications();
+      });
+    }
+
+    document.documentElement.dataset.notifBound = '1';
+
+    // 비로그인(또는 DB 미준비) — 종을 누르면 로그인 안내 패널만 노출
     if (!session) {
       const guestPanel = document.createElement('div');
       guestPanel.id = 'notifPanel';
