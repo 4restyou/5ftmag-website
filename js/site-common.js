@@ -1637,7 +1637,7 @@
   }
 
 
-  // ── PWA service worker 등록 + "PC 화면으로 보기" 토글 ──
+  // ── PWA service worker 등록 ──
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
@@ -1673,10 +1673,9 @@
       if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
     }
   }
-  // 최초 로드 시 저장된 설정 적용
-  if (isForceDesktop()) setForceDesktop(true);
+  // 'PC 화면으로 보기' 기능 제거 — 이전에 켜둔 사용자는 다음 로드 때 모바일로 복귀.
+  if (isForceDesktop()) setForceDesktop(false);
 
-  // 햄버거 메뉴에 "PC 화면으로 보기" 토글 항목 추가
   // PWA standalone (홈 화면 추가 후) 감지 — 앱 모드에선 chrome 단순화.
   function isStandalonePwa() {
     try {
@@ -1686,64 +1685,6 @@
   }
   if (isStandalonePwa()) {
     document.documentElement.classList.add('is-standalone-pwa');
-  }
-
-  function injectDesktopToggle() {
-    // PWA standalone (홈 화면 추가) 사용자에겐 의미 없는 토글 — 숨김.
-    if (isStandalonePwa()) return;
-    const nav = document.getElementById('mobileNav');
-    if (!nav || nav.querySelector('[data-action="toggle-desktop"]')) return;
-    const a = document.createElement('button');
-    a.type = 'button';
-    a.dataset.action = 'toggle-desktop';
-    a.style.cssText = 'display:block; width:100%; text-align:left; background:none; border:none; padding:14px 20px; font:inherit; color:inherit; cursor:pointer; border-top:1px solid var(--border); margin-top:8px;';
-    a.textContent = isForceDesktop() ? '✓ PC 화면으로 보기' : '☐ PC 화면으로 보기';
-    a.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const next = !isForceDesktop();
-      setForceDesktop(next);
-      a.textContent = next ? '✓ PC 화면으로 보기' : '☐ PC 화면으로 보기';
-      // 모바일 nav 닫고 새로고침해서 레이아웃 다시 잡기
-      setTimeout(() => location.reload(), 120);
-    });
-    nav.appendChild(a);
-  }
-
-  // PC 강제 모드일 때 우하단에 "모바일 화면으로" 플로팅 버튼 표시.
-  // 데스크탑 헤더에는 햄버거 메뉴가 숨겨져서 토글로 되돌릴 수 없는 문제 해결.
-  function injectMobileBackButton() {
-    if (!isForceDesktop()) return;
-    if (isStandalonePwa()) return; // PWA 모드면 PC 강제 자체가 안 일어나야 함
-    if (document.getElementById('mhBackToMobile')) return;
-    const btn = document.createElement('button');
-    btn.id = 'mhBackToMobile';
-    btn.type = 'button';
-    btn.textContent = '📱 모바일 화면으로';
-    btn.style.cssText = [
-      'position:fixed', 'right:16px', 'bottom:16px', 'z-index:9999',
-      'font:inherit', 'font-size:13px', 'font-weight:600',
-      'padding:10px 16px', 'border:1px solid #111', 'border-radius:999px',
-      'background:#fff', 'color:#111', 'cursor:pointer',
-      'box-shadow:0 4px 16px rgba(0,0,0,0.18)',
-    ].join(';');
-    btn.addEventListener('click', () => {
-      setForceDesktop(false);
-      location.reload();
-    });
-    document.body.appendChild(btn);
-  }
-
-  // URL 쿼리로도 해제 가능: ?mobile=1 진입 시 강제 해제 + 쿼리 정리
-  function handleMobileQuery() {
-    try {
-      const u = new URL(location.href);
-      if (u.searchParams.get('mobile') === '1' && isForceDesktop()) {
-        setForceDesktop(false);
-        u.searchParams.delete('mobile');
-        history.replaceState(null, '', u.toString());
-        location.reload();
-      }
-    } catch (_) {}
   }
 
   // 모바일 사진 올리기 FAB — films·me·홈에서만 노출.
@@ -1799,9 +1740,6 @@
 
   function bootPwa() {
     registerServiceWorker();
-    handleMobileQuery();
-    injectDesktopToggle();
-    injectMobileBackButton();
     injectUploadFab();
   }
 
