@@ -15,6 +15,7 @@
 
   let _client = null;
   let _originRestoreInstalled = false;
+  let _resumeInstalled = false;
 
   // /admin/ 페이지 여부. 관리 화면은 토큰 유효시간 내의 짧은 편집 세션이라
   // 자동 갱신이 필요 없고, 자동 갱신을 끄면 아래 데드락 자체가 사라진다.
@@ -53,7 +54,32 @@
       },
     });
     installOriginRestore();
+    installVisibilityResume();
     return _client;
+  }
+
+  // iOS/모바일에서 다른 앱·탭에 다녀온 뒤 돌아오면, 백그라운드 동안 멈췄던
+  // 인증 요청·타이머가 클라이언트를 wedge 시켜 이후 저장·로드가 모두 멈추는
+  // 사례가 있다. 복귀 시점에 인증 락 체인을 풀고(다음 호출이 막히지 않게)
+  // 자동 갱신을 다시 돌리며 토큰을 미리 갱신해, 다음 사용자 동작이 깨끗한
+  // 상태에서 시작하도록 한다.
+  function installVisibilityResume() {
+    if (_resumeInstalled) return;
+    _resumeInstalled = true;
+    const onShow = () => {
+      _authLockChain = Promise.resolve();
+      if (!IS_ADMIN_PAGE) { try { _client?.auth?.startAutoRefresh?.(); } catch (_) {} }
+      // 네트워크가 살아있는 지금 토큰을 선갱신(가드 포함, 결과 무시).
+      try { withTimeout(_client.auth.getSession(), 7000, 'resume').catch(() => {}); } catch (_) {}
+    };
+    const onHide = () => {
+      if (!IS_ADMIN_PAGE) { try { _client?.auth?.stopAutoRefresh?.(); } catch (_) {} }
+    };
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') onShow(); else onHide();
+    });
+    // iOS bfcache 복귀 (visibilitychange 가 안 오는 경우 대비)
+    window.addEventListener('pageshow', (e) => { if (e.persisted) onShow(); });
   }
   function normalizeReturnUrl(value) {
     try {
@@ -133,10 +159,26 @@
 
   const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+  // 인증 네트워크 호출이 (백그라운드 복귀 등으로) 영영 안 끝날 때를 대비한 가드.
+  // ms 안에 안 끝나면 거부해 상위에서 빠르게 재시도/에러표시 할 수 있게 한다.
+  function withTimeout(promise, ms, label) {
+    let timer;
+    const guard = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error((label || 'auth') + ' timeout')), ms);
+    });
+    return Promise.race([promise, guard]).finally(() => clearTimeout(timer));
+  }
+
   async function session() {
     const c = client(); if (!c) return null;
     for (let i = 0; i < 24; i++) {
-      const { data } = await c.auth.getSession();
+      let data;
+      try {
+        ({ data } = await withTimeout(c.auth.getSession(), 7000, 'getSession'));
+      } catch (_) {
+        // 멈춘 인증 호출 — 무한 대기 대신 빠르게 포기 (resume 복구 + 재시도로 회복)
+        return null;
+      }
       if (data.session) return data.session;
       if (i < 23) await wait(150);
     }
@@ -152,8 +194,12 @@
     getSession: session,
     async getUser() {
       const c = client(); if (!c) return null;
-      const { data } = await c.auth.getUser();
-      return data.user;
+      try {
+        const { data } = await withTimeout(c.auth.getUser(), 7000, 'getUser');
+        return data.user;
+      } catch (_) {
+        return null;
+      }
     },
     async signInWithGoogle(redirectTo) {
       const c = client(); if (!c) throw new Error('client unavailable');
@@ -477,7 +523,7 @@
       }
       let accessToken = null;
       try {
-        const { data } = await c.auth.getSession();
+        const { data } = await withTimeout(c.auth.getSession(), 7000, 'getSession');
         accessToken = data?.session?.access_token || null;
       } catch (_) {}
       if (!accessToken) return { error: { message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.' } };
@@ -1585,7 +1631,7 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const clean = String(body || '').trim();
       if (!clean || clean.length > 500) return { error: { message: 'body 1~500자' } };
-      const uid = (await c.auth.getUser()).data?.user?.id || null;
+      const uid = await userId();
       const row = { body: clean, created_by: uid };
       if (starts_at) row.starts_at = starts_at;
       if (ends_at) row.ends_at = ends_at;
@@ -1633,7 +1679,7 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const payload = { ...row };
       if (!payload.created_by) {
-        try { payload.created_by = (await c.auth.getUser()).data?.user?.id || null; } catch (_) {}
+        try { payload.created_by = await userId(); } catch (_) {}
       }
       const onConflict = payload.id ? undefined : 'slug';
       const { data, error } = await c.from('article_drafts')
