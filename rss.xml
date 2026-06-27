@@ -6,13 +6,40 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Sat, 20 Jun 2026 12:19:42 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 27 Jun 2026 15:43:02 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>사진을 찍기만 하고, 보여주지 않은 사람</title>
+      <link>https://www.5ftmag.com/stories/vivian-maier.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/vivian-maier.html</guid>
+      <pubDate>Sat, 27 Jun 2026 00:00:00 GMT</pubDate>
+      <description>평생 남의 집 아이를 돌보며 15만 장을 찍은 유모 비비안 마이어. 롤라이플렉스로 거리를 담고, 현상조차 안 한 채 떠난 사진가의 이야기.</description>
+      <category>PHOTOGRAPHER</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
+    <item>
+      <title>마틴 파, 그가 떠난 뒤의 첫 회고전. 7월 서울</title>
+      <link>https://www.5ftmag.com/stories/martin-parr-sema-2026.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/martin-parr-sema-2026.html</guid>
+      <pubDate>Wed, 24 Jun 2026 00:00:00 GMT</pubDate>
+      <description>매그넘의 사진가 마틴 파가 지난 12월 세상을 떠났다. 그를 보내고 처음 열리는 아시아 대규모 회고전이 7월 16일 서울시립 사진미술관에서 시작된다. 약 500점, 14개 시리즈, 89권의 사진집. 2000년대 초 남북한 촬영분도 처음 공개된다.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>브리스냅 필름헛소리 02 — 보물찾기 같은 필름 중고카메라 구매</title>
+      <link>https://www.5ftmag.com/stories/brisnap-02.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/brisnap-02.html</guid>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 GMT</pubDate>
+      <description>호주 시골 할아버지의 슬라이드, 70년 묵은 코닥 브라우니 안의 필름, 게라지 세일에서 건진 한 뭉치. 필름카메라 중고거래에서 만난 세 번의 시간여행.</description>
+      <category>ESSAY</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Brisnap TV</dc:creator>
+    </item>
     <item>
       <title>같은 에멀젼, 다른 네 이름. Optik OptiColour 200 의 정체</title>
       <link>https://www.5ftmag.com/stories/optik-opticolour-200.html</link>
@@ -181,7 +208,7 @@
       <guid isPermaLink="true">https://www.5ftmag.com/stories/15.html</guid>
       <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
       <description>할리우드 영화용 필름 Kodak Vision3 500T가 C-41 현상소에서 쓸 수 있게 변종으로 태어났다. 붉은 할레이션과 ISO 800의 자유, 텅스텐의 양면성과 거친 그레인까지 — 일상을 영화의 한 장면으로 바꾸는 필름.</description>
-      <category>FILM REVIEW</category>
+      <category>FILM</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
     </item>
     <item>
@@ -208,7 +235,7 @@
       <guid isPermaLink="true">https://www.5ftmag.com/stories/12.html</guid>
       <pubDate>Fri, 08 May 2026 00:00:00 GMT</pubDate>
       <description>박스형 디자인, 큼직한 다이얼, 그리고 매끈한 셔터. 보이그랜더의 마지막 자존심이 담긴 작은 카메라 — 60년대의 라디오를 닮은 비테사 500 AE를 앨리카메라 강혜원 대표가 들여다본다.</description>
-      <category>CAMERA REVIEW</category>
+      <category>CAMERA</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">강혜원 (앨리카메라 대표)</dc:creator>
     </item>
     <item>
@@ -226,7 +253,7 @@
       <guid isPermaLink="true">https://www.5ftmag.com/stories/11.html</guid>
       <pubDate>Sun, 08 Feb 2026 00:00:00 GMT</pubDate>
       <description>디지털의 무결점에는 &apos;감정&apos;이 없다. 〈캐롤〉의 16mm 겨울 공기부터 〈오펜하이머〉의 묵직한 흑백 IMAX까지, 필름이 빛으로 새긴 10편의 시네마. Vol.02 〈Feature〉에서 다룬 영화 중 다섯 편을 먼저 만나본다.</description>
-      <category>FEATURE</category>
+      <category>EDITORIAL</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
     </item>
     <item>
@@ -271,7 +298,7 @@
       <guid isPermaLink="true">https://www.5ftmag.com/stories/05.html</guid>
       <pubDate>Tue, 10 Dec 2024 00:00:00 GMT</pubDate>
       <description>2024년, 펜탁스가 새 필름카메라를 만들었다. 하프 프레임 72컷, 가벼운 보디, 부담 없는 가격. Brisnap TV가 직접 써본 Pentax 17의 첫인상.</description>
-      <category>CAMERA REVIEW</category>
+      <category>CAMERA</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Brisnap TV</dc:creator>
     </item>
     <item>
