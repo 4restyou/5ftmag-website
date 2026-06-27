@@ -1,5 +1,19 @@
 [
   {
+    "id": "vivian-maier",
+    "title": "사진을 찍기만 하고, 보여주지 않은 사람",
+    "category": "essay",
+    "categoryLabel": "PHOTOGRAPHER",
+    "author": "Film Social Club",
+    "date": "2026-06-27",
+    "issue": "",
+    "thumbnail": "img/stories/vivian-maier/main-selfportrait-rollei.jpg",
+    "excerpt": "평생 남의 집 아이를 돌보며 15만 장을 찍은 유모 비비안 마이어. 롤라이플렉스로 거리를 담고, 현상조차 안 한 채 떠난 사진가의 이야기.",
+    "page": "stories/vivian-maier.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "martin-parr-sema-2026",
     "title": "마틴 파, 그가 떠난 뒤의 첫 회고전. 7월 서울",
     "category": "exhibition",
