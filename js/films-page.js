@@ -350,6 +350,7 @@
   // ════════════════════════════
   const modalOverlay = document.getElementById('modalOverlay');
   const modalContent = document.getElementById('modalContent');
+  let modalTrapRelease = null;
   const modalClose = document.getElementById('modalClose');
 
   async function waitForApprovedFetcher(timeoutMs = 5000) {
@@ -594,6 +595,7 @@
     modalOverlay.classList.add('open');
     document.body.classList.add('modal-open');
     modalOverlay.scrollTop = 0;
+    modalTrapRelease = window.createFocusTrap ? window.createFocusTrap(modalOverlay) : null;
 
     // 모달이 열릴 때마다 댓글 위젯 초기화 (필름마다 다른 page_id)
     if (window.MagComments) {
@@ -1028,6 +1030,7 @@
   function closeModal() {
     modalOverlay.classList.remove('open');
     document.body.classList.remove('modal-open');
+    if (modalTrapRelease) { modalTrapRelease(); modalTrapRelease = null; }
     currentFilmKey = null;
     currentCameraKey = null;
     // URL 에서 film/camera/contributor 제거
@@ -1168,6 +1171,7 @@
 
     modalOverlay.classList.add('open');
     document.body.classList.add('modal-open');
+    modalTrapRelease = window.createFocusTrap ? window.createFocusTrap(modalOverlay) : null;
     return true;
   }
 
@@ -1185,6 +1189,12 @@
 
   // 닫기 버튼
   modalClose.addEventListener('click', closeModal);
+
+  // Escape 로 닫기 — 라이트박스가 열려 있으면 포커스가 그쪽(형제 요소)에 있어
+  // 이 핸들러는 발동하지 않고 라이트박스 자체 핸들러가 처리한다.
+  modalOverlay.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalOverlay.classList.contains('open')) closeModal();
+  });
 
   // 공유 버튼
   const modalShare = document.getElementById('modalShare');

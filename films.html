@@ -50,7 +50,7 @@
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
-  <link rel="stylesheet" href="./css/common.css?v=20260622-libtb">
+  <link rel="stylesheet" href="./css/common.css?v=20260627-a11y">
   <link rel="stylesheet" href="./css/comments.css?v=20260622-polish">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260616-themeauto">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
@@ -176,14 +176,14 @@
             <span class="ms-dropdown-label">브랜드 전체</span>
             <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="ms-dropdown-panel" role="dialog" aria-label="브랜드 다중 선택" hidden></div>
+          <div class="ms-dropdown-panel" role="group" aria-label="브랜드 다중 선택" hidden></div>
         </div>
         <div class="ms-dropdown" id="libraryCameraMS" data-key="camera">
           <button type="button" class="ms-dropdown-btn" aria-haspopup="true" aria-expanded="false">
             <span class="ms-dropdown-label">카메라 전체</span>
             <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="ms-dropdown-panel" role="dialog" aria-label="카메라 다중 선택" hidden></div>
+          <div class="ms-dropdown-panel" role="group" aria-label="카메라 다중 선택" hidden></div>
         </div>
       </div>
       <div class="library-filter library-toolbar-films-only" id="libraryFilter" role="tablist" aria-label="필름 종류 필터"></div>
@@ -257,7 +257,7 @@
 </div>
 
 <!-- ════════ MODAL ════════ -->
-<div class="modal-overlay" id="modalOverlay">
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="상세 보기">
   <button class="modal-share" id="modalShare" type="button" aria-label="이 필름 링크 공유" title="링크 공유">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="6" cy="12" r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -355,7 +355,7 @@
 <script src="./js/films-reader-export.js?v=20260602-modules" defer></script>
 <script src="./js/films-reader-roll-ui.js?v=20260615-singleauthor" defer></script>
 <script src="./js/films-reader-roll-data.js?v=20260602-modules" defer></script>
-<script src="./js/films-page.js?v=20260622-libtb" defer></script>
+<script src="./js/films-page.js?v=20260627-a11y" defer></script>
 <script src="./js/films-propose.js?v=20260602-propose" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>
@@ -367,6 +367,6 @@
 <script src="./js/reader-film-picker.js?v=20260616-themeauto" defer></script>
 <script src="./js/reader-upload-form-ui.js?v=20260602-uploadui" defer></script>
 <script src="./js/reader-upload-flow.js?v=20260602-uploadlog" defer></script>
-<script src="./js/reader-submissions.js?v=20260616-themeauto" defer></script>
+<script src="./js/reader-submissions.js?v=20260627-a11y" defer></script>
 </body>
 </html>

@@ -882,6 +882,16 @@
       pendingUploadedPhoto = null;
     });
 
+    // 드롭존(span role=button) 키보드 작동 + 숨은 파일 input 은 탭 순서에서 제외(이중 탭스톱 방지)
+    const photoInput = form.querySelector('input[name="photo"]');
+    const dropzone = form.querySelector('#rs-dropzone');
+    if (photoInput && dropzone) {
+      photoInput.setAttribute('tabindex', '-1');
+      dropzone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); photoInput.click(); }
+      });
+    }
+
     if (!window.ReaderFilmPicker?.bindFilmPicker) {
       showError('필름 선택 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
       return;
