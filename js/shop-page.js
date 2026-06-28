@@ -10,6 +10,7 @@
   const modal = document.getElementById('shopModal');
   const modalPanel = document.getElementById('shopModalPanel');
   const modalClose = document.getElementById('shopModalClose');
+  let shopTrapRelease = null;
 
   if (!grid) return;
 
@@ -193,6 +194,7 @@
     `;
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
+    shopTrapRelease = window.createFocusTrap ? window.createFocusTrap(modal) : null;
     try {
       const u = new URL(window.location.href);
       u.searchParams.set('p', p.slug);
@@ -203,6 +205,7 @@
   function closeModal() {
     modal.hidden = true;
     document.body.style.overflow = '';
+    if (shopTrapRelease) { shopTrapRelease(); shopTrapRelease = null; }
     try {
       const u = new URL(window.location.href);
       if (u.searchParams.has('p')) {

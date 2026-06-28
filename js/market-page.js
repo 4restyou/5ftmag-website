@@ -203,6 +203,15 @@ function renderGrid() {
       }
       openDetail(card.dataset.id);
     });
+    // 공유 아이콘(span role=button)의 키보드 작동 — Enter/Space
+    card.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const share = e.target.closest('[data-action="share"]');
+      if (!share) return;
+      e.preventDefault();
+      e.stopPropagation();
+      shareListing(share.dataset.id);
+    });
   });
 }
 
@@ -328,7 +337,7 @@ function renderDetail(r) {
   const thumbs = paths.length > 1 ? `
     <div class="mkt-gallery-thumbs">
       ${paths.map((p, i) => `
-        <button type="button" class="mkt-gallery-thumb${i === idx ? ' is-active' : ''}" data-action="thumb" data-i="${i}">
+        <button type="button" class="mkt-gallery-thumb${i === idx ? ' is-active' : ''}" data-action="thumb" data-i="${i}" aria-label="${i + 1}번째 사진 보기">
           <img src="${escapeAttr(db().market.publicUrl(p))}" alt="" />
         </button>`).join('')}
     </div>` : '';
@@ -619,7 +628,7 @@ function renderForm(existing) {
   $('mktForm').addEventListener('submit', onSubmit);
   // 입력 시작하면 누락 표시(aria-invalid) 해제
   $('mktForm').querySelectorAll('[name]').forEach(el => {
-    el.addEventListener('input', () => el.removeAttribute('aria-invalid'));
+    el.addEventListener('input', () => { el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); });
   });
 }
 
@@ -806,6 +815,7 @@ async function onSubmit(e) {
       const field = form.querySelector(`[name="${missing[0]}"]`);
       if (field) {
         field.setAttribute('aria-invalid', 'true');
+        field.setAttribute('aria-describedby', 'mktFormError');
         field.scrollIntoView({ behavior: 'smooth', block: 'center' });
         field.focus({ preventScroll: true });
       }

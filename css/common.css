@@ -508,7 +508,7 @@ header {
 }
 
 :where(a, button, input, textarea, select):focus-visible {
-  outline: 2px solid var(--accent) !important;
+  outline: 2px solid var(--text) !important;
   outline-offset: 3px;
 }
 
@@ -863,7 +863,6 @@ footer {
   white-space: nowrap;
   padding-left: 100%;
   animation: announcement-marquee linear infinite;
-  will-change: transform;
 }
 .announcement-bar.is-static .announcement-bar-text {
   padding-left: 0;
