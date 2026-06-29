@@ -165,6 +165,10 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 .wz-meta-desc { font-size: 15px; line-height: 1.7; opacity: .82; margin: 14px 0 22px; word-break: keep-all; white-space: pre-line; max-height: 9em; overflow: hidden; }
 .wz-meta-read { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 22px; padding: 12px 24px; border-radius: var(--btn-radius); background: #fff; color: #111; font-size: 14px; font-weight: var(--fw-heading); letter-spacing: 0.02em; text-decoration: none; transition: opacity .15s; }
 .wz-meta-desc + .wz-meta-read { margin-top: 0; }
+/* 유료 이북 — 가격(설명 아래, 읽기 버튼 위). 크게. */
+.wz-meta-price { font-size: 30px; font-weight: var(--fw-heading); letter-spacing: -0.02em; line-height: 1; margin: 4px 0 0; }
+.wz-meta-price .wz-meta-won { font-size: 15px; margin-left: 4px; opacity: .8; }
+.wz-meta-price + .wz-meta-read { margin-top: 16px; }
 .wz-meta-read:hover { opacity: .85; }
 .wz-open-actions { display: flex; gap: 10px; margin-top: 14px; }
 .wz-act { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: var(--btn-radius); border: 1px solid rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .06); color: #fff; font-size: 13px; font-weight: var(--fw-heading); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
@@ -216,6 +220,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
   .wz-spine-title { font-size: clamp(11px, 2.8vw, 14px); }
   .wz-meta-title { font-size: 22px; }
   .wz-meta-desc { max-height: 7em; }
+  .wz-meta-price { font-size: 24px; }
   /* 좁은 화면: 표지 옆이 아니라 표지 아래로 정보를 쌓는다(가로로 안 넘치게). */
   .wz-slot.is-open { width: var(--cw2); }
   .wz-info { left: 50%; width: 86vw; top: calc(var(--h) + 14px); height: auto; transform: translateX(-50%); justify-content: flex-start; }

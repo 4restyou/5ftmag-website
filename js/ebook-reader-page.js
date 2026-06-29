@@ -40,7 +40,7 @@
     const priceLabel = product.price ? product.price.toLocaleString('ko-KR') + '원 · 구매하고 전체 보기' : '구매하고 전체 보기';
     const opts = {
       onClose: () => { location.href = 'books.html'; },
-      cta: access.entitled ? null : { label: priceLabel, onClick: onBuy },
+      cta: access.entitled ? null : { label: priceLabel, note: '미리보기는 여기까지예요', onClick: onBuy },
     };
     // 책장 뷰어(무료 웹진과 동일) 열기
     window.WebzineReader.open(access.url, product.title, opts);
