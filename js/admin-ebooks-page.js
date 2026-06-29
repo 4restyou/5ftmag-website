@@ -263,6 +263,12 @@ async function uploadPages() {
     const idxs = Array.from({ length: freeN }, (_, i) => i);
     const copied = await prev.copyPages(full, idxs);
     copied.forEach(p => prev.addPage(p));
+    // 미리보기 끝 — 깔끔한 브랜드 빈 페이지 1장(메시지·구매 버튼은 뷰어 HTML 오버레이).
+    try {
+      const { width, height } = full.getPage(0).getSize();
+      const endPage = prev.addPage([width, height]);
+      endPage.drawRectangle({ x: 0, y: 0, width, height, color: window.PDFLib.rgb(0.94, 0.94, 0.95) });
+    } catch (_) {}
     const prevBytes = await prev.save();
 
     // 업로드: full.pdf + preview.pdf

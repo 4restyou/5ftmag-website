@@ -134,9 +134,9 @@
     // 유료 이북 — 읽기 링크는 보호 뷰어(ebook-read)로. 좋아요/공유 없음.
     if (it._ebook) {
       return `<button type="button" class="wz-close" aria-label="닫기">✕</button>
-        ${it.issue_label ? `<span class="wz-meta-issue">${esc(it.issue_label)}</span>` : ''}
         <h2 class="wz-meta-title">${esc(it.title)}</h2>
         ${it.description ? `<p class="wz-meta-desc">${esc(it.description)}</p>` : ''}
+        ${it.price ? `<div class="wz-meta-price">${it.price.toLocaleString('ko-KR')}<span class="wz-meta-won">원</span></div>` : ''}
         <a class="wz-meta-read" href="ebook-read.html?slug=${encodeURIComponent(it.slug)}">읽기 →</a>`;
     }
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
@@ -518,7 +518,7 @@
         category: e.kind === 'backissue' ? '5ft 이월호 · 유료' : 'SPC 사진첩 · 유료',
         cover_url: e.cover_image || '',
         description: e.excerpt || e.description || '',
-        issue_label: e.price ? e.price.toLocaleString('ko-KR') + '원' : '',
+        issue_label: '',   // 책등엔 가격 표시 안 함 (펼친 정보에만)
         price: e.price,
         sort_order: -1000 + (e.sort_order || 0),
         created_at: e.created_at,

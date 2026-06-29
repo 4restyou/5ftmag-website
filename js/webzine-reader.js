@@ -105,7 +105,7 @@
           <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="닫기">✕</button>
         </div>
       </div>
-      ${readerOpts && readerOpts.cta ? `<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || '전체 보기')}</button>` : ''}
+      ${readerOpts && readerOpts.cta ? `<div class="wz-reader-cta-wrap">${readerOpts.cta.note ? `<p class="wz-reader-cta-note">${esc(readerOpts.cta.note)}</p>` : ''}<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || '전체 보기')}</button></div>` : ''}
       <div class="wz-reader-stage">
         <div class="wz-reader-loading">불러오는 중…</div>
         <div class="wz-reader-zoom"><div class="wz-reader-book"></div></div>
