@@ -148,6 +148,7 @@ function openForm(row) {
   form.description.value = row?.description || '';
   form.images.value = Array.isArray(row?.images) ? row.images.join('\n') : '';
   form.smart_store_url.value = row?.smart_store_url || '';
+  form.ebook_slug.value = row?.ebook_slug || '';
   form.sort_order.value = row?.sort_order ?? 0;
   form.published.checked = !!row?.published;
   form.available.checked = row ? row.available !== false : true;
@@ -185,6 +186,7 @@ async function saveForm(e) {
     description: f.description.value,
     images,
     smart_store_url: f.smart_store_url.value.trim(),
+    ebook_slug: f.ebook_slug.value.trim() || null,
     sort_order: Number(f.sort_order.value) || 0,
     available: !!f.available.checked,
     published: !!f.published.checked,
@@ -194,8 +196,8 @@ async function saveForm(e) {
     $('formMsg').textContent = '제목은 필수입니다.';
     return;
   }
-  if (row.published && !row.smart_store_url) {
-    $('formMsg').textContent = '발행 상태로 두려면 Smart Store URL 이 필요합니다 (구매 버튼 동작).';
+  if (row.published && row.available && !row.smart_store_url) {
+    $('formMsg').textContent = '판매 중으로 발행하려면 Smart Store URL 이 필요합니다 (구매 버튼 동작). 품절이면 비워도 됩니다.';
     return;
   }
 
