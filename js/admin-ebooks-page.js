@@ -207,7 +207,7 @@ async function deleteRow() {
   const r = currentRow();
   if (!r) return;
   if (!confirm(`정말 삭제할까요?\n\n${r.title}\n(${r.slug})\n\n페이지 이미지·열람권도 함께 사라집니다. 복구 불가.`)) return;
-  await db().ebooks.clearPages(r.pages_path || r.slug);
+  await db().ebooks.clearPdfs(r.pages_path || r.slug);
   const { error } = await db().ebooks.remove(r.slug);
   if (error) { $('formMsg').textContent = '삭제 실패: ' + (error.message || '알 수 없는 오류'); return; }
   closeForm();
@@ -217,34 +217,55 @@ async function deleteRow() {
 // ────────── 페이지 업로드 ──────────
 async function refreshPagesStatus(row) {
   const path = row.pages_path || row.slug;
-  $('pagesStatus').textContent = '페이지 확인 중…';
-  const names = await db().ebooks.listPageNames(path);
-  $('pagesStatus').textContent = names.length
-    ? `현재 ${names.length}장 업로드됨 (${names[0]} … ${names[names.length - 1]})`
-    : '아직 업로드된 페이지가 없어요.';
+  $('pagesStatus').textContent = 'PDF 확인 중…';
+  const has = await db().ebooks.hasPdf(path);
+  $('pagesStatus').textContent = has
+    ? `PDF 업로드됨 (총 ${row.page_count || '?'}쪽, 무료 미리보기 ${Math.max(1, Math.ceil((row.page_count || 0) / 3))}쪽)`
+    : '아직 PDF 가 업로드되지 않았어요.';
 }
 
 async function uploadPages() {
   const row = currentRow();
   if (!row) return;
+  if (!window.PDFLib) { $('pagesMsg').textContent = 'PDF 라이브러리 로드 실패. 새로고침 후 다시 시도하세요.'; return; }
   const input = $('pagesInput');
-  const files = [...(input.files || [])].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-  if (!files.length) { $('pagesMsg').textContent = '업로드할 파일을 먼저 선택하세요.'; return; }
+  const file = (input.files || [])[0];
+  if (!file) { $('pagesMsg').textContent = '업로드할 PDF 를 먼저 선택하세요.'; return; }
+  if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') { $('pagesMsg').textContent = 'PDF 파일만 업로드할 수 있어요.'; return; }
   const path = row.pages_path || row.slug;
   $('uploadBtn').disabled = true;
-  let done = 0;
-  for (const file of files) {
-    $('pagesMsg').textContent = `업로드 중… ${done + 1}/${files.length} (${file.name})`;
-    const { error } = await db().ebooks.uploadPage(path, file.name, file);
-    if (error) { $('pagesMsg').textContent = `업로드 실패 (${file.name}): ${error.message || '오류'}`; $('uploadBtn').disabled = false; return; }
-    done++;
+  try {
+    $('pagesMsg').textContent = 'PDF 읽는 중…';
+    const buf = await file.arrayBuffer();
+    const full = await window.PDFLib.PDFDocument.load(buf);
+    const n = full.getPageCount();
+    if (!n) { $('pagesMsg').textContent = '페이지가 없는 PDF 예요.'; $('uploadBtn').disabled = false; return; }
+    const freeN = Math.max(1, Math.ceil(n / 3));
+
+    // 앞 1/3 미리보기 PDF 생성
+    $('pagesMsg').textContent = `미리보기(${freeN}/${n}쪽) 만드는 중…`;
+    const prev = await window.PDFLib.PDFDocument.create();
+    const idxs = Array.from({ length: freeN }, (_, i) => i);
+    const copied = await prev.copyPages(full, idxs);
+    copied.forEach(p => prev.addPage(p));
+    const prevBytes = await prev.save();
+
+    // 업로드: full.pdf + preview.pdf
+    $('pagesMsg').textContent = '전체 PDF 업로드 중…';
+    let res = await db().ebooks.uploadPdf(path, 'full.pdf', new Blob([buf], { type: 'application/pdf' }));
+    if (res.error) { $('pagesMsg').textContent = '전체 PDF 업로드 실패: ' + (res.error.message || '오류'); $('uploadBtn').disabled = false; return; }
+    $('pagesMsg').textContent = '미리보기 PDF 업로드 중…';
+    res = await db().ebooks.uploadPdf(path, 'preview.pdf', new Blob([prevBytes], { type: 'application/pdf' }));
+    if (res.error) { $('pagesMsg').textContent = '미리보기 PDF 업로드 실패: ' + (res.error.message || '오류'); $('uploadBtn').disabled = false; return; }
+
+    if (row.id) await db().ebooks.setPageCount(row.id, n);
+    $('pagesMsg').textContent = `완료 — 총 ${n}쪽 (무료 미리보기 ${freeN}쪽).`;
+    input.value = '';
+  } catch (e) {
+    $('pagesMsg').textContent = 'PDF 처리 실패: ' + (e.message || '오류');
+  } finally {
+    $('uploadBtn').disabled = false;
   }
-  // page_count 갱신
-  const names = await db().ebooks.listPageNames(path);
-  if (row.id) await db().ebooks.setPageCount(row.id, names.length);
-  $('pagesMsg').textContent = `완료 — 총 ${names.length}장.`;
-  input.value = '';
-  $('uploadBtn').disabled = false;
   await reload();
   const saved = STATE.rows.find(r => r.slug === row.slug);
   if (saved) { STATE.editing = saved.slug; refreshPagesStatus(saved); }
@@ -253,12 +274,12 @@ async function uploadPages() {
 async function clearAllPages() {
   const row = currentRow();
   if (!row) return;
-  if (!confirm('이 이북의 페이지 이미지를 전부 삭제할까요? 복구 불가.')) return;
+  if (!confirm('이 이북의 PDF(전체·미리보기)를 삭제할까요? 복구 불가.')) return;
   const path = row.pages_path || row.slug;
-  const { error } = await db().ebooks.clearPages(path);
+  const { error } = await db().ebooks.clearPdfs(path);
   if (error) { $('pagesMsg').textContent = '삭제 실패: ' + (error.message || '오류'); return; }
   if (row.id) await db().ebooks.setPageCount(row.id, 0);
-  $('pagesMsg').textContent = '페이지 전체 삭제됨.';
+  $('pagesMsg').textContent = 'PDF 삭제됨.';
   await reload();
   const saved = STATE.rows.find(r => r.slug === row.slug);
   if (saved) { STATE.editing = saved.slug; refreshPagesStatus(saved); }

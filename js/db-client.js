@@ -2002,29 +2002,24 @@
       return { error };
     },
 
-    // ── 페이지 이미지 (비공개 버킷, 편집부 업로드용) ──
-    // 편집부가 admin 에서 페이지 원본을 올린다. 경로: {pagesPath}/{fileName}
-    async uploadPage(pagesPath, fileName, file) {
+    // ── PDF (비공개 버킷, 편집부 업로드용) ──
+    // full.pdf(전체) + preview.pdf(앞 1/3)를 {pagesPath}/ 에 둔다.
+    async uploadPdf(pagesPath, fileName, blob) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const path = `${pagesPath}/${fileName}`;
       const { error } = await c.storage.from('ebook-pages')
-        .upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+        .upload(`${pagesPath}/${fileName}`, blob, { upsert: true, contentType: 'application/pdf' });
       return { error };
     },
-    async listPageNames(pagesPath) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.storage.from('ebook-pages')
-        .list(pagesPath, { limit: 2000, sortBy: { column: 'name', order: 'asc' } });
-      if (error) { console.warn('[ebooks.listPageNames]', error.message); return []; }
-      return (data || []).map(o => o.name).filter(n => /\.(jpe?g|png|webp)$/i.test(n));
-    },
-    async clearPages(pagesPath) {
+    async clearPdfs(pagesPath) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const names = await this.listPageNames(pagesPath);
-      if (!names.length) return { error: null };
       const { error } = await c.storage.from('ebook-pages')
-        .remove(names.map(n => `${pagesPath}/${n}`));
+        .remove([`${pagesPath}/full.pdf`, `${pagesPath}/preview.pdf`]);
       return { error };
+    },
+    async hasPdf(pagesPath) {
+      const c = client(); if (!c) return false;
+      const { data } = await c.storage.from('ebook-pages').list(pagesPath, { limit: 100 });
+      return (data || []).some(o => o.name === 'full.pdf');
     },
     // 페이지 수만 안전하게 갱신 (upsert 는 누락 컬럼을 날리므로 targeted update)
     async setPageCount(id, count) {
@@ -2033,21 +2028,21 @@
         .update({ page_count: count }).eq('id', id);
       return { error };
     },
-    // 뷰어용 — Edge Function(ebook-page)에서 페이지 이미지를 Blob 으로 받아온다.
-    // 무료 미리보기(앞 1/3)는 토큰 없이도 받고, 유료 페이지는 토큰을 실어 보낸다.
-    // 권한 없거나 실패 시 null.
-    async fetchPage(slug, page) {
+    // 뷰어용 — Edge Function(ebook-page)에서 서명된 PDF URL 을 받는다.
+    // { url, entitled, page_count, free_pages } 또는 실패 시 null.
+    async getAccess(slug) {
       const c = client(); if (!c) return null;
       const headers = {};
       try {
         const s = await session();
         if (s?.access_token) headers.Authorization = `Bearer ${s.access_token}`;
       } catch (_) {}
-      const u = `${URL_}/functions/v1/ebook-page?slug=${encodeURIComponent(slug)}&page=${encodeURIComponent(page)}`;
+      const u = `${URL_}/functions/v1/ebook-page?slug=${encodeURIComponent(slug)}`;
       try {
         const res = await fetch(u, { headers });
-        if (!res.ok) return null;
-        return await res.blob();
+        const data = await res.json().catch(() => null);
+        if (!res.ok) return data || null;
+        return data;
       } catch (_) { return null; }
     },
   };
