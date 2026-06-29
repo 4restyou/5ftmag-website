@@ -2033,16 +2033,19 @@
         .update({ page_count: count }).eq('id', id);
       return { error };
     },
-    // 보호 뷰어용 — Edge Function(ebook-page)에서 워터마크 새긴 페이지 이미지를
-    // 로그인 토큰과 함께 받아 Blob 으로 반환. 권한 없거나 실패 시 null.
+    // 뷰어용 — Edge Function(ebook-page)에서 페이지 이미지를 Blob 으로 받아온다.
+    // 무료 미리보기(앞 1/3)는 토큰 없이도 받고, 유료 페이지는 토큰을 실어 보낸다.
+    // 권한 없거나 실패 시 null.
     async fetchPage(slug, page) {
       const c = client(); if (!c) return null;
-      const s = await session();
-      const token = s?.access_token;
-      if (!token) return null;
+      const headers = {};
+      try {
+        const s = await session();
+        if (s?.access_token) headers.Authorization = `Bearer ${s.access_token}`;
+      } catch (_) {}
       const u = `${URL_}/functions/v1/ebook-page?slug=${encodeURIComponent(slug)}&page=${encodeURIComponent(page)}`;
       try {
-        const res = await fetch(u, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(u, { headers });
         if (!res.ok) return null;
         return await res.blob();
       } catch (_) { return null; }
