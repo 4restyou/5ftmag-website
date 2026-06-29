@@ -18,15 +18,19 @@
     .ebook-gate { max-width: 520px; margin: 0 auto; padding: 80px 24px; text-align: center; color: var(--text-muted); }
     .ebook-gate h2 { color: var(--text); font-size: 20px; margin: 0 0 10px; }
     .ebook-gate p { font-size: 14px; line-height: 1.7; margin: 0 0 8px; }
-    /* 구매 CTA — 리더 우하단 플로팅 */
+    /* 구매 CTA — 하단 중앙, 키컬러(노랑)로 눈에 띄게 */
     .wz-reader-cta {
-      position: fixed; right: 18px; bottom: 18px; z-index: 30;
-      font: inherit; font-size: 14px; font-weight: 700;
-      padding: 12px 20px; border-radius: 999px; border: none;
-      background: #111; color: #fff; cursor: pointer;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+      position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
+      z-index: 30;
+      font: inherit; font-size: 15px; font-weight: 800; letter-spacing: -0.01em;
+      padding: 15px 32px; border-radius: 999px; border: none;
+      background: var(--accent); color: #111; cursor: pointer;
+      box-shadow: 0 10px 34px rgba(0,0,0,0.4);
+      transition: transform .15s ease, box-shadow .15s ease;
+      animation: wz-cta-rise .4s ease both;
     }
-    .wz-reader-cta:hover { opacity: 0.9; }
+    .wz-reader-cta:hover { transform: translateX(-50%) translateY(-2px) scale(1.03); box-shadow: 0 14px 40px rgba(0,0,0,0.45); }
+    @keyframes wz-cta-rise { from { opacity: 0; transform: translateX(-50%) translateY(12px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
   </style>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
@@ -39,7 +43,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db-client.js?v=20260629-ebkpdf" defer></script>
+<script src="./js/db-client.js?v=20260629-ebkcover" defer></script>
 <script src="./js/util.js?v=20260620-schedule" defer></script>
 <script src="./js/site-common.js?v=20260628-bell" defer></script>
 <script src="./js/webzine-reader.js?v=20260629-ebkpdf" defer></script>
