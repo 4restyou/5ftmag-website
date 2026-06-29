@@ -266,6 +266,7 @@
       description: r.description || '',
       images: Array.isArray(r.images) ? r.images : [],
       smartStoreUrl: r.smart_store_url || '',
+      ebookSlug: r.ebook_slug || r.ebookSlug || '',
       available: r.available !== false,
       sortOrder: Number(r.sort_order) || 0,
       updatedAt: r.updated_at || r.updatedAt || null,
