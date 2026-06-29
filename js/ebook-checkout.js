@@ -131,16 +131,17 @@
         storeId: CFG.storeId,
         channelKey: ch.key,
         paymentId,
-        orderName: product.title,
-        totalAmount: product.price,
+        orderName: String(product.title || '이북'),
+        totalAmount: Number(product.price),
         currency: 'CURRENCY_KRW',
         payMethod: 'EASY_PAY',
-        customData: { slug: product.slug },
+        customData: JSON.stringify({ slug: product.slug }),
         redirectUrl: location.href.split('#')[0], // 모바일 복귀용 (slug 포함)
       });
     } catch (e) {
       busy = false;
-      alert('결제를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
+      console.error('[ebook] requestPayment 실패', e);
+      alert('결제를 시작하지 못했어요.\n' + (e && (e.message || e.code) ? (e.message || e.code) : '잠시 후 다시 시도해 주세요.'));
       return;
     }
     // 모바일은 redirect 되어 여기로 안 옴(복귀 시 checkReturn 처리).
