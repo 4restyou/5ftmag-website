@@ -1910,9 +1910,102 @@
     },
   };
 
+  // ── 유료 이북 (SPC 사진첩 완판분 / 5ft 이월호) ──
+  // 카탈로그 + 열람권(entitlement). 페이지 이미지는 Edge Function 이 보호.
+  const ebooks = {
+    // 공개 — 발행된 이북 목록 (Books 페이지용)
+    async listPublished() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('ebook_products')
+        .select('*')
+        .eq('published', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) { console.warn('[ebooks.listPublished]', error.message); return []; }
+      return data || [];
+    },
+    // 편집부 — 전체 (미발행 포함)
+    async listAll() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('ebook_products')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) { console.warn('[ebooks.listAll]', error.message); return []; }
+      return data || [];
+    },
+    async get(slug) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.from('ebook_products')
+        .select('*').eq('slug', slug).maybeSingle();
+      if (error) { console.warn('[ebooks.get]', error.message); return null; }
+      return data;
+    },
+    async upsert(row) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const onConflict = row.id ? undefined : 'slug';
+      const { data, error } = await c.from('ebook_products')
+        .upsert(row, { onConflict })
+        .select('id, slug')
+        .single();
+      if (error) return { error };
+      return { data };
+    },
+    async remove(slug) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { error } = await c.from('ebook_products').delete().eq('slug', slug);
+      return { error };
+    },
+
+    // ── 열람권 ──
+    // 현재 로그인 사용자가 열람권을 가진 product_id 집합 (Set)
+    async myEntitlementIds() {
+      const c = client(); if (!c) return new Set();
+      const uid = await userId();
+      if (!uid) return new Set();
+      const { data, error } = await c.from('ebook_entitlements')
+        .select('product_id').eq('user_id', uid);
+      if (error) { console.warn('[ebooks.myEntitlementIds]', error.message); return new Set(); }
+      return new Set((data || []).map(r => r.product_id));
+    },
+    async hasAccess(productId) {
+      if (!productId) return false;
+      const ids = await this.myEntitlementIds();
+      return ids.has(productId);
+    },
+    // 편집부 — 특정 이북의 열람권 보유자 목록
+    async listEntitlements(productId) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('ebook_entitlements')
+        .select('id, user_id, source, order_ref, created_at')
+        .eq('product_id', productId)
+        .order('created_at', { ascending: false });
+      if (error) { console.warn('[ebooks.listEntitlements]', error.message); return []; }
+      return data || [];
+    },
+    // 편집부 — 수동 부여 (무통장입금 확인 후). 중복이면 무시.
+    async grant(userId_, productId, { source = 'manual', orderRef = '' } = {}) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const grantedBy = await userId();
+      const { error } = await c.from('ebook_entitlements')
+        .upsert(
+          { user_id: userId_, product_id: productId, source, order_ref: orderRef, granted_by: grantedBy },
+          { onConflict: 'user_id,product_id', ignoreDuplicates: true }
+        );
+      return { error };
+    },
+    // 편집부 — 회수
+    async revoke(userId_, productId) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { error } = await c.from('ebook_entitlements')
+        .delete().eq('user_id', userId_).eq('product_id', productId);
+      return { error };
+    },
+  };
+
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages, shop,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages, shop, ebooks,
   };
 })();
