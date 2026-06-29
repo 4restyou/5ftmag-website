@@ -158,10 +158,15 @@
     const priceLine = (p.originalPrice && p.originalPrice > p.price)
       ? `<span class="shop-card-price-original">${escapeHtml(fmtPrice(p.originalPrice))}</span> <strong class="shop-modal-price">${escapeHtml(fmtPrice(p.price))}</strong>`
       : `<strong class="shop-modal-price">${escapeHtml(fmtPrice(p.price))}</strong>`;
-    const buyDisabled = !p.smartStoreUrl || p.available === false;
-    const buyButton = buyDisabled
-      ? `<button type="button" class="shop-buy-btn is-disabled" disabled>${p.available === false ? '품절' : '준비 중'}</button>`
-      : `<a href="${escapeAttr(p.smartStoreUrl)}" target="_blank" rel="noopener" class="shop-buy-btn">Smart Store 에서 구매하기 <span class="shop-buy-arrow">↗</span></a>`;
+    let buyButton;
+    if (p.available === false && p.ebookSlug) {
+      // 품절 실물 → 동일 이북으로 보기 (같은 사이트라 새 탭 아님)
+      buyButton = `<a href="ebook-read.html?slug=${escapeAttr(p.ebookSlug)}" class="shop-buy-btn">품절 · 이북으로 보기 <span class="shop-buy-arrow">↗</span></a>`;
+    } else if (!p.smartStoreUrl || p.available === false) {
+      buyButton = `<button type="button" class="shop-buy-btn is-disabled" disabled>${p.available === false ? '품절' : '준비 중'}</button>`;
+    } else {
+      buyButton = `<a href="${escapeAttr(p.smartStoreUrl)}" target="_blank" rel="noopener" class="shop-buy-btn">Smart Store 에서 구매하기 <span class="shop-buy-arrow">↗</span></a>`;
+    }
     const description = p.description
       ? `<div class="shop-modal-desc">${escapeHtml(p.description).replace(/\n/g, '<br>')}</div>`
       : '';

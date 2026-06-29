@@ -247,6 +247,13 @@
         </div>
       </div>
       <div class="form-row">
+        <label>연결 이북 slug</label>
+        <div>
+          <input type="text" name="ebook_slug" placeholder="spc-03-sundust-people" />
+          <div class="hint">품절(판매 중 해제) 시 카드에서 "이북으로 보기" 링크로 이 이북을 엽니다. 비우면 그냥 "품절". (이북 관리의 slug 와 동일하게)</div>
+        </div>
+      </div>
+      <div class="form-row">
         <label>정렬 우선순위</label>
         <div>
           <input type="number" name="sort_order" step="1" value="0" />
@@ -275,6 +282,6 @@
 <script src="../js/site-common.js?v=20260628-bell" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260629-ebkpay" defer></script>
-<script src="../js/admin-shop-page.js?v=20260627-a11y" defer></script>
+<script src="../js/admin-shop-page.js?v=20260629-ebooklink" defer></script>
 </body>
 </html>
