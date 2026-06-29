@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Shop 관리 | 5ft magazine Admin</title>
+  <title>이북 관리 | 5ft magazine Admin</title>
   <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css?v=20260609-cardtok">
@@ -25,26 +25,17 @@
     table.shop-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .shop-table th, .shop-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     .shop-table th { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
-    .shop-table .col-thumb { width: 56px; }
-    .shop-table .col-thumb img { width: 48px; height: 48px; object-fit: cover; background: var(--bg-sub); border-radius: 4px; display: block; }
+    .shop-table .col-thumb { width: 48px; }
+    .shop-table .col-thumb img { width: 40px; height: 56px; object-fit: cover; background: var(--bg-sub); border-radius: 3px; display: block; }
     .shop-table .col-title { font-weight: var(--fw-heading); }
     .shop-table .col-slug { font-size: 12px; color: var(--text-muted); font-family: ui-monospace, monospace; }
     .shop-table .col-price { font-variant-numeric: tabular-nums; text-align: right; }
     .shop-table .col-actions { text-align: right; white-space: nowrap; }
-    .shop-table tr[draggable] { cursor: grab; }
-    .shop-table tr.dragging { opacity: 0.4; cursor: grabbing; }
-    .shop-table tr.drag-over-before td { box-shadow: inset 0 2px 0 var(--text); }
-    .shop-table tr.drag-over-after td { box-shadow: inset 0 -2px 0 var(--text); }
-    .drag-handle { font: inherit; padding: 4px 6px; background: transparent; border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted); cursor: grab; line-height: 1; user-select: none; }
-    .drag-handle:hover { color: var(--text); border-color: var(--text); }
-    .drag-handle:active { cursor: grabbing; }
-    .drag-handle[disabled] { opacity: 0.3; cursor: not-allowed; }
-    .drag-hint { font-size: 11px; color: var(--text-muted); margin: 4px 0 0; }
     .badge { display: inline-block; padding: 2px 8px; background: var(--bg-sub); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; }
     .badge.unpub { background: var(--bg-sub); color: var(--text-muted); }
     .badge.pub { background: var(--text); color: var(--bg); }
-    .badge.soldout { background: #ffe5e5; color: #c00; }
-    [data-theme="dark"] .badge.soldout { background: #4a1f1f; color: #ff7a7a; }
+    .badge.onsale { background: #e5f4ea; color: #137a3e; }
+    [data-theme="dark"] .badge.onsale { background: #1f3a29; color: #7cd190; }
 
     .empty { padding: 32px; text-align: center; color: var(--text-muted); }
 
@@ -69,6 +60,24 @@
     .form-actions .save { background: var(--text); color: var(--bg); border-color: var(--text); }
     .form-actions .del { color: #c00; border-color: #c00; margin-right: auto; }
     [data-theme="dark"] .form-actions .del { color: #ff7a7a; border-color: #ff7a7a; }
+
+    /* 편집 전용 패널 (페이지 업로드 / 열람권) */
+    .edit-panel { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .edit-panel h3 { margin: 0 0 4px; font-size: 14px; font-weight: var(--fw-heading); }
+    .edit-panel .panel-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; line-height: 1.6; }
+    .edit-panel[hidden] { display: none; }
+    .pages-status { font-size: 13px; margin: 8px 0; }
+    .ent-search { display: flex; gap: 8px; }
+    .ent-search input { flex: 1; font: inherit; font-size: 14px; padding: 8px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+    .ent-results { margin: 8px 0; display: flex; flex-direction: column; gap: 6px; }
+    .ent-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--bg-sub); border-radius: 4px; font-size: 13px; }
+    .ent-row .ent-name { font-weight: var(--fw-heading); }
+    .ent-row .ent-meta { color: var(--text-muted); font-size: 12px; }
+    .ent-row .ent-act { margin-left: auto; font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 5px 10px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+    .ent-row .ent-act.revoke { color: #c00; border-color: #c00; }
+    [data-theme="dark"] .ent-row .ent-act.revoke { color: #ff7a7a; border-color: #ff7a7a; }
+    .mini-btn { font: inherit; font-size: 12px; font-weight: var(--fw-heading); padding: 6px 12px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+    .mini-btn.danger { color: #c00; border-color: #c00; }
 
     @media (max-width: 700px) {
       .shop-table thead { display: none; }
@@ -97,7 +106,7 @@
       <li><a href="../labs.html">Labs</a></li>
       <li><a href="../market.html">Market</a></li>
       <li><a href="../about.html">About</a></li>
-      <li><a href="shop.html" class="current">Shop</a></li>
+      <li><a href="../shop.html">Shop</a></li>
     </ul>
     <div class="nav-right">
       <a href="../search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
@@ -119,7 +128,7 @@
 <div class="admin-header">
   <a class="admin-back" href="../index.html">← 5ft magazine 으로</a>
   <div class="admin-title-row">
-    <h1 class="admin-title">Shop 관리</h1>
+    <h1 class="admin-title">이북 관리</h1>
     <span class="admin-user" id="adminUser">불러오는 중…</span>
   </div>
   <nav class="admin-subnav" aria-label="편집부 페이지">
@@ -138,7 +147,8 @@
     <a href="/admin/labs.html" class="admin-subnav-link">현상소</a>
     <a href="/admin/repairs.html" class="admin-subnav-link">수리실</a>
     <a href="/admin/webzine.html" class="admin-subnav-link">웹진</a>
-    <a href="/admin/shop.html" class="admin-subnav-link is-current">Shop</a>
+    <a href="/admin/shop.html" class="admin-subnav-link">Shop</a>
+    <a href="/admin/ebooks.html" class="admin-subnav-link is-current">이북</a>
     <span class="admin-subnav-group">분석</span>
     <a href="/admin/analytics.html" class="admin-subnav-link">통계</a>
   </nav>
@@ -153,29 +163,27 @@
 
 <main id="app" hidden>
   <div class="toolbar">
-    <input type="search" class="filter" id="filter" placeholder="제목·slug 로 필터" aria-label="상품 필터" autocomplete="off" />
-    <select class="filter" id="catFilter" aria-label="카테고리">
-      <option value="all">전체 카테고리</option>
-      <option value="film">필름</option>
-      <option value="camera">카메라</option>
-      <option value="goods">굿즈</option>
-      <option value="book">책</option>
+    <input type="search" class="filter" id="filter" placeholder="제목·slug 로 필터" aria-label="이북 필터" autocomplete="off" />
+    <select class="filter" id="kindFilter" aria-label="종류">
+      <option value="all">전체 종류</option>
+      <option value="spc">SPC 사진첩</option>
+      <option value="backissue">5ft 이월호</option>
     </select>
     <span class="count" id="count">·</span>
-    <button type="button" class="primary-btn" id="newBtn">+ 새 상품</button>
+    <button type="button" class="primary-btn" id="newBtn">+ 새 이북</button>
   </div>
   <p class="section-help" style="font-size:12px; color:var(--text-muted); margin: 0 0 18px; line-height:1.6;">
-    저장 즉시 DB 반영. 정적 <code>data/shop.json</code> 은 다음 사이트 빌드(Netlify 자동)에 동기화돼요.
-    결제·재고·정산은 <strong>Smart Store</strong> 가 처리하고, 여기선 노출과 deep link 만 관리합니다.
-    Smart Store 의 가격이 바뀌면 여기 가격도 손으로 맞춰주세요.
+    SPC 사진첩은 실물 100권 <strong>완판 후</strong> "이북 판매중"을 켜서 저가 이북으로 전환합니다.
+    페이지 이미지는 비공개 버킷에 올라가고, 열람권이 있는 회원만 볼 수 있어요(Phase 1 은 입금 확인 후 <strong>수동 부여</strong>).
+    가격·공개·열람권은 즉시 DB 반영됩니다.
   </p>
 
   <table class="shop-table">
     <thead>
       <tr>
         <th class="col-thumb"></th>
-        <th>상품</th>
-        <th>카테고리</th>
+        <th>이북</th>
+        <th>종류</th>
         <th class="col-price">가격</th>
         <th>상태</th>
         <th class="col-actions"></th>
@@ -183,43 +191,41 @@
     </thead>
     <tbody id="rows"></tbody>
   </table>
-  <div class="empty" id="empty" hidden>등록된 상품이 없어요. "+ 새 상품" 으로 첫 항목을 추가하세요.</div>
+  <div class="empty" id="empty" hidden>등록된 이북이 없어요. "+ 새 이북" 으로 첫 항목을 추가하세요.</div>
 </main>
 
 <!-- 폼 모달 -->
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2 id="modalTitle">새 상품</h2>
+    <h2 id="modalTitle">새 이북</h2>
     <form id="form">
       <div class="form-row">
         <label>slug *</label>
         <div>
-          <input type="text" name="slug" required maxlength="80" placeholder="kodak-portra-400" />
-          <div class="hint">영문 소문자·숫자·하이픈. 저장 후 수정 안 됨 (URL 의 일부).</div>
+          <input type="text" name="slug" required maxlength="80" placeholder="spc-03-sundust-people" />
+          <div class="hint">영문 소문자·숫자·하이픈. 저장 후 수정 안 됨. 페이지 이미지 폴더명으로도 쓰임.</div>
         </div>
       </div>
       <div class="form-row">
         <label>제목 *</label>
-        <input type="text" name="title" required maxlength="200" placeholder="Kodak Portra 400 (5롤 팩)" />
+        <input type="text" name="title" required maxlength="200" placeholder="sun, dust, people — 홍민우 (SPC Issue 03)" />
       </div>
       <div class="form-row">
-        <label>카테고리 *</label>
-        <select name="category" required>
-          <option value="goods">굿즈</option>
-          <option value="film">필름</option>
-          <option value="camera">카메라</option>
-          <option value="book">책</option>
+        <label>종류 *</label>
+        <select name="kind" required>
+          <option value="spc">SPC 사진첩</option>
+          <option value="backissue">5ft 이월호</option>
         </select>
       </div>
       <div class="form-row">
-        <label>가격 (원)</label>
-        <input type="number" name="price" min="0" step="100" placeholder="135000" />
+        <label>이북 가격 (원)</label>
+        <input type="number" name="price" min="0" step="100" placeholder="5000" />
       </div>
       <div class="form-row">
-        <label>정가 (원)</label>
+        <label>실물 정가 (원)</label>
         <div>
-          <input type="number" name="original_price" min="0" step="100" placeholder="(옵션 — 할인 표시할 때)" />
-          <div class="hint">정가 > 가격 일 때 카드에 취소선 정가가 함께 표시됩니다.</div>
+          <input type="number" name="original_price" min="0" step="100" placeholder="(옵션 — '실물 OO원 → 이북 OO원' 표시)" />
+          <div class="hint">정가 > 이북가 일 때 카드에 취소선 정가가 함께 표시됩니다.</div>
         </div>
       </div>
       <div class="form-row">
@@ -228,21 +234,13 @@
       </div>
       <div class="form-row">
         <label>상세 설명</label>
-        <textarea name="description" placeholder="상품 상세. 줄바꿈 그대로 표시됨."></textarea>
+        <textarea name="description" placeholder="작가·내용 소개. 줄바꿈 그대로 표시됨."></textarea>
       </div>
       <div class="form-row">
-        <label>이미지 URL</label>
+        <label>표지 이미지 URL</label>
         <div>
-          <textarea name="images" placeholder="한 줄에 한 개. 첫 번째가 카드 썸네일.
-예) https://www.5ftmag.com/img/shop/portra400-1.jpg"></textarea>
-          <div class="hint">Smart Store 상품 이미지 URL 을 복사해와도 되고, /img/shop/ 경로에 직접 올린 파일을 써도 됨.</div>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>Smart Store URL *</label>
-        <div>
-          <input type="url" name="smart_store_url" placeholder="https://smartstore.naver.com/film_socialclub/products/12345" />
-          <div class="hint">"구매하기" 버튼이 새 탭에서 여는 deep link. Smart Store 상품 페이지 주소 그대로.</div>
+          <input type="url" name="cover_image" placeholder="https://www.5ftmag.com/img/ebooks/spc-03-cover.webp" />
+          <div class="hint">공개용 표지 (Books 카드). /img/ebooks/ 에 올린 파일 경로.</div>
         </div>
       </div>
       <div class="form-row">
@@ -254,11 +252,11 @@
       </div>
       <div class="form-row check">
         <label>발행</label>
-        <div><input type="checkbox" name="published" /> <span style="font-size:13px; color:var(--text-muted);">체크하면 공개 화면에 노출</span></div>
+        <div><input type="checkbox" name="published" /> <span style="font-size:13px; color:var(--text-muted);">체크하면 Books 에 노출</span></div>
       </div>
       <div class="form-row check">
-        <label>판매 중</label>
-        <div><input type="checkbox" name="available" checked /> <span style="font-size:13px; color:var(--text-muted);">해제하면 카드에 "품절" 오버레이 + 구매 버튼 비활성</span></div>
+        <label>이북 판매중</label>
+        <div><input type="checkbox" name="ebook_on_sale" /> <span style="font-size:13px; color:var(--text-muted);">실물 완판 후 체크 — 구매(열람권) 안내 노출</span></div>
       </div>
       <p class="form-msg" id="formMsg" aria-live="polite" style="font-size:13px; color:#c00; min-height:18px;"></p>
       <div class="form-actions">
@@ -267,6 +265,33 @@
         <button type="submit" class="save">저장</button>
       </div>
     </form>
+
+    <!-- 페이지 업로드 (편집 시) -->
+    <div class="edit-panel" id="pagesPanel" hidden>
+      <h3>페이지 이미지</h3>
+      <p class="panel-sub">비공개 버킷에 올립니다. 파일명 순서대로 페이지가 됩니다(p01, p02 … 권장). 다시 올리면 같은 이름은 덮어씁니다.</p>
+      <p class="pages-status" id="pagesStatus">…</p>
+      <input type="file" id="pagesInput" accept="image/jpeg,image/png,image/webp" multiple />
+      <div class="form-actions" style="justify-content: flex-start; margin-top: 10px;">
+        <button type="button" class="mini-btn" id="uploadBtn">선택한 파일 업로드</button>
+        <button type="button" class="mini-btn danger" id="clearPagesBtn">전체 페이지 삭제</button>
+      </div>
+      <p class="form-msg" id="pagesMsg" aria-live="polite" style="font-size:13px; min-height:18px;"></p>
+    </div>
+
+    <!-- 열람권 (편집 시) -->
+    <div class="edit-panel" id="entPanel" hidden>
+      <h3>열람권 (수동 부여)</h3>
+      <p class="panel-sub">입금/구매 확인 후 회원을 찾아 부여하세요. 회원은 이름·작가명·인스타로 검색됩니다.</p>
+      <div class="ent-search">
+        <input type="search" id="entSearch" placeholder="이름 · 작가명 · @인스타" autocomplete="off" />
+        <button type="button" class="mini-btn" id="entSearchBtn">검색</button>
+      </div>
+      <div class="ent-results" id="entResults"></div>
+      <h3 style="margin-top:16px;">현재 열람권 보유</h3>
+      <div class="ent-results" id="entHolders"></div>
+      <p class="form-msg" id="entMsg" aria-live="polite" style="font-size:13px; min-height:18px;"></p>
+    </div>
   </div>
 </div>
 
@@ -274,6 +299,6 @@
 <script src="../js/site-common.js?v=20260628-bell" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260628-ebk2" defer></script>
-<script src="../js/admin-shop-page.js?v=20260627-a11y" defer></script>
+<script src="../js/admin-ebooks-page.js?v=20260628-ebooks" defer></script>
 </body>
 </html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>이북 뷰어 | 5ft magazine</title>
+  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <script src="./js/theme-init.js"></script>
+  <link rel="stylesheet" href="./pretendard.css" />
+  <link rel="stylesheet" href="./css/tokens.css?v=20260609-cardtok">
+  <link rel="stylesheet" href="./css/common.css?v=20260627-a11y">
+  <style>
+    body { background: var(--bg); color: var(--text); }
+    .reader-wrap { max-width: 820px; margin: 0 auto; padding: 24px 16px 80px; }
+    .reader-top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .reader-back { font-size: 13px; font-weight: var(--fw-heading); color: var(--text-muted); text-decoration: none; }
+    .reader-back:hover { color: var(--text); }
+    .reader-title { font-size: 18px; font-weight: var(--fw-heading); margin: 0; }
+    .reader-state { text-align: center; padding: 64px 20px; color: var(--text-muted); }
+    .reader-state h2 { color: var(--text); font-size: 20px; margin: 0 0 10px; }
+    .reader-state p { font-size: 14px; line-height: 1.7; margin: 0 0 8px; }
+    .reader-cover { max-width: 280px; width: 60%; margin: 0 auto 20px; display: block; border-radius: 4px; }
+    .reader-cta { display: inline-block; margin-top: 14px; font: inherit; font-size: 14px; font-weight: var(--fw-heading); padding: 10px 20px; border-radius: 999px; background: var(--text); color: var(--bg); border: none; cursor: pointer; text-decoration: none; }
+    .reader-cta:hover { opacity: 0.88; }
+    .reader-progress { text-align: center; font-size: 13px; color: var(--text-muted); margin: 10px 0; }
+
+    /* 페이지 — 저장·드래그 억제 (워터마크는 서버에서 이미 새겨짐) */
+    .reader-pages { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+    .reader-page { width: 100%; max-width: 720px; user-select: none; -webkit-user-select: none; }
+    .reader-page img { width: 100%; height: auto; display: block; pointer-events: none; -webkit-user-drag: none; user-drag: none; background: var(--bg-sub); border-radius: 2px; }
+    .reader-note { text-align: center; font-size: 12px; color: var(--text-muted); margin: 28px 0 0; line-height: 1.6; }
+  </style>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+</head>
+<body>
+
+<main class="reader-wrap" id="main">
+  <div class="reader-top">
+    <a href="books.html" class="reader-back">← Books</a>
+    <h1 class="reader-title" id="title">이북</h1>
+  </div>
+
+  <div class="reader-state" id="state">
+    <p>불러오는 중…</p>
+  </div>
+
+  <div class="reader-progress" id="progress" hidden></div>
+  <div class="reader-pages" id="pages"></div>
+  <p class="reader-note" id="note" hidden>이 페이지에는 구매자 식별 워터마크가 새겨져 있습니다. 무단 복제·배포 시 추적될 수 있어요.</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="./js/db-client.js?v=20260628-ebk2" defer></script>
+<script src="./js/util.js?v=20260620-schedule" defer></script>
+<script src="./js/site-common.js?v=20260628-bell" defer></script>
+<script src="./js/ebook-reader-page.js?v=20260628-ebooks" defer></script>
+</body>
+</html>
