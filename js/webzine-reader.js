@@ -27,7 +27,7 @@
   }
 
   let overlay = null, flip = null, pdfDoc = null;
-  let total = 0, busy = false, onKey = null;
+  let total = 0, busy = false, onKey = null, readerOpts = null;
   let pageDivs = [], rendered = [], baseW = 1, baseH = 1, dispW = 0, dpr = 1;
   let zoom = 1, panX = 0, panY = 0;
   let pinchD0 = 0, zoom0 = 1, panActive = false, px0 = 0, py0 = 0;
@@ -105,6 +105,7 @@
           <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="닫기">✕</button>
         </div>
       </div>
+      ${readerOpts && readerOpts.cta ? `<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || '전체 보기')}</button>` : ''}
       <div class="wz-reader-stage">
         <div class="wz-reader-loading">불러오는 중…</div>
         <div class="wz-reader-zoom"><div class="wz-reader-book"></div></div>
@@ -112,6 +113,8 @@
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
     overlay.querySelector('[data-close]').addEventListener('click', close);
+    const ctaBtn = overlay.querySelector('[data-cta]');
+    if (ctaBtn && readerOpts && readerOpts.cta) ctaBtn.addEventListener('click', () => { try { readerOpts.cta.onClick && readerOpts.cta.onClick(); } catch (_) {} });
     overlay.querySelector('[data-prev]').addEventListener('click', () => flip && flip.flipPrev());
     overlay.querySelector('[data-next]').addEventListener('click', () => flip && flip.flipNext());
     overlay.querySelector('[data-zin]').addEventListener('click', () => setZoom(zoom + 0.6));
@@ -135,6 +138,7 @@
   }
 
   function close() {
+    const cb = readerOpts && readerOpts.onClose;
     if (onKey) { document.removeEventListener('keydown', onKey); onKey = null; }
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
@@ -144,6 +148,8 @@
     document.body.style.overflow = '';
     total = 0; pageDivs = []; rendered = [];
     zoom = 1; panX = 0; panY = 0; pinchD0 = 0; panActive = false; mDrag = false;
+    readerOpts = null;
+    if (typeof cb === 'function') { try { cb(); } catch (_) {} }
   }
 
   function fit(aspect) {
@@ -184,9 +190,10 @@
     }
   }
 
-  async function open(url, title) {
+  async function open(url, title, opts) {
     if (busy) return;
     busy = true;
+    readerOpts = opts || null;
     build(title);
     const mine = overlay;
     try {
