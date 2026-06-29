@@ -166,6 +166,7 @@
   letter-spacing: -0.02em;
   line-height: 1.2;
   margin-bottom: 8px;
+  color: var(--text);
 }
 .film-spec {
   font-size: 14px;
