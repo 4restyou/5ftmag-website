@@ -39,7 +39,7 @@
   function db() { return window.MagDB; }
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   const FALLBACK = ['#7a3b52', '#3f5a78', '#6b5036', '#4a6b4f', '#5a4a78', '#8a4a32'];
-  const coverUrl = (it) => (it.cover_path ? db().webzine.publicUrl(it.cover_path) : '');
+  const coverUrl = (it) => (it.cover_url ? it.cover_url : (it.cover_path ? db().webzine.publicUrl(it.cover_path) : ''));
 
   let issues = [];
   const palette = [];
@@ -113,8 +113,9 @@
   }
 
   function bookMarkup(it, c) {
-    const cover = it.cover_path
-      ? `<img src="${esc(coverUrl(it))}" alt="" loading="lazy" />`
+    const cu = coverUrl(it);
+    const cover = cu
+      ? `<img src="${esc(cu)}" alt="" loading="lazy" />`
       : `<span class="wz-f-text">${esc(it.title)}</span>`;
     return `<div class="wz-book3d" style="--spine:${c.spine};--spine-text:${c.text}">
       <div class="f-front">${cover}</div>
@@ -130,6 +131,14 @@
     </div>`;
   }
   function infoHtml(it) {
+    // 유료 이북 — 읽기 링크는 보호 뷰어(ebook-read)로. 좋아요/공유 없음.
+    if (it._ebook) {
+      return `<button type="button" class="wz-close" aria-label="닫기">✕</button>
+        ${it.issue_label ? `<span class="wz-meta-issue">${esc(it.issue_label)}</span>` : ''}
+        <h2 class="wz-meta-title">${esc(it.title)}</h2>
+        ${it.description ? `<p class="wz-meta-desc">${esc(it.description)}</p>` : ''}
+        <a class="wz-meta-read" href="ebook-read.html?slug=${encodeURIComponent(it.slug)}">읽기 →</a>`;
+    }
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
     const fav = favSet.has(it.id);
     return `<button type="button" class="wz-close" aria-label="닫기">✕</button>
@@ -399,7 +408,8 @@
         slot.querySelector('.wz-book-btn').addEventListener('click', () => onBook(rs, pos));
         slot.querySelector('.wz-close').addEventListener('click', (e) => { e.stopPropagation(); closeOpen(); });
         const read = slot.querySelector('.wz-meta-read');
-        if (read) read.addEventListener('click', (e) => { e.stopPropagation(); if (!window.WebzineReader) return; e.preventDefault(); window.WebzineReader.open(read.href, it.title); });
+        // 무료 웹진은 인앱 flip 리더로, 유료 이북은 ebook-read 페이지로(게이트 처리) 정상 이동.
+        if (read && !it._ebook) read.addEventListener('click', (e) => { e.stopPropagation(); if (!window.WebzineReader) return; e.preventDefault(); window.WebzineReader.open(read.href, it.title); });
         const likeBtn = slot.querySelector('.wz-like');
         if (likeBtn) likeBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleLike(it, likeBtn); });
         const shareBtn = slot.querySelector('.wz-share');
@@ -492,8 +502,30 @@
 
   (async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
-    try { issues = await db().webzine.listPublished(); } catch (_) { issues = []; }
-    if (!Array.isArray(issues)) issues = [];
+    let webzineIssues = [];
+    try { webzineIssues = await db().webzine.listPublished(); } catch (_) { webzineIssues = []; }
+    if (!Array.isArray(webzineIssues)) webzineIssues = [];
+
+    // 유료 이북 — 상단에 별도 책장으로. 같은 책장 스타일, 클릭 시 보호 뷰어로.
+    let ebookItems = [];
+    try {
+      const eb = (db().ebooks && await db().ebooks.listPublished()) || [];
+      ebookItems = eb.map((e) => ({
+        id: 'ebook-' + e.id,
+        _ebook: true,
+        slug: e.slug,
+        title: e.title,
+        category: e.kind === 'backissue' ? '5ft 이월호 · 유료' : 'SPC 사진첩 · 유료',
+        cover_url: e.cover_image || '',
+        description: e.excerpt || e.description || '',
+        issue_label: e.price ? e.price.toLocaleString('ko-KR') + '원' : '',
+        price: e.price,
+        sort_order: -1000 + (e.sort_order || 0),
+        created_at: e.created_at,
+      }));
+    } catch (_) { ebookItems = []; }
+
+    issues = ebookItems.concat(webzineIssues);
     issues.sort((a, b) => ((a.sort_order || 0) - (b.sort_order || 0)) || (new Date(a.created_at || 0) - new Date(b.created_at || 0)));
     issues.forEach((_, i) => { palette[i] = { spine: FALLBACK[i % FALLBACK.length], text: '#fff' }; });
     render();
@@ -508,7 +540,7 @@
     if (slug) { const i = issues.findIndex(x => x.slug === slug); const ref = slotIndex.get(i); if (ref) openBook(ref.rs, ref.pos); }
 
     issues.forEach((it, i) => {
-      if (!it.cover_path) return;
+      if (!coverUrl(it)) return;
       pickColor(coverUrl(it)).then(c => {
         if (!c) return;
         palette[i] = { spine: c.spine, text: c.text };
