@@ -2001,6 +2001,38 @@
         .delete().eq('user_id', userId_).eq('product_id', productId);
       return { error };
     },
+
+    // ── 페이지 이미지 (비공개 버킷, 편집부 업로드용) ──
+    // 편집부가 admin 에서 페이지 원본을 올린다. 경로: {pagesPath}/{fileName}
+    async uploadPage(pagesPath, fileName, file) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const path = `${pagesPath}/${fileName}`;
+      const { error } = await c.storage.from('ebook-pages')
+        .upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+      return { error };
+    },
+    async listPageNames(pagesPath) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.storage.from('ebook-pages')
+        .list(pagesPath, { limit: 2000, sortBy: { column: 'name', order: 'asc' } });
+      if (error) { console.warn('[ebooks.listPageNames]', error.message); return []; }
+      return (data || []).map(o => o.name).filter(n => /\.(jpe?g|png|webp)$/i.test(n));
+    },
+    async clearPages(pagesPath) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const names = await this.listPageNames(pagesPath);
+      if (!names.length) return { error: null };
+      const { error } = await c.storage.from('ebook-pages')
+        .remove(names.map(n => `${pagesPath}/${n}`));
+      return { error };
+    },
+    // 페이지 수만 안전하게 갱신 (upsert 는 누락 컬럼을 날리므로 targeted update)
+    async setPageCount(id, count) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const { error } = await c.from('ebook_products')
+        .update({ page_count: count }).eq('id', id);
+      return { error };
+    },
   };
 
   window.MagDB = {
