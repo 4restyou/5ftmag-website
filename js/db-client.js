@@ -2033,6 +2033,20 @@
         .update({ page_count: count }).eq('id', id);
       return { error };
     },
+    // 보호 뷰어용 — Edge Function(ebook-page)에서 워터마크 새긴 페이지 이미지를
+    // 로그인 토큰과 함께 받아 Blob 으로 반환. 권한 없거나 실패 시 null.
+    async fetchPage(slug, page) {
+      const c = client(); if (!c) return null;
+      const s = await session();
+      const token = s?.access_token;
+      if (!token) return null;
+      const u = `${URL_}/functions/v1/ebook-page?slug=${encodeURIComponent(slug)}&page=${encodeURIComponent(page)}`;
+      try {
+        const res = await fetch(u, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) return null;
+        return await res.blob();
+      } catch (_) { return null; }
+    },
   };
 
   window.MagDB = {
