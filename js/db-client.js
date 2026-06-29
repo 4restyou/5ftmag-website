@@ -2055,6 +2055,23 @@
         return data;
       } catch (_) { return null; }
     },
+    // 결제 검증 — PortOne 결제 후 paymentId 를 Edge Function(ebook-purchase)에 보내
+    // 위변조 확인 + 열람권 부여. { ok:true } 또는 { error }.
+    async purchaseVerify(slug, paymentId) {
+      const c = client(); if (!c) return { error: 'unavailable' };
+      const headers = { 'content-type': 'application/json' };
+      try {
+        const s = await session();
+        if (s?.access_token) headers.Authorization = `Bearer ${s.access_token}`;
+      } catch (_) {}
+      const u = `${URL_}/functions/v1/ebook-purchase`;
+      try {
+        const res = await fetch(u, { method: 'POST', headers, body: JSON.stringify({ slug, paymentId }) });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) return data || { error: 'verify failed' };
+        return data;
+      } catch (_) { return { error: 'network' }; }
+    },
   };
 
   window.MagDB = {

@@ -38,6 +38,46 @@
     }
     .wz-reader-cta:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 14px 40px rgba(0,0,0,0.45); }
     @keyframes wz-cta-rise { from { opacity: 0; transform: translateX(-50%) translateY(12px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+    /* 결제수단 선택 모달 */
+    .ebk-pay-modal-back {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      padding: 20px; animation: ebk-fade .2s ease both;
+    }
+    .ebk-pay-modal {
+      width: 100%; max-width: 340px; background: var(--bg); color: var(--text);
+      border-radius: 18px; padding: 26px 22px 18px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .ebk-pay-modal-title { margin: 0 0 4px; font-size: 18px; }
+    .ebk-pay-modal-sub { margin: 0 0 18px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .ebk-pay-methods { display: flex; flex-direction: column; gap: 10px; }
+    .ebk-pay-method {
+      font: inherit; font-size: 15px; font-weight: 700; padding: 14px; border-radius: 12px;
+      border: 1px solid var(--line, rgba(0,0,0,0.12)); background: var(--surface, #f5f5f7); color: var(--text);
+      cursor: pointer; transition: transform .12s ease, border-color .12s ease;
+    }
+    .ebk-pay-method:hover:not([disabled]) { transform: translateY(-1px); border-color: var(--accent); }
+    .ebk-pay-method[disabled] { opacity: .5; cursor: not-allowed; }
+    .ebk-pay-soon { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .ebk-pay-cancel {
+      margin-top: 14px; font: inherit; font-size: 13px; color: var(--text-muted);
+      background: none; border: none; cursor: pointer; padding: 6px;
+    }
+    /* 처리 중 오버레이 */
+    .ebk-pay-overlay {
+      position: fixed; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    }
+    .ebk-pay-overlay-box { text-align: center; color: #fff; }
+    .ebk-pay-overlay-box p { margin: 14px 0 0; font-size: 14px; font-weight: 600; }
+    .ebk-pay-spinner {
+      display: inline-block; width: 34px; height: 34px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; animation: ebk-spin .8s linear infinite;
+    }
+    @keyframes ebk-spin { to { transform: rotate(360deg); } }
+    @keyframes ebk-fade { from { opacity: 0; } to { opacity: 1; } }
   </style>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
@@ -50,10 +90,11 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db-client.js?v=20260629-ebkcover" defer></script>
+<script src="./js/db-client.js?v=20260629-ebkpay" defer></script>
 <script src="./js/util.js?v=20260620-schedule" defer></script>
 <script src="./js/site-common.js?v=20260628-bell" defer></script>
 <script src="./js/webzine-reader.js?v=20260629-ebkprev" defer></script>
+<script src="./js/ebook-checkout.js?v=20260629-ebkpay" defer></script>
 <script src="./js/ebook-reader-page.js?v=20260629-ebkprev" defer></script>
 </body>
 </html>
