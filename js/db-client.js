@@ -2021,16 +2021,15 @@
       const { data } = await c.storage.from('ebook-pages').list(pagesPath, { limit: 100 });
       return (data || []).some(o => o.name === 'full.pdf');
     },
-    // 표지 — 웹진과 같은 공개 버킷(webzine)에 ebooks/ 경로로 업로드. 공개 URL 반환.
+    // 표지 — 웹진과 같은 공개 버킷에 ebooks/ 경로로 업로드. 공개 URL 반환.
+    // 기존 webzine 네임스페이스(uploadFile/publicUrl)를 재사용한다.
     async uploadCover(slug, file) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const ext = (file.name && file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+      const ext = ((file.name && file.name.split('.').pop()) || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
       const path = `ebooks/${slug}-cover.${ext}`;
-      const { error } = await c.storage.from('webzine')
-        .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: true });
+      const { error } = await webzine.uploadFile(path, file);
       if (error) return { error };
-      const url = `${URL_}/storage/v1/object/public/webzine/${path}?t=${Date.now()}`;
-      return { url };
+      return { url: `${webzine.publicUrl(path)}?t=${Date.now()}` };
     },
     // 페이지 수만 안전하게 갱신 (upsert 는 누락 컬럼을 날리므로 targeted update)
     async setPageCount(id, count) {
