@@ -132,7 +132,11 @@ function openForm(row) {
   form.original_price.value = row?.original_price ?? '';
   form.excerpt.value = row?.excerpt || '';
   form.description.value = row?.description || '';
-  form.cover_image.value = row?.cover_image || '';
+  STATE.coverImage = row?.cover_image || '';   // 재업로드 안 하면 유지
+  $('coverFile').value = '';
+  const cp = $('coverPreview');
+  if (STATE.coverImage) { cp.src = STATE.coverImage; cp.style.display = 'block'; }
+  else { cp.removeAttribute('src'); cp.style.display = 'none'; }
   form.sort_order.value = row?.sort_order ?? 0;
   form.published.checked = !!row?.published;
   form.ebook_on_sale.checked = !!row?.ebook_on_sale;
@@ -169,6 +173,17 @@ async function saveForm(e) {
   }
 
   const existing = STATE.editing ? STATE.rows.find(r => r.slug === STATE.editing) : null;
+
+  // 표지 — 파일 선택했으면 업로드(웹진과 같은 공개 버킷), 아니면 기존 유지
+  let coverImage = STATE.coverImage || '';
+  const coverFile = ($('coverFile').files || [])[0];
+  if (coverFile) {
+    $('formMsg').textContent = '표지 업로드 중…';
+    const up = await db().ebooks.uploadCover(slug, coverFile);
+    if (up.error) { $('formMsg').textContent = '표지 업로드 실패: ' + (up.error.message || '오류'); return; }
+    coverImage = up.url;
+  }
+
   const row = {
     slug,
     title: f.title.value.trim(),
@@ -177,8 +192,8 @@ async function saveForm(e) {
     original_price: f.original_price.value ? Number(f.original_price.value) : null,
     excerpt: f.excerpt.value.trim(),
     description: f.description.value,
-    cover_image: f.cover_image.value.trim(),
-    pages_path: slug,  // 페이지 이미지 폴더 = slug
+    cover_image: coverImage,
+    pages_path: slug,
     page_count: existing?.page_count || 0,
     sort_order: Number(f.sort_order.value) || 0,
     published: !!f.published.checked,
@@ -187,7 +202,7 @@ async function saveForm(e) {
 
   if (!row.title) { $('formMsg').textContent = '제목은 필수입니다.'; return; }
   if (row.ebook_on_sale && !row.page_count) {
-    $('formMsg').textContent = '이북 판매중으로 두려면 페이지 이미지를 먼저 올려주세요. (저장 후 아래 "페이지 이미지"에서 업로드)';
+    $('formMsg').textContent = '이북 판매중으로 두려면 PDF 를 먼저 올려주세요. (저장 후 아래 "PDF 업로드")';
     f.ebook_on_sale.checked = false;
     row.ebook_on_sale = false;
   }
@@ -339,6 +354,11 @@ async function revokeFrom(userId) {
 }
 
 // ────────── 이벤트 ──────────
+$('coverFile').addEventListener('change', (e) => {
+  const file = (e.target.files || [])[0];
+  const cp = $('coverPreview');
+  if (file) { cp.src = URL.createObjectURL(file); cp.style.display = 'block'; }
+});
 $('newBtn').addEventListener('click', () => openForm(null));
 $('cancelBtn').addEventListener('click', closeForm);
 $('delBtn').addEventListener('click', deleteRow);
