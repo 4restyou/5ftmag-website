@@ -1,5 +1,22 @@
 [
   {
+    "id": "18",
+    "title": "Kodak UltraMax 400, 가장 솔직한 필름",
+    "excerpt": "코닥 골드의 혈통을 잇지만 'Gold'라는 이름을 잃은 일반 소비자용 필름. 균형 잡힌 색과 자연스러운 피부 톤, Print Grain Index까지 짚으며 다시 보게 되는 울트라맥스 400.",
+    "date": "2026-06-30",
+    "category": "review",
+    "categoryLabel": "FILM",
+    "author": "Film Social Club",
+    "films": [
+      "ultramax"
+    ],
+    "issue": "",
+    "manual": true,
+    "page": "stories/18.html",
+    "published": true,
+    "thumbnail": "img/stories/18/ultramax-1.jpg"
+  },
+  {
     "id": "vivian-maier",
     "title": "사진을 찍기만 하고, 보여주지 않은 사람",
     "category": "essay",
