@@ -114,6 +114,15 @@ $('newBtn').addEventListener('click', () => openModal(null));
 $('cancelBtn').addEventListener('click', closeModal);
 $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
 $('f-slug').addEventListener('input', validateSlugLive);
+// 파일 업로드하면 비어 있는 slug/제목을 파일명에서 자동 채움
+function autofillFromFile(file) {
+  if (!file) return;
+  const base = String(file.name || '').replace(/\.[^.]+$/, '');
+  if (!$('f-slug').value.trim()) { $('f-slug').value = slugify(base); validateSlugLive(); }
+  if (!$('f-title').value.trim()) { $('f-title').value = base.replace(/[-_]+/g, ' ').trim(); }
+}
+$('f-pdf').addEventListener('change', (e) => autofillFromFile((e.target.files || [])[0]));
+$('f-cover').addEventListener('change', (e) => autofillFromFile((e.target.files || [])[0]));
 $('deleteBtn')?.addEventListener('click', async () => {
   if (!STATE.editingId) return;
   const issue = STATE.issues.find(x => String(x.id) === String(STATE.editingId));

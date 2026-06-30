@@ -142,8 +142,8 @@ function openForm(row) {
   form.slug.readOnly = !!row;
   form.title.value = row?.title || '';
   form.category.value = row?.category || 'goods';
-  form.price.value = row?.price ?? '';
-  form.original_price.value = row?.original_price ?? '';
+  form.price.value = window.MoneyInput ? window.MoneyInput.format(row?.price) : (row?.price ?? '');
+  form.original_price.value = window.MoneyInput ? window.MoneyInput.format(row?.original_price) : (row?.original_price ?? '');
   form.excerpt.value = row?.excerpt || '';
   form.description.value = row?.description || '';
   form.images.value = Array.isArray(row?.images) ? row.images.join('\n') : '';
@@ -180,8 +180,8 @@ async function saveForm(e) {
     slug,
     title: f.title.value.trim(),
     category: f.category.value,
-    price: Number(f.price.value) || 0,
-    original_price: f.original_price.value ? Number(f.original_price.value) : null,
+    price: (window.MoneyInput ? window.MoneyInput.parse(f.price.value) : Number(f.price.value)) || 0,
+    original_price: window.MoneyInput ? window.MoneyInput.parse(f.original_price.value) : (f.original_price.value ? Number(f.original_price.value) : null),
     excerpt: f.excerpt.value.trim(),
     description: f.description.value,
     images,
