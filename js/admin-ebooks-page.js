@@ -128,8 +128,8 @@ function openForm(row) {
   form.slug.readOnly = !!row;
   form.title.value = row?.title || '';
   form.kind.value = row?.kind || 'spc';
-  form.price.value = row?.price ?? '';
-  form.original_price.value = row?.original_price ?? '';
+  form.price.value = window.MoneyInput ? window.MoneyInput.format(row?.price) : (row?.price ?? '');
+  form.original_price.value = window.MoneyInput ? window.MoneyInput.format(row?.original_price) : (row?.original_price ?? '');
   form.excerpt.value = row?.excerpt || '';
   form.description.value = row?.description || '';
   STATE.coverImage = row?.cover_image || '';   // 재업로드 안 하면 유지
@@ -188,8 +188,8 @@ async function saveForm(e) {
     slug,
     title: f.title.value.trim(),
     kind: f.kind.value,
-    price: Number(f.price.value) || 0,
-    original_price: f.original_price.value ? Number(f.original_price.value) : null,
+    price: (window.MoneyInput ? window.MoneyInput.parse(f.price.value) : Number(f.price.value)) || 0,
+    original_price: window.MoneyInput ? window.MoneyInput.parse(f.original_price.value) : (f.original_price.value ? Number(f.original_price.value) : null),
     excerpt: f.excerpt.value.trim(),
     description: f.description.value,
     cover_image: coverImage,
@@ -360,10 +360,22 @@ async function revokeFrom(userId) {
 }
 
 // ────────── 이벤트 ──────────
+function slugFromFileName(name) {
+  return String(name || '').replace(/\.[^.]+$/, '')   // 확장자 제거
+    .normalize('NFKC').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 $('coverFile').addEventListener('change', (e) => {
   const file = (e.target.files || [])[0];
   const cp = $('coverPreview');
   if (file) { cp.src = URL.createObjectURL(file); cp.style.display = 'block'; }
+  // 새 이북일 때만, 비어 있으면 파일명에서 slug/제목 자동 채움
+  const form = $('form');
+  if (file && !STATE.editing) {
+    const base = String(file.name || '').replace(/\.[^.]+$/, '');
+    if (!form.slug.value.trim()) form.slug.value = slugFromFileName(file.name);
+    if (!form.title.value.trim()) form.title.value = base.replace(/[-_]+/g, ' ').trim();
+  }
 });
 $('newBtn').addEventListener('click', () => openForm(null));
 $('cancelBtn').addEventListener('click', closeForm);

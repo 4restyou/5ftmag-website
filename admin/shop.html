@@ -214,12 +214,12 @@
       </div>
       <div class="form-row">
         <label>가격 (원)</label>
-        <input type="number" name="price" min="0" step="100" placeholder="135000" />
+        <input type="text" inputmode="numeric" data-money name="price" placeholder="135,000" />
       </div>
       <div class="form-row">
         <label>정가 (원)</label>
         <div>
-          <input type="number" name="original_price" min="0" step="100" placeholder="(옵션 — 할인 표시할 때)" />
+          <input type="text" inputmode="numeric" data-money name="original_price" placeholder="(옵션 — 할인 표시할 때)" />
           <div class="hint">정가 > 가격 일 때 카드에 취소선 정가가 함께 표시됩니다.</div>
         </div>
       </div>
@@ -282,6 +282,7 @@
 <script src="../js/site-common.js?v=20260628-bell" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db-client.js?v=20260629-ebkpay" defer></script>
-<script src="../js/admin-shop-page.js?v=20260629-ebooklink" defer></script>
+<script src="../js/money-input.js?v=20260629-money" defer></script>
+<script src="../js/admin-shop-page.js?v=20260629-money" defer></script>
 </body>
 </html>
