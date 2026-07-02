@@ -17,8 +17,9 @@
 (function () {
   const CFG = {
     storeId: 'store-4c794b21-bbaa-466c-8fa9-17f42db08940',
-    // 카카오페이 채널 — 재심사 통과 후 라이브 키로 교체. 비우면 버튼 숨김.
-    kakaoChannelKey: 'channel-key-6eb4e2ce-a4f7-4a99-99cb-f4998d60e1b2',
+    // 카카오페이 채널 — 재심사 통과 후 라이브 키를 넣으면 버튼이 다시 나타남.
+    // (테스트 키: channel-key-6eb4e2ce-a4f7-4a99-99cb-f4998d60e1b2)
+    kakaoChannelKey: '',
   };
   const SDK_SRC = 'https://cdn.portone.io/v2/browser-sdk.js';
 
