@@ -7,13 +7,15 @@
 -- 2) ebook_entitlements.order_ref 부분 유니크 —
 --    같은 결제(포트원 paymentId)나 같은 스마트스토어 주문번호로
 --    열람권을 두 번 얻는 것을 DB 차원에서 차단.
---    (수동 부여의 빈 문자열 order_ref 는 제외)
+--    자동 결제 경로(source portone/smartstore)만 대상 — 수동 부여의
+--    order_ref 는 입금자명 메모라 중복이 정상이다 (prod 에 실제 존재).
 -- replay-safe.
 -- ════════════════════════════════════════════════════════════════════
 
 alter table public.ebook_products
   add column if not exists store_url text not null default '';
 
-create unique index if not exists idx_ebook_entitlements_order_ref
+drop index if exists public.idx_ebook_entitlements_order_ref;
+create unique index idx_ebook_entitlements_order_ref
   on public.ebook_entitlements(order_ref)
-  where order_ref <> '';
+  where order_ref <> '' and source in ('portone', 'smartstore');
