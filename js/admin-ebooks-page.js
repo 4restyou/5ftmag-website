@@ -137,6 +137,7 @@ function openForm(row) {
   const cp = $('coverPreview');
   if (STATE.coverImage) { cp.src = STATE.coverImage; cp.style.display = 'block'; }
   else { cp.removeAttribute('src'); cp.style.display = 'none'; }
+  form.store_url.value = row?.store_url || '';
   form.sort_order.value = row?.sort_order ?? 0;
   form.published.checked = !!row?.published;
   form.ebook_on_sale.checked = !!row?.ebook_on_sale;
@@ -195,6 +196,7 @@ async function saveForm(e) {
     cover_image: coverImage,
     pages_path: slug,
     page_count: existing?.page_count || 0,
+    store_url: f.store_url.value.trim(),
     sort_order: Number(f.sort_order.value) || 0,
     published: !!f.published.checked,
     ebook_on_sale: !!f.ebook_on_sale.checked,

@@ -91,22 +91,29 @@ Deno.serve(async (req) => {
     return json({ error: 'amount mismatch' }, 402, origin);
   }
   if (payment?.currency && payment.currency !== 'KRW') return json({ error: 'currency mismatch' }, 402, origin);
-  // customData 는 문자열 또는 객체로 올 수 있다 — slug 일치 확인
+  // customData.slug 는 필수 — 없으면 우리 체크아웃이 만든 결제가 아니다.
+  // (A 상품 결제로 같은 가격의 B 상품 열람권을 얻는 우회 차단)
   let cdSlug = '';
   try {
     const cd = typeof payment?.customData === 'string' ? JSON.parse(payment.customData) : payment?.customData;
     cdSlug = (cd?.slug || '').trim();
   } catch (_) { /* noop */ }
-  if (cdSlug && cdSlug !== slug) return json({ error: 'product mismatch' }, 402, origin);
+  if (cdSlug !== slug) return json({ error: 'product mismatch' }, 402, origin);
 
-  // 열람권 부여 (중복은 무시 — 재호출 안전)
+  // 이미 열람권 보유 → 그대로 성공 (재호출 안전)
+  const { data: existing } = await admin
+    .from('ebook_entitlements')
+    .select('id').eq('user_id', user.id).eq('product_id', product.id).maybeSingle();
+  if (existing) return json({ ok: true, already: true }, 200, origin);
+
+  // 부여 — order_ref 부분 유니크 인덱스가 같은 paymentId 재사용을 차단
   const { error: grantErr } = await admin
     .from('ebook_entitlements')
-    .upsert(
-      { user_id: user.id, product_id: product.id, source: 'portone', order_ref: paymentId },
-      { onConflict: 'user_id,product_id', ignoreDuplicates: true }
-    );
-  if (grantErr) return json({ error: 'grant failed', detail: grantErr.message }, 500, origin);
+    .insert({ user_id: user.id, product_id: product.id, source: 'portone', order_ref: paymentId });
+  if (grantErr) {
+    if (grantErr.code === '23505') return json({ error: 'payment already used' }, 409, origin);
+    return json({ error: 'grant failed', detail: grantErr.message }, 500, origin);
+  }
 
   return json({ ok: true }, 200, origin);
 });

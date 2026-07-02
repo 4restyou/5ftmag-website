@@ -2072,6 +2072,23 @@
         return data;
       } catch (_) { return { error: 'network' }; }
     },
+    // 스마트스토어 주문번호 인증 — Edge Function(ebook-redeem)이 커머스 API 로
+    // 주문을 확인하고 열람권 부여. { ok:true } 또는 { error, detail }.
+    async redeemOrder(slug, orderNo) {
+      const c = client(); if (!c) return { error: 'unavailable' };
+      const headers = { 'content-type': 'application/json' };
+      try {
+        const s = await session();
+        if (s?.access_token) headers.Authorization = `Bearer ${s.access_token}`;
+      } catch (_) {}
+      const u = `${URL_}/functions/v1/ebook-redeem`;
+      try {
+        const res = await fetch(u, { method: 'POST', headers, body: JSON.stringify({ slug, orderNo }) });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) return data || { error: 'redeem failed' };
+        return data;
+      } catch (_) { return { error: 'network' }; }
+    },
   };
 
   window.MagDB = {
