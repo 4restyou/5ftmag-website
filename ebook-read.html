@@ -60,7 +60,17 @@
     }
     .ebk-pay-method:hover:not([disabled]) { transform: translateY(-1px); border-color: var(--accent); }
     .ebk-pay-method[disabled] { opacity: .5; cursor: not-allowed; }
+    .ebk-pay-method-link { display: block; text-decoration: none; text-align: center; box-sizing: border-box; }
+    .ebk-pay-method-sub { font-weight: 600; font-size: 13.5px; background: none; }
     .ebk-pay-soon { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .ebk-pay-legal { margin: 14px 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+    .ebk-pay-legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+    .ebk-pay-input {
+      width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; padding: 12px 14px;
+      border-radius: 10px; border: 1px solid var(--line, rgba(0,0,0,0.15)); background: var(--bg);
+      color: var(--text); margin-bottom: 8px; letter-spacing: 0.02em;
+    }
+    .ebk-pay-redeem-msg { min-height: 18px; margin: 0 0 10px; font-size: 12.5px; color: var(--text-muted); }
     .ebk-pay-cancel {
       margin-top: 14px; font: inherit; font-size: 13px; color: var(--text-muted);
       background: none; border: none; cursor: pointer; padding: 6px;
@@ -90,11 +100,11 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db-client.js?v=20260629-ebkpay" defer></script>
+<script src="./js/db-client.js?v=20260630-redeem" defer></script>
 <script src="./js/util.js?v=20260620-schedule" defer></script>
 <script src="./js/site-common.js?v=20260628-bell" defer></script>
 <script src="./js/webzine-reader.js?v=20260629-ebkprev" defer></script>
-<script src="./js/ebook-checkout.js?v=20260629-ebkpay2" defer></script>
+<script src="./js/ebook-checkout.js?v=20260630-redeem" defer></script>
 <script src="./js/ebook-reader-page.js?v=20260629-ebkprev" defer></script>
 </body>
 </html>
