@@ -195,6 +195,36 @@ for (const css of cssFiles) {
   checkCssBraces(relative(ROOT, css), readFileSync(css, 'utf8'));
 }
 
+// 6) 캐시버스트 단일 버전 가드 — 같은 자산이 페이지마다 다른 ?v= 를 물면 실패.
+//    (tokens.css 가 4개 버전으로 갈라져 authors 페이지가 옛 토큰에 고착됐던 사고 방지)
+//    scripts/templates/ 도 포함 — 템플릿이 stale 버전을 새 페이지에 전파하는 것 차단.
+//    일괄 갱신: node scripts/bump-version.mjs <asset> <tag>
+const versionMap = new Map(); // canonical asset → Map(tag → [files])
+const templateFiles = walk(join(ROOT, 'scripts', 'templates'), /\.html$/);
+const verRe = /(?:src|href)=["'][^"']*?((?:css|js)\/[a-z0-9._-]+\.(?:css|js))\?v=([0-9A-Za-z-]+)["']/gi;
+for (const html of [...htmlFiles, ...templateFiles]) {
+  const text = readFileSync(html, 'utf8');
+  let m;
+  while ((m = verRe.exec(text))) {
+    const [, asset, tag] = m;
+    if (!versionMap.has(asset)) versionMap.set(asset, new Map());
+    const tags = versionMap.get(asset);
+    if (!tags.has(tag)) tags.set(tag, []);
+    tags.get(tag).push(relative(ROOT, html));
+  }
+}
+for (const [asset, tags] of versionMap) {
+  if (tags.size <= 1) continue;
+  const detail = [...tags.entries()]
+    .map(([tag, files]) => `?v=${tag} (${files.length}곳, 예: ${files[0]})`)
+    .join(' vs ');
+  broken.push({
+    file: asset,
+    ref: `버전 분열: ${detail}`,
+    expected: `node scripts/bump-version.mjs ${asset} <tag> 로 통일`,
+  });
+}
+
 // 결과 출력
 console.log(`\n자산 검증: ${htmlFiles.length} HTML / ${dataFiles.length} JSON / ${cssFiles.length} CSS 검사`);
 console.log(`  총 참조 ${refCount}개`);

@@ -796,6 +796,7 @@
       ['이용약관', base + 'legal/terms.html'],
       ['개인정보', base + 'legal/privacy.html'],
       ['저작권',  base + 'legal/copyright.html'],
+      ['취소·환불', base + 'legal/refund.html'],
     ];
     entries.forEach(([label, href]) => {
       const a = document.createElement('a');

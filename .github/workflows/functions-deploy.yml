@@ -31,12 +31,14 @@ jobs:
         with:
           version: latest
 
-      # 함수 추가 시 여기에도 추가할 것 — 빠지면 머지돼도 배포가 조용히 누락된다.
-      - name: Deploy functions
+      # supabase/functions/ 하위 폴더를 전부 배포 — 함수를 추가해도
+      # 워크플로우를 고칠 필요가 없다 (하드코딩 누락 사고 방지).
+      - name: Deploy all functions
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          for fn in send-push ebook-page ebook-purchase ebook-redeem; do
+          for dir in supabase/functions/*/; do
+            fn=$(basename "$dir")
             supabase functions deploy "$fn" \
               --project-ref "$SUPABASE_PROJECT_REF" \
               --no-verify-jwt
