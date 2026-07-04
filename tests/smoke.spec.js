@@ -11,6 +11,7 @@ const PAGES = [
   { path: '/legal/terms.html',  must: ['이용약관', '4rest'] },
   { path: '/legal/privacy.html', must: ['개인정보처리방침'] },
   { path: '/legal/copyright.html', must: ['저작권 안내'] },
+  { path: '/legal/refund.html', must: ['취소·환불 규정'] },
 ];
 
 for (const { path, must } of PAGES) {
@@ -146,5 +147,5 @@ test('중첩 짧은 경로의 asset fallback redirect가 동작한다', async ({
 test('legal 푸터 링크가 동적으로 inject 되는지', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => document.querySelector('.footer-links a[data-legal]'));
-  await expect(page.locator('.footer-links a[data-legal]')).toHaveCount(3);
+  await expect(page.locator('.footer-links a[data-legal]')).toHaveCount(4);
 });
