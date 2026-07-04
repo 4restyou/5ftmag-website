@@ -133,7 +133,7 @@
     }
     root.classList.remove('is-searching');
 
-    return renderRecommendations() + renderRecentRow() + renderThemeBlock();
+    return renderRecommendations() + renderRecentRow() + renderPhotoStrip() + renderThemeBlock();
   }
 
   // escAttr 도우미
@@ -175,6 +175,7 @@
     const newHtml = renderNewStories(STATE.stories);
     const libraryHtml = renderLibrary(STATE.films, STATE.query, STATE.categories);
     root.querySelector('#mhBody').innerHTML = newHtml + libraryHtml;
+    bindPhotoStrip();
   }
 
   // 활성 카테고리 개수 (badge 용). 0 또는 4 = 전체 = 표시 안 함.
@@ -357,6 +358,57 @@
         </div>
         ${compactFilmGrid(list)}
       </section>`;
+  }
+
+  // ─── 홈 사진 띠 (독자 승인 사진, 최근 300장 중 랜덤 9장 · 3×3) ───
+  // 데스크톱 홈 Photo 그리드와 같은 소스. 제목 없이 그리드만 —
+  // 필름 카탈로그 사이에 실제 사진이 보이게 하는 시각적 앵커.
+  let _homeStrip = null; // null = 미로드(스켈레톤), [] = 없음(섹션 숨김), [...] = 확정 9장
+  function renderPhotoStrip() {
+    if (Array.isArray(_homeStrip) && !_homeStrip.length) return '';
+    const cells = Array.isArray(_homeStrip)
+      ? _homeStrip.map((r, i) => `
+        <button type="button" class="mh-photo-cell" data-strip-index="${i}" aria-label="${esc(r.film || '독자 사진')} 크게 보기">
+          <img src="${esc(r.image)}" alt="" loading="lazy" />
+        </button>`).join('')
+      : Array.from({ length: 9 }).map(() => '<div class="mh-photo-cell mh-photo-cell-skel"></div>').join('');
+    return `
+      <section class="mh-compact-section mh-photostrip" id="mhPhotoStrip">
+        <div class="mh-photo-grid"${Array.isArray(_homeStrip) ? '' : ' aria-busy="true"'}>${cells}</div>
+      </section>`;
+  }
+
+  let _homeStripLoading = false;
+  async function loadPhotoStrip() {
+    if (_homeStripLoading || _homeStrip !== null) return;
+    _homeStripLoading = true;
+    let api = null;
+    for (let i = 0; i < 50; i++) {
+      if (window.MagDB?.isReady?.() && window.MagDB.submissions?.listApproved) {
+        api = window.MagDB.submissions; break;
+      }
+      await new Promise(r => setTimeout(r, 80));
+    }
+    let rows = [];
+    try { rows = api ? await api.listApproved(300) : []; } catch { rows = []; }
+    _homeStrip = shuffleInPlace(rows.filter(r => r && r.image).slice()).slice(0, 9);
+    const section = root.querySelector('#mhPhotoStrip');
+    if (!section) return; // 검색 중 등으로 섹션이 화면에 없음 — 다음 렌더에서 반영
+    if (!_homeStrip.length) { section.remove(); return; }
+    section.outerHTML = renderPhotoStrip();
+    bindPhotoStrip();
+  }
+
+  function bindPhotoStrip() {
+    const section = root.querySelector('#mhPhotoStrip');
+    if (!section) return;
+    if (_homeStrip === null) { loadPhotoStrip(); return; }
+    section.addEventListener('click', (e) => {
+      const cell = e.target.closest('[data-strip-index]');
+      if (!cell) return;
+      try { window.trackEvent?.('lightbox_opened', { from: 'home_strip' }); } catch (_) {}
+      openSheetLightbox(_homeStrip, Number(cell.dataset.stripIndex), null);
+    });
   }
 
   function renderThemeBlock() {
