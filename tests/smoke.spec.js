@@ -147,5 +147,5 @@ test('중첩 짧은 경로의 asset fallback redirect가 동작한다', async ({
 test('legal 푸터 링크가 동적으로 inject 되는지', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => document.querySelector('.footer-links a[data-legal]'));
-  await expect(page.locator('.footer-links a[data-legal]')).toHaveCount(3);
+  await expect(page.locator('.footer-links a[data-legal]')).toHaveCount(4);
 });
