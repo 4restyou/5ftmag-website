@@ -24,7 +24,41 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const NCP_CLIENT_ID = Deno.env.get('NAVER_COMMERCE_CLIENT_ID') || '';
 const NCP_CLIENT_SECRET = Deno.env.get('NAVER_COMMERCE_CLIENT_SECRET') || '';
+// 고정 IP 중계 (relay/naver-relay.mjs) — 커머스 API 가 등록된 IP 에서만
+// 호출을 허용하는데 엣지 함수는 고정 IP 가 없어서, 설정돼 있으면 모든
+// 커머스 API 호출을 중계 서버로 보낸다. 비어 있으면 직접 호출(로컬 테스트용).
+const RELAY_URL = (Deno.env.get('NAVER_RELAY_URL') || '').replace(/\/$/, '');
+const RELAY_KEY = Deno.env.get('NAVER_RELAY_KEY') || '';
 const API = 'https://api.commerce.naver.com/external';
+
+// 커머스 API 호출 — 중계 경유/직접 을 한 곳에서. { status, text } 반환.
+async function naverFetch(path: string, opts: { method?: string; contentType?: string; authorization?: string; body?: string } = {}): Promise<{ status: number; text: string }> {
+  const method = opts.method || 'GET';
+  if (RELAY_URL && RELAY_KEY) {
+    const res = await fetch(`${RELAY_URL}/forward`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-relay-key': RELAY_KEY },
+      body: JSON.stringify({
+        path: `/external${path}`,
+        method,
+        contentType: opts.contentType || '',
+        authorization: opts.authorization || '',
+        body: opts.body || '',
+      }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || typeof data?.status !== 'number') {
+      console.error('[ebook-redeem] relay fail', res.status, data?.error || '');
+      return { status: 0, text: '' };
+    }
+    return { status: data.status, text: String(data.body ?? '') };
+  }
+  const headers: Record<string, string> = {};
+  if (opts.contentType) headers['content-type'] = opts.contentType;
+  if (opts.authorization) headers['authorization'] = opts.authorization;
+  const res = await fetch(API + path, { method, headers, body: opts.body || undefined });
+  return { status: res.status, text: await res.text() };
+}
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -50,6 +84,10 @@ function json(body: unknown, status: number, origin: string | null) {
   });
 }
 
+function parseJson(text: string): any {
+  try { return JSON.parse(text); } catch { return null; }
+}
+
 // 커머스 API 토큰 (client_credentials + bcrypt 서명)
 async function commerceToken(): Promise<string | null> {
   const timestamp = Date.now();
@@ -61,13 +99,13 @@ async function commerceToken(): Promise<string | null> {
     client_secret_sign: sign,
     type: 'SELF',
   });
-  const res = await fetch(`${API}/v1/oauth2/token`, {
+  const res = await naverFetch('/v1/oauth2/token', {
     method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body,
+    contentType: 'application/x-www-form-urlencoded',
+    body: body.toString(),
   });
-  const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.access_token) {
+  const data = parseJson(res.text);
+  if (res.status !== 200 || !data?.access_token) {
     console.error('[ebook-redeem] token fail', res.status, data?.message || '');
     return null;
   }
@@ -76,24 +114,25 @@ async function commerceToken(): Promise<string | null> {
 
 // 상품주문 상세 조회 — productOrderIds 배열로 질의
 async function queryProductOrders(token: string, ids: string[]): Promise<any[]> {
-  const res = await fetch(`${API}/v1/pay-order/seller/product-orders/query`, {
+  const res = await naverFetch('/v1/pay-order/seller/product-orders/query', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
+    contentType: 'application/json',
+    authorization: `Bearer ${token}`,
     body: JSON.stringify({ productOrderIds: ids }),
   });
-  const data = await res.json().catch(() => null);
-  if (!res.ok) { console.error('[ebook-redeem] query fail', res.status, data?.message || ''); return []; }
+  const data = parseJson(res.text);
+  if (res.status !== 200) { console.error('[ebook-redeem] query fail', res.status, data?.message || ''); return []; }
   const list = data?.data || [];
   return Array.isArray(list) ? list : [];
 }
 
 // 주문번호(orderId) → 상품주문번호 목록
 async function productOrderIdsOf(token: string, orderId: string): Promise<string[]> {
-  const res = await fetch(`${API}/v1/pay-order/seller/orders/${encodeURIComponent(orderId)}/product-order-ids`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const res = await naverFetch(`/v1/pay-order/seller/orders/${encodeURIComponent(orderId)}/product-order-ids`, {
+    authorization: `Bearer ${token}`,
   });
-  const data = await res.json().catch(() => null);
-  if (!res.ok) return [];
+  const data = parseJson(res.text);
+  if (res.status !== 200) return [];
   const ids = data?.data?.productOrderIds || data?.productOrderIds || [];
   return Array.isArray(ids) ? ids.map(String) : [];
 }

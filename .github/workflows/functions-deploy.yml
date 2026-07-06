@@ -9,6 +9,7 @@ name: Supabase Edge Functions
 #   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT, PUSH_DISPATCH_SECRET
 #   PORTONE_API_SECRET (ebook-purchase)
 #   NAVER_COMMERCE_CLIENT_ID, NAVER_COMMERCE_CLIENT_SECRET (ebook-redeem)
+#   NAVER_RELAY_URL, NAVER_RELAY_KEY (ebook-redeem — 고정 IP 중계, relay/ 참고)
 
 on:
   push:
