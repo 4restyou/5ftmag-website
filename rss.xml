@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Sat, 27 Jun 2026 15:43:02 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 06 Jul 2026 15:14:45 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>Kodak UltraMax 400, 가장 솔직한 필름</title>
+      <link>https://www.5ftmag.com/stories/18.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/18.html</guid>
+      <pubDate>Tue, 30 Jun 2026 00:00:00 GMT</pubDate>
+      <description>코닥 골드의 혈통을 잇지만 &apos;Gold&apos;라는 이름을 잃은 일반 소비자용 필름. 균형 잡힌 색과 자연스러운 피부 톤, Print Grain Index까지 짚으며 다시 보게 되는 울트라맥스 400.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
     <item>
       <title>사진을 찍기만 하고, 보여주지 않은 사람</title>
       <link>https://www.5ftmag.com/stories/vivian-maier.html</link>
