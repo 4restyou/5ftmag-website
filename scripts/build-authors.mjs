@@ -121,8 +121,8 @@ function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css?
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="pretendard.css" />
-  <link rel="stylesheet" href="css/tokens.css?v=20260526-fontscale">
-  <link rel="stylesheet" href="css/common.css?v=20260531-search">
+  <link rel="stylesheet" href="css/tokens.css?v=20260702-unify">
+  <link rel="stylesheet" href="css/common.css?v=20260627-a11y">
   <link rel="stylesheet" href="${cssHref}">
 </head>`;
 }
@@ -182,8 +182,8 @@ function footer(prefix = '') {
   <span class="footer-copy">© 2024 5ft magazine</span>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="${prefix}js/db-client.js?v=20260531-unsub"></script>
-<script src="${prefix}js/site-common.js?v=20260531-search"></script>`;
+<script src="${prefix}js/db-client.js?v=20260630-redeem"></script>
+<script src="${prefix}js/site-common.js?v=20260704-legalfix"></script>`;
 }
 
 function storyCard(story, prefix = '') {
