@@ -154,6 +154,26 @@ Deno.serve(async (req) => {
   const user = userData?.user;
   if (!user) return json({ error: 'login required' }, 401, origin);
 
+  // 레이트리밋 — 주문번호 무차별 대입 완화. 오류가 나면 통과(fail-open)해서
+  // 정상 상환이 절대 막히지 않도록 한다. 로그인 계정·IP 각각 1시간 창 기준.
+  const clientIp = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim();
+  try {
+    const sinceIso = new Date(Date.now() - 3600_000).toISOString();
+    const userQ = admin.from('ebook_redeem_attempts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id).gte('created_at', sinceIso);
+    const ipQ = clientIp
+      ? admin.from('ebook_redeem_attempts')
+          .select('id', { count: 'exact', head: true })
+          .eq('ip', clientIp).gte('created_at', sinceIso)
+      : Promise.resolve({ count: 0 });
+    const [uRes, ipRes]: any = await Promise.all([userQ, ipQ]);
+    if ((uRes?.count || 0) >= 15 || (ipRes?.count || 0) >= 40) {
+      return json({ error: 'too many attempts', detail: '시도가 너무 많아요. 잠시 후 다시 시도해 주세요.' }, 429, origin);
+    }
+    await admin.from('ebook_redeem_attempts').insert({ user_id: user.id, ip: clientIp || null });
+  } catch (_) { /* fail-open */ }
+
   let body: any = null;
   try { body = await req.json(); } catch (_) { /* noop */ }
   const slug = (body?.slug || '').trim();
