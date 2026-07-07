@@ -13,7 +13,7 @@
   'use strict';
 
   // ─── 1) Plausible (서버 보유 데이터 X · 쿠키 X · 개인정보 X) ───
-  const PLAUSIBLE_DOMAIN = '';  // ← 예: '5ftmag.com'
+  const PLAUSIBLE_DOMAIN = '5ftmag.com';  // plausible.io 에 이 도메인 등록 필요
   if (PLAUSIBLE_DOMAIN) {
     const s = document.createElement('script');
     s.defer = true;
