@@ -18,6 +18,22 @@ ebook-redeem (엣지 함수)  ──X-Relay-Key──▶  중계 서버(고정 I
 
 ---
 
+## 현재 배포 상태 (2026-07 구축 완료)
+
+| 항목 | 값 |
+| --- | --- |
+| 중계 도메인 | `relay.5ftmag.com` |
+| 고정 IP (Lightsail) | `3.36.123.26` (AWS 서울 ap-northeast-2, user `ubuntu`) |
+| DNS 존 | `5ftmag.com` — **네임서버 Wix**(`ns14/ns15.wixdns.net`). A 레코드 `relay` → 고정 IP 를 Wix DNS 에서 추가 |
+| 네이버 커머스 앱 | `5ftmag` / 스토어 `필름소셜클럽` — **API 호출 IP 에 고정 IP 등록됨**, API 그룹 `주문 판매자` 포함 |
+| Supabase 시크릿 | `NAVER_RELAY_URL`, `NAVER_RELAY_KEY`, `NAVER_COMMERCE_CLIENT_ID`, `NAVER_COMMERCE_CLIENT_SECRET` 설정됨 |
+| 헬스체크 | `https://relay.5ftmag.com/healthz` → `ok` |
+
+> `RELAY_KEY` 등 비밀값은 이 문서에 두지 않는다. 서버 `/etc/naver-relay.env` 와
+> Supabase 시크릿에만 존재. 유출 시 재설치로 새 키 발급 후 시크릿만 갱신.
+
+---
+
 ## 설정 절차
 
 준비물: Lightsail 인스턴스 + 연결된 **고정 IP**, `5ftmag.com` DNS 관리 권한,
@@ -34,7 +50,9 @@ Lightsail 콘솔 → 인스턴스 → **Networking** 탭에서:
 
 ### 2. DNS A 레코드
 `relay.5ftmag.com` 의 A 레코드가 **고정 IP** 를 가리키도록 추가한다.
-(5ftmag.com DNS 관리처에서 설정 — 전파가 끝나야 TLS 가 발급된다.)
+5ftmag.com 은 **Wix DNS**(네임서버 `*.wixdns.net`)로 관리되므로 Wix 계정 →
+도메인 → DNS 레코드 관리 → A(호스트)에서 호스트명 `relay`, 값 `고정 IP` 로 추가.
+(전파가 끝나야 TLS 가 발급된다.)
 
 확인:
 ```bash
