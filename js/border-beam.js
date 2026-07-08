@@ -8,14 +8,8 @@
   if (window.__borderBeamInit) return;
   window.__borderBeamInit = true;
 
-  // iOS·Safari(WebKit)는 mask-composite 렌더링 차이로 회전 빔이 혜성 대신
-  // 굵은 검은 링으로 깨진다. 그래서 WebKit 계열(데스크톱 Safari + 모든 iOS 브라우저)
-  // 에선 빔을 적용하지 않는다. Blink(Chrome/Edge/Android)·Gecko(Firefox)만 원본 표시.
-  var _ua = navigator.userAgent || '';
-  var _isSafari = /AppleWebKit/.test(_ua) && !/Chrome|Chromium|Edg|OPR|SamsungBrowser/.test(_ua);
-  var _isIOS = /iP(hone|ad|od)/.test(_ua) ||
-    (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1); // iPadOS 데스크톱 모드
-  if (_isSafari || _isIOS) return;
+  // CSS 는 WebKit/iOS 호환 2겹 마스크 방식이라 모든 최신 브라우저에서 표시된다.
+  // (@property·conic-gradient 미지원 아주 옛 브라우저에선 자동으로 아무것도 안 그려짐.)
 
   // currentScript 는 최상위 실행 중에만 유효 → 지금 캡처
   var SCRIPT_SRC = (document.currentScript && document.currentScript.src) || '';
@@ -41,8 +35,8 @@
   function injectCSS() {
     try {
       var src = SCRIPT_SRC;
-      var href = src.replace(/js\/border-beam\.js.*$/, 'css/border-beam.css');
-      if (!href || href === src) href = 'css/border-beam.css';
+      var href = src.replace(/js\/border-beam\.js.*$/, 'css/border-beam.css?v=20260708b');
+      if (!href || href === src) href = 'css/border-beam.css?v=20260708b';
       if (document.querySelector('link[data-border-beam]')) return;
       var link = document.createElement('link');
       link.rel = 'stylesheet';
