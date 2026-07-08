@@ -105,8 +105,8 @@
         </div>
         <div data-pane="redeem" hidden>
           <h2 class="ebk-pay-modal-title">주문번호 인증</h2>
-          <p class="ebk-pay-modal-sub">스마트스토어 결제 후 받은 주문번호를 입력하면 이 계정에 열람권이 발급돼요. (주문 내역 &gt; 주문번호)</p>
-          <input type="text" class="ebk-pay-input" inputmode="numeric" placeholder="예: 2026063012345671" maxlength="32" aria-label="스마트스토어 주문번호" />
+          <p class="ebk-pay-modal-sub">스마트스토어 결제 후 받은 <b>주문번호</b>를 입력하면 이 계정에 열람권이 발급돼요. (네이버페이 주문내역 &gt; 주문번호)</p>
+          <input type="text" class="ebk-pay-input" inputmode="numeric" placeholder="예: 2026070812345671" maxlength="32" aria-label="스마트스토어 주문번호" />
           <p class="ebk-pay-redeem-msg" aria-live="polite"></p>
           <div class="ebk-pay-methods">
             <button type="button" class="ebk-pay-method" data-redeem-go>인증하고 열람권 받기</button>

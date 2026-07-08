@@ -112,8 +112,10 @@ async function commerceToken(): Promise<string | null> {
   return data.access_token as string;
 }
 
-// 상품주문 상세 조회 — productOrderIds 배열로 질의
-async function queryProductOrders(token: string, ids: string[]): Promise<any[]> {
+// 상품주문 상세 조회 — '상품주문번호' 배열로 질의. { status, orders } 반환.
+// 상품주문번호가 아닌 주문번호를 넣으면 400 "처리 권한이 없는 상품 주문 번호" 가 온다
+// (그 경우 호출부에서 recentProductOrderIds 로 역추적한다).
+async function queryProductOrders(token: string, ids: string[]): Promise<{ status: number; orders: any[] }> {
   const res = await naverFetch('/v1/pay-order/seller/product-orders/query', {
     method: 'POST',
     contentType: 'application/json',
@@ -121,20 +123,36 @@ async function queryProductOrders(token: string, ids: string[]): Promise<any[]> 
     body: JSON.stringify({ productOrderIds: ids }),
   });
   const data = parseJson(res.text);
-  if (res.status !== 200) { console.error('[ebook-redeem] query fail', res.status, data?.message || ''); return []; }
+  if (res.status !== 200) {
+    console.error('[ebook-redeem] query fail', res.status, data?.message || '');
+    return { status: res.status, orders: [] };
+  }
   const list = data?.data || [];
-  return Array.isArray(list) ? list : [];
+  return { status: 200, orders: Array.isArray(list) ? list : [] };
 }
 
-// 주문번호(orderId) → 상품주문번호 목록
-async function productOrderIdsOf(token: string, orderId: string): Promise<string[]> {
-  const res = await naverFetch(`/v1/pay-order/seller/orders/${encodeURIComponent(orderId)}/product-order-ids`, {
-    authorization: `Bearer ${token}`,
-  });
-  const data = parseJson(res.text);
-  if (res.status !== 200) return [];
-  const ids = data?.data?.productOrderIds || data?.productOrderIds || [];
-  return Array.isArray(ids) ? ids.map(String) : [];
+// 최근 변경(결제 포함) 상품주문번호 목록 — '주문번호' 입력을 상품주문으로 역추적할 때 사용.
+// 커머스 API 엔 '주문번호 → 상품주문번호' 직접 변환이 없어서, 최근 상품주문번호를 모은 뒤
+// 상세 조회해 order.orderId 로 대조한다. last-changed-statuses 는 1회 최대 24h 범위라
+// 최근 며칠을 24h 단위로 스캔. 소규모 스토어 기준(최근 주문 수 적음)으로 상한을 둔다.
+async function recentProductOrderIds(token: string, maxIds = 300): Promise<string[]> {
+  const ids = new Set<string>();
+  const now = Date.now();
+  for (let i = 0; i < 4 && ids.size < maxIds; i++) {
+    const to = new Date(now - i * 86_400_000).toISOString();
+    const from = new Date(now - (i + 1) * 86_400_000).toISOString();
+    const params = new URLSearchParams({ lastChangedFrom: from, lastChangedTo: to });
+    const res = await naverFetch(`/v1/pay-order/seller/product-orders/last-changed-statuses?${params.toString()}`, {
+      authorization: `Bearer ${token}`,
+    });
+    if (res.status !== 200) { console.error('[ebook-redeem] scan fail', res.status); continue; }
+    const data = parseJson(res.text);
+    const list = data?.data?.lastChangeStatuses || data?.lastChangeStatuses || [];
+    for (const it of (Array.isArray(list) ? list : [])) {
+      if (it?.productOrderId) ids.add(String(it.productOrderId));
+    }
+  }
+  return [...ids].slice(0, maxIds);
 }
 
 // 결제가 유지되는 상태만 통과 (취소·반품·교환 거절)
@@ -202,19 +220,32 @@ Deno.serve(async (req) => {
   const ncpToken = await commerceToken();
   if (!ncpToken) return json({ error: 'store verify unavailable' }, 502, origin);
 
-  // 입력이 상품주문번호일 수도, 주문번호일 수도 있다 — 둘 다 시도
-  let orders = await queryProductOrders(ncpToken, [orderNo]);
+  // 1) 입력을 '상품주문번호'로 직접 조회 (상품주문번호를 넣은 경우 바로 매칭).
+  // 2) 비면(대개 '주문번호'를 넣은 경우) 최근 상품주문을 조회해 order.orderId 로 대조.
+  let orders = (await queryProductOrders(ncpToken, [orderNo])).orders;
+  let requireOrderId = false;
   if (!orders.length) {
-    const ids = await productOrderIdsOf(ncpToken, orderNo);
-    if (ids.length) orders = await queryProductOrders(ncpToken, ids);
+    const recent = await recentProductOrderIds(ncpToken);
+    if (recent.length) { orders = (await queryProductOrders(ncpToken, recent)).orders; requireOrderId = true; }
   }
-  if (!orders.length) return json({ error: 'order not found', detail: '주문을 찾을 수 없어요. 번호를 다시 확인해 주세요.' }, 404, origin);
+  if (!orders.length) {
+    return json({
+      error: 'order not found',
+      detail: '주문을 찾을 수 없어요. 주문번호를 다시 확인해 주세요. (결제 직후라면 잠시 후 다시 시도해 주세요.)',
+    }, 404, origin);
+  }
 
-  // 이 이북 상품에 해당하고 결제가 유지 중인 상품주문 찾기
+  // 이 이북 상품에 해당하고 결제가 유지 중인 상품주문 찾기.
+  // 주문번호 경로(requireOrderId)에선 반드시 입력 주문번호와 order.orderId 가 일치해야 한다
+  // (타인 주문에 매칭되는 것을 막는 보안 확인).
   let matched: any = null;
   let sawProduct = false;
   for (const row of orders) {
     const po = row?.productOrder || row;
+    if (requireOrderId) {
+      const parentOrderId = String(row?.order?.orderId || po?.orderId || '');
+      if (parentOrderId !== orderNo) continue;
+    }
     const candidates = [po?.productId, po?.originProductId, po?.channelProductId, po?.merchantChannelProductId]
       .filter(Boolean).map(String);
     if (!candidates.includes(expectedProductNo)) continue;
