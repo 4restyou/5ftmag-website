@@ -1983,6 +1983,23 @@
       if (error) { console.warn('[ebooks.listEntitlements]', error.message); return []; }
       return data || [];
     },
+    // 편집부 — 이북별 판매(열람권 발급) 집계. { [product_id]: { total, portone, smartstore, manual } }
+    // 편집부 RLS 로 전체 열람권 조회 가능. 소규모라 클라이언트 집계.
+    async salesByProduct() {
+      const c = client(); if (!c) return {};
+      const { data, error } = await c.from('ebook_entitlements').select('product_id, source');
+      if (error) { console.warn('[ebooks.salesByProduct]', error.message); return {}; }
+      const map = {};
+      for (const r of (data || [])) {
+        const pid = r.product_id; if (!pid) continue;
+        const m = map[pid] || (map[pid] = { total: 0, portone: 0, smartstore: 0, manual: 0 });
+        m.total += 1;
+        if (r.source === 'portone') m.portone += 1;
+        else if (r.source === 'smartstore') m.smartstore += 1;
+        else m.manual += 1;
+      }
+      return map;
+    },
     // 편집부 — 수동 부여 (무통장입금 확인 후). 중복이면 무시.
     async grant(userId_, productId, { source = 'manual', orderRef = '' } = {}) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
