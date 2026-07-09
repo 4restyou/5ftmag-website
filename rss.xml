@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Thu, 09 Jul 2026 03:55:54 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 09 Jul 2026 17:57:37 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>Leica Monopan 50, 라이카가 만든 첫 필름</title>
+      <link>https://www.5ftmag.com/stories/leica-monopan-50.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/leica-monopan-50.html</guid>
+      <pubDate>Thu, 09 Jul 2026 00:00:00 GMT</pubDate>
+      <description>라이카 I 100주년에 맞춰 나온 라이카의 첫 35mm 흑백 필름. ISO 50 초미립자, 280 line pairs/mm, 근적외선까지 뻗는 적색 감도. 그런데 뚜껑을 열면 아비포트가 있다 — 가장 솔직한 리뷰.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
     <item>
       <title>2026 / 7, 이달의 사진 전시</title>
       <link>https://www.5ftmag.com/stories/jul-2026-exhibitions.html</link>
