@@ -1263,9 +1263,10 @@
 
     // 실시간 — 새 알림 도착 시 뱃지 + 토스트
     try {
-      await window.MagDB.realtime.subscribeNotifications((n) => {
+      await window.MagDB.realtime.subscribeNotifications((n, kind) => {
         refreshBadge();
-        if (typeof window.showToast === 'function') {
+        // 새 알림(INSERT)일 때만 토스트. 읽음 처리(UPDATE)는 뱃지만 조용히 갱신.
+        if (kind !== 'UPDATE' && typeof window.showToast === 'function') {
           window.showToast(n.title || '새 알림', { type: 'info', duration: 4200 });
         }
       });
