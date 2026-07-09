@@ -1753,10 +1753,24 @@
     injectUploadFab();
   }
 
+  // 관리자 서브내비(모바일 가로 스크롤 바) — 페이지 이동 후에도 현재 탭이 보이게.
+  // 바가 가로 스크롤 상태일 때만 .is-current 를 가운데 근처로 스크롤한다.
+  // 데스크톱 세로 사이드바(overflow-x 없음)에서는 scrollLeft 가 0 그대로라 무해.
+  function revealAdminSubnavCurrent() {
+    const nav = document.querySelector('.admin-subnav');
+    if (!nav) return;
+    const cur = nav.querySelector('.admin-subnav-link.is-current');
+    if (!cur) return;
+    if (nav.scrollWidth <= nav.clientWidth + 1) return; // 스크롤 없음(데스크톱 등)
+    const target = cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2;
+    nav.scrollLeft = Math.max(0, target);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { init(); bootPwa(); });
+    document.addEventListener('DOMContentLoaded', () => { init(); bootPwa(); revealAdminSubnavCurrent(); });
   } else {
     init();
     bootPwa();
+    revealAdminSubnavCurrent();
   }
 })();
