@@ -177,6 +177,20 @@
     "manual": true
   },
   {
+    "id": "leica-monopan-50",
+    "title": "Leica Monopan 50, 라이카가 만든 첫 필름",
+    "category": "review",
+    "categoryLabel": "FILM",
+    "author": "Film Social Club",
+    "date": "2026-07-09",
+    "issue": "",
+    "thumbnail": "img/stories/monopan-50/packaging.webp",
+    "excerpt": "라이카 I 100주년에 맞춰 나온 라이카의 첫 35mm 흑백 필름. ISO 50 초미립자, 280 line pairs/mm, 근적외선까지 뻗는 적색 감도. 그런데 뚜껑을 열면 아비포트가 있다 — 가장 솔직한 리뷰.",
+    "page": "stories/leica-monopan-50.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "jul-2026-exhibitions",
     "title": "2026 / 7, 이달의 사진 전시",
     "category": "essay",
