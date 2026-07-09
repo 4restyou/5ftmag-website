@@ -887,6 +887,42 @@ function renderReferrers(rows) {
   }).join('');
 }
 
+function renderEbookSales(products, sales) {
+  const tbody = $('ebookSales');
+  if (!tbody) return;
+  const rows = (products || []).map(p => {
+    const s = (sales && sales[p.id]) || { total: 0, portone: 0, smartstore: 0, manual: 0 };
+    const paid = (s.smartstore || 0) + (s.portone || 0);
+    return {
+      title: p.title || p.slug || '(제목 없음)',
+      total: s.total || 0, smartstore: s.smartstore || 0, portone: s.portone || 0, manual: s.manual || 0,
+      revenue: paid * (p.price || 0),
+    };
+  });
+  rows.sort((a, b) => (b.total - a.total) || (b.revenue - a.revenue));
+
+  let totalSales = 0, totalRevenue = 0;
+  for (const r of rows) { totalSales += r.total; totalRevenue += r.revenue; }
+  const withSales = rows.filter(r => r.total > 0);
+  if ($('eb-total')) $('eb-total').textContent = fmtNum(totalSales);
+  if ($('eb-total-sub')) $('eb-total-sub').textContent = `이북 ${fmtNum(withSales.length)}종`;
+  if ($('eb-revenue')) $('eb-revenue').textContent = '₩' + fmtNum(totalRevenue);
+
+  if (!withSales.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">아직 판매가 없어요.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = withSales.map(r => `
+    <tr>
+      <td>${escapeHtml(r.title)}</td>
+      <td class="num">${fmtNum(r.total)}</td>
+      <td class="num">${fmtNum(r.smartstore)}</td>
+      <td class="num">${fmtNum(r.portone)}</td>
+      <td class="num">${fmtNum(r.manual)}</td>
+      <td class="num">₩${fmtNum(r.revenue)}</td>
+    </tr>`).join('');
+}
+
 async function reload() {
   const d = STATE.days;
   const label = `최근 ${d}일`;
@@ -909,6 +945,7 @@ async function reload() {
   const [
     summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths,
     upSummary, upDaily, upTopContrib, upTopFilms, upTopCameras, upThemeRatio, pendingReports,
+    ebookProducts, ebookSales,
   ] = await Promise.all([
     db().analytics.summary(),
     db().analytics.daily(d),
@@ -926,6 +963,8 @@ async function reload() {
     topCamerasFn,
     db().analytics.uploadsThemeRatio(d),
     getPendingReportCount(),
+    (db().ebooks && db().ebooks.listAll) ? db().ebooks.listAll() : Promise.resolve([]),
+    (db().ebooks && db().ebooks.salesByProduct) ? db().ebooks.salesByProduct() : Promise.resolve({}),
   ]);
 
   await loadCameraOverrides();
@@ -946,6 +985,8 @@ async function reload() {
   renderTopByKey('topFilms', upTopFilms, 'film');
   renderTopByKey('topCameras', upTopCameras, 'camera');
   renderOpsStatus({ uploads: upSummary, pendingReports }, { announce: !!STATE.ops.previous });
+
+  renderEbookSales(ebookProducts, ebookSales);
 }
 
 document.querySelectorAll('.range-btn').forEach(btn => {
