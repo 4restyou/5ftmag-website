@@ -177,6 +177,34 @@
     "manual": true
   },
   {
+    "id": "kono-effect-films",
+    "title": "KONO MOJO · OFFBEAT · BEBOP — 색을 입고 나온 세 필름",
+    "category": "review",
+    "categoryLabel": "FILM",
+    "author": "Film Social Club",
+    "date": "2026-07-09",
+    "issue": "",
+    "thumbnail": "img/stories/kono-effect-films/hero.webp",
+    "excerpt": "빈의 실험 필름 하우스 KONO가 재즈 이름을 단 컬러 이펙트 필름 세 종을 냈다. 모두 35mm ISO 200 컬러 네거티브. 핑크·민트의 MOJO, 초록의 OFFBEAT, 앰버의 BEBOP — 필름마다 색을 미리 입혀 나온다.",
+    "page": "stories/kono-effect-films.html",
+    "published": true,
+    "manual": true
+  },
+  {
+    "id": "reflx-110-film",
+    "title": "Reflx Lab, 110 필름을 두 배로 늘리다",
+    "category": "review",
+    "categoryLabel": "FILM",
+    "author": "Film Social Club",
+    "date": "2026-07-09",
+    "issue": "",
+    "thumbnail": "img/stories/reflx-110/hero.webp",
+    "excerpt": "로모그래피만 만들던 110 포맷에 Reflx Lab이 두 종을 더했다. 컬러 네거티브 Fortuna C200, 컬러 리버설 100R. 3D 프린트 카트리지에 24컷, 127 제작의 부산물로 태어난 필름.",
+    "page": "stories/reflx-110-film.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "leica-monopan-50",
     "title": "Leica Monopan 50, 라이카가 만든 첫 필름",
     "category": "review",

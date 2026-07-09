@@ -6,13 +6,31 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Thu, 09 Jul 2026 17:57:37 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 09 Jul 2026 18:15:27 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>KONO MOJO · OFFBEAT · BEBOP — 색을 입고 나온 세 필름</title>
+      <link>https://www.5ftmag.com/stories/kono-effect-films.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/kono-effect-films.html</guid>
+      <pubDate>Thu, 09 Jul 2026 00:00:00 GMT</pubDate>
+      <description>빈의 실험 필름 하우스 KONO가 재즈 이름을 단 컬러 이펙트 필름 세 종을 냈다. 모두 35mm ISO 200 컬러 네거티브. 핑크·민트의 MOJO, 초록의 OFFBEAT, 앰버의 BEBOP — 필름마다 색을 미리 입혀 나온다.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
+    <item>
+      <title>Reflx Lab, 110 필름을 두 배로 늘리다</title>
+      <link>https://www.5ftmag.com/stories/reflx-110-film.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/reflx-110-film.html</guid>
+      <pubDate>Thu, 09 Jul 2026 00:00:00 GMT</pubDate>
+      <description>로모그래피만 만들던 110 포맷에 Reflx Lab이 두 종을 더했다. 컬러 네거티브 Fortuna C200, 컬러 리버설 100R. 3D 프린트 카트리지에 24컷, 127 제작의 부산물로 태어난 필름.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
     <item>
       <title>Leica Monopan 50, 라이카가 만든 첫 필름</title>
       <link>https://www.5ftmag.com/stories/leica-monopan-50.html</link>
