@@ -1088,6 +1088,7 @@
           <p class="notif-panel-guest-title">로그인하면 알림을 받을 수 있어요</p>
           <p class="notif-panel-guest-body">댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.</p>
           <button type="button" class="notif-panel-guest-btn" data-action="auth-login">Google로 로그인</button>
+          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.</p>
         </div>`;
       document.body.appendChild(guestPanel);
       bell.addEventListener('click', (e) => {
