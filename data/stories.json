@@ -177,6 +177,20 @@
     "manual": true
   },
   {
+    "id": "jul-2026-exhibitions",
+    "title": "2026 / 7, 이달의 사진 전시",
+    "category": "essay",
+    "categoryLabel": "EXHIBITION",
+    "author": "5ft.mag 편집부",
+    "date": "2026-07-09",
+    "issue": "",
+    "thumbnail": "img/stories/jul-2026-exhibitions/ralph-gibson.webp",
+    "excerpt": "7월 안에 닫히는 세 장면과 여름을 건너가는 세 장면. 곽명우의 스무 해, 대구의 달, 온빛사진상 광주전, 그리고 부산에 문 연 국내 첫 랄프 깁슨 미술관까지. 일정과 동선을 한자리에.",
+    "page": "stories/jul-2026-exhibitions.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "jun-2026-exhibitions",
     "title": "2026 / 6, 이달의 사진 전시",
     "category": "essay",
