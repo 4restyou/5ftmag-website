@@ -1249,7 +1249,12 @@
       return c.channel(`user-notifications-${uid}`)
         .on('postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'user_notifications', filter: `user_id=eq.${uid}` },
-          (payload) => onChange(payload.new))
+          (payload) => onChange(payload.new, 'INSERT'))
+        // 읽음 처리(read_at 갱신)도 반영 — 관리 페이지에서 요청을 처리하면
+        // 트리거가 검토 알림을 자동 읽음 처리하고, 그 변화로 뱃지를 즉시 갱신한다.
+        .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'user_notifications', filter: `user_id=eq.${uid}` },
+          (payload) => onChange(payload.new, 'UPDATE'))
         .subscribe();
     },
   };
