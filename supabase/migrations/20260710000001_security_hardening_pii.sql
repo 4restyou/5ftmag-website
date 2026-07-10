@@ -22,9 +22,8 @@ ALTER VIEW IF EXISTS public.reader_submissions_approved SET (security_invoker = 
 --     listMine() · 편집부 관리 정상. 공개 목록은 market_listings_public 뷰(연락처 마스킹).
 DROP POLICY IF EXISTS "market public visible" ON public.market_listings;
 
--- 1b) 연락처 포함 authed 뷰는 클라이언트 미사용인데 authenticated 전체에 GRANT 돼
---     베이스와 동일한 대량 수집 경로였다. 회수한다.
-REVOKE SELECT ON public.market_listings_authed FROM authenticated;
+-- 1b) (참고) 연락처 포함 market_listings_authed 뷰는 마이그레이션 007 에서 이미 제거됨
+--     (RPC 로 대체). 별도 회수 불필요.
 
 -- 1c) 연락처는 이제 market_listing_contact() RPC 로만 노출. RPC 반복 호출로 전량
 --     수집하는 것을 막기 위해 시간당 조회 횟수 제한을 둔다(일반 구매자는 몇 건 수준).
