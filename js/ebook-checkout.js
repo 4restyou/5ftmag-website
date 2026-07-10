@@ -105,8 +105,10 @@
         </div>
         <div data-pane="redeem" hidden>
           <h2 class="ebk-pay-modal-title">주문번호 인증</h2>
-          <p class="ebk-pay-modal-sub">스마트스토어 결제 후 받은 <b>주문번호</b>를 입력하면 이 계정에 열람권이 발급돼요. (네이버페이 주문내역 &gt; 주문번호)</p>
-          <input type="text" class="ebk-pay-input" inputmode="numeric" placeholder="예: 2026070812345671" maxlength="32" aria-label="스마트스토어 주문번호" />
+          <p class="ebk-pay-modal-sub">스마트스토어 결제 후 받은 <b>주문번호</b>와 <b>주문자 정보</b>를 입력하면 이 계정에 열람권이 발급돼요. (네이버페이 주문내역 &gt; 주문번호)</p>
+          <input type="text" class="ebk-pay-input" data-redeem-order inputmode="numeric" placeholder="주문번호 (예: 2026070812345671)" maxlength="32" aria-label="스마트스토어 주문번호" />
+          <input type="text" class="ebk-pay-input" data-redeem-name placeholder="주문자 이름" maxlength="40" autocomplete="name" aria-label="주문자 이름" />
+          <input type="text" class="ebk-pay-input" data-redeem-phone inputmode="numeric" placeholder="주문자 연락처 끝 4자리" maxlength="16" autocomplete="tel" aria-label="주문자 연락처 끝 4자리" />
           <p class="ebk-pay-redeem-msg" aria-live="polite"></p>
           <div class="ebk-pay-methods">
             <button type="button" class="ebk-pay-method" data-redeem-go>인증하고 열람권 받기</button>
@@ -118,24 +120,33 @@
     function pane(name) {
       back.querySelector('[data-pane="pick"]').hidden = name !== 'pick';
       back.querySelector('[data-pane="redeem"]').hidden = name !== 'redeem';
-      if (name === 'redeem') setTimeout(() => back.querySelector('.ebk-pay-input')?.focus(), 30);
+      if (name === 'redeem') setTimeout(() => back.querySelector('[data-redeem-order]')?.focus(), 30);
     }
     function close() { back.remove(); document.removeEventListener('keydown', onKey); }
     function onKey(e) { if (e.key === 'Escape') close(); }
 
     async function doRedeem() {
-      const input = back.querySelector('.ebk-pay-input');
       const msgEl = back.querySelector('.ebk-pay-redeem-msg');
-      const orderNo = (input.value || '').trim();
+      const orderNo = (back.querySelector('[data-redeem-order]')?.value || '').trim();
+      const buyerName = (back.querySelector('[data-redeem-name]')?.value || '').trim();
+      const buyerPhone = (back.querySelector('[data-redeem-phone]')?.value || '').trim();
       if (orderNo.replace(/[^0-9A-Za-z]/g, '').length < 8) {
         msgEl.textContent = '주문번호를 다시 확인해 주세요.';
+        return;
+      }
+      if (!buyerName) {
+        msgEl.textContent = '주문자 이름을 입력해 주세요.';
+        return;
+      }
+      if (buyerPhone.replace(/\D/g, '').length < 4) {
+        msgEl.textContent = '주문자 연락처 끝 4자리를 입력해 주세요.';
         return;
       }
       if (busy) return;
       busy = true;
       msgEl.textContent = '주문 확인 중…';
       let r = null;
-      try { r = await db().ebooks.redeemOrder(product.slug, orderNo); } catch (_) {}
+      try { r = await db().ebooks.redeemOrder(product.slug, orderNo, buyerName, buyerPhone); } catch (_) {}
       busy = false;
       if (r && r.ok) {
         close();
