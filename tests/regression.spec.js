@@ -421,7 +421,8 @@ test('필름스트립 저장 캔버스는 줄 사이에 흰 간격을 둔다', a
 
     const strip = await renderRollStripCanvas(target, 'reader');
     const ctx = strip.getContext('2d');
-    const gapY = Math.round(345 * 1.5) + 8;
+    // 7컷 → 4칸×2줄 (칸 균등 분배): tileW=570, tileH=round(570*345/380)=518
+    const gapY = Math.round(518 * 1.5) + 8;
     const sample = ctx.getImageData(0, gapY, 48, 24).data;
     let darkPixels = 0;
     let whitePixels = 0;
@@ -434,7 +435,8 @@ test('필름스트립 저장 캔버스는 줄 사이에 흰 간격을 둔다', a
     return { height: strip.height, darkPixels, whitePixels };
   });
 
-  expect(result.height).toBe(1077);
+  // innerH = 2줄 × 518 + 28 (줄 간격) = 1064 → ×1.5 = 1596
+  expect(result.height).toBe(1596);
   expect(result.darkPixels).toBeLessThan(40);
   expect(result.whitePixels).toBeGreaterThan(1000);
 });
