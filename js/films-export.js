@@ -254,13 +254,17 @@
 
   async function renderRollStripCanvas(target, kind, options = {}) {
     const frames = collectRollExportFrames(target, kind, options);
-    const cols = 6;
-    const tileW = 380;
-    const tileH = 345;
+    // 컷 수에 맞춰 칸 수를 정하고 타일을 키워, 몇 컷이든 스트립이 전체 폭을 꽉 채운다.
+    // 출력 폭은 기존 6칸 기준(2280×scale)으로 고정 — 헤더/푸터 비율과 파일 크기 유지.
+    const count = Math.max(1, frames.length);
+    const maxCols = 6;
+    const innerW = maxCols * 380; // 2280 고정
+    const rows = Math.max(1, Math.ceil(count / maxCols));
+    const cols = Math.max(1, Math.ceil(count / rows)); // 줄 수 안에서 최소 칸 수 → 빈 칸 최소화
+    const tileW = innerW / cols;
+    const tileH = Math.round(tileW * (345 / 380)); // 프레임 SVG 비율 유지
     const rowGap = 28; // 컷은 한 줄 안에서 붙이고, 줄이 바뀌는 필름 스트립 사이에는 흰 여백을 둔다.
-    const rows = Math.max(1, Math.ceil(frames.length / cols));
     const scale = 1.5;
-    const innerW = cols * tileW;
     const innerH = rows * tileH + Math.max(0, rows - 1) * rowGap;
     const canvas = document.createElement('canvas');
     canvas.width = innerW * scale;
@@ -302,6 +306,23 @@
         drawFilmFrameOverlay(ctx, x, y, tileW, tileH, idx % 2);
       }
     });
+    // 마지막 줄에 빈 칸이 남으면(예: 7컷 → 4칸×2줄) 미노광 컷처럼 빈 프레임으로
+    // 채워 스트립이 끊기지 않고 이어져 보이게 한다.
+    for (let idx = frames.length; idx < rows * cols; idx += 1) {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const x = col * tileW;
+      const y = row * (tileH + rowGap);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, y, tileW, tileH);
+      const frameImg = (idx % 2 === 0) ? frameImgA : frameImgB;
+      if (frameImg) {
+        ctx.drawImage(frameImg, x, y, tileW, tileH);
+      } else {
+        drawFilmFrameBase(ctx, x, y, tileW, tileH);
+        drawFilmFrameOverlay(ctx, x, y, tileW, tileH, idx % 2);
+      }
+    }
     return canvas;
   }
 
