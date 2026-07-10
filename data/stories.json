@@ -1,5 +1,19 @@
 [
   {
+    "id": "park-chanwook-arles",
+    "title": "박찬욱, 연출을 내려놓은 아침",
+    "category": "exhibition",
+    "categoryLabel": "EXHIBITION",
+    "author": "5ft.mag 편집부",
+    "date": "2026-07-10",
+    "issue": "",
+    "thumbnail": "img/stories/park-chanwook-arles/hero-kimono.webp",
+    "excerpt": "17편의 영화를 만든 감독이 카메라 한 대를 들고 연출 없는 세계로 갔다. 유럽 첫 사진 개인전 《Park Chan-wook, par un matin calme》이 프랑스 아를 이우환 미술관에서 10월 4일까지 열린다. 아를 국제사진축제 공식 연계, 한불 수교 140주년.",
+    "page": "stories/park-chanwook-arles.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "kono-effect-films",
     "title": "KONO MOJO · OFFBEAT · BEBOP — 색을 입고 나온 세 필름",
     "category": "review",
