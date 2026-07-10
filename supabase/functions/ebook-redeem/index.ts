@@ -1,16 +1,20 @@
 // 5ft.mag — 스마트스토어 주문번호 인증 → 이북 열람권 부여.
 //
 // 흐름: 구매자가 스마트스토어에서 열람권 상품을 결제 → 사이트 로그인 →
-// 주문번호 입력 → 이 함수가 네이버 커머스 API 로 주문을 조회해
+// 주문번호 + 주문자 이름/연락처 입력 → 이 함수가 네이버 커머스 API 로 주문을 조회해
 //   - 결제 완료 상태인지 (취소/반품 아님)
 //   - 주문한 상품이 이 이북의 스마트스토어 상품(store_url 의 /products/{번호})인지
+//   - 주문자 이름 + 연락처 끝 4자리가 네이버 주문의 주문자 정보와 일치하는지
 // 확인 후 열람권을 넣는다. order_ref 부분 유니크 인덱스가 같은 주문의
-// 재사용을 DB 차원에서 막는다.
+// 재사용을 DB 차원에서 막고, 주문자 대조가 주문번호 유출만으로의 가로채기를 막는다.
 //
 // 호출(브라우저 fetch):
 //   POST /functions/v1/ebook-redeem
 //   Authorization: Bearer <user access_token>
-//   body: { slug, orderNo }   // orderNo = 주문번호 또는 상품주문번호
+//   body: { slug, orderNo, buyerName, buyerPhone }
+//     orderNo   = 주문번호 또는 상품주문번호
+//     buyerName = 스마트스토어 주문자 이름
+//     buyerPhone= 주문자 연락처(끝 4자리만 대조)
 // 응답: { ok: true } 또는 { error }
 //
 // 필요 시크릿: NAVER_COMMERCE_CLIENT_ID / NAVER_COMMERCE_CLIENT_SECRET
@@ -86,6 +90,15 @@ function json(body: unknown, status: number, origin: string | null) {
 
 function parseJson(text: string): any {
   try { return JSON.parse(text); } catch { return null; }
+}
+
+// 구매자 본인 확인용 정규화 — 이름은 공백 제거·소문자화, 전화는 숫자만 남겨 끝 4자리.
+function normName(s: unknown): string {
+  return String(s || '').replace(/\s+/g, '').toLowerCase();
+}
+function phoneTail(s: unknown): string {
+  const d = String(s || '').replace(/\D/g, '');
+  return d.length >= 4 ? d.slice(-4) : '';
 }
 
 // 커머스 API 토큰 (client_credentials + bcrypt 서명)
@@ -199,6 +212,13 @@ Deno.serve(async (req) => {
   if (!slug || !orderNo || orderNo.length < 8 || orderNo.length > 32) {
     return json({ error: 'invalid order number' }, 400, origin);
   }
+  // 구매자 본인 확인 — 주문번호만 유출돼도 타인이 열람권을 가로채지 못하도록,
+  // 스마트스토어 주문자 이름 + 연락처 끝 4자리를 네이버 주문의 주문자 정보와 대조한다.
+  const buyerName = normName(body?.buyerName);
+  const buyerPhone4 = phoneTail(body?.buyerPhone);
+  if (!buyerName || !buyerPhone4) {
+    return json({ error: 'buyer info required', detail: '주문자 이름과 연락처(끝 4자리)를 입력해 주세요.' }, 400, origin);
+  }
 
   // 상품 + 스마트스토어 상품번호 (store_url 의 /products/{번호})
   const { data: product } = await admin
@@ -239,11 +259,13 @@ Deno.serve(async (req) => {
   // 주문번호 경로(requireOrderId)에선 반드시 입력 주문번호와 order.orderId 가 일치해야 한다
   // (타인 주문에 매칭되는 것을 막는 보안 확인).
   let matched: any = null;
-  let sawProduct = false;
+  let sawProduct = false;    // 이 이북 상품이 포함된 주문을 봤는지
+  let buyerMismatch = false; // 결제 완료인데 주문자 정보가 안 맞았는지
   for (const row of orders) {
     const po = row?.productOrder || row;
+    const ord = row?.order || {};
     if (requireOrderId) {
-      const parentOrderId = String(row?.order?.orderId || po?.orderId || '');
+      const parentOrderId = String(ord?.orderId || po?.orderId || '');
       if (parentOrderId !== orderNo) continue;
     }
     const candidates = [po?.productId, po?.originProductId, po?.channelProductId, po?.merchantChannelProductId]
@@ -251,9 +273,23 @@ Deno.serve(async (req) => {
     if (!candidates.includes(expectedProductNo)) continue;
     sawProduct = true;
     const status = String(po?.productOrderStatus || '');
-    if (OK_STATUS.has(status)) { matched = po; break; }
+    if (!OK_STATUS.has(status)) continue;
+    // 구매자 본인 확인 — 주문자 이름 + 연락처 끝 4자리 모두 일치해야 부여.
+    if (normName(ord?.ordererName) !== buyerName || phoneTail(ord?.ordererTel) !== buyerPhone4) {
+      buyerMismatch = true;
+      continue;
+    }
+    matched = po;
+    break;
   }
   if (!matched) {
+    // 우선순위: 주문자 불일치 > (상품은 있으나 미결제/기타) > 상품 없음
+    if (buyerMismatch) {
+      return json({
+        error: 'buyer mismatch',
+        detail: '주문자 이름 또는 연락처가 주문 정보와 달라요. 스마트스토어 주문자 정보와 똑같이 입력해 주세요.',
+      }, 403, origin);
+    }
     return json({
       error: sawProduct ? 'order not payable' : 'product mismatch',
       detail: sawProduct

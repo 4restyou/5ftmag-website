@@ -182,7 +182,7 @@ function footer(prefix = '') {
   <span class="footer-copy">© 2024 5ft magazine</span>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="${prefix}js/db-client.js?v=20260630-redeem"></script>
+<script src="${prefix}js/db-client.js?v=20260710-buyerbind"></script>
 <script src="${prefix}js/site-common.js?v=20260704-legalfix"></script>`;
 }
 
