@@ -618,8 +618,13 @@
   function normalizePrimaryNavigation() {
     const mainNav = document.querySelector('.main-nav');
     const mobileNav = document.getElementById('mobileNav');
-    const byPage = (root, page) => Array.from(root?.querySelectorAll('a') || [])
-      .find(a => (a.getAttribute('href') || '').split(/[?#]/)[0].endsWith(page));
+    const byPage = (root, page) => {
+      const stem = page.replace(/\.html$/, '');
+      return Array.from(root?.querySelectorAll('a') || []).find(a => {
+        const href = (a.getAttribute('href') || '').split(/[?#]/)[0].replace(/\/$/, '');
+        return href.endsWith(page) || href.endsWith('/' + stem) || href === stem;
+      });
+    };
 
     if (mainNav && !mainNav.dataset.primaryNormalized) {
       const links = {
