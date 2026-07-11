@@ -41,7 +41,7 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="./css/common.css?v=20260711-navhierarchy">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260616-themeauto">
-  <link rel="stylesheet" href="./css/home.css?v=20260711-filmfinder">
+  <link rel="stylesheet" href="./css/home.css?v=20260712-filmsuggest">
   <link rel="stylesheet" href="./css/mobile-home.css?v=20260620-compact">
 
   <!-- Schema.org Organization + WebSite -->
@@ -222,12 +222,13 @@
         <h3 id="homeFilmFinderTitle">Film Finder</h3>
         <a class="label" href="films.html">전체 필름 보기 →</a>
       </div>
-      <form class="home-film-search" id="homeFilmSearch" action="films.html" method="get">
-        <input type="search" name="search" id="homeFilmSearchInput" placeholder="필름 이름이나 브랜드 검색" aria-label="필름 이름이나 브랜드 검색" autocomplete="off">
+      <form class="home-film-search" id="homeFilmSearch" action="films.html" method="get" role="search">
+        <input type="search" name="search" id="homeFilmSearchInput" placeholder="필름 이름이나 브랜드 검색" aria-label="필름 이름이나 브랜드 검색" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="homeFilmSuggest">
         <button type="submit" aria-label="필름 검색">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
         </button>
       </form>
+      <ul class="home-film-suggest" id="homeFilmSuggest" role="listbox" aria-label="필름 추천 목록" hidden></ul>
       <a class="home-film-pick" id="homeFilmPick" href="films.html" hidden></a>
     </section>
 
@@ -396,7 +397,7 @@
   <script src="./js/site-telemetry.js?v=20260712-modules" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="./js/site-common.js?v=20260712-structure" defer></script>
-<script src="./js/home-page.js?v=20260712-metrics" defer></script>
+<script src="./js/home-page.js?v=20260712-filmsuggest" defer></script>
 <script src="./js/mh-pure.js?v=20260620-recommend" defer></script>
 <script src="./js/mobile-home-model.js?v=20260712-modules" defer></script>
 <script src="./js/films-catalog-loader.js?v=20260602-modules" defer></script>

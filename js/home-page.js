@@ -46,6 +46,143 @@
       .catch(() => {});
   }
 
+  // Film Finder 자동완성 — 필름명을 다 입력하지 않아도(부분 일치) 또는
+  // 살짝 틀리게 입력해도(문자 순서만 맞는 유사 일치) 후보를 힌트로 띄운다.
+  // 후보 클릭 시 해당 필름 페이지로 바로 이동, 그냥 엔터면 기존 검색 제출 유지.
+  (function setupFilmFinderSuggest() {
+    const input = document.getElementById('homeFilmSearchInput');
+    const listEl = document.getElementById('homeFilmSuggest');
+    if (!input || !listEl) return;
+    const norm = window.MagUtil.normalizeFilmLabel;
+
+    let index = null;     // [{ slug, label, meta, keys:[정규화 문자열] }]
+    let items = [];       // 현재 렌더된 후보
+    let active = -1;      // 키보드 하이라이트 위치
+    let timer = null;
+
+    // q 의 문자들이 순서대로 s 에 나타나면 true (빠뜨리고 입력한 글자 허용)
+    function isSubseq(q, s) {
+      let i = 0;
+      for (let j = 0; j < s.length && i < q.length; j++) if (s[j] === q[i]) i++;
+      return i === q.length;
+    }
+    // a 와 b 의 편집거리가 max 이하인지 (밴드 조기종료) — 오타(치환·중복·삽입) 허용
+    function withinEdits(a, b, max) {
+      if (Math.abs(a.length - b.length) > max) return false;
+      let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        const cur = [i];
+        let rowMin = i;
+        for (let j = 1; j <= b.length; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+          if (cur[j] < rowMin) rowMin = cur[j];
+        }
+        if (rowMin > max) return false;
+        prev = cur;
+      }
+      return prev[b.length] <= max;
+    }
+    function buildIndex(data) {
+      index = Object.entries(data || {}).map(([slug, film]) => {
+        const keys = (film.aliases || [])
+          .concat([film.displayName, film.name, film.brand, slug])
+          .filter(Boolean).map(norm).filter(Boolean);
+        const meta = [film.brand, film.iso && `ISO ${film.iso}`, film.format].filter(Boolean).join(' · ');
+        return { slug, label: film.displayName || film.name || slug, meta, keys: [...new Set(keys)] };
+      });
+    }
+    function ensureIndex() {
+      if (index) return Promise.resolve();
+      return fetch('data/films.json', { cache: 'force-cache' })
+        .then(res => res.json()).then(buildIndex).catch(() => { index = []; });
+    }
+    function scoreOf(qn, film) {
+      let best = 9;
+      for (const k of film.keys) {
+        if (k === qn) return 0;
+        if (k.startsWith(qn)) best = Math.min(best, 1);
+        else if (k.includes(qn)) best = Math.min(best, 2);
+        else if (qn.length >= 3 && isSubseq(qn, k)) best = Math.min(best, 3);
+      }
+      // 위 단계에서 못 잡은 오타는 편집거리로 마지막 관용 (입력한 만큼의 앞부분과 비교)
+      if (best === 9 && qn.length >= 3) {
+        const cap = qn.length <= 4 ? 1 : 2;
+        for (const k of film.keys) {
+          if (withinEdits(qn, k.slice(0, qn.length), cap)) { best = 4; break; }
+        }
+      }
+      return best;
+    }
+    function suggest(q) {
+      const qn = norm(q);
+      if (!index || qn.length < 2) return [];
+      return index
+        .map(f => ({ f, s: scoreOf(qn, f) }))
+        .filter(x => x.s <= 4)
+        .sort((a, b) => a.s - b.s || a.f.label.length - b.f.label.length)
+        .slice(0, 8)
+        .map(x => x.f);
+    }
+    function closeList() {
+      listEl.hidden = true;
+      listEl.innerHTML = '';
+      items = []; active = -1;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+    }
+    function renderList(list) {
+      items = list; active = -1;
+      if (!list.length) { closeList(); return; }
+      listEl.innerHTML = list.map((f, i) =>
+        `<li class="home-film-suggest-item" id="hfs-opt-${i}" role="option" aria-selected="false" data-slug="${escapeAttr(f.slug)}">` +
+          `<span class="home-film-suggest-name">${escapeHtml(f.label)}</span>` +
+          (f.meta ? `<span class="home-film-suggest-meta">${escapeHtml(f.meta)}</span>` : '') +
+        `</li>`).join('');
+      listEl.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+    }
+    function goToFilm(slug) {
+      window.trackEvent?.('film_finder_suggestion_clicked');
+      window.location.href = `films.html?film=${encodeURIComponent(slug)}`;
+    }
+    function moveActive(delta) {
+      const opts = Array.from(listEl.children);
+      if (!opts.length) return;
+      active = (active + delta + opts.length) % opts.length;
+      opts.forEach((el, i) => {
+        const on = i === active;
+        el.classList.toggle('is-active', on);
+        el.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      input.setAttribute('aria-activedescendant', `hfs-opt-${active}`);
+    }
+
+    input.addEventListener('input', () => {
+      const q = input.value;
+      clearTimeout(timer);
+      timer = setTimeout(() => ensureIndex().then(() => renderList(suggest(q))), 110);
+    });
+    input.addEventListener('focus', () => {
+      if (input.value.trim()) ensureIndex().then(() => renderList(suggest(input.value)));
+    });
+    input.addEventListener('keydown', (e) => {
+      if (listEl.hidden) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveActive(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveActive(-1); }
+      else if (e.key === 'Enter' && active >= 0 && items[active]) { e.preventDefault(); goToFilm(items[active].slug); }
+      else if (e.key === 'Escape') { closeList(); }
+    });
+    // mousedown: input blur 로 목록이 닫히기 전에 선택을 처리한다.
+    listEl.addEventListener('mousedown', (e) => {
+      const li = e.target.closest('[data-slug]');
+      if (li) { e.preventDefault(); goToFilm(li.dataset.slug); }
+    });
+    document.addEventListener('click', (e) => {
+      if (e.target !== input && !listEl.contains(e.target)) closeList();
+    });
+  })();
+
   // ════════════════════════════
   // 메인의 Stories: JSON 로딩
   // (stories.html과 같은 데이터를 읽어서 메인에 표시)
