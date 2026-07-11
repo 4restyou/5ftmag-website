@@ -557,10 +557,9 @@ header {
   display: none !important;
 }
 
-:where(a, button, input, textarea, select):focus-visible {
-  outline: 2px solid var(--text) !important;
-  outline-offset: 3px;
-}
+/* 포커스 표시는 아래쪽 "글로벌 focus-visible" 의 부드러운 ring(box-shadow) 하나로 통일.
+   (예전의 outline 2px !important 전역 규칙은 텍스트 입력창이 마우스 클릭만으로도
+   focus-visible 이 되는 특성 때문에 모든 검색창에 굵은 검정 테두리를 상시 노출시켰다) */
 
 .icon-btn:focus-visible {
   opacity: 1;
