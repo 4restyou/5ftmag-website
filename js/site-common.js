@@ -550,6 +550,8 @@
       setupInAppBrowserNotice();
     }
 
+    normalizePrimaryNavigation();
+
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');
     const mobileNav = document.getElementById('mobileNav');
@@ -609,6 +611,52 @@
     injectSkipLink();
     setAriaCurrentOnNav();
     loadAnalyticsOnce();
+  }
+
+  // 핵심 콘텐츠는 바로 보이고, 보조 경로는 More 안에 묶는다.
+  // 기존 링크 노드를 옮겨 페이지별 상대경로와 current 상태를 보존한다.
+  function normalizePrimaryNavigation() {
+    const mainNav = document.querySelector('.main-nav');
+    const mobileNav = document.getElementById('mobileNav');
+    const byPage = (root, page) => Array.from(root?.querySelectorAll('a') || [])
+      .find(a => (a.getAttribute('href') || '').split(/[?#]/)[0].endsWith(page));
+
+    if (mainNav && !mainNav.dataset.primaryNormalized) {
+      const links = {
+        articles: byPage(mainNav, 'stories.html'), films: byPage(mainNav, 'films.html'),
+        magazine: byPage(mainNav, 'books.html'), market: byPage(mainNav, 'market.html'),
+        labs: byPage(mainNav, 'labs.html'), about: byPage(mainNav, 'about.html'),
+        shop: byPage(mainNav, 'shop.html'),
+      };
+      if (links.magazine) links.magazine.textContent = 'Magazine';
+      [links.articles, links.films, links.magazine, links.market].filter(Boolean)
+        .forEach(a => mainNav.appendChild(a.closest('li')));
+      const secondary = [links.labs, links.about, links.shop].filter(Boolean);
+      secondary.forEach(a => a.closest('li')?.remove());
+      if (secondary.length) {
+        const li = document.createElement('li');
+        li.className = 'nav-more';
+        const current = secondary.some(a => a.classList.contains('current'));
+        li.innerHTML = `<details><summary${current ? ' class="current"' : ''}>More</summary><div class="nav-more-menu"></div></details>`;
+        secondary.forEach(a => li.querySelector('.nav-more-menu').appendChild(a));
+        mainNav.appendChild(li);
+      }
+      mainNav.dataset.primaryNormalized = '1';
+    }
+
+    if (mobileNav && !mobileNav.dataset.primaryNormalized) {
+      const links = {
+        articles: byPage(mobileNav, 'stories.html'), films: byPage(mobileNav, 'films.html'),
+        magazine: byPage(mobileNav, 'books.html'), market: byPage(mobileNav, 'market.html'),
+        labs: byPage(mobileNav, 'labs.html'), about: byPage(mobileNav, 'about.html'),
+        shop: byPage(mobileNav, 'shop.html'),
+      };
+      if (links.magazine) links.magazine.textContent = 'Magazine';
+      [links.articles, links.films, links.magazine, links.market, links.labs, links.about, links.shop]
+        .filter(Boolean).forEach(a => mobileNav.appendChild(a));
+      links.labs?.classList.add('mobile-nav-secondary-start');
+      mobileNav.dataset.primaryNormalized = '1';
+    }
   }
 
   // ════════════════════════════════════════════════

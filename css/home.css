@@ -492,6 +492,55 @@ body.modal-open { overflow: hidden; }
    우측 패널 — 서브 섹션 헤더
    (Photo / News / Partners / Ad)
 ════════════════════════════ */
+.home-film-finder { border-bottom: 1px solid var(--border); }
+.home-film-finder .sub-section-head { padding-bottom: 18px; }
+.home-film-finder .sub-section-head .label { text-decoration: none; }
+.home-film-search {
+  display: flex;
+  align-items: center;
+  margin: 20px 32px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+.home-film-search input {
+  min-width: 0;
+  flex: 1;
+  height: 42px;
+  padding: 0 14px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-body);
+}
+.home-film-search button {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.home-film-pick {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin: 0 32px 20px;
+  padding: 12px 0;
+  color: var(--text);
+}
+.home-film-pick[hidden] { display: none; }
+.home-film-pick-thumb { width: 64px; height: 48px; object-fit: cover; background: var(--bg-sub); }
+.home-film-pick-copy { min-width: 0; }
+.home-film-pick-label { display: block; margin-bottom: 4px; color: var(--text-muted); font-size: var(--fs-meta); letter-spacing: .08em; text-transform: uppercase; }
+.home-film-pick-name { display: block; overflow: hidden; font-size: var(--fs-body); font-weight: var(--fw-heading); text-overflow: ellipsis; white-space: nowrap; }
+.home-film-pick-arrow { font-size: 18px; }
+.home-film-pick:hover { opacity: var(--card-hover-opacity); }
+
 .sub-section-head {
   padding: 44px 32px 24px;
   border-bottom: 1px solid var(--border);
@@ -1576,5 +1625,4 @@ body.modal-open { overflow: hidden; }
   background: #fafafa; /* 다크 모드에서도 흰 박스 그대로 (필름 박스 사진은 흰 배경 그대로 보여야 자연스러움) */
   border: 1px solid var(--border);
 }
-
 

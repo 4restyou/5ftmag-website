@@ -392,6 +392,15 @@
     function bindControls() {
       const input = document.getElementById('librarySearch');
       if (input && !input.dataset.librarySearchBound) {
+        const initialSearch = new URLSearchParams(window.location.search).get('search') || '';
+        if (initialSearch) {
+          input.value = initialSearch;
+          currentSearch = initialSearch;
+          const initialBar = document.getElementById('librarySearchBar');
+          const initialBtn = document.getElementById('librarySearchBtn');
+          if (initialBar) initialBar.hidden = false;
+          initialBtn?.setAttribute('aria-expanded', 'true');
+        }
         let debounce = null;
         input.addEventListener('input', () => {
           clearTimeout(debounce);
