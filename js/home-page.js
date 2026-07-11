@@ -16,6 +16,31 @@
     return `<picture><source srcset="${escapeAttr(webpSrc)}" type="image/webp">${img}</picture>`;
   }
 
+  // PC 홈 Film Finder. 사진이 있는 필름 중 한 편을 방문할 때마다 추천한다.
+  const homeFilmPick = document.getElementById('homeFilmPick');
+  if (homeFilmPick) {
+    fetch('data/films.json', { cache: 'no-cache' })
+      .then(res => res.json())
+      .then(data => {
+        const candidates = Object.entries(data || {}).filter(([, film]) =>
+          Array.isArray(film?.photos) && film.photos.some(photo => photo?.src)
+        );
+        if (!candidates.length) return;
+        const [slug, film] = candidates[Math.floor(Math.random() * candidates.length)];
+        const photo = film.photos.find(item => item?.src);
+        homeFilmPick.href = `films.html?film=${encodeURIComponent(slug)}`;
+        homeFilmPick.innerHTML = `
+          <img class="home-film-pick-thumb" src="${escapeAttr(photo.src)}" alt="" loading="lazy">
+          <span class="home-film-pick-copy">
+            <span class="home-film-pick-label">오늘의 추천 필름</span>
+            <span class="home-film-pick-name">${escapeHtml(film.displayName || film.name || slug)}</span>
+          </span>
+          <span class="home-film-pick-arrow" aria-hidden="true">→</span>`;
+        homeFilmPick.hidden = false;
+      })
+      .catch(() => {});
+  }
+
   // ════════════════════════════
   // 메인의 Stories: JSON 로딩
   // (stories.html과 같은 데이터를 읽어서 메인에 표시)
