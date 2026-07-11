@@ -1,0 +1,11 @@
+{
+  "version": "2026-07-12",
+  "description": "수동 생성된 초기 스키마를 새 Supabase 프로젝트에 복구하는 적용 순서",
+  "files": [
+    "comments-schema.sql",
+    "user-favorites-schema.sql",
+    "market-schema.sql",
+    "reader-submissions-schema.sql",
+    "webzine-schema.sql"
+  ]
+}

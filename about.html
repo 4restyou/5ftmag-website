@@ -62,11 +62,11 @@
   <div class="header-inner">
     <a href="index.html" class="site-logo"><img decoding="async" src="./img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="./img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     <ul class="main-nav">
-      <li><a href="index.html#stories">Articles</a></li>
+      <li><a href="stories.html">Articles</a></li>
       <li><a href="films.html">Films</a></li>
-      <li><a href="books.html">Books</a></li>
-      <li><a href="labs.html">Labs</a></li>
+      <li><a href="books.html">Magazine</a></li>
       <li><a href="market.html">Market</a></li>
+      <li><a href="labs.html">Labs</a></li>
       <li><a href="about.html" class="current">About</a></li>
       <li><a href="shop.html">Shop</a></li>
     </ul>
@@ -77,12 +77,12 @@
     </div>
   </div>
   <nav class="mobile-nav" id="mobileNav">
-    <a href="index.html#stories">Articles</a>
+    <a href="stories.html">Articles</a>
     <a href="films.html">Films</a>
-    <a href="books.html">Books</a>
-    <a href="labs.html">Labs</a>
+    <a href="books.html">Magazine</a>
     <a href="market.html">Market</a>
-    <a href="about.html">About</a>
+    <a href="labs.html">Labs</a>
+    <a href="about.html" class="current">About</a>
     <a href="shop.html">Shop</a>
   </nav>
 </header>
@@ -477,7 +477,7 @@
     <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
   </div>
   <div class="footer-links">
-    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
+    <a href="shop.html">Shop</a>
     <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
     <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
     <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
@@ -487,8 +487,11 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db-client.js?v=20260710-buyerbind" defer></script>
+<script src="./js/db/commerce.js?v=20260712-modules" defer></script>
+  <script src="./js/db-client.js?v=20260712-domains" defer></script>
 <script src="./js/util.js?v=20260620-schedule" defer></script>
-  <script src="./js/site-common.js?v=20260711-navhierarchy2" defer></script>
+  <script src="./js/site-telemetry.js?v=20260712-modules" defer></script>
+  <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
+  <script src="./js/site-common.js?v=20260712-structure" defer></script>
 </body>
 </html>

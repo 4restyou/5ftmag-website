@@ -18,7 +18,12 @@
 
   // PC 홈 Film Finder. 사진이 있는 필름 중 한 편을 방문할 때마다 추천한다.
   const homeFilmPick = document.getElementById('homeFilmPick');
+  document.getElementById('homeFilmSearch')?.addEventListener('submit', () => {
+    const query = document.getElementById('homeFilmSearchInput')?.value.trim() || '';
+    window.trackEvent?.('film_finder_searched', { query_length: query.length });
+  });
   if (homeFilmPick) {
+    homeFilmPick.addEventListener('click', () => window.trackEvent?.('film_finder_recommendation_clicked'));
     fetch('data/films.json', { cache: 'no-cache' })
       .then(res => res.json())
       .then(data => {

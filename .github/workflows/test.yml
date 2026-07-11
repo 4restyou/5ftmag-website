@@ -21,8 +21,12 @@ jobs:
       - run: npm ci
       - name: 자산 참조 검증
         run: npm run validate
+      - name: 공통 내비게이션·푸터 동기화
+        run: npm run shell:check
       - name: Vitest 단위 테스트
         run: npm run test:unit
+      - name: DB baseline·계약 검증
+        run: npm run db:baseline:check && node scripts/db-audit.mjs --strict
       # 발행 글이 rss.xml·sitemap.xml 에 반영됐는지(빌드 드리프트) 검증. data-only 커밋에서
       # 파생 산출물 재빌드를 빠뜨리는 사고를 막는다. Playwright 와 달리 항상 실행.
       - name: 스모크 QA (rss·sitemap 동기화)

@@ -25,25 +25,21 @@ import { fileURLToPath } from 'url';
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-// 마이그레이션에 정의가 없어도 prod 에 존재하는 게 확인된 객체 (추적 안 된 초기 스키마).
-// drift 보고에서 "확인됨" 으로 분류해 노이즈를 줄인다. 새로 추가되는 미정의 객체만 부각.
-// 새 known 객체를 추가하기 전에 정말 prod 에 있는지 확인할 것 (docs/maintenance.md).
-export const KNOWN_BASE_OBJECTS = new Set([
-  'comments',
-  'comments_with_meta',
-  'likes',
-  'market_listings',
-  'market_reports',
-  'reader_submissions',
-  'reader_submissions_approved',
-  'webzine_issues',
-  'profiles_public', // prod/workroom 스키마 불일치 진행 중 — docs/maintenance.md 참고
-]);
+// 2026-07 baseline 정리 후 예외 목록은 비어 있다. 새 예외를 추가하지 말고
+// 초기 객체는 db/*-schema.sql, 이후 변경은 supabase/migrations에 정의한다.
+export const KNOWN_BASE_OBJECTS = new Set();
 
 function listJsFiles(root) {
-  return readdirSync(join(root, 'js'))
-    .filter((f) => f.endsWith('.js'))
-    .map((f) => join(root, 'js', f));
+  const files = [];
+  function walk(dir) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith('.js')) files.push(full);
+    }
+  }
+  walk(join(root, 'js'));
+  return files;
 }
 
 export function collectRefs(root = ROOT) {
@@ -66,9 +62,12 @@ export function collectRefs(root = ROOT) {
 
 export function collectDefs(root = ROOT) {
   const defs = new Set();
-  const dir = join(root, 'supabase', 'migrations');
-  for (const f of readdirSync(dir).filter((x) => x.endsWith('.sql'))) {
-    const src = readFileSync(join(dir, f), 'utf8');
+  const files = [
+    ...readdirSync(join(root, 'supabase', 'migrations')).filter(x => x.endsWith('.sql')).map(x => join(root, 'supabase', 'migrations', x)),
+    ...readdirSync(join(root, 'db')).filter(x => x.endsWith('-schema.sql')).map(x => join(root, 'db', x)),
+  ];
+  for (const file of files) {
+    const src = readFileSync(file, 'utf8');
     const re = /create\s+(?:or\s+replace\s+)?(?:table|view|materialized\s+view|function)\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?/gi;
     for (const m of src.matchAll(re)) defs.add(m[1].toLowerCase());
   }
@@ -122,5 +121,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.log(`\n신규 drift ${newDrift.length}건 — 마이그레이션에 정의를 추가하거나 KNOWN_BASE_OBJECTS 에 등재(prod 존재 확인 후)하세요.`);
     }
   }
-  process.exit(0);
+  process.exit(process.argv.includes('--strict') && newDrift.length ? 1 : 0);
 }
