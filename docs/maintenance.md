@@ -1,7 +1,19 @@
 # 유지보수 / 정리 계획
 
-2026-06-20 기준. 메시지 시스템 작업 중 드러난 구조적 위험을 정리한다.
+2026-07-12 갱신. 메시지 시스템 작업 중 드러난 구조적 위험과 처리 상태를 정리한다.
 체크박스가 빈 항목은 아직 안 된 것, 우선순위 순.
+
+## 2026-07-12 처리 현황
+
+- 프로덕션은 `profiles.user_id + is_editor` 구조와 `profiles_public` 뷰를 사용함을 확인했다.
+- `SUPABASE_ACCESS_TOKEN`을 교체했고 DB·Edge Function 배포가 정상 동작한다.
+- 메시지·Push 보안 마이그레이션 적용을 확인했다.
+- 초기 수동 스키마를 `db/baseline.sql`로 재현하고 DB 계약 drift를 0건으로 정리했다.
+- `site-common.js`에서 텔레메트리·PWA를, `db-client.js`에서 Shop·이북을 분리했다.
+- 공통 내비게이션·푸터는 `data/site-shell.json`을 단일 원본으로 사용한다.
+
+아래 1~7번은 당시 진단 기록으로 보존한다. 현재 운영 판단은 위 현황과
+`docs/database-recovery.md`, `docs/editorial-operations.md`를 우선한다.
 
 ## 한 줄 진단
 

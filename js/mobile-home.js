@@ -304,30 +304,22 @@
   }
 
   // ─── 최근 본 필름 (localStorage) ───
-  const RECENT_KEY = '5ft-mh-recent';
-  const RECENT_MAX = 8;
-  function getRecent() {
-    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); }
-    catch { return []; }
-  }
+  const recentModel = window.MobileHomeModel.create({
+    getFilms: () => STATE.films,
+    pickRecommendedFilms,
+    onChange: () => {
+      chooseRecommendations();
+      render();
+    },
+  });
+  const getRecent = recentModel.getRecent;
+  const recentFilms = recentModel.recentFilms;
   function pushRecent(slug) {
-    if (!slug) return;
-    const cur = getRecent().filter(s => s !== slug);
-    cur.unshift(slug);
-    try { localStorage.setItem(RECENT_KEY, JSON.stringify(cur.slice(0, RECENT_MAX))); } catch {}
-    // 로그인 사용자라면 DB 도 동기화 (디바이스 간 공유). 실패 무시.
-    try { window.MagDB?.personalization?.pushRecentFilm?.(slug); } catch (_) {}
-    chooseRecommendations();
-    render();
-  }
-  function recentFilms() {
-    const slugs = getRecent();
-    const map = new Map(STATE.films.map(f => [f.slug || f.id, f]));
-    return slugs.map(s => map.get(s)).filter(Boolean);
+    recentModel.pushRecent(slug);
   }
 
   function chooseRecommendations() {
-    STATE.recommendations = pickRecommendedFilms(STATE.films, getRecent(), 3);
+    STATE.recommendations = recentModel.recommendations(3);
   }
 
   function compactFilmGrid(films) {

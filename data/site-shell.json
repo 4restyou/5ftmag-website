@@ -1,0 +1,17 @@
+{
+  "navigation": [
+    { "label": "Articles", "path": "stories.html" },
+    { "label": "Films", "path": "films.html" },
+    { "label": "Magazine", "path": "books.html" },
+    { "label": "Market", "path": "market.html" },
+    { "label": "Labs", "path": "labs.html" },
+    { "label": "About", "path": "about.html" },
+    { "label": "Shop", "path": "shop.html" }
+  ],
+  "footerLinks": [
+    { "label": "Shop", "path": "shop.html" },
+    { "label": "@5ft.magazine ↗", "href": "https://instagram.com/5ft.magazine", "external": true },
+    { "label": "4rest_design@naver.com", "href": "mailto:4rest_design@naver.com" },
+    { "label": "4rest.net ↗", "href": "https://www.4rest.net", "external": true }
+  ]
+}

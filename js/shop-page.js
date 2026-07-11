@@ -170,6 +170,9 @@
     const description = p.description
       ? `<div class="shop-modal-desc">${escapeHtml(p.description).replace(/\n/g, '<br>')}</div>`
       : '';
+    const magazineLink = (p.category === 'book' || p.ebookSlug)
+      ? `<a href="books.html${p.ebookSlug ? `?issue=${encodeURIComponent(p.ebookSlug)}` : ''}" class="shop-share-btn" data-action="view-magazine">이 호의 내용 보기 →</a>`
+      : '';
 
     modalPanel.classList.toggle('has-images', !!imgs);
     modalPanel.innerHTML = `
@@ -182,6 +185,7 @@
         ${description}
         <div class="shop-modal-actions">
           ${buyButton}
+          ${magazineLink}
           <button type="button" class="shop-share-btn" data-action="share-product" data-slug="${escapeAttr(p.slug)}" aria-label="이 상품 공유">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -252,6 +256,12 @@
     const slug = card.dataset.slug;
     const p = STATE.products.find(x => x.slug === slug);
     if (p) openModal(p);
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target.closest('[data-action="view-magazine"]')) {
+      window.trackEvent?.('shop_magazine_link_clicked');
+    }
   });
 
   // DB row → camelCase 형태 (build-shop.mjs 의 rowToJson 와 동일)

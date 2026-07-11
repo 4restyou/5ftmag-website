@@ -122,8 +122,9 @@ for (const phrase of ['외부 유입 도메인', '시간대', '페이지 체류 
   check(privacyHtml.includes(phrase), `Privacy policy missing analytics disclosure phrase: ${phrase}`);
 }
 const siteCommonJs = readFileSync(join(ROOT, 'js/site-common.js'), 'utf8');
-check(siteCommonJs.includes('function pvReferrerDomain()'), 'site-common missing referrer minimization helper');
-check(!siteCommonJs.includes('document.referrer.slice'), 'site-common should not store full referrer URLs');
+const siteTelemetryJs = readFileSync(join(ROOT, 'js/site-telemetry.js'), 'utf8');
+check(siteTelemetryJs.includes('function pvReferrerDomain()'), 'site-telemetry missing referrer minimization helper');
+check(!siteTelemetryJs.includes('document.referrer.slice'), 'site-telemetry should not store full referrer URLs');
 
 // 7) Analytics DB access contract
 for (const file of [
