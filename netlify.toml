@@ -317,6 +317,16 @@
   [headers.values]
     Cache-Control = "public, max-age=300, must-revalidate"
 
+# 매물 공유 OG stub — /market/:id 는 Supabase 엣지 함수(market-og)로 프록시된다.
+# 외부 프록시 과정에서 함수의 Content-Type(text/html) 이 브라우저까지 전달되지
+# 않으면, 전역 nosniff 때문에 HTML 이 렌더링되지 못하고 소스가 그대로 노출되며
+# 한글도 charset 없이 깨진다. 여기서 Content-Type 을 강제해 확실히 전달한다.
+# (/market/<uuid> 만 해당 — /market.html·/market 은 이 패턴에 안 걸린다.)
+[[headers]]
+  for = "/market/*"
+  [headers.values]
+    Content-Type = "text/html; charset=UTF-8"
+
 # Supabase Storage 프록시 응답 — 사진 파일은 path 자체가 unique (user_id + uuid)
 # 라 immutable. Netlify edge 가 1년 캐싱, 브라우저도 1년. 두 번째 viewer 부터
 # Supabase 까지 안 가고 Netlify edge 에서 끝.
