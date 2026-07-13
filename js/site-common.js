@@ -336,6 +336,18 @@
         li.innerHTML = `<details><summary${current ? ' class="current"' : ''}>More</summary><div class="nav-more-menu"></div></details>`;
         secondary.forEach(a => li.querySelector('.nav-more-menu').appendChild(a));
         mainNav.appendChild(li);
+        // 네이티브 details 는 summary 재클릭으로만 닫힌다 —
+        // 메뉴 바깥 클릭이나 ESC 로도 닫히게 한다 (ESC 는 포커스를 summary 로 복귀).
+        const moreDetails = li.querySelector('details');
+        document.addEventListener('click', (e) => {
+          if (moreDetails.open && !moreDetails.contains(e.target)) moreDetails.open = false;
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && moreDetails.open) {
+            moreDetails.open = false;
+            moreDetails.querySelector('summary')?.focus();
+          }
+        });
       }
       mainNav.dataset.primaryNormalized = '1';
     }
