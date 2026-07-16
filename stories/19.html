@@ -78,6 +78,23 @@
       text-underline-offset: 2px;
     }
     .photo-credit a:hover { color: var(--text); }
+
+    /* Soap 연작 4×3 격자 */
+    .soap-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .soap-grid img {
+      width: 100%;
+      aspect-ratio: 825 / 1024;
+      object-fit: cover;
+      display: block;
+      border-radius: 2px;
+    }
+    @media (max-width: 640px) {
+      .soap-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    }
   </style>
 
   <script type="application/ld+json">
@@ -194,7 +211,20 @@
     <h2>낡은 것들의 표정</h2>
 
     <figure class="full-width">
-      <img decoding="async" src="../img/stories/19/koo-4.jpg" alt="구본창 〈Soap〉 연작. 오래 써서 닳고 색이 바랜 비누들이 격자로 늘어서 있다." loading="lazy" />
+      <div class="soap-grid">
+        <img decoding="async" src="../img/stories/19/soap-01.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-02.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-03.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-04.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-05.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-06.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-07.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-08.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-09.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-10.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-11.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+        <img decoding="async" src="../img/stories/19/soap-12.jpg" alt="구본창 〈Soap〉 연작 - 오래 써서 닳고 색이 바랜 비누" loading="lazy" />
+      </div>
       <figcaption>〈Soap / 비누〉(2004~07). 닳고 바랜 비누 하나하나를 표본처럼 늘어놓았다. 새것의 반짝임이 아니라 시간이 지나간 자리다. <span class="photo-credit">이미지 ⓒ 구본창 <a href="http://www.bckoo.com" target="_blank" rel="noopener">bckoo.com</a></span></figcaption>
     </figure>
 
