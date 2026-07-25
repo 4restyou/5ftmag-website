@@ -434,3 +434,22 @@ body { background: var(--bg); color: var(--text); }
   color: var(--text-muted, rgba(127,127,127,.85));
   margin-right: auto;
 }
+
+/* ─── 프로필 편집 섹션 ─── */
+.me-profile { max-width: 520px; display: flex; flex-direction: column; gap: 22px; padding: 4px 0; }
+.me-profile-avatar { display: flex; align-items: center; gap: 18px; }
+.me-profile-avatar-img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: var(--bg-sub); border: 1px solid var(--border); flex: none; }
+.me-profile-avatar-side { display: flex; flex-direction: column; gap: 8px; }
+.me-profile-avatar-btn { align-self: flex-start; }
+.me-profile-hint { font-size: 12px; color: var(--text-muted); margin: 0; }
+.me-profile-field { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.me-profile-label { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.04em; color: var(--text-muted); }
+.me-profile-field input,
+.me-profile-field textarea { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: var(--btn-radius); padding: 10px 12px; width: 100%; }
+.me-profile-field input:focus,
+.me-profile-field textarea:focus { outline: none; border-color: var(--text); }
+.me-profile-field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.me-profile-count { align-self: flex-end; font-size: 11px; color: var(--text-muted); }
+.me-profile-locked { font-size: 12px; color: var(--text-muted); margin: 0; padding: 10px 12px; background: var(--bg-sub); border-radius: var(--btn-radius); }
+.me-profile-foot { display: flex; align-items: center; gap: 14px; }
+.me-profile-status { font-size: 13px; color: var(--text-muted); }

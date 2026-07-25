@@ -22,6 +22,9 @@ const STATE = {
   favContributors: null,
   filmsData: null,       // films.json 캐시 (좋아한 필름 렌더용)
   storiesData: null,     // stories.json 캐시 (스크랩한 글 렌더용)
+  profile: null,         // 내 프로필 (프로필 편집 폼 prefill)
+  profileLoaded: false,
+  pendingAvatar: null,   // 저장 전 임시 업로드된 아바타 {url, path}
 };
 
 const CAT_LABELS = { film:'필름', camera:'카메라', lens:'렌즈', accessory:'액세서리', etc:'기타' };
@@ -63,6 +66,7 @@ async function checkAuth() {
   if (!session) { showGate(); return false; }
   STATE.user = session.user;
   const profile = await db().profiles.getMine();
+  STATE.profile = profile;
   const name = profile?.display_name || STATE.user.email?.split('@')[0] || '사용자';
   $('meUser').innerHTML = `${escapeHtml(name)} · <button id="logout">로그아웃</button>`;
   $('logout').addEventListener('click', async () => {
@@ -348,6 +352,7 @@ function bindMarketCardActions() {
 function switchSection(sec) {
   STATE.section = sec;
   document.querySelectorAll('.me-pagetab').forEach(t => t.classList.toggle('active', t.dataset.section === sec));
+  $('section-profile').hidden          = sec !== 'profile';
   $('section-photos').hidden           = sec !== 'photos';
   $('section-market').hidden           = sec !== 'market';
   $('section-notifs').hidden           = sec !== 'notifs';
@@ -359,6 +364,7 @@ function switchSection(sec) {
   $('section-fav-webzine').hidden      = sec !== 'fav-webzine';
   $('section-fav-contributors').hidden = sec !== 'fav-contributors';
   $('section-fav-articles').hidden     = sec !== 'fav-articles';
+  if (sec === 'profile'          && !STATE.profileLoaded) loadProfile();
   if (sec === 'market' && STATE.marketRows.length === 0) loadMarket();
   if (sec === 'notifs'            && STATE.notifs           === null) loadNotifs();
   if (sec === 'messages'          && STATE.messages         === null) loadMessages();
@@ -379,6 +385,102 @@ function switchSection(sec) {
 document.querySelectorAll('.me-pagetab').forEach(t => {
   t.addEventListener('click', () => switchSection(t.dataset.section));
 });
+
+// ═════════════════════════════════════════
+// 프로필 편집 (표시 이름 · 아바타 · 자기소개)
+// ═════════════════════════════════════════
+const AVATAR_PLACEHOLDER =
+  'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">' +
+    '<rect width="80" height="80" fill="%23e9e9e9"/>' +
+    '<circle cx="40" cy="31" r="15" fill="%23bdbdbd"/>' +
+    '<path d="M12 74c0-16 13-25 28-25s28 9 28 25z" fill="%23bdbdbd"/></svg>');
+
+function setAvatarPreview(url) {
+  const img = $('profileAvatarPreview');
+  if (img) img.src = url || AVATAR_PLACEHOLDER;
+}
+
+// 아바타를 정사각 512px 이하 jpeg 로 축소 (업로드 용량·표시 일관성)
+function resizeAvatar(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const size = Math.min(512, Math.max(img.naturalWidth, img.naturalHeight));
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const sx = (img.naturalWidth - side) / 2;
+      const sy = (img.naturalHeight - side) / 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('encode-failed')), 'image/jpeg', 0.85);
+    };
+    img.onerror = () => reject(new Error('load-failed'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function loadProfile() {
+  STATE.profileLoaded = true;
+  const p = STATE.profile || {};
+  $('profileName').value = p.display_name || '';
+  $('profileBio').value = p.bio || '';
+  $('profileBioCount').textContent = String((p.bio || '').length);
+  setAvatarPreview(p.avatar_url);
+
+  $('profileBio').addEventListener('input', e => {
+    $('profileBioCount').textContent = String(e.target.value.length);
+  });
+
+  $('profileAvatarInput').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    const status = $('profileStatus');
+    status.textContent = '사진 올리는 중…';
+    try {
+      const blob = await resizeAvatar(file);
+      const res = await db().profiles.uploadAvatar(blob);
+      if (res.error || !res.url) throw new Error(res.error?.message || 'upload-failed');
+      STATE.pendingAvatar = res;
+      setAvatarPreview(res.url);
+      status.textContent = '사진 준비됨. 저장을 눌러 반영하세요.';
+    } catch (err) {
+      status.textContent = '사진 업로드 실패: ' + (err.message || err);
+    }
+  });
+
+  $('profileForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const status = $('profileStatus');
+    const btn = $('profileSave');
+    const patch = {
+      display_name: $('profileName').value.trim(),
+      bio: $('profileBio').value.trim(),
+    };
+    if (STATE.pendingAvatar) patch.avatar_url = STATE.pendingAvatar.url;
+    if (!patch.display_name) { status.textContent = '표시 이름을 입력해 주세요.'; return; }
+
+    btn.disabled = true;
+    status.textContent = '저장 중…';
+    const res = await db().profiles.updateMine(patch);
+    btn.disabled = false;
+    if (res.error) { status.textContent = '저장 실패: ' + res.error.message; return; }
+
+    // 이전 아바타 정리(우리 버킷 파일일 때만)
+    if (STATE.pendingAvatar && STATE.profile?.avatar_url) {
+      db().profiles.removeAvatarByUrl(STATE.profile.avatar_url);
+    }
+    STATE.profile = { ...(STATE.profile || {}), ...patch };
+    STATE.pendingAvatar = null;
+    // 헤더 이름도 갱신
+    $('meUser').innerHTML =
+      `${escapeHtml(patch.display_name)} · <button id="logout">로그아웃</button>`;
+    $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
+    status.textContent = '저장했어요.';
+  });
+}
 
 // ═════════════════════════════════════════
 // 좋아한 사진 (reader_submissions 중 본인이 ♡ 한 것)
