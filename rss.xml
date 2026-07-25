@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Sat, 25 Jul 2026 16:32:42 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 25 Jul 2026 17:56:13 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>히라야마의 올림푸스 뮤, 그리고 두 번 없는 빛</title>
+      <link>https://www.5ftmag.com/stories/21.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/21.html</guid>
+      <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
+      <description>《퍼펙트 데이즈》의 남자는 매일 같은 자리에서 나뭇잎 사이 빛을 흑백 필름에 담는다. 올림푸스 뮤 한 대와 코모레비, 그리고 필름 사진이 하루를 대하는 태도.</description>
+      <category>CINEMA</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
     <item>
       <title>한영수, 전쟁이 지나간 서울을 걷다</title>
       <link>https://www.5ftmag.com/stories/20.html</link>
