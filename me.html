@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="css/common.css?v=20260712-softfocus">
-  <link rel="stylesheet" href="css/me.css?v=20260620-editdel">
+  <link rel="stylesheet" href="css/me.css?v=20260725-profile">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -67,6 +67,7 @@
 <div id="app" hidden>
   <!-- 상위 페이지 탭 -->
   <div class="me-pagetabs">
+    <button type="button" class="me-pagetab" data-section="profile">프로필</button>
     <button type="button" class="me-pagetab active" data-section="photos">사진</button>
     <button type="button" class="me-pagetab" data-section="market">매물</button>
     <button type="button" class="me-pagetab" data-section="notifs">알림 <span class="me-pagetab-badge" id="notifsBadge" hidden></span></button>
@@ -79,6 +80,42 @@
     <button type="button" class="me-pagetab" data-section="fav-contributors">좋아한 작가</button>
     <button type="button" class="me-pagetab" data-section="fav-articles">스크랩한 글</button>
   </div>
+
+  <!-- ─── 프로필 섹션 ─── -->
+  <section id="section-profile" hidden>
+    <form class="me-profile" id="profileForm" novalidate>
+      <div class="me-profile-avatar">
+        <img id="profileAvatarPreview" class="me-profile-avatar-img" alt="프로필 사진" decoding="async" />
+        <div class="me-profile-avatar-side">
+          <label class="me-btn me-profile-avatar-btn">
+            사진 변경
+            <input type="file" id="profileAvatarInput" accept="image/jpeg,image/png,image/webp" hidden />
+          </label>
+          <p class="me-profile-hint">정사각형 이미지를 권장해요. 최대 2MB.</p>
+        </div>
+      </div>
+
+      <label class="me-profile-field">
+        <span class="me-profile-label">표시 이름</span>
+        <input type="text" id="profileName" maxlength="40" autocomplete="off"
+               placeholder="댓글·장터에 보이는 이름" />
+      </label>
+
+      <label class="me-profile-field">
+        <span class="me-profile-label">자기소개</span>
+        <textarea id="profileBio" maxlength="500" rows="4"
+                  placeholder="간단한 소개 (최대 500자)"></textarea>
+        <span class="me-profile-count"><span id="profileBioCount">0</span>/500</span>
+      </label>
+
+      <p class="me-profile-locked">로그인 계정(이메일)은 구글 계정에서 관리해요. 여기서는 바꿀 수 없어요.</p>
+
+      <div class="me-profile-foot">
+        <button type="submit" class="me-btn me-btn-primary" id="profileSave">저장</button>
+        <span class="me-profile-status" id="profileStatus" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
 
   <!-- ─── 사진 섹션 ─── -->
   <section id="section-photos">
@@ -187,7 +224,7 @@
   <script src="./js/site-telemetry.js?v=20260712-modules" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="./js/site-common.js?v=20260712-moreclose" defer></script>
-<script src="./js/me-page.js?v=20260620-schedule" defer></script>
+<script src="./js/me-page.js?v=20260725-profile" defer></script>
 
 </body>
 </html>

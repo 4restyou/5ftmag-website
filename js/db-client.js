@@ -225,11 +225,53 @@
       const c = client(); if (!c) return null;
       const uid = await userId();
       if (!uid) return null;
+      // select('*') — bio 컬럼 마이그레이션이 배포보다 늦게 적용돼도 에러 없이
+      // 있는 컬럼만 돌려받게 한다(뷰는 안전 컬럼만 노출). getMine 은 헤더 이름에도
+      // 쓰이므로 특정 컬럼 결합으로 깨지면 안 됨.
       const { data } = await c.from('profiles_public')
-        .select('display_name, avatar_url, is_editor')
+        .select('*')
         .eq('user_id', uid)
         .maybeSingle();
       return data || null;
+    },
+    // 본인 프로필 수정 (표시 이름 · 아바타 URL · 자기소개).
+    // RLS profiles_update_own 이 본인 행만 통과시키고, is_editor/user_id 는
+    // profiles_privilege_guard 트리거가 막으므로 안전한 컬럼만 넘긴다.
+    async updateMine(patch = {}) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'not-signed-in' } };
+      const fields = {};
+      if (typeof patch.display_name === 'string') fields.display_name = patch.display_name.trim();
+      if (typeof patch.bio === 'string')          fields.bio = patch.bio.trim();
+      if (typeof patch.avatar_url === 'string')   fields.avatar_url = patch.avatar_url;
+      if (Object.keys(fields).length === 0) return { error: { message: 'no-fields' } };
+      fields.updated_at = new Date().toISOString();
+      return c.from('profiles').update(fields).eq('user_id', uid);
+    },
+    // 아바타 이미지를 avatars 버킷의 본인 폴더에 올리고 public URL 을 돌려준다.
+    async uploadAvatar(blob) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const uid = await userId();
+      if (!uid) return { error: { message: 'not-signed-in' } };
+      const ext = (blob.type && blob.type.includes('png')) ? 'png'
+        : (blob.type && blob.type.includes('webp')) ? 'webp' : 'jpg';
+      const path = `${uid}/avatar-${Date.now()}.${ext}`;
+      const up = await c.storage.from('user-avatars').upload(path, blob, {
+        contentType: blob.type || 'image/jpeg', upsert: false,
+      });
+      if (up.error) return { error: up.error };
+      const { data } = c.storage.from('user-avatars').getPublicUrl(path);
+      return { url: data?.publicUrl || null, path };
+    },
+    // 이전 아바타 파일 정리(본인 폴더). 실패해도 무시.
+    async removeAvatarByUrl(url) {
+      const c = client(); if (!c || !url) return;
+      const marker = '/user-avatars/';
+      const i = url.indexOf(marker);
+      if (i === -1) return;
+      const path = url.slice(i + marker.length).split('?')[0];
+      try { await c.storage.from('user-avatars').remove([path]); } catch (_) {}
     },
     // 편집부가 메시지 보낼 회원을 찾을 때.
     // display_name (Google 계정 이름), 사진 등록 시 입력한 작가명 (submitter_name),
