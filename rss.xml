@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Thu, 16 Jul 2026 09:17:06 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 25 Jul 2026 16:32:42 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>한영수, 전쟁이 지나간 서울을 걷다</title>
+      <link>https://www.5ftmag.com/stories/20.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/20.html</guid>
+      <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
+      <description>폐허가 된 도시에서 그가 본 것은 비참함이 아니라 다시 시작하는 일상이었다. 1956년부터 1963년까지 한영수가 붙든 서울, 그리고 내년 5월 나올 새 사진집까지.</description>
+      <category>PHOTOGRAPHER</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>구본창, 사라지는 것들을 붙드는 사진</title>
       <link>https://www.5ftmag.com/stories/19.html</link>
