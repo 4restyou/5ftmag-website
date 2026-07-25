@@ -436,7 +436,8 @@ body { background: var(--bg); color: var(--text); }
 }
 
 /* ─── 프로필 편집 섹션 ─── */
-.me-profile { max-width: 520px; display: flex; flex-direction: column; gap: 22px; padding: 4px 0; }
+.me-profile { max-width: 1100px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 22px; }
+.me-profile > * { max-width: 520px; width: 100%; }
 .me-profile-avatar { display: flex; align-items: center; gap: 18px; }
 .me-profile-avatar-img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: var(--bg-sub); border: 1px solid var(--border); flex: none; }
 .me-profile-avatar-side { display: flex; flex-direction: column; gap: 8px; }
