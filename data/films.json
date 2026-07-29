@@ -4504,5 +4504,59 @@
     "format": "35mm, 120",
     "photographers": [],
     "photos": []
+  },
+  "tudorxlx100": {
+    "slug": "tudorxlx100",
+    "tier": "library",
+    "brand": "TUDOR",
+    "name": "Tudorcolor XLX 100",
+    "displayName": "Tudorcolor XLX 100",
+    "aliases": [
+      "Tudor",
+      "Tudorcolor",
+      "Tudor XLX",
+      "Tudorcolor XLX",
+      "Tudorcolor XLX 100",
+      "Tudor XLX 100",
+      "TudorColor XLX 100",
+      "투도르",
+      "투도르컬러",
+      "투도르 XLX 100",
+      "투도르컬러 XLX 100",
+      "tudorxlx100"
+    ],
+    "desc": "영국 Tudor Photography 의 저가 컬러 네거티브. 일본 후지필름이 만든 리브랜드로 알려져 있고 C-41 로 현상한다. 부담 없이 막 찍기 좋은 데일리 컬러 필름.",
+    "iso": "100",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
+  },
+  "tudorxlx200": {
+    "slug": "tudorxlx200",
+    "tier": "library",
+    "brand": "TUDOR",
+    "name": "Tudorcolor XLX 200",
+    "displayName": "Tudorcolor XLX 200",
+    "aliases": [
+      "Tudor",
+      "Tudorcolor",
+      "Tudor XLX",
+      "Tudorcolor XLX",
+      "Tudorcolor XLX 200",
+      "Tudor XLX 200",
+      "TudorColor XLX 200",
+      "투도르",
+      "투도르컬러",
+      "투도르 XLX 200",
+      "투도르컬러 XLX 200",
+      "tudorxlx200"
+    ],
+    "desc": "영국 Tudor Photography 의 저가 컬러 네거티브. 일본 후지필름이 만든 리브랜드로 알려져 있고 C-41 로 현상한다. 부담 없이 막 찍기 좋은 데일리 컬러 필름.",
+    "iso": "200",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
   }
 }
