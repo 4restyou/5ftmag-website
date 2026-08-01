@@ -1,5 +1,20 @@
 [
   {
+    "id": "22",
+    "title": "달에 두고 온 카메라",
+    "excerpt": "인류가 달에서 찍은 사진은 전부 필름이었다. 핫셀블라드와 코닥 70mm, 사진마다 찍힌 십자 표식, 그리고 달에 남겨진 열두 대의 카메라 이야기.",
+    "date": "2026-07-25",
+    "category": "feature",
+    "categoryLabel": "FILM STORY",
+    "author": "Film Social Club",
+    "films": [],
+    "issue": "",
+    "manual": true,
+    "page": "stories/22.html",
+    "published": true,
+    "thumbnail": "img/stories/22/moon-hero.jpg"
+  },
+  {
     "id": "21",
     "title": "히라야마의 올림푸스 뮤, 그리고 두 번 없는 빛",
     "excerpt": "《퍼펙트 데이즈》의 남자는 매일 같은 자리에서 나뭇잎 사이 빛을 흑백 필름에 담는다. 올림푸스 뮤 한 대와 코모레비, 그리고 필름 사진이 하루를 대하는 태도.",
