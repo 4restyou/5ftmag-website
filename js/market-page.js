@@ -42,13 +42,7 @@ function fmtDate(iso) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 // "30000000" → "30,000,000원". 숫자가 아니면 (예: "가격 협의") 원문 그대로.
-function fmtPrice(v) {
-  const raw = String(v ?? '').trim();
-  if (!raw) return '';
-  const n = Number(raw.replace(/[^0-9.-]/g, ''));
-  if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
-  return escapeHtml(n.toLocaleString('ko-KR')) + '원';
-}
+function fmtPrice(v) { return window.MagUtil.formatPrice(v, { keepText: true }); }
 function categoryLabel(k) {
   return (CATEGORIES.find(c => c.key === k) || {}).label || k;
 }

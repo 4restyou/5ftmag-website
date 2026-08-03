@@ -17,31 +17,11 @@ function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
 function escapeAttr(s) { return window.MagUtil.escapeAttr(s); }
 
 // ────────── 권한 ──────────
-function showGate(msg) {
-  $('gate').hidden = false;
-  if (msg) $('gate').querySelector('p').textContent = msg;
-}
+// 접근 권한 — 공통 게이트(js/admin-guard.js) 위임.
+const showGate = (msg) => window.AdminGuard.showGate(msg);
+async function checkAccess() { return window.AdminGuard.requireEditor(STATE); }
 
-async function checkAccess() {
-  for (let i = 0; i < 50; i++) {
-    if (db() && db().isReady()) break;
-    await new Promise(r => setTimeout(r, 50));
-  }
-  if (!db() || !db().isReady()) { showGate('서비스 준비 실패. 잠시 후 새로고침해주세요.'); return false; }
-  const session = await db().auth.getSession();
-  if (!session) { showGate(); return false; }
-  STATE.user = session.user;
-  const profile = await db().profiles.getMine();
-  if (!profile?.is_editor) { showGate('편집부 권한이 있는 계정으로 로그인해야 이 페이지를 볼 수 있어요.'); return false; }
-  STATE.isEditor = true;
-  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
-  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
-  return true;
-}
 
-$('gateLogin').addEventListener('click', async () => {
-  await db().auth.signInWithGoogle(window.location.href);
-});
 
 // ────────── 목록 ──────────
 async function reload() {
@@ -59,10 +39,7 @@ function categoryLabel(cat) {
   }
 }
 
-function fmtPrice(n) {
-  if (!n || n <= 0) return '—';
-  return n.toLocaleString('ko-KR') + '원';
-}
+function fmtPrice(n) { return window.MagUtil.formatPrice(n, { empty: '—' }); }
 
 function render() {
   const q = STATE.filter.toLowerCase();
