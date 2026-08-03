@@ -299,15 +299,18 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# css/js 는 HTML 에서 ?v=YYYYMMDD-tag 로 버전 고정된다(validate-assets 가 단일
+# 버전을 CI 에서 강제). 파일이 바뀌면 쿼리스트링이 바뀌어 캐시 키가 자동으로
+# 갈리므로 immutable 로 둬도 안전하다 — 재방문 시 5분마다 재검증(304) 왕복이 사라진다.
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=300, must-revalidate"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=300, must-revalidate"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/data/*"

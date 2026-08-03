@@ -308,7 +308,7 @@
       .catch(() => {});
   }
 
-  fetch('data/stories.json', { cache: 'no-cache' })
+  fetch('data/stories.json')
     .then(res => {
       if (!res.ok) throw new Error('데이터를 불러올 수 없습니다.');
       return res.json();

@@ -30,7 +30,7 @@
 
   async function fetchJsonSafe(url) {
     try {
-      const res = await fetch(url, { cache: 'no-cache' });
+      const res = await fetch(url);
       if (!res.ok) return null;
       return await res.json();
     } catch (_) { return null; }

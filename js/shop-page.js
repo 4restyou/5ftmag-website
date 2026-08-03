@@ -316,7 +316,7 @@
       }
     }
     try {
-      const res = await fetch('data/shop.json', { cache: 'no-cache' });
+      const res = await fetch('data/shop.json');
       const data = await res.json();
       return Array.isArray(data) ? data : [];
     } catch (e) {

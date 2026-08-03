@@ -103,7 +103,7 @@
   function getCurrentTheme() {
     if (_themePromise) return _themePromise;
     const depth = (location.pathname.match(/\/(stories|admin)\//) ? '../' : './');
-    _themePromise = fetchWithTimeout(depth + THEME_PATH, 8000, { cache: 'no-cache' })
+    _themePromise = fetchWithTimeout(depth + THEME_PATH, 8000)
       .then(r => r.ok ? r.json() : null)
       .catch(() => { _themePromise = null; return null; });
     return _themePromise;
@@ -114,7 +114,7 @@
   function getFilms() {
     if (_filmsPromise) return _filmsPromise;
     const depth = (location.pathname.match(/\/(stories|admin)\//) ? '../' : './');
-    _filmsPromise = fetchWithTimeout(depth + FILMS_PATH, 8000, { cache: 'no-cache' })
+    _filmsPromise = fetchWithTimeout(depth + FILMS_PATH, 8000)
       .then(r => r.ok ? r.json() : null)
       .catch(() => { _filmsPromise = null; return null; });
     return _filmsPromise;
