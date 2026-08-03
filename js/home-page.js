@@ -27,15 +27,21 @@
     fetch('data/films.json', { cache: 'no-cache' })
       .then(res => res.json())
       .then(data => {
-        const candidates = Object.entries(data || {}).filter(([, film]) =>
-          Array.isArray(film?.photos) && film.photos.some(photo => photo?.src)
-        );
+        // 후보: 샘플 사진이 있거나(우선) 캔 썸네일이 있는 필름. 사진은 featured
+        // 2편뿐이라 그것만 걸러내면 매번 같은 필름만 떠서, 캔 썸네일(152편)까지
+        // 후보에 넣어 전체 카탈로그에서 랜덤 추천되게 한다.
+        const candidates = Object.entries(data || {}).filter(([, film]) => {
+          const hasPhoto = Array.isArray(film?.photos) && film.photos.some(photo => photo?.src);
+          const hasCan = film?.canThumbnailStatus === 'set' && film?.canThumbnail;
+          return hasPhoto || hasCan;
+        });
         if (!candidates.length) return;
         const [slug, film] = candidates[Math.floor(Math.random() * candidates.length)];
-        const photo = film.photos.find(item => item?.src);
+        const photo = Array.isArray(film.photos) ? film.photos.find(item => item?.src) : null;
+        const imgSrc = photo?.src || film.canThumbnail;
         homeFilmPick.href = `films.html?film=${encodeURIComponent(slug)}`;
         homeFilmPick.innerHTML = `
-          <img class="home-film-pick-thumb" src="${escapeAttr(photo.src)}" alt="" loading="lazy">
+          <img class="home-film-pick-thumb" src="${escapeAttr(imgSrc)}" alt="" loading="lazy">
           <span class="home-film-pick-copy">
             <span class="home-film-pick-label">오늘의 추천 필름</span>
             <span class="home-film-pick-name">${escapeHtml(film.displayName || film.name || slug)}</span>
