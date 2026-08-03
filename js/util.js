@@ -45,11 +45,26 @@
     return date <= today;
   }
 
+  // 가격 표기 통합. 페이지마다 따로 구현돼 같은 금액이 다르게 보이던 것을 하나로.
+  //   opts.empty    — 값이 없거나 0 이하일 때 표시 (기본 '')
+  //   opts.keepText — 숫자가 아닌 값("가격 협의" 등)을 원문 그대로 살릴지 (기본 false)
+  // keepText 경로는 사용자 입력이므로 escapeHtml 로 감싼다.
+  function formatPrice(value, opts) {
+    const empty = opts && 'empty' in opts ? opts.empty : '';
+    const keepText = !!(opts && opts.keepText);
+    const raw = String(value ?? '').trim();
+    if (!raw) return empty;
+    const n = Number(raw.replace(/[^0-9.-]/g, ''));
+    if (!Number.isFinite(n) || n <= 0) return keepText ? escapeHtml(raw) : empty;
+    return n.toLocaleString('ko-KR') + '원';
+  }
+
   window.MagUtil = Object.freeze({
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     normalizeFilmLabel: normalizeFilmLabel,
     seoulTodayIso: seoulTodayIso,
     isPublishedContent: isPublishedContent,
+    formatPrice: formatPrice,
   });
 })();

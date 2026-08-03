@@ -132,34 +132,11 @@ function mergeTopCameraRows(rows) {
   )).slice(0, 10);
 }
 
-async function checkAccess() {
-  if (!db() || !db().isReady()) {
-    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
-    return false;
-  }
-  const session = await db().auth.getSession();
-  if (!session) { showGate(); return false; }
-  STATE.user = session.user;
-
-  const profile = await db().profiles.getMine();
-  if (!profile?.is_editor) { showGate('접근 권한이 없어요.'); return false; }
-  STATE.isEditor = true;
-  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
-  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
-  return true;
-}
-
-function showGate(msg) {
-  $('gate').hidden = false;
-  $('app').hidden = true;
-  if (msg) {
-    $('gate').querySelector('p').textContent = msg;
-    $('gateLogin').style.display = 'none';
-  }
-  $('gateLogin').addEventListener('click', async () => {
-    await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
-  });
-}
+// 접근 권한 — 공통 게이트(js/admin-guard.js) 위임.
+// 기존 구현엔 db 준비 폴링이 없어 로그인 직후 "인증 모듈 로드 실패" 로 빠질 수
+// 있었다. guard 가 폴링(50×50ms)까지 처리한다.
+const showGate = (msg) => window.AdminGuard.showGate(msg);
+async function checkAccess() { return window.AdminGuard.requireEditor(STATE); }
 
 function renderSummary(s) {
   if (!s) {

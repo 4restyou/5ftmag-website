@@ -347,10 +347,14 @@
 
   // ─── 댓글 (read via view, write via base table) ───
   const comments = {
-    async list(pageId) {
+    // 상한을 둔다 — 인기 글의 댓글은 무한히 쌓일 수 있고, 전량 로드는 페이로드와
+    // 렌더 비용이 선형으로 증가한다. 넘치면 limit 을 올려 호출한다.
+    async list(pageId, { limit = 300 } = {}) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.from('comments_with_meta')
-        .select('*').eq('page_id', pageId).order('created_at', { ascending: true });
+        .select('*').eq('page_id', pageId)
+        .order('created_at', { ascending: true })
+        .limit(limit);
       if (error) return [];
       return data || [];
     },
@@ -1865,10 +1869,11 @@
       return count || 0;
     },
     // 편집부 인박스: 회원별 스레드 목록 (마지막 메시지 / 안읽음 카운트 포함)
-    async listThreads() {
+    async listThreads({ limit = 200 } = {}) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.from('message_threads').select('*')
-        .order('last_at', { ascending: false });
+        .order('last_at', { ascending: false })
+        .limit(limit);
       if (error) { console.warn('[messages.listThreads]', error.message); return []; }
       return data || [];
     },
