@@ -6,6 +6,13 @@
   const escapeHtml = window.MagUtil.escapeHtml;
   const escapeAttr = window.MagUtil.escapeAttr;
 
+  // films.json 을 로드당 1회만 가져와 모든 소비처(추천 픽·검색 인덱스·사진 풀)가
+  // 공유한다. no-cache 를 쓰지 않아 브라우저 캐시(netlify /data/* max-age)를 활용.
+  let _filmsJsonPromise = null;
+  function filmsJson() {
+    return (_filmsJsonPromise ||= fetch('data/films.json').then(r => r.json()).catch(() => ({})));
+  }
+
   function thumbnailPicture(src, alt, loading = 'lazy') {
     const cleanSrc = String(src || '');
     const webpSrc = /\.(jpe?g|png)$/i.test(cleanSrc)
@@ -24,8 +31,7 @@
   });
   if (homeFilmPick) {
     homeFilmPick.addEventListener('click', () => window.trackEvent?.('film_finder_recommendation_clicked'));
-    fetch('data/films.json', { cache: 'no-cache' })
-      .then(res => res.json())
+    filmsJson()
       .then(data => {
         // 후보: 샘플 사진이 있거나(우선) 캔 썸네일이 있는 필름. 사진은 featured
         // 2편뿐이라 그것만 걸러내면 매번 같은 필름만 떠서, 캔 썸네일(152편)까지
@@ -100,8 +106,7 @@
     }
     function ensureIndex() {
       if (index) return Promise.resolve();
-      return fetch('data/films.json', { cache: 'force-cache' })
-        .then(res => res.json()).then(buildIndex).catch(() => { index = []; });
+      return filmsJson().then(buildIndex).catch(() => { index = []; });
     }
     function scoreOf(qn, film) {
       let best = 9;
@@ -214,7 +219,7 @@
   }
 
   if (storyList) {
-    fetch('data/stories.json', { cache: 'no-cache' })
+    fetch('data/stories.json')
       .then(res => res.json())
       .then(data => {
         // 발행된 글만, 최신순
@@ -321,7 +326,7 @@
   const newsList = document.getElementById('newsList');
 
   if (newsList) {
-    fetch('data/news.json', { cache: 'no-cache' })
+    fetch('data/news.json')
       .then(res => res.json())
       .then(data => {
         // 발행된 소식만, 최신순, 최대 4개
@@ -364,7 +369,7 @@
   (function renderNextIssueBlock() {
     const slot = document.getElementById('nextIssueBlock');
     if (!slot) return;
-    fetch('data/current-theme.json', { cache: 'no-cache' })
+    fetch('data/current-theme.json')
       .then(r => r.ok ? r.json() : null)
       .then(theme => {
         if (!theme || !theme.active) return;
@@ -468,7 +473,7 @@
           if (obj && Object.keys(obj).length) return obj;
         }
       } catch (_) {}
-      return fetch('data/films.json').then(r => r.json()).catch(() => ({}));
+      return filmsJson();
     }
 
     // 통합 풀: editorial(films DB) + 독자 승인 제출(readers.json + Supabase)

@@ -36,7 +36,7 @@
   // ── 데이터 fetch ──
   async function fetchJson(url) {
     try {
-      const res = await fetch(url, { cache: 'no-cache' });
+      const res = await fetch(url);
       return await res.json();
     } catch (err) { console.warn('[mh] fetch', url, err); return null; }
   }

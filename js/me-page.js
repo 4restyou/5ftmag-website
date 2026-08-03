@@ -562,7 +562,7 @@ async function loadFavFilms() {
         STATE.filmsData = await db().films.listAsObject();
       }
       if (!STATE.filmsData || Object.keys(STATE.filmsData).length === 0) {
-        const res = await fetch('data/films.json', { cache: 'no-cache' });
+        const res = await fetch('data/films.json');
         STATE.filmsData = await res.json();
       }
     } catch (_) {
@@ -758,7 +758,7 @@ async function loadFavArticles() {
   }
   if (!STATE.storiesData) {
     try {
-      const res = await fetch('data/stories.json', { cache: 'no-cache' });
+      const res = await fetch('data/stories.json');
       STATE.storiesData = await res.json();
     } catch (_) {
       STATE.storiesData = [];
