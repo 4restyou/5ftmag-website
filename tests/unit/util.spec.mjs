@@ -89,10 +89,37 @@ describe('window.MagUtil.normalizeFilmLabel', () => {
   });
 });
 
+describe('formatPrice', () => {
+  const f = (...args) => window.MagUtil.formatPrice(...args);
+
+  it('formats numbers with ko-KR thousands separator', () => {
+    expect(f(30000)).toBe('30,000원');
+    expect(f('30000000')).toBe('30,000,000원');
+  });
+
+  it('returns the empty fallback for missing or non-positive values', () => {
+    expect(f('')).toBe('');
+    expect(f(null)).toBe('');
+    expect(f(0)).toBe('');
+    // admin 목록은 빈칸 대신 대시를 쓴다
+    expect(f(0, { empty: '—' })).toBe('—');
+    expect(f(undefined, { empty: '—' })).toBe('—');
+  });
+
+  it('keeps non-numeric text only when keepText is set (market/me)', () => {
+    expect(f('가격 협의', { keepText: true })).toBe('가격 협의');
+    expect(f('가격 협의')).toBe('');
+  });
+
+  it('escapes kept text (user input path)', () => {
+    expect(f('<script>x</script>', { keepText: true })).not.toContain('<script>');
+  });
+});
+
 describe('window.MagUtil shape', () => {
   it('exposes the shared browser utilities', () => {
     expect(Object.keys(window.MagUtil).sort()).toEqual(
-      ['escapeAttr', 'escapeHtml', 'isPublishedContent', 'normalizeFilmLabel', 'seoulTodayIso']
+      ['escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'normalizeFilmLabel', 'seoulTodayIso']
     );
   });
 
