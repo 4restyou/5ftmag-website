@@ -22,10 +22,7 @@
     filter: 'all',
   };
 
-  function fmtPrice(n) {
-    if (!n || n <= 0) return '';
-    return n.toLocaleString('ko-KR') + '원';
-  }
+  function fmtPrice(n) { return window.MagUtil.formatPrice(n); }
 
   function categoryLabel(cat) {
     switch (cat) {
