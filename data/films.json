@@ -4449,7 +4449,9 @@
     "type": "Black & White",
     "format": "35mm, 120",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/aristaedu100-can.webp",
+    "canThumbnailStatus": "set"
   },
   "aristaedu200": {
     "slug": "aristaedu200",
@@ -4476,7 +4478,9 @@
     "type": "Black & White",
     "format": "35mm, 120",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/aristaedu200-can.webp",
+    "canThumbnailStatus": "set"
   },
   "aristaedu400": {
     "slug": "aristaedu400",
@@ -4503,7 +4507,9 @@
     "type": "Black & White",
     "format": "35mm, 120",
     "photographers": [],
-    "photos": []
+    "photos": [],
+    "canThumbnail": "img/films/aristaedu400-can.webp",
+    "canThumbnailStatus": "set"
   },
   "tudorxlx100": {
     "slug": "tudorxlx100",
@@ -4558,5 +4564,30 @@
     "format": "35mm",
     "photographers": [],
     "photos": []
+  },
+  "candido400": {
+    "slug": "candido400",
+    "tier": "library",
+    "brand": "CANDIDO",
+    "name": "Candido 400",
+    "displayName": "Candido 400",
+    "aliases": [
+      "Candido",
+      "Candido 400",
+      "Candido400",
+      "CANDIDO 400",
+      "칸디도",
+      "칸디도 400",
+      "캔디도 400",
+      "candido400"
+    ],
+    "desc": "영국 Candido Collective 의 컬러 네거티브. 코닥 Vision3 250D 시네필름에서 렘젯을 벗겨 만들어 일반 C-41 현상소에 그대로 맡길 수 있다. 데이라이트 밸런스라 낮 촬영에 무난하다.",
+    "iso": "400",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "canThumbnail": "img/films/candido400-can.webp",
+    "canThumbnailStatus": "set"
   }
 }
