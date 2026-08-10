@@ -6,7 +6,7 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Mon, 10 Aug 2026 01:53:15 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 10 Aug 2026 02:13:44 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
@@ -14,11 +14,11 @@
       <link>https://www.5ftmag.com</link>
     </image>
     <item>
-      <title>감독의 눈은 필름 카메라였다</title>
+      <title>놀란이 현장에서 들고 있는 필름 카메라</title>
       <link>https://www.5ftmag.com/stories/23.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/23.html</guid>
       <pubDate>Mon, 10 Aug 2026 00:00:00 GMT</pubDate>
-      <description>300파운드짜리 IMAX 카메라 옆에서, 크리스토퍼 놀란이 눈에 대는 건 1969년에 설계된 중형 필름 카메라다. IMAX 가 개조한 펜탁스 67 이야기.</description>
+      <description>사진을 찍지 않는 필름 카메라, 펜탁스 67. IMAX 가 셔터를 들어내고 디렉터스 뷰파인더로 개조했다. 크리스토퍼 놀란이 IMAX 촬영 현장에서 이 카메라를 드는 이유.</description>
       <category>FILM STORY</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
     </item>
