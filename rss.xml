@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Tue, 04 Aug 2026 03:04:23 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 10 Aug 2026 01:53:15 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>감독의 눈은 필름 카메라였다</title>
+      <link>https://www.5ftmag.com/stories/23.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/23.html</guid>
+      <pubDate>Mon, 10 Aug 2026 00:00:00 GMT</pubDate>
+      <description>300파운드짜리 IMAX 카메라 옆에서, 크리스토퍼 놀란이 눈에 대는 건 1969년에 설계된 중형 필름 카메라다. IMAX 가 개조한 펜탁스 67 이야기.</description>
+      <category>FILM STORY</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
     <item>
       <title>2026 / 8, 이달의 사진 전시</title>
       <link>https://www.5ftmag.com/stories/aug-2026-exhibitions.html</link>

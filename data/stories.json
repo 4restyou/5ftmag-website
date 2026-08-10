@@ -1,5 +1,20 @@
 [
   {
+    "id": "23",
+    "title": "감독의 눈은 필름 카메라였다",
+    "excerpt": "300파운드짜리 IMAX 카메라 옆에서, 크리스토퍼 놀란이 눈에 대는 건 1969년에 설계된 중형 필름 카메라다. IMAX 가 개조한 펜탁스 67 이야기.",
+    "date": "2026-08-10",
+    "category": "feature",
+    "categoryLabel": "FILM STORY",
+    "author": "Film Social Club",
+    "films": [],
+    "issue": "",
+    "manual": true,
+    "page": "stories/23.html",
+    "published": true,
+    "thumbnail": "img/stories/23/nolan-hero.jpg"
+  },
+  {
     "id": "aug-2026-exhibitions",
     "title": "2026 / 8, 이달의 사진 전시",
     "category": "essay",
