@@ -534,7 +534,11 @@ body.modal-open { overflow: hidden; }
   color: var(--text);
 }
 .home-film-pick[hidden] { display: none; }
-.home-film-pick-thumb { width: 64px; height: 48px; object-fit: cover; background: var(--bg-sub); }
+/* 정사각 썸네일. 실사 사진은 꽉 채우고(cover), 세로로 긴 필름 캔은 잘리지
+   않도록 전체를 보여준다(contain) — 가로로 납작한 박스에서 캔 위아래가
+   잘려 나가던 문제를 이렇게 나눠 해결한다. */
+.home-film-pick-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 2px; background: var(--bg-sub); flex: none; }
+.home-film-pick-thumb.is-can { object-fit: contain; background: none; }
 .home-film-pick-copy { min-width: 0; }
 .home-film-pick-label { display: block; margin-bottom: 4px; color: var(--text-muted); font-size: var(--fs-meta); letter-spacing: .08em; text-transform: uppercase; }
 .home-film-pick-name { display: block; overflow: hidden; font-size: var(--fs-body); font-weight: var(--fw-heading); text-overflow: ellipsis; white-space: nowrap; }

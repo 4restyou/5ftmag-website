@@ -31,23 +31,64 @@
   });
   if (homeFilmPick) {
     homeFilmPick.addEventListener('click', () => window.trackEvent?.('film_finder_recommendation_clicked'));
-    filmsJson()
-      .then(data => {
-        // 후보: 샘플 사진이 있거나(우선) 캔 썸네일이 있는 필름. 사진은 featured
-        // 2편뿐이라 그것만 걸러내면 매번 같은 필름만 떠서, 캔 썸네일(152편)까지
-        // 후보에 넣어 전체 카탈로그에서 랜덤 추천되게 한다.
-        const candidates = Object.entries(data || {}).filter(([, film]) => {
-          const hasPhoto = Array.isArray(film?.photos) && film.photos.some(photo => photo?.src);
-          const hasCan = film?.canThumbnailStatus === 'set' && film?.canThumbnail;
-          return hasPhoto || hasCan;
+    // 추천은 "필름 먼저" 뽑는다. 독자 사진(readers.json)은 현재 특정 필름에
+    // 몰려 있어서 사진 기준으로 뽑으면 매번 같은 필름만 떴다(#649 와 같은 문제).
+    // 필름을 카탈로그 전체에서 고르고, 그 필름에 실사 사진이 있으면 그것을,
+    // 없으면 캔 썸네일을 쓴다. 캔은 세로로 길어 썸네일에서 잘리므로 사진 우선.
+    Promise.all([
+      filmsJson(),
+      fetch('data/readers.json').then(r => r.json()).catch(() => []),
+    ])
+      .then(([data, readers]) => {
+        const films = data || {};
+        const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+
+        // 필름명·별칭 → slug 역인덱스 (독자 사진의 film 문자열을 카탈로그에 잇는다)
+        const bySlugName = {};
+        for (const [slug, film] of Object.entries(films)) {
+          [film.displayName, film.name, ...(film.aliases || [])]
+            .filter(Boolean)
+            .forEach((alias) => { bySlugName[norm(alias)] = slug; });
+        }
+
+        // slug → 그 필름으로 찍은 독자 사진들
+        const photosBySlug = {};
+        (Array.isArray(readers) ? readers : []).forEach((r) => {
+          if (!r || r.published === false || !r.image) return;
+          const slug = bySlugName[norm(r.film)];
+          if (!slug) return;
+          (photosBySlug[slug] ||= []).push({ src: r.image, author: r.author || '' });
         });
+
+        // 후보 = 보여줄 이미지가 하나라도 있는 필름 (독자 사진 · 에디토리얼 · 캔)
+        const candidates = Object.entries(films).filter(([slug, film]) =>
+          photosBySlug[slug]?.length
+          || (Array.isArray(film?.photos) && film.photos.some((p) => p?.src))
+          || (film?.canThumbnailStatus === 'set' && film?.canThumbnail)
+        );
         if (!candidates.length) return;
+
         const [slug, film] = candidates[Math.floor(Math.random() * candidates.length)];
-        const photo = Array.isArray(film.photos) ? film.photos.find(item => item?.src) : null;
-        const imgSrc = photo?.src || film.canThumbnail;
+
+        // 이미지 우선순위: 독자 사진 → 에디토리얼 샘플 → 캔 썸네일
+        const readerShots = photosBySlug[slug] || [];
+        const editorial = Array.isArray(film.photos) ? film.photos.find((p) => p?.src) : null;
+        let imgSrc, alt = '', isCan = false;
+        if (readerShots.length) {
+          const shot = readerShots[Math.floor(Math.random() * readerShots.length)];
+          imgSrc = shot.src;
+          alt = shot.author ? `${shot.author} 님이 이 필름으로 찍은 사진` : '';
+        } else if (editorial) {
+          imgSrc = editorial.src;
+          alt = editorial.author ? `${editorial.author} 님이 이 필름으로 찍은 사진` : '';
+        } else {
+          imgSrc = film.canThumbnail;
+          isCan = true;
+        }
+
         homeFilmPick.href = `films.html?film=${encodeURIComponent(slug)}`;
         homeFilmPick.innerHTML = `
-          <img class="home-film-pick-thumb" src="${escapeAttr(imgSrc)}" alt="" loading="lazy">
+          <img class="home-film-pick-thumb${isCan ? ' is-can' : ''}" src="${escapeAttr(imgSrc)}" alt="${escapeAttr(alt)}" loading="lazy">
           <span class="home-film-pick-copy">
             <span class="home-film-pick-label">오늘의 추천 필름</span>
             <span class="home-film-pick-name">${escapeHtml(film.displayName || film.name || slug)}</span>
