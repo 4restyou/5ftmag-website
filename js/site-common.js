@@ -429,24 +429,72 @@
     document.body.appendChild(_toastHost);
     return _toastHost;
   }
+  // 화면에 동시에 띄울 최대 개수. 일괄 승인처럼 알림이 한꺼번에 쏟아질 때
+  // 토스트가 무한정 쌓여 모바일 화면을 덮어버리던 문제를 막는다.
+  const TOAST_MAX = 3;
+  // 같은 메시지가 이 시간 안에 다시 오면 새로 띄우지 않고 "N건" 으로 합친다.
+  const TOAST_COALESCE_MS = 6000;
+  const _liveToasts = [];   // [{ el, key, count, countEl, dismiss, timer, duration }]
+
   function showToast(msg, opts = {}) {
     const { type = 'default', duration = 2200 } = opts;
+    const text = String(msg ?? '');
     const host = ensureToastHost();
+
+    // 1) 같은 메시지가 이미 떠 있으면 개수만 올린다 (알림 폭주 대응)
+    const key = `${type}::${text}`;
+    const existing = _liveToasts.find((t) => t.key === key);
+    if (existing) {
+      existing.count += 1;
+      existing.countEl.textContent = `${existing.count}건`;
+      existing.countEl.hidden = false;
+      // 타이머 연장 — 마지막 건 기준으로 다시 센다
+      if (existing.timer) clearTimeout(existing.timer);
+      if (existing.duration > 0) existing.timer = setTimeout(existing.dismiss, existing.duration);
+      return existing.dismiss;
+    }
+
     const el = document.createElement('div');
     el.className = `ft-toast ft-toast-${type}`;
-    el.textContent = String(msg ?? '');
     el.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+
+    const label = document.createElement('span');
+    label.className = 'ft-toast-text';
+    label.textContent = text;
+    const countEl = document.createElement('span');
+    countEl.className = 'ft-toast-count';
+    countEl.hidden = true;
+    el.append(label, countEl);
     host.appendChild(el);
-    // 들어올 때 animation
+
     requestAnimationFrame(() => el.classList.add('is-in'));
+
     let dismissed = false;
+    const entry = { el, key, count: 1, countEl, duration, timer: null, dismiss: null };
     const dismiss = () => {
       if (dismissed) return; dismissed = true;
+      if (entry.timer) clearTimeout(entry.timer);
+      const i = _liveToasts.indexOf(entry);
+      if (i !== -1) _liveToasts.splice(i, 1);
       el.classList.remove('is-in');
       el.classList.add('is-out');
       setTimeout(() => el.remove(), 400);
     };
-    if (duration > 0) setTimeout(dismiss, duration);
+    entry.dismiss = dismiss;
+    _liveToasts.push(entry);
+
+    // 2) 상한을 넘으면 가장 오래된 것부터 정리. 알림이 쏟아질 때는 퇴장
+    //    애니메이션(400ms)을 기다리는 사이에도 화면이 덮이므로 즉시 걷어낸다.
+    while (_liveToasts.length > TOAST_MAX) {
+      const oldest = _liveToasts[0];
+      oldest.dismiss();
+      oldest.el.remove();
+    }
+
+    // 합쳐질 여지를 주려고 최소 노출 시간을 확보한다
+    const effective = duration > 0 ? Math.max(duration, TOAST_COALESCE_MS) : 0;
+    entry.duration = effective;
+    if (effective > 0) entry.timer = setTimeout(dismiss, effective);
     el.addEventListener('click', dismiss);
     return dismiss;
   }
@@ -1018,14 +1066,27 @@
     // 초기 뱃지
     refreshBadge();
 
-    // 실시간 — 새 알림 도착 시 뱃지 + 토스트
+    // 실시간 — 새 알림 도착 시 뱃지 + 토스트.
+    // 일괄 승인처럼 알림이 한꺼번에 들어오면 제목이 제각각이라 토스트가 줄줄이
+    // 쌓인다. 짧은 시간 동안 모았다가, 2건 이상이면 "새 알림 N건" 하나로 띄운다.
+    let _burst = [];
+    let _burstTimer = null;
+    const flushBurst = () => {
+      _burstTimer = null;
+      const batch = _burst;
+      _burst = [];
+      if (!batch.length || typeof window.showToast !== 'function') return;
+      const msg = batch.length === 1 ? (batch[0] || '새 알림') : `새 알림 ${batch.length}건`;
+      window.showToast(msg, { type: 'info', duration: 4200 });
+    };
     try {
       await window.MagDB.realtime.subscribeNotifications((n, kind) => {
         refreshBadge();
         // 새 알림(INSERT)일 때만 토스트. 읽음 처리(UPDATE)는 뱃지만 조용히 갱신.
-        if (kind !== 'UPDATE' && typeof window.showToast === 'function') {
-          window.showToast(n.title || '새 알림', { type: 'info', duration: 4200 });
-        }
+        if (kind === 'UPDATE') return;
+        _burst.push(n.title || '');
+        if (_burstTimer) clearTimeout(_burstTimer);
+        _burstTimer = setTimeout(flushBurst, 900);
       });
     } catch (_) {}
   }
