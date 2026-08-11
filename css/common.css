@@ -861,6 +861,22 @@ footer {
 .ft-toast-danger  { background: var(--color-danger-text); color: #fff; }
 .ft-toast-success,
 .ft-toast-info    { background: var(--accent); color: var(--accent-text); }
+/* 같은 메시지가 반복될 때 붙는 건수 뱃지 ("승인했어요 · 12건") */
+.ft-toast-count {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+/* 모바일에서는 토스트가 화면을 덮지 않게 폭·개수 노출을 줄인다.
+   (JS 가 동시 3개로 제한하지만, 좁은 화면에서는 2개까지만 보인다.) */
+@media (max-width: 640px) {
+  .ft-toast-host { left: 12px; right: 12px; bottom: 16px; transform: none; }
+  .ft-toast { min-width: 0; max-width: none; width: 100%; padding: 10px 14px; }
+  .ft-toast-host .ft-toast:nth-last-child(n + 3) { display: none; }
+}
 
 
 /* ════════════════════════════════════════════════
