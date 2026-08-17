@@ -1,5 +1,19 @@
 [
   {
+    "id": "brisnap-03",
+    "title": "브리스냅 필름헛소리 03. 내가 제일 좋아하는 일카",
+    "category": "essay",
+    "categoryLabel": "ESSAY",
+    "author": "Brisnap TV",
+    "date": "2026-08-17",
+    "issue": "",
+    "thumbnail": "img/stories/brisnap-03/hero.webp",
+    "excerpt": "초점도 고정, 조리개도 못 만지고, 27장이 전부. 그런데도 여행 갈 때마다 손이 가는 일회용 필름카메라 이야기. 코닥 펀세이버부터 요즘 다시 나오는 일회용 카메라까지.",
+    "page": "stories/brisnap-03.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "23",
     "title": "놀란이 현장에서 들고 있는 필름 카메라",
     "excerpt": "사진을 찍지 않는 필름 카메라, 펜탁스 67. IMAX 가 셔터를 들어내고 디렉터스 뷰파인더로 개조했다. 크리스토퍼 놀란이 IMAX 촬영 현장에서 이 카메라를 드는 이유.",

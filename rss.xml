@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Mon, 10 Aug 2026 02:13:44 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 17 Aug 2026 01:50:38 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>브리스냅 필름헛소리 03. 내가 제일 좋아하는 일카</title>
+      <link>https://www.5ftmag.com/stories/brisnap-03.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/brisnap-03.html</guid>
+      <pubDate>Mon, 17 Aug 2026 00:00:00 GMT</pubDate>
+      <description>초점도 고정, 조리개도 못 만지고, 27장이 전부. 그런데도 여행 갈 때마다 손이 가는 일회용 필름카메라 이야기. 코닥 펀세이버부터 요즘 다시 나오는 일회용 카메라까지.</description>
+      <category>ESSAY</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Brisnap TV</dc:creator>
+    </item>
     <item>
       <title>놀란이 현장에서 들고 있는 필름 카메라</title>
       <link>https://www.5ftmag.com/stories/23.html</link>
