@@ -383,7 +383,13 @@
     }
     let rows = [];
     try { rows = api ? await api.listApproved(300) : []; } catch { rows = []; }
-    _homeStrip = shuffleInPlace(rows.filter(r => r && r.image).slice()).slice(0, 9);
+    // listApproved 는 최신순. 그냥 섞어 9장을 뽑으면 한 사람이 몰아 올린 기간에
+    // 띠 전체가 그 작가로 채워지므로, 작가별 라운드로빈으로 뽑고 순서만 섞는다.
+    // 최근 300건이 한 작가뿐이어도 그 뒤 작가의 최신 컷까지 거슬러 올라간다.
+    const stripPool = rows.filter(r => r && r.image);
+    _homeStrip = shuffleInPlace(
+      window.MagUtil.pickByAuthorRoundRobin(stripPool, 9).slice(),
+    );
     const section = root.querySelector('#mhPhotoStrip');
     if (!section) return; // 검색 중 등으로 섹션이 화면에 없음 — 다음 렌더에서 반영
     if (!_homeStrip.length) { section.remove(); return; }

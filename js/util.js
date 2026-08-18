@@ -59,6 +59,53 @@
     return n.toLocaleString('ko-KR') + '원';
   }
 
+  // 사진 풀에서 작가를 한 명씩 돌아가며 뽑는다 (라운드로빈).
+  // 모든 작가가 1장씩 받은 뒤에야 누군가의 2장째로 넘어가므로, 한 사람이 몰아
+  // 올린 기간에도 메인이 한 작가로만 채워지지 않는다. 작가 수가 칸 수보다 적을
+  // 때만 같은 작가의 다음 컷으로 채운다 — 상한을 숫자로 박지 않아도 실제 작가
+  // 수에 맞춰 노출이 알아서 나뉜다.
+  //
+  // 버킷 안의 순서는 입력 순서를 그대로 유지한다. 최신순으로 정렬해 넘기면
+  // 각 작가의 "가장 최근 컷"이 먼저 뽑히고, 셔플해 넘기면 무작위 컷이 뽑힌다.
+  // 어느 작가가 뽑히느냐는 매번 달라지도록 버킷 순서만 섞는다.
+  // 작성자 미상은 각자 다른 버킷으로 둔다 (한 명으로 묶으면 통째로 밀려난다).
+  function pickByAuthorRoundRobin(pool, count, authorOf, random) {
+    const list = Array.isArray(pool) ? pool : [];
+    const want = Math.min(Math.floor(Number(count)) || 0, list.length);
+    if (want <= 0) return [];
+    const getAuthor = typeof authorOf === 'function' ? authorOf : function (item) {
+      return item && item.author;
+    };
+    const rnd = typeof random === 'function' ? random : Math.random;
+
+    const buckets = new Map();
+    list.forEach(function (item, i) {
+      const raw = String(getAuthor(item) ?? '').trim().toLowerCase();
+      const key = raw || `__anon_${i}`;
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(item);
+    });
+
+    const queues = [...buckets.values()];
+    for (let i = queues.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [queues[i], queues[j]] = [queues[j], queues[i]];
+    }
+
+    const picked = [];
+    for (let round = 0; picked.length < want; round++) {
+      let advanced = false;
+      for (const queue of queues) {
+        if (round >= queue.length) continue;
+        picked.push(queue[round]);
+        advanced = true;
+        if (picked.length >= want) break;
+      }
+      if (!advanced) break;
+    }
+    return picked;
+  }
+
   window.MagUtil = Object.freeze({
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
@@ -66,5 +113,6 @@
     seoulTodayIso: seoulTodayIso,
     isPublishedContent: isPublishedContent,
     formatPrice: formatPrice,
+    pickByAuthorRoundRobin: pickByAuthorRoundRobin,
   });
 })();
