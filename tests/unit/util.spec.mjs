@@ -116,10 +116,83 @@ describe('formatPrice', () => {
   });
 });
 
+
+describe('window.MagUtil.pickByAuthorRoundRobin', () => {
+  // 버킷 순서 셔플을 끄고(항상 0) 결정적으로 검증한다.
+  const pick = (pool, count, authorOf) =>
+    window.MagUtil.pickByAuthorRoundRobin(pool, count, authorOf, () => 0);
+  const shot = (author, id) => ({ author, id });
+
+  it('가장 흔한 작가가 칸을 독식하지 않는다', () => {
+    const pool = [
+      ...Array.from({ length: 20 }, (_, i) => shot('A', `a${i}`)),
+      shot('B', 'b0'), shot('C', 'c0'),
+    ];
+    const got = pick(pool, 6);
+    const fromA = got.filter((p) => p.author === 'A').length;
+    // A 가 20장이어도 다른 작가가 먼저 한 바퀴를 받는다
+    expect(new Set(got.map((p) => p.author))).toEqual(new Set(['A', 'B', 'C']));
+    expect(fromA).toBe(4);
+  });
+
+  it('작가가 한 명뿐이면 그 작가 사진으로 채운다', () => {
+    const pool = Array.from({ length: 5 }, (_, i) => shot('A', `a${i}`));
+    expect(pick(pool, 3).map((p) => p.id)).toEqual(['a0', 'a1', 'a2']);
+  });
+
+  it('최근순 풀을 주면 각 작가의 최신 컷이 먼저 뽑힌다', () => {
+    // 최근 3장이 전부 A — 잘라내지 않고 뒤로 거슬러 올라가 B·C 를 찾아야 한다
+    const pool = [
+      shot('A', 'a-new1'), shot('A', 'a-new2'), shot('A', 'a-new3'),
+      shot('B', 'b-new'), shot('B', 'b-old'),
+      shot('C', 'c-new'),
+    ];
+    const got = pick(pool, 3).map((p) => p.id);
+    expect(got.sort()).toEqual(['a-new1', 'b-new', 'c-new']);
+  });
+
+  it('작성자 미상은 한 명으로 묶지 않는다', () => {
+    const pool = [shot('', 'x1'), shot('', 'x2'), shot('  ', 'x3')];
+    expect(pick(pool, 3)).toHaveLength(3);
+  });
+
+  it('작가 이름은 대소문자·공백 차이를 같은 사람으로 본다', () => {
+    const pool = [shot('Kim', 'k1'), shot(' kim ', 'k2'), shot('Lee', 'l1')];
+    const got = pick(pool, 2).map((p) => p.id);
+    expect(got.sort()).toEqual(['k1', 'l1']);
+  });
+
+  it('요청 수가 풀보다 크면 있는 만큼만 준다', () => {
+    expect(pick([shot('A', 'a')], 10)).toHaveLength(1);
+  });
+
+  it('빈 입력·0 이하 요청을 안전하게 처리한다', () => {
+    expect(pick([], 5)).toEqual([]);
+    expect(pick(null, 5)).toEqual([]);
+    expect(pick([shot('A', 'a')], 0)).toEqual([]);
+    expect(pick([shot('A', 'a')], -1)).toEqual([]);
+  });
+
+  it('작가 키를 뽑는 함수를 직접 줄 수 있다', () => {
+    const pool = [
+      { by: 'A', id: 'a1' }, { by: 'A', id: 'a2' }, { by: 'B', id: 'b1' },
+    ];
+    const got = pick(pool, 2, (p) => p.by).map((p) => p.id);
+    expect(got.sort()).toEqual(['a1', 'b1']);
+  });
+
+  it('원본 배열을 건드리지 않는다', () => {
+    const pool = [shot('A', 'a1'), shot('B', 'b1')];
+    const copy = [...pool];
+    pick(pool, 2);
+    expect(pool).toEqual(copy);
+  });
+});
+
 describe('window.MagUtil shape', () => {
   it('exposes the shared browser utilities', () => {
     expect(Object.keys(window.MagUtil).sort()).toEqual(
-      ['escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'normalizeFilmLabel', 'seoulTodayIso']
+      ['escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'normalizeFilmLabel', 'pickByAuthorRoundRobin', 'seoulTodayIso']
     );
   });
 

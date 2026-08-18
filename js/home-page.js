@@ -604,51 +604,29 @@
         // 독자 사진 중심으로 보이게. 나머지 자리는 reader 풀에서 채움.
         const PHOTO_COUNT = isMobileHome() ? 10 : 24;
         const EDITORIAL_RATIO = 0.02;
-        const RECENT_POOL_LIMIT = 200;
         const editorialPool = allPhotos.filter(p => p.source === 'editorial');
         const readerPool    = allPhotos.filter(p => p.source !== 'editorial');
-        // 같은 작성자 사진이 한 번에 몰리지 않도록 작가별 1장씩 우선 뽑고,
-        // 자리가 남으면 나머지로 채움. 그룹 안/사이를 모두 shuffle 한다.
-        function diversifyByAuthor(pool, count) {
-          if (count <= 0) return [];
-          const byAuthor = new Map();
-          pool.forEach((p, i) => {
-            const raw = (p.author || '').trim().toLowerCase();
-            // 작성자 미상은 각자 다른 버킷으로 — 한 명으로 묶지 않기
-            const key = raw || `__anon_${i}`;
-            if (!byAuthor.has(key)) byAuthor.set(key, []);
-            byAuthor.get(key).push(p);
-          });
-          const primary = [];
-          const leftover = [];
-          for (const group of byAuthor.values()) {
-            const ordered = shuffleSeeded(group);
-            primary.push(ordered[0]);
-            if (ordered.length > 1) leftover.push(...ordered.slice(1));
-          }
-          const primaryOrdered = shuffleSeeded(primary);
-          const leftoverOrdered = shuffleSeeded(leftover);
-          if (primaryOrdered.length >= count) return primaryOrdered.slice(0, count);
-          return [...primaryOrdered, ...leftoverOrdered].slice(0, count);
-        }
+        // 같은 작성자 사진이 한 번에 몰리지 않도록 작가별 라운드로빈으로 뽑는다.
+        // 구현은 MagUtil.pickByAuthorRoundRobin (모바일 홈 사진 띠와 공용).
+        const pickByAuthor = window.MagUtil.pickByAuthorRoundRobin;
 
         // 모드별 selected 계산.
         //   - random: editorial 2% + reader 98%, 마지막에 한 번 더 shuffle
-        //   - recent: editorial 제외(타임스탬프 없음). 최근 200장 서브풀에서
-        //     작가 다양성 + 셔플 — "최근 컷들"이라는 의미는 유지하면서
-        //     한 사람이 많이 올린 날에도 메인이 한 작가로만 채워지지 않게 함.
+        //   - recent: editorial 제외(타임스탬프 없음). 최신순으로 정렬한 풀을 통째로
+        //     넘겨 작가별 라운드로빈 — 각 작가의 가장 최근 컷이 먼저 뽑힌다.
+        //     앞부분을 N장으로 잘라두지 않으므로, 한 사람이 최근을 도배한 기간에도
+        //     그 뒤쪽에 있는 다른 작가의 최신 컷까지 자동으로 거슬러 올라간다.
         function computeSelected(mode) {
           if (mode === 'recent') {
             const ts = (p) => Date.parse(p.createdAt || '') || 0;
-            const recentPool = [...readerPool]
-              .sort((a, b) => ts(b) - ts(a))
-              .slice(0, RECENT_POOL_LIMIT);
-            return diversifyByAuthor(recentPool, PHOTO_COUNT);
+            const recentPool = [...readerPool].sort((a, b) => ts(b) - ts(a));
+            return pickByAuthor(recentPool, PHOTO_COUNT, null, rng);
           }
           const expectedEditorial = PHOTO_COUNT * EDITORIAL_RATIO;
           const editorialN = Math.floor(expectedEditorial) + (rng() < (expectedEditorial % 1) ? 1 : 0);
           const editorialPick = shuffleSeeded(editorialPool).slice(0, Math.min(editorialN, editorialPool.length));
-          const readerPick    = diversifyByAuthor(readerPool, PHOTO_COUNT - editorialPick.length);
+          // random 모드는 풀을 먼저 섞어 넘긴다 — 각 작가에게서 무작위 컷이 뽑히도록.
+          const readerPick    = pickByAuthor(shuffleSeeded(readerPool), PHOTO_COUNT - editorialPick.length, null, rng);
           return shuffleSeeded([...editorialPick, ...readerPick]);
         }
 
