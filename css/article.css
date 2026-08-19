@@ -495,6 +495,66 @@ body {
   letter-spacing: -0.025em;
   margin-bottom: 24px;
 }
+/* 본문 중간에 끼우는 다른 기사 링크 카드.
+   문단 사이에 괄호로 링크만 넣으면 본문처럼 읽혀 클릭으로 이어지지 않는다.
+   썸네일 + 제목 + 한 줄 설명으로 묶어 본문 흐름에서 분리한다. */
+.article-body .article-ref-card {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  gap: 18px;
+  align-items: center;
+  margin: 40px 0;
+  padding: 16px;
+  border: 0;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-sub);
+  color: inherit;
+  text-decoration: none;
+  transition: background .2s;
+}
+.article-body .article-ref-card:hover { background: var(--accent-soft); }
+[data-theme="dark"] .article-body .article-ref-card:hover { background: #22201a; }
+.article-body .article-ref-card img {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+}
+.article-ref-label {
+  display: block;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.article-ref-title {
+  display: block;
+  font-size: 17px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+.article-ref-desc {
+  display: block;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+@media (max-width: 640px) {
+  .article-body .article-ref-card {
+    grid-template-columns: 96px 1fr;
+    gap: 12px;
+    padding: 12px;
+    margin: 32px 0;
+  }
+  .article-ref-title { font-size: 15px; }
+  .article-ref-desc { display: none; }
+}
+
 .related-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
