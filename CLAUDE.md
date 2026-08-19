@@ -48,6 +48,12 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 - **`add-external-service`** — 외부 SDK/API 연동(CSP + 시크릿 + 콘솔 디버깅).
 - 외부(ibelick/ui-skills, MIT): `fixing-accessibility` · `fixing-metadata` · `fixing-motion-performance` — Tailwind/React 전제 부분은 우리 vanilla 스택 등가물로 읽는다.
 
+## 출력 스타일 (자동 적용)
+
+`.claude/output-styles/` 의 output-style 은 `.claude/settings.json` 의 `outputStyle` 로 선택되며, **새 세션 시작 시점**에 시스템 프롬프트로 올라간다. 현재 기본값은 `fluent-korean` (snflkd/fluent-korean, MIT).
+
+한국어 답변에서 조사·어미·문장 성분을 생략하지 않고 서술어로 문장을 맺게 하는 지침이다. 아래 "글쓰기 규칙" 과 충돌하지 않으며, 충돌 시 CLAUDE.md 가 우선한다. **기사 본문 문체는 이 스타일이 아니라 아래 글쓰기 규칙을 따른다.** 자세한 내용은 `.claude/output-styles/README.md`.
+
 ## 배포 정책
 
 PR 생성 후 **CI 통과**하면 **사용자가 "배포하지 마" / "PR 만 만들어" 등으로 명시적 중단을 지시하지 않는 한** 머지·배포까지 자동 진행한다. 실행 절차서는 `ship` 스킬.
