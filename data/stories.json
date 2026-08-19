@@ -1,5 +1,19 @@
 [
   {
+    "id": "eddy-chen-euphoria",
+    "title": "드라마 한 편을 필름으로 기록한 사람",
+    "category": "essay",
+    "categoryLabel": "PHOTOGRAPHER",
+    "author": "5ft.mag 편집부",
+    "date": "2026-08-19",
+    "issue": "",
+    "thumbnail": "img/stories/eddy-chen-euphoria/hero.webp",
+    "excerpt": "유포리아 현장 스틸을 맡은 에디 첸은 방송사가 요구하던 안전한 기록에서 벗어나 필름을 들고 현장에 들어갔다. 시즌 2를 대표하는 젠데이아의 키아트는 포스터 촬영장이 아니라 조명을 맞추던 몇 초 사이에 나왔다.",
+    "page": "stories/eddy-chen-euphoria.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "brisnap-03",
     "title": "브리스냅 필름헛소리 03. 내가 제일 좋아하는 일카",
     "category": "essay",

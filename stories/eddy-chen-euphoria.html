@@ -46,6 +46,50 @@
     .photo-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
     .photo-credit a:hover { color: var(--text); }
 
+    .onset-grid,
+    .stills-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .onset-grid { grid-template-columns: repeat(3, 1fr); }
+    .stills-grid { grid-template-columns: repeat(4, 1fr); }
+    .onset-grid > picture,
+    .stills-grid > picture { display: block; }
+    /* .article-body figure.full-width img 가 object-fit:contain + max-width 를 걸어
+       타일이 어긋나므로, 같은 깊이로 다시 잡아 준다. */
+    .article-body figure.full-width .onset-grid img,
+    .article-body figure.full-width .stills-grid img {
+      width: 100%;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
+      display: block;
+      border-radius: 2px;
+    }
+
+    .keyart-pair {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .keyart-pair > picture { display: block; }
+    .article-body figure.full-width .keyart-pair img {
+      width: 100%;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      display: block;
+      border-radius: 2px;
+    }
+
+    @media (max-width: 700px) {
+      .onset-grid,
+      .stills-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    }
   </style>
 
   <script type="application/ld+json">
@@ -123,7 +167,13 @@
   </div>
 
   <!-- 메인 이미지 -->
-  <!-- TODO(hero): 사진 도착하면 여기에 히어로 배치 -->
+  <div class="article-hero">
+    <picture>
+      <source srcset="../img/stories/eddy-chen-euphoria/hero.webp" type="image/webp">
+      <img fetchpriority="high" decoding="async" src="../img/stories/eddy-chen-euphoria/hero.jpg" alt="유포리아 촬영장 백스테이지에서 서로를 카메라로 찍고 있는 젠데이아와 헌터 셰이퍼" width="1600" height="1061" />
+    </picture>
+    <p class="photo-credit" style="text-align: center; margin-top: 12px;">촬영장에서 서로를 찍는 젠데이아와 헌터 셰이퍼. 이미지 ⓒ Eddy Chen, courtesy of i-D</p>
+  </div>
 
   <!-- 본문 -->
   <div class="article-body">
@@ -137,6 +187,14 @@
     <h2>안전한 사진만 찍던 시절</h2>
 
     <p>처음부터 그랬던 건 아니다. 첸은 2012년 촬영 스태프 노조인 ICG 로컬 600에 들어간 뒤 〈브루클린 나인나인〉, 〈글리〉 같은 현장에서 일했다. 그때 방송사가 요구한 건 정확한 사진이었다. 수평과 수직이 맞고, 피사체가 정면으로 보이고, 어디에 써도 문제가 없는 컷.</p>
+
+    <figure class="full-width">
+      <picture>
+        <source srcset="../img/stories/eddy-chen-euphoria/makeup.webp" type="image/webp">
+        <img decoding="async" src="../img/stories/eddy-chen-euphoria/makeup.jpg" alt="메이크업 의자에 앉아 분장을 받고 있는 배우 제이콥 엘로디" loading="lazy" />
+      </picture>
+      <figcaption>메이크업 의자의 제이콥 엘로디. 방송사가 요구하던 정면 구도와는 거리가 먼 사진이다. <span class="photo-credit">이미지 ⓒ Eddy Chen, courtesy of i-D</span></figcaption>
+    </figure>
 
     <p>몇 년이 지나자 소진이 왔다. 패션 사진가이자 멘토였던 벤 모리스가 해준 조언이 그를 돌려세웠다.</p>
 
@@ -152,6 +210,14 @@
 
     <p>시즌 1에서 첸은 후지필름 디지털카메라와 필름카메라를 함께 썼다. 시즌 2를 앞두고 HBO가 전한 요청은 한 줄이었다. 필름을 더 많이 찍어 달라는 것.</p>
 
+    <figure class="full-width">
+      <picture>
+        <source srcset="../img/stories/eddy-chen-euphoria/audience.webp" type="image/webp">
+        <img decoding="async" src="../img/stories/eddy-chen-euphoria/audience.jpg" alt="어두운 객석에서 렉시의 연극을 보며 웃고 박수 치는 관객들" loading="lazy" />
+      </picture>
+      <figcaption>렉시의 연극 장면에 참여한 출연진과 관객. 시즌 2. <span class="photo-credit">이미지 ⓒ Eddy Chen, courtesy of i-D</span></figcaption>
+    </figure>
+
     <p>본편 자체가 필름으로 제작되고 있었기 때문에, 현장 스틸과 드라마 화면의 질감이 자연스럽게 이어졌다. 코닥이 올해 정식 라인업에 넣은 영화용 컬러 네거티브 VERITA 200D 도 〈유포리아〉 새 시즌 촬영을 위해 개발됐다는 점을 앞세웠다. (→ <a href="/stories/verita-200d-fuji-bw.html">확장하는 코닥, 정리하는 후지</a>)</p>
 
     <p>다만 여기서 하나를 구분해야 한다. 첸이 현장 스틸에 쓴 코닥 필름은 스틸 카메라용이다. 드라마 본편에 들어가는 영화용 스톡과는 다른 물건이다. 그는 이후 〈디 아이돌〉에서 프로젝트마다 결과를 다르게 만들기 위해 시네스틸로 바꿨다.</p>
@@ -162,9 +228,25 @@
 
     <p>루의 침실 세트 밖이었다. 샘 레빈슨 감독과 촬영감독 마르첼 레브가 조명과 구도를 잡고 있었다. 첸은 창문 너머로 방 안에 서 있는 젠데이아를 봤다. 그는 셔터 소리를 막는 방음 케이스인 블림프에 니콘 F6 를 넣어 들고 있었고, 렌즈는 58밀리였다.</p>
 
+    <figure class="full-width">
+      <picture>
+        <source srcset="../img/stories/eddy-chen-euphoria/rue-set.webp" type="image/webp">
+        <img decoding="async" src="../img/stories/eddy-chen-euphoria/rue-set.jpg" alt="유포리아 촬영장에 지어진 루의 침실 세트. 침대에 두 배우가 앉아 있다" loading="lazy" />
+      </picture>
+      <figcaption>루의 침실 세트. 첸이 창문 너머로 젠데이아를 발견한 곳이다. <span class="photo-credit">이미지 ⓒ Eddy Chen, courtesy of i-D</span></figcaption>
+    </figure>
+
     <p>창문을 두드려 젠데이아의 시선을 끌었다. 찍을 수 있었던 시간은 몇 초였다. 연속으로 서너 프레임을 눌렀고, 그중 젠데이아가 팔을 내리고 고개를 옆으로 기울인 한 장이 남았다.</p>
 
     <p>두세 달 뒤 HBO 는 그 사진을 시즌 2 마케팅 캠페인의 핵심 이미지로 골랐다. 첸에 따르면 손을 크게 대지 않았다. 원본을 크롭하는 정도로 끝났다.</p>
+
+    <figure class="full-width">
+      <div class="keyart-pair">
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/keyart1.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/keyart1.jpg" alt="유포리아 시즌 1 키아트" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/keyart2.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/keyart2.jpg" alt="유포리아 시즌 2 키아트" loading="lazy" /></picture>
+      </div>
+      <figcaption>시즌 1(왼쪽)과 시즌 2 키아트. 두 시즌 모두 첸이 찍은 젠데이아의 사진이 쓰였다. <span class="photo-credit">사진 Eddy Chen · ⓒ HBO</span></figcaption>
+    </figure>
 
     <p>작품의 얼굴이 되는 이미지가 통제된 스튜디오에서만 나오는 건 아니다. 현장을 아는 사진가가 준비 과정과 배우의 짧은 반응을 읽고 있을 때, 촬영 준비 시간에도 그런 사진이 나온다.</p>
 
@@ -184,11 +266,55 @@
 
     <p>라이카를 언제부터 썼는지는 짚어둘 필요가 있다. 그가 현장에서 라이카를 본격적으로 쓰기 시작한 건 시즌 2가 끝난 뒤, 〈디 아이돌〉부터다. 2023년 라이카 갤러리 LA 에서 연 개인전 「Idol Moments」 는 전량 35밀리 필름으로 찍었고 보디는 라이카 MP 와 M7, 필름은 시네스틸이었다. 유포리아 시즌 1·2 의 필름 사진을 라이카로 찍었다는 설명은 정확하지 않다.</p>
 
+    <p>아래는 시즌 2 공개 당시 매체에 배포된 공식 스틸이다. 위의 현장 필름사진과 나란히 놓고 보면 같은 사람이 같은 현장에서 만든 두 종류의 결과물이 보인다.</p>
+
+    <figure class="full-width">
+      <div class="stills-grid">
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b01.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b01.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b02.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b02.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b03.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b03.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b04.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b04.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b05.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b05.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b06.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b06.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b07.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b07.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b08.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b08.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b09.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b09.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b10.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b10.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b11.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b11.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b12.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b12.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b13.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b13.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b14.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b14.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b15.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b15.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b16.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b16.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b17.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b17.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b18.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b18.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b19.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b19.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b20.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b20.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b21.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b21.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b22.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b22.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b23.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b23.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b24.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b24.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b25.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b25.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b26.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b26.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b27.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b27.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/b28.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/b28.jpg" alt="유포리아 시즌 2 공식 스틸" loading="lazy" /></picture>
+      </div>
+      <figcaption>시즌 2 공식 스틸. 각 장이 필름으로 찍혔는지는 출처가 개별적으로 밝히지 않았다. <span class="photo-credit">사진 Eddy Chen / HBO</span></figcaption>
+    </figure>
+
     <h2>Get it and get out</h2>
 
     <p>첸이 반복해서 말하는 건 장비가 아니라 접근 권한과 신뢰다.</p>
 
     <p>강도 높은 연기를 찍을 때는 배우에게 먼저 어디까지 가능한지 묻는다. 젠데이아는 시즌 1부터 그가 가까이서 찍는 걸 허락했고, 나중에는 카메라가 있다는 걸 의식하지 않은 채 연기를 이어갔다. 배우 시드니 스위니는 자기 프로젝트에 첸을 직접 부르고 다른 배우들에게 소개하기도 했다.</p>
+
+    <figure class="full-width">
+      <picture>
+        <source srcset="../img/stories/eddy-chen-euphoria/trust.webp" type="image/webp">
+        <img decoding="async" src="../img/stories/eddy-chen-euphoria/trust.jpg" alt="백스테이지에서 헌터 셰이퍼에게 입을 맞추는 젠데이아" loading="lazy" />
+      </picture>
+      <figcaption>카메라가 이만큼 가까이 갈 수 있는 건 장비가 아니라 관계 때문이다. <span class="photo-credit">이미지 ⓒ Eddy Chen, courtesy of i-D</span></figcaption>
+    </figure>
 
     <p>허락을 받았다고 모든 테이크를 찍지는 않는다. 필요한 프레임이 나오면 바로 빠진다.</p>
 
@@ -212,6 +338,36 @@
 
     <p>배우 앵거스 클라우드가 상점 네온사인 앞에 선 사진도 장노출과 플래시로 찍었다. 카메라를 아래로 움직여 네온 빛이 얼굴까지 흘러내리게 만들었다. 첸은 이 두 장과 젠데이아 키아트를 시즌 2 의 대표적인 결과로 꼽는다.</p>
 
+    <figure class="full-width">
+      <div class="onset-grid">
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a01.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a01.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a02.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a02.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a03.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a03.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a04.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a04.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a05.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a05.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a06.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a06.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a07.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a07.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a08.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a08.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a09.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a09.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a10.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a10.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a11.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a11.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a12.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a12.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a13.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a13.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a14.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a14.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a15.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a15.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a16.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a16.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a17.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a17.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a18.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a18.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a19.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a19.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a20.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a20.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a21.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a21.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a22.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a22.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a23.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a23.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+        <picture><source srcset="../img/stories/eddy-chen-euphoria/a24.webp" type="image/webp"><img decoding="async" src="../img/stories/eddy-chen-euphoria/a24.jpg" alt="에디 첸이 유포리아 시즌 2 촬영장에서 필름으로 찍은 미공개 사진" loading="lazy" /></picture>
+      </div>
+      <figcaption>i-D 가 공개한 시즌 2 현장 필름사진. 촬영 사이사이의 시간이 대부분이다. <span class="photo-credit">이미지 ⓒ Eddy Chen, courtesy of i-D</span></figcaption>
+    </figure>
+
     <h2>아버지의 카메라에서 시작해서</h2>
 
     <p>첸은 어릴 때 아버지가 물려준 니콘과 마미야로 사진을 시작했다. 대학을 마치지 않고 LA 로 옮겨 사진가의 길을 골랐다. 초기 사진은 니콘 D200 에 아버지의 50밀리 F1.4 렌즈로 찍은 것들이고, 피사체는 당시 여자친구이자 지금의 아내였다.</p>
@@ -232,7 +388,7 @@
   <div class="article-end">
     <p class="article-signature">
       <span class="role">글</span>5ft.mag 편집부<br />
-      <span class="role">이미지</span>ⓒ Eddy Chen, courtesy of i-D<br />
+      <span class="role">이미지</span>현장 필름사진 ⓒ Eddy Chen, courtesy of i-D · 공식 스틸 Eddy Chen / HBO · 키아트 ⓒ HBO<br />
       <span class="role">참고</span>PHOTO CINEMATICA 인터뷰 · BuzzFeed News · Leica Gallery LA
     </p>
     <div class="share-bar">
