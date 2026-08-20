@@ -32,7 +32,7 @@
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="/css/common.css?v=20260810-toast">
-  <link rel="stylesheet" href="/css/film-detail.css?v=1bd00abc">
+  <link rel="stylesheet" href="/css/film-detail.css?v=d857453d">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -250,8 +250,13 @@
         </ul>
       </section>
 
+  <section class="film-detail-block film-reader" id="filmReaderPhotos" hidden
+           data-film-slug="portra160nc"
+           data-film-label="Kodak Portra 160 NC"
+           data-film-names="[&quot;Kodak Portra 160 NC&quot;,&quot;Portra 160 NC&quot;,&quot;Portra 160NC&quot;,&quot;Portra NC 160&quot;,&quot;Kodak Portra 160NC&quot;,&quot;포트라 160 NC&quot;,&quot;포트라 160NC&quot;,&quot;포트라NC 160&quot;,&quot;코닥 포트라 160 NC&quot;,&quot;portra160nc&quot;]"></section>
+
   <section class="film-detail-cta">
-    <p>이 필름으로 찍은 독자들의 사진은 카탈로그에서 이어서 볼 수 있습니다.</p>
+    <p>카탈로그에서는 이 필름으로 찍은 사진을 촬영자·카메라별로 골라 보고, 직접 올릴 수도 있습니다.</p>
     <div class="film-detail-cta-actions">
       <a class="film-detail-btn film-detail-btn-primary" href="/films.html?film=portra160nc">카탈로그에서 보기</a>
       <a class="film-detail-btn" href="/films.html">필름 전체 목록</a>
@@ -273,7 +278,11 @@
   <span class="footer-copy">© 2026 5ft magazine</span>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="/js/db/commerce.js?v=20260712-modules" defer></script>
+<script src="/js/db-client.js?v=20260803-arch" defer></script>
 <script src="/js/util.js?v=20260817-photodiv" defer></script>
-<script src="/js/site-common.js?v=20260810-toast" defer></script>
+<script src="/js/site-common.js?v=20260820-sharefix" defer></script>
+<script src="/js/film-detail.js?v=29481ee6" defer></script>
 </body>
 </html>
