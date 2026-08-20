@@ -70,6 +70,7 @@ for (const file of [
   'rss.xml',
   'sitemap.xml',
   'robots.txt',
+  'llms.txt',
   'css/common.css',
   'css/tokens.css',
   'css/about.css',

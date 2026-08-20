@@ -2,4 +2,30 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 
+# AI 검색·답변 엔진의 수집을 허용한다. 인용될 때 출처로 함께 노출되는 편이
+# 매거진에 이롭다고 판단했다. 막고 싶어지면 아래 Allow 를 Disallow 로 바꾼다.
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin/
+
 Sitemap: https://www.5ftmag.com/sitemap.xml
