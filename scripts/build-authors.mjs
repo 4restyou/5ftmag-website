@@ -6,6 +6,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { assetVersions } from './lib/asset-version.mjs';
+import { navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isPublishedContent } from './story-visibility.mjs';
@@ -216,50 +217,32 @@ function subHead(title, description, canonicalPath, structuredData = '') {
     .replaceAll('src="./js/', 'src="../js/');
 }
 
-function header(prefix = '') {
+// 내비게이션·푸터는 data/site-shell.json 이 원본이다. 예전에는 여기에 마크업을
+// 박아 두어서, 배포할 때마다 저자 페이지가 옛 내비게이션("Books", 네이버 스토어
+// Shop 링크)으로 덮여 쓰이고 있었다. shell:sync 로 고쳐도 다음 빌드에서 되돌아갔다.
+function header(outFile, prefix = '') {
   return `<header>
   <div class="header-inner">
     <a href="${prefix}index.html" class="site-logo"><img src="${prefix}img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="${prefix}img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
-    <ul class="main-nav">
-      <li><a href="${prefix}stories.html">Articles</a></li>
-      <li><a href="${prefix}films.html">Films</a></li>
-      <li><a href="${prefix}books.html">Books</a></li>
-      <li><a href="${prefix}labs.html">Labs</a></li>
-      <li><a href="${prefix}market.html">Market</a></li>
-      <li><a href="${prefix}about.html">About</a></li>
-      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
-    </ul>
+    ${navHtml(outFile)}
     <div class="nav-right">
       <a href="${prefix}search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
       <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
-  <nav class="mobile-nav" id="mobileNav">
-    <a href="${prefix}stories.html">Articles</a>
-    <a href="${prefix}films.html">Films</a>
-    <a href="${prefix}books.html">Books</a>
-    <a href="${prefix}labs.html">Labs</a>
-    <a href="${prefix}market.html">Market</a>
-    <a href="${prefix}about.html">About</a>
-    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
-  </nav>
+  ${mobileNavHtml(outFile)}
 </header>`;
 }
 
-function footer(prefix = '') {
+function footer(outFile, prefix = '') {
   return `<footer>
   <div class="footer-inner-left">
     <span class="footer-logo">5ft magazine</span>
-    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 전남광주통합특별시 동구 충장로46번길 8, 2층</span>
   </div>
-  <div class="footer-links">
-    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
-    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
-    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
-    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
-  </div>
-  <span class="footer-copy">© 2024 5ft magazine</span>
+  ${footerHtml(outFile)}
+  <span class="footer-copy">© 2026 5ft magazine</span>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="${prefix}js/db-client.js${v('js/db-client.js')}"></script>
@@ -307,7 +290,7 @@ mkdirSync(join(ROOT, 'data'), { recursive: true });
 
 const listHtml = `${rootHead('Authors | 5ft magazine', '5ft magazine에 참여한 작가와 contributor의 글을 한곳에서 모아봅니다.', '/authors.html', undefined, authorsIndexStructuredData(authorList))}
 <body>
-${header()}
+${header(join(ROOT, 'authors.html'))}
 <main class="authors-page">
   <section class="authors-hero">
     <span class="authors-kicker">CONTRIBUTORS</span>
@@ -322,7 +305,7 @@ ${header()}
     </a>`).join('\n    ')}
   </section>
 </main>
-${footer()}
+${footer(join(ROOT, 'authors.html'))}
 </body>
 </html>
 `;
@@ -330,11 +313,12 @@ ${footer()}
 writeFileSync(join(ROOT, 'authors.html'), listHtml);
 
 for (const author of authorList) {
+  const authorFile = join(ROOT, 'authors', `${author.slug}.html`);
   const title = `${author.name} | 5ft magazine Authors`;
   const description = `${author.name}의 5ft magazine 아카이브. ${author.stories.length}개의 글을 모았습니다.`;
   const html = `${subHead(title, description, `/authors/${author.slug}.html`, authorStructuredData(author))}
 <body>
-${header('../')}
+${header(authorFile, '../')}
 <main class="authors-page author-detail-page">
   <section class="authors-hero">
     <a class="authors-back" href="../authors.html">← Authors</a>
@@ -346,7 +330,7 @@ ${header('../')}
     ${author.stories.map((story) => storyCard(story, '../')).join('\n    ')}
   </section>
 </main>
-${footer('../')}
+${footer(authorFile, '../')}
 </body>
 </html>
 `;
