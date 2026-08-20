@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 정적 페이지, published stories, authors 페이지를 sitemap.xml 로 묶는다.
+ * 정적 페이지, published stories, authors, 필름 상세 페이지를 sitemap.xml 로 묶는다.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -65,6 +65,20 @@ if (existsSync(authorsPath)) {
       changefreq: 'monthly',
       priority: '0.6',
     });
+  }
+}
+
+// 필름 상세 페이지 158종. build-film-pages.mjs 가 /film/<slug>.html 로 찍어내고
+// 기사·저자 페이지와 같이 확장자를 붙인 주소를 정식 주소로 싣는다.
+const filmsPath = join(ROOT, 'data/films.json');
+if (existsSync(filmsPath)) {
+  const films = JSON.parse(readFileSync(filmsPath, 'utf8'));
+  const entries = Array.isArray(films)
+    ? films
+    : Object.entries(films).map(([slug, film]) => ({ ...film, slug: film.slug || slug }));
+  for (const film of entries) {
+    if (!film.slug || !/^[a-z0-9-]+$/i.test(film.slug)) continue;
+    addUrl(urls, `/film/${film.slug}.html`, { changefreq: 'monthly', priority: '0.6' });
   }
 }
 
