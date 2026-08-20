@@ -45,8 +45,14 @@
   }
 
   async function shareFilm(filmKey, film) {
-    const path = prettyFilmPath(filmKey);
-    const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
+    // 공유 링크는 받은 사람이 사진을 바로 보게 카탈로그를 연다.
+    // prettyFilmPath 가 만드는 /film/<slug> 는 검색용 정적 상세 페이지라
+    // 공유로 들어오면 사진을 한 번 더 눌러야 한다.
+    // prettyShareUrl 이 films.html?film= 를 /films?film= 로 바꿔 준다.
+    const path = `/films.html?film=${encodeURIComponent(filmKey)}`;
+    const url = window.prettyShareUrl
+      ? window.prettyShareUrl(path)
+      : `https://5ftmag.com/films?film=${encodeURIComponent(filmKey)}`;
     const filmName = film?.displayName || film?.name || filmKey;
     await shareOrCopy({
       title: `${filmName} · 5ft.mag Films`,
