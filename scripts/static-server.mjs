@@ -38,7 +38,10 @@ createServer((req, res) => {
   }
   p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/(css|js|img|data)\//, '/$2/');
   p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/pretendard\.css$/, '/pretendard.css');
-  if (/^\/film\/[^/]+$/.test(p) || /^\/camera\/[^/]+$/.test(p) || /^\/contributor\/[^/]+$/.test(p)) {
+  if (/^\/film\/[^/]+$/.test(p)) {
+    // netlify.toml 과 같게: /film/<slug> 는 생성된 상세 페이지를 그대로 서빙한다.
+    p = `${p}.html`;
+  } else if (/^\/camera\/[^/]+$/.test(p) || /^\/contributor\/[^/]+$/.test(p)) {
     p = '/films.html';
   } else if (/^\/market\/[^/]+$/.test(p)) {
     p = '/market.html';

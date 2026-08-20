@@ -2492,3 +2492,63 @@
 }
 .propose-submit { background: var(--text); color: var(--bg); border-color: var(--text); }
 .propose-submit:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ── 필름 전체 목록 (브랜드별 정적 인덱스) ──
+   scripts/build-film-pages.mjs 가 채우는 블록. 카탈로그 카드가 버튼이라
+   크롤러가 상세 페이지로 갈 링크가 없어서, 이 목록이 정적 통로 역할을 한다. */
+.film-index {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 20px 24px;
+  border-top: 1px solid var(--border);
+}
+.film-index-title {
+  font-size: 20px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+.film-index-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 24px;
+  word-break: keep-all;
+}
+/* 브랜드마다 필름 개수가 크게 달라(1개 ~ 27개) grid 로 깔면 행 높이가 가장 긴
+   브랜드에 맞춰져 빈 공간이 크게 남는다. 다단 흐름으로 채워 붙인다. */
+.film-index-grid {
+  column-count: 5;
+  column-gap: 20px;
+}
+.film-index-brand {
+  break-inside: avoid;
+  margin-bottom: 22px;
+}
+.film-index-brand h3 {
+  margin-top: 0;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.film-index-brand ul { list-style: none; margin: 0; padding: 0; }
+.film-index-brand li { margin-bottom: 5px; }
+.film-index-brand a {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  line-height: 1.45;
+}
+.film-index-brand a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+
+@media (max-width: 1000px) {
+  .film-index-grid { column-count: 3; }
+}
+
+@media (max-width: 640px) {
+  .film-index { padding: 40px 16px 16px; }
+  .film-index-grid { column-count: 2; column-gap: 16px; }
+}

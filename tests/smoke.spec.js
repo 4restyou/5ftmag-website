@@ -51,8 +51,8 @@ test('짧은 필름 공유 링크에서도 모바일 asset과 이미지가 깨�
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/film/superia400', { waitUntil: 'networkidle' });
-  await expect(page.locator('body')).toContainText('Library');
-  await expect(page.locator('#filmsGridLibrary .film-card').first()).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('h1')).toHaveText('Fujifilm Superia X-TRA 400');
+  await expect(page.locator('.film-detail-head')).toBeVisible({ timeout: 8000 });
   const result = await page.evaluate(() => ({
     fontFamily: getComputedStyle(document.body).fontFamily,
     brokenImages: [...document.images]
@@ -78,7 +78,7 @@ test('짧은 필름 공유 링크에서도 모바일 asset과 이미지가 깨�
 
 test('카톡 인앱형 짧은 공유 링크들이 모바일에서 asset을 잃지 않는다', async ({ page }) => {
   const paths = [
-    { path: '/film/superia400', must: 'Library', imageScope: '#filmsGridLibrary' },
+    { path: '/film/superia400', must: 'Fujifilm Superia X-TRA 400', imageScope: '.film-detail' },
     { path: '/camera/Leica%20M6', must: 'Library', imageScope: '#filmsGridLibrary' },
     { path: '/contributor/__botong', must: 'Library', imageScope: '#filmsGridLibrary' },
     { path: '/market/test-listing-id', must: '중고 장터', imageScope: 'body' },

@@ -34,5 +34,6 @@ playwright-report/
 *.log
 .cache/
 
-# build-film-og.mjs 가 생성하는 OG stub — Netlify 빌드 시점에 생성, 커밋 제외
-/film/
+# build-film-pages.mjs 가 생성하는 /film/<slug>.html 은 커밋한다.
+# sitemap.xml·data/films.json 과 같은 취급이다. validate-assets 가 films.html 의
+# 링크를 실제 파일로 확인하고, bump-version 도 함께 갱신해야 하기 때문.

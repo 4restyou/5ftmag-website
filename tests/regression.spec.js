@@ -350,8 +350,10 @@ test('필름스트립 저장 캔버스는 모바일에서도 프레임과 필름
   expect(result.nonWhite).toBeGreaterThan(1000);
 });
 
+// /film/<slug> 는 이제 정적 상세 페이지라 films.html 의 캔버스 코드가 없다.
+// 중첩 경로에서 루트 asset 을 불러오는지 보는 것이 목적이므로 /camera/ 로 확인한다.
 test('짧은 필름 링크에서도 저장 캔버스 asset을 루트에서 불러온다', async ({ page }) => {
-  await page.goto('/film/superia400');
+  await page.goto('/camera/Leica%20M6');
   const result = await page.evaluate(async () => {
     const target = document.createElement('div');
     target.innerHTML = Array.from({ length: 2 }, (_, idx) => {
