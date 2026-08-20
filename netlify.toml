@@ -119,6 +119,17 @@
   to = "/films.html?contributor=:contributor"
   status = 200
 
+# 지역별 현상소 페이지 (build-lab-pages.mjs 생성). 확장자 없는 주소로 들어와도 이어 준다.
+[[redirects]]
+  from = "/labs"
+  to = "/labs.html"
+  status = 200
+
+[[redirects]]
+  from = "/labs/:region"
+  to = "/labs/:region.html"
+  status = 200
+
 [[redirects]]
   from = "/market"
   to = "/market.html"

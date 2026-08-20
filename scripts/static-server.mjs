@@ -49,6 +49,10 @@ createServer((req, res) => {
     p = `${p}.html`;
   } else if (/^\/authors\/[^/.]+$/.test(p)) {
     p = `${p}.html`;
+  } else if (p === '/labs') {
+    p = '/labs.html';
+  } else if (/^\/labs\/[^/.]+$/.test(p)) {
+    p = `${p}.html`;
   } else if (p === '/films') {
     p = '/films.html';
   } else if (p === '/stories') {

@@ -549,3 +549,51 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
   .labs-list { grid-template-columns: 1fr; }
   html.labs-view-map .labs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ── 지역별 현상소 목록 (정적 인덱스) ──
+   scripts/build-lab-pages.mjs 가 채우는 블록. 목록을 JS 로만 그려서
+   크롤러가 읽을 본문도, 지역 페이지로 갈 링크도 없었다. */
+.lab-index {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 40px 24px;
+  border-top: 1px solid var(--border);
+}
+.lab-index-title {
+  font-size: 20px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+.lab-index-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 24px;
+  word-break: keep-all;
+}
+.lab-index-grid { column-count: 4; column-gap: 24px; }
+.lab-index-region { break-inside: avoid; margin-bottom: 22px; }
+.lab-index-region h3 {
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.02em;
+}
+.lab-index-region h3 a { color: inherit; text-decoration: none; }
+.lab-index-region h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.lab-index-region h3 span { font-size: 11px; font-weight: 400; color: var(--text-muted); }
+.lab-index-region ul { list-style: none; margin: 0; padding: 0; }
+.lab-index-region li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+@media (max-width: 1000px) { .lab-index-grid { column-count: 3; } }
+@media (max-width: 640px) {
+  .lab-index { padding: 40px 20px 16px; }
+  .lab-index-grid { column-count: 2; column-gap: 16px; }
+}

@@ -50,7 +50,7 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="./css/common.css?v=20260810-toast">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/labs.css?v=20260616-uipack">
+  <link rel="stylesheet" href="./css/labs.css?v=20260820-labindex">
   <style>
     .labs-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 20px 40px 0; }
     .labs-region-divider { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 18px 0 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em; color: var(--text); }
@@ -161,6 +161,191 @@
     <button type="button" class="btn btn-secondary btn-md labs-more-btn" id="labsMoreBtn">더 보기</button>
   </div>
 </div>
+
+<!-- ════════ 지역별 현상소 목록 ════════
+     scripts/build-lab-pages.mjs 가 data/labs.json 을 읽어 아래 두 마커 사이를 채운다.
+     이 페이지도 목록을 자바스크립트로만 그려서 정적 본문이 440자뿐이었다.
+     이 목록이 지역 페이지로 가는 정적 통로이자 본문 텍스트 역할을 한다. -->
+<section class="lab-index" aria-labelledby="labIndexTitle">
+  <h2 class="lab-index-title" id="labIndexTitle">지역별 현상소</h2>
+  <p class="lab-index-sub">지역 이름을 누르면 그 지역 현상소의 주소와 현상 가격을 한 번에 볼 수 있어요.</p>
+  <!-- LAB-INDEX:START -->
+  <div class="lab-index-grid">
+    <div class="lab-index-region">
+      <h3><a href="./labs/seoul.html">서울</a> <span>38곳</span></h3>
+      <ul>
+        <li>갤러리사진관</li>
+        <li>고래사진관</li>
+        <li>낙성대사진관</li>
+        <li>다크룸서울</li>
+        <li>동부칼라</li>
+        <li>망우삼림</li>
+        <li>명광스튜디오</li>
+        <li>미림사진관</li>
+        <li>보다봄</li>
+        <li>스코피 노량진</li>
+        <li>스코피 홍대</li>
+        <li>신신칼라</li>
+        <li>엘리카메라</li>
+        <li>연남 필름</li>
+        <li>옥상필름</li>
+        <li>우성상사</li>
+        <li>위켄드 필름</li>
+        <li>이룸포토</li>
+        <li>인스튜디오</li>
+        <li>일삼오삼육</li>
+        <li>일양칼라</li>
+        <li>중앙칼라</li>
+        <li>청계사진관</li>
+        <li>취미사</li>
+        <li>코닥 안국점</li>
+        <li>타임포토</li>
+        <li>태그원스튜디오</li>
+        <li>팔레트 사진관</li>
+        <li>포토마루</li>
+        <li>포토위드</li>
+        <li>포토피아</li>
+        <li>픽커서울</li>
+        <li>필름로그 서울</li>
+        <li>한일포토</li>
+        <li>홍대포토랜드</li>
+        <li>홍포토</li>
+        <li>B&amp;W 흑백 현상소</li>
+        <li>Color Lab</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/gyeonggi.html">경기</a> <span>9곳</span></h3>
+      <ul>
+        <li>달의바다</li>
+        <li>리틀베어 스튜디오</li>
+        <li>모란 현상소</li>
+        <li>미금포토</li>
+        <li>수원 칼라 현상소</li>
+        <li>야탑포토</li>
+        <li>이터너블</li>
+        <li>판교 코닥</li>
+        <li>포토플러스</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/incheon.html">인천</a> <span>3곳</span></h3>
+      <ul>
+        <li>정우 현상소</li>
+        <li>카메라 사진관</li>
+        <li>해당화 사진관</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/gangwon.html">강원</a> <span>1곳</span></h3>
+      <ul>
+        <li>필름로그</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/daejeon.html">대전</a> <span>4곳</span></h3>
+      <ul>
+        <li>슈퍼포토마켓</li>
+        <li>포토닉스</li>
+        <li>행복찾기현상소</li>
+        <li>홍명코닥칼라</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/chungnam.html">충남</a> <span>4곳</span></h3>
+      <ul>
+        <li>달팽이 사진관</li>
+        <li>모던 이미지 (한암)</li>
+        <li>수석동 사진관</li>
+        <li>행복한날 스튜디오</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/chungbuk.html">충북</a> <span>1곳</span></h3>
+      <ul>
+        <li>화양연화</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/daegu.html">대구</a> <span>10곳</span></h3>
+      <ul>
+        <li>88필름</li>
+        <li>대구 칼라</li>
+        <li>석주 사진관</li>
+        <li>세하포토랩</li>
+        <li>솔리스트</li>
+        <li>올리브 칼라</li>
+        <li>포토매직</li>
+        <li>헤르츠삼오 대구점</li>
+        <li>현풍미도디지털사진관</li>
+        <li>the 35mm</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/gyeongbuk.html">경북</a> <span>4곳</span></h3>
+      <ul>
+        <li>디지털 희망칼라</li>
+        <li>바라보다 사진관 (경주필름)</li>
+        <li>실개천 사진관</li>
+        <li>필름로그 경주점</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/busan.html">부산</a> <span>5곳</span></h3>
+      <ul>
+        <li>간지사진관</li>
+        <li>토픽칼라</li>
+        <li>헤르츠삼오 부산점</li>
+        <li>화목포토</li>
+        <li>NEW 조광</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/ulsan.html">울산</a> <span>2곳</span></h3>
+      <ul>
+        <li>부광사진관</li>
+        <li>에이티사진관</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/gyeongnam.html">경남</a> <span>2곳</span></h3>
+      <ul>
+        <li>공단 칼라</li>
+        <li>동광칼라현상소</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/gwangju.html">광주</a> <span>2곳</span></h3>
+      <ul>
+        <li>문화사진관</li>
+        <li>영상칼라</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/jeonbuk.html">전북</a> <span>3곳</span></h3>
+      <ul>
+        <li>베르베르스튜디오 (매직포토)</li>
+        <li>중앙칼라현상소</li>
+        <li>코아칼라현상소</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/jeonnam.html">전남</a> <span>1곳</span></h3>
+      <ul>
+        <li>필름로그</li>
+      </ul>
+    </div>
+    <div class="lab-index-region">
+      <h3><a href="./labs/jeju.html">제주</a> <span>3곳</span></h3>
+      <ul>
+        <li>동방사진관</li>
+        <li>책방무사</li>
+        <li>필름로그 제주</li>
+      </ul>
+    </div>
+  </div>
+  <!-- LAB-INDEX:END -->
+</section>
 
 <!-- ════════ FOOTER ════════ -->
 <div class="footer-partners">
