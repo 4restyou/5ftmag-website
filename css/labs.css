@@ -559,12 +559,34 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
   padding: 56px 40px 24px;
   border-top: 1px solid var(--border);
 }
-.lab-index-title {
-  font-size: 20px;
+/* 접어 두는 목록. 접혀 있어도 마크업은 남아 크롤러가 읽는다. */
+.lab-index-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
   font-weight: var(--fw-heading);
-  letter-spacing: -0.02em;
-  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+  padding: 6px 0;
 }
+.lab-index-fold > summary::-webkit-details-marker { display: none; }
+.lab-index-fold > summary::before {
+  content: '+';
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  line-height: 17px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 13px;
+}
+.lab-index-fold[open] > summary::before { content: '−'; }
+.lab-index-fold > summary:hover { color: var(--text); }
+.lab-index-fold[open] > summary { margin-bottom: 6px; }
 .lab-index-sub {
   font-size: 13px;
   color: var(--text-muted);

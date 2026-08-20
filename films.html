@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="./css/comments.css?v=20260622-polish">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260616-themeauto">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/films.css?v=20260820-filmindex2">
+  <link rel="stylesheet" href="./css/films.css?v=20260820-foldindex">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -306,10 +306,12 @@
      카탈로그 카드는 버튼이라 크롤러가 따라갈 링크가 없다. 이 목록이 158개 상세
      페이지로 가는 유일한 정적 통로이자, 이 페이지의 본문 텍스트 역할도 한다. -->
 <section class="film-index" aria-labelledby="filmIndexTitle">
-  <h2 class="film-index-title" id="filmIndexTitle">필름 전체 목록</h2>
-  <p class="film-index-sub">브랜드별로 정리한 필름 카탈로그입니다. 이름을 누르면 규격과 설명을 볼 수 있어요.</p>
+  <h2 class="sr-only" id="filmIndexTitle">필름 전체 목록</h2>
   <!-- FILM-INDEX:START -->
-  <div class="film-index-grid">
+  <details class="film-index-fold">
+    <summary>필름 전체 목록 158종</summary>
+    <p class="film-index-sub">브랜드별로 정리한 필름 카탈로그입니다. 이름을 누르면 규격과 설명을 볼 수 있어요.</p>
+    <div class="film-index-grid">
     <div class="film-index-brand">
       <h3>1SHOT</h3>
       <ul>
@@ -623,7 +625,8 @@
         <li><a href="./film/yashicagolden80s.html">Yashica Golden 80s</a></li>
       </ul>
     </div>
-  </div>
+    </div>
+  </details>
   <!-- FILM-INDEX:END -->
 </section>
 

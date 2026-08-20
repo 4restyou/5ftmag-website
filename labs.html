@@ -50,7 +50,7 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="./css/common.css?v=20260810-toast">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/labs.css?v=20260820-labindex">
+  <link rel="stylesheet" href="./css/labs.css?v=20260820-foldindex">
   <style>
     .labs-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 20px 40px 0; }
     .labs-region-divider { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 18px 0 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: var(--fw-heading); letter-spacing: -0.01em; color: var(--text); }
@@ -167,10 +167,12 @@
      이 페이지도 목록을 자바스크립트로만 그려서 정적 본문이 440자뿐이었다.
      이 목록이 지역 페이지로 가는 정적 통로이자 본문 텍스트 역할을 한다. -->
 <section class="lab-index" aria-labelledby="labIndexTitle">
-  <h2 class="lab-index-title" id="labIndexTitle">지역별 현상소</h2>
-  <p class="lab-index-sub">지역 이름을 누르면 그 지역 현상소의 주소와 현상 가격을 한 번에 볼 수 있어요.</p>
+  <h2 class="sr-only" id="labIndexTitle">지역별 현상소</h2>
   <!-- LAB-INDEX:START -->
-  <div class="lab-index-grid">
+  <details class="lab-index-fold">
+    <summary>지역별 현상소 92곳</summary>
+    <p class="lab-index-sub">지역 이름을 누르면 그 지역 현상소의 주소와 현상 가격을 한 번에 볼 수 있어요.</p>
+    <div class="lab-index-grid">
     <div class="lab-index-region">
       <h3><a href="./labs/seoul.html">서울</a> <span>38곳</span></h3>
       <ul>
@@ -343,7 +345,8 @@
         <li>필름로그 제주</li>
       </ul>
     </div>
-  </div>
+    </div>
+  </details>
   <!-- LAB-INDEX:END -->
 </section>
 

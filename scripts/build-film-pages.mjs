@@ -169,9 +169,19 @@ ${items}
 
   const page = path.join(ROOT, 'films.html');
   const source = await fs.readFile(page, 'utf-8');
+  // details 로 접어 둔다. 접혀 있어도 마크업은 HTML 에 그대로 남아 크롤러가
+  // 읽고 링크를 따라간다. 화면에서만 기본으로 감춘다.
   const next = source.replace(
     /<!-- FILM-INDEX:START -->[\s\S]*?<!-- FILM-INDEX:END -->/,
-    `<!-- FILM-INDEX:START -->\n  <div class="film-index-grid">\n${html}\n  </div>\n  <!-- FILM-INDEX:END -->`,
+    `<!-- FILM-INDEX:START -->
+  <details class="film-index-fold">
+    <summary>필름 전체 목록 ${films.length}종</summary>
+    <p class="film-index-sub">브랜드별로 정리한 필름 카탈로그입니다. 이름을 누르면 규격과 설명을 볼 수 있어요.</p>
+    <div class="film-index-grid">
+${html}
+    </div>
+  </details>
+  <!-- FILM-INDEX:END -->`,
   );
   if (next !== source) {
     await fs.writeFile(page, next, 'utf-8');
