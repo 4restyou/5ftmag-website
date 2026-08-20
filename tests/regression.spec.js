@@ -455,7 +455,9 @@ test('공유 링크는 파일 확장자와 query 대신 짧은 경로를 사용�
   }));
 
   expect(urls.story).toBe('https://5ftmag.com/stories/film-flea-market-s6');
-  expect(urls.film).toBe('https://5ftmag.com/film/portra400');
+  // 필름 공유는 카탈로그를 연다. /film/<slug> 는 검색용 정적 상세 페이지라
+  // 공유로 들어온 사람이 사진을 한 번 더 눌러야 보게 되기 때문.
+  expect(urls.film).toBe('https://5ftmag.com/films?film=portra400');
   expect(urls.camera).toBe('https://5ftmag.com/camera/Leica%20M6');
   expect(urls.contributor).toBe('https://5ftmag.com/contributor/__botong');
   expect(urls.market).toBe('https://5ftmag.com/market/abc-123');

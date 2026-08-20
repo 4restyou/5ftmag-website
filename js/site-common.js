@@ -113,7 +113,10 @@
     if (/\/films\.html$/i.test(cleanPath)) {
       if (camera) return `${PUBLIC_SHARE_ORIGIN}/camera/${encodeURIComponent(camera)}`;
       if (contributor) return `${PUBLIC_SHARE_ORIGIN}/contributor/${encodeURIComponent(contributor)}`;
-      if (film) return `${PUBLIC_SHARE_ORIGIN}/film/${encodeURIComponent(film)}`;
+      // 필름은 /film/<slug> 라는 정적 상세 페이지가 따로 있다. 공유 링크는 받은
+      // 사람이 사진을 바로 보게 카탈로그를 열어야 하므로 이쪽 주소를 쓴다.
+      // (상세 페이지도 독자 사진을 함께 보여주므로 어느 쪽으로 들어와도 사진은 보인다.)
+      if (film) return `${PUBLIC_SHARE_ORIGIN}/films?film=${encodeURIComponent(film)}`;
       return `${PUBLIC_SHARE_ORIGIN}/films`;
     }
     if (/\/market\.html$/i.test(cleanPath)) {
