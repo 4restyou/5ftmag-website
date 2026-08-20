@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 정적 페이지, published stories, authors, 필름 상세 페이지를 sitemap.xml 로 묶는다.
+ * 정적 페이지, published stories, authors, 필름 상세, 지역별 현상소 페이지를 묶는다.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -79,6 +79,24 @@ if (existsSync(filmsPath)) {
   for (const film of entries) {
     if (!film.slug || !/^[a-z0-9-]+$/i.test(film.slug)) continue;
     addUrl(urls, `/film/${film.slug}.html`, { changefreq: 'monthly', priority: '0.6' });
+  }
+}
+
+// 지역별 현상소 페이지. build-lab-pages.mjs 가 /labs/<region>.html 로 찍어낸다.
+const REGION_SLUGS = {
+  '서울': 'seoul', '경기': 'gyeonggi', '인천': 'incheon', '강원': 'gangwon',
+  '대전': 'daejeon', '충남': 'chungnam', '충북': 'chungbuk', '세종': 'sejong',
+  '대구': 'daegu', '경북': 'gyeongbuk', '부산': 'busan', '울산': 'ulsan',
+  '경남': 'gyeongnam', '광주': 'gwangju', '전북': 'jeonbuk', '전남': 'jeonnam',
+  '제주': 'jeju',
+};
+const labsPath = join(ROOT, 'data/labs.json');
+if (existsSync(labsPath)) {
+  const parsed = JSON.parse(readFileSync(labsPath, 'utf8'));
+  const labs = Array.isArray(parsed) ? parsed : parsed.labs || [];
+  const regions = new Set(labs.map((lab) => lab?.region).filter((region) => REGION_SLUGS[region]));
+  for (const region of regions) {
+    addUrl(urls, `/labs/${REGION_SLUGS[region]}.html`, { changefreq: 'monthly', priority: '0.7' });
   }
 }
 
