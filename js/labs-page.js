@@ -102,6 +102,7 @@
   const markerBySlug = new Map();
   let activeMapSlug = null;
   let deepLinkApplied = false;
+  let deepLinkOtherTabTried = false;
 
   // 테이블 row(컬럼명) → 현상소 카드가 쓰는 형태(scan_res → scanRes 만 다름).
   function rowToLab(r) {
@@ -751,9 +752,26 @@
   function tryApplyDeepLink() {
     const slug = new URL(location.href).searchParams.get('lab');
     if (!slug) { deepLinkApplied = true; return; }
-    if (!findItemBySlug(slug)) return; // 다음 렌더에서 다시 시도 (탭 전환 후 등)
-    deepLinkApplied = true;
-    openModal(slug, { scroll: true });
+    if (findItemBySlug(slug)) {
+      deepLinkApplied = true;
+      openModal(slug, { scroll: true });
+      return;
+    }
+    // 공유 링크는 현상소와 수리실이 같은 lab 파라미터를 쓴다. 페이지는 항상
+    // 현상소 탭으로 열리므로, 수리실을 공유한 링크는 여기서 찾지 못한다.
+    // 반대쪽 목록을 불러와 확인하고, 거기 있으면 탭을 바꿔 연다.
+    if (deepLinkOtherTabTried) return;
+    deepLinkOtherTabTried = true;
+    const other = tab === 'labs' ? 'repairs' : 'labs';
+    (async () => {
+      try {
+        if (!datasets[other]) {
+          datasets[other] = other === 'labs' ? await loadLabs() : await loadRepairs();
+        }
+        const found = (datasets[other] || []).some((item) => itemSlug(item) === slug);
+        if (found) await setTab(other);
+      } catch (_) {}
+    })();
   }
   listEl.addEventListener('click', (e) => {
     const head = e.target.closest('.lab-card-head');

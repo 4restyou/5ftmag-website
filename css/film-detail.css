@@ -173,3 +173,96 @@
   .film-detail-photos { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .film-detail-siblings { grid-template-columns: 1fr; }
 }
+
+/* ── 독자 사진 (js/film-detail.js 가 채움) ── */
+.film-reader h2 {
+  font-size: 19px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+  word-break: keep-all;
+}
+.film-shots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.film-shot {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.film-shot img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  display: block;
+}
+.film-shot-who {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 8px 6px;
+  font-size: 11px;
+  color: #fff;
+  text-align: left;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.film-shot:hover .film-shot-who,
+.film-shot:focus-visible .film-shot-who { opacity: 1; }
+.film-shots-more { margin: 14px 0 0; font-size: 13px; }
+.film-shots-more a { color: var(--text-muted); text-underline-offset: 3px; }
+.film-shots-more a:hover { color: var(--text); }
+
+.film-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+}
+.film-lightbox[hidden] { display: none; }
+.film-lightbox figure { margin: 0; max-width: 100%; max-height: 100%; text-align: center; }
+.film-lightbox img {
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+.film-lightbox figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+  word-break: keep-all;
+}
+.film-lightbox button {
+  position: absolute;
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 10px 14px;
+}
+.film-lightbox-close { top: 8px; right: 10px; font-size: 22px; }
+.film-lightbox-prev { left: 4px; top: 50%; transform: translateY(-50%); }
+.film-lightbox-next { right: 4px; top: 50%; transform: translateY(-50%); }
+
+@media (max-width: 700px) {
+  .film-shots { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .film-shot-who { opacity: 1; }
+  .film-lightbox { padding: 40px 8px; }
+}

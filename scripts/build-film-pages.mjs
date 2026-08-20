@@ -94,6 +94,15 @@ function thumbnailOf(film) {
     || (Array.isArray(film.photos) && film.photos[0]?.src) || '';
 }
 
+// 독자 투고의 film 값은 표시 이름이나 별칭 중 아무거나로 저장돼 있다.
+// 사진을 빠짐없이 찾으려면 후보를 모두 넘긴다.
+function filmNameCandidates(film) {
+  const names = [film.displayName, film.name, ...(film.aliases || [])]
+    .map((value) => String(value ?? '').trim())
+    .filter(Boolean);
+  return [...new Set(names)];
+}
+
 function jsonLd(film, sameBrand) {
   const name = displayNameOf(film);
   const url = `${ORIGIN}/film/${film.slug}.html`;
@@ -290,8 +299,13 @@ ${aliasHtml}
 ${photosHtml}
 ${brandHtml}
 
+  <section class="film-detail-block film-reader" id="filmReaderPhotos" hidden
+           data-film-slug="${esc(film.slug)}"
+           data-film-label="${esc(name)}"
+           data-film-names="${esc(JSON.stringify(filmNameCandidates(film)))}"></section>
+
   <section class="film-detail-cta">
-    <p>이 필름으로 찍은 독자들의 사진은 카탈로그에서 이어서 볼 수 있습니다.</p>
+    <p>카탈로그에서는 이 필름으로 찍은 사진을 촬영자·카메라별로 골라 보고, 직접 올릴 수도 있습니다.</p>
     <div class="film-detail-cta-actions">
       <a class="film-detail-btn film-detail-btn-primary" href="/films.html?film=${encodeURIComponent(film.slug)}">카탈로그에서 보기</a>
       <a class="film-detail-btn" href="/films.html">필름 전체 목록</a>
@@ -308,8 +322,12 @@ ${brandHtml}
   <span class="footer-copy">© 2026 5ft magazine</span>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="${versioned('js/db/commerce.js')}" defer></script>
+<script src="${versioned('js/db-client.js')}" defer></script>
 <script src="${versioned('js/util.js')}" defer></script>
 <script src="${versioned('js/site-common.js')}" defer></script>
+<script src="${versioned('js/film-detail.js')}" defer></script>
 </body>
 </html>
 `;
@@ -324,6 +342,7 @@ ${brandHtml}
   const referenceHtml = await fs.readFile(REFERENCE_PAGE, 'utf-8');
   const versioned = assetVersionReader(referenceHtml, {
     'css/film-detail.css': await contentHash('css/film-detail.css'),
+    'js/film-detail.js': await contentHash('js/film-detail.js'),
   });
 
   const data = JSON.parse(raw);
