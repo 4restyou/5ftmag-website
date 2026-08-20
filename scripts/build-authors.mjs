@@ -5,6 +5,8 @@
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { assetVersions } from './lib/asset-version.mjs';
+import { navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isPublishedContent } from './story-visibility.mjs';
@@ -96,7 +98,82 @@ function formatDate(date) {
   return date.replaceAll('-', '.');
 }
 
-function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css?v=20260520-init') {
+// 단체 계정(편집부·클럽)과 개인 필자를 구분한다. 실제로 단체인 byline 을 Person 으로
+// 적으면 사실과 다르다. 대신 author 노드에 url 을 붙여 저자 페이지와 이어 준다.
+const ORGANIZATION_BYLINES = new Set([
+  '5ft.mag 편집부', 'Film Social Club', 'Street Photography Club', 'Brisnap TV',
+]);
+
+export function authorEntityType(name) {
+  return ORGANIZATION_BYLINES.has(name) ? 'Organization' : 'Person';
+}
+
+function ldScript(node, indent = '  ') {
+  return `${indent}<script type="application/ld+json">\n${JSON.stringify(node, null, 2)}\n${indent}</script>\n`;
+}
+
+function authorStructuredData(author) {
+  const url = `${SITE_URL}/authors/${author.slug}.html`;
+  const entity = {
+    '@type': authorEntityType(author.name),
+    name: author.name,
+    url,
+  };
+  if (author.note) entity.description = author.note;
+  const links = (author.externalLinks || []).map((link) => link.url).filter(Boolean);
+  if (links.length) entity.sameAs = links;
+
+  const profile = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    url,
+    inLanguage: 'ko-KR',
+    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/` },
+    mainEntity: entity,
+  };
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '5ft magazine', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Authors', item: `${SITE_URL}/authors.html` },
+      { '@type': 'ListItem', position: 3, name: author.name, item: url },
+    ],
+  };
+  return ldScript(profile) + ldScript(breadcrumb);
+}
+
+function authorsIndexStructuredData(authors) {
+  return ldScript({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Authors | 5ft magazine',
+    url: `${SITE_URL}/authors.html`,
+    inLanguage: 'ko-KR',
+    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: authors.length,
+      itemListElement: authors.map((author, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': authorEntityType(author.name),
+          name: author.name,
+          url: `${SITE_URL}/authors/${author.slug}.html`,
+        },
+      })),
+    },
+  });
+}
+
+// 자산 버전은 index.html 에서 읽어 온다. 여기에 하드코딩하면 bump-version 으로
+// 버전을 올려도 이 스크립트가 옛 버전을 다시 써서 저자 페이지만 갈라진다.
+// css/authors.css 는 index.html 이 참조하지 않는다. about.html 에서 링크되는
+// 손으로 관리하는 저자 페이지가 이 자산을 물고 있으므로 그쪽에서 읽는다.
+const v = assetVersions(['index.html', 'authors/noh-aegyeong.html']);
+
+function rootHead(title, description, canonicalPath, cssHref = `css/authors.css${v('css/authors.css')}`, structuredData = '') {
   return `<!DOCTYPE html>
 <html lang="ko" data-theme="light">
 <head>
@@ -114,21 +191,25 @@ function rootHead(title, description, canonicalPath, cssHref = 'css/authors.css?
   <meta property="og:url" content="${SITE_URL}${canonicalPath}">
   <meta property="og:site_name" content="5ft magazine">
   <meta property="og:locale" content="ko_KR">
-  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="${SITE_URL}/img/og/5ft-link1.webp">
+${structuredData}  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/icon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/icon-16.png">
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
   <script src="./js/theme-init.js"></script>
   <link rel="stylesheet" href="pretendard.css" />
-  <link rel="stylesheet" href="css/tokens.css?v=20260702-unify">
-  <link rel="stylesheet" href="css/common.css?v=20260627-a11y">
+  <link rel="stylesheet" href="css/tokens.css${v('css/tokens.css')}">
+  <link rel="stylesheet" href="css/common.css${v('css/common.css')}">
   <link rel="stylesheet" href="${cssHref}">
 </head>`;
 }
 
-function subHead(title, description, canonicalPath) {
-  return rootHead(title, description, canonicalPath, '../css/authors.css?v=20260520-init')
+function subHead(title, description, canonicalPath, structuredData = '') {
+  return rootHead(title, description, canonicalPath, `../css/authors.css${v('css/authors.css')}`, structuredData)
     .replaceAll('href="rss.xml"', 'href="../rss.xml"')
     .replaceAll('href="img/', 'href="../img/')
     .replaceAll('href="pretendard.css"', 'href="../pretendard.css"')
@@ -136,54 +217,36 @@ function subHead(title, description, canonicalPath) {
     .replaceAll('src="./js/', 'src="../js/');
 }
 
-function header(prefix = '') {
+// 내비게이션·푸터는 data/site-shell.json 이 원본이다. 예전에는 여기에 마크업을
+// 박아 두어서, 배포할 때마다 저자 페이지가 옛 내비게이션("Books", 네이버 스토어
+// Shop 링크)으로 덮여 쓰이고 있었다. shell:sync 로 고쳐도 다음 빌드에서 되돌아갔다.
+function header(outFile, prefix = '') {
   return `<header>
   <div class="header-inner">
     <a href="${prefix}index.html" class="site-logo"><img src="${prefix}img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="${prefix}img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
-    <ul class="main-nav">
-      <li><a href="${prefix}stories.html">Articles</a></li>
-      <li><a href="${prefix}films.html">Films</a></li>
-      <li><a href="${prefix}books.html">Books</a></li>
-      <li><a href="${prefix}labs.html">Labs</a></li>
-      <li><a href="${prefix}market.html">Market</a></li>
-      <li><a href="${prefix}about.html">About</a></li>
-      <li><a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener" class="ext">Shop</a></li>
-    </ul>
+    ${navHtml(outFile)}
     <div class="nav-right">
       <a href="${prefix}search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
       <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
-  <nav class="mobile-nav" id="mobileNav">
-    <a href="${prefix}stories.html">Articles</a>
-    <a href="${prefix}films.html">Films</a>
-    <a href="${prefix}books.html">Books</a>
-    <a href="${prefix}labs.html">Labs</a>
-    <a href="${prefix}market.html">Market</a>
-    <a href="${prefix}about.html">About</a>
-    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
-  </nav>
+  ${mobileNavHtml(outFile)}
 </header>`;
 }
 
-function footer(prefix = '') {
+function footer(outFile, prefix = '') {
   return `<footer>
   <div class="footer-inner-left">
     <span class="footer-logo">5ft magazine</span>
-    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 전남광주통합특별시 동구 충장로46번길 8, 2층</span>
   </div>
-  <div class="footer-links">
-    <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
-    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
-    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
-    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
-  </div>
-  <span class="footer-copy">© 2024 5ft magazine</span>
+  ${footerHtml(outFile)}
+  <span class="footer-copy">© 2026 5ft magazine</span>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="${prefix}js/db-client.js?v=20260710-buyerbind"></script>
-<script src="${prefix}js/site-common.js?v=20260704-legalfix"></script>`;
+<script src="${prefix}js/db-client.js${v('js/db-client.js')}"></script>
+<script src="${prefix}js/site-common.js${v('js/site-common.js')}"></script>`;
 }
 
 function storyCard(story, prefix = '') {
@@ -225,9 +288,9 @@ const authorList = [...authors.values()]
 mkdirSync(join(ROOT, 'authors'), { recursive: true });
 mkdirSync(join(ROOT, 'data'), { recursive: true });
 
-const listHtml = `${rootHead('Authors | 5ft magazine', '5ft magazine에 참여한 작가와 contributor의 글을 한곳에서 모아봅니다.', '/authors.html')}
+const listHtml = `${rootHead('Authors | 5ft magazine', '5ft magazine에 참여한 작가와 contributor의 글을 한곳에서 모아봅니다.', '/authors.html', undefined, authorsIndexStructuredData(authorList))}
 <body>
-${header()}
+${header(join(ROOT, 'authors.html'))}
 <main class="authors-page">
   <section class="authors-hero">
     <span class="authors-kicker">CONTRIBUTORS</span>
@@ -242,7 +305,7 @@ ${header()}
     </a>`).join('\n    ')}
   </section>
 </main>
-${footer()}
+${footer(join(ROOT, 'authors.html'))}
 </body>
 </html>
 `;
@@ -250,11 +313,12 @@ ${footer()}
 writeFileSync(join(ROOT, 'authors.html'), listHtml);
 
 for (const author of authorList) {
+  const authorFile = join(ROOT, 'authors', `${author.slug}.html`);
   const title = `${author.name} | 5ft magazine Authors`;
   const description = `${author.name}의 5ft magazine 아카이브. ${author.stories.length}개의 글을 모았습니다.`;
-  const html = `${subHead(title, description, `/authors/${author.slug}.html`)}
+  const html = `${subHead(title, description, `/authors/${author.slug}.html`, authorStructuredData(author))}
 <body>
-${header('../')}
+${header(authorFile, '../')}
 <main class="authors-page author-detail-page">
   <section class="authors-hero">
     <a class="authors-back" href="../authors.html">← Authors</a>
@@ -266,7 +330,7 @@ ${header('../')}
     ${author.stories.map((story) => storyCard(story, '../')).join('\n    ')}
   </section>
 </main>
-${footer('../')}
+${footer(authorFile, '../')}
 </body>
 </html>
 `;

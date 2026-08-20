@@ -1,0 +1,240 @@
+# 5ft magazine (오피트)
+
+> 필름 사진 전문 매거진입니다. 발행처는 4rest, 광주에 있습니다. 필름 사진에 관한 기사, 필름 158종의 카탈로그, 전국 필름 현상소 92곳의 주소와 현상 가격, 이북과 종이 매거진, 중고 장터, 독자 사진 투고를 다룹니다. 모든 내용은 한국어입니다.
+
+사이트 주소: https://www.5ftmag.com/
+전체 주소 목록: https://www.5ftmag.com/sitemap.xml
+RSS: https://www.5ftmag.com/rss.xml
+
+## 주요 페이지
+
+- [기사 목록](https://www.5ftmag.com/stories.html): 필름 사진, 사진가, 필름 제품, 전시를 다룬 기사 모음
+- [필름 카탈로그](https://www.5ftmag.com/films.html): 필름 158종의 감도·종류·포맷과 독자들이 찍은 사진
+- [현상소 목록](https://www.5ftmag.com/labs.html): 전국 필름 현상소 92곳의 주소·스캔 화질·현상 가격
+- [필자 목록](https://www.5ftmag.com/authors.html): 이 매거진에 글을 쓴 10명(팀)의 아카이브
+- [매거진](https://www.5ftmag.com/books.html): 종이 매거진과 이북
+- [중고 장터](https://www.5ftmag.com/market.html): 독자들이 올리는 필름 카메라·장비 중고 거래
+- [소개](https://www.5ftmag.com/about.html): 매거진 소개와 발행처 정보
+
+## 최근 기사
+
+- [드라마 한 편을 필름으로 기록한 사람](https://www.5ftmag.com/stories/eddy-chen-euphoria.html): 유포리아 현장 스틸을 맡은 에디 첸은 방송사가 요구하던 안전한 기록에서 벗어나 필름을 들고 현장에 들어갔다. 시즌 2를 대표하는 젠데이아의 KEY ART 는 포스터 촬영장이 아니라 조명을 맞추던 몇 초 사이에 나왔다. (5ft.mag 편집부, 2026-08-19)
+- [브리스냅 필름헛소리 03. 내가 제일 좋아하는 일카](https://www.5ftmag.com/stories/brisnap-03.html): 초점도 고정, 조리개도 못 만지고, 27장이 전부. 그런데도 여행 갈 때마다 손이 가는 일회용 필름카메라 이야기. 코닥 펀세이버부터 요즘 다시 나오는 일회용 카메라까지. (Brisnap TV, 2026-08-17)
+- [놀란이 현장에서 들고 있는 필름 카메라](https://www.5ftmag.com/stories/23.html): 사진을 찍지 않는 필름 카메라, 펜탁스 67. IMAX 가 셔터를 들어내고 디렉터스 뷰파인더로 개조했다. 크리스토퍼 놀란이 IMAX 촬영 현장에서 이 카메라를 드는 이유. (Film Social Club, 2026-08-10)
+- [2026 / 8, 이달의 사진 전시](https://www.5ftmag.com/stories/aug-2026-exhibitions.html): 8월은 사진제의 달이다. 이경모 탄생 100주년전, 부산국제사진제, 다큐멘터리 사진 페스티벌, 인천 개항장까지. 이번 주에 닫히는 것부터 8월을 건너가는 것까지 마감순으로 정리했다. (5ft.mag 편집부, 2026-08-04)
+- [달에 두고 온 카메라](https://www.5ftmag.com/stories/22.html): 인류가 달에서 찍은 사진은 전부 필름이었다. 핫셀블라드와 코닥 70mm, 사진마다 찍힌 십자 표식, 그리고 달에 남겨진 열두 대의 카메라 이야기. (Film Social Club, 2026-07-25)
+- [히라야마의 올림푸스 뮤, 그리고 두 번 없는 빛](https://www.5ftmag.com/stories/21.html): 《퍼펙트 데이즈》의 남자는 매일 같은 자리에서 나뭇잎 사이 빛을 흑백 필름에 담는다. 올림푸스 뮤 한 대와 코모레비, 그리고 필름 사진이 하루를 대하는 태도. (Film Social Club, 2026-07-25)
+- [한영수, 전쟁이 지나간 서울을 걷다](https://www.5ftmag.com/stories/20.html): 폐허가 된 도시에서 그가 본 것은 비참함이 아니라 다시 시작하는 일상이었다. 1956년부터 1963년까지 한영수가 붙든 서울, 그리고 내년 5월 나올 새 사진집까지. (5ft.mag 편집부, 2026-07-25)
+- [구본창, 사라지는 것들을 붙드는 사진](https://www.5ftmag.com/stories/19.html): 붕대와 실, 낡은 비누와 조선백자를 지나온 한 사진가의 오랜 응시. 지금 국제갤러리에서 열리는 그의 기획전 《진동하는 사물들》까지. (5ft.mag 편집부, 2026-07-14)
+- [박찬욱, 연출을 내려놓은 아침](https://www.5ftmag.com/stories/park-chanwook-arles.html): 17편의 영화를 만든 감독이 카메라 한 대를 들고 연출 없는 세계로 갔다. 유럽 첫 사진 개인전 《Park Chan-wook, par un matin calme》이 프랑스 아를 이우환 미술관에서 10월 4일까지 열린다. 아를 국제사진축제 공식 연계, 한불 수교 140주년. (5ft.mag 편집부, 2026-07-10)
+- [KONO MOJO · OFFBEAT · BEBOP — 색을 입고 나온 세 필름](https://www.5ftmag.com/stories/kono-effect-films.html): 빈의 실험 필름 하우스 KONO가 재즈 이름을 단 컬러 이펙트 필름 세 종을 냈다. 모두 35mm ISO 200 컬러 네거티브. 핑크·민트의 MOJO, 초록의 OFFBEAT, 앰버의 BEBOP — 필름마다 색을 미리 입혀 나온다. (Film Social Club, 2026-07-09)
+- [Reflx Lab, 110 필름을 두 배로 늘리다](https://www.5ftmag.com/stories/reflx-110-film.html): 로모그래피만 만들던 110 포맷에 Reflx Lab이 두 종을 더했다. 컬러 네거티브 Fortuna C200, 컬러 리버설 100R. 3D 프린트 카트리지에 24컷, 127 제작의 부산물로 태어난 필름. (Film Social Club, 2026-07-09)
+- [Leica Monopan 50, 라이카가 만든 첫 필름](https://www.5ftmag.com/stories/leica-monopan-50.html): 라이카 I 100주년에 맞춰 나온 라이카의 첫 35mm 흑백 필름. ISO 50 초미립자, 280 line pairs/mm, 근적외선까지 뻗는 적색 감도. 그런데 뚜껑을 열면 아비포트가 있다 — 가장 솔직한 리뷰. (Film Social Club, 2026-07-09)
+- [2026 / 7, 이달의 사진 전시](https://www.5ftmag.com/stories/jul-2026-exhibitions.html): 7월 안에 닫히는 세 장면과 여름을 건너가는 세 장면. 곽명우의 스무 해, 대구의 달, 온빛사진상 광주전, 그리고 부산에 문 연 국내 첫 랄프 깁슨 미술관까지. 일정과 동선을 한자리에. (5ft.mag 편집부, 2026-07-09)
+- [Kodak UltraMax 400, 가장 솔직한 필름](https://www.5ftmag.com/stories/18.html): 코닥 골드의 혈통을 잇지만 'Gold'라는 이름을 잃은 일반 소비자용 필름. 균형 잡힌 색과 자연스러운 피부 톤, Print Grain Index까지 짚으며 다시 보게 되는 울트라맥스 400. (Film Social Club, 2026-06-30)
+- [사진을 찍기만 하고, 보여주지 않은 사람](https://www.5ftmag.com/stories/vivian-maier.html): 평생 남의 집 아이를 돌보며 15만 장을 찍은 유모 비비안 마이어. 롤라이플렉스로 거리를 담고, 현상조차 안 한 채 떠난 사진가의 이야기. (Film Social Club, 2026-06-27)
+- [마틴 파, 그가 떠난 뒤의 첫 회고전. 7월 서울](https://www.5ftmag.com/stories/martin-parr-sema-2026.html): 매그넘의 사진가 마틴 파가 지난 12월 세상을 떠났다. 그를 보내고 처음 열리는 아시아 대규모 회고전이 7월 16일 서울시립 사진미술관에서 시작된다. 약 500점, 14개 시리즈, 89권의 사진집. 2000년대 초 남북한 촬영분도 처음 공개된다. (5ft.mag 편집부, 2026-06-24)
+- [브리스냅 필름헛소리 02 — 보물찾기 같은 필름 중고카메라 구매](https://www.5ftmag.com/stories/brisnap-02.html): 호주 시골 할아버지의 슬라이드, 70년 묵은 코닥 브라우니 안의 필름, 게라지 세일에서 건진 한 뭉치. 필름카메라 중고거래에서 만난 세 번의 시간여행. (Brisnap TV, 2026-06-22)
+- [같은 에멀젼, 다른 네 이름. Optik OptiColour 200 의 정체](https://www.5ftmag.com/stories/optik-opticolour-200.html): 미국 인디 브랜드 Optik Oldschool 이 새 컬러 필름 OptiColour 200 을 공개했다. 그런데 안에 든 에멀젼은 ORWO Wolfen NC200 그대로다. 같은 InovisCoat 에멀젼이 네 가지 브랜드로 풀리는 이유와, Optik 이 손본 단 한 가지 차이를 정리… (5ft.mag 편집부, 2026-06-19)
+- [렌즈를 복각하던 회사가, 이번엔 필름을 만든다](https://www.5ftmag.com/stories/lll-film-project.html): 라이카 빈티지 렌즈를 1:1 복각해온 중국 라이트렌즈랩이 2025년 초에 필름 제조 계획을 발표했다. 1년 반이 지난 지금, 배합·코팅 장비·QC 라인까지 모두 사내에서 만드는 흐름이 어디까지 왔는지 정리. (5ft.mag 편집부, 2026-06-18)
+- [브리스냅 필름헛소리 01 — 필름사진 찍는 이유](https://www.5ftmag.com/stories/brisnap-01.html): 첫 글로 뭘 쓸까 고민하다 결국, 저는 왜 필름을 쓰는지 이야기를 풀어봅니다. 니콘 FM2 동경부터 D80을 손에 쥐게 된 용산 일화, 그리고 다시 F3 로 돌아오기까지. (Brisnap TV, 2026-06-16)
+- [비오톱 서울 — SPC 사진첩 ISSUE.02](https://www.5ftmag.com/stories/spc-issue02.html): 상경 후 코로나의 한가운데에서, 외부인의 시선으로 바라본 서울이라는 비오톱. 김도균의 SPC 사진첩 ISSUE.02. (Street Photography Club, 2026-06-12)
+- [빛, 먼지, 사람 — SPC 사진첩 ISSUE.03](https://www.5ftmag.com/stories/spc-issue03.html): 사건이 아니라 상태. 반복해서 마주친 빛·먼지·사람이 겹치는 순간들을 모은 한 권. 홍민우의 SPC 사진첩 ISSUE.03. (Street Photography Club, 2026-06-12)
+- [골문 앞의 ISO 400, 일포드 풋볼 에디션](https://www.5ftmag.com/stories/ilford-football.html): 월드컵 개막에 맞춰 일포드가 HP5 Plus 와 XP2 Super 풋볼 컬렉터스 에디션을 내놨다. 유제는 그대로, 상자에 Expired Film Club 의 흑백 축구 사진이 입혀졌다. (5ft.mag 편집부, 2026-06-11)
+- [세 발짝의 거리, 아츠시 니시지마](https://www.5ftmag.com/stories/nishijima.html): 요르고스 란티모스의 현장을 10년 가까이 기록해 온 스틸 포토그래퍼. 『가여운 것들』 곁에서 그는 디지털 대신 필름 카메라를 들었다. (5ft.mag 편집부, 2026-06-10)
+- [제4회 후지필름 포토페스타 2026 — 노들섬에 〈사이의 시간〉](https://www.5ftmag.com/stories/fpfi-2026.html): 시리즈 15명·싱글 20명, 두 갤러리·아홉 날. 6월 노들섬에서 사진의 '잠시 멈춘 시간' 을 본다. (5ft.mag 편집부, 2026-06-08)
+- [2026 / 6, 이달의 사진 전시](https://www.5ftmag.com/stories/jun-2026-exhibitions.html): 한 달 안에 닫히는 일곱, 여름까지 가는 다섯, 그리고 5년 만에 돌아온 서울사진축제 〈컴백홈〉. 6월 첫 주말이 가장 분주하다. 일정과 동선까지 한자리에. (5ft.mag 편집부, 2026-06-06)
+- [확장하는 코닥, 정리하는 후지. 2026 봄의 필름 풍경](https://www.5ftmag.com/stories/verita-200d-fuji-bw.html): 한쪽에선 코닥이 VERITA 200D 를 새로 풀었고, 다른 한쪽에선 후지필름의 흑백 라인이 정리된다는 이야기가 빠르게 번졌다. 두 사건이 같은 결론에 닿는 이유. (5ft.mag 편집부, 2026-06-01)
+- [남들보다 20년 빨랐던 사진가, 세상이 따라오는 데는 50년이 걸렸다](https://www.5ftmag.com/stories/fred-herzog.html): 이글스턴보다 20년 먼저 컬러로 거리를 찍었지만 오래 무명이었던 사진가 프레드 헤어조그. 코다크롬 슬라이드의 색과, 그 색을 인화가 따라잡기까지 걸린 50년의 이야기. (Film Social Club, 2026-05-25)
+- [5월 23일, 어울마당로의 한 토요일](https://www.5ftmag.com/stories/film-flea-market-s6.html): 세기 P&C 가 여는 여섯 번째 필름카메라 플리마켓. 5월 23일 토요일 10:30~16:00, 어울마당로 일대 다섯 자리에 카메라와 필름과 커피가 한 골목 안에 모입니다. (Film Social Club, 2026-05-19)
+- [Widelux 가 다시 만들어진다](https://www.5ftmag.com/stories/widelux-revival.html): Jeff Bridges 가 차린 SilverBridges 가 독일 베츨라에서 Widelux 의 첫 시제품 0001 을 공개했다. 일본에서 1958 년에 처음 만들어진 스윙렌즈 파노라마 카메라가 26 년 만에 부활을 시작한다. (5ft.mag 편집부, 2026-05-17)
+
+## 지역별 현상소
+
+각 페이지에 그 지역 현상소의 주소, 기본 스캔 화질, 컬러·흑백·슬라이드·시네마 현상 가격이 135·120 포맷별로 정리돼 있습니다.
+
+- [서울 필름 현상소](https://www.5ftmag.com/labs/seoul.html): 38곳
+- [경기 필름 현상소](https://www.5ftmag.com/labs/gyeonggi.html): 9곳
+- [인천 필름 현상소](https://www.5ftmag.com/labs/incheon.html): 3곳
+- [강원 필름 현상소](https://www.5ftmag.com/labs/gangwon.html): 1곳
+- [대전 필름 현상소](https://www.5ftmag.com/labs/daejeon.html): 4곳
+- [충남 필름 현상소](https://www.5ftmag.com/labs/chungnam.html): 4곳
+- [충북 필름 현상소](https://www.5ftmag.com/labs/chungbuk.html): 1곳
+- [대구 필름 현상소](https://www.5ftmag.com/labs/daegu.html): 10곳
+- [경북 필름 현상소](https://www.5ftmag.com/labs/gyeongbuk.html): 4곳
+- [부산 필름 현상소](https://www.5ftmag.com/labs/busan.html): 5곳
+- [울산 필름 현상소](https://www.5ftmag.com/labs/ulsan.html): 2곳
+- [경남 필름 현상소](https://www.5ftmag.com/labs/gyeongnam.html): 2곳
+- [광주 필름 현상소](https://www.5ftmag.com/labs/gwangju.html): 2곳
+- [전북 필름 현상소](https://www.5ftmag.com/labs/jeonbuk.html): 3곳
+- [전남 필름 현상소](https://www.5ftmag.com/labs/jeonnam.html): 1곳
+- [제주 필름 현상소](https://www.5ftmag.com/labs/jeju.html): 3곳
+
+## 필름 카탈로그
+
+각 페이지에 브랜드, 감도, 종류, 포맷, 설명, 다르게 부르는 이름이 정리돼 있습니다.
+
+- [1SHOT 400](https://www.5ftmag.com/film/1shot400.html): ISO 400, Color Negative, 35mm
+- [Adox CHS 100 II](https://www.5ftmag.com/film/adoxchs100.html): ISO 100, Black & White, 35mm, 120
+- [Adox Color Mission 200](https://www.5ftmag.com/film/adoxmission200.html): ISO 200, Color Negative, 35mm
+- [Adox HR-50](https://www.5ftmag.com/film/adoxhr50.html): ISO 50, Black & White, 35mm, 120
+- [Agfa APX 100](https://www.5ftmag.com/film/agfaapx100.html): ISO 100, Black & White, 35mm
+- [Agfa APX 400](https://www.5ftmag.com/film/agfaapx400.html): ISO 400, Black & White, 35mm
+- [Agfa CT Precisa 100](https://www.5ftmag.com/film/agfactprecisa100.html): ISO 100, Slide (E-6), 35mm
+- [Agfa Ultra 100](https://www.5ftmag.com/film/agfaultra100.html): ISO 100, Color Negative, 35mm
+- [Agfa Vista 100](https://www.5ftmag.com/film/agfavista100.html): ISO 100, Color Negative, 35mm
+- [Agfa Vista 200](https://www.5ftmag.com/film/agfavista200.html): ISO 200, Color Negative, 35mm
+- [Agfa Vista 400](https://www.5ftmag.com/film/agfavista400.html): ISO 400, Color Negative, 35mm
+- [Arista EDU Ultra 100](https://www.5ftmag.com/film/aristaedu100.html): ISO 100, Black & White, 35mm, 120
+- [Arista EDU Ultra 200](https://www.5ftmag.com/film/aristaedu200.html): ISO 200, Black & White, 35mm, 120
+- [Arista EDU Ultra 400](https://www.5ftmag.com/film/aristaedu400.html): ISO 400, Black & White, 35mm, 120
+- [Bergger Pancro 400](https://www.5ftmag.com/film/bergger400.html): ISO 400, Black & White, 35mm, 120
+- [Candido 400](https://www.5ftmag.com/film/candido400.html): ISO 400, Color Negative, 35mm
+- [Chinese CineStill 100D](https://www.5ftmag.com/film/chinesecinestill100d.html): ISO 100, Color Negative, 35mm
+- [Chinese CineStill 320T](https://www.5ftmag.com/film/chinesecinestill320t.html): ISO 320, Tungsten, 35mm
+- [Chinese CineStill 400D](https://www.5ftmag.com/film/chinesecinestill400d.html): ISO 400, Color Negative, 35mm
+- [Chinese CineStill 800T](https://www.5ftmag.com/film/chinesecinestill800t.html): ISO 800, Tungsten, 35mm
+- [Cinestill 400D](https://www.5ftmag.com/film/cinestill400d.html): ISO 400, Daylight, 35mm, 120
+- [Cinestill 50D](https://www.5ftmag.com/film/cinestill50d.html): ISO 50, Daylight, 35mm, 120
+- [Cinestill 800T](https://www.5ftmag.com/film/cinestill800t.html): ISO 800, Tungsten, 35mm, 120
+- [Cinestill BwXX](https://www.5ftmag.com/film/cinestillxx.html): ISO 250, Black & White, 35mm, 120
+- [Ferrania P30](https://www.5ftmag.com/film/ferraniap30.html): ISO 80, Black & White, 35mm, 120
+- [FilmNeverDie × Mr. Negative Zombie 400](https://www.5ftmag.com/film/zombie400.html): ISO 400, Color Negative, 35mm
+- [FilmNeverDie IRO 200](https://www.5ftmag.com/film/fndiro200.html): ISO 200, Color Negative, 35mm
+- [FilmNeverDie IRO 400](https://www.5ftmag.com/film/fndiro400.html): ISO 400, Color Negative, 35mm
+- [FilmNeverDie KIRO 400](https://www.5ftmag.com/film/fndkiro400.html): ISO 400, Color Negative, 35mm
+- [FilmNeverDie KUMO 250D](https://www.5ftmag.com/film/fndkumo250d.html): ISO 250, Daylight, 35mm
+- [FilmNeverDie SORA 200](https://www.5ftmag.com/film/fndsora200.html): ISO 200, Color Negative, 35mm
+- [FilmNeverDie UMI 800](https://www.5ftmag.com/film/fndumi800.html): ISO 800, Color Negative, 35mm
+- [Foma Fomapan 100 Classic](https://www.5ftmag.com/film/fomapan100.html): ISO 100, Black & White, 35mm, 120
+- [Foma Fomapan 200 Creative](https://www.5ftmag.com/film/fomapan200.html): ISO 200, Black & White, 35mm, 120, Sheet
+- [Foma Fomapan 400 Action](https://www.5ftmag.com/film/fomapan400.html): ISO 400, Black & White, 35mm, 120
+- [Fotocola 250D](https://www.5ftmag.com/film/fotocola250d.html): ISO 250, Daylight, 35mm
+- [Fotocola 500T](https://www.5ftmag.com/film/fotocola500t.html): ISO 500, Tungsten, 35mm
+- [Fujifilm 200](https://www.5ftmag.com/film/fujifilm200.html): ISO 200, Color Negative, 35mm
+- [Fujifilm 400](https://www.5ftmag.com/film/fujifilm400.html): ISO 400, Color Negative, 35mm
+- [Fujifilm Astia 100F](https://www.5ftmag.com/film/fujiastia100f.html): ISO 100, Slide (E-6), 35mm, 120
+- [Fujifilm C200](https://www.5ftmag.com/film/c200.html): ISO 200, Color Negative, 35mm
+- [Fujifilm Eterna 250D](https://www.5ftmag.com/film/eterna250d.html): ISO 250, Daylight, 35mm
+- [Fujifilm Eterna 500T](https://www.5ftmag.com/film/eterna500t.html): ISO 500, Tungsten, 35mm
+- [Fujifilm Fujicolor 100](https://www.5ftmag.com/film/fujifilm100.html): ISO 100, Color Negative, 35mm
+- [Fujifilm Fujicolor Industrial 100](https://www.5ftmag.com/film/industrial100.html): ISO 100, Color Negative, 35mm
+- [Fujifilm Fujicolor Industrial 400](https://www.5ftmag.com/film/industrial400.html): ISO 400, Color Negative, 35mm
+- [Fujifilm Fujicolor Super HG 1600](https://www.5ftmag.com/film/fujisuperhg1600.html): ISO 1600, Color Negative, 35mm
+- [Fujifilm Natura 1600](https://www.5ftmag.com/film/natura1600.html): ISO 1600, Color Negative, 35mm
+- [Fujifilm Neopan 1600 Super Presto](https://www.5ftmag.com/film/fujineopan1600.html): ISO 1600, Black & White, 35mm
+- [Fujifilm Neopan 400 Presto](https://www.5ftmag.com/film/fujineopan400.html): ISO 400, Black & White, 35mm
+- [Fujifilm Neopan Acros 100](https://www.5ftmag.com/film/acros1.html): ISO 100, Black & White, 35mm, 120
+- [Fujifilm Neopan Acros II 100](https://www.5ftmag.com/film/acros2.html): ISO 100, Black & White, 35mm, 120
+- [Fujifilm Neopan SS](https://www.5ftmag.com/film/fujineopanss.html): ISO 100, Black & White, 35mm
+- [Fujifilm Pro 400H](https://www.5ftmag.com/film/fujipro400h.html): ISO 400, Color Negative, 35mm, 120
+- [Fujifilm Provia 100F](https://www.5ftmag.com/film/provia100f.html): ISO 100, Slide (E-6), 35mm, 120
+- [Fujifilm Reala 100](https://www.5ftmag.com/film/reala100.html): ISO 100, Color Negative, 35mm, 120
+- [Fujifilm Reala 500D](https://www.5ftmag.com/film/reala500d.html): ISO 500, Daylight, 35mm
+- [Fujifilm Reala Ace 100](https://www.5ftmag.com/film/realaace100.html): ISO 100, Color Negative, 35mm, 120
+- [Fujifilm Superia Premium 400](https://www.5ftmag.com/film/superiapremium400.html): ISO 400, Color Negative, 35mm
+- [Fujifilm Superia Venus 800](https://www.5ftmag.com/film/superiavenus800.html): ISO 800, Color Negative, 35mm
+- [Fujifilm Superia X-TRA 400](https://www.5ftmag.com/film/superia400.html): ISO 400, Color Negative, 35mm
+- [Fujifilm Velvia 100](https://www.5ftmag.com/film/velvia100.html): ISO 100, Slide (E-6), 35mm, 120
+- [Fujifilm Velvia 100F](https://www.5ftmag.com/film/fujivelvia100f.html): ISO 100, Slide (E-6), 35mm, 120
+- [Fujifilm Velvia 50](https://www.5ftmag.com/film/velvia50.html): ISO 50, Slide (E-6), 35mm, 120
+- [Harman Phoenix 200](https://www.5ftmag.com/film/phoenix200.html): ISO 200, Color Negative, 35mm, 120
+- [Harman Phoenix II 200](https://www.5ftmag.com/film/phoenix2.html): ISO 200, Color Negative, 35mm, 120
+- [Holga 400](https://www.5ftmag.com/film/holga400.html): ISO 400, Black & White, 35mm, 120
+- [Ilford Delta 100](https://www.5ftmag.com/film/delta100.html): ISO 100, Black & White, 35mm, 120
+- [Ilford Delta 3200](https://www.5ftmag.com/film/delta3200.html): ISO 3200, Black & White, 35mm, 120
+- [Ilford Delta 400](https://www.5ftmag.com/film/delta400.html): ISO 400, Black & White, 35mm, 120
+- [Ilford FP4 Plus 125](https://www.5ftmag.com/film/fp4plus.html): ISO 125, Black & White, 35mm, 120
+- [Ilford HP5 Plus 400](https://www.5ftmag.com/film/hp5plus.html): ISO 400, Black & White, 35mm, 120
+- [Ilford Ortho Plus 80](https://www.5ftmag.com/film/orthoplus80.html): ISO 80, Black & White, 35mm, 120
+- [Ilford Pan 100](https://www.5ftmag.com/film/ilfordpan100.html): ISO 100, Black & White, 35mm, 120
+- [Ilford Pan F Plus 50](https://www.5ftmag.com/film/panfplus50.html): ISO 50, Black & White, 35mm, 120
+- [Ilford SFX 200](https://www.5ftmag.com/film/sfx200.html): ISO 200, Black & White, 35mm, 120
+- [Ilford XP2 Super 400](https://www.5ftmag.com/film/xp2super.html): ISO 400, Black & White, 35mm, 120
+- [JCH StreetPan 400](https://www.5ftmag.com/film/jchstreetpan400.html): ISO 400, Black & White, 35mm
+- [Kentmere 400](https://www.5ftmag.com/film/kentmere400.html): ISO 400, Black & White, 35mm, 120
+- [Kentmere Pan 100](https://www.5ftmag.com/film/kentmere100.html): ISO 100, Black & White, 35mm, 120
+- [Kentmere Pan 200](https://www.5ftmag.com/film/kentmere200.html): ISO 200, Black & White, 35mm, 120
+- [Kodak Aerocolor IV](https://www.5ftmag.com/film/aerocolor.html): ISO 125, Color Negative, 35mm
+- [Kodak BW400CN](https://www.5ftmag.com/film/bw400cn.html): ISO 400, Black & White, 35mm, 120
+- [Kodak ColorPlus 200](https://www.5ftmag.com/film/colorplus200.html): ISO 200, Color Negative, 35mm
+- [Kodak Eastman Double-X 5222](https://www.5ftmag.com/film/doublex.html): ISO 250/200, Black & White, 35mm
+- [Kodak Ektachrome E100](https://www.5ftmag.com/film/ektachrome100.html): ISO 100, Slide (E-6), 35mm, 120
+- [Kodak Ektachrome E100D 5294](https://www.5ftmag.com/film/kodake100d5294.html): ISO 100, Daylight Cinema, 35mm
+- [Kodak Ektachrome E100VS](https://www.5ftmag.com/film/e100vs.html): ISO 100, Slide, 35mm, 120
+- [Kodak Ektachrome E200](https://www.5ftmag.com/film/ektachromeE200.html): ISO 200, Slide (E-6), 35mm
+- [Kodak Ektar 100](https://www.5ftmag.com/film/ektar100.html): ISO 100, Color Negative, 35mm, 120
+- [Kodak Gold 200](https://www.5ftmag.com/film/gold200.html): ISO 200, Color Negative, 35mm, 120
+- [Kodak Kodacolor 100](https://www.5ftmag.com/film/kodacolor100.html): ISO 100, Color Negative, 35mm
+- [Kodak Kodacolor 200](https://www.5ftmag.com/film/kodacolor200.html): ISO 200, Color Negative, 35mm
+- [Kodak Portra 160](https://www.5ftmag.com/film/portra160.html): ISO 160, Color Negative, 35mm, 120
+- [Kodak Portra 160 NC](https://www.5ftmag.com/film/portra160nc.html): ISO 160, Color Negative, 35mm, 120
+- [Kodak Portra 160 VC](https://www.5ftmag.com/film/portra160vc.html): ISO 160, Color Negative, 35mm, 120
+- [Kodak Portra 400](https://www.5ftmag.com/film/portra400.html): ISO 400, Color Negative, 35mm, 120
+- [Kodak Portra 400 NC](https://www.5ftmag.com/film/portra400nc.html): ISO 400, Color Negative, 35mm, 120
+- [Kodak Portra 400 VC](https://www.5ftmag.com/film/portra400vc.html): ISO 400, Color Negative, 35mm, 120
+- [Kodak Portra 800](https://www.5ftmag.com/film/portra800.html): ISO 800, Color Negative, 35mm, 120
+- [Kodak Pro Image 100](https://www.5ftmag.com/film/proimage100.html): ISO 100, Color Negative, 35mm
+- [Kodak ProFoto XL 100](https://www.5ftmag.com/film/profotoxl100.html): ISO 100, Color Negative, 35mm
+- [Kodak T-Max 100](https://www.5ftmag.com/film/tmax100.html): ISO 100, Black & White, 35mm, 120
+- [Kodak T-Max 400](https://www.5ftmag.com/film/tmax400.html): ISO 400, Black & White, 35mm, 120
+- [Kodak T-Max P3200](https://www.5ftmag.com/film/tmaxp3200.html): ISO 3200, Black & White, 35mm
+- [Kodak Tri-X 400](https://www.5ftmag.com/film/trix400.html): ISO 400, Black & White, 35mm, 120
+- [Kodak UltraMax 400](https://www.5ftmag.com/film/ultramax.html): ISO 400, Color Negative, 35mm
+- [Kodak Vision3 200T](https://www.5ftmag.com/film/vision3200t.html): ISO 200, Tungsten, 35mm
+- [Kodak Vision3 250D](https://www.5ftmag.com/film/vision250d.html): ISO 250, Daylight, 35mm
+- [Kodak Vision3 250D AHU](https://www.5ftmag.com/film/vision250dahu.html): ISO 250, Daylight, 35mm
+- [Kodak Vision3 500T](https://www.5ftmag.com/film/vision500t.html): ISO 500, Tungsten, 35mm
+- [Kodak Vision3 500T AHU](https://www.5ftmag.com/film/vision500tahu.html): ISO 500, Tungsten, 35mm
+- [Konica Centuria 100](https://www.5ftmag.com/film/konicacenturia100.html): ISO 100, Color Negative, 35mm
+- [Konica Centuria 400](https://www.5ftmag.com/film/konicacenturia400.html): ISO 400, Color Negative, 35mm
+- [Konica Centuria Super 200](https://www.5ftmag.com/film/konicacenturia200.html): ISO 200, Color Negative, 35mm
+- [Konica Industrial 100](https://www.5ftmag.com/film/konicaindustrial100.html): ISO 100, Color Negative, 35mm
+- [Leica MONOPAN 50](https://www.5ftmag.com/film/monopan50.html): ISO 50, BW Negative, 35mm
+- [Lomography Babylon Kino 13](https://www.5ftmag.com/film/babylonkino13.html): ISO 13, Black & White, 35mm, 120
+- [Lomography Berlin Kino 400](https://www.5ftmag.com/film/berlinkino400.html): ISO 400, Black & White, 35mm, 120
+- [Lomography Color Negative 100](https://www.5ftmag.com/film/lomocolor100.html): ISO 100, Color Negative, 35mm, 120
+- [Lomography Color Negative 400](https://www.5ftmag.com/film/lomocolor400.html): ISO 400, Color Negative, 35mm, 120
+- [Lomography Color Negative 800](https://www.5ftmag.com/film/lomocolor800.html): ISO 800, Color Negative, 35mm, 120
+- [Lomography Earl Grey 100](https://www.5ftmag.com/film/earlgrey100.html): ISO 100, Black & White, 35mm, 120
+- [Lomography Lady Grey 400](https://www.5ftmag.com/film/ladygrey400.html): ISO 400, Black & White, 35mm, 120
+- [Lomography LomoChrome Classicolor 200](https://www.5ftmag.com/film/lomoclassicolor200.html): ISO 200, Color Negative, 35mm, 110
+- [Lomography LomoChrome Color '92](https://www.5ftmag.com/film/lomocolor92.html): ISO 400, Color Negative, 35mm, 120, 110
+- [Lomography LomoChrome Metropolis](https://www.5ftmag.com/film/lomometropolis.html): ISO 100/400, Color Negative, 35mm, 120, 110
+- [Lomography LomoChrome Purple](https://www.5ftmag.com/film/lomopurple.html): ISO 100/400, Color Negative, 35mm, 120, 110
+- [Lomography LomoChrome Turquoise](https://www.5ftmag.com/film/lomoturquoise.html): ISO 100/400, Color Negative, 35mm, 120, 110
+- [Lomography Potsdam Kino 100](https://www.5ftmag.com/film/potsdamkino100.html): ISO 100, Black & White, 35mm, 120
+- [Lomography Redscale XR 50–200](https://www.5ftmag.com/film/lomoredscale.html): ISO 50/200, Color Negative, 35mm, 120
+- [Lucky Color 200](https://www.5ftmag.com/film/luckycolor200.html): ISO 200, Color Negative, 35mm
+- [Lucky SHD 100 New](https://www.5ftmag.com/film/luckyshd100.html): ISO 100, Black & White, 35mm, 120
+- [Lucky SHD 400](https://www.5ftmag.com/film/luckyshd400.html): ISO 400, Black & White, 35mm, 120
+- [Oriental Seagull 100](https://www.5ftmag.com/film/orientalseagull100.html): ISO 100, Black & White, 35mm
+- [Oriental Seagull 400](https://www.5ftmag.com/film/orientalseagull400.html): ISO 400, Black & White, 35mm
+- [ORWO N75 Plus](https://www.5ftmag.com/film/orwon75.html): ISO 400, Black & White, 35mm
+- [ORWO UN54](https://www.5ftmag.com/film/orwoun54.html): ISO 100, Black & White, 35mm
+- [ORWO Wolfen NC400](https://www.5ftmag.com/film/wolfennc400.html): ISO 400, Daylight, 35mm, 120
+- [ORWO Wolfen NC500](https://www.5ftmag.com/film/wolfennc500.html): ISO 400, Daylight, 35mm
+- [Reflx Lab 250D](https://www.5ftmag.com/film/reflxlab250d.html): ISO 250, Daylight, 35mm, 120
+- [Reflx Lab 320D](https://www.5ftmag.com/film/reflxlab320d.html): ISO 320, Daylight, 35mm, 120
+- [Reflx Lab 400D](https://www.5ftmag.com/film/reflxlab400d.html): ISO 400, Daylight, 35mm, 120
+- [Reflx Lab 800T](https://www.5ftmag.com/film/reflxlab800t.html): ISO 800, Tungsten, 35mm, 120
+- [Reto Retocolor Aqua 400](https://www.5ftmag.com/film/retoaqua400.html): ISO 400, Color Negative, 35mm
+- [Reto Retocolor Glow 400](https://www.5ftmag.com/film/retoglow400.html): ISO 400, Color Negative, 35mm
+- [Reto Retocolor Prism 400](https://www.5ftmag.com/film/retoprism400.html): ISO 400, Color Negative, 35mm
+- [Rollei Retro 400S](https://www.5ftmag.com/film/rolleiretro400s.html): ISO 400, Black & White, 35mm, 120
+- [Rollei Retro 80S](https://www.5ftmag.com/film/rolleiretro80s.html): ISO 80, Black & White, 35mm, 120
+- [Rollei RPX 100](https://www.5ftmag.com/film/rpx100.html): ISO 100, Black & White, 35mm, 120
+- [Rollei RPX 400](https://www.5ftmag.com/film/rpx400.html): ISO 400, Black & White, 35mm, 120
+- [Shanghai GP3 100](https://www.5ftmag.com/film/gp3100.html): ISO 100, Black & White, 35mm, 120
+- [Shanghai GP3 400](https://www.5ftmag.com/film/gp3400.html): ISO 400, Black & White, 35mm, 120
+- [Tudorcolor XLX 100](https://www.5ftmag.com/film/tudorxlx100.html): ISO 100, Color Negative, 35mm
+- [Tudorcolor XLX 200](https://www.5ftmag.com/film/tudorxlx200.html): ISO 200, Color Negative, 35mm
+- [Yashica Black & White 400](https://www.5ftmag.com/film/yashicabw400.html): ISO 400, Black & White, 35mm
+- [Yashica Color 400](https://www.5ftmag.com/film/yashicacolor400.html): ISO 400, Color Negative, 35mm
+- [Yashica Golden 80s](https://www.5ftmag.com/film/yashicagolden80s.html): ISO 400, Color Negative, 35mm
+
+## 이용 안내
+
+- 기사와 사진의 저작권은 5ft magazine 및 각 사진가·권리자에게 있습니다.
+- 인용할 때는 출처와 원문 주소를 함께 밝혀 주세요.
+- 현상 가격과 현상소 정보는 바뀔 수 있습니다. 최종 반영 시점은 현상소 페이지에서 확인해 주세요.

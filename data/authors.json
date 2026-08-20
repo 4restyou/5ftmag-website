@@ -3,7 +3,7 @@
     "name": "5ft.mag 편집부",
     "slug": "5ftmag",
     "note": "필름 매거진 5ft magazine의 기획과 편집을 맡습니다.",
-    "count": 19,
+    "count": 23,
     "page": "authors/5ftmag.html",
     "externalLinks": [
       {
@@ -22,7 +22,7 @@
     "name": "Film Social Club",
     "slug": "film-social-club",
     "note": "광주 충장로를 기반으로 필름과 사진 문화를 이어가는 공간입니다.",
-    "count": 9,
+    "count": 12,
     "page": "authors/film-social-club.html",
     "externalLinks": [
       {
@@ -38,6 +38,20 @@
     ]
   },
   {
+    "name": "Brisnap TV",
+    "slug": "brisnap-tv",
+    "note": "필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널입니다.",
+    "count": 4,
+    "page": "authors/brisnap-tv.html",
+    "externalLinks": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/@BRISNAPTV",
+        "label": "@BRISNAPTV"
+      }
+    ]
+  },
+  {
     "name": "김현아",
     "slug": "kim-hyuna",
     "note": "일상과 관계의 결을 짧은 에세이로 기록합니다.",
@@ -48,20 +62,6 @@
         "type": "instagram",
         "url": "https://instagram.com/aaaaa._.nuyh",
         "label": "@aaaaa._.nuyh"
-      }
-    ]
-  },
-  {
-    "name": "Brisnap TV",
-    "slug": "brisnap-tv",
-    "note": "필름카메라와 사진 장비를 직접 써보고 소개하는 영상 채널입니다.",
-    "count": 3,
-    "page": "authors/brisnap-tv.html",
-    "externalLinks": [
-      {
-        "type": "youtube",
-        "url": "https://www.youtube.com/@BRISNAPTV",
-        "label": "@BRISNAPTV"
       }
     ]
   },

@@ -21,7 +21,7 @@
     "content:health": "node scripts/content-health.mjs",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
-    "build": "node scripts/build-films.mjs && node scripts/build-labs.mjs && node scripts/build-shop.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs && node scripts/build-film-pages.mjs && node scripts/build-lab-pages.mjs",
+    "build": "node scripts/build-films.mjs && node scripts/build-labs.mjs && node scripts/build-shop.mjs && node scripts/build-authors.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs && node scripts/build-film-pages.mjs && node scripts/build-lab-pages.mjs && node scripts/build-llms.mjs",
     "build:rss": "node scripts/build-rss.mjs",
     "build:authors": "node scripts/build-authors.mjs",
     "build:sitemap": "node scripts/build-sitemap.mjs",
