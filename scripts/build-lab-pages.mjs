@@ -269,9 +269,20 @@ ${labs.map((lab) => `        <li>${esc(lab.name)}</li>`).join('\n')}
 
   const page = path.join(ROOT, 'labs.html');
   const source = await fs.readFile(page, 'utf-8');
+  // details 로 접어 둔다. 접혀 있어도 마크업은 HTML 에 그대로 남아 크롤러가
+  // 읽고 링크를 따라간다. 화면에서만 기본으로 감춘다.
+  const total = [...byRegion.values()].reduce((sum, list) => sum + list.length, 0);
   const next = source.replace(
     /<!-- LAB-INDEX:START -->[\s\S]*?<!-- LAB-INDEX:END -->/,
-    `<!-- LAB-INDEX:START -->\n  <div class="lab-index-grid">\n${html}\n  </div>\n  <!-- LAB-INDEX:END -->`,
+    `<!-- LAB-INDEX:START -->
+  <details class="lab-index-fold">
+    <summary>지역별 현상소 ${total}곳</summary>
+    <p class="lab-index-sub">지역 이름을 누르면 그 지역 현상소의 주소와 현상 가격을 한 번에 볼 수 있어요.</p>
+    <div class="lab-index-grid">
+${html}
+    </div>
+  </details>
+  <!-- LAB-INDEX:END -->`,
   );
   if (next !== source) {
     await fs.writeFile(page, next, 'utf-8');
