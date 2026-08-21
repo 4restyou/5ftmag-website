@@ -258,10 +258,12 @@ ${others.map(([name, otherSlug, count]) => `      <li><a href="/labs/${esc(other
 }
 
 // labs.html 하단에 지역별 현상소 목록을 넣는다. 이 페이지도 본문이 440자뿐이라
-// 크롤러가 읽을 내용이 없었고, 지역 페이지로 갈 링크도 없었다.
+// 크롤러가 읽을 내용이 없었다. 링크는 이 목록의 지역 필터로 보낸다.
+// 지역 페이지(/labs/<region>.html)는 검색 전용이라 독자가 그쪽으로 들어가지
+// 않게 하고, 색인은 sitemap 과 지역 페이지끼리의 상호 링크로 이뤄진다.
 async function writeLabIndex(byRegion) {
   const html = [...byRegion.entries()].map(([region, labs]) => `    <div class="lab-index-region">
-      <h3><a href="./labs/${esc(SLUG_BY_REGION.get(region))}.html">${esc(region)}</a> <span>${labs.length}곳</span></h3>
+      <h3><a href="./labs.html?region=${encodeURIComponent(region)}">${esc(region)}</a> <span>${labs.length}곳</span></h3>
       <ul>
 ${labs.map((lab) => `        <li>${esc(lab.name)}</li>`).join('\n')}
       </ul>

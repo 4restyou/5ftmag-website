@@ -145,7 +145,10 @@ function jsonLd(film, sameBrand) {
 }
 
 // films.html 하단의 브랜드별 전체 목록을 채운다. 카탈로그 카드가 버튼이라
-// 크롤러가 상세 페이지로 갈 링크가 없고, films.html 본문 자체도 비어 있었다.
+// 이 페이지에는 크롤러가 읽을 본문도, 필름 이름도 없었다.
+// 링크는 카탈로그로 보낸다. 상세 페이지(/film/<slug>.html)는 검색 전용이라
+// 독자가 그쪽으로 들어가지 않게 하고, 색인은 sitemap 과 상세 페이지끼리의
+// 상호 링크로 이뤄진다.
 async function writeFilmIndex(films) {
   const byBrand = new Map();
   for (const film of films) {
@@ -157,7 +160,7 @@ async function writeFilmIndex(films) {
   const html = brands.map((brand) => {
     const items = byBrand.get(brand)
       .sort((a, b) => displayNameOf(a).localeCompare(displayNameOf(b), 'ko'))
-      .map((film) => `        <li><a href="./film/${esc(film.slug)}.html">${esc(displayNameOf(film))}</a></li>`)
+      .map((film) => `        <li><a href="./films.html?film=${encodeURIComponent(film.slug)}">${esc(displayNameOf(film))}</a></li>`)
       .join('\n');
     return `    <div class="film-index-brand">
       <h3>${esc(brand)}</h3>
