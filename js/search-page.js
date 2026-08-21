@@ -112,7 +112,7 @@
 
   function cardFilm(f, q) {
     const name = f.displayName || (f.brand ? `${f.brand} ${f.name || ''}`.trim() : f.name || '');
-    return `<a class="search-card" href="films.html#film-${esc(f.slug || '')}">
+    return `<a class="search-card" href="film/${esc(f.slug || '')}.html">
       <div class="sc-body">
         <div class="sc-kicker">${esc(f.brand || 'FILM')}</div>
         <div class="sc-title">${highlight(name, q)}</div>
@@ -135,8 +135,18 @@
     </a>`;
   }
 
+// labs-page.js 의 itemSlug 와 같은 규칙. 현상소·수리실 딥링크(?lab=)가 이 값으로
+  // 항목을 찾으므로 규칙이 어긋나면 링크를 눌러도 아무 일이 일어나지 않는다.
+  function labSlug(lab) {
+    const raw = `${lab?.name || ''}-${lab?.region || ''}`;
+    return String(raw).toLowerCase()
+      .replace(/[^a-z0-9가-힣\s-]/g, '')
+      .replace(/\s+/g, '-').replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   function cardLab(l, q) {
-    return `<a class="search-card" href="labs.html">
+    return `<a class="search-card" href="labs.html?lab=${encodeURIComponent(labSlug(l))}">
       <div class="sc-body">
         <div class="sc-kicker">LAB${l.region ? ' · ' + esc(l.region) : ''}</div>
         <div class="sc-title">${highlight(l.name || '', q)}</div>
@@ -149,7 +159,7 @@
     const priceTxt = (m.price && Number(m.price) > 0)
       ? Number(m.price).toLocaleString('ko-KR') + '원'
       : '가격 협의';
-    return `<a class="search-card" href="market.html#item-${esc(m.id || '')}">
+    return `<a class="search-card" href="market.html?id=${encodeURIComponent(m.id || '')}">
       <div class="sc-body">
         <div class="sc-kicker">MARKET${m.category ? ' · ' + esc(m.category) : ''}</div>
         <div class="sc-title">${highlight(m.title || '', q)}</div>
