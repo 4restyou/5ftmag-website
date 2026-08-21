@@ -102,6 +102,7 @@
   const markerBySlug = new Map();
   let activeMapSlug = null;
   let deepLinkApplied = false;
+  let regionDeepLinkApplied = false;
   let deepLinkOtherTabTried = false;
 
   // 테이블 row(컬럼명) → 현상소 카드가 쓰는 형태(scan_res → scanRes 만 다름).
@@ -207,6 +208,16 @@
   function renderFilter() {
     if (!filterEl) return;
     const regions = regionsInOrder();
+    // labs.html?region=서울 로 들어오면 그 지역만 걸러 보여준다.
+    // 지역 페이지(/labs/<region>.html)는 검색용이라, 독자에게 보이는 링크는
+    // 이 목록으로 오게 하고 여기서 지역을 맞춰 준다.
+    if (!regionDeepLinkApplied) {
+      regionDeepLinkApplied = true;
+      try {
+        const wanted = new URL(location.href).searchParams.get('region');
+        if (wanted && regions.includes(wanted)) region = wanted;
+      } catch (_) {}
+    }
     const chip = (key, label, n) =>
       `<button type="button" class="ft-chip filter-chip${key === region ? ' active' : ''}" data-region="${escapeAttr(key)}">${escapeHtml(label)}<span class="ft-chip-count labs-chip-count">${n}</span></button>`;
     let html = chip('all', '전체', data.length);

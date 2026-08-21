@@ -112,7 +112,7 @@
 
   function cardFilm(f, q) {
     const name = f.displayName || (f.brand ? `${f.brand} ${f.name || ''}`.trim() : f.name || '');
-    return `<a class="search-card" href="film/${esc(f.slug || '')}.html">
+    return `<a class="search-card" href="films.html?film=${encodeURIComponent(f.slug || '')}">
       <div class="sc-body">
         <div class="sc-kicker">${esc(f.brand || 'FILM')}</div>
         <div class="sc-title">${highlight(name, q)}</div>

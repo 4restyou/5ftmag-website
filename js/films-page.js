@@ -49,7 +49,6 @@
   const {
     routeParam,
     filmsBasePath,
-    prettyFilmPath,
     prettyCameraPath,
     prettyContributorPath,
     shareFilm: shareFilmLink,
@@ -464,7 +463,12 @@
     // URL 동기화 — 공유/북마크 가능하게
     try {
       const contributor = normalizeContributorKey(options.contributor);
-      history.replaceState(null, '', contributor ? prettyContributorPath(contributor) : prettyFilmPath(filmKey));
+      // 필름은 카탈로그 주소를 남긴다. 주소창을 복사해 공유하는 사람도 있는데,
+      // /film/<slug> 는 검색용 정적 페이지라 그쪽으로 가면 카탈로그가 열리지 않는다.
+      // (contributor·camera 짧은 주소는 그대로 카탈로그를 연다.)
+      history.replaceState(null, '', contributor
+        ? prettyContributorPath(contributor)
+        : `/films.html?film=${encodeURIComponent(filmKey)}`);
     } catch (_) {}
 
     const isFeatured = data.tier === 'featured';
