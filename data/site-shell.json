@@ -1,17 +1,56 @@
 {
   "navigation": [
-    { "label": "Articles", "path": "stories.html" },
-    { "label": "Films", "path": "films.html" },
-    { "label": "Magazine", "path": "books.html" },
-    { "label": "Market", "path": "market.html" },
-    { "label": "Labs", "path": "labs.html" },
-    { "label": "About", "path": "about.html" },
-    { "label": "Shop", "path": "shop.html" }
+    {
+      "label": "Articles",
+      "path": "stories.html"
+    },
+    {
+      "label": "Films",
+      "path": "films.html"
+    },
+    {
+      "label": "Magazine",
+      "path": "books.html"
+    },
+    {
+      "label": "Market",
+      "path": "market.html"
+    },
+    {
+      "label": "Labs",
+      "path": "labs.html"
+    },
+    {
+      "label": "About",
+      "path": "about.html"
+    },
+    {
+      "label": "Shop",
+      "path": "shop.html"
+    }
   ],
   "footerLinks": [
-    { "label": "Shop", "path": "shop.html" },
-    { "label": "@5ft.magazine ↗", "href": "https://instagram.com/5ft.magazine", "external": true },
-    { "label": "4rest_design@naver.com", "href": "mailto:4rest_design@naver.com" },
-    { "label": "4rest.net ↗", "href": "https://www.4rest.net", "external": true }
-  ]
+    {
+      "label": "Shop",
+      "path": "shop.html"
+    },
+    {
+      "label": "@5ft.magazine ↗",
+      "href": "https://instagram.com/5ft.magazine",
+      "external": true
+    },
+    {
+      "label": "4rest_design@naver.com",
+      "href": "mailto:4rest_design@naver.com"
+    },
+    {
+      "label": "4rest.net ↗",
+      "href": "https://www.4rest.net",
+      "external": true
+    }
+  ],
+  "footer": {
+    "publisher": "발행처 4rest · 편집 박순렬 · 전남광주통합특별시 동구 충장로46번길 8, 2층",
+    "copyright": "© 2026 5ft magazine"
+  }
 }

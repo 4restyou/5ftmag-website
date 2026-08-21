@@ -669,7 +669,12 @@
     }
     let session = null;
     let isEditor = false;
-    if (window.MagDB && window.MagDB.isReady()) {
+    // db-client 를 싣지 않은 페이지에서는 확인할 방법이 없다. 그때 확인 실패를
+    // "로그아웃" 으로 단정하면, 로그인한 사람이 그 페이지에 들어갈 때마다
+    // 헤더가 로그아웃 상태로 바뀐다(legal 페이지에서 실제로 그랬다).
+    // 확인이 된 경우에만 추정값을 보정한다.
+    const canVerify = !!(window.MagDB && window.MagDB.isReady());
+    if (canVerify) {
       try {
         session = await window.MagDB.auth.getSession();
         if (session && window.MagDB.profiles && typeof window.MagDB.profiles.getMine === 'function') {
@@ -678,6 +683,7 @@
         }
       } catch (_) { /* silent — 익명/오프라인 모두 OK */ }
     }
+    if (!canVerify) return;
     writeEditorCache(!!session && isEditor);
     // 3) 추정값과 실제값이 다르면 보정
     if (!!session !== guessLoggedIn || isEditor !== guessEditor) {
