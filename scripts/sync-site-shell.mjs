@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT as root, navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
+import { ROOT as root, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, footerCopyHtml } from './lib/site-shell.mjs';
 
 const check = process.argv.includes('--check');
 const changed = [];
@@ -27,6 +27,21 @@ for (const file of walk(root)) {
   }
   if (/<div class="footer-links">[\s\S]*?<\/div>/.test(next)) {
     next = next.replace(/<div class="footer-links">[\s\S]*?<\/div>/, footerHtml(file));
+  }
+  // 발행처·저작권 줄도 원본에서 맞춘다. 페이지마다 손으로 들고 있던 탓에
+  // 주소가 옛 주소로 남거나 연도가 2024 로 굳거나, legal 페이지처럼 저작권 줄이
+  // 아예 빠져서 푸터 정렬이 달라지는 일이 있었다.
+  if (/<span class="footer-publisher">[\s\S]*?<\/span>/.test(next)) {
+    next = next.replace(/<span class="footer-publisher">[\s\S]*?<\/span>/, footerPublisherHtml());
+  }
+  if (/<span class="footer-copy">[\s\S]*?<\/span>/.test(next)) {
+    next = next.replace(/<span class="footer-copy">[\s\S]*?<\/span>/, footerCopyHtml());
+  } else if (/<div class="footer-links">[\s\S]*?<\/div>\s*<\/footer>/.test(next)) {
+    // 저작권 줄이 없는 페이지에는 푸터 링크 뒤에 새로 넣는다.
+    next = next.replace(
+      /(<div class="footer-links">[\s\S]*?<\/div>)(\s*)<\/footer>/,
+      `$1$2${footerCopyHtml()}\n</footer>`,
+    );
   }
   if (next !== source) {
     changed.push(path.relative(root, file));

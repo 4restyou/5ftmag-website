@@ -47,3 +47,11 @@ export function footerHtml(file) {
   }).join('\n');
   return `<div class="footer-links">\n${links}\n  </div>`;
 }
+
+export function footerPublisherHtml() {
+  return `<span class="footer-publisher">${shellConfig.footer.publisher}</span>`;
+}
+
+export function footerCopyHtml() {
+  return `<span class="footer-copy">${shellConfig.footer.copyright}</span>`;
+}

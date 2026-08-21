@@ -465,6 +465,7 @@
     .admin-subnav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
+
   </style>
   <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -585,10 +586,11 @@
 <script src="../js/reader-upload-form-ui.js?v=20260602-uploadui" defer></script>
 <script src="../js/reader-upload-flow.js?v=20260602-uploadlog" defer></script>
 <script src="../js/reader-submissions.js?v=20260803-cache" defer></script>
-<script src="../js/util.js?v=20260817-photodiv" defer></script>
+<script src="../js/film-name-picker.js?v=20260821-picker"></script>
+  <script src="../js/util.js?v=20260817-photodiv" defer></script>
   <script src="../js/site-telemetry.js?v=20260712-modules" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20260820-sharefix" defer></script>
+  <script src="../js/site-common.js?v=20260820-authkeep" defer></script>
 <script>
 'use strict';
 
@@ -970,7 +972,7 @@ function bindCardActions() {
           await loadList();
         } else if (action === 'edit-film') {
           const current = btn.dataset.film || '';
-          const v = prompt('필름 표기를 직접 수정합니다.\n(예: Kodak Portra 400)', current);
+          const v = await window.FilmNamePicker.open({ films: STATE.films, current });
           if (v === null) return;
           const trimmed = String(v).trim();
           if (!trimmed) { window.notify?.('필름 표기는 비워둘 수 없습니다. 정확한 필름명을 입력해 주세요.'); return; }
@@ -1256,6 +1258,7 @@ async function loadReportBadge() {
   updateSelectAllRow();
 })();
 </script>
+
 
 </body>
 </html>
