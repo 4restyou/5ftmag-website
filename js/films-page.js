@@ -1254,6 +1254,41 @@
     if (targetFilmKey) openModal(targetFilmKey, { contributor: key });
   }
 
+// ── 편집부 전용: 라이트박스에서 필름 표기 고치기 ─────────────────────────
+  // 잘못 올라간 표기를 고치려고 관리자 화면에서 그 사진을 다시 찾는 수고를 없앤다.
+  // 편집부 여부는 화면 표시용이고, 실제 방어는 reader_submissions 의 RLS 에 있다.
+  let editorChecked = false;
+  let isEditorUser = false;
+  
+  async function refreshEditorFlag() {
+    if (editorChecked) return isEditorUser;
+    editorChecked = true;
+    try {
+      if (!window.MagDB?.isReady?.()) return false;
+      const session = await window.MagDB.auth.getSession();
+      if (!session) return false;
+      const profile = await window.MagDB.profiles?.getMine?.();
+      isEditorUser = !!(profile && profile.is_editor);
+    } catch (_) {
+      isEditorUser = false;
+    }
+    return isEditorUser;
+  }
+  
+  async function editSubmissionFilm(submissionId, current) {
+    if (!submissionId || !window.FilmNamePicker) return;
+    const next = await window.FilmNamePicker.open({ films: filmsData, current });
+    if (next === null || next === current) return;
+    const { error } = await window.MagDB.review.patch(submissionId, { film: next });
+    if (error) {
+      window.notify?.('필름 표기를 저장하지 못했어요. (' + (error.message || '권한을 확인해 주세요') + ')', 'danger');
+      return;
+    }
+    window.notify?.('필름 표기를 "' + next + '" 로 바꿨어요. 목록을 새로 불러옵니다.', 'info');
+    // 캐시된 승인 목록과 카탈로그 매칭을 다시 만들어야 반영된다.
+    setTimeout(() => window.location.reload(), 900);
+  }
+
   const filmsLightbox = window.FilmsLightbox.create({
     getCurrentFilmKey: () => currentFilmKey,
     getEditorialPhotos: () => (currentFilmKey && filmsData[currentFilmKey]?.photos) || [],
@@ -1268,6 +1303,8 @@
     setPhotoFavorite: setPhotoFavoriteState,
     ensureFavoriteSession: ensurePhotoFavoriteSession,
     togglePhotoFavorite: (subId, wasFav) => window.MagDB.favorites.toggle('submission', subId, wasFav),
+    canEditFilm: () => isEditorUser,
+    onEditFilm: editSubmissionFilm,
     isModalOpen: () => modalOverlay.classList.contains('open'),
     closeModal,
     notify: window.notify,
@@ -1755,3 +1792,13 @@
       setLibraryView('photos');
     }
   } catch {}
+
+  // 편집부 여부를 미리 확인해 둔다. 라이트박스 캡션이 "필름 수정" 버튼을
+  // 보여줄지 이 값으로 정한다. db-client 준비를 잠깐 기다린다.
+  (async function primeEditorFlag() {
+    for (let i = 0; i < 60; i++) {
+      if (window.MagDB?.isReady?.()) break;
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    await refreshEditorFlag();
+  })();

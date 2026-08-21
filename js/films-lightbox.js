@@ -152,12 +152,23 @@
       if (photo.camera) {
         parts.push(`<button type="button" class="lightbox-caption-camera lightbox-caption-link" data-jump-camera="${escapeText(photo.camera)}">${escapeText(photo.camera)}</button>`);
       }
+      // 편집부로 로그인했을 때만, 잘못 올라간 필름 표기를 여기서 바로 고칠 수 있게 한다.
+      // 관리자 화면에서 그 사진을 다시 찾아내는 수고를 없애려는 것이다.
+      if (photo.submissionId && options.canEditFilm?.()) {
+        parts.push(`<button type="button" class="lightbox-caption-link lightbox-caption-edit" data-edit-film="${escapeText(photo.submissionId)}" data-edit-current="${escapeText(photo.film || '')}">필름 수정</button>`);
+      }
       const metaHtml = parts.join(' · ');
       const noteHtml = photo.caption ? `<span class="lightbox-note">${escapeText(photo.caption)}</span>` : '';
       return noteHtml ? `${metaHtml}<span class="lightbox-note-wrap">${noteHtml}</span>` : metaHtml;
     }
 
     function bindCaptionActions() {
+      lightboxCap.querySelectorAll('[data-edit-film]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          options.onEditFilm?.(button.dataset.editFilm, button.dataset.editCurrent || '');
+        });
+      });
       lightboxCap.querySelectorAll('[data-jump-contributor]').forEach((button) => {
         button.addEventListener('click', (event) => {
           event.stopPropagation();
