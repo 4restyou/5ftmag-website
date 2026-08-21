@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Wed, 19 Aug 2026 01:12:06 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 10:33:31 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>카메라 앞에 서던 배우가 뷰파인더 뒤로</title>
+      <link>https://www.5ftmag.com/stories/yoo-seungho-blue-hour.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/yoo-seungho-blue-hour.html</guid>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <description>배우 유승호의 첫 필름 사진전 〈BLUE HOUR〉가 10월 3일부터 11일까지 서울 용산 LAYER 7 에서 열린다. 티켓은 9월 8일 저녁 7시 네이버 예약. 기획한 엘리필름은 잔나비 최정훈, 데이먼스 이어, 레드벨벳 슬기, 이시언의 필름 사진전을 이어 온 곳이다.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>드라마 한 편을 필름으로 기록한 사람</title>
       <link>https://www.5ftmag.com/stories/eddy-chen-euphoria.html</link>
