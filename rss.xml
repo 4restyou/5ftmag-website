@@ -6,7 +6,7 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Sun, 23 Aug 2026 17:21:16 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 23 Aug 2026 23:41:50 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
@@ -18,7 +18,7 @@
       <link>https://www.5ftmag.com/stories/2001-space-odyssey.html</link>
       <guid isPermaLink="true">https://www.5ftmag.com/stories/2001-space-odyssey.html</guid>
       <pubDate>Sun, 23 Aug 2026 00:00:00 GMT</pubDate>
-      <description>1968년 영화 《2001: 스페이스 오디세이》가 4K 화면에서도 흐릿하지 않은 이유. 숏의 절반 이상이 복사본이었지만, 컬러 인터포지티브 대신 흑백 3색 분리 마스터로 복사했다. 더글러스 트럼불이 직접 밝힌 방법과 스타게이트를 만든 슬릿스캔, 2018년 8K 스캔까지.</description>
+      <description>1968년 영화 《2001: 스페이스 오디세이》가 4K 화면에서도 흐릿하지 않은 이유. 65mm 에 이스트만 5251, 감도 50 으로 찍었다. 숏의 절반 이상이 복사본이었지만 컬러 인터포지티브 대신 흑백 3색 분리 마스터로 복사했다. 스타게이트를 만든 슬릿스캔과 2018년 8K 스캔까지.</description>
       <category>CINEMA</category>
       <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
     </item>
