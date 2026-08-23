@@ -1,5 +1,19 @@
 [
   {
+    "id": "2001-space-odyssey",
+    "title": "58년 전 영화가 4K에서도 선명한 이유",
+    "category": "feature",
+    "categoryLabel": "CINEMA",
+    "author": "Film Social Club",
+    "date": "2026-08-23",
+    "issue": "",
+    "thumbnail": "img/stories/2001-space-odyssey/hero.webp",
+    "excerpt": "1968년 영화 《2001: 스페이스 오디세이》가 4K 화면에서도 흐릿하지 않은 이유. 숏의 절반 이상이 복사본이었지만, 컬러 인터포지티브 대신 흑백 3색 분리 마스터로 복사했다. 더글러스 트럼불이 직접 밝힌 방법과 2018년 8K 스캔까지.",
+    "page": "stories/2001-space-odyssey.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "yoo-seungho-blue-hour",
     "title": "카메라 앞에 서던 배우가 뷰파인더 뒤로",
     "category": "essay",
