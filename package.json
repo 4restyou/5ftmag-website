@@ -18,6 +18,7 @@
     "db:baseline:check": "node scripts/build-db-baseline.mjs --check",
     "shell:sync": "node scripts/sync-site-shell.mjs",
     "shell:check": "node scripts/sync-site-shell.mjs --check",
+    "writing:check": "node scripts/writing-check.mjs",
     "content:health": "node scripts/content-health.mjs",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
