@@ -1,0 +1,30 @@
+<svg viewBox="0 0 1200 675" role="img" aria-labelledby="ct cd" class="slope">
+  <title id="ct">일본 필름 사진가 설문의 브랜드 사용률 변화</title>
+  <desc id="cd">2024년에는 후지필름 84퍼센트, 코닥 81퍼센트였다. 2025년에는 후지필름 68퍼센트, 코닥 71퍼센트로 순위가 뒤집혔다. 두 브랜드 모두 사용률이 떨어졌고, 후지필름이 16퍼센트포인트로 코닥의 10퍼센트포인트보다 더 크게 줄었다.</desc>
+
+  <text x="60" y="62" class="ttl">지난 1년간 이 브랜드 필름을 썼다</text>
+  <text x="60" y="98" class="sub">일본 필름 사진 설문 · 2024년 802명, 2025년 1,337명 응답 · 복수 응답</text>
+
+  <line x1="300" y1="128" x2="300" y2="520" stroke="var(--c-grid)" stroke-width="1"/>
+  <line x1="900" y1="128" x2="900" y2="520" stroke="var(--c-grid)" stroke-width="1"/>
+  <text x="300" y="554" class="ax" text-anchor="middle">2024</text>
+  <text x="900" y="554" class="ax" text-anchor="middle">2025</text>
+
+  <line x1="300" y1="289" x2="900" y2="430" stroke="#0E8A66" stroke-width="2"/>
+  <circle cx="300" cy="289" r="6" fill="#0E8A66" stroke="var(--c-surface)" stroke-width="2"/>
+  <circle cx="900" cy="430" r="6" fill="#0E8A66" stroke="var(--c-surface)" stroke-width="2"/>
+  <text x="278" y="271" class="val" text-anchor="end">84%</text>
+  <text x="278" y="297" class="nm" text-anchor="end">후지필름</text>
+  <text x="922" y="436" class="val">68%</text>
+  <text x="922" y="462" class="nm">후지필름</text>
+
+  <line x1="300" y1="315" x2="900" y2="403" stroke="#B96A12" stroke-width="2"/>
+  <circle cx="300" cy="315" r="6" fill="#B96A12" stroke="var(--c-surface)" stroke-width="2"/>
+  <circle cx="900" cy="403" r="6" fill="#B96A12" stroke="var(--c-surface)" stroke-width="2"/>
+  <text x="278" y="349" class="val" text-anchor="end">81%</text>
+  <text x="278" y="375" class="nm" text-anchor="end">코닥</text>
+  <text x="922" y="389" class="val">71%</text>
+  <text x="922" y="415" class="nm">코닥</text>
+
+  <text x="60" y="612" class="note">후지 16%p, 코닥 10%p 줄었다. 순위는 덜 줄어든 쪽으로 넘어갔다.</text>
+</svg>
