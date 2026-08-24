@@ -90,8 +90,11 @@
     .num-table .hi { font-weight:var(--fw-heading); }
 
     /* 원본이 383px 인 캔이 늘어나지 않도록 두 칸 합을 원본 폭에 맞춘다 */
-    .pair { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:778px; margin:0 auto; align-items:center; }
+    .pair { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:1100px; margin:0 auto; align-items:center; }
     .article-body figure.full-width .pair img { width:100%; max-width:none; max-height:none; margin:0; object-fit:contain; }
+    /* 원본이 작은 사진은 원본 폭까지만 쓴다 */
+    .article-body figure.w700 img { max-width:700px; margin:0 auto; }
+    .article-body figure.tall img { max-width:560px; margin:0 auto; }
     @media (max-width:640px) { .pair { grid-template-columns:1fr; } .num-table { font-size:13px; } }
 </style>
 </head>
@@ -179,17 +182,45 @@
 
     <p>한 해에 열네 통. 한 달에 한 통을 조금 넘긴다. 이 숫자가 두 해째 같은 자리에 있다.</p>
 
-    <p>덜 찍는다고 답한 사람들의 62% 가 이유로 가격을 꼽았다. 그런데 전체 평균은 안 떨어졌다. 누가 그 자리를 채웠을까. 새로 들어온 사람들이다.</p>
+    <p>덜 찍는다고 답한 사람들의 62% 가 이유로 가격을 꼽았다. 그런데 전체 평균은 안 떨어졌다. 누가 그 자리를 채웠을까.</p>
 
     <h2>줄인 사람과 들어온 사람</h2>
 
-    <p>가격에 반응하는 방식도 설문에 나온다. 자주 쓰는 필름 몇 가지로 좁히고, 값싼 스톡을 집어 오고, 일부는 집에서 직접 현상한다.</p>
+    <p>설문은 경력으로 나눠 물었다. 답이 아주 깔끔하게 갈린다.</p>
 
-    <p>익숙한 풍경이다. 국내 커뮤니티에서도 몇 해째 같은 이야기가 오간다. 다만 일본 설문은 그것을 숫자로 확인해 준다.</p>
+    <figure class="full-width">
+      <picture>
+        <source srcset="../img/stories/japan-film-survey-2025/experience.webp" type="image/webp">
+        <img decoding="async" loading="lazy" src="../img/stories/japan-film-survey-2025/experience.jpg" alt="가로 누적 막대 다섯 줄. 경력이 짧을수록 늘었다는 파란 칸이 길고, 경력이 길수록 줄었다는 붉은 칸이 길어진다." width="1400" height="887" />
+      </picture>
+      <figcaption>경력 구간마다 파란 칸이 줄고 붉은 칸이 늘어난다. 중간에 뒤집히는 지점이 3~5년 언저리다.<span class="photo-credit">데이터 출처 FilmFocus 2025 설문. 그래프는 5ft.mag 가 직접 그렸습니다.</span></figcaption>
+    </figure>
+
+    <p>1년 미만은 절반 가까이가 더 찍었다고 답했다. 줄였다는 쪽은 6% 뿐이다. 10년 넘게 찍어 온 사람들은 반대다. 40% 가 줄였다고 답했고 늘렸다는 쪽은 15% 다.</p>
+
+    <p>구간을 따라 내려가면 파란 칸이 49, 40, 31, 21, 15 로 줄고 붉은 칸이 6, 11, 26, 32, 40 으로 는다. 한 칸도 어긋나지 않는다.</p>
+
+    <p>가격에 반응하는 방식도 설문에 나온다. 자주 쓰는 필름 몇 가지로 좁히고, 값싼 스톡을 집어 오고, 일부는 집에서 직접 현상한다. 오래 찍은 사람일수록 이 조정을 먼저 한다.</p>
+
+    <p>그러니까 평균이 유지된 것은 시장이 건강해서가 아니다. 오래 찍던 사람이 빠진 만큼 새로 들어온 사람이 채웠다. 같은 숫자 안에서 사람이 바뀌고 있다.</p>
 
     <h2>현상소를 고르는 기준</h2>
 
-    <p>설문은 촬영 이후의 경험, 그러니까 현상과 스캔의 품질이 필름 사진의 핵심으로 올라오고 있다고 정리한다. 필름을 고르는 일보다 맡기는 곳을 고르는 일이 결과를 더 크게 가른다는 인식이다.</p>
+    <p>촬영 이후의 경험도 물었다. 현상소를 고를 때 무엇을 첫째로 보느냐는 물음이다.</p>
+
+    <table class="num-table">
+      <thead><tr><th>현상소 선택 기준</th><th>1순위로 꼽은 비율</th><th>평균 순위</th></tr></thead>
+      <tbody>
+        <tr><td>현상 · 스캔 품질</td><td class="hi">41%</td><td>2.2위</td></tr>
+        <tr><td>가격</td><td>24%</td><td>2.6위</td></tr>
+        <tr><td>거리 · 위치</td><td>20%</td><td>3.6위</td></tr>
+        <tr><td>완성까지 걸리는 시간</td><td>8%</td><td>3.6위</td></tr>
+        <tr><td>서비스 종류</td><td>4%</td><td>4.2위</td></tr>
+        <tr><td>입소문 · 지인 평가</td><td>3%</td><td>4.8위</td></tr>
+      </tbody>
+    </table>
+
+    <p>품질이 가격의 두 배 가까이 앞선다. 필름값이 비싸다고 답한 사람들이 현상소만큼은 싼 곳으로 가지 않는다. 필름을 고르는 일보다 맡기는 곳을 고르는 일이 결과를 더 크게 가른다고 보는 것이다.</p>
 
     <p>그러면 한국은 어떤가. 우리 카탈로그에 올라 있는 현상소 92곳을 그대로 집계해 봤다.</p>
 
@@ -226,7 +257,7 @@
   <div class="article-end">
     <p class="article-signature">
       <span class="role">글</span>5ft.mag 편집부<br />
-      <span class="role">자료</span>FilmFocus 「2025년 필름 사진 현황 설문」(2025.11.30~12.31, 유효응답 1,337, 나니와 그룹 후원) · Kosmo Foto · PetaPixel · Digital Camera World · 국내 수치는 5ft.mag <a href="../labs.html">현상소 데이터</a> 92곳 집계
+      <span class="role">자료</span>FilmFocus 「2025년 필름 사진 현황 설문」 (조사 2025.11.30~12.31, 유효응답 1,337, 집계 모리카와 기미야스, 나니와 그룹 후원, <a href="https://www.film-photo.net/articles/film-survey-2025-result" target="_blank" rel="noopener">film-photo.net</a> 2026.08.08) · 교차 확인 Kosmo Foto · PetaPixel · Digital Camera World · 그래프 두 장은 원 데이터를 받아 5ft.mag 가 직접 그렸습니다 · 국내 수치는 5ft.mag <a href="../labs.html">현상소 데이터</a> 92곳 집계
     </p>
     <div class="share-bar">
       <span class="share-label">SHARE</span>

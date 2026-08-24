@@ -13,7 +13,7 @@
   <meta property="og:type" content="article">
   <meta property="og:title" content="박스 스피드를 다시 매겼다 | 5ft magazine">
   <meta property="og:description" content="하만이 단종했던 오리지널 Phoenix 를 ISO 125 로 다시 내놓는다. 사용자들이 실제로 노출하던 감도에 맞춰 박스 스피드를 바꾼 드문 사례다. 후속작 Phoenix II 와는 다른 제품이다.">
-  <meta property="og:image" content="https://www.5ftmag.com/img/stories/harman-phoenix-125/cans.webp">
+  <meta property="og:image" content="https://www.5ftmag.com/img/stories/harman-phoenix-125/hero.webp">
   <meta property="og:url" content="https://www.5ftmag.com/stories/harman-phoenix-125.html">
   <meta property="og:site_name" content="5ft magazine">
   <meta property="og:locale" content="ko_KR">
@@ -21,7 +21,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="박스 스피드를 다시 매겼다 | 5ft magazine">
   <meta name="twitter:description" content="하만이 단종했던 오리지널 Phoenix 를 ISO 125 로 다시 내놓는다. 사용자들이 실제로 노출하던 감도에 맞춰 박스 스피드를 바꾼 드문 사례다. 후속작 Phoenix II 와는 다른 제품이다.">
-  <meta name="twitter:image" content="https://www.5ftmag.com/img/stories/harman-phoenix-125/cans.webp">
+  <meta name="twitter:image" content="https://www.5ftmag.com/img/stories/harman-phoenix-125/hero.webp">
 
   <script type="application/ld+json">
 {
@@ -30,7 +30,7 @@
   "headline": "박스 스피드를 다시 매겼다",
   "description": "하만이 단종했던 오리지널 Phoenix 를 ISO 125 로 다시 내놓는다. 사용자들이 실제로 노출하던 감도에 맞춰 박스 스피드를 바꾼 드문 사례다. 후속작 Phoenix II 와는 다른 제품이다.",
   "image": [
-    "https://www.5ftmag.com/img/stories/harman-phoenix-125/cans.jpg"
+    "https://www.5ftmag.com/img/stories/harman-phoenix-125/hero.jpg"
   ],
   "datePublished": "2026-08-26",
   "author": {
@@ -90,8 +90,11 @@
     .num-table .hi { font-weight:var(--fw-heading); }
 
     /* 원본이 383px 인 캔이 늘어나지 않도록 두 칸 합을 원본 폭에 맞춘다 */
-    .pair { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:778px; margin:0 auto; align-items:center; }
+    .pair { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:1100px; margin:0 auto; align-items:center; }
     .article-body figure.full-width .pair img { width:100%; max-width:none; max-height:none; margin:0; object-fit:contain; }
+    /* 원본이 작은 사진은 원본 폭까지만 쓴다 */
+    .article-body figure.w700 img { max-width:700px; margin:0 auto; }
+    .article-body figure.tall img { max-width:560px; margin:0 auto; }
     @media (max-width:640px) { .pair { grid-template-columns:1fr; } .num-table { font-size:13px; } }
 </style>
 </head>
@@ -145,10 +148,10 @@
 
   <figure class="article-hero">
     <picture>
-      <source srcset="../img/stories/harman-phoenix-125/cans.webp" type="image/webp">
-      <img decoding="async" fetchpriority="high" src="../img/stories/harman-phoenix-125/cans.jpg" alt="흰 배경에 하만 Phoenix 필름 캔 두 개가 나란히 놓여 있다. 왼쪽이 오리지널 Phoenix, 오른쪽이 Phoenix II 다." width="1400" height="900" />
+      <source srcset="../img/stories/harman-phoenix-125/hero.webp" type="image/webp">
+      <img decoding="async" fetchpriority="high" src="../img/stories/harman-phoenix-125/hero.jpg" alt="하만 Phoenix 125 35mm 신형 패키지. 검은 상자와 카세트에 주황과 붉은색으로 PHOENIX 125 라고 적혀 있다." width="1500" height="1001" />
     </picture>
-    <figcaption>왼쪽이 2023년 오리지널 Phoenix, 오른쪽이 후속작 Phoenix II. 감도가 바뀐 것은 왼쪽이다.</figcaption>
+    <figcaption>Phoenix 125 의 새 패키지. 상자에 적히는 숫자가 200 에서 125 로 내려갔다.<span class="photo-credit">© HARMAN technology Ltd / HARMAN Photo. 보도 목적 인용입니다.</span></figcaption>
   </figure>
 
   <div class="article-body">
@@ -173,11 +176,27 @@
 
     <p>실용적인 효과도 있다. 35mm 판은 DX 코드가 125 로 박혀 나온다. 자동으로 감도를 읽는 카메라에 물리면 이제 사용자가 손댈 것이 없다.</p>
 
+    <figure class="full-width w700">
+      <picture>
+        <source srcset="../img/stories/harman-phoenix-125/speed-not-attitude.webp" type="image/webp">
+        <img decoding="async" loading="lazy" src="../img/stories/harman-phoenix-125/speed-not-attitude.jpg" alt="하만 공식 그래픽. Phoenix 125 패키지 옆에 changed the speed, not the attitude 라는 문구가 적혀 있다." width="700" height="700" />
+      </picture>
+      <figcaption>하만이 발표에 붙인 문구. &ldquo;성격이 아니라 속도를 바꿨다.&rdquo;<span class="photo-credit">© HARMAN technology Ltd / HARMAN Photo. 보도 목적 인용입니다.</span></figcaption>
+    </figure>
+
     <h2>필름 자체는 그대로다</h2>
 
     <p>감도만 바뀌었다. 높은 대비, 굵은 입자, 튀는 색, 빛이 번지는 헐레이션까지 오리지널의 성격이 남는다. 좋아하는 사람과 싫어하는 사람이 갈리던 그 필름이다.</p>
 
     <p>C-41 이 기본이다. E6 나 ECN-2 로도 현상이 된다고 하만이 밝혔다. 국내에서 이 두 공정을 받아 주는 곳은 많지 않으니 맡기기 전에 확인하는 편이 좋다.</p>
+
+    <figure class="full-width w700">
+      <picture>
+        <source srcset="../img/stories/harman-phoenix-125/sample-night.webp" type="image/webp">
+        <img decoding="async" loading="lazy" src="../img/stories/harman-phoenix-125/sample-night.jpg" alt="밤거리 간판을 찍은 작례. 붉은 네온이 번지고 대비가 강하다." width="700" height="700" />
+      </picture>
+      <figcaption>하만이 발표에 함께 낸 Phoenix 125 작례. 빛이 번지는 헐레이션이 그대로 남아 있다.<span class="photo-credit">사진 Casey Thurman / HARMAN Photo 제공. 보도 목적 인용입니다.</span></figcaption>
+    </figure>
 
     <h2>Phoenix II 와 헷갈리지 않기</h2>
 
@@ -196,15 +215,15 @@
     <figure class="full-width">
       <div class="pair">
         <picture>
-          <source srcset="../img/stories/harman-phoenix-125/can-original.webp" type="image/webp">
-          <img decoding="async" loading="lazy" src="../img/stories/harman-phoenix-125/can-original.jpg" alt="하만 Phoenix 200 필름 캔. 검은 바탕에 주황과 붉은색 글자가 적혀 있다." width="383" height="458" />
+          <source srcset="../img/stories/harman-phoenix-125/phoenix200-box.webp" type="image/webp">
+          <img decoding="async" loading="lazy" src="../img/stories/harman-phoenix-125/phoenix200-box.jpg" alt="2023년 출시 당시의 하만 Phoenix 200 상자와 카세트." width="1200" height="800" />
         </picture>
         <picture>
-          <source srcset="../img/stories/harman-phoenix-125/can-ii.webp" type="image/webp">
-          <img decoding="async" loading="lazy" src="../img/stories/harman-phoenix-125/can-ii.jpg" alt="하만 Phoenix II 필름 캔." width="748" height="1006" />
+          <source srcset="../img/stories/harman-phoenix-125/phoenix2-box.webp" type="image/webp">
+          <img decoding="async" loading="lazy" src="../img/stories/harman-phoenix-125/phoenix2-box.jpg" alt="하만 Phoenix II 35mm 상자와 카세트." width="1200" height="800" />
         </picture>
       </div>
-      <figcaption>왼쪽이 오리지널 Phoenix, 오른쪽이 Phoenix II. 125 는 왼쪽의 후신이다.</figcaption>
+      <figcaption>왼쪽이 2023년 오리지널 Phoenix 200, 오른쪽이 2025년 Phoenix II. 감도가 바뀐 것은 왼쪽의 후신이다.<span class="photo-credit">© HARMAN technology Ltd / HARMAN Photo. 보도 목적 인용입니다.</span></figcaption>
     </figure>
 
     <h2>가격과 국내 사정</h2>
@@ -218,7 +237,7 @@
   <div class="article-end">
     <p class="article-signature">
       <span class="role">글</span>Film Social Club<br />
-      <span class="role">자료</span>Harman Photo 발표 · Kosmo Foto 2026.08 · PetaPixel 2026.08
+      <span class="role">자료</span>HARMAN Photo 공식 제품 페이지 및 발표 자료 · Kosmo Foto 2026.08.12 · PetaPixel 2026.08.12 · 작례 Casey Thurman
     </p>
     <div class="share-bar">
       <span class="share-label">SHARE</span>
