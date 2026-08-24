@@ -40,10 +40,24 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
 - 필름 리뷰면 film-spec 카드(Base/Process/ISO/Look), CTA 박스(호수 구매 유도), article-end 시그니처(글/사진 크레딧)
 - 하단 관련글 스크립트의 `CURRENT_ID` 갱신, 댓글 `data-page-id="stories/NN"`
 
+## 3.5. 초고 퇴고
+
+`npm run writing:check stories/<파일>.html` 로 AI 글쓰기 흔적을 센다.
+
+- **S1 은 0 으로 만든다.** "~에 대해", "~에 있어", "가지고 있다", 이중 피동, "그녀/그것/그들", 이모지, 상투 종결구.
+- **K-1 "A 가 아니라 B" 는 스무 문장당 1회를 넘기지 않는다.** 가장 자주 나오는 항목이다. 고치는 방법은 결론만 남기기, 의문문으로 바꾸기, 문장 나누기, 대구로 풀기. 논지 자체가 대조인 자리는 남긴다.
+- **K-2 캡션이 본문 문장을 그대로 되풀이하면 0 으로.** 캡션은 사진에 보이는 것을 짚는다.
+- **K-3 긴 글이면 의문문을 한두 번 섞는다.**
+- 직접 인용문 안은 고치지 않는다. 원문이다.
+- 고친 양이 원문의 30% 를 넘으면 멈추고 다시 본다. 문체를 고치다 내용을 바꾸고 있다는 신호다.
+
+검사기가 과하게 잡을 수 있다. **수치가 이상하면 규칙부터 의심하고 표본을 직접 읽는다.** 자세한 내용은 CLAUDE.md 「글쓰기 규칙 → 초고를 쓴 뒤 돌린다」.
+
 ## 4. 등록 + 검증
 
 - `data/stories.json` **최상단**에 항목 삽입 (id, title, excerpt, date=오늘, category, categoryLabel, author, films[슬러그 — data/films.json 에서 확인], manual: true, page, published: true, thumbnail).
 - `node scripts/validate-assets.mjs` — webp 페어 경고까지 0 이어야 함.
+- `npm run writing:check stories/<파일>.html` — S1 0 확인 (3.5 에서 이미 돌렸다면 재확인만).
 - rss/sitemap 은 Netlify 빌드가 재생성하므로 커밋 불필요.
 
 ## 5. 배포
