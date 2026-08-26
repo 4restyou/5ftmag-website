@@ -59,15 +59,78 @@
   const getPat = () => sessionStorage.getItem(PAT_KEY) || '';
   const setPat = (v) => v ? sessionStorage.setItem(PAT_KEY, v) : sessionStorage.removeItem(PAT_KEY);
 
-  function openPatModal() {
+  function openPatModal(msg) {
     $('patInput').value = getPat();
+    patStatus(msg || '', msg ? 'bad' : '');
     $('patModal').classList.add('is-open');
     setTimeout(() => $('patInput').focus(), 50);
   }
+  function patStatus(text, kind) {
+    const el = $('patStatus');
+    if (!el) return;
+    el.hidden = !text;
+    el.textContent = text;
+    el.className = 'pat-status' + (kind ? ' is-' + kind : '');
+  }
   $('patCancel').addEventListener('click', () => $('patModal').classList.remove('is-open'));
+
+  // 토큰이 왜 안 되는지는 상태 코드로만 갈린다. 저장하는 자리에서 바로 물어보고
+  // 사람 말로 알려 준다. 이걸 안 하면 토글을 눌러야 실패를 알게 되고,
+  // 그때 나오는 메시지는 잘린 원문이라 원인을 알 수 없다.
+  async function verifyPat(pat) {
+    const call = (path) => fetch(`https://api.github.com${path}`, {
+      headers: {
+        Authorization: `Bearer ${pat}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    });
+
+    let who;
+    try {
+      who = await call('/user');
+    } catch {
+      return { ok: false, msg: 'GitHub 에 연결하지 못했습니다. 네트워크를 확인해 주세요.' };
+    }
+    if (who.status === 401) {
+      return { ok: false, msg: '토큰이 만료됐거나 잘못됐습니다 (401).\n새로 발급받아 넣어 주세요.' };
+    }
+    if (!who.ok) {
+      return { ok: false, msg: `GitHub 응답 ${who.status}. 토큰을 다시 확인해 주세요.` };
+    }
+    const login = (await who.json()).login;
+
+    const repo = await call(`/repos/${REPO}`);
+    if (repo.status === 404) {
+      return { ok: false, msg: `${login} 계정으로는 이 저장소가 보이지 않습니다 (404).\n`
+        + 'Classic 토큰이면 repo 권한을, Fine-grained 토큰이면 이 저장소를 접근 대상에 넣고\n'
+        + 'Contents 를 Read and write 로 주세요.' };
+    }
+    if (!repo.ok) {
+      return { ok: false, msg: `저장소 확인 실패 (${repo.status}). 조직 정책으로 막혔을 수 있습니다.` };
+    }
+    const perms = (await repo.json()).permissions || {};
+    if (!perms.push) {
+      return { ok: false, msg: `${login} 계정은 읽기만 됩니다.\n`
+        + '쓰기 권한이 없으면 토글이 커밋을 만들지 못합니다. 토큰 권한을 Read and write 로 올려 주세요.' };
+    }
+    return { ok: true, msg: `${login} 계정으로 쓰기까지 확인했습니다.` };
+  }
+
   $('patApply').addEventListener('click', async () => {
-    setPat($('patInput').value.trim());
-    $('patModal').classList.remove('is-open');
+    const pat = $('patInput').value.trim();
+    if (!pat) { patStatus('토큰을 넣어 주세요.', 'bad'); return; }
+
+    $('patApply').disabled = true;
+    patStatus('확인하는 중…', 'busy');
+    const res = await verifyPat(pat);
+    $('patApply').disabled = false;
+
+    if (!res.ok) { patStatus(res.msg, 'bad'); return; }   // 틀린 토큰은 저장하지 않는다
+
+    setPat(pat);
+    patStatus(res.msg, 'ok');
+    setTimeout(() => $('patModal').classList.remove('is-open'), 700);
     if (STATE.pendingToggle) {
       const { id, nextPublished } = STATE.pendingToggle;
       STATE.pendingToggle = null;
@@ -242,9 +305,18 @@
       render();
     } catch (err) {
       console.error(err);
-      toast('토글 실패: ' + err.message.slice(0, 80), 'error');
+      const m = /→ (\d{3})/.exec(err.message);
+      const code = m ? m[1] : '';
+      const why = {
+        401: '토큰이 만료됐거나 잘못됐습니다.',
+        403: '권한이 막혀 있습니다. 조직 정책이나 토큰 설정을 확인해 주세요.',
+        404: '저장소가 보이지 않습니다. 토큰에 이 저장소 쓰기 권한이 필요합니다.',
+        409: '다른 곳에서 먼저 바뀌었습니다. 새로고침 뒤 다시 눌러 주세요.',
+        422: '요청이 거부됐습니다. 파일이 그사이 바뀌었을 수 있습니다.',
+      }[code];
+      toast(why ? `토글 실패 (${code}). ${why}` : '토글 실패: ' + err.message.slice(0, 90), 'error');
       revertCheckbox(id, !nextPublished);
-      if (/401|PAT 없음/.test(err.message)) openPatModal();
+      if (!code || /^(401|403|404)$/.test(code)) openPatModal(why || '');
     } finally {
       if (row) row.classList.remove('is-busy');
     }
