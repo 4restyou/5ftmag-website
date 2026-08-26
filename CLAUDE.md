@@ -64,6 +64,7 @@ PR 생성 후 **CI 통과**하면 **사용자가 "배포하지 마" / "PR 만 �
   - **Netlify** — `main` 머지 시 정적 사이트 자동 빌드/배포 (1–2분).
   - **db-deploy** — `supabase/migrations/**` 변경 시 `supabase db push --include-all`.
   - **functions-deploy** — `supabase/functions/**` 변경 시 전 함수 디렉토리 스캔 배포(`--no-verify-jwt`, 함수가 자체 인증).
+  - **feeds-sync** — `data/stories.json` 변경 시 `rss.xml`·`sitemap.xml` 을 재생성해 뒤따라 커밋한다. 관리 페이지 토글이 stories.json 만 커밋하는 탓에 main 의 CI 가 드리프트로 실패하던 것을 막는다.
 
 ### 배포 루프 (표준 절차)
 

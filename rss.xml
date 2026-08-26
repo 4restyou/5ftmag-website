@@ -6,13 +6,31 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Mon, 24 Aug 2026 08:21:14 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 26 Aug 2026 08:18:15 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>박스 스피드를 다시 매겼다</title>
+      <link>https://www.5ftmag.com/stories/harman-phoenix-125.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/harman-phoenix-125.html</guid>
+      <pubDate>Mon, 24 Aug 2026 00:00:00 GMT</pubDate>
+      <description>하만이 단종했던 오리지널 Phoenix 를 ISO 125 로 다시 내놓는다. 사용자들이 실제로 노출하던 감도에 맞춰 박스 스피드를 바꾼 드문 사례다. 후속작 Phoenix II 와는 다른 제품이다.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Film Social Club</dc:creator>
+    </item>
+    <item>
+      <title>후지 84에서 68, 코닥 81에서 71</title>
+      <link>https://www.5ftmag.com/stories/japan-film-survey-2025.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/japan-film-survey-2025.html</guid>
+      <pubDate>Mon, 24 Aug 2026 00:00:00 GMT</pubDate>
+      <description>일본 필름 사진가 1,337명 설문. 코닥이 후지를 앞섰지만 두 브랜드 모두 사용률이 떨어졌다. 경력 10년 이상의 40%가 촬영을 줄인 자리를 신규 유입이 채웠다. 현상소를 고르는 첫 기준은 가격(24%)이 아니라 현상·스캔 품질(41%)이다. 국내 현상소 92곳 가격도 함께 집계했다.</description>
+      <category>FILM</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>58년 전 영화가 4K에서도 선명한 이유</title>
       <link>https://www.5ftmag.com/stories/2001-space-odyssey.html</link>

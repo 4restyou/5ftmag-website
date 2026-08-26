@@ -1,0 +1,50 @@
+# 관리 페이지(admin/articles.html) 의 공개/비공개 토글은 GitHub Contents API 로
+# data/stories.json 한 파일만 커밋한다. 그런데 qa-smoke 는 발행 글이 rss.xml·
+# sitemap.xml 에도 들어가 있는지 검사하므로, 토글할 때마다 main 의 CI 가 드리프트로
+# 실패했다. 이 워크플로우가 토글 직후 두 파일을 재생성해 뒤따라 커밋한다.
+#
+# 두 빌더는 로컬 파일(data/*.json)만 읽으므로 DB 접근이나 시크릿이 필요 없다.
+name: feeds-sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/stories.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: feeds-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: rss·sitemap 재생성
+        run: npm run build:rss && npm run build:sitemap
+      - name: 바뀐 것이 있으면 커밋
+        run: |
+          if git diff --quiet -- rss.xml sitemap.xml; then
+            echo "드리프트 없음 — 커밋하지 않는다"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rss.xml sitemap.xml
+          git commit -m "chore(feeds): rss·sitemap 을 stories.json 에 맞춘다"
+          # 토글이 연달아 들어오면 main 이 앞서 있을 수 있으므로 rebase 후 푸시한다.
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            echo "푸시 재시도 $i"; sleep 5
+          done
+          exit 1
