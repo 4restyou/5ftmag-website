@@ -44,7 +44,9 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
 
 `npm run writing:check stories/<파일>.html` 로 AI 글쓰기 흔적을 센다.
 
+- **자연도 등급 A 를 목표로 한다.** S1 0 건 + 임계치를 넘긴 S2 2 종 이하. 화면에서 `←` 가 붙은 줄이 임계치를 넘긴 것이다.
 - **S1 은 0 으로 만든다.** "~에 대해", "~에 있어", "가지고 있다", 이중 피동, "그녀/그것/그들", 이모지, 상투 종결구.
+- **제목 안의 대시·콜론은 그대로 둔다.** 공식 전시명·작품명은 원문이라 검사기도 세지 않는다.
 - **K-1 "A 가 아니라 B" 는 스무 문장당 1회를 넘기지 않는다.** 가장 자주 나오는 항목이다. 고치는 방법은 결론만 남기기, 의문문으로 바꾸기, 문장 나누기, 대구로 풀기. 논지 자체가 대조인 자리는 남긴다.
 - **K-2 캡션이 본문 문장을 그대로 되풀이하면 0 으로.** 캡션은 사진에 보이는 것을 짚는다.
 - **K-3 긴 글이면 의문문을 한두 번 섞는다.**
@@ -57,7 +59,7 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
 
 - `data/stories.json` **최상단**에 항목 삽입 (id, title, excerpt, date=오늘, category, categoryLabel, author, films[슬러그 — data/films.json 에서 확인], manual: true, page, published: true, thumbnail).
 - `node scripts/validate-assets.mjs` — webp 페어 경고까지 0 이어야 함.
-- `npm run writing:check stories/<파일>.html` — S1 0 확인 (3.5 에서 이미 돌렸다면 재확인만).
+- `npm run writing:check stories/<파일>.html` — 자연도 등급 A 확인 (3.5 에서 이미 돌렸다면 재확인만).
 - 공개 상태(`published: true`)로 등록했다면 `npm run build:rss && npm run build:sitemap` 을 돌려 함께 커밋한다.
   CI 의 qa-smoke 가 커밋된 두 파일에 발행 글이 들어 있는지 검사하므로, 빠뜨리면 main 이 빨간색이 된다.
   비공개(`published: false`)로 넣는 경우엔 두 파일에 들어가지 않는 것이 정상이라 그대로 두면 된다.
