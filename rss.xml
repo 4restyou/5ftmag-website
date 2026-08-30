@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Wed, 26 Aug 2026 08:18:15 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 30 Aug 2026 07:23:46 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>2026 / 9, 이달의 사진 전시</title>
+      <link>https://www.5ftmag.com/stories/sep-2026-exhibitions.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/sep-2026-exhibitions.html</guid>
+      <pubDate>Sun, 30 Aug 2026 00:00:00 GMT</pubDate>
+      <description>9월엔 사진가의 확대기 여섯 대가 미술관이 된다. 김포 제리 율스만 기념관 개관, 대구사진비엔날레 특별전, 대전포토페스티벌 〈노동〉, 인천국제현대사진전까지. 이번 달은 서울 바깥이 바쁘다.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>박스 스피드를 다시 매겼다</title>
       <link>https://www.5ftmag.com/stories/harman-phoenix-125.html</link>
