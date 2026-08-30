@@ -58,7 +58,9 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
 - `data/stories.json` **최상단**에 항목 삽입 (id, title, excerpt, date=오늘, category, categoryLabel, author, films[슬러그 — data/films.json 에서 확인], manual: true, page, published: true, thumbnail).
 - `node scripts/validate-assets.mjs` — webp 페어 경고까지 0 이어야 함.
 - `npm run writing:check stories/<파일>.html` — S1 0 확인 (3.5 에서 이미 돌렸다면 재확인만).
-- rss/sitemap 은 Netlify 빌드가 재생성하므로 커밋 불필요.
+- 공개 상태(`published: true`)로 등록했다면 `npm run build:rss && npm run build:sitemap` 을 돌려 함께 커밋한다.
+  CI 의 qa-smoke 가 커밋된 두 파일에 발행 글이 들어 있는지 검사하므로, 빠뜨리면 main 이 빨간색이 된다.
+  비공개(`published: false`)로 넣는 경우엔 두 파일에 들어가지 않는 것이 정상이라 그대로 두면 된다.
 
 ## 5. 배포
 
