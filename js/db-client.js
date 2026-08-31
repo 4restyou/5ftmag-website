@@ -1165,53 +1165,60 @@
       if (error) { console.warn('[analytics.summary]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
     },
-    async daily(days = 30) {
+    async daily(from = null, to = null) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_daily', { p_days: days });
+      const { data, error } = await c.rpc('admin_analytics_daily', { p_from: from, p_to: to });
       if (error) { console.warn('[analytics.daily]', error.message); return []; }
       return data || [];
     },
-    async topPaths(days = 7, limit = 20) {
+    async topPaths(from = null, to = null, limit = 20) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_top_paths', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_analytics_top_paths', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.topPaths]', error.message); return []; }
       return data || [];
     },
-    async referrers(days = 7, limit = 20) {
+    async referrers(from = null, to = null, limit = 20) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_referrers', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_analytics_referrers', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.referrers]', error.message); return []; }
       return data || [];
     },
-    async regions(days = 7, limit = 20) {
+    async regions(from = null, to = null, limit = 20) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_regions', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_analytics_regions', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.regions]', error.message); return []; }
       return data || [];
     },
-    async languages(days = 7, limit = 20) {
+    async languages(from = null, to = null, limit = 20) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_languages', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_analytics_languages', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.languages]', error.message); return []; }
       return data || [];
     },
-    async dwellSummary(days = 30) {
+    async dwellSummary(from = null, to = null) {
       const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_analytics_dwell_summary', { p_days: days });
+      const { data, error } = await c.rpc('admin_analytics_dwell_summary', { p_from: from, p_to: to });
       if (error) { console.warn('[analytics.dwellSummary]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
     },
-    async dwellByPath(days = 7, limit = 10) {
+    async dwellByPath(from = null, to = null, limit = 10) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_dwell_by_path', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_analytics_dwell_by_path', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.dwellByPath]', error.message); return []; }
       return data || [];
     },
-    async sessionStats(days = 30) {
+    async sessionStats(from = null, to = null) {
       const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_analytics_session_stats', { p_days: days });
+      const { data, error } = await c.rpc('admin_analytics_session_stats', { p_from: from, p_to: to });
       if (error) { console.warn('[analytics.sessionStats]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
+    },
+    // 전체 기간 라벨에 실제 시작일을 적기 위해 쓴다
+    async firstDay() {
+      const c = await ready();
+      const { data, error } = await c.rpc('admin_analytics_first_day');
+      if (error) { console.warn('[analytics.firstDay]', error.message); return null; }
+      return (data && data[0]) || null;
     },
     async uploadsSummary() {
       const c = client(); if (!c) return null;
@@ -1219,21 +1226,21 @@
       if (error) { console.warn('[analytics.uploadsSummary]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
     },
-    async uploadsDaily(days = 30) {
+    async uploadsDaily(from = null, to = null) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_daily', { p_days: days });
+      const { data, error } = await c.rpc('admin_uploads_daily', { p_from: from, p_to: to });
       if (error) { console.warn('[analytics.uploadsDaily]', error.message); return []; }
       return data || [];
     },
-    async uploadsTopContributors(days = 30, limit = 10) {
+    async uploadsTopContributors(from = null, to = null, limit = 10) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_contributors', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_uploads_top_contributors', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.uploadsTopContributors]', error.message); return []; }
       return data || [];
     },
-    async uploadsTopFilms(days = 30, limit = 10) {
+    async uploadsTopFilms(from = null, to = null, limit = 10) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_films', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_uploads_top_films', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return fallbackUploadsTop('film', { days, limit }); }
       return data?.length ? data : fallbackUploadsTop('film', { days, limit });
     },
@@ -1243,9 +1250,9 @@
       if (error) { console.warn('[analytics.uploadsTopFilmsAll]', error.message); return fallbackUploadsTop('film', { limit }); }
       return data?.length ? data : fallbackUploadsTop('film', { limit });
     },
-    async uploadsTopCameras(days = 30, limit = 10) {
+    async uploadsTopCameras(from = null, to = null, limit = 10) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_cameras', { p_days: days, p_limit: limit });
+      const { data, error } = await c.rpc('admin_uploads_top_cameras', { p_from: from, p_to: to, p_limit: limit });
       if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return fallbackUploadsTop('camera', { days, limit }); }
       return data?.length ? data : fallbackUploadsTop('camera', { days, limit });
     },
@@ -1255,9 +1262,9 @@
       if (error) { console.warn('[analytics.uploadsTopCamerasAll]', error.message); return fallbackUploadsTop('camera', { limit }); }
       return data?.length ? data : fallbackUploadsTop('camera', { limit });
     },
-    async uploadsThemeRatio(days = 30) {
+    async uploadsThemeRatio(from = null, to = null) {
       const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_uploads_theme_ratio', { p_days: days });
+      const { data, error } = await c.rpc('admin_uploads_theme_ratio', { p_from: from, p_to: to });
       if (error) { console.warn('[analytics.uploadsThemeRatio]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
     },

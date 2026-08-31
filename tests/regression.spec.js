@@ -1954,6 +1954,7 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
           total_views: 1000,
           total_sessions: 400,
         }),
+        firstDay: async () => ({ views_from: '2026-05-18', uploads_from: '2026-05-20' }),
         daily: async () => rows,
         topPaths: async () => [],
         referrers: async () => [],
@@ -2153,6 +2154,7 @@ test('관리 통계 상위 카메라는 띄어쓰기와 별칭 차이를 병합�
       },
       analytics: {
         summary: async () => null,
+        firstDay: async () => ({ views_from: '2026-05-18', uploads_from: '2026-05-20' }),
         daily: async () => rows,
         topPaths: async () => [],
         referrers: async () => [],

@@ -3,7 +3,10 @@
 const STATE = {
   user: null,
   isEditor: false,
-  days: 30,
+  preset: '30',        // '7' | '30' | '90' | 'all' | 'custom'
+  from: null,          // 'YYYY-MM-DD' 또는 null(하한 없음)
+  to: null,            // 'YYYY-MM-DD' 또는 null(오늘까지)
+  firstDay: null,      // 기록이 시작된 날. 전체 기간 라벨에 쓴다
   filmsMode: 'range',
   camerasMode: 'range',
   cameraAliasMap: new Map(),
@@ -50,6 +53,47 @@ function fmtDay(d) {
   const date = (d instanceof Date) ? d : new Date(d + 'T00:00:00');
   return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
 }
+
+// ── 기간 ──────────────────────────────────────────────────
+const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return isoDay(d); };
+const dotDay = (iso) => iso ? iso.replace(/-/g, '.') : '';
+
+// preset 을 실제 날짜 두 개로 바꾼다. 'all' 은 둘 다 null 이고, 서버가 전체로 읽는다.
+function applyPreset(preset) {
+  STATE.preset = preset;
+  if (preset === 'all')      { STATE.from = null; STATE.to = null; return; }
+  if (preset === 'custom')   { return; }              // 입력칸 값을 그대로 쓴다
+  const n = Number(preset);
+  STATE.from = daysAgo(n - 1);
+  STATE.to   = isoDay(new Date());
+}
+
+function rangeLabel() {
+  if (STATE.preset === 'all') {
+    return STATE.firstDay ? `전체 기간 (${dotDay(STATE.firstDay)}부터)` : '전체 기간';
+  }
+  if (STATE.preset === 'custom') {
+    return `${dotDay(STATE.from) || '처음'} – ${dotDay(STATE.to) || '오늘'}`;
+  }
+  return `최근 ${STATE.preset}일`;
+}
+
+// 구간이 길면 막대가 실오라기처럼 가늘어져 읽히지 않는다. 주 단위로 묶는다.
+// 삼 년을 넘기면 달 단위로 한 번 더 묶는다.
+function bucketDays(rows, keys) {
+  if (rows.length <= 120) return rows;
+  const size = rows.length > 800 ? 30 : 7;
+  const out = [];
+  for (let i = 0; i < rows.length; i += size) {
+    const chunk = rows.slice(i, i + size);
+    const merged = { day: chunk[0].day, span: chunk.length };
+    for (const k of keys) merged[k] = chunk.reduce((a, r) => a + Number(r[k] || 0), 0);
+    out.push(merged);
+  }
+  return out;
+}
+const spanNote = (r) => (r.span > 1 ? ` (${r.span}일 합계)` : '');
 
 function fmtClock(date = new Date()) {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
@@ -228,13 +272,13 @@ function drawBarChart(svgId, tipId, rows, valueKey, tipFormatter) {
 }
 
 function renderChart(rows) {
-  drawBarChart('chart', 'chartTip', rows, 'views',
-    r => `${fmtDay(r.day)} · ${fmtNum(r.views)} 뷰 · ${fmtNum(r.sessions)} 세션`);
+  drawBarChart('chart', 'chartTip', bucketDays(rows, ['views', 'sessions']), 'views',
+    r => `${fmtDay(r.day)}${spanNote(r)} · ${fmtNum(r.views)} 뷰 · ${fmtNum(r.sessions)} 세션`);
 }
 
 function renderUploadChart(rows) {
-  drawBarChart('uploadChart', 'uploadChartTip', rows, 'uploads',
-    r => `${fmtDay(r.day)} · ${fmtNum(r.uploads)} 업로드 · 승인 ${fmtNum(r.approved)}`);
+  drawBarChart('uploadChart', 'uploadChartTip', bucketDays(rows, ['uploads', 'approved']), 'uploads',
+    r => `${fmtDay(r.day)}${spanNote(r)} · ${fmtNum(r.uploads)} 업로드 · 승인 ${fmtNum(r.approved)}`);
 }
 
 function niceCeil(n) {
@@ -901,8 +945,8 @@ function renderEbookSales(products, sales) {
 }
 
 async function reload() {
-  const d = STATE.days;
-  const label = `최근 ${d}일`;
+  const f = STATE.from, t = STATE.to;
+  const label = rangeLabel();
   $('chartRangeLabel').textContent  = label;
   $('topRangeLabel').textContent    = label;
   $('refRangeLabel').textContent    = label;
@@ -916,8 +960,8 @@ async function reload() {
   $('topFilmsRangeLabel').textContent    = STATE.filmsMode   === 'all' ? '전체 누적' : label;
   $('topCamerasRangeLabel').textContent  = STATE.camerasMode === 'all' ? '전체 누적' : label;
 
-  const topFilmsFn   = STATE.filmsMode   === 'all' ? db().analytics.uploadsTopFilmsAll(10)   : db().analytics.uploadsTopFilms(d, 10);
-  const topCamerasFn = STATE.camerasMode === 'all' ? db().analytics.uploadsTopCamerasAll(200) : db().analytics.uploadsTopCameras(d, 200);
+  const topFilmsFn   = STATE.filmsMode   === 'all' ? db().analytics.uploadsTopFilmsAll(10)   : db().analytics.uploadsTopFilms(f, t, 10);
+  const topCamerasFn = STATE.camerasMode === 'all' ? db().analytics.uploadsTopCamerasAll(200) : db().analytics.uploadsTopCameras(f, t, 200);
 
   const [
     summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths,
@@ -925,20 +969,20 @@ async function reload() {
     ebookProducts, ebookSales,
   ] = await Promise.all([
     db().analytics.summary(),
-    db().analytics.daily(d),
-    db().analytics.topPaths(d, 10),
-    db().analytics.referrers(d, 15),
-    db().analytics.regions(d, 20),
-    db().analytics.languages(d, 15),
-    db().analytics.sessionStats(d),
-    db().analytics.dwellSummary(d),
-    db().analytics.dwellByPath(d, 10),
+    db().analytics.daily(f, t),
+    db().analytics.topPaths(f, t, 10),
+    db().analytics.referrers(f, t, 15),
+    db().analytics.regions(f, t, 20),
+    db().analytics.languages(f, t, 15),
+    db().analytics.sessionStats(f, t),
+    db().analytics.dwellSummary(f, t),
+    db().analytics.dwellByPath(f, t, 10),
     db().analytics.uploadsSummary(),
-    db().analytics.uploadsDaily(d),
-    db().analytics.uploadsTopContributors(d, 10),
+    db().analytics.uploadsDaily(f, t),
+    db().analytics.uploadsTopContributors(f, t, 10),
     topFilmsFn,
     topCamerasFn,
-    db().analytics.uploadsThemeRatio(d),
+    db().analytics.uploadsThemeRatio(f, t),
     getPendingReportCount(),
     (db().ebooks && db().ebooks.listAll) ? db().ebooks.listAll() : Promise.resolve([]),
     (db().ebooks && db().ebooks.salesByProduct) ? db().ebooks.salesByProduct() : Promise.resolve({}),
@@ -966,13 +1010,35 @@ async function reload() {
   renderEbookSales(ebookProducts, ebookSales);
 }
 
+function markCurrent(preset) {
+  document.querySelectorAll('.range-btn').forEach(b => {
+    b.classList.toggle('is-current', b.dataset.range === preset);
+  });
+}
+
 document.querySelectorAll('.range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('is-current'));
-    btn.classList.add('is-current');
-    STATE.days = Number(btn.dataset.days) || 30;
+    applyPreset(btn.dataset.range || '30');
+    markCurrent(STATE.preset);
+    // 입력칸을 지금 구간으로 맞춰 둔다. 다음에 직접 고칠 때 기준점이 된다.
+    $('rangeFrom').value = STATE.from || '';
+    $('rangeTo').value   = STATE.to   || '';
     reload();
   });
+});
+
+$('rangeApply').addEventListener('click', () => {
+  const from = $('rangeFrom').value || null;
+  const to   = $('rangeTo').value   || null;
+  if (from && to && from > to) {
+    alert('시작일이 종료일보다 뒤입니다.\n두 날짜를 바꿔서 넣어 주세요.');
+    return;
+  }
+  STATE.from = from;
+  STATE.to   = to;
+  applyPreset(from || to ? 'custom' : 'all');
+  markCurrent(STATE.preset);
+  reload();
 });
 
 document.querySelectorAll('.top-mode').forEach(group => {
@@ -1031,6 +1097,24 @@ async function purgeClientErrors() {
   $('gate').hidden = true;
   $('app').hidden = false;
   $('clientErrorsPurgeBtn')?.addEventListener('click', purgeClientErrors);
+
+  applyPreset('30');
+  markCurrent('30');
+  $('rangeFrom').value = STATE.from || '';
+  $('rangeTo').value   = STATE.to   || '';
+  // 기록이 시작된 날. 전체 기간 라벨에 쓰고, 입력칸의 하한으로도 둔다.
+  // 라벨을 꾸미는 부가 기능이라 실패해도 화면을 막지 않는다. 못 받으면
+  // 라벨이 "전체 기간" 으로만 나오고 나머지는 그대로 돈다.
+  Promise.resolve(db().analytics.firstDay?.()).then((row) => {
+    if (!row) return;
+    const first = [row.views_from, row.uploads_from].filter(Boolean).sort()[0];
+    if (!first) return;
+    STATE.firstDay = first;
+    $('rangeFrom').min = first;
+    $('rangeTo').min   = first;
+    if (STATE.preset === 'all') reload();
+  }).catch(() => {});
+
   await Promise.all([loadThumbnailDebt(), loadClientErrors()]);
   await reload();
   startOpsWatch();

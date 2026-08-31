@@ -36,6 +36,14 @@
     .range-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 6px 14px; border-radius: 999px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text); transition: background .15s, border-color .15s, color .15s; }
     .range-btn:hover { border-color: var(--text); }
     .range-btn.is-current { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .range-sep { width: 1px; align-self: stretch; background: var(--border); margin: 0 4px; }
+    .range-date input { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+    .range-date input:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+    .range-tilde { color: var(--text-muted); font-size: 13px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    @media (max-width: 560px) { .range-sep { display: none; } }
     .top-mode { display: inline-flex; gap: 4px; margin-top: 6px; }
     .top-mode-btn { font: inherit; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.04em; padding: 3px 10px; border-radius: 999px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: background .15s, border-color .15s, color .15s; }
     .top-mode-btn:hover { border-color: var(--text); color: var(--text); }
@@ -217,9 +225,17 @@
 
   <div class="range-row">
     <span class="label">기간</span>
-    <button type="button" class="range-btn" data-days="7">7일</button>
-    <button type="button" class="range-btn is-current" data-days="30">30일</button>
-    <button type="button" class="range-btn" data-days="90">90일</button>
+    <button type="button" class="range-btn" data-range="7">7일</button>
+    <button type="button" class="range-btn is-current" data-range="30">30일</button>
+    <button type="button" class="range-btn" data-range="90">90일</button>
+    <button type="button" class="range-btn" data-range="all">전체</button>
+    <span class="range-sep" aria-hidden="true"></span>
+    <label class="range-date"><span class="sr-only">시작일</span>
+      <input type="date" id="rangeFrom" aria-label="시작일"></label>
+    <span class="range-tilde">–</span>
+    <label class="range-date"><span class="sr-only">종료일</span>
+      <input type="date" id="rangeTo" aria-label="종료일"></label>
+    <button type="button" class="range-btn" id="rangeApply">적용</button>
   </div>
 
   <section class="ops-panel">
@@ -475,13 +491,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/db/commerce.js?v=20260712-modules" defer></script>
-  <script src="../js/db-client.js?v=20260803-arch" defer></script>
+  <script src="../js/db-client.js?v=20260830-daterange" defer></script>
 <script src="../js/util.js?v=20260817-photodiv" defer></script>
   <script src="../js/site-telemetry.js?v=20260712-modules" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="../js/site-common.js?v=20260820-authkeep" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/admin-analytics-page.js?v=20260803-arch" defer></script>
+<script src="../js/admin-analytics-page.js?v=20260830-daterange" defer></script>
 
 </body>
 </html>
