@@ -1103,7 +1103,9 @@ async function purgeClientErrors() {
   $('rangeFrom').value = STATE.from || '';
   $('rangeTo').value   = STATE.to   || '';
   // 기록이 시작된 날. 전체 기간 라벨에 쓰고, 입력칸의 하한으로도 둔다.
-  db().analytics.firstDay().then((row) => {
+  // 라벨을 꾸미는 부가 기능이라 실패해도 화면을 막지 않는다. 못 받으면
+  // 라벨이 "전체 기간" 으로만 나오고 나머지는 그대로 돈다.
+  Promise.resolve(db().analytics.firstDay?.()).then((row) => {
     if (!row) return;
     const first = [row.views_from, row.uploads_from].filter(Boolean).sort()[0];
     if (!first) return;
@@ -1111,7 +1113,7 @@ async function purgeClientErrors() {
     $('rangeFrom').min = first;
     $('rangeTo').min   = first;
     if (STATE.preset === 'all') reload();
-  });
+  }).catch(() => {});
 
   await Promise.all([loadThumbnailDebt(), loadClientErrors()]);
   await reload();
