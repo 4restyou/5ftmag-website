@@ -1049,6 +1049,36 @@ body {
   .article-body figure.on-white.product-pair { grid-template-columns: 1fr; }
 }
 
+/* ════════ 이 글에 나온 필름 (article 끝 inject) ════════ */
+/* 기사 → 카탈로그. 반대 방향(카탈로그 모달의 "이 필름으로 쓴 글")은 films-page 에 있다. */
+.article-films {
+  max-width: var(--read-width);
+  margin: 72px auto 0;
+  padding: 0 24px;
+}
+.article-films-head {
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+}
+.article-films-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.article-film-chip {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);   /* .article-body a 의 밑줄 규칙을 덮는다 */
+  transition: border-color .15s ease, background .15s ease;
+}
+.article-film-chip:hover { border-color: var(--text); background: var(--bg-sub); }
+
 /* ════════ Author bio + Related by author (article 끝 inject) ════════ */
 .article-author-bio {
   max-width: var(--read-width);
@@ -1132,6 +1162,7 @@ body {
 }
 @media (max-width: 720px) {
   .related-grid { grid-template-columns: 1fr; gap: 24px; }
+  .article-films { margin-top: 48px; }
   .article-author-bio { margin-top: 56px; }
   .related-by-author { margin-top: 40px; }
 }

@@ -57,7 +57,12 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
 
 ## 4. 등록 + 검증
 
-- `data/stories.json` **최상단**에 항목 삽입 (id, title, excerpt, date=오늘, category, categoryLabel, author, films[슬러그 — data/films.json 에서 확인], manual: true, page, published: true, thumbnail).
+- `data/stories.json` **최상단**에 항목 삽입 (id, title, excerpt, date=오늘, category, categoryLabel, author, films, manual: true, page, published: true, thumbnail).
+- **`films` 를 반드시 채운다.** 본문에 두 번 이상 나온 카탈로그 필름의 슬러그를 넣는다(`data/films.json` 에서 확인). 이 배열 하나가 세 곳을 동시에 켠다.
+  - 기사 하단 「이 글에 나온 필름」 칩 → 카탈로그 (`article-author-bio.js`)
+  - 카탈로그 모달의 「이 필름으로 쓴 글 N편」 링크와 카드 배지 (`films-page.js`)
+  - `/film/<슬러그>.html` 의 「… 를 다룬 글」 목록 (`build-film-pages.mjs`)
+  - 비우면 세 곳 다 안 뜬다. 한 번 스친 언급은 넣지 않는다. 그러면 "이 필름으로 쓴 글" 이라는 말이 거짓이 된다.
 - `node scripts/validate-assets.mjs` — webp 페어 경고까지 0 이어야 함.
 - `npm run writing:check stories/<파일>.html` — 자연도 등급 A 확인 (3.5 에서 이미 돌렸다면 재확인만).
 - 공개 상태(`published: true`)로 등록했다면 `npm run build:rss && npm run build:sitemap` 을 돌려 함께 커밋한다.

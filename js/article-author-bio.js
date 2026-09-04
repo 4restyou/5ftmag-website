@@ -19,8 +19,45 @@
 
   const currentPath = location.pathname.replace(/^\//, '');
 
+  buildFilmChips(stories, currentPath);
   buildAuthorBio(authors, stories, currentPath);
   buildPrevNext(stories, currentPath);
+
+  // ── 이 글에 나온 필름 → 카탈로그 ──
+  // 필름 → 기사 방향(카탈로그 모달의 "이 필름으로 쓴 글")은 이미 있었다.
+  // 반대 방향이 없어서 기사를 읽고 카탈로그로 넘어갈 길이 없었다.
+  // 링크는 상세 페이지가 아니라 카탈로그로 보낸다(독자 동선 규칙).
+  async function buildFilmChips(stories, currentPath) {
+    const current = stories.find((s) => s.page === currentPath);
+    const slugs = (current && Array.isArray(current.films)) ? current.films : [];
+    if (!slugs.length) return;                       // 대부분의 기사는 여기서 끝난다
+
+    let films = {};
+    try { films = await fetch('/data/films.json').then((r) => r.json()); } catch (_) { return; }
+
+    const items = slugs
+      .map((slug) => ({ slug, name: films[slug] && (films[slug].displayName || films[slug].name) }))
+      .filter((x) => x.name);                        // 카탈로그에서 사라진 슬러그는 건너뛴다
+    if (!items.length) return;
+
+    const sec = document.createElement('section');
+    sec.className = 'article-films';
+    sec.innerHTML = `
+      <h4 class="article-films-head">이 글에 나온 필름</h4>
+      <div class="article-films-chips">
+        ${items.map((x) => `
+          <a class="article-film-chip" href="/films.html?film=${encodeURIComponent(x.slug)}">
+            ${escapeText(x.name)}
+          </a>`).join('')}
+      </div>`;
+
+    // .article-end 앞에 끼운다. bio 보다 위라 본문 흐름에 바로 이어진다.
+    const shareBar = articleEl.querySelector('.share-bar');
+    let ref = shareBar;
+    while (ref && ref.parentNode !== articleEl) ref = ref.parentNode;
+    if (ref) articleEl.insertBefore(sec, ref);
+    else articleEl.appendChild(sec);
+  }
 
   // ── 작가 bio + 같은 작가 다른 글 ──
   function buildAuthorBio(authors, stories, currentPath) {

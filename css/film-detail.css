@@ -139,6 +139,30 @@
 .film-detail-siblings a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .film-detail-siblings span { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
 
+/* 이 필름을 다룬 글. 형제 필름 목록과 같은 결이되 제목이 길어 한 단으로 둔다. */
+.film-detail-articles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.film-detail-articles li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.film-detail-articles a { color: inherit; text-decoration: none; font-weight: var(--fw-heading); }
+.film-detail-articles a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.film-detail-articles span {
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
 .film-detail-cta {
   margin-top: 48px;
   padding: 24px;
