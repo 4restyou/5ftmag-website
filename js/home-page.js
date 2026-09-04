@@ -764,6 +764,71 @@
   }
 
   // ════════════════════════════
+  // ── 이주의 사진 ──
+  // 편집부가 고른 한 장. 선정된 것이 없으면 섹션째 숨어 있으므로, 아무것도
+  // 안 걸린 주에도 홈이 비어 보이지 않는다.
+  // 사진 자체가 바뀌는 것이 갱신 신호라 날짜는 화면에 찍지 않는다. 날짜를 박으면
+  // 한 주 걸렀을 때 그 라벨이 사이트가 멈춘 증거로 남는다.
+  (async () => {
+    const sec  = document.getElementById('potw');
+    const mSec = document.getElementById('mhPotw');
+    if (!sec && !mSec) return;
+    for (let i = 0; i < 60 && !(window.MagDB && window.MagDB.isReady()); i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    let pick = null;
+    try { pick = await window.MagDB?.submissions?.featuredCurrent?.(); } catch (_) { return; }
+    if (!pick || !pick.image) return;
+
+    const author = pick.submitterName || pick.instagram || '';
+    const altText = [author, pick.film].filter(Boolean).join(', ') || '이주의 사진';
+
+    // 라이트박스·♡·공유는 Photo 그리드 것을 그대로 쓴다. 한 장짜리 목록으로 넘긴다.
+    const openIt = () => openPhotoLightbox([{
+      source: 'reader',
+      src: pick.image,
+      author,
+      filmName: pick.film || '',
+      filmKey: resolveFilmKeyByName(pick.film),
+      camera: pick.camera || '',
+      caption: pick.caption || '',
+      instagram: pick.instagram || '',
+      instagramUrl: pick.instagramUrl || '',
+      submissionId: typeof pick.id === 'string' ? pick.id.replace(/^sub-/, '') : '',
+    }], 0);
+
+    // 데스크톱 — 마크업이 index.html 에 이미 있다
+    if (sec) {
+      const img = document.getElementById('potwImg');
+      img.src = pick.image;
+      img.alt = altText;
+      const note = document.getElementById('potwNote');
+      if (pick.featuredNote) { note.textContent = pick.featuredNote; note.hidden = false; }
+      document.getElementById('potwAuthor').textContent = author;
+      document.getElementById('potwFilm').textContent = pick.film || '';
+      document.getElementById('potwShot').addEventListener('click', openIt);
+      sec.hidden = false;
+    }
+
+    // 모바일 — 빈 자리에 만들어 넣는다. #mhBody 는 보기 전환마다 갈아끼워지므로
+    // 그 바깥에 두어야 사진이 사라지지 않는다.
+    if (mSec) {
+      const esc = window.MagUtil.escapeHtml;
+      mSec.innerHTML = `
+        <h3 class="mh-potw-head" id="mhPotwHead">이주의 사진<span>편집부가 고른 한 장</span></h3>
+        <button type="button" class="mh-potw-shot">
+          <img src="${esc(pick.image)}" alt="${esc(altText)}" decoding="async" />
+        </button>
+        ${pick.featuredNote ? `<p class="mh-potw-note">${esc(pick.featuredNote)}</p>` : ''}
+        <p class="mh-potw-by">
+          <span class="mh-potw-author">${esc(author)}</span>
+          <span>${esc(pick.film || '')}</span>
+        </p>`;
+      mSec.querySelector('.mh-potw-shot').addEventListener('click', openIt);
+      mSec.hidden = false;
+    }
+  })();
+
   // Photo 라이트박스 (통합 — editorial + 독자 사진)
   // ════════════════════════════
   const photoLightbox  = document.getElementById('photoLightbox');
