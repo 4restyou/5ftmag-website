@@ -16,6 +16,7 @@ import { ROOT, navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
 const FILMS_JSON = path.join(ROOT, 'data/films.json');
 const OUT_DIR = path.join(ROOT, 'film');
 const REFERENCE_PAGE = path.join(ROOT, 'films.html');
+const STORIES_JSON = path.join(ROOT, 'data/stories.json');
 
 const ORIGIN = 'https://www.5ftmag.com';
 const SITE_NAME = '5ft magazine';
@@ -193,7 +194,7 @@ ${html}
   return false;
 }
 
-function render(film, sameBrand, versioned, outFile) {
+function render(film, sameBrand, versioned, outFile, articles) {
   const name = displayNameOf(film);
   const title = `${name} | 5ft magazine`;
   const description = descriptionOf(film);
@@ -227,6 +228,16 @@ ${photos.map((photo) => `          <figure>
 ${photo.author ? `            <figcaption>${esc(photo.author)}</figcaption>` : ''}
           </figure>`).join('\n')}
         </div>
+      </section>` : '';
+
+  // 이 필름을 다룬 기사. data/stories.json 의 films 배열이 근거다.
+  // 카탈로그 모달의 "이 필름으로 쓴 글" 링크도 같은 데이터를 쓴다.
+  const articleHtml = (articles && articles.length) ? `
+      <section class="film-detail-block">
+        <h2>${esc(name)} 를 다룬 글</h2>
+        <ul class="film-detail-articles">
+${articles.map((st) => `          <li><a href="/${esc(st.page)}">${esc(st.title)}</a><span>${esc(st.categoryLabel || '')}</span></li>`).join('\n')}
+        </ul>
       </section>` : '';
 
   const brandHtml = sameBrand.length ? `
@@ -310,7 +321,8 @@ ${jsonLd(film, sameBrand)}
   </div>
 ${aliasHtml}
 ${photosHtml}
-${brandHtml}
+${articleHtml}
+      ${brandHtml}
 
   <section class="film-detail-block film-reader" id="filmReaderPhotos" hidden
            data-film-slug="${esc(film.slug)}"
@@ -371,6 +383,21 @@ ${brandHtml}
     byBrand.get(film.brand).push(film);
   }
 
+  // 필름 슬러그 → 그 필름을 다룬 발행 기사 (최신순)
+  const storiesRaw = await fs.readFile(STORIES_JSON, 'utf-8').catch(() => null);
+  const byFilm = new Map();
+  if (storiesRaw) {
+    const stories = JSON.parse(storiesRaw)
+      .filter((st) => st.published !== false && Array.isArray(st.films) && st.films.length)
+      .sort((x, y) => String(y.date || '').localeCompare(String(x.date || '')));
+    for (const st of stories) {
+      for (const slug of st.films) {
+        if (!byFilm.has(slug)) byFilm.set(slug, []);
+        byFilm.get(slug).push(st);
+      }
+    }
+  }
+
   await fs.mkdir(OUT_DIR, { recursive: true });
 
   for (const film of films) {
@@ -378,9 +405,10 @@ ${brandHtml}
       .filter((other) => other.slug !== film.slug)
       .slice(0, SAME_BRAND_LIMIT);
     const outFile = path.join(OUT_DIR, `${film.slug}.html`);
-    await fs.writeFile(outFile, render(film, sameBrand, versioned, outFile), 'utf-8');
+    await fs.writeFile(outFile, render(film, sameBrand, versioned, outFile, byFilm.get(film.slug)), 'utf-8');
   }
   const indexUpdated = await writeFilmIndex(films);
   console.log(`[build-film-pages] ${films.length}개 필름 상세 페이지 생성: ${path.relative(ROOT, OUT_DIR)}/`);
   console.log(`[build-film-pages] films.html 전체 목록 ${indexUpdated ? '갱신' : '변경 없음'}`);
+  console.log(`[build-film-pages] 기사가 연결된 필름 ${byFilm.size}종`);
 })();

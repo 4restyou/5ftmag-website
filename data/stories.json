@@ -53,7 +53,11 @@
     "issue": "",
     "page": "stories/harman-phoenix-125.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "phoenix2",
+      "phoenix200"
+    ]
   },
   {
     "id": "japan-film-survey-2025",
@@ -254,7 +258,11 @@
     "excerpt": "로모그래피만 만들던 110 포맷에 Reflx Lab이 두 종을 더했다. 컬러 네거티브 Fortuna C200, 컬러 리버설 100R. 3D 프린트 카트리지에 24컷, 127 제작의 부산물로 태어난 필름.",
     "page": "stories/reflx-110-film.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "ektachrome100",
+      "luckycolor200"
+    ]
   },
   {
     "id": "leica-monopan-50",
@@ -268,7 +276,11 @@
     "excerpt": "라이카 I 100주년에 맞춰 나온 라이카의 첫 35mm 흑백 필름. ISO 50 초미립자, 280 line pairs/mm, 근적외선까지 뻗는 적색 감도. 그런데 뚜껑을 열면 아비포트가 있다 — 가장 솔직한 리뷰.",
     "page": "stories/leica-monopan-50.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "adoxhr50",
+      "monopan50"
+    ]
   },
   {
     "id": "jul-2026-exhibitions",
@@ -293,6 +305,8 @@
     "categoryLabel": "FILM",
     "author": "Film Social Club",
     "films": [
+      "portra400",
+      "portra800",
       "ultramax"
     ],
     "issue": "",
@@ -356,7 +370,12 @@
     "page": "stories/optik-opticolour-200.html",
     "published": true,
     "manual": true,
-    "films": []
+    "films": [
+      "lomoclassicolor200",
+      "luckycolor200",
+      "wolfennc400",
+      "wolfennc500"
+    ]
   },
   {
     "id": "lll-film-project",
@@ -371,7 +390,10 @@
     "page": "stories/lll-film-project.html",
     "published": true,
     "manual": true,
-    "films": []
+    "films": [
+      "orientalseagull100",
+      "orientalseagull400"
+    ]
   },
   {
     "id": "brisnap-01",
@@ -549,6 +571,7 @@
     "published": true,
     "manual": true,
     "films": [
+      "gold200",
       "kodacolor100",
       "kodacolor200",
       "portra160",
@@ -556,8 +579,7 @@
       "portra800",
       "tmax100",
       "tmax400",
-      "tmaxp3200",
-      "gold200"
+      "tmaxp3200"
     ]
   },
   {
@@ -602,12 +624,14 @@
     "published": true,
     "manual": true,
     "films": [
+      "ektachrome100",
+      "gp3100",
       "luckycolor200",
       "luckyshd100",
       "luckyshd400",
-      "gp3100",
+      "reflxlab250d",
       "reflxlab800t",
-      "reflxlab250d"
+      "vision500t"
     ]
   },
   {
@@ -638,7 +662,8 @@
     "published": true,
     "manual": true,
     "films": [
-      "cinestill800t"
+      "cinestill800t",
+      "vision500t"
     ]
   },
   {
@@ -711,11 +736,14 @@
     "published": true,
     "manual": true,
     "films": [
+      "cinestill800t",
+      "cinestillxx",
+      "doublex",
+      "gold200",
       "lomocolor800",
       "portra160",
-      "gold200",
-      "cinestill800t",
-      "cinestillxx"
+      "vision250d",
+      "vision500t"
     ]
   },
   {
@@ -732,7 +760,8 @@
     "published": true,
     "manual": true,
     "films": [
-      "cinestill800t"
+      "cinestill800t",
+      "tmax400"
     ]
   },
   {
@@ -775,7 +804,10 @@
     "excerpt": "5ft.mag Vol.01 창간호 구매자에게 함께 보내는 굿즈 두 가지. 조리개·셔터속도 노출표 카드와 필름 박스 스티커를 소개합니다.",
     "page": "stories/06.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "ultramax"
+    ]
   },
   {
     "id": "05",
@@ -789,7 +821,11 @@
     "excerpt": "2024년, 펜탁스가 새 필름카메라를 만들었다. 하프 프레임 72컷, 가벼운 보디, 부담 없는 가격. Brisnap TV가 직접 써본 Pentax 17의 첫인상.",
     "page": "stories/05.html",
     "published": true,
-    "manual": true
+    "manual": true,
+    "films": [
+      "colorplus200",
+      "ultramax"
+    ]
   },
   {
     "id": "04",
@@ -847,6 +883,7 @@
     "published": true,
     "manual": true,
     "films": [
+      "cinestill800t",
       "ultramax"
     ]
   }
