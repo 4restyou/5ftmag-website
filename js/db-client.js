@@ -489,6 +489,8 @@
       caption: r.caption,
       createdAt: r.created_at,
       created_at: r.created_at,
+      featuredAt: r.featured_at || '',
+      featuredNote: r.featured_note || '',
       published: true,
       _source: 'submission',
     };
@@ -522,6 +524,21 @@
         if (page.length < (to - from + 1)) break;
       }
       return rows.map(mapApprovedSubmission);
+    },
+    // 이주의 사진 — 오늘 기준으로 가장 최근에 선정된 사진 하나.
+    // "이번 주에 올라온" 이 아니라 "이번 주에 선정된" 이라, created_at 이 아니라
+    // featured_at 으로 찾는다. 미래 날짜로 예약해 둔 것은 그 날이 되어야 걸린다.
+    async featuredCurrent() {
+      const c = client(); if (!c) return null;
+      const today = new Date().toISOString().slice(0, 10);
+      const { data, error } = await c.from('reader_submissions_approved')
+        .select('*')
+        .not('featured_at', 'is', null)
+        .lte('featured_at', today)
+        .order('featured_at', { ascending: false })
+        .limit(1);
+      if (error || !data?.length) return null;
+      return mapApprovedSubmission(data[0]);
     },
     async countApprovedByFilms(filmNames) {
       const c = client(); if (!c) return 0;
@@ -703,6 +720,36 @@
     async remove(id) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('reader_submissions').delete().eq('id', id);
+    },
+    // ── 이주의 사진 (편집부) ──
+    // 선정은 승인된 사진이면 무엇이든 가능하다. 좋아요 수는 고를 때 참고하는
+    // 값일 뿐 조건이 아니다. 좋아요를 안 누르는 독자가 많아서, 좋아요가 적다고
+    // 좋은 사진이 아닌 것은 아니다.
+    async setFeatured(id, dateStr, note) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))) {
+        return { error: { message: '날짜 형식이 올바르지 않습니다 (YYYY-MM-DD)' } };
+      }
+      return c.from('reader_submissions').update({
+        featured_at: dateStr,
+        featured_note: (note || '').trim().slice(0, 300) || null,
+      }).eq('id', id).select('id');
+    },
+    async clearFeatured(id) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      return c.from('reader_submissions').update({
+        featured_at: null, featured_note: null,
+      }).eq('id', id).select('id');
+    },
+    // 선정 목록 — 예약분까지 포함해 편집부가 일정을 본다 (미래 날짜 포함).
+    async listFeatured() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('reader_submissions')
+        .select('id, storage_path, submitter_name, instagram, film, featured_at, featured_note')
+        .not('featured_at', 'is', null)
+        .order('featured_at', { ascending: false });
+      if (error) return [];
+      return data || [];
     },
     // 편집부 전용 — 사진 좋아요 수 집계 (개인정보 노출 X)
     // RPC SECURITY DEFINER 함수가 caller 의 is_editor 검사

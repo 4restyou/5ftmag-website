@@ -258,6 +258,17 @@
     .sub-card-status.pending  { background: #fef3c7; color: #78350f; }
     .sub-card-status.approved { background: #d1fae5; color: #064e3b; }
     .sub-card-status.rejected { background: #fee2e2; color: #7f1d1d; }
+    /* 이주의 사진 배지 — 선정됨/예약됨 */
+    .sub-card-featured {
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: var(--badge-radius, 4px);
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
     /* ♡ 카운트 배지 (편집부 전용 — 우수작 선정 보조) */
     .sub-card-likes {
       display: inline-block; margin-left: 8px;
@@ -578,7 +589,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20260712-modules" defer></script>
-  <script src="../js/db-client.js?v=20260830-daterange" defer></script>
+  <script src="../js/db-client.js?v=20260904-potw" defer></script>
 <script src="../js/image-processor.js?v=20260520-mobileupload" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20260602-camera-ui" defer></script>
@@ -605,6 +616,7 @@ const STATE = {
   themeOnly: false, // 테마 응모만 필터링 (theme_month NOT NULL)
   likeSort: false,  // 좋아요 순 정렬 모드 — 편집부 우수작 선정 보조
   likes: new Map(), // submission_id → like_count
+  featuredDates: new Set(), // 이미 선정된 날짜 — 다음 후보일 제안과 중복 경고에 쓴다
   allRows: [],      // 좋아요 순 모드일 때 status 전체를 한 번 끌어와 정렬한 결과
   selected: new Set(), // bulk 처리용 — 선택된 submission id 집합
   query: '',        // 응모자·필름 텍스트 검색 (승인됨/반려됨 만)
@@ -688,6 +700,27 @@ function buildReviewOpts() {
     if (STATE.month && STATE.month !== 'all') opts.month = STATE.month;
   }
   return opts;
+}
+
+// 이주의 사진 일정 — 예약분 포함. 다음 후보일을 제안하고 같은 날 중복을 막는다.
+async function loadFeaturedDates() {
+  try {
+    const rows = await db().review.listFeatured();
+    STATE.featuredDates = new Set(rows.map(r => String(r.featured_at)));
+  } catch (_) { STATE.featuredDates = new Set(); }
+}
+
+// 아직 비어 있는 다음 월요일. 예약을 쌓아 두는 것이 이 기능의 전제라
+// 매번 오늘을 제안하지 않고 빈 자리를 찾아 준다.
+function suggestFeatureDate() {
+  const d = new Date();
+  d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); // 다음 월요일
+  for (let i = 0; i < 104; i++) {
+    const iso = d.toISOString().slice(0, 10);
+    if (!STATE.featuredDates.has(iso)) return iso;
+    d.setDate(d.getDate() + 7);
+  }
+  return new Date().toISOString().slice(0, 10);
 }
 
 async function loadLikes() {
@@ -866,6 +899,11 @@ function renderCard(r) {
   const likeBadge = likeCount > 0
     ? `<span class="sub-card-likes" title="이 사진에 ♡ 누른 사용자 수">♡ ${likeCount}</span>`
     : '';
+  // 이주의 사진 배지. 오늘 이후 날짜면 예약분이라 따로 표시한다.
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const featBadge = r.featured_at
+    ? `<span class="sub-card-featured" title="${r.featured_at > todayStr ? '예약된 이주의 사진' : '이주의 사진으로 걸린 사진'}">${r.featured_at > todayStr ? '예약' : '이주의 사진'} ${escapeHtml(r.featured_at)}</span>`
+    : '';
   const filmMatchHint = getFilmMatchHint(r.film);
 
   // 대기 탭에서만 일괄 처리용 체크박스 노출 (승인됨·반려됨 탭은 단건만)
@@ -883,6 +921,7 @@ function renderCard(r) {
           <span class="sub-card-status ${escapeHtml(r.status)}">${escapeHtml(r.status)}</span>
           ${themeBadge}
           ${likeBadge}
+          ${featBadge}
         </div>
         <div class="sub-card-row">
           <span class="k">제출</span>
@@ -930,6 +969,8 @@ function renderCard(r) {
           ` : ''}
           ${STATE.status === 'approved' ? `
             <button type="button" class="sub-btn sub-btn-reject" data-action="reject">반려로 되돌리기</button>
+            <button type="button" class="sub-btn sub-btn-feature" data-action="feature">${r.featured_at ? '이주의 사진 수정' : '이주의 사진으로 걸기'}</button>
+            ${r.featured_at ? `<button type="button" class="sub-btn" data-action="unfeature">선정 해제</button>` : ''}
           ` : ''}
           ${getFilmOpenLink(r.film)}
           ${getContributorOpenLink(r)}
@@ -999,6 +1040,37 @@ function bindCardActions() {
           });
           if (error) { window.notify?.('반려 처리에 실패했어요. 권한과 네트워크 상태를 확인해 주세요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '반려'; return; }
           await Promise.all([loadCounts(), loadList()]);
+        } else if (action === 'feature') {
+          // 이번 주에 올라온 사진이 아니라 이번 주에 선정한 사진이다.
+          // 그래서 제출일과 상관없이 아무 승인 사진이나 걸 수 있다.
+          const cur = card.querySelector('.sub-card-featured');
+          const suggested = suggestFeatureDate();
+          const dateStr = prompt(
+            '이 사진을 이주의 사진으로 겁니다.\n\n' +
+            '언제부터 걸까요? (YYYY-MM-DD)\n' +
+            '오늘 이후 날짜를 넣으면 그 날짜에 자동으로 걸립니다. 미리 여러 장을 잡아 두면 매주 들어오지 않아도 됩니다.',
+            suggested,
+          );
+          if (dateStr === null) return;
+          const date = String(dateStr).trim();
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { window.notify?.('날짜는 2026-09-07 처럼 넣어 주세요.'); return; }
+          if (STATE.featuredDates.has(date) && !cur) {
+            if (!confirm(date + ' 에 이미 다른 사진이 걸려 있습니다.\n그래도 이 사진으로 바꿀까요? (같은 날짜면 나중에 등록한 쪽이 홈에 걸립니다)')) return;
+          }
+          const note = prompt('편집부 한 줄을 적어 주세요. 비워 두면 사진과 작가만 나옵니다. (선택, 300자)', '');
+          if (note === null) return;
+          btn.disabled = true; btn.textContent = '처리 중…';
+          const { error } = await db().review.setFeatured(id, date, note);
+          if (error) { window.notify?.('이주의 사진 등록에 실패했어요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '이주의 사진으로 걸기'; return; }
+          await loadFeaturedDates();
+          await loadList();
+        } else if (action === 'unfeature') {
+          if (!confirm('이 사진의 이주의 사진 선정을 해제할까요? 사진 자체는 그대로 남습니다.')) return;
+          btn.disabled = true; btn.textContent = '해제 중…';
+          const { error } = await db().review.clearFeatured(id);
+          if (error) { window.notify?.('해제에 실패했어요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '선정 해제'; return; }
+          await loadFeaturedDates();
+          await loadList();
         } else if (action === 'delete') {
           if (!confirm('이 제출을 완전히 삭제할까요? 사진 파일과 DB 기록이 모두 지워져 복구할 수 없습니다.')) return;
           btn.disabled = true; btn.textContent = '삭제 중…';
@@ -1254,7 +1326,7 @@ async function loadReportBadge() {
   // 필름 카탈로그를 먼저 로드 — getFilmMatchHint 가 STATE.films 에 의존
   // (loadList 가 먼저 끝나면 모든 카드에 "라이브러리에 없는 필름" 으로 잘못 표시됨)
   await loadFilms();
-  await Promise.all([loadCounts(), loadLikes(), loadList(), loadReportBadge()]);
+  await Promise.all([loadCounts(), loadLikes(), loadFeaturedDates(), loadList(), loadReportBadge()]);
   updateSelectAllRow();
 })();
 </script>

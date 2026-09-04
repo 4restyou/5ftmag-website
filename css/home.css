@@ -1656,3 +1656,56 @@ body.modal-open { overflow: hidden; }
   border: 1px solid var(--border);
 }
 
+
+/* ════════ 이주의 사진 ════════
+   편집부가 고른 한 장. Photo 그리드 바로 위에 두어, 자동으로 뽑히는 그리드와
+   편집부가 고른 한 장이 나란히 놓이게 한다.
+   선정된 것이 없으면 [hidden] 으로 통째로 빠진다. */
+.potw {
+  border-bottom: 1px solid var(--border);
+}
+.potw-body {
+  padding: 0 32px 36px;
+}
+.potw-shot {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 24px 0 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+  line-height: 0;
+}
+.potw-shot img {
+  width: 100%;
+  max-height: 620px;
+  object-fit: contain;         /* 세로 사진의 위아래를 자르지 않는다 */
+  background: var(--bg-sub);
+}
+.potw-meta {
+  margin: 16px 0 0;
+  max-width: 640px;
+}
+.potw-note {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.potw-by {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.potw-author { font-weight: var(--fw-heading); color: var(--text); }
+
+@media (max-width: 720px) {
+  .potw-body { padding: 0 20px 28px; }
+  .potw-shot { margin-top: 18px; }
+  .potw-shot img { max-height: 460px; }
+  .potw-note { font-size: 14px; }
+}

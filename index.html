@@ -41,8 +41,8 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="./css/common.css?v=20260810-toast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260616-themeauto">
-  <link rel="stylesheet" href="./css/home.css?v=20260810-filmpick">
-  <link rel="stylesheet" href="./css/mobile-home.css?v=20260620-compact">
+  <link rel="stylesheet" href="./css/home.css?v=20260904-potw">
+  <link rel="stylesheet" href="./css/mobile-home.css?v=20260904-potw">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -160,6 +160,10 @@
       <button type="button" class="mh-search-close" id="mhSearchClose" aria-label="검색 닫기">✕</button>
     </div>
   </div>
+  <!-- 이주의 사진 (모바일). 데스크톱 블록은 .panel 안이라 모바일에서 숨으므로
+       여기에 한 번 더 둔다. 채우는 쪽은 js/home-page.js 하나다. -->
+  <section class="mh-potw" id="mhPotw" hidden aria-labelledby="mhPotwHead"></section>
+
   <div id="mhBody"></div>
 
   <!-- 필름 유형 필터 — bottom sheet, 멀티 select -->
@@ -240,6 +244,31 @@
     <div class="news-list" id="newsList">
       <!-- 자바스크립트가 data/news.json을 읽어서 자동 생성 -->
     </div>
+
+    <!-- ── 이주의 사진 ──
+         편집부가 승인된 독자 사진 하나를 골라 건다. "이번 주에 올라온 사진" 이
+         아니라 "이번 주에 선정된 사진" 이라, 제출일과 선정일은 무관하다.
+         선정된 것이 없으면 자바스크립트가 통째로 숨긴다. -->
+    <section class="potw" id="potw" hidden aria-labelledby="potwHead">
+      <div class="sub-section-head">
+        <div class="sub-section-head-text">
+          <h3 id="potwHead">이주의 사진</h3>
+          <span class="label label--copy">편집부가 고른 한 장</span>
+        </div>
+      </div>
+      <div class="potw-body">
+        <button type="button" class="potw-shot" id="potwShot">
+          <img id="potwImg" alt="" decoding="async" />
+        </button>
+        <figcaption class="potw-meta">
+          <p class="potw-note" id="potwNote" hidden></p>
+          <p class="potw-by">
+            <span class="potw-author" id="potwAuthor"></span>
+            <span class="potw-film" id="potwFilm"></span>
+          </p>
+        </figcaption>
+      </div>
+    </section>
 
     <!-- ── Photo 갤러리 (통합) ──
          editorial(films.json) + 독자 승인 제출(Supabase) 혼합 랜덤 노출.
@@ -397,14 +426,14 @@
   <script src="./js/site-telemetry.js?v=20260712-modules" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="./js/site-common.js?v=20260820-authkeep" defer></script>
-<script src="./js/home-page.js?v=20260817-photodiv" defer></script>
+<script src="./js/home-page.js?v=20260904-potw" defer></script>
 <script src="./js/mh-pure.js?v=20260620-recommend" defer></script>
 <script src="./js/mobile-home-model.js?v=20260712-modules" defer></script>
 <script src="./js/films-catalog-loader.js?v=20260602-modules" defer></script>
 <script src="./js/mobile-home.js?v=20260817-photodiv" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db/commerce.js?v=20260712-modules" defer></script>
-  <script src="./js/db-client.js?v=20260830-daterange" defer></script>
+  <script src="./js/db-client.js?v=20260904-potw" defer></script>
 <!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->
 <script src="./js/reader-camera-input.js?v=20260602-camera-ui" defer></script>
 <script src="./js/reader-film-picker.js?v=20260616-themeauto" defer></script>

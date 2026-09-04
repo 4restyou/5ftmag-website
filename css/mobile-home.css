@@ -443,3 +443,59 @@ html.mh-sheet-open, html.mh-sheet-open body { overflow: hidden; }
 .mh-card:focus-visible, .mh-new-card:focus-visible, .mh-brand-fav:focus-visible, .mh-chip:focus-visible {
   outline: 2px solid var(--text); outline-offset: 2px; border-radius: 4px;
 }
+
+/* ════════ 이주의 사진 (모바일) ════════
+   #mhBody 는 보기 전환마다 통째로 갈아끼워지므로 그 바깥에 둔다.
+   선정된 것이 없으면 [hidden] 으로 빠진다. */
+.mh-potw { display: none; }
+html.is-mobile-home .mh-potw {
+  display: block;
+  padding: 16px var(--mh-pad) 20px;
+  border-bottom: 1px solid var(--border);
+}
+html.is-mobile-home .mh-potw[hidden] { display: none; }
+.mh-potw-head {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.mh-potw-head span {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+.mh-potw-shot {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 0;
+  cursor: zoom-in;
+}
+.mh-potw-shot img {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;      /* 세로 사진을 자르지 않는다 */
+  background: var(--bg-sub);
+}
+.mh-potw-note {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
+}
+.mh-potw-by {
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.mh-potw-author { font-weight: var(--fw-heading); color: var(--text); }
