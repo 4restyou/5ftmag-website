@@ -815,16 +815,62 @@
     if (mSec) {
       const esc = window.MagUtil.escapeHtml;
       mSec.innerHTML = `
-        <h3 class="mh-potw-head" id="mhPotwHead">이주의 사진<span>편집부가 고른 한 장</span></h3>
-        <button type="button" class="mh-potw-shot">
-          <img src="${esc(pick.image)}" alt="${esc(altText)}" decoding="async" />
-        </button>
-        ${pick.featuredNote ? `<p class="mh-potw-note">${esc(pick.featuredNote)}</p>` : ''}
-        <p class="mh-potw-by">
-          <span class="mh-potw-author">${esc(author)}</span>
-          <span>${esc(pick.film || '')}</span>
-        </p>`;
+        <div class="mh-potw-inner">
+          <h3 class="mh-potw-head" id="mhPotwHead">
+            <span class="mh-potw-title">이주의 사진</span>
+            <span class="mh-potw-sub">편집부가 고른 한 장</span>
+            <button type="button" class="mh-potw-close" aria-label="이주의 사진 접기">✕</button>
+          </h3>
+          <button type="button" class="mh-potw-shot">
+            <img src="${esc(pick.image)}" alt="${esc(altText)}" decoding="async" />
+          </button>
+          ${pick.featuredNote ? `<p class="mh-potw-note">${esc(pick.featuredNote)}</p>` : ''}
+          <p class="mh-potw-by">
+            <span class="mh-potw-author">${esc(author)}</span>
+            <span>${esc(pick.film || '')}</span>
+          </p>
+        </div>
+        <button type="button" class="mh-potw-reopen" hidden aria-expanded="false">
+          이주의 사진<span class="mh-potw-caret" aria-hidden="true">▾</span>
+        </button>`;
       mSec.querySelector('.mh-potw-shot').addEventListener('click', openIt);
+
+      // 접기 — 모바일에서는 첫 화면의 절반 넘게 차지해서, 매일 들어오는 독자가
+      // 같은 사진을 일주일 내내 본다. 접으면 그 픽의 선정일을 브라우저에 적어
+      // 두고 다음 픽이 걸릴 때까지 접힌 채로 둔다. 사진 id 가 아니라 선정일을
+      // 쓰는 이유는, 같은 사진을 나중에 다시 걸면 그때는 새로 걸린 것이라
+      // 다시 보여야 하기 때문이다.
+      // 완전히 숨기지 않고 한 줄을 남긴다. 접고 나서 다시 보고 싶을 때 열 수 있고,
+      // 이번 주 픽이 있다는 것 자체는 알 수 있어야 한다.
+      const KEY = 'potw-collapsed';
+      const stamp = String(pick.featuredAt || '');
+      const inner  = mSec.querySelector('.mh-potw-inner');
+      const reopen = mSec.querySelector('.mh-potw-reopen');
+
+      // 저장소는 사파리 프라이빗 등에서 접근 자체가 예외를 던진다. 실패하면
+      // 그냥 펼친 채로 둔다 (기능이 없던 때와 같은 상태).
+      const readKey  = () => { try { return localStorage.getItem(KEY) || ''; } catch (_) { return ''; } };
+      const writeKey = (v) => { try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch (_) {} };
+
+      function setCollapsed(on) {
+        inner.hidden  = on;
+        reopen.hidden = !on;
+        reopen.setAttribute('aria-expanded', String(!on));
+        mSec.classList.toggle('is-collapsed', on); // 접혔을 때 섹션 여백을 줄인다
+      }
+
+      mSec.querySelector('.mh-potw-close').addEventListener('click', () => {
+        setCollapsed(true);
+        writeKey(stamp);
+      });
+      // 다시 펼치면 접어둔 기록을 지운다. 안 지우면 새로고침할 때마다 도로
+      // 접혀서, 열어둔 것이 유지되지 않는다.
+      reopen.addEventListener('click', () => {
+        setCollapsed(false);
+        writeKey('');
+      });
+
+      setCollapsed(Boolean(stamp) && readKey() === stamp);
       mSec.hidden = false;
     }
   })();

@@ -463,12 +463,46 @@ html.is-mobile-home .mh-potw[hidden] { display: none; }
   align-items: baseline;
   gap: 8px;
 }
-.mh-potw-head span {
+.mh-potw-sub {
   font-size: 11px;
   font-weight: 400;
   color: var(--text-muted);
   letter-spacing: 0.02em;
 }
+/* 접기 버튼 — 손가락으로 누를 자리를 확보하되 시각적으로는 작게. */
+.mh-potw-close {
+  margin-left: auto;
+  align-self: center;
+  padding: 6px 8px;
+  margin-right: -8px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.mh-potw-close:hover { color: var(--text); }
+
+/* 접힌 상태의 한 줄. 완전히 숨기지 않는 이유는 다시 펴는 길을 남기기 위해서다. */
+.mh-potw-reopen {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default);
+  cursor: pointer;
+}
+.mh-potw-reopen[hidden] { display: none; }
+/* 접히면 사진이 차지하던 여백까지 같이 줄여, 정말 한 줄로 보이게 한다. */
+html.is-mobile-home .mh-potw.is-collapsed { padding-top: 2px; padding-bottom: 2px; }
+.mh-potw-caret { font-size: 10px; }
 .mh-potw-shot {
   display: block;
   width: 100%;
