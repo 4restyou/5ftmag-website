@@ -589,7 +589,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20260712-modules" defer></script>
-  <script src="../js/db-client.js?v=20260904-potw" defer></script>
+  <script src="../js/db-client.js?v=20260905-potwnotify" defer></script>
 <script src="../js/image-processor.js?v=20260520-mobileupload" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20260602-camera-ui" defer></script>
@@ -1062,6 +1062,17 @@ function bindCardActions() {
           btn.disabled = true; btn.textContent = '처리 중…';
           const { error } = await db().review.setFeatured(id, date, note);
           if (error) { window.notify?.('이주의 사진 등록에 실패했어요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '이주의 사진으로 걸기'; return; }
+
+          // 뽑힌 사람에게 알린다 (벨 + 폰 푸시). 처음 걸 때만 보낸다.
+          // 날짜를 고칠 때마다 보내면 한 사람의 폰이 여러 번 울린다.
+          if (!cur) {
+            const row = (STATE.rows || []).find(x => String(x.id) === String(id));
+            const { error: nErr } = await db().review.notifyFeatured(row, date);
+            // 알림이 실패해도 선정 자체는 이미 저장됐다. 되돌리지 않고 알리기만 한다.
+            if (nErr) window.notify?.('선정은 저장했지만 알림을 보내지 못했어요. (' + nErr.message + ')');
+            else window.notify?.('선정하고 제출자에게 알렸어요.');
+          }
+
           await loadFeaturedDates();
           await loadList();
         } else if (action === 'unfeature') {
