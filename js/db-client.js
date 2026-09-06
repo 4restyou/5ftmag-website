@@ -735,6 +735,31 @@
         featured_note: (note || '').trim().slice(0, 300) || null,
       }).eq('id', id).select('id');
     },
+    // 선정 알림 — 뽑힌 사람에게 알린다. 이 한 줄이 벨 알림과 Web Push 를
+    // 함께 띄운다 (user_notifications INSERT 트리거).
+    //
+    // 게재일이 아니라 선정한 순간에 보낸다. 예약분은 아직 홈에 없으므로
+    // "걸렸어요" 라고 하면 거짓이 된다. 그래서 문구를 나눈다.
+    async notifyFeatured(row, dateStr) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      if (!row?.user_id) return { error: { message: '제출자를 찾을 수 없습니다' } };
+
+      const today = new Date().toISOString().slice(0, 10);
+      const live  = String(dateStr) <= today;
+      const [, mm, dd] = String(dateStr).split('-');
+      const when = `${Number(mm)}월 ${Number(dd)}일`;
+
+      return c.from('user_notifications').insert({
+        user_id: row.user_id,
+        type: 'submission_featured',
+        related_id: row.id,
+        title: live ? '사진이 홈에 걸렸어요' : '이주의 사진으로 뽑혔어요',
+        body: live
+          ? `보내주신 사진이 5ft.mag 홈 첫 화면에 걸렸어요.${row.film ? ` (${row.film})` : ''}`
+          : `보내주신 사진이 ${when}부터 홈 첫 화면에 걸립니다.${row.film ? ` (${row.film})` : ''}`,
+        link: '/',
+      });
+    },
     async clearFeatured(id) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('reader_submissions').update({
