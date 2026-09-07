@@ -299,6 +299,11 @@
     .sub-btn-approve { background: #064e3b; color: #fff; }
     .sub-btn-reject  { background: #fff; color: #7f1d1d; border: 1px solid #fca5a5; }
     .sub-btn-delete  { background: none; color: var(--text-muted); }
+    /* 이주의 사진 — 배지(.sub-card-featured)와 같은 계열로 묶어 한눈에 이어 보이게 한다.
+       .sub-btn 은 배경·글자색을 정하지 않으므로 변형마다 반드시 둘 다 지정해야 한다.
+       빠뜨리면 흰 바탕에 흐릿하게 깔려 버튼이 없는 것처럼 보인다. */
+    .sub-btn-feature   { background: #92400e; color: #fff; }
+    .sub-btn-unfeature { background: #fff; color: #92400e; border: 1px solid #fcd34d; }
     .sub-btn-delete:hover { color: #7f1d1d; }
     a.sub-btn-download { display: inline-flex; align-items: center; background: var(--bg); color: var(--text); border: 1px solid var(--border); text-decoration: none; }
     a.sub-btn-download:hover { border-color: var(--text); opacity: 1; }
@@ -970,7 +975,7 @@ function renderCard(r) {
           ${STATE.status === 'approved' ? `
             <button type="button" class="sub-btn sub-btn-reject" data-action="reject">반려로 되돌리기</button>
             <button type="button" class="sub-btn sub-btn-feature" data-action="feature">${r.featured_at ? '이주의 사진 수정' : '이주의 사진으로 걸기'}</button>
-            ${r.featured_at ? `<button type="button" class="sub-btn" data-action="unfeature">선정 해제</button>` : ''}
+            ${r.featured_at ? `<button type="button" class="sub-btn sub-btn-unfeature" data-action="unfeature">선정 해제</button>` : ''}
           ` : ''}
           ${getFilmOpenLink(r.film)}
           ${getContributorOpenLink(r)}
