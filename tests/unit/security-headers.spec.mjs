@@ -12,6 +12,19 @@ function csp() {
 }
 
 describe('security headers', () => {
+  it('allows geolocation only for the same origin and preserves other restrictions', () => {
+    const toml = read('netlify.toml');
+    expect(toml).toContain('geolocation=(self)');
+    expect(toml).toContain('camera=(), microphone=()');
+    expect(csp()).not.toContain("'unsafe-eval'");
+    expect(csp()).not.toContain("'wasm-unsafe-eval'");
+  });
+
+  it('uses the existing refund page and redirects old links', () => {
+    expect(read('js/ebook-checkout.js')).toContain('href="/legal/refund.html"');
+    expect(fs.existsSync('legal/refund.html')).toBe(true);
+    expect(read('netlify.toml')).toMatch(/from = "\/refund\.html"\s+to = "\/legal\/refund\.html"\s+status = 301/);
+  });
   it('keeps core CSP boundaries in place', () => {
     const header = csp();
     expect(header).toContain("default-src 'self'");

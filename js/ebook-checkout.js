@@ -100,7 +100,7 @@
           <h2 id="ebkPayTitle" class="ebk-pay-modal-title">구매 방법 선택</h2>
           <p class="ebk-pay-modal-sub">${esc(product.title)}${won ? ` · ${won}` : ''}</p>
           <div class="ebk-pay-methods">${methodButtons}</div>
-          <p class="ebk-pay-legal">열람을 시작하면 청약철회가 제한됩니다. <a href="/refund.html" target="_blank" rel="noopener">취소·환불 규정</a></p>
+          <p class="ebk-pay-legal">열람을 시작하면 청약철회가 제한됩니다. <a href="/legal/refund.html" target="_blank" rel="noopener">취소·환불 규정</a></p>
           <button type="button" class="ebk-pay-cancel" data-cancel>취소</button>
         </div>
         <div data-pane="redeem" hidden>

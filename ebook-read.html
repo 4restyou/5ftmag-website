@@ -18,26 +18,24 @@
     .ebook-gate { max-width: 520px; margin: 0 auto; padding: 80px 24px; text-align: center; color: var(--text-muted); }
     .ebook-gate h2 { color: var(--text); font-size: 20px; margin: 0 0 10px; }
     .ebook-gate p { font-size: 14px; line-height: 1.7; margin: 0 0 8px; }
-    /* 구매 CTA — 하단 중앙, 안내 한 줄 + 키컬러(노랑) 버튼 */
+    /* 본문을 가리지 않는 고정 높이의 구매 영역. */
     .wz-reader-cta-wrap {
-      position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
-      z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 10px;
-      animation: wz-cta-rise .4s ease both;
+      order: 2; flex: 0 0 auto; height: calc(104px + env(safe-area-inset-bottom, 0px));
+      box-sizing: border-box; padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px;
     }
+    .wz-reader:has(.wz-reader-cta-wrap) .wz-reader-stage { min-height: 0; }
     .wz-reader-cta-note {
-      margin: 0; font-size: 13px; font-weight: 600; color: #fff;
-      background: rgba(0,0,0,0.55); padding: 6px 14px; border-radius: 999px;
-      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      margin: 0; font-size: 13px; line-height: 20px; font-weight: 600; color: #fff;
     }
     .wz-reader-cta {
-      font: inherit; font-size: 15px; font-weight: 800; letter-spacing: -0.01em;
-      padding: 15px 32px; border-radius: 999px; border: none;
-      background: var(--accent); color: #111; cursor: pointer;
-      box-shadow: 0 10px 34px rgba(0,0,0,0.4);
-      transition: transform .15s ease, box-shadow .15s ease;
+      font: inherit; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: 0;
+      width: min(100%, 340px); min-height: 44px; padding: 11px 16px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.5); background: transparent; color: #fff; cursor: pointer;
     }
-    .wz-reader-cta:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 14px 40px rgba(0,0,0,0.45); }
-    @keyframes wz-cta-rise { from { opacity: 0; transform: translateX(-50%) translateY(12px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    .wz-reader.is-preview-end .wz-reader-cta { background: var(--accent); color: #111; border-color: var(--accent); }
+    .wz-reader-cta:hover { border-color: var(--accent); }
+    .wz-reader-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
     /* 결제수단 선택 모달 */
     .ebk-pay-modal-back {
@@ -103,11 +101,11 @@
 <script src="./js/db/commerce.js?v=20260712-modules" defer></script>
   <script src="./js/db-client.js?v=20260905-potwnotify" defer></script>
 <script src="./js/util.js?v=20260817-photodiv" defer></script>
-<script src="./js/site-telemetry.js?v=20260712-modules" defer></script>
+<script src="./js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="./js/site-common.js?v=20260820-authkeep" defer></script>
-<script src="./js/webzine-reader.js?v=20260629-ebkprev" defer></script>
-<script src="./js/ebook-checkout.js?v=20260710-buyerbind" defer></script>
-<script src="./js/ebook-reader-page.js?v=20260629-ebkprev" defer></script>
+<script src="./js/webzine-reader.js?v=20260907-security" defer></script>
+<script src="./js/ebook-checkout.js?v=20260907-security" defer></script>
+<script src="./js/ebook-reader-page.js?v=20260907-security" defer></script>
 </body>
 </html>

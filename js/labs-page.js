@@ -407,6 +407,12 @@
     btn.hidden = false;
     btn.addEventListener('click', () => {
       if (btn.classList.contains('is-loading')) return;
+      const policy = document.permissionsPolicy || document.featurePolicy;
+      if (policy && !policy.allowsFeature('geolocation')) {
+        const msg = '이 화면에서는 위치 접근이 제한되어 있어요. 외부 브라우저에서 열거나 지역을 선택해 주세요.';
+        window.notify ? window.notify(msg, 'info') : alert(msg);
+        return;
+      }
       btn.classList.add('is-loading');
       navigator.geolocation.getCurrentPosition(
         (pos) => {

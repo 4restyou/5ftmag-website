@@ -6,8 +6,9 @@
 // 멀어진 페이지는 비운다(220 쪽도 메모리·선명도 문제 없이). 확대(핀치·버튼·드래그 팬) 지원.
 // 실패 시 새 탭 링크를 보여준다.
 (function () {
-  const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
-  const PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  const PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/';
+  const PDFJS = PDFJS_BASE + 'legacy/build/pdf.min.mjs';
+  const PDFJS_WORKER = PDFJS_BASE + 'legacy/build/pdf.worker.min.mjs';
   const FLIP = 'https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js';
   const NEAR = 1, KEEP = 3;          // 현재 기준 ±NEAR 렌더, ±KEEP 밖은 비움
   const ZMAX = 3.5;
@@ -20,7 +21,8 @@
   function ensureLibs() {
     if (libsP) return libsP;
     libsP = (async () => {
-      if (!window.pdfjsLib) { await loadScript(PDFJS); window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; }
+      if (!window.pdfjsLib) { window.pdfjsLib = await import(PDFJS); }
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
       if (!(window.St && window.St.PageFlip)) { await loadScript(FLIP); }
     })().catch(e => { libsP = null; throw e; });
     return libsP;
@@ -38,6 +40,10 @@
   function updateNo() {
     if (!flip || !overlay) return;
     const el = overlay.querySelector('[data-pageno]'); if (el) el.textContent = `${Math.min(curIndex() + 1, total)} / ${total}`;
+    const note = overlay.querySelector('.wz-reader-cta-note');
+    const visiblePages = curIndex() > 0 && flip.getOrientation?.() === 'landscape' ? 2 : 1;
+    if (note) note.hidden = curIndex() + visiblePages < total;
+    overlay.classList.toggle('is-preview-end', Boolean(note && !note.hidden));
   }
 
   function applyZoom() {
@@ -105,7 +111,7 @@
           <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="닫기">✕</button>
         </div>
       </div>
-      ${readerOpts && readerOpts.cta ? `<div class="wz-reader-cta-wrap">${readerOpts.cta.note ? `<p class="wz-reader-cta-note">${esc(readerOpts.cta.note)}</p>` : ''}<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || '전체 보기')}</button></div>` : ''}
+      ${readerOpts && readerOpts.cta ? `<div class="wz-reader-cta-wrap">${readerOpts.cta.note ? `<p class="wz-reader-cta-note" hidden>${esc(readerOpts.cta.note)}</p>` : ''}<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || '전체 보기')}</button></div>` : ''}
       <div class="wz-reader-stage">
         <div class="wz-reader-loading">불러오는 중…</div>
         <div class="wz-reader-zoom"><div class="wz-reader-book"></div></div>
@@ -198,7 +204,15 @@
     const mine = overlay;
     try {
       await ensureLibs();
-      pdfDoc = await window.pdfjsLib.getDocument({ url }).promise;
+      pdfDoc = await window.pdfjsLib.getDocument({
+        url,
+        isEvalSupported: false,
+        useWasm: false,
+        wasmUrl: PDFJS_BASE + 'wasm/',
+        cMapUrl: PDFJS_BASE + 'cmaps/',
+        cMapPacked: true,
+        standardFontDataUrl: PDFJS_BASE + 'standard_fonts/',
+      }).promise;
       if (overlay !== mine) return;
       total = pdfDoc.numPages;
       rendered = new Array(total).fill(false);

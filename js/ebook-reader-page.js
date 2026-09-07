@@ -43,6 +43,7 @@
       cta: access.entitled ? null : { label: priceLabel, note: '미리보기는 여기까지예요', onClick: onBuy },
     };
     // 책장 뷰어(무료 웹진과 동일) 열기
+    gate('');
     window.WebzineReader.open(access.url, product.title, opts);
   }
 

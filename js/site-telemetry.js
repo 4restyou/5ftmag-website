@@ -68,22 +68,21 @@
     }
   }
 
-  // utm_*, fb/google 광고 클릭 ID 등 트래킹 파라미터 제거 — 같은 페이지가 100가지 변종으로 흩어지는 걸 방지
-  const PV_TRACKING_KEYS = new Set([
-    'fbclid', 'gclid', 'gbraid', 'wbraid', 'msclkid', 'yclid', 'dclid', 'twclid',
-    'mc_eid', 'mc_cid', '_hsenc', '_hsmi', 'igshid', 'ref', 'ref_src', 'ref_url',
-    'ck_subscriber_id',
-  ]);
+  // 콘텐츠 식별값만 허용한다. 검색어·인증·결제·구독 해지 파라미터는 수집하지 않는다.
+  const PV_CONTENT_KEYS = {
+    '/ebook-read.html': ['slug'],
+    '/films.html': ['film', 'slug'],
+    '/films': ['film', 'slug'],
+  };
   function pvCleanPath() {
     const p = location.pathname;
     if (!location.search) return p;
     try {
       const params = new URLSearchParams(location.search);
       const kept = [];
-      for (const [k, v] of params) {
-        if (k.startsWith('utm_')) continue;
-        if (PV_TRACKING_KEYS.has(k.toLowerCase())) continue;
-        kept.push([k, v]);
+      for (const k of PV_CONTENT_KEYS[p] || []) {
+        const v = params.get(k);
+        if (v && /^[a-z0-9][a-z0-9_-]{0,99}$/i.test(v)) kept.push([k, v]);
       }
       if (!kept.length) return p;
       const qs = kept.map(([k, v]) => v === '' ? encodeURIComponent(k) : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
@@ -137,7 +136,7 @@
       path: pvCleanPath().slice(0, 500),
       session_id: pvSessionId(),
       ua_family: pvUaFamily(navigator.userAgent || ''),
-      properties: (properties && typeof properties === 'object') ? properties : null,
+      properties: (properties && typeof properties === 'object') ? cleanLogProperties(properties) : null,
     };
     try {
       fetch(PV_URL + '/rest/v1/app_events', {
@@ -199,10 +198,28 @@
   function maskErrorPII(s) {
     if (!s) return s;
     return String(s)
+      .replace(/https?:\/\/[^\s<>"']+/gi, value => {
+        try { const url = new URL(value); return url.origin + url.pathname; }
+        catch (_) { return '[url]'; }
+      })
+      .replace(/([?&#](?:token|code|paymentId|orderId|access_token|refresh_token|id_token|signature|authorization)=)[^\s&#]*/gi, '$1[redacted]')
       .replace(/[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/g, '[email]')
       .replace(/\b0\d{1,2}-?\d{3,4}-?\d{4}\b/g, '[phone]')
       .replace(/\b(?:Bearer|bearer)\s+[A-Za-z0-9\-._~+/=]+/g, 'Bearer [token]')
       .replace(/eyJ[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+/g, '[jwt]');
+  }
+
+  function cleanLogProperties(value, depth = 0) {
+    if (depth > 4) return null;
+    if (typeof value === 'string') return maskErrorPII(value).slice(0, 1000);
+    if (Array.isArray(value)) return value.slice(0, 20).map(v => cleanLogProperties(v, depth + 1));
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value).slice(0, 30).map(([key, val]) => [key,
+        /token|password|secret|authorization|signature|payment.?id|order.?id|^code$|email|phone/i.test(key)
+          ? '[redacted]' : cleanLogProperties(val, depth + 1),
+      ]));
+    }
+    return value;
   }
 
   function recordClientError(payload) {
@@ -213,7 +230,7 @@
     const body = {
       path: pvCleanPath().slice(0, 500),
       message,
-      source: payload?.source ? String(payload.source).slice(0, 500) : null,
+      source: payload?.source ? maskErrorPII(String(payload.source).split(/[?#]/)[0]).slice(0, 500) : null,
       lineno: Number.isFinite(payload?.lineno) ? payload.lineno : null,
       colno: Number.isFinite(payload?.colno) ? payload.colno : null,
       stack: payload?.stack ? maskErrorPII(String(payload.stack)).slice(0, 4000) : null,
