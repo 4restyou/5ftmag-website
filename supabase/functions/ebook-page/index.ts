@@ -12,6 +12,24 @@
 //
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import {
+  isActiveNaverOrder,
+  naverOrderStatus,
+  portonePaymentSlug,
+  portonePaymentStatus,
+  shouldRevalidate,
+  smartstoreProductOrderId,
+} from '../_shared/entitlement.ts';
+import {
+  commerceToken,
+  naverCommerceConfigured,
+  queryProductOrders,
+} from '../_shared/naver-commerce.ts';
+import {
+  lookupPayment,
+  portoneConfigured,
+  PORTONE_STORE_ID,
+} from '../_shared/portone.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -40,6 +58,74 @@ function json(body: unknown, status: number, origin: string | null) {
   return new Response(JSON.stringify(body), {
     status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...cors(origin) },
   });
+}
+
+type Entitlement = {
+  id: string;
+  source: string;
+  order_ref: string;
+  status: string;
+  last_verified_at: string | null;
+};
+
+async function markVerified(entitlement: Entitlement, externalStatus: string): Promise<void> {
+  const { error } = await admin.from('ebook_entitlements').update({
+    last_verified_at: new Date().toISOString(),
+    external_status: externalStatus,
+  }).eq('id', entitlement.id).eq('status', 'active');
+  if (error) console.error('[ebook-page] verification update failed', error.code || 'unknown');
+}
+
+async function revoke(entitlement: Entitlement, externalStatus: string): Promise<void> {
+  const { error } = await admin.from('ebook_entitlements').update({
+    status: 'revoked',
+    last_verified_at: new Date().toISOString(),
+    external_status: externalStatus,
+    revoked_at: new Date().toISOString(),
+    revoke_reason: `external:${externalStatus}`,
+  }).eq('id', entitlement.id).eq('status', 'active');
+  if (error) console.error('[ebook-page] entitlement revoke failed', error.code || 'unknown');
+}
+
+// Returns true only for a definitive active state. null means the provider was
+// unavailable, in which case an existing customer keeps access and we retry later.
+async function verifyAutomaticEntitlement(
+  entitlement: Entitlement,
+  slug: string,
+): Promise<boolean | null> {
+  if (entitlement.source === 'portone') {
+    if (!portoneConfigured() || !entitlement.order_ref) return null;
+    const result = await lookupPayment(entitlement.order_ref);
+    if (result.status !== 200 || !result.payment) return null;
+    // Amount/product were verified when this entitlement was granted. Rechecking
+    // the current catalog price would revoke legitimate buyers after a price edit.
+    const active = portonePaymentStatus(result.payment) === 'PAID'
+      && String(result.payment.storeId || '') === PORTONE_STORE_ID
+      && portonePaymentSlug(result.payment) === slug;
+    const status = portonePaymentStatus(result.payment);
+    if (active) await markVerified(entitlement, status);
+    else await revoke(entitlement, status);
+    return active;
+  }
+
+  if (entitlement.source === 'smartstore') {
+    const productOrderNo = smartstoreProductOrderId(entitlement.order_ref);
+    if (!naverCommerceConfigured() || !productOrderNo) return null;
+    const token = await commerceToken();
+    if (!token) return null;
+    const result = await queryProductOrders(token, [productOrderNo]);
+    const row = result.orders[0];
+    if (result.status !== 200 || !row) return null;
+    // The product relation was verified at grant time; only its payment lifecycle
+    // changes here. This also survives a later Smart Store product URL migration.
+    const active = isActiveNaverOrder(row);
+    const status = naverOrderStatus(row);
+    if (active) await markVerified(entitlement, status);
+    else await revoke(entitlement, status);
+    return active;
+  }
+
+  return true;
 }
 
 Deno.serve(async (req) => {
@@ -71,8 +157,13 @@ Deno.serve(async (req) => {
     if (userData?.user) {
       const { data: ent } = await admin
         .from('ebook_entitlements')
-        .select('id').eq('user_id', userData.user.id).eq('product_id', product.id).maybeSingle();
-      entitled = !!ent;
+        .select('id, source, order_ref, status, last_verified_at')
+        .eq('user_id', userData.user.id).eq('product_id', product.id).maybeSingle();
+      entitled = ent?.status === 'active';
+      if (ent && entitled && ['portone', 'smartstore'].includes(ent.source) && shouldRevalidate(ent.last_verified_at)) {
+        const verified = await verifyAutomaticEntitlement(ent as Entitlement, slug);
+        if (verified === false) entitled = false;
+      }
     }
   }
 

@@ -15,10 +15,19 @@
 //
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import {
+  isActivePortonePayment,
+  portonePaymentSlug,
+  portonePaymentStatus,
+} from '../_shared/entitlement.ts';
+import {
+  lookupPayment,
+  portoneConfigured,
+  PORTONE_STORE_ID,
+} from '../_shared/portone.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const PORTONE_API_SECRET = Deno.env.get('PORTONE_API_SECRET') || '';
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -48,7 +57,7 @@ Deno.serve(async (req) => {
   const origin = req.headers.get('origin');
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
   if (req.method !== 'POST') return json({ error: 'method' }, 405, origin);
-  if (!PORTONE_API_SECRET) return json({ error: 'payment not configured' }, 500, origin);
+  if (!portoneConfigured()) return json({ error: 'payment not configured' }, 500, origin);
 
   // 로그인 확인
   const auth = req.headers.get('authorization') || '';
@@ -73,46 +82,61 @@ Deno.serve(async (req) => {
   if (prodErr || !product || !product.published) return json({ error: 'not found' }, 404, origin);
 
   // PortOne 결제 단건 조회
-  let payment: any = null;
-  try {
-    const res = await fetch(`https://api.portone.io/payments/${encodeURIComponent(paymentId)}`, {
-      headers: { Authorization: `PortOne ${PORTONE_API_SECRET}` },
-    });
-    payment = await res.json().catch(() => null);
-    if (!res.ok) return json({ error: 'payment lookup failed', detail: payment?.message || res.status }, 502, origin);
-  } catch (_) {
-    return json({ error: 'payment lookup failed' }, 502, origin);
-  }
+  const lookup = await lookupPayment(paymentId);
+  const payment: any = lookup.payment;
+  if (lookup.status === 404) return json({ error: 'payment not found' }, 404, origin);
+  if (lookup.status !== 200) return json({ error: 'payment lookup failed' }, 502, origin);
 
   // 검증 — 상태 / 금액 / 통화 / slug
-  if (payment?.status !== 'PAID') return json({ error: 'not paid', status: payment?.status || 'UNKNOWN' }, 402, origin);
-  const paidAmount = Number(payment?.amount?.total);
-  if (!Number.isFinite(paidAmount) || paidAmount !== Number(product.price)) {
+  if (portonePaymentStatus(payment) !== 'PAID') {
+    return json({ error: 'not paid', status: portonePaymentStatus(payment) }, 402, origin);
+  }
+  if (!Number.isFinite(Number(payment?.amount?.total)) || Number(payment.amount.total) !== Number(product.price)) {
     return json({ error: 'amount mismatch' }, 402, origin);
   }
   if (payment?.currency && payment.currency !== 'KRW') return json({ error: 'currency mismatch' }, 402, origin);
+  if (String(payment?.storeId || '') !== PORTONE_STORE_ID) return json({ error: 'store mismatch' }, 402, origin);
   // customData.slug 는 필수 — 없으면 우리 체크아웃이 만든 결제가 아니다.
   // (A 상품 결제로 같은 가격의 B 상품 열람권을 얻는 우회 차단)
-  let cdSlug = '';
-  try {
-    const cd = typeof payment?.customData === 'string' ? JSON.parse(payment.customData) : payment?.customData;
-    cdSlug = (cd?.slug || '').trim();
-  } catch (_) { /* noop */ }
+  const cdSlug = portonePaymentSlug(payment);
   if (cdSlug !== slug) return json({ error: 'product mismatch' }, 402, origin);
+  if (!isActivePortonePayment(payment, { slug, price: Number(product.price), storeId: PORTONE_STORE_ID })) {
+    return json({ error: 'payment mismatch' }, 402, origin);
+  }
 
   // 이미 열람권 보유 → 그대로 성공 (재호출 안전)
   const { data: existing } = await admin
     .from('ebook_entitlements')
-    .select('id').eq('user_id', user.id).eq('product_id', product.id).maybeSingle();
-  if (existing) return json({ ok: true, already: true }, 200, origin);
+    .select('id, status').eq('user_id', user.id).eq('product_id', product.id).maybeSingle();
+  if (existing?.status === 'active') return json({ ok: true, already: true }, 200, origin);
 
   // 부여 — order_ref 부분 유니크 인덱스가 같은 paymentId 재사용을 차단
-  const { error: grantErr } = await admin
-    .from('ebook_entitlements')
-    .insert({ user_id: user.id, product_id: product.id, source: 'portone', order_ref: paymentId });
+  const grant = {
+    user_id: user.id,
+    product_id: product.id,
+    source: 'portone',
+    order_ref: paymentId,
+    status: 'active',
+    last_verified_at: new Date().toISOString(),
+    external_status: portonePaymentStatus(payment),
+    revoked_at: null,
+    revoke_reason: '',
+  };
+  const grantResult = existing?.id
+    ? await admin.from('ebook_entitlements').update(grant).eq('id', existing.id)
+    : await admin.from('ebook_entitlements').insert(grant);
+  const grantErr = grantResult.error;
   if (grantErr) {
-    if (grantErr.code === '23505') return json({ error: 'payment already used' }, 409, origin);
-    return json({ error: 'grant failed', detail: grantErr.message }, 500, origin);
+    if (grantErr.code === '23505') {
+      const { data: owner } = await admin.from('ebook_entitlements')
+        .select('user_id, product_id, status').eq('order_ref', paymentId).maybeSingle();
+      if (owner?.user_id === user.id && owner?.product_id === product.id && owner?.status === 'active') {
+        return json({ ok: true, already: true }, 200, origin);
+      }
+      return json({ error: 'payment already used' }, 409, origin);
+    }
+    console.error('[ebook-purchase] grant failed', grantErr.code || 'unknown');
+    return json({ error: 'grant failed' }, 500, origin);
   }
 
   return json({ ok: true }, 200, origin);

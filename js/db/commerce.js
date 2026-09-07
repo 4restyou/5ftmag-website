@@ -2,6 +2,27 @@
 (function () {
   'use strict';
   function create({ client, session, url, webzine }) {
+  async function postFunction(name, body, timeoutMs = 25_000) {
+    const headers = { 'content-type': 'application/json' };
+    try {
+      const current = await session();
+      if (current?.access_token) headers.Authorization = `Bearer ${current.access_token}`;
+    } catch (_) {}
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(`${url}/functions/v1/${name}`, {
+        method: 'POST', headers, signal: controller.signal, body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => null);
+      return res.ok ? data : data || { error: `${name} failed` };
+    } catch (error) {
+      return { error: error?.name === 'AbortError' ? 'timeout' : 'network' };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   // ════════════════════════════════════════
   // shop_products — 자체 상품 카탈로그 (Smart Store deep link 매핑)
   // ════════════════════════════════════════
@@ -115,7 +136,7 @@
       const uid = await userId();
       if (!uid) return new Set();
       const { data, error } = await c.from('ebook_entitlements')
-        .select('product_id').eq('user_id', uid);
+        .select('product_id').eq('user_id', uid).eq('status', 'active');
       if (error) { console.warn('[ebooks.myEntitlementIds]', error.message); return new Set(); }
       return new Set((data || []).map(r => r.product_id));
     },
@@ -125,12 +146,14 @@
       return ids.has(productId);
     },
     // 편집부 — 특정 이북의 열람권 보유자 목록
-    async listEntitlements(productId) {
+    async listEntitlements(productId, status = 'active') {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.from('ebook_entitlements')
-        .select('id, user_id, source, order_ref, created_at')
+      let query = c.from('ebook_entitlements')
+        .select('id, user_id, source, order_ref, status, external_status, last_verified_at, revoked_at, revoke_reason, created_at')
         .eq('product_id', productId)
         .order('created_at', { ascending: false });
+      if (status) query = query.eq('status', status);
+      const { data, error } = await query;
       if (error) { console.warn('[ebooks.listEntitlements]', error.message); return []; }
       return data || [];
     },
@@ -138,7 +161,8 @@
     // 편집부 RLS 로 전체 열람권 조회 가능. 소규모라 클라이언트 집계.
     async salesByProduct() {
       const c = client(); if (!c) return {};
-      const { data, error } = await c.from('ebook_entitlements').select('product_id, source');
+      const { data, error } = await c.from('ebook_entitlements')
+        .select('product_id, source').eq('status', 'active');
       if (error) { console.warn('[ebooks.salesByProduct]', error.message); return {}; }
       const map = {};
       for (const r of (data || [])) {
@@ -151,22 +175,26 @@
       }
       return map;
     },
-    // 편집부 — 수동 부여 (무통장입금 확인 후). 중복이면 무시.
+    // 편집부 — 수동 부여 (무통장입금 확인 후). 회수 이력이 있으면 재활성화.
     async grant(userId_, productId, { source = 'manual', orderRef = '' } = {}) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const grantedBy = await userId();
       const { error } = await c.from('ebook_entitlements')
         .upsert(
-          { user_id: userId_, product_id: productId, source, order_ref: orderRef, granted_by: grantedBy },
-          { onConflict: 'user_id,product_id', ignoreDuplicates: true }
+          {
+            user_id: userId_, product_id: productId, source, order_ref: orderRef, granted_by: grantedBy,
+            status: 'active', last_verified_at: null, external_status: '', revoked_at: null, revoke_reason: '',
+          },
+          { onConflict: 'user_id,product_id' }
         );
       return { error };
     },
-    // 편집부 — 회수
+    // 편집부 — 회수. 감사·환불 확인을 위해 행을 삭제하지 않는다.
     async revoke(userId_, productId) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const { error } = await c.from('ebook_entitlements')
-        .delete().eq('user_id', userId_).eq('product_id', productId);
+        .update({ status: 'revoked', revoked_at: new Date().toISOString(), revoke_reason: 'manual' })
+        .eq('user_id', userId_).eq('product_id', productId).eq('status', 'active');
       return { error };
     },
 
@@ -227,35 +255,13 @@
     // 위변조 확인 + 열람권 부여. { ok:true } 또는 { error }.
     async purchaseVerify(slug, paymentId) {
       const c = client(); if (!c) return { error: 'unavailable' };
-      const headers = { 'content-type': 'application/json' };
-      try {
-        const s = await session();
-        if (s?.access_token) headers.Authorization = `Bearer ${s.access_token}`;
-      } catch (_) {}
-      const u = `${url}/functions/v1/ebook-purchase`;
-      try {
-        const res = await fetch(u, { method: 'POST', headers, body: JSON.stringify({ slug, paymentId }) });
-        const data = await res.json().catch(() => null);
-        if (!res.ok) return data || { error: 'verify failed' };
-        return data;
-      } catch (_) { return { error: 'network' }; }
+      return postFunction('ebook-purchase', { slug, paymentId });
     },
     // 스마트스토어 주문번호 인증 — Edge Function(ebook-redeem)이 커머스 API 로
     // 주문을 확인하고 열람권 부여. { ok:true } 또는 { error, detail }.
     async redeemOrder(slug, orderNo, buyerName, buyerPhone) {
       const c = client(); if (!c) return { error: 'unavailable' };
-      const headers = { 'content-type': 'application/json' };
-      try {
-        const s = await session();
-        if (s?.access_token) headers.Authorization = `Bearer ${s.access_token}`;
-      } catch (_) {}
-      const u = `${url}/functions/v1/ebook-redeem`;
-      try {
-        const res = await fetch(u, { method: 'POST', headers, body: JSON.stringify({ slug, orderNo, buyerName, buyerPhone }) });
-        const data = await res.json().catch(() => null);
-        if (!res.ok) return data || { error: 'redeem failed' };
-        return data;
-      } catch (_) { return { error: 'network' }; }
+      return postFunction('ebook-redeem', { slug, orderNo, buyerName, buyerPhone });
     },
   };
 

@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const [asset, tag] = process.argv.slice(2);
-if (!asset || !tag || !/^(css|js)\/[a-z0-9._-]+\.(css|js)$/.test(asset) || !/^[0-9A-Za-z-]+$/.test(tag)) {
+if (!asset || asset.includes('..') || !tag || !/^(css|js)\/[a-z0-9._/-]+\.(css|js)$/.test(asset) || !/^[0-9A-Za-z-]+$/.test(tag)) {
   console.error('사용법: node scripts/bump-version.mjs <css/x.css|js/x.js> <YYYYMMDD-feature>');
   process.exit(1);
 }

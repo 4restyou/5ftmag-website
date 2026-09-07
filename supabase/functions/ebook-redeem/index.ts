@@ -22,47 +22,19 @@
 //
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
-import bcrypt from 'https://esm.sh/bcryptjs@2.4.3';
+import {
+  commerceToken,
+  naverCommerceConfigured,
+  resolveProductOrders,
+} from '../_shared/naver-commerce.ts';
+import {
+  isActiveNaverOrder,
+  productOrderId,
+  productOrderMatches,
+} from '../_shared/entitlement.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const NCP_CLIENT_ID = Deno.env.get('NAVER_COMMERCE_CLIENT_ID') || '';
-const NCP_CLIENT_SECRET = Deno.env.get('NAVER_COMMERCE_CLIENT_SECRET') || '';
-// 고정 IP 중계 (relay/naver-relay.mjs) — 커머스 API 가 등록된 IP 에서만
-// 호출을 허용하는데 엣지 함수는 고정 IP 가 없어서, 설정돼 있으면 모든
-// 커머스 API 호출을 중계 서버로 보낸다. 비어 있으면 직접 호출(로컬 테스트용).
-const RELAY_URL = (Deno.env.get('NAVER_RELAY_URL') || '').replace(/\/$/, '');
-const RELAY_KEY = Deno.env.get('NAVER_RELAY_KEY') || '';
-const API = 'https://api.commerce.naver.com/external';
-
-// 커머스 API 호출 — 중계 경유/직접 을 한 곳에서. { status, text } 반환.
-async function naverFetch(path: string, opts: { method?: string; contentType?: string; authorization?: string; body?: string } = {}): Promise<{ status: number; text: string }> {
-  const method = opts.method || 'GET';
-  if (RELAY_URL && RELAY_KEY) {
-    const res = await fetch(`${RELAY_URL}/forward`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-relay-key': RELAY_KEY },
-      body: JSON.stringify({
-        path: `/external${path}`,
-        method,
-        contentType: opts.contentType || '',
-        authorization: opts.authorization || '',
-        body: opts.body || '',
-      }),
-    });
-    const data = await res.json().catch(() => null);
-    if (!res.ok || typeof data?.status !== 'number') {
-      console.error('[ebook-redeem] relay fail', res.status, data?.error || '');
-      return { status: 0, text: '' };
-    }
-    return { status: data.status, text: String(data.body ?? '') };
-  }
-  const headers: Record<string, string> = {};
-  if (opts.contentType) headers['content-type'] = opts.contentType;
-  if (opts.authorization) headers['authorization'] = opts.authorization;
-  const res = await fetch(API + path, { method, headers, body: opts.body || undefined });
-  return { status: res.status, text: await res.text() };
-}
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -88,10 +60,6 @@ function json(body: unknown, status: number, origin: string | null) {
   });
 }
 
-function parseJson(text: string): any {
-  try { return JSON.parse(text); } catch { return null; }
-}
-
 // 구매자 본인 확인용 정규화 — 이름은 공백 제거·소문자화, 전화는 숫자만 남겨 끝 4자리.
 function normName(s: unknown): string {
   return String(s || '').replace(/\s+/g, '').toLowerCase();
@@ -101,81 +69,18 @@ function phoneTail(s: unknown): string {
   return d.length >= 4 ? d.slice(-4) : '';
 }
 
-// 커머스 API 토큰 (client_credentials + bcrypt 서명)
-async function commerceToken(): Promise<string | null> {
-  const timestamp = Date.now();
-  const sign = btoa(bcrypt.hashSync(`${NCP_CLIENT_ID}_${timestamp}`, NCP_CLIENT_SECRET));
-  const body = new URLSearchParams({
-    client_id: NCP_CLIENT_ID,
-    timestamp: String(timestamp),
-    grant_type: 'client_credentials',
-    client_secret_sign: sign,
-    type: 'SELF',
-  });
-  const res = await naverFetch('/v1/oauth2/token', {
-    method: 'POST',
-    contentType: 'application/x-www-form-urlencoded',
-    body: body.toString(),
-  });
-  const data = parseJson(res.text);
-  if (res.status !== 200 || !data?.access_token) {
-    console.error('[ebook-redeem] token fail', res.status, data?.message || '');
-    return null;
-  }
-  return data.access_token as string;
+async function hashIp(ip: string): Promise<string> {
+  if (!ip) return '';
+  const bytes = new TextEncoder().encode(`${ip}|${SERVICE_ROLE_KEY.slice(-24)}`);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join('');
 }
-
-// 상품주문 상세 조회 — '상품주문번호' 배열로 질의. { status, orders } 반환.
-// 상품주문번호가 아닌 주문번호를 넣으면 400 "처리 권한이 없는 상품 주문 번호" 가 온다
-// (그 경우 호출부에서 recentProductOrderIds 로 역추적한다).
-async function queryProductOrders(token: string, ids: string[]): Promise<{ status: number; orders: any[] }> {
-  const res = await naverFetch('/v1/pay-order/seller/product-orders/query', {
-    method: 'POST',
-    contentType: 'application/json',
-    authorization: `Bearer ${token}`,
-    body: JSON.stringify({ productOrderIds: ids }),
-  });
-  const data = parseJson(res.text);
-  if (res.status !== 200) {
-    console.error('[ebook-redeem] query fail', res.status, data?.message || '');
-    return { status: res.status, orders: [] };
-  }
-  const list = data?.data || [];
-  return { status: 200, orders: Array.isArray(list) ? list : [] };
-}
-
-// 최근 변경(결제 포함) 상품주문번호 목록 — '주문번호' 입력을 상품주문으로 역추적할 때 사용.
-// 커머스 API 엔 '주문번호 → 상품주문번호' 직접 변환이 없어서, 최근 상품주문번호를 모은 뒤
-// 상세 조회해 order.orderId 로 대조한다. last-changed-statuses 는 1회 최대 24h 범위라
-// 최근 며칠을 24h 단위로 스캔. 소규모 스토어 기준(최근 주문 수 적음)으로 상한을 둔다.
-async function recentProductOrderIds(token: string, maxIds = 300): Promise<string[]> {
-  const ids = new Set<string>();
-  const now = Date.now();
-  for (let i = 0; i < 4 && ids.size < maxIds; i++) {
-    const to = new Date(now - i * 86_400_000).toISOString();
-    const from = new Date(now - (i + 1) * 86_400_000).toISOString();
-    const params = new URLSearchParams({ lastChangedFrom: from, lastChangedTo: to });
-    const res = await naverFetch(`/v1/pay-order/seller/product-orders/last-changed-statuses?${params.toString()}`, {
-      authorization: `Bearer ${token}`,
-    });
-    if (res.status !== 200) { console.error('[ebook-redeem] scan fail', res.status); continue; }
-    const data = parseJson(res.text);
-    const list = data?.data?.lastChangeStatuses || data?.lastChangeStatuses || [];
-    for (const it of (Array.isArray(list) ? list : [])) {
-      if (it?.productOrderId) ids.add(String(it.productOrderId));
-    }
-  }
-  return [...ids].slice(0, maxIds);
-}
-
-// 결제가 유지되는 상태만 통과 (취소·반품·교환 거절)
-const OK_STATUS = new Set(['PAYED', 'DELIVERING', 'DELIVERED', 'PURCHASE_DECIDED', 'DISPATCHED']);
 
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin');
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
   if (req.method !== 'POST') return json({ error: 'method' }, 405, origin);
-  if (!NCP_CLIENT_ID || !NCP_CLIENT_SECRET) return json({ error: 'redeem not configured' }, 500, origin);
+  if (!naverCommerceConfigured()) return json({ error: 'redeem not configured' }, 500, origin);
 
   // 로그인 확인
   const auth = req.headers.get('authorization') || '';
@@ -185,25 +90,33 @@ Deno.serve(async (req) => {
   const user = userData?.user;
   if (!user) return json({ error: 'login required' }, 401, origin);
 
-  // 레이트리밋 — 주문번호 무차별 대입 완화. 오류가 나면 통과(fail-open)해서
-  // 정상 상환이 절대 막히지 않도록 한다. 로그인 계정·IP 각각 1시간 창 기준.
+  // 레이트리밋 — 주문번호 무차별 대입 완화. 원본 IP 대신 keyed hash 만 저장한다.
+  // 제한 저장소가 고장 난 경우에는 우회를 허용하지 않고 잠시 후 재시도시킨다.
   const clientIp = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim();
   try {
     const sinceIso = new Date(Date.now() - 3600_000).toISOString();
+    const ipHash = await hashIp(clientIp);
     const userQ = admin.from('ebook_redeem_attempts')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id).gte('created_at', sinceIso);
-    const ipQ = clientIp
+    const ipQ = ipHash
       ? admin.from('ebook_redeem_attempts')
           .select('id', { count: 'exact', head: true })
-          .eq('ip', clientIp).gte('created_at', sinceIso)
+          .eq('ip_hash', ipHash).gte('created_at', sinceIso)
       : Promise.resolve({ count: 0 });
     const [uRes, ipRes]: any = await Promise.all([userQ, ipQ]);
+    if (uRes?.error || ipRes?.error) throw new Error('rate limit lookup failed');
     if ((uRes?.count || 0) >= 15 || (ipRes?.count || 0) >= 40) {
       return json({ error: 'too many attempts', detail: '시도가 너무 많아요. 잠시 후 다시 시도해 주세요.' }, 429, origin);
     }
-    await admin.from('ebook_redeem_attempts').insert({ user_id: user.id, ip: clientIp || null });
-  } catch (_) { /* fail-open */ }
+    const { error: attemptError } = await admin.from('ebook_redeem_attempts')
+      .insert({ user_id: user.id, ip: null, ip_hash: ipHash || null });
+    if (attemptError) throw attemptError;
+    await admin.from('ebook_redeem_attempts')
+      .delete().lt('created_at', new Date(Date.now() - 48 * 3600_000).toISOString());
+  } catch (_) {
+    return json({ error: 'rate limit unavailable', detail: '주문 확인을 잠시 사용할 수 없어요. 잠시 후 다시 시도해 주세요.' }, 503, origin);
+  }
 
   let body: any = null;
   try { body = await req.json(); } catch (_) { /* noop */ }
@@ -234,21 +147,20 @@ Deno.serve(async (req) => {
   // 이미 열람권 보유 → 그대로 성공 (재호출 안전)
   const { data: existing } = await admin
     .from('ebook_entitlements')
-    .select('id').eq('user_id', user.id).eq('product_id', product.id).maybeSingle();
-  if (existing) return json({ ok: true, already: true }, 200, origin);
+    .select('id, status').eq('user_id', user.id).eq('product_id', product.id).maybeSingle();
+  if (existing?.status === 'active') return json({ ok: true, already: true }, 200, origin);
 
   const ncpToken = await commerceToken();
   if (!ncpToken) return json({ error: 'store verify unavailable' }, 502, origin);
 
-  // 1) 입력을 '상품주문번호'로 직접 조회 (상품주문번호를 넣은 경우 바로 매칭).
-  // 2) 비면(대개 '주문번호'를 넣은 경우) 최근 상품주문을 조회해 order.orderId 로 대조.
-  let orders = (await queryProductOrders(ncpToken, [orderNo])).orders;
-  let requireOrderId = false;
+  // 상품주문번호면 바로 상세 조회, 일반 주문번호면 네이버의 공식 변환 API 사용.
+  // 주문 시점과 무관하므로 오래된 구매도 인증할 수 있다.
+  const resolved = await resolveProductOrders(ncpToken, orderNo);
+  const orders = resolved.orders;
   if (!orders.length) {
-    const recent = await recentProductOrderIds(ncpToken);
-    if (recent.length) { orders = (await queryProductOrders(ncpToken, recent)).orders; requireOrderId = true; }
-  }
-  if (!orders.length) {
+    if (resolved.status === 0) {
+      return json({ error: 'store verify unavailable', detail: '스마트스토어 주문 확인이 지연되고 있어요. 잠시 후 다시 시도해 주세요.' }, 502, origin);
+    }
     return json({
       error: 'order not found',
       detail: '주문을 찾을 수 없어요. 주문번호를 다시 확인해 주세요. (결제 직후라면 잠시 후 다시 시도해 주세요.)',
@@ -256,30 +168,20 @@ Deno.serve(async (req) => {
   }
 
   // 이 이북 상품에 해당하고 결제가 유지 중인 상품주문 찾기.
-  // 주문번호 경로(requireOrderId)에선 반드시 입력 주문번호와 order.orderId 가 일치해야 한다
-  // (타인 주문에 매칭되는 것을 막는 보안 확인).
   let matched: any = null;
   let sawProduct = false;    // 이 이북 상품이 포함된 주문을 봤는지
   let buyerMismatch = false; // 결제 완료인데 주문자 정보가 안 맞았는지
   for (const row of orders) {
-    const po = row?.productOrder || row;
     const ord = row?.order || {};
-    if (requireOrderId) {
-      const parentOrderId = String(ord?.orderId || po?.orderId || '');
-      if (parentOrderId !== orderNo) continue;
-    }
-    const candidates = [po?.productId, po?.originProductId, po?.channelProductId, po?.merchantChannelProductId]
-      .filter(Boolean).map(String);
-    if (!candidates.includes(expectedProductNo)) continue;
+    if (!productOrderMatches(row, expectedProductNo)) continue;
     sawProduct = true;
-    const status = String(po?.productOrderStatus || '');
-    if (!OK_STATUS.has(status)) continue;
+    if (!isActiveNaverOrder(row)) continue;
     // 구매자 본인 확인 — 주문자 이름 + 연락처 끝 4자리 모두 일치해야 부여.
     if (normName(ord?.ordererName) !== buyerName || phoneTail(ord?.ordererTel) !== buyerPhone4) {
       buyerMismatch = true;
       continue;
     }
-    matched = po;
+    matched = row;
     break;
   }
   if (!matched) {
@@ -299,15 +201,34 @@ Deno.serve(async (req) => {
   }
 
   // 부여 — order_ref 유니크 인덱스가 같은 주문 재사용을 차단
-  const orderRef = `ss_${String(matched.productOrderId || orderNo)}`;
-  const { error: grantErr } = await admin
-    .from('ebook_entitlements')
-    .insert({ user_id: user.id, product_id: product.id, source: 'smartstore', order_ref: orderRef });
+  const externalStatus = String((matched?.productOrder || matched)?.productOrderStatus || 'PAYED');
+  const orderRef = `ss_${productOrderId(matched) || orderNo}`;
+  const grant = {
+    user_id: user.id,
+    product_id: product.id,
+    source: 'smartstore',
+    order_ref: orderRef,
+    status: 'active',
+    last_verified_at: new Date().toISOString(),
+    external_status: externalStatus,
+    revoked_at: null,
+    revoke_reason: '',
+  };
+  const grantResult = existing?.id
+    ? await admin.from('ebook_entitlements').update(grant).eq('id', existing.id)
+    : await admin.from('ebook_entitlements').insert(grant);
+  const grantErr = grantResult.error;
   if (grantErr) {
     if (grantErr.code === '23505') {
+      const { data: owner } = await admin.from('ebook_entitlements')
+        .select('user_id, product_id, status').eq('order_ref', orderRef).maybeSingle();
+      if (owner?.user_id === user.id && owner?.product_id === product.id && owner?.status === 'active') {
+        return json({ ok: true, already: true }, 200, origin);
+      }
       return json({ error: 'order already used', detail: '이미 사용된 주문번호예요. 본인 주문인데 문제가 있다면 문의해 주세요.' }, 409, origin);
     }
-    return json({ error: 'grant failed', detail: grantErr.message }, 500, origin);
+    console.error('[ebook-redeem] grant failed', grantErr.code || 'unknown');
+    return json({ error: 'grant failed' }, 500, origin);
   }
 
   return json({ ok: true }, 200, origin);

@@ -40,6 +40,7 @@ jobs:
         run: |
           for dir in supabase/functions/*/; do
             fn=$(basename "$dir")
+            [[ "$fn" == _* ]] && continue
             supabase functions deploy "$fn" \
               --project-ref "$SUPABASE_PROJECT_REF" \
               --no-verify-jwt

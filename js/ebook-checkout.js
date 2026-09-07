@@ -22,6 +22,7 @@
     kakaoChannelKey: '',
   };
   const SDK_SRC = 'https://cdn.portone.io/v2/browser-sdk.js';
+  const PENDING_KEY = '5ft_ebook_pending_payment';
 
   function db() { return window.MagDB; }
   function esc(s) { return window.MagUtil ? window.MagUtil.escapeHtml(s) : String(s == null ? '' : s); }
@@ -43,6 +44,7 @@
   }
 
   function shortId() {
+    if (window.crypto?.randomUUID) return `eb_${window.crypto.randomUUID()}`;
     const t = Date.now().toString(36);
     const r = Math.random().toString(36).slice(2, 8);
     return `eb_${t}_${r}`;
@@ -50,6 +52,25 @@
   function cleanUrl() {
     const slug = new URLSearchParams(location.search).get('slug') || '';
     return location.pathname + (slug ? `?slug=${encodeURIComponent(slug)}` : '');
+  }
+  function pendingPayment() {
+    try {
+      const value = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null');
+      if (!value?.slug || !value?.paymentId || Date.now() - Number(value.createdAt) > 24 * 3600_000) {
+        sessionStorage.removeItem(PENDING_KEY);
+        return null;
+      }
+      return value;
+    } catch (_) { return null; }
+  }
+  function rememberPayment(slug, paymentId) {
+    try { sessionStorage.setItem(PENDING_KEY, JSON.stringify({ slug, paymentId, createdAt: Date.now() })); } catch (_) {}
+  }
+  function forgetPayment(paymentId) {
+    try {
+      const value = pendingPayment();
+      if (!paymentId || value?.paymentId === paymentId) sessionStorage.removeItem(PENDING_KEY);
+    } catch (_) {}
   }
 
   // ── 오버레이 (확인 중 / 안내) ──
@@ -188,6 +209,7 @@
       return;
     }
     const paymentId = shortId();
+    rememberPayment(product.slug, paymentId);
     let resp = null;
     try {
       resp = await window.PortOne.requestPayment({
@@ -199,10 +221,11 @@
         currency: 'CURRENCY_KRW',
         payMethod: 'EASY_PAY',
         customData: JSON.stringify({ slug: product.slug }),
-        redirectUrl: location.href.split('#')[0], // 모바일 복귀용 (slug 포함)
+        redirectUrl: new URL(cleanUrl(), location.origin).href, // 모바일 복귀용 (slug 포함)
       });
     } catch (e) {
       busy = false;
+      forgetPayment(paymentId);
       console.error('[ebook] requestPayment 실패', e);
       alert('결제를 시작하지 못했어요.\n' + (e && (e.message || e.code) ? (e.message || e.code) : '잠시 후 다시 시도해 주세요.'));
       return;
@@ -211,11 +234,13 @@
     if (!resp) { busy = false; return; }
     if (resp.code != null && resp.code !== '') {
       busy = false;
+      forgetPayment(paymentId);
       if (!/cancel/i.test(resp.code || '') && !/취소/.test(resp.message || '')) {
         alert('결제가 완료되지 않았어요.\n' + (resp.message || ''));
       }
       return;
     }
+    rememberPayment(product.slug, resp.paymentId || paymentId);
     await finishVerify(product.slug, resp.paymentId || paymentId);
   }
 
@@ -226,25 +251,48 @@
     try { r = await db().ebooks.purchaseVerify(slug, paymentId); } catch (_) {}
     busy = false;
     if (r && r.ok) {
+      forgetPayment(paymentId);
       overlay('완료! 전체 페이지를 불러올게요…');
       location.replace(cleanUrl());
       return;
     }
     hideOverlay();
-    alert('결제는 처리됐지만 열람권 확인에 실패했어요.\n잠시 후 새로고침하거나 인스타그램 @film_socialclub 으로 문의해 주세요.');
+    if (r?.error === 'login required') {
+      if (confirm('결제 확인을 계속하려면 다시 로그인이 필요해요. Google로 로그인할까요?')) {
+        db().auth.signInWithGoogle(new URL(cleanUrl(), location.origin).href);
+      }
+      return;
+    }
+    const terminalErrors = new Set([
+      'payment not found', 'not paid', 'amount mismatch', 'currency mismatch',
+      'store mismatch', 'product mismatch', 'payment mismatch', 'payment already used',
+    ]);
+    if (terminalErrors.has(r?.error)) {
+      forgetPayment(paymentId);
+      alert('결제가 완료되지 않았거나 결제 정보가 일치하지 않아요. 결제 내역을 확인해 주세요.');
+      return;
+    }
+    alert('결제는 처리됐지만 열람권 확인이 지연되고 있어요.\n결제번호를 보관했으니 새로고침하면 자동으로 다시 확인합니다.');
   }
 
   // ── 모바일 redirect 복귀 처리 ──
   function checkReturn() {
     const p = new URLSearchParams(location.search);
-    const paymentId = p.get('paymentId');
+    const saved = pendingPayment();
+    const returnedPaymentId = p.get('paymentId');
+    const currentSlug = p.get('slug') || '';
+    const savedForPage = saved?.slug === currentSlug ? saved : null;
+    const paymentId = returnedPaymentId || savedForPage?.paymentId;
     if (!paymentId) return;
-    const slug = p.get('slug') || '';
+    const slug = currentSlug || savedForPage?.slug || '';
     const code = p.get('code');
     if (code != null && code !== '') {
+      forgetPayment(paymentId);
       history.replaceState(null, '', cleanUrl()); // 실패/취소 — 흔적 제거
       return;
     }
+    rememberPayment(slug, paymentId);
+    if (returnedPaymentId) history.replaceState(null, '', cleanUrl());
     finishVerify(slug, paymentId);
   }
 

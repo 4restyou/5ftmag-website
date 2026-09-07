@@ -126,6 +126,7 @@ function openForm(row) {
   $('entMsg').textContent = '';
   $('entResults').innerHTML = '';
   $('entHolders').innerHTML = '';
+  $('entRevoked').innerHTML = '';
   $('entSearch').value = '';
   if (row) { refreshPagesStatus(row); refreshHolders(row); }
 
@@ -308,13 +309,32 @@ async function refreshHolders(row) {
   const r = row || currentRow();
   if (!r?.id) return;
   $('entHolders').innerHTML = '<p class="ent-meta" style="padding:6px 2px;">불러오는 중…</p>';
-  const ents = await db().ebooks.listEntitlements(r.id);
-  if (!ents.length) { $('entHolders').innerHTML = '<p class="ent-meta" style="padding:6px 2px;">아직 열람권 보유자가 없어요.</p>'; return; }
-  $('entHolders').innerHTML = ents.map(e => {
-    const meta = escapeHtml(`${e.source}${e.order_ref ? ' · ' + e.order_ref : ''} · ${(e.user_id || '').slice(0, 8)}`);
-    const date = e.created_at ? new Date(e.created_at).toLocaleDateString('ko-KR') : '';
-    return `<div class="ent-row"><span class="ent-name">${escapeHtml(date)}</span><span class="ent-meta">${meta}</span><button type="button" class="ent-act revoke" data-revoke="${escapeAttr(e.user_id)}">회수</button></div>`;
-  }).join('');
+  $('entRevoked').innerHTML = '<p class="ent-meta" style="padding:6px 2px;">불러오는 중…</p>';
+  const [ents, revoked] = await Promise.all([
+    db().ebooks.listEntitlements(r.id, 'active'),
+    db().ebooks.listEntitlements(r.id, 'revoked'),
+  ]);
+  if (!ents.length) {
+    $('entHolders').innerHTML = '<p class="ent-meta" style="padding:6px 2px;">아직 열람권 보유자가 없어요.</p>';
+  } else {
+    $('entHolders').innerHTML = ents.map(e => {
+      const state = e.external_status ? ` · ${e.external_status}` : '';
+      const checked = e.last_verified_at ? ` · 확인 ${new Date(e.last_verified_at).toLocaleDateString('ko-KR')}` : '';
+      const meta = escapeHtml(`${e.source}${state}${checked}${e.order_ref ? ' · ' + e.order_ref : ''} · ${(e.user_id || '').slice(0, 8)}`);
+      const date = e.created_at ? new Date(e.created_at).toLocaleDateString('ko-KR') : '';
+      return `<div class="ent-row"><span class="ent-name">${escapeHtml(date)}</span><span class="ent-meta">${meta}</span><button type="button" class="ent-act revoke" data-revoke="${escapeAttr(e.user_id)}">회수</button></div>`;
+    }).join('');
+  }
+  if (!revoked.length) {
+    $('entRevoked').innerHTML = '<p class="ent-meta" style="padding:6px 2px;">회수 이력이 없어요.</p>';
+  } else {
+    $('entRevoked').innerHTML = revoked.map(e => {
+      const date = e.revoked_at ? new Date(e.revoked_at).toLocaleDateString('ko-KR') : '';
+      const reason = e.revoke_reason || e.external_status || '회수';
+      const meta = escapeHtml(`${e.source} · ${reason}${e.order_ref ? ' · ' + e.order_ref : ''} · ${(e.user_id || '').slice(0, 8)}`);
+      return `<div class="ent-row"><span class="ent-name">${escapeHtml(date)}</span><span class="ent-meta">${meta}</span></div>`;
+    }).join('');
+  }
 }
 
 async function grantTo(userId, displayName) {
