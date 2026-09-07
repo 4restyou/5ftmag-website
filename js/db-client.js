@@ -831,6 +831,32 @@
         link: '/',
       });
     },
+    // 선정 저장과 알림을 한 번에. 관리 화면과 사진 라이트박스가 함께 쓴다.
+    //
+    // 호출자가 user_id 를 몰라도 되게 여기서 행을 읽는다. 공개 뷰
+    // (reader_submissions_approved)에는 user_id 가 없고, 베이스 테이블은
+    // 편집부만 읽을 수 있다("editors read all"). 그래서 이 함수는 편집부
+    // 세션에서만 끝까지 통과한다.
+    async feature(id, dateStr, note) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))) {
+        return { error: { message: '날짜 형식이 올바르지 않습니다 (YYYY-MM-DD)' } };
+      }
+      const { data: row, error: readErr } = await c.from('reader_submissions')
+        .select('id, user_id, film, featured_at, status').eq('id', id).maybeSingle();
+      if (readErr) return { error: readErr };
+      if (!row) return { error: { message: '사진을 찾을 수 없습니다 (편집부 계정인지 확인해 주세요)' } };
+      if (row.status !== 'approved') return { error: { message: '승인된 사진만 걸 수 있습니다' } };
+
+      const wasFeatured = Boolean(row.featured_at);
+      const { error } = await this.setFeatured(id, dateStr, note);
+      if (error) return { error };
+
+      // 처음 걸 때만 알린다. 날짜만 고칠 때도 보내면 한 사람의 폰이 여러 번 울린다.
+      if (wasFeatured) return { notified: false };
+      const { error: nErr } = await this.notifyFeatured(row, dateStr);
+      return { notified: !nErr, notifyError: nErr || null };
+    },
     async clearFeatured(id) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('reader_submissions').update({

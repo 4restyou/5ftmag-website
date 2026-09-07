@@ -594,7 +594,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20260907-entitlement" defer></script>
-  <script src="../js/db-client.js?v=20260907-opsdetail" defer></script>
+  <script src="../js/db-client.js?v=20260907-potwpick" defer></script>
 <script src="../js/image-processor.js?v=20260520-mobileupload" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20260602-camera-ui" defer></script>
@@ -603,6 +603,7 @@
 <script src="../js/reader-upload-flow.js?v=20260907-upload-recovery" defer></script>
 <script src="../js/reader-submissions.js?v=20260907-upload-recovery" defer></script>
 <script src="../js/film-name-picker.js?v=20260821-picker"></script>
+<script src="../js/potw-picker.js?v=20260907-potwpick"></script>
   <script src="../js/util.js?v=20260817-photodiv" defer></script>
   <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
@@ -621,7 +622,6 @@ const STATE = {
   themeOnly: false, // 테마 응모만 필터링 (theme_month NOT NULL)
   likeSort: false,  // 좋아요 순 정렬 모드 — 편집부 우수작 선정 보조
   likes: new Map(), // submission_id → like_count
-  featuredDates: new Set(), // 이미 선정된 날짜 — 다음 후보일 제안과 중복 경고에 쓴다
   allRows: [],      // 좋아요 순 모드일 때 status 전체를 한 번 끌어와 정렬한 결과
   selected: new Set(), // bulk 처리용 — 선택된 submission id 집합
   query: '',        // 응모자·필름 텍스트 검색 (승인됨/반려됨 만)
@@ -705,27 +705,6 @@ function buildReviewOpts() {
     if (STATE.month && STATE.month !== 'all') opts.month = STATE.month;
   }
   return opts;
-}
-
-// 이주의 사진 일정 — 예약분 포함. 다음 후보일을 제안하고 같은 날 중복을 막는다.
-async function loadFeaturedDates() {
-  try {
-    const rows = await db().review.listFeatured();
-    STATE.featuredDates = new Set(rows.map(r => String(r.featured_at)));
-  } catch (_) { STATE.featuredDates = new Set(); }
-}
-
-// 아직 비어 있는 다음 월요일. 예약을 쌓아 두는 것이 이 기능의 전제라
-// 매번 오늘을 제안하지 않고 빈 자리를 찾아 준다.
-function suggestFeatureDate() {
-  const d = new Date();
-  d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); // 다음 월요일
-  for (let i = 0; i < 104; i++) {
-    const iso = d.toISOString().slice(0, 10);
-    if (!STATE.featuredDates.has(iso)) return iso;
-    d.setDate(d.getDate() + 7);
-  }
-  return new Date().toISOString().slice(0, 10);
 }
 
 async function loadLikes() {
@@ -907,7 +886,7 @@ function renderCard(r) {
   // 이주의 사진 배지. 오늘 이후 날짜면 예약분이라 따로 표시한다.
   const todayStr = new Date().toISOString().slice(0, 10);
   const featBadge = r.featured_at
-    ? `<span class="sub-card-featured" title="${r.featured_at > todayStr ? '예약된 이주의 사진' : '이주의 사진으로 걸린 사진'}">${r.featured_at > todayStr ? '예약' : '이주의 사진'} ${escapeHtml(r.featured_at)}</span>`
+    ? `<span class="sub-card-featured" data-date="${escapeHtml(r.featured_at)}" title="${r.featured_at > todayStr ? '예약된 이주의 사진' : '이주의 사진으로 걸린 사진'}">${r.featured_at > todayStr ? '예약' : '이주의 사진'} ${escapeHtml(r.featured_at)}</span>`
     : '';
   const filmMatchHint = getFilmMatchHint(r.film);
 
@@ -1046,46 +1025,19 @@ function bindCardActions() {
           if (error) { window.notify?.('반려 처리에 실패했어요. 권한과 네트워크 상태를 확인해 주세요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '반려'; return; }
           await Promise.all([loadCounts(), loadList()]);
         } else if (action === 'feature') {
-          // 이번 주에 올라온 사진이 아니라 이번 주에 선정한 사진이다.
-          // 그래서 제출일과 상관없이 아무 승인 사진이나 걸 수 있다.
+          // 흐름은 js/potw-picker.js 하나에 모아 두었다. 카탈로그·홈 라이트박스도
+          // 같은 함수를 부르므로 어디서 걸든 동작과 문구가 같다.
           const cur = card.querySelector('.sub-card-featured');
-          const suggested = suggestFeatureDate();
-          const dateStr = prompt(
-            '이 사진을 이주의 사진으로 겁니다.\n\n' +
-            '언제부터 걸까요? (YYYY-MM-DD)\n' +
-            '오늘 이후 날짜를 넣으면 그 날짜에 자동으로 걸립니다. 미리 여러 장을 잡아 두면 매주 들어오지 않아도 됩니다.',
-            suggested,
-          );
-          if (dateStr === null) return;
-          const date = String(dateStr).trim();
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { window.notify?.('날짜는 2026-09-07 처럼 넣어 주세요.'); return; }
-          if (STATE.featuredDates.has(date) && !cur) {
-            if (!confirm(date + ' 에 이미 다른 사진이 걸려 있습니다.\n그래도 이 사진으로 바꿀까요? (같은 날짜면 나중에 등록한 쪽이 홈에 걸립니다)')) return;
-          }
-          const note = prompt('편집부 한 줄을 적어 주세요. 비워 두면 사진과 작가만 나옵니다. (선택, 300자)', '');
-          if (note === null) return;
-          btn.disabled = true; btn.textContent = '처리 중…';
-          const { error } = await db().review.setFeatured(id, date, note);
-          if (error) { window.notify?.('이주의 사진 등록에 실패했어요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '이주의 사진으로 걸기'; return; }
-
-          // 뽑힌 사람에게 알린다 (벨 + 폰 푸시). 처음 걸 때만 보낸다.
-          // 날짜를 고칠 때마다 보내면 한 사람의 폰이 여러 번 울린다.
-          if (!cur) {
-            const row = (STATE.rows || []).find(x => String(x.id) === String(id));
-            const { error: nErr } = await db().review.notifyFeatured(row, date);
-            // 알림이 실패해도 선정 자체는 이미 저장됐다. 되돌리지 않고 알리기만 한다.
-            if (nErr) window.notify?.('선정은 저장했지만 알림을 보내지 못했어요. (' + nErr.message + ')');
-            else window.notify?.('선정하고 제출자에게 알렸어요.');
-          }
-
-          await loadFeaturedDates();
+          btn.disabled = true;
+          const ok = await window.PotwPicker.pick(id, { current: cur ? cur.dataset.date : '' });
+          btn.disabled = false;
+          if (!ok) return;
           await loadList();
         } else if (action === 'unfeature') {
           if (!confirm('이 사진의 이주의 사진 선정을 해제할까요? 사진 자체는 그대로 남습니다.')) return;
           btn.disabled = true; btn.textContent = '해제 중…';
           const { error } = await db().review.clearFeatured(id);
           if (error) { window.notify?.('해제에 실패했어요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '선정 해제'; return; }
-          await loadFeaturedDates();
           await loadList();
         } else if (action === 'delete') {
           if (!confirm('이 제출을 완전히 삭제할까요? 사진 파일과 DB 기록이 모두 지워져 복구할 수 없습니다.')) return;
@@ -1342,7 +1294,7 @@ async function loadReportBadge() {
   // 필름 카탈로그를 먼저 로드 — getFilmMatchHint 가 STATE.films 에 의존
   // (loadList 가 먼저 끝나면 모든 카드에 "라이브러리에 없는 필름" 으로 잘못 표시됨)
   await loadFilms();
-  await Promise.all([loadCounts(), loadLikes(), loadFeaturedDates(), loadList(), loadReportBadge()]);
+  await Promise.all([loadCounts(), loadLikes(), loadList(), loadReportBadge()]);
   updateSelectAllRow();
 })();
 </script>

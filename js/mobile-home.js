@@ -598,6 +598,7 @@
               <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>
             </svg>
           </button>
+          <button type="button" class="mh-sheet-lb-potw" hidden>이주의 사진으로 걸기</button>
           <a class="mh-sheet-lb-link mh-sheet-lb-filmlink">필름 보기 →</a>
           <a class="mh-sheet-lb-link mh-sheet-lb-contributor" hidden>촬영자 보기 →</a>
         </div>
@@ -614,6 +615,26 @@
     const favBtn = lb.querySelector('.mh-sheet-lb-fav');
     const shareBtn = lb.querySelector('.mh-sheet-lb-share');
     const filmLinkEl = lb.querySelector('.mh-sheet-lb-filmlink');
+    // 편집부로 로그인했을 때만 뜬다. 좋은 사진을 발견한 자리에서 바로 걸 수 있게.
+    const potwBtn = lb.querySelector('.mh-sheet-lb-potw');
+    let isEditorUser = null;
+    async function checkEditor() {
+      if (isEditorUser !== null) return isEditorUser;
+      isEditorUser = false;
+      try {
+        if (!window.MagDB?.isReady?.()) return false;
+        if (!(await window.MagDB.auth.getSession())) return false;
+        const profile = await window.MagDB.profiles?.getMine?.();
+        isEditorUser = !!(profile && profile.is_editor);
+      } catch (_) { isEditorUser = false; }
+      return isEditorUser;
+    }
+    potwBtn?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const subId = potwBtn.dataset.submissionId || '';
+      if (!subId || !window.PotwPicker) return;
+      await window.PotwPicker.pick(subId);
+    });
     const contribLinkEl = lb.querySelector('.mh-sheet-lb-contributor');
 
     if (typeof navigator.share === 'function') shareBtn.hidden = false;
@@ -647,6 +668,15 @@
       const note = (r.caption || '').trim();
       noteEl.textContent = note;
       noteEl.hidden = !note;
+
+      if (potwBtn) {
+        // 'sub-' 접두사가 붙은 것만 독자 투고다. 접두사를 확인하지 않고 그냥
+        // 벗기면 나중에 다른 출처가 섞였을 때 버튼이 잘못 뜬다.
+        const subId = (typeof r.id === 'string' && r.id.startsWith('sub-')) ? r.id.slice(4) : '';
+        potwBtn.dataset.submissionId = subId;
+        potwBtn.hidden = true;
+        if (subId) checkEditor().then((ok) => { if (ok && potwBtn.dataset.submissionId === subId) potwBtn.hidden = false; });
+      }
 
       counterEl.textContent = `${cur + 1} / ${rows.length}`;
       // 스크린리더에 변화 알림

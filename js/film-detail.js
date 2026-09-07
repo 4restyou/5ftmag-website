@@ -63,6 +63,27 @@
     const img = box.querySelector('img');
     const caption = box.querySelector('figcaption');
 
+    // 편집부로 로그인했을 때만 이주의 사진으로 걸 수 있는 버튼이 캡션에 붙는다.
+    // 검색으로 이 페이지에 들어온 편집부도 발견한 자리에서 바로 걸 수 있어야 한다.
+    let isEditorUser = null;
+    async function checkEditor() {
+      if (isEditorUser !== null) return isEditorUser;
+      isEditorUser = false;
+      try {
+        if (!window.MagDB?.isReady?.()) return false;
+        if (!(await window.MagDB.auth.getSession())) return false;
+        const profile = await window.MagDB.profiles?.getMine?.();
+        isEditorUser = !!(profile && profile.is_editor);
+      } catch (_) { isEditorUser = false; }
+      return isEditorUser;
+    }
+    caption.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-feature-sub]');
+      if (!btn || !window.PotwPicker) return;
+      e.stopPropagation();
+      await window.PotwPicker.pick(btn.dataset.featureSub);
+    });
+
     function paint() {
       const photo = photos[index];
       if (!photo) return;
@@ -71,6 +92,19 @@
       img.alt = `${filmLabel} 로 찍은 사진${who ? `. 촬영 ${who}` : ''}`;
       const bits = [who, photo.camera, photo.caption].filter(Boolean).map(escapeHtml);
       caption.innerHTML = bits.join(' · ');
+
+      // 'sub-' 접두사가 붙은 것만 독자 투고다.
+      const subId = (typeof photo.id === 'string' && photo.id.startsWith('sub-')) ? photo.id.slice(4) : '';
+      if (!subId) return;
+      checkEditor().then((ok) => {
+        if (!ok || photos[index] !== photo) return;   // 그새 사진이 넘어갔으면 붙이지 않는다
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'film-lightbox-potw';
+        b.dataset.featureSub = subId;
+        b.textContent = '이주의 사진으로 걸기';
+        caption.appendChild(b);
+      });
     }
     function open(next) {
       index = next;

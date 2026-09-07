@@ -1293,6 +1293,13 @@
     setTimeout(() => window.location.reload(), 900);
   }
 
+  // 이주의 사진 선정 — 흐름은 js/potw-picker.js 하나에 모여 있다.
+  // 관리 화면·홈·필름 상세도 같은 함수를 부르므로 어디서 걸든 동작이 같다.
+  async function featureSubmission(submissionId) {
+    if (!submissionId || !window.PotwPicker) return;
+    await window.PotwPicker.pick(submissionId);
+  }
+
   const filmsLightbox = window.FilmsLightbox.create({
     getCurrentFilmKey: () => currentFilmKey,
     getEditorialPhotos: () => (currentFilmKey && filmsData[currentFilmKey]?.photos) || [],
@@ -1309,6 +1316,7 @@
     togglePhotoFavorite: (subId, wasFav) => window.MagDB.favorites.toggle('submission', subId, wasFav),
     canEditFilm: () => isEditorUser,
     onEditFilm: editSubmissionFilm,
+    onFeature: featureSubmission,
     isModalOpen: () => modalOverlay.classList.contains('open'),
     closeModal,
     notify: window.notify,
