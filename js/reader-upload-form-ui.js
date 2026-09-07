@@ -39,7 +39,7 @@
           setUploadStatus('progress', '아직 처리 중입니다', '모바일 네트워크나 큰 사진은 시간이 더 걸릴 수 있어요. 같은 버튼을 다시 누르지 않아도 됩니다.');
         }, 18000),
         setTimeout(() => {
-          setUploadStatus('progress', '서버 응답을 기다리는 중', '1분 안에 완료되지 않으면 자동으로 중단되고 다시 시도할 수 있게 복구됩니다.');
+          setUploadStatus('progress', '서버 응답을 기다리는 중', '전송이 지연되면 자동으로 재시도합니다. 사진 전송은 최대 3분 안에 중단되며 입력 내용은 유지됩니다.');
         }, 38000),
       ];
     }
@@ -74,7 +74,7 @@
         showError('JPG, PNG, WebP 이미지만 올릴 수 있어요.');
         return;
       }
-      if (!fileInput) return;
+      if (!fileInput || fileInput.disabled) return;
       if (typeof DataTransfer === 'undefined') {
         showError('이 브라우저에서는 드래그앤드롭 파일 지정이 지원되지 않아요. 파일 선택 버튼을 사용해 주세요.');
         return;

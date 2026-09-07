@@ -229,11 +229,8 @@
   }
 
   // 업로드/네트워크 호출에도 timeout — supabase storage 가 모바일 약한 네트워크에서 hang 하는 경우 대응
-  function withNetworkTimeout(promise, ms, label) {
-    return new Promise((resolve, reject) => {
-      const t = setTimeout(() => reject(new Error(`${label} 시간 초과 (${Math.round(ms/1000)}초). 네트워크 상태 확인 후 다시 시도해 주세요.`)), ms);
-      promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
-    });
+  function withNetworkTimeout(operation, ms, label) {
+    return window.ReaderUploadFlow.withNetworkTimeout(operation, ms, label);
   }
 
   // Supabase JS v2 가 localStorage 의 'sb-<ref>-auth-token' 에 세션 JSON 을 둠.
@@ -311,7 +308,12 @@
     document.body.style.overflow = 'hidden';
   }
 
+  let submissionBusy = false;
   function closeModal() {
+    if (submissionBusy) {
+      showError('제출 처리 중입니다. 입력 내용을 보존하려면 결과가 나올 때까지 잠시 기다려 주세요.');
+      return;
+    }
     const wrap = document.getElementById('rs-modal');
     clearFormOutsideClickHandler();
     if (wrap) wrap.classList.remove('open');
@@ -565,6 +567,7 @@
   const escapeHtml = window.MagUtil.escapeHtml;
   const escapeAttr = window.MagUtil.escapeAttr;
   function uuid() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
@@ -812,7 +815,7 @@
     if (hasUploadedPhoto || stage === 'database') {
       return {
         title: '사진 저장은 완료됐어요',
-        detail: '사진 파일은 이미 올라갔습니다. 아래 버튼을 누르면 사진을 다시 보내지 않고 제출 기록만 다시 저장합니다.',
+        detail: '사진 파일은 이미 올라갔습니다. 아래 버튼을 누르면 처음 제출한 내용으로 저장 결과를 확인하고, 기록이 없을 때만 다시 저장합니다.',
         button: '제출 기록 다시 저장',
       };
     }
@@ -852,6 +855,7 @@
     if (!form) return;
     let submitting = false;
     let pendingUploadedPhoto = null;
+    let uploadState = {};
 
     if (!window.ReaderCameraInput?.bindCameraInput) {
       showError('카메라 입력 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
@@ -880,6 +884,7 @@
 
     form.querySelector('input[name="photo"]')?.addEventListener('change', () => {
       pendingUploadedPhoto = null;
+      uploadState = {};
     });
 
     // 드롭존(span role=button) 키보드 작동 + 숨은 파일 input 은 탭 순서에서 제외(이중 탭스톱 방지)
@@ -911,6 +916,9 @@
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitting || submitBtn?.disabled) return;
       submitting = true;
+      submissionBusy = true;
+      const controls = Array.from(form.querySelectorAll('input, select, textarea, button'));
+      const disabledBefore = controls.map(el => el.disabled);
       submitBtn.disabled = true;
       submitBtn.textContent = '업로드 중…';
       setUploadStatus('progress', '제출 준비 중', '사진과 입력 내용을 확인하고 있어요.');
@@ -932,6 +940,7 @@
         uploadMeta.fileLastModified = file.lastModified || '';
         const currentFileSignature = fileSignature(file);
         fields = validateAndNormalizeSubmissionFields(fields, films);
+        controls.forEach(el => { el.disabled = true; });
 
         if (!window.ReaderUploadFlow?.uploadPhoto) {
           throw new Error('사진 업로드 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
@@ -955,6 +964,7 @@
             uuid,
             withNetworkTimeout,
             uploadMeta,
+            uploadState,
             setSubmitText: (text) => { submitBtn.textContent = text; },
             markProgress,
           }).catch(err => {
@@ -963,20 +973,32 @@
           });
           pendingUploadedPhoto = {
             ...uploadResult,
+            submissionId: uuid(),
             fileSignature: currentFileSignature,
             lastSuccessfulKind: uploadMeta.lastSuccessfulKind || '',
           };
         }
         const { user, path, triedPaths } = uploadResult;
 
-        const insertData = buildSubmissionInsertData({ userId: user.id, path, fields });
+        // 응답만 늦은 경우에도 같은 ID/내용으로 재시도하여 중복 INSERT를 막는다.
+        const insertData = pendingUploadedPhoto.record || {
+          ...buildSubmissionInsertData({ userId: user.id, path, fields }),
+          id: pendingUploadedPhoto.submissionId,
+        };
+        pendingUploadedPhoto.record = insertData;
         submitBtn.textContent = '제출 기록 저장 중…';
         markProgress('database', '제출 기록 저장 중', '사진 정보와 필름 정보를 함께 저장하고 있어요.');
-        const { error: dbErr } = await withNetworkTimeout(
-          db().submissions.create(insertData),
+        let { error: dbErr } = await withNetworkTimeout(
+          signal => db().submissions.create(insertData, { signal }),
           25000,
           '제출 기록 저장'
         ).catch(err => ({ error: { message: err.message } }));
+        if (dbErr && db().submissions.findOwn) {
+          const saved = await withNetworkTimeout(
+            signal => db().submissions.findOwn(insertData, { signal }), 6000, '제출 결과 확인'
+          ).catch(() => null);
+          if (saved?.data && !saved.error) dbErr = null;
+        }
         if (dbErr) {
           uploadMeta.lastSuccessfulPath = path;
           uploadMeta.lastSuccessfulKind = uploadMeta.lastSuccessfulKind || pendingUploadedPhoto?.lastSuccessfulKind || 'storage';
@@ -993,6 +1015,8 @@
         }
 
         // 4) 메타 기억
+        fields = { ...fields, film: insertData.film, camera: insertData.camera,
+          submitterName: insertData.submitter_name || '', instagram: insertData.instagram || '' };
         rememberSubmissionMeta(fields);
         pendingUploadedPhoto = null;
 
@@ -1011,7 +1035,10 @@
         submitBtn.disabled = false;
         submitBtn.textContent = errState.button;
       } finally {
+        controls.forEach((el, i) => { el.disabled = disabledBefore[i]; });
+        submitBtn.disabled = false;
         submitting = false;
+        submissionBusy = false;
         clearSlowUploadHints();
       }
     });

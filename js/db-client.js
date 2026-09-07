@@ -503,6 +503,42 @@
       .slice(0, 40);
   }
 
+  // storage-js의 upload 옵션은 AbortSignal을 전달하지 않아 이 경로만 fetch를 사용한다.
+  async function readerStorageRequest(method, path, blob, opts) {
+    const c = client(); if (!c) return { error: { message: 'unavailable' } };
+    try {
+      if (opts.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      const { data } = await withTimeout(c.auth.getSession(), 7000, 'getSession');
+      if (opts.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      const session = data?.session;
+      if (!session?.access_token || !path.startsWith(session.user.id + '/')) {
+        return { error: { message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.', status: 401 } };
+      }
+      const encoded = path.split('/').map(encodeURIComponent).join('/');
+      let body;
+      if (blob) {
+        body = new FormData();
+        body.append('cacheControl', '3600');
+        body.append('', blob);
+      }
+      const response = await fetch(`${URL_}/storage/v1/object/${method === 'HEAD' ? 'authenticated/' : ''}${BUCKET}/${encoded}`, {
+        method,
+        signal: opts.signal,
+        cache: 'no-store',
+        headers: { apikey: ANON_, authorization: `Bearer ${session.access_token}`, 'x-upsert': 'false' },
+        ...(body ? { body } : {}),
+      });
+      if (!response.ok) {
+        const detail = method === 'HEAD' ? {} : await response.json().catch(() => ({}));
+        return { error: { message: detail.message || detail.error || `업로드 오류 (${response.status})`, status: Number(detail.statusCode) || response.status } };
+      }
+      const length = response.headers.get('content-length');
+      return { error: null, bytes: length == null ? null : Number(length) };
+    } catch (error) {
+      return { error: { message: error.message, code: error.name === 'AbortError' ? 'ABORTED' : 'NETWORK_ERROR' } };
+    }
+  }
+
   // ─── 독자 사진 (공개 read view + 본인 INSERT + Storage 업로드) ───
   const submissions = {
     async listApproved(limit = null) {
@@ -565,19 +601,39 @@
       if (error) return [];
       return (data || []).map(mapApprovedSubmission);
     },
-    async create(record) {
+    async findOwn(record, opts = {}) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('reader_submissions').insert(record);
+      let query = c.from('reader_submissions').select('id')
+        .eq('id', record.id).eq('user_id', record.user_id).eq('storage_path', record.storage_path).maybeSingle();
+      if (opts.signal) query = query.abortSignal(opts.signal);
+      return query;
     },
-    async uploadPhoto(path, blob) {
+    async create(record, opts = {}) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.storage.from(BUCKET).upload(path, blob, {
-        contentType: 'image/jpeg', upsert: false,
-      });
+      if (record.id) {
+        const existing = await submissions.findOwn(record, opts);
+        if (existing.error || existing.data) return existing;
+      }
+      let query = c.from('reader_submissions').insert(record);
+      if (opts.signal) query = query.abortSignal(opts.signal);
+      const result = await query;
+      if (result.error?.code === '23505' && record.id && !opts.signal?.aborted) {
+        const existing = await submissions.findOwn(record, opts);
+        if (existing.data && !existing.error) return existing;
+      }
+      return result;
     },
-    // TUS resumable 업로드. 약한 모바일 네트워크에서 청크 단위로 전송하고
-    // 중간 끊김 시 같은 청크부터 재개 → 90초 timeout 으로 처음부터 다시
-    // 올리는 단일 POST 보다 통과율이 훨씬 높음. tus-js-client 가 로드되어
+    async uploadPhoto(path, blob, opts = {}) {
+      return readerStorageRequest('POST', path, blob, opts);
+    },
+    async photoExists(path, bytes, opts = {}) {
+      const result = await readerStorageRequest('HEAD', path, null, opts);
+      // 고유 UUID 경로의 HEAD 성공 자체가 저장 완료 증거다. 브라우저 CORS가
+      // Content-Length를 숨긴 경우에는 크기 비교 없이 복구한다.
+      return { exists: !result.error && (result.bytes == null || result.bytes === bytes), error: result.error };
+    },
+    // TUS resumable 업로드. 약한 모바일 네트워크에서 서버가 받은 위치부터
+    // 이어 보낼 수 있어 단일 POST보다 복구가 쉽다. tus-js-client가 로드되어
     // window.tus.Upload 로 접근 가능해야 함.
     async uploadPhotoResumable(path, blob, opts = {}) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
@@ -590,13 +646,25 @@
         accessToken = data?.session?.access_token || null;
       } catch (_) {}
       if (!accessToken) return { error: { message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.' } };
+      if (opts.signal?.aborted) return { error: { message: '업로드가 중단되었어요.', code: 'ABORTED' } };
 
       return new Promise((resolve) => {
         let settled = false;
-        const finish = (result) => { if (!settled) { settled = true; resolve(result); } };
+        let onAbort;
+        const finish = (result) => {
+          if (!settled) {
+            settled = true;
+            if (onAbort) opts.signal?.removeEventListener('abort', onAbort);
+            resolve(result);
+          }
+        };
         const upload = new window.tus.Upload(blob, {
           endpoint: `${URL_}/storage/v1/upload/resumable`,
           retryDelays: [0, 1500, 3500, 8000, 15000],
+          onShouldRetry(err) {
+            const status = err?.originalResponse?.getStatus?.() || 0;
+            return !opts.signal?.aborted && (!status || status === 408 || status === 429 || status >= 500);
+          },
           headers: {
             authorization: `Bearer ${accessToken}`,
             'x-upsert': 'false',
@@ -610,27 +678,30 @@
             contentType: blob.type || 'image/jpeg',
             cacheControl: '3600',
           },
+          fingerprint: async () => `reader:${BUCKET}:${path}:${blob.size}`,
           onError(err) {
             const message = err?.message || String(err || '업로드 실패');
-            finish({ error: { message: String(message).slice(0, 300) } });
+            finish({ error: { message: String(message).slice(0, 300), status: err?.originalResponse?.getStatus?.() } });
           },
           onProgress(bytesSent, bytesTotal) {
-            try { opts.onProgress?.(bytesSent, bytesTotal); } catch (_) {}
+            if (!settled && !opts.signal?.aborted) { try { opts.onProgress?.(bytesSent, bytesTotal); } catch (_) {} }
           },
           onSuccess() { finish({ error: null }); },
         });
         if (opts.signal) {
-          const onAbort = () => {
-            try { upload.abort(true); } catch (_) {}
-            finish({ error: { message: '업로드가 중단되었어요.' } });
+          onAbort = () => {
+            // 네트워크 DELETE 완료를 기다리지 않고 로컬 전송/재시도부터 중단한다.
+            try { Promise.resolve(upload.abort()).catch(() => {}); } catch (_) {}
+            finish({ error: { message: '업로드가 중단되었어요.', code: 'ABORTED' } });
           };
           if (opts.signal.aborted) { onAbort(); return; }
           opts.signal.addEventListener('abort', onAbort, { once: true });
         }
         Promise.resolve(upload.findPreviousUploads()).then((prev) => {
+          if (settled || opts.signal?.aborted) return;
           if (prev && prev.length) upload.resumeFromPreviousUpload(prev[0]);
           upload.start();
-        }).catch(() => upload.start());
+        }).catch(() => { if (!settled && !opts.signal?.aborted) upload.start(); });
       });
     },
     async removePhoto(path) {
