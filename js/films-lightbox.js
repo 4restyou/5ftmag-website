@@ -156,6 +156,9 @@
       // 관리자 화면에서 그 사진을 다시 찾아내는 수고를 없애려는 것이다.
       if (photo.submissionId && options.canEditFilm?.()) {
         parts.push(`<button type="button" class="lightbox-caption-link lightbox-caption-edit" data-edit-film="${escapeText(photo.submissionId)}" data-edit-current="${escapeText(photo.film || '')}">필름 수정</button>`);
+        // 좋은 사진을 발견한 자리에서 바로 걸 수 있게 한다. 관리 화면에서 그 사진을
+        // 다시 찾아내는 수고를 없애려는 것이다. 대상은 독자 투고(submissionId)뿐이다.
+        parts.push(`<button type="button" class="lightbox-caption-link lightbox-caption-potw" data-feature-sub="${escapeText(photo.submissionId)}">이주의 사진</button>`);
       }
       const metaHtml = parts.join(' · ');
       const noteHtml = photo.caption ? `<span class="lightbox-note">${escapeText(photo.caption)}</span>` : '';
@@ -163,6 +166,12 @@
     }
 
     function bindCaptionActions() {
+      lightboxCap.querySelectorAll('[data-feature-sub]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          options.onFeature?.(button.dataset.featureSub);
+        });
+      });
       lightboxCap.querySelectorAll('[data-edit-film]').forEach((button) => {
         button.addEventListener('click', (event) => {
           event.stopPropagation();

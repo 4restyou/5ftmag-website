@@ -41,8 +41,8 @@
   <link rel="stylesheet" href="./css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="./css/common.css?v=20260810-toast">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260616-themeauto">
-  <link rel="stylesheet" href="./css/home.css?v=20260904-potw">
-  <link rel="stylesheet" href="./css/mobile-home.css?v=20260904-potwfold">
+  <link rel="stylesheet" href="./css/home.css?v=20260907-potwpick">
+  <link rel="stylesheet" href="./css/mobile-home.css?v=20260907-potwpick">
 
   <!-- Schema.org Organization + WebSite -->
   <script type="application/ld+json">
@@ -374,6 +374,7 @@
                   d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
           </svg>
         </button>
+        <button type="button" class="photo-lb-potw" id="photoLbPotw" hidden>이주의 사진으로 걸기</button>
         <a href="films.html" class="photo-lb-link" id="photoLbFilmLink">필름 보기 →</a>
         <a href="films.html" class="photo-lb-link" id="photoLbContributorLink">촬영자 보기 →</a>
       </span>
@@ -426,14 +427,15 @@
   <script src="./js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="./js/site-common.js?v=20260820-authkeep" defer></script>
-<script src="./js/home-page.js?v=20260904-potwfold" defer></script>
+<script src="./js/potw-picker.js?v=20260907-potwpick" defer></script>
+<script src="./js/home-page.js?v=20260907-potwpick" defer></script>
 <script src="./js/mh-pure.js?v=20260620-recommend" defer></script>
 <script src="./js/mobile-home-model.js?v=20260712-modules" defer></script>
 <script src="./js/films-catalog-loader.js?v=20260602-modules" defer></script>
-<script src="./js/mobile-home.js?v=20260817-photodiv" defer></script>
+<script src="./js/mobile-home.js?v=20260907-potwpick" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db/commerce.js?v=20260907-entitlement" defer></script>
-  <script src="./js/db-client.js?v=20260907-opsdetail" defer></script>
+  <script src="./js/db-client.js?v=20260907-potwpick" defer></script>
 <!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->
 <script src="./js/reader-camera-input.js?v=20260602-camera-ui" defer></script>
 <script src="./js/reader-film-picker.js?v=20260616-themeauto" defer></script>

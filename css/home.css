@@ -866,6 +866,25 @@ body.modal-open { overflow: hidden; }
   background: rgba(255, 255, 255, 0.1);
   border-color: #fff;
 }
+/* 이주의 사진으로 걸기 (편집부에게만 보인다). ♡ 옆에 나란히 둔다. */
+.photo-lb-potw {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 36px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--fw-heading);
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.photo-lb-potw:hover { border-color: #fff; background: rgba(255, 255, 255, 0.12); }
+.photo-lb-potw[hidden] { display: none; }
+
 .photo-lb-fav {
   display: inline-flex;
   align-items: center;

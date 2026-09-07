@@ -352,6 +352,7 @@ ${articleHtml}
 <script src="${versioned('js/db-client.js')}" defer></script>
 <script src="${versioned('js/util.js')}" defer></script>
 <script src="${versioned('js/site-common.js')}" defer></script>
+<script src="${versioned('js/potw-picker.js')}" defer></script>
 <script src="${versioned('js/film-detail.js')}" defer></script>
 </body>
 </html>
@@ -368,6 +369,8 @@ ${articleHtml}
   const versioned = assetVersionReader(referenceHtml, {
     'css/film-detail.css': await contentHash('css/film-detail.css'),
     'js/film-detail.js': await contentHash('js/film-detail.js'),
+    // potw-picker.js 는 여기 넣지 않는다. films.html 에도 실려 bump-version 이
+    // 관리하므로, 자체 해시를 붙이면 버전이 갈라져 단일 버전 가드에 걸린다.
   });
 
   const data = JSON.parse(raw);

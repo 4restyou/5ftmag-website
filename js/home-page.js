@@ -922,6 +922,39 @@
     releasePhotoLbTrap = window.createFocusTrap?.(photoLightbox) || (() => {});
   }
 
+  // 편집부로 로그인했으면 라이트박스에서 바로 이주의 사진으로 걸 수 있게 한다.
+  // 좋은 사진을 발견한 자리에서 걸 수 있어야 자연스럽다. 대상은 독자 투고뿐이라
+  // 편집부가 카탈로그에 올린 샘플(editorial)에는 버튼이 뜨지 않는다.
+  let isEditorUser = null;
+  async function checkEditor() {
+    if (isEditorUser !== null) return isEditorUser;
+    isEditorUser = false;
+    try {
+      if (!window.MagDB?.isReady?.()) return false;
+      if (!(await window.MagDB.auth.getSession())) return false;
+      const profile = await window.MagDB.profiles?.getMine?.();
+      isEditorUser = !!(profile && profile.is_editor);
+    } catch (_) { isEditorUser = false; }
+    return isEditorUser;
+  }
+
+  const photoLbPotw = document.getElementById('photoLbPotw');
+  async function syncPhotoLbPotw() {
+    if (!photoLbPotw) return;
+    const p = currentPhotos[currentPhotoIndex];
+    const subId = p && p.source === 'reader' && p.submissionId ? p.submissionId : '';
+    photoLbPotw.hidden = !subId || !(await checkEditor());
+    photoLbPotw.dataset.submissionId = subId;
+  }
+  if (photoLbPotw) {
+    photoLbPotw.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const subId = photoLbPotw.dataset.submissionId || '';
+      if (!subId || !window.PotwPicker) return;
+      await window.PotwPicker.pick(subId);
+    });
+  }
+
   function syncPhotoLbFav() {
     if (!photoLbFav) return;
     const p = currentPhotos[currentPhotoIndex];
@@ -1011,6 +1044,7 @@
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;
     try { window.srAnnounce?.(`사진 ${index + 1}, 총 ${currentPhotos.length}장. ${p.author || ''}${p.filmName ? ', ' + p.filmName : ''}`.trim()); } catch (_) {}
     syncPhotoLbFav();
+    syncPhotoLbPotw();
 
     if (photoLbLink) {
       photoLbLink.href = filmLinkFor(p);
