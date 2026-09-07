@@ -597,6 +597,8 @@ function clientUploadDetail(row) {
   }
   const triedCount = String(data.tried_paths || '').split(',').map(s => s.trim()).filter(Boolean).length;
   if (triedCount > 1) parts.push(`경로 ${fmtNum(triedCount)}개`);
+  const sessionCount = Number(row.session_count) || 0;
+  if (sessionCount > 1) parts.push(`세션 ${fmtNum(sessionCount)}개`);
   return parts.join(' · ');
 }
 
@@ -626,6 +628,37 @@ function clientUploadAction(row, meta) {
     return '조치: 임시 업로드 파일 정리가 실패했을 수 있으니 Storage 잔여 파일을 점검하세요.';
   }
   return '조치: 같은 단계의 반복 발생 여부를 보고 재현 환경을 먼저 좁혀보세요.';
+}
+
+function clientUploadDiagnostic(row, meta) {
+  const data = parseClientErrorStack(row);
+  const entries = [
+    ['kind', meta.area || 'upload'],
+    ['stage', meta.stage || data.stage || 'unknown'],
+    ['message', meta.displayMessage || row?.message || ''],
+    ['path', row?.path || ''],
+    ['source', row?.source || ''],
+    ['latest_at', row?.ts || ''],
+    ['first_at', row?.first_ts || ''],
+    ['occurrences', row?.occurrences || ''],
+    ['sessions', row?.session_count || ''],
+    ['ua_family', row?.ua_family || ''],
+    ['online', data.online || ''],
+    ['input_bytes', data.input_bytes || ''],
+    ['upload_bytes', data.upload_bytes || ''],
+    ['photo_count', data.photo_count || ''],
+    ['file_name', data.file_name || ''],
+    ['file_type', data.file_type || ''],
+    ['attempt_count', data.attempt_count || ''],
+    ['last_successful_kind', data.last_successful_kind || ''],
+    ['last_successful_path', data.last_successful_path || ''],
+    ['last_error', data.last_error || data.final_error || ''],
+    ['tried_paths', data.tried_paths || ''],
+  ];
+  return entries
+    .filter(([, value]) => value != null && String(value).trim() !== '')
+    .map(([key, value]) => `${key}: ${String(value).trim()}`)
+    .join('\n');
 }
 
 function clientUploadSummaries(rows) {
@@ -680,6 +713,7 @@ async function loadClientErrors() {
       const loc = [row.source, row.lineno ? `${row.lineno}:${row.colno || 0}` : ''].filter(Boolean).join(' ');
       const uploadDetail = meta.kind === 'upload' ? clientUploadDetail(row) : '';
       const uploadAction = meta.kind === 'upload' ? clientUploadAction(row, meta) : '';
+      const diagnostic = meta.kind === 'upload' ? clientUploadDiagnostic(row, meta) : '';
       return `
         <div class="ops-row">
           <div class="ops-row-main">
@@ -689,8 +723,9 @@ async function loadClientErrors() {
             <div class="ops-row-sub">${escapeHtml(row.path || '-')} ${loc ? `· ${escapeHtml(loc)}` : ''}</div>
             ${uploadDetail ? `<div class="ops-row-sub">${escapeHtml(uploadDetail)}</div>` : ''}
             ${uploadAction ? `<div class="ops-row-action">${escapeHtml(uploadAction)}</div>` : ''}
+            ${diagnostic ? `<div class="ops-row-tools"><button type="button" class="ops-row-tool" data-action="copy-client-diagnostic" data-diagnostic="${escapeAttr(diagnostic)}">진단 복사</button></div>` : ''}
           </div>
-          <div class="ops-row-meta">${escapeHtml(fmtAgoShort(row.ts))}<br>${fmtNum(row.occurrences)}건</div>
+          <div class="ops-row-meta">${escapeHtml(fmtAgoShort(row.ts))}<br>${fmtNum(row.occurrences)}건${Number(row.session_count) > 1 ? `<br>${fmtNum(row.session_count)}세션` : ''}</div>
         </div>
       `;
     }).join('');
@@ -709,6 +744,25 @@ async function loadClientErrors() {
     return [];
   }
 }
+
+document.addEventListener('click', async (event) => {
+  const btn = event.target?.closest?.('[data-action="copy-client-diagnostic"]');
+  if (!btn) return;
+  const text = btn.dataset.diagnostic || '';
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    const prev = btn.textContent;
+    btn.textContent = '복사됨';
+    btn.classList.add('is-copied');
+    setTimeout(() => {
+      btn.textContent = prev;
+      btn.classList.remove('is-copied');
+    }, 1500);
+  } catch (_) {
+    window.prompt?.('진단 내용을 복사해 주세요.', text);
+  }
+});
 
 async function loadThumbnailDebt() {
   const countEl = $('thumbPendingCount');

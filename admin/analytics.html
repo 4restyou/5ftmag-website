@@ -75,6 +75,10 @@
     .ops-row-name { font-weight: var(--fw-heading); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .ops-row-sub { color: var(--text-muted); font-size: 12px; margin-top: 3px; overflow-wrap: anywhere; }
     .ops-row-action { margin-top: 6px; color: var(--text); font-size: 12px; font-weight: var(--fw-heading); line-height: 1.45; overflow-wrap: anywhere; }
+    .ops-row-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .ops-row-tool { font: inherit; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.03em; padding: 5px 9px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; transition: border-color .15s, background .15s; }
+    .ops-row-tool:hover { border-color: var(--text); }
+    .ops-row-tool.is-copied { background: var(--text); color: var(--bg); border-color: var(--text); }
     .ops-row-meta { color: var(--text-muted); font-size: 12px; text-align: right; white-space: nowrap; }
     .ops-badge { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; margin-right: 6px; border-radius: var(--badge-radius); background: var(--bg-sub); color: var(--text-muted); font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; }
     .ops-badge.is-danger { background: var(--text); color: var(--bg); }
@@ -491,13 +495,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/db/commerce.js?v=20260907-entitlement" defer></script>
-  <script src="../js/db-client.js?v=20260907-upload-recovery" defer></script>
+  <script src="../js/db-client.js?v=20260907-opsdetail" defer></script>
 <script src="../js/util.js?v=20260817-photodiv" defer></script>
   <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="../js/site-common.js?v=20260820-authkeep" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/admin-analytics-page.js?v=20260830-daterange" defer></script>
+<script src="../js/admin-analytics-page.js?v=20260907-opsdetail" defer></script>
 
 </body>
 </html>

@@ -1258,17 +1258,20 @@
   };
 
   // ─── 통계 (편집부 전용 — 모든 RPC 내부에서 is_editor 검사) ───
-  async function fallbackUploadsTop(field, { days = null, limit = 10 } = {}) {
+  async function fallbackUploadsTop(field, { from = null, to = null, days = null, limit = 10 } = {}) {
     const c = client(); if (!c) return [];
     const col = field === 'camera' ? 'camera' : 'film';
     const since = days ? new Date(Date.now() - Number(days) * 86400000).toISOString() : null;
+    const fromIso = from && /^\d{4}-\d{2}-\d{2}$/.test(String(from)) ? `${from}T00:00:00` : since;
+    const toIso = to && /^\d{4}-\d{2}-\d{2}$/.test(String(to)) ? `${to}T23:59:59.999` : null;
     let rows = [];
 
     let q = c.from('reader_submissions')
       .select(`${col}, status, created_at`)
       .not(col, 'is', null)
       .limit(5000);
-    if (since) q = q.gte('created_at', since);
+    if (fromIso) q = q.gte('created_at', fromIso);
+    if (toIso) q = q.lte('created_at', toIso);
     const primary = await q;
 
     if (primary.error) {
@@ -1276,7 +1279,8 @@
         .select(`${col}, created_at`)
         .not(col, 'is', null)
         .limit(5000);
-      if (since) publicQ = publicQ.gte('created_at', since);
+      if (fromIso) publicQ = publicQ.gte('created_at', fromIso);
+      if (toIso) publicQ = publicQ.lte('created_at', toIso);
       const fallback = await publicQ;
       if (fallback.error) {
         console.warn(`[analytics.fallbackUploadsTop.${col}]`, fallback.error.message);
@@ -1384,8 +1388,8 @@
     async uploadsTopFilms(from = null, to = null, limit = 10) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_uploads_top_films', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return fallbackUploadsTop('film', { days, limit }); }
-      return data?.length ? data : fallbackUploadsTop('film', { days, limit });
+      if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return fallbackUploadsTop('film', { from, to, limit }); }
+      return data?.length ? data : fallbackUploadsTop('film', { from, to, limit });
     },
     async uploadsTopFilmsAll(limit = 10) {
       const c = client(); if (!c) return [];
@@ -1396,8 +1400,8 @@
     async uploadsTopCameras(from = null, to = null, limit = 10) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_uploads_top_cameras', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return fallbackUploadsTop('camera', { days, limit }); }
-      return data?.length ? data : fallbackUploadsTop('camera', { days, limit });
+      if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return fallbackUploadsTop('camera', { from, to, limit }); }
+      return data?.length ? data : fallbackUploadsTop('camera', { from, to, limit });
     },
     async uploadsTopCamerasAll(limit = 10) {
       const c = client(); if (!c) return [];
@@ -1413,9 +1417,11 @@
     },
     async clientErrorsRecent(hours = 24, limit = 20) {
       const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_client_errors_recent', { p_hours: hours, p_limit: limit });
-      if (error) { console.warn('[analytics.clientErrorsRecent]', error.message); return []; }
-      return data || [];
+      const modern = await c.rpc('admin_client_errors_recent_v2', { p_hours: hours, p_limit: limit });
+      if (!modern.error) return modern.data || [];
+      const legacy = await c.rpc('admin_client_errors_recent', { p_hours: hours, p_limit: limit });
+      if (legacy.error) { console.warn('[analytics.clientErrorsRecent]', legacy.error.message || modern.error.message); return []; }
+      return legacy.data || [];
     },
     async clientErrorsPurge(keepDays = 30) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };

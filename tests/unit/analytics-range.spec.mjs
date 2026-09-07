@@ -67,6 +67,8 @@ describe('통계 RPC 계약', () => {
   const CLIENT = fs.readFileSync(path.resolve(process.cwd(), 'js/db-client.js'), 'utf8');
   const SQL = fs.readFileSync(
     path.resolve(process.cwd(), 'supabase/migrations/20260830000001_analytics_date_range.sql'), 'utf8');
+  const ERROR_SQL = fs.readFileSync(
+    path.resolve(process.cwd(), 'supabase/migrations/20260907000002_client_error_details.sql'), 'utf8');
 
   const FNS = [
     'admin_analytics_daily', 'admin_analytics_top_paths', 'admin_analytics_referrers',
@@ -88,5 +90,16 @@ describe('통계 RPC 계약', () => {
     for (const fn of FNS) {
       expect(CLIENT.includes(`'${fn}', { p_days`)).toBe(false);
     }
+  });
+
+  it('최근 JS 오류 v2 는 최신 상세 로그를 돌려주고 클라이언트가 우선 호출한다', () => {
+    expect(ERROR_SQL).toContain('create or replace function public.admin_client_errors_recent_v2');
+    expect(ERROR_SQL).toContain('details       text');
+    expect(ERROR_SQL).toContain('r.stack as details');
+    expect(ERROR_SQL).toContain('session_count bigint');
+    expect(CLIENT).toContain("admin_client_errors_recent_v2");
+    expect(CLIENT.indexOf("admin_client_errors_recent_v2")).toBeLessThan(
+      CLIENT.indexOf("admin_client_errors_recent', { p_hours")
+    );
   });
 });
