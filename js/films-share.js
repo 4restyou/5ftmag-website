@@ -66,6 +66,20 @@
     });
   }
 
+  // 작가 뷰는 필름 모달 안에서 열린다. 그래서 공유 버튼이 필름만 보고 있으면
+  // 작가를 공유해도 필름 링크가 나갔다. 작가를 먼저 확인해 이 함수로 보낸다.
+  async function shareContributor(key, label) {
+    if (!key) return;
+    const path = prettyContributorPath(key);
+    const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
+    const who = label || '@' + key;
+    await shareOrCopy({
+      title: `${who} 의 필름 사진 · 5ft magazine`,
+      text: `${who} 님이 5ft.mag 에 올린 필름 사진 보기`,
+      url,
+    });
+  }
+
   window.FilmsShare = {
     routeParam,
     filmsBasePath,
@@ -73,5 +87,6 @@
     prettyContributorPath,
     shareFilm,
     shareCamera,
+    shareContributor,
   };
 })();
