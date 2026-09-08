@@ -163,7 +163,7 @@ function jsonLd(label, key, photos) {
   return `  <script type="application/ld+json">${JSON.stringify(data)}</script>`;
 }
 
-function render(key, label, photos, films, firstFilmSlug, versioned, outFile) {
+function render(key, label, photos, total, films, firstFilmSlug, versioned, outFile) {
   const url = `${ORIGIN}/contributor/${key}`;
   // 카탈로그 목적지. 필름 슬러그를 함께 실어야 카탈로그가 승인 사진 전체를
   // 기다리지 않고 곧바로 모달을 연다.
@@ -172,7 +172,10 @@ function render(key, label, photos, films, firstFilmSlug, versioned, outFile) {
   const ogImage = latest ? ORIGIN + imageOf(latest) : FALLBACK_OG;
   const title = `${label} 의 필름 사진 · ${SITE_NAME}`;
   const filmList = films.slice(0, 6).join(', ');
-  const description = `${label} 님이 5ft.mag 에 올린 필름 사진 ${photos.length}장`
+  // photos 는 이 페이지에 싣는 일부(PHOTO_LIMIT)일 뿐이다. 개수는 실제로
+  // 올린 총장수를 써야 한다. 자른 숫자를 쓰면 미리보기와 본문이 둘 다
+  // 올린 것보다 적게 말한다.
+  const description = `${label} 님이 5ft.mag 에 올린 필름 사진 ${total}장`
     + (filmList ? `. ${filmList} 으로 찍었습니다.` : '.');
 
   return `<!DOCTYPE html>
@@ -242,7 +245,7 @@ ${mobileNavHtml(outFile)}
   <header class="contributor-head">
     <p class="contributor-eyebrow">READER</p>
     <h1>${esc(label)}</h1>
-    <p class="contributor-count">5ft.mag 에 올린 필름 사진 ${photos.length}장</p>
+    <p class="contributor-count">5ft.mag 에 올린 필름 사진 ${total}장</p>
     ${films.length ? `<p class="contributor-films">${films.slice(0, 8).map((f) => esc(f)).join(' · ')}</p>` : ''}
     <a class="contributor-cta" href="${esc(catalogHref)}">카탈로그에서 크게 보기 →</a>
   </header>
@@ -322,7 +325,7 @@ ${p.film || p.camera ? `      <figcaption>${esc([p.film, p.camera].filter(Boolea
     // 카탈로그가 바로 열 수 있는 필름 하나. 최신 사진의 필름부터 찾는다.
     const firstFilmSlug = all.map((p) => resolveFilmSlug(p.film)).find(Boolean) || '';
     const outFile = path.join(OUT_DIR, `${key}.html`);
-    await fs.writeFile(outFile, render(key, label, photos, films, firstFilmSlug, versioned, outFile), 'utf-8');
+    await fs.writeFile(outFile, render(key, label, photos, all.length, films, firstFilmSlug, versioned, outFile), 'utf-8');
     made.push({ key, count: all.length });
   }
 
