@@ -90,6 +90,10 @@
   let contributorFavKeys = new Set();
   let currentFilmKey = null;
   let currentCameraKey = null;
+  // 작가 뷰가 열려 있는 동안의 키와 표시 이름. 공유 버튼이 필름 대신 작가를
+  // 공유해야 하는지 판단하는 데 쓴다.
+  let currentContributorKey = null;
+  let currentContributorLabel = '';
   // 라이브러리 카드의 "원본" 정렬 순서 (좋아요 해제 시 복귀용)
   // 데스크탑·모바일 모두 sortLibrary 알파벳(브랜드→이름 가나다·ABC) 순
   let libraryOriginalOrder = [];
@@ -751,6 +755,7 @@
         ? rollRows
         : rollRows.filter(sub => personKeyOf(sub) === activePerson);
       if (contributorView) contributorView.hidden = true;
+      currentContributorKey = null;
       grid.hidden = false;
       if (rollIntro) {
         rollIntro.textContent = rollIntroText({ ...rollMeta(activeRoll), rows: rollRows });
@@ -780,6 +785,7 @@
       rollRows = nextRows;
       visible = rollRows;
       if (contributorView) contributorView.hidden = true;
+      currentContributorKey = null;
       grid.hidden = false;
       if (rollIntro) rollIntro.textContent = rollIntroText({ number: activeRoll, rows: rollRows, current: activeRoll === currentNumber });
       renderReaderSlots();
@@ -841,6 +847,8 @@
       updateReaderSelectionControls();
       if (personFilter) personFilter.hidden = true;
       contributorView.hidden = false;
+      currentContributorKey = personKey;
+      currentContributorLabel = label;
       if (rollIntro) {
         rollIntro.textContent = `${label}님이 5ft.mag에 올린 전체 Reader's Roll 사진입니다.`;
       }
@@ -1037,6 +1045,7 @@
     if (modalTrapRelease) { modalTrapRelease(); modalTrapRelease = null; }
     currentFilmKey = null;
     currentCameraKey = null;
+    currentContributorKey = null;
     // URL 에서 film/camera/contributor 제거
     try {
       const u = new URL(location.href);
@@ -1205,7 +1214,10 @@
   if (modalShare) {
     modalShare.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (currentCameraKey) shareCameraLink(currentCameraKey, cameraIndex.get(currentCameraKey));
+      // 작가 뷰는 필름 모달 안에서 열린다. 필름을 먼저 보면 작가를 보고 있어도
+      // 필름 링크가 나가므로, 작가를 가장 먼저 확인한다.
+      if (currentContributorKey) window.FilmsShare.shareContributor(currentContributorKey, currentContributorLabel);
+      else if (currentCameraKey) shareCameraLink(currentCameraKey, cameraIndex.get(currentCameraKey));
       else if (currentFilmKey) shareFilmLink(currentFilmKey, filmsData[currentFilmKey]);
     });
   }

@@ -1,0 +1,70 @@
+/* 작가별 사진 페이지 (/contributor/<키>.html)
+   검색과 메신저 미리보기가 읽는 정적 페이지다. 사람이 크게 보는 것은
+   카탈로그의 작가 뷰가 맡으므로, 여기서는 목록을 담백하게만 보여준다. */
+.contributor-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
+.contributor-head {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 28px;
+  margin-bottom: 32px;
+}
+.contributor-eyebrow {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+.contributor-head h1 {
+  margin: 0 0 8px;
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-default);
+}
+.contributor-count { margin: 0; font-size: 14px; color: var(--text-muted); }
+.contributor-films {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.contributor-cta {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 14px;
+  font-weight: var(--fw-heading);
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--text);
+  padding-bottom: 2px;
+}
+.contributor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.contributor-grid figure { margin: 0; }
+.contributor-grid img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: var(--bg-sub);
+  display: block;
+}
+.contributor-grid figcaption {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.contributor-foot { margin: 44px 0 0; font-size: 14px; }
+.contributor-foot a { color: var(--text); }
+
+@media (max-width: 900px) {
+  .contributor-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+}
+@media (max-width: 600px) {
+  .contributor-page { padding: 32px 20px 60px; }
+}

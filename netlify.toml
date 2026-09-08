@@ -121,6 +121,9 @@
   status = 200
 
 [[redirects]]
+  # 생성된 작가 페이지(build-contributor-pages.mjs)가 있으면 Netlify 가 그 파일을
+  # 먼저 서빙한다. force 가 아닌 리라이트는 실제 파일이 있으면 건너뛰기 때문이다.
+  # 사진이 적거나 한글 이름이라 페이지가 없는 작가만 이 규칙으로 카탈로그를 연다.
   from = "/contributor/:contributor"
   to = "/films.html?contributor=:contributor"
   status = 200
