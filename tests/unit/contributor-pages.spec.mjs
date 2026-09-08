@@ -139,3 +139,17 @@ describe('작가 페이지 사진 개수', () => {
     expect(builder).toContain('render(key, label, photos, all.length,');
   });
 });
+
+describe('작가 모아보기 개수', () => {
+  const roll = readFileSync(join(ROOT, 'js/films-reader-roll-data.js'), 'utf8');
+
+  it('그 사람 사진을 자르지 않는다', () => {
+    // 120장에서 자르면 그 이상 올린 작가는 화면이 늘 정확히 "120 photos" 로
+    // 멈추고, 목록 순서대로 앞 120장만 남아 뒤쪽 필름의 개수까지 깎인다.
+    // 실제로 @tsuki_gaze 가 120 에 걸려 시네스틸 800T 가 6컷으로 나왔다.
+    const fn = roll.slice(roll.indexOf('async function submissionsForPerson'));
+    const body = fn.slice(0, fn.indexOf('\n    }'));
+    expect(body).toContain('personKeyOf(sub) === personKey');
+    expect(body).not.toMatch(/\.slice\(0,\s*\d+\)/);
+  });
+});

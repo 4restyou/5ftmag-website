@@ -85,13 +85,18 @@
       };
     }
 
+    // 그 사람이 올린 사진 전부. 자르지 않는다.
+    //
+    // 예전에는 120장에서 잘랐다. 그래서 120장을 넘긴 작가는 화면이 늘 정확히
+    // "120 photos" 로 멈췄고, 필름별 개수도 실제보다 적게 나왔다. 목록 순서대로
+    // 앞 120장만 남으니 뒤쪽 필름이 통째로 깎였다. 개수가 거짓이 되는 쪽이
+    // DOM 이 늘어나는 것보다 나쁘다. 썸네일은 lazy 로딩이라 실제 부담은 작다.
     async function submissionsForPerson(personKey, personKeyOf) {
       if (!fallbackSubmissions) {
         fallbackSubmissions = await getApprovedSubmissions();
       }
       return (fallbackSubmissions || [])
-        .filter(sub => personKeyOf(sub) === personKey)
-        .slice(0, 120);
+        .filter(sub => personKeyOf(sub) === personKey);
     }
 
     function cachedRows(number) {
