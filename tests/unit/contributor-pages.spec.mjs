@@ -74,3 +74,25 @@ describe('작가 공유', () => {
     expect(page).toContain('currentContributorKey = null;');
   });
 });
+
+describe('작가 페이지 CTA', () => {
+  const builder = readFileSync(join(ROOT, 'scripts/build-contributor-pages.mjs'), 'utf8');
+  const page = readFileSync(join(ROOT, 'js/films-page.js'), 'utf8');
+
+  it('CTA 링크에 필름 슬러그를 함께 싣는다', () => {
+    // 필름이 없으면 카탈로그가 승인 사진 전체를 받아 그 사람의 첫 사진이 어느
+    // 필름인지 알아낸 뒤에야 모달을 연다. 사진이 수천 장이면 그 사이 아무 일도
+    // 일어나지 않아 버튼이 고장 난 것처럼 보인다.
+    expect(builder).toContain('film=${firstFilmSlug}&contributor=${key}');
+    expect(builder).toContain('const firstFilmSlug =');
+  });
+
+  it('카탈로그는 film 이 오면 승인 사진을 기다리지 않는다', () => {
+    // 이 분기가 유지되어야 위 최적화가 의미를 갖는다.
+    expect(page).toContain('if (!filmKey && contributor) {');
+  });
+
+  it('작가를 못 찾으면 조용히 끝내지 않는다', () => {
+    expect(page).toMatch(/이 작가의 사진을 찾지 못했어요/);
+  });
+});
