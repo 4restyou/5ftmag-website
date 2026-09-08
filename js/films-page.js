@@ -451,8 +451,11 @@
           : null;
         filmKey = match?.slug || resolveFilmKey(first.film);
       } else {
+        // 못 찾으면 지금까지는 스크롤만 하고 조용히 끝났다. 링크를 받은 사람은
+        // 아무 일도 안 일어난 것으로 보여 고장으로 읽는다. 이유를 밝힌다.
         const contributorCard = document.getElementById('filmsGridLibrary');
         if (contributorCard) contributorCard.scrollIntoView({ block: 'start' });
+        window.notify?.('이 작가의 사진을 찾지 못했어요. 사진이 내려갔거나 표기가 바뀐 것 같습니다.', 'info');
       }
     }
 

@@ -82,17 +82,9 @@ if (existsSync(filmsPath)) {
   }
 }
 
-// 작가별 사진 페이지. build-contributor-pages.mjs 가 /contributor/<키>.html 로
-// 찍어내고 만든 목록을 data/contributors.json 에 남긴다. 사진이 지워져 기준
-// 미만이 된 작가는 다음 빌드에서 목록에서 빠지므로 사이트맵도 따라 줄어든다.
-const contributorsPath = join(ROOT, 'data/contributors.json');
-if (existsSync(contributorsPath)) {
-  const rows = JSON.parse(readFileSync(contributorsPath, 'utf8'));
-  for (const row of Array.isArray(rows) ? rows : []) {
-    if (!row?.key || !/^[a-z0-9._-]+$/.test(row.key)) continue;
-    addUrl(urls, `/contributor/${row.key}.html`, { changefreq: 'weekly', priority: '0.5' });
-  }
-}
+// 작가별 사진 페이지(/contributor/<키>.html)는 싣지 않는다. 사람이 열면
+// 카탈로그로 넘어가는 페이지라 색인 대상이 아니고, noindex 도 달려 있다.
+// 미리보기용 <meta> 만 크롤러가 읽는다.
 
 // 지역별 현상소 페이지. build-lab-pages.mjs 가 /labs/<region>.html 로 찍어낸다.
 const REGION_SLUGS = {

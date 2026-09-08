@@ -74,3 +74,56 @@ describe('작가 공유', () => {
     expect(page).toContain('currentContributorKey = null;');
   });
 });
+
+describe('작가 페이지 CTA', () => {
+  const builder = readFileSync(join(ROOT, 'scripts/build-contributor-pages.mjs'), 'utf8');
+  const page = readFileSync(join(ROOT, 'js/films-page.js'), 'utf8');
+
+  it('CTA 링크에 필름 슬러그를 함께 싣는다', () => {
+    // 필름이 없으면 카탈로그가 승인 사진 전체를 받아 그 사람의 첫 사진이 어느
+    // 필름인지 알아낸 뒤에야 모달을 연다. 사진이 수천 장이면 그 사이 아무 일도
+    // 일어나지 않아 버튼이 고장 난 것처럼 보인다.
+    expect(builder).toContain('film=${firstFilmSlug}&contributor=${key}');
+    expect(builder).toContain('const firstFilmSlug =');
+  });
+
+  it('카탈로그는 film 이 오면 승인 사진을 기다리지 않는다', () => {
+    // 이 분기가 유지되어야 위 최적화가 의미를 갖는다.
+    expect(page).toContain('if (!filmKey && contributor) {');
+  });
+
+  it('작가를 못 찾으면 조용히 끝내지 않는다', () => {
+    expect(page).toMatch(/이 작가의 사진을 찾지 못했어요/);
+  });
+});
+
+describe('작가 페이지 자동 이동', () => {
+  const builder = readFileSync(join(ROOT, 'scripts/build-contributor-pages.mjs'), 'utf8');
+  const server = readFileSync(join(ROOT, 'scripts/static-server.mjs'), 'utf8');
+
+  it('replace 로 넘겨 방문 기록에 남기지 않는다', () => {
+    // push 로 넘기면 뒤로 가기가 이 페이지로 돌아왔다가 다시 튕겨 나가
+    // 빠져나갈 수 없다.
+    expect(builder).toContain('location.replace(');
+    expect(builder).not.toContain('location.href =');
+  });
+
+  it('색인에서 빼는 것을 명시한다', () => {
+    // 자동 이동을 넣으면 구글이 어차피 색인하지 않는다. 명시해 두면 검색
+    // 콘솔에 "리다이렉트가 있는 페이지" 경고가 쌓이지 않는다.
+    expect(builder).toContain('noindex, follow');
+  });
+
+  it('CTA 와 자동 이동이 같은 주소를 쓴다', () => {
+    // 둘이 갈라지면 자바스크립트가 꺼진 환경에서만 다른 곳으로 간다.
+    expect(builder).toContain('const catalogHref =');
+    expect(builder).toContain('location.replace(${JSON.stringify(catalogHref)})');
+    expect(builder).toContain('href="${esc(catalogHref)}"');
+  });
+
+  it('로컬 서버가 확장자 있는 주소를 그대로 서빙한다', () => {
+    // /contributor/x.html 에 .html 을 또 붙이면 파일을 못 찾아 카탈로그가
+    // 대신 나온다. 실제로 이것 때문에 자동 이동이 동작하지 않는 것으로 오인했다.
+    expect(server).toContain('/^\\/contributor\\/[^/.]+$/');
+  });
+});

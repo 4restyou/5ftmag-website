@@ -7,9 +7,15 @@
  * 알 수 없었다.
  *
  * 그래서 작가마다 정적 페이지를 만들어 제목·설명·대표 이미지를 박는다.
- * 사람이 열면 카탈로그의 작가 뷰로 넘어가고(js/contributor-page.js),
- * 크롤러와 메신저 미리보기는 이 정적 내용을 읽는다. 필름 상세 페이지와
- * 같은 구조다.
+ * 메신저 미리보기는 <meta> 만 읽으므로 이 정적 내용을 그대로 가져간다.
+ * 사람이 열면 곧바로 카탈로그의 작가 뷰로 넘어간다(#675 의 독자 동선 규칙).
+ *
+ * 자동 이동을 넣으면 검색 색인은 포기하게 된다. 구글은 자바스크립트를
+ * 실행하므로 이 페이지를 "다른 데로 보내는 주소" 로 보고 색인에서 뺀다.
+ * 대신 잃는 것이 작다고 판단했다. 독자 아이디로 검색하는 사람은 거의 없고,
+ * 이 페이지의 값어치는 검색이 아니라 미리보기에 있다. 미리보기는 메신저가
+ * <meta> 만 읽으므로 자동 이동과 무관하게 유지된다.
+ * 같은 이유로 사이트맵에도 싣지 않는다.
  *
  * 대표 이미지는 그 작가의 가장 최근 사진으로 고정한다. 무작위로 뽑으면
  * 빌드할 때마다 바뀌어서, 이미 공유된 링크의 미리보기와 어긋난다. 메신저는
@@ -24,6 +30,7 @@ import path from 'node:path';
 import { ROOT, navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
 
 const OUT_DIR = path.join(ROOT, 'contributor');
+const FILMS_JSON = path.join(ROOT, 'data/films.json');
 const REFERENCE_PAGE = path.join(ROOT, 'films.html');
 
 const ORIGIN = 'https://www.5ftmag.com';
@@ -58,6 +65,29 @@ function normalizeContributorKey(value) {
 // 그대로 두는 편이 안전하다(인코딩된 파일명은 서버·CDN 마다 다르게 다뤄진다).
 function isSafeKey(key) {
   return /^[a-z0-9._-]{2,64}$/.test(key);
+}
+
+// js/util.js 의 normalizeFilmLabel 과 같은 규칙.
+function normalizeFilmLabel(s) {
+  return String(s ?? '').toLowerCase().replace(/[\s\-_+()/.]+/g, '');
+}
+
+// 필름 이름 → 카탈로그 슬러그. 카탈로그의 resolveFilmKey 와 같은 순서로 찾는다.
+function filmSlugResolver(filmsData) {
+  const byLabel = new Map();
+  for (const [slug, film] of Object.entries(filmsData || {})) {
+    const names = [film.displayName, film.name, ...(film.aliases || [])].filter(Boolean);
+    for (const n of names) {
+      const k = normalizeFilmLabel(n);
+      if (k && !byLabel.has(k)) byLabel.set(k, slug);
+    }
+  }
+  return function resolve(name) {
+    const raw = String(name || '').trim();
+    if (!raw) return '';
+    if (filmsData[raw]) return raw;
+    return byLabel.get(normalizeFilmLabel(raw)) || '';
+  };
 }
 
 function assetVersionReader(referenceHtml, ownVersions) {
@@ -133,8 +163,11 @@ function jsonLd(label, key, photos) {
   return `  <script type="application/ld+json">${JSON.stringify(data)}</script>`;
 }
 
-function render(key, label, photos, films, versioned, outFile) {
+function render(key, label, photos, films, firstFilmSlug, versioned, outFile) {
   const url = `${ORIGIN}/contributor/${key}`;
+  // 카탈로그 목적지. 필름 슬러그를 함께 실어야 카탈로그가 승인 사진 전체를
+  // 기다리지 않고 곧바로 모달을 연다.
+  const catalogHref = `/films.html?${firstFilmSlug ? `film=${firstFilmSlug}&contributor=${key}` : `contributor=${key}`}`;
   const latest = photos[0];
   const ogImage = latest ? ORIGIN + imageOf(latest) : FALLBACK_OG;
   const title = `${label} 의 필름 사진 · ${SITE_NAME}`;
@@ -152,6 +185,10 @@ function render(key, label, photos, films, versioned, outFile) {
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(description)}">
   <link rel="canonical" href="${esc(url)}">
+  <!-- 사람이 열면 카탈로그로 넘어가므로 색인 대상이 아니다. 자동 이동을 넣은
+       이상 구글은 어차피 색인하지 않는데, 명시해 두면 검색 콘솔에 "리다이렉트가
+       있는 페이지" 경고가 쌓이지 않는다. 미리보기용 <meta> 는 그대로 읽힌다. -->
+  <meta name="robots" content="noindex, follow">
 
   <meta property="og:type" content="profile">
   <meta property="og:title" content="${esc(title)}">
@@ -179,6 +216,23 @@ function render(key, label, photos, films, versioned, outFile) {
 ${jsonLd(label, key, photos)}
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
+  <script>
+    // 카탈로그로 넘긴다. 이 페이지는 미리보기(<meta>)용이고 독자가 읽을 곳은
+    // 카탈로그의 작가 뷰다 (#675 의 독자 동선 규칙).
+    //
+    // replace 로 넘겨 방문 기록에 남기지 않는다. push 로 넘기면 뒤로 가기를
+    // 눌렀을 때 이 페이지로 돌아왔다가 다시 튕겨 나가 빠져나갈 수 없다.
+    //
+    // <head> 안에서 바로 실행해 본문이 그려지기 전에 넘긴다. 화면이 한 번
+    // 번쩍이지 않는다. 자바스크립트가 꺼져 있으면 아래 본문이 그대로 보이고
+    // 「카탈로그에서 크게 보기」 버튼으로 갈 수 있다.
+    (function () {
+      try {
+        // 크롤러가 <meta> 를 읽는 것은 막지 않는다. 스크립트를 실행하지 않기 때문.
+        location.replace(${JSON.stringify(catalogHref)});
+      } catch (e) { /* 실패하면 본문이 그대로 보인다 */ }
+    })();
+  </script>
 </head>
 <body>
 ${navHtml(outFile)}
@@ -190,7 +244,7 @@ ${mobileNavHtml(outFile)}
     <h1>${esc(label)}</h1>
     <p class="contributor-count">5ft.mag 에 올린 필름 사진 ${photos.length}장</p>
     ${films.length ? `<p class="contributor-films">${films.slice(0, 8).map((f) => esc(f)).join(' · ')}</p>` : ''}
-    <a class="contributor-cta" href="/films.html?contributor=${esc(key)}">카탈로그에서 크게 보기 →</a>
+    <a class="contributor-cta" href="${esc(catalogHref)}">카탈로그에서 크게 보기 →</a>
   </header>
 
   <div class="contributor-grid">
@@ -243,6 +297,16 @@ ${p.film || p.camera ? `      <figcaption>${esc([p.film, p.camera].filter(Boolea
     byKey.get(key).push(r);
   }
 
+  // 카탈로그 슬러그를 붙이기 위해 필름 목록을 읽는다. 링크에 필름이 없으면
+  // 카탈로그가 승인 사진 전체를 받아 그 사람의 첫 사진이 어느 필름인지 알아낸
+  // 뒤에야 모달을 연다. 사진이 수천 장이면 그동안 아무 일도 일어나지 않아
+  // 버튼이 고장 난 것처럼 보인다.
+  let resolveFilmSlug = () => '';
+  try {
+    const filmsData = JSON.parse(await fs.readFile(FILMS_JSON, 'utf-8'));
+    resolveFilmSlug = filmSlugResolver(filmsData);
+  } catch (_) { /* 없으면 슬러그 없이 만든다. 느릴 뿐 동작은 한다 */ }
+
   await fs.mkdir(OUT_DIR, { recursive: true });
   const referenceHtml = await fs.readFile(REFERENCE_PAGE, 'utf-8');
   const versioned = assetVersionReader(referenceHtml, {
@@ -255,8 +319,10 @@ ${p.film || p.camera ? `      <figcaption>${esc([p.film, p.camera].filter(Boolea
     const photos = all.slice(0, PHOTO_LIMIT);
     const label = labelOf(all[0]);
     const films = [...new Set(all.map((p) => p.film).filter(Boolean))];
+    // 카탈로그가 바로 열 수 있는 필름 하나. 최신 사진의 필름부터 찾는다.
+    const firstFilmSlug = all.map((p) => resolveFilmSlug(p.film)).find(Boolean) || '';
     const outFile = path.join(OUT_DIR, `${key}.html`);
-    await fs.writeFile(outFile, render(key, label, photos, films, versioned, outFile), 'utf-8');
+    await fs.writeFile(outFile, render(key, label, photos, films, firstFilmSlug, versioned, outFile), 'utf-8');
     made.push({ key, count: all.length });
   }
 

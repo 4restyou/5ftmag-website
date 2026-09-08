@@ -41,7 +41,7 @@ createServer((req, res) => {
   if (/^\/film\/[^/]+$/.test(p)) {
     // netlify.toml 과 같게: /film/<slug> 는 생성된 상세 페이지를 그대로 서빙한다.
     p = `${p}.html`;
-  } else if (/^\/contributor\/[^/]+$/.test(p)) {
+  } else if (/^\/contributor\/[^/.]+$/.test(p)) {
     // netlify.toml 과 같게: 생성된 작가 페이지가 있으면 그것을 서빙하고,
     // 없으면 카탈로그의 작가 뷰로 넘긴다(사진이 적거나 한글 이름인 작가).
     // Netlify 는 리라이트가 force 가 아니면 실제 파일을 먼저 찾는다.
