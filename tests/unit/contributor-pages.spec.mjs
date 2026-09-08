@@ -127,3 +127,15 @@ describe('작가 페이지 자동 이동', () => {
     expect(server).toContain('/^\\/contributor\\/[^/.]+$/');
   });
 });
+
+describe('작가 페이지 사진 개수', () => {
+  const builder = readFileSync(join(ROOT, 'scripts/build-contributor-pages.mjs'), 'utf8');
+
+  it('개수는 화면에 실은 수가 아니라 실제 총장수를 쓴다', () => {
+    // photos 는 PHOTO_LIMIT 으로 자른 일부다. 그걸로 세면 미리보기와 본문이
+    // 둘 다 올린 것보다 적게 말한다.
+    expect(builder).toContain('필름 사진 ${total}장');
+    expect(builder).not.toContain('필름 사진 ${photos.length}장');
+    expect(builder).toContain('render(key, label, photos, all.length,');
+  });
+});
