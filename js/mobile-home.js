@@ -6,7 +6,8 @@
 
 (function () {
   const MOBILE_MAX = 640;
-  const NEW_DAYS = 14;
+  // 최근 글 띠에 싣는 개수. 기간이 아니라 개수로 세는 이유는 아래 renderNewStories 참고.
+  const RECENT_COUNT = 8;
 
   function isMobile() {
     if (window.MagPwa && window.MagPwa.isForceDesktop()) return false;
@@ -46,7 +47,6 @@
   // pure 함수들 — js/mh-pure.js 에서 추출 (window.MHPure)
   // index.html 에서 mh-pure.js 가 mobile-home.js 보다 먼저 로드됨.
   const P = window.MHPure || {};
-  const daysAgo = P.daysAgo;
   const shuffleInPlace = P.shuffleInPlace;
   const pickRecommendedFilms = P.pickRecommendedFilms;
   const filmAliasListPure = P.filmAliasList;
@@ -56,14 +56,22 @@
   const photoMatchesCategoryPure = P.photoMatchesCategory;
   const photoMatchesQueryPure = P.photoMatchesQuery;
 
-  // ── 렌더: 신규 글 띠 ──
+  // ── 렌더: 최근 글 띠 ──
+  //
+  // 예전에는 "최근 2주" 로 기간을 걸었다. 매거진은 매일 내는 매체가 아니라서
+  // 발행이 뜸한 주에는 카드가 한 장만 남았고, 가로로 넘기는 띠에 한 장만 있으면
+  // 고장 난 것처럼 보였다. 게다가 제목이 기간을 약속하는 탓에 글이 안 올라온다는
+  // 사실이 첫 화면에 그대로 드러났다.
+  //
+  // 그래서 개수로 센다. 발행 간격과 무관하게 띠가 일정하게 채워진다. 제목도
+  // 기간을 약속하지 않는 「최근 글」로 바꿨다.
   function renderNewStories(stories) {
     const fresh = stories
-      .filter(s => window.MagUtil.isPublishedContent(s) && daysAgo(s.date) <= NEW_DAYS)
+      .filter(s => window.MagUtil.isPublishedContent(s))
       .slice()
       .sort((a, b) => new Date(b.date) - new Date(a.date));
     if (!fresh.length) return '';
-    const cards = fresh.slice(0, 12).map(s => `
+    const cards = fresh.slice(0, RECENT_COUNT).map(s => `
       <a class="mh-new-card" href="/${esc(s.page)}">
         <div class="mh-new-thumb">${s.thumbnail ? `<img src="/${esc(s.thumbnail)}" alt="" loading="lazy" />` : ''}</div>
         <div class="mh-new-meta">${esc(s.categoryLabel || s.category || '')}</div>
@@ -73,7 +81,7 @@
     return `
       <section class="mh-new">
         <div class="mh-new-head">
-          <h2 class="mh-new-title">새 글 · 최근 2주</h2>
+          <h2 class="mh-new-title">최근 글</h2>
           <a class="mh-new-more" href="/stories.html">전체 보기 →</a>
         </div>
         <div class="mh-new-strip">${cards}</div>
