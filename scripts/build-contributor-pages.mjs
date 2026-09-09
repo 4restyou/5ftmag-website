@@ -294,8 +294,10 @@ ${p.film || p.camera ? `      <figcaption>${esc([p.film, p.camera].filter(Boolea
   const byKey = new Map();
   for (const r of rows) {
     if (!r.storage_path) continue;
+    // 여기서는 키를 버리지 않는다. 주소로 못 쓰는 키(한글 이름 등)도 전체 검색에는
+    // 실려야 하기 때문이다. 페이지를 만들지 말지는 아래에서 따로 판단한다.
     const key = normalizeContributorKey(r.instagram || r.submitter_name || '');
-    if (!isSafeKey(key)) continue;
+    if (!key) continue;
     if (!byKey.has(key)) byKey.set(key, []);
     byKey.get(key).push(r);
   }
@@ -316,28 +318,37 @@ ${p.film || p.camera ? `      <figcaption>${esc([p.film, p.camera].filter(Boolea
     'css/contributor.css': await contentHash('css/contributor.css'),
   });
 
-  const made = [];
+  const index = [];
+  let pageCount = 0;
   for (const [key, all] of byKey) {
-    if (all.length < MIN_PHOTOS) continue;
-    const photos = all.slice(0, PHOTO_LIMIT);
     const label = labelOf(all[0]);
-    const films = [...new Set(all.map((p) => p.film).filter(Boolean))];
-    // 카탈로그가 바로 열 수 있는 필름 하나. 최신 사진의 필름부터 찾는다.
-    const firstFilmSlug = all.map((p) => resolveFilmSlug(p.film)).find(Boolean) || '';
-    const outFile = path.join(OUT_DIR, `${key}.html`);
-    await fs.writeFile(outFile, render(key, label, photos, all.length, films, firstFilmSlug, versioned, outFile), 'utf-8');
-    made.push({ key, count: all.length });
+    // 페이지는 주소로 쓸 수 있는 키에, 사진이 일정 수 이상일 때만 만든다.
+    const hasPage = isSafeKey(key) && all.length >= MIN_PHOTOS;
+    if (hasPage) {
+      const photos = all.slice(0, PHOTO_LIMIT);
+      const films = [...new Set(all.map((p) => p.film).filter(Boolean))];
+      // 카탈로그가 바로 열 수 있는 필름 하나. 최신 사진의 필름부터 찾는다.
+      const firstFilmSlug = all.map((p) => resolveFilmSlug(p.film)).find(Boolean) || '';
+      const outFile = path.join(OUT_DIR, `${key}.html`);
+      await fs.writeFile(outFile, render(key, label, photos, all.length, films, firstFilmSlug, versioned, outFile), 'utf-8');
+      pageCount += 1;
+    }
+    // 전체 검색이 읽는 목록. 페이지가 없는 작가도 카탈로그의 작가 뷰로는
+    // 갈 수 있으므로 링크를 함께 담아 검색 결과에서 바로 열리게 한다.
+    index.push({
+      key,
+      label,
+      count: all.length,
+      url: hasPage ? `/contributor/${key}` : `/films.html?contributor=${encodeURIComponent(key)}`,
+    });
   }
 
-  // 사이트맵이 읽을 목록. 사진이 지워져 기준 미만이 된 작가는 다음 빌드에서
-  // 빠지므로, 이 파일이 그때그때의 실제 목록이다.
   await fs.writeFile(
     path.join(ROOT, 'data/contributors.json'),
-    JSON.stringify(made.sort((a, b) => b.count - a.count), null, 2) + '\n',
+    JSON.stringify(index.sort((a, b) => b.count - a.count), null, 2) + '\n',
     'utf-8',
   );
 
-  const skipped = byKey.size - made.length;
-  console.log(`[build-contributor-pages] ${made.length}명 페이지 생성: contributor/`);
-  console.log(`[build-contributor-pages] 사진 ${MIN_PHOTOS}장 미만이라 건너뜀: ${skipped}명`);
+  console.log(`[build-contributor-pages] ${pageCount}명 페이지 생성: contributor/`);
+  console.log(`[build-contributor-pages] 검색 색인: ${index.length}명 (페이지 없는 작가 포함)`);
 })();
