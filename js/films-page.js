@@ -1016,15 +1016,20 @@
           readerExport.toggleContributorPhotoSelection(photo);
           return;
         }
+        // 화면을 그릴 때와 같은 함수로 목록을 가져온다. 예전에는 여기서
+        // rollSource.fallbackSubmissions 를 직접 걸러 쓰면서 .slice(0, 120) 까지
+        // 따로 두었다. 그래서 #697 에서 화면 쪽 상한만 없애고 이 자리를 놓쳤고,
+        // 120장이 넘는 작가는 카운트가 20컷인데 라이트박스는 5장만 열렸다.
+        // 목록을 만드는 곳을 하나로 두면 같은 어긋남이 다시 생기지 않는다.
         const key = photo.dataset.personKey;
-        const all = rollSource.fallbackSubmissions
-          ? rollSource.fallbackSubmissions.filter(sub => personKeyOf(sub) === key).slice(0, 120)
-          : [];
         const filmName = photo.dataset.filmName;
-        const group = all.filter(sub => filmLabelOf(sub.film) === filmName);
         const idx = parseInt(photo.dataset.photoIndex, 10);
-        if (Number.isNaN(idx) || idx >= group.length) return;
-        openFilmReaderLightbox(group, idx);
+        if (Number.isNaN(idx)) return;
+        submissionsForPerson(key).then((all) => {
+          const group = all.filter(sub => filmLabelOf(sub.film) === filmName);
+          if (idx >= group.length) return;
+          openFilmReaderLightbox(group, idx);
+        }).catch(err => console.warn('작가 사진 열기 실패:', err));
       };
     }
 

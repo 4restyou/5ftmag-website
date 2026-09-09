@@ -153,3 +153,28 @@ describe('작가 모아보기 개수', () => {
     expect(body).not.toMatch(/\.slice\(0,\s*\d+\)/);
   });
 });
+
+describe('작가 뷰 라이트박스', () => {
+  const page = readFileSync(join(ROOT, 'js/films-page.js'), 'utf8');
+
+  it('사진 목록을 화면과 같은 함수로 가져온다', () => {
+    // 예전에는 클릭 핸들러가 rollSource.fallbackSubmissions 를 직접 걸러 쓰면서
+    // .slice(0, 120) 을 따로 두었다. 그래서 화면 쪽 상한만 없앤 #697 이 여기에
+    // 반영되지 않았고, 120장이 넘는 작가는 카운트가 20컷인데 라이트박스는
+    // 5장만 열렸다.
+    const start = page.indexOf("const photo = e.target.closest('.reader-contributor-photo')");
+    // 주석에는 옛 코드 이름이 설명으로 남아 있으므로 코드 줄만 본다.
+    const body = page.slice(start, start + 1800)
+      .split('\n').filter(l => !l.trim().startsWith('//')).join('\n');
+    expect(body).toContain('submissionsForPerson(key)');
+    expect(body).not.toContain('rollSource.fallbackSubmissions');
+  });
+
+  it('사진 목록 어디에도 개수 상한이 남아 있지 않다', () => {
+    const roll = readFileSync(join(ROOT, 'js/films-reader-roll-data.js'), 'utf8');
+    for (const src of [page, roll]) {
+      const code = src.split('\n').filter(l => !l.trim().startsWith('//')).join('\n');
+      expect(code).not.toMatch(/\.slice\(0,\s*120\)/);
+    }
+  });
+});
