@@ -155,6 +155,18 @@
     </a>`;
   }
 
+  // 작가(투고자) 카드. url 은 빌더가 넣어 준다. 페이지가 있으면 /contributor/<키>,
+  // 없으면 카탈로그의 작가 뷰로 간다.
+  function cardContributor(c, q) {
+    return `<a class="search-card" href="${esc(c.url || '/films.html')}">
+      <div class="sc-body">
+        <div class="sc-kicker">CONTRIBUTOR</div>
+        <div class="sc-title">${highlight(c.label || c.key || '', q)}</div>
+        <div class="sc-meta">사진 ${Number(c.count) || 0}장</div>
+      </div>
+    </a>`;
+  }
+
   function cardMarket(m, q) {
     const priceTxt = (m.price && Number(m.price) > 0)
       ? Number(m.price).toLocaleString('ko-KR') + '원'
@@ -175,9 +187,12 @@
 
     const dbReady = db() && db().isReady && db().isReady();
 
-    const [storiesArr, filmsObj, webzineArr, labsArr, marketArr] = await Promise.all([
+    const [storiesArr, filmsObj, contributorsArr, webzineArr, labsArr, marketArr] = await Promise.all([
       fetchJsonSafe('/data/stories.json'),
       fetchJsonSafe('/data/films.json'),
+      // 빌드 때 승인 사진에서 뽑은 작가 목록. 사진 전체를 받아오지 않고도
+      // 아이디로 찾을 수 있다.
+      fetchJsonSafe('/data/contributors.json'),
       dbReady ? db().webzine.listPublished() : Promise.resolve([]),
       dbReady ? db().labs.list() : Promise.resolve([]),
       dbReady ? db().market.list({ limit: 500 }) : Promise.resolve([]),
@@ -255,9 +270,24 @@
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score);
 
+    // 작가 — 아이디(키)와 표시 이름 둘 다로 찾는다. 독자는 "@" 를 붙여 검색하기도
+    // 하고 빼고 치기도 하므로 키는 "@" 없는 형태로 저장돼 있다.
+    const contributors = (contributorsArr || [])
+      .map((c) => ({
+        item: c,
+        score: scoreMatch(tokens, [
+          { text: c.key, weight: 10 },
+          { text: c.label, weight: 10 },
+          { text: String(c.label || '').replace(/^@/, ''), weight: 8 },
+        ]),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || (b.item.count || 0) - (a.item.count || 0));
+
     const sections = [
       { label: 'Articles', items: stories, all: 'stories.html?q=' + encodeURIComponent(q), card: (x) => cardArticle(x.item, q) },
       { label: 'Films',    items: films,   all: 'films.html',                              card: (x) => cardFilm(x.item, q) },
+      { label: 'Contributors', items: contributors, all: 'films.html', card: (x) => cardContributor(x.item, q) },
       { label: 'Books',    items: webzine, all: 'books.html',                              card: (x) => cardWebzine(x.item, q) },
       { label: 'Labs',     items: labs,    all: 'labs.html',                               card: (x) => cardLab(x.item, q) },
       { label: 'Market',   items: market,  all: 'market.html',                             card: (x) => cardMarket(x.item, q) },

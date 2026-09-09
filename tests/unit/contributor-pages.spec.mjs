@@ -40,9 +40,17 @@ describe('작가 페이지 빌더', () => {
     expect(builder).toContain('const latest = photos[0]');
   });
 
-  it('사진이 적은 작가는 건너뛴다', () => {
+  it('사진이 적거나 주소로 쓸 수 없는 키는 페이지를 만들지 않는다', () => {
+    // 페이지는 걸러 만들되, 전체 검색이 읽는 목록에는 모두 실어야 한다.
+    // 그래야 한글 이름이나 사진이 적은 작가도 아이디로 찾을 수 있다.
     expect(builder).toMatch(/const MIN_PHOTOS = \d+/);
-    expect(builder).toContain('if (all.length < MIN_PHOTOS) continue;');
+    expect(builder).toContain('const hasPage = isSafeKey(key) && all.length >= MIN_PHOTOS;');
+    expect(builder).toContain('if (hasPage) {');
+  });
+
+  it('검색 색인에는 페이지가 없는 작가도 담고 갈 곳을 함께 적는다', () => {
+    expect(builder).toContain('index.push({');
+    expect(builder).toContain("hasPage ? `/contributor/${key}` : `/films.html?contributor=");
   });
 
   it('조회에 실패하면 빌드를 세우지 않고 건너뛴다', () => {
