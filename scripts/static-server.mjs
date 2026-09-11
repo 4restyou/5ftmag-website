@@ -54,6 +54,9 @@ createServer((req, res) => {
     p = `${p}.html`;
   } else if (/^\/authors\/[^/.]+$/.test(p)) {
     p = `${p}.html`;
+  } else if (/^\/labs\/(gwangju|jeonnam)(\.html)?$/.test(p)) {
+    // netlify.toml 과 같게: 합쳐진 옛 지역 주소는 새 지역 페이지로 보낸다.
+    p = '/labs/jeonnamgwangju.html';
   } else if (p === '/labs') {
     p = '/labs.html';
   } else if (/^\/labs\/[^/.]+$/.test(p)) {

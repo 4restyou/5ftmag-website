@@ -544,7 +544,7 @@ ${bodyHtml}
 <footer>
   <div class="footer-inner-left">
     <span class="footer-logo">5ft magazine</span>
-    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 광주광역시 동구 충장로46번길 8, 2층</span>
+    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 전남광주통합특별시 동구 충장로46번길 8, 2층</span>
   </div>
   <div class="footer-links">
     <a href="https://smartstore.naver.com/film_socialclub" target="_blank" rel="noopener">Shop ↗</a>
