@@ -17,7 +17,7 @@ const REGION_SLUGS = {
   '서울': 'seoul', '경기': 'gyeonggi', '인천': 'incheon', '강원': 'gangwon',
   '대전': 'daejeon', '충남': 'chungnam', '충북': 'chungbuk', '세종': 'sejong',
   '대구': 'daegu', '경북': 'gyeongbuk', '부산': 'busan', '울산': 'ulsan',
-  '경남': 'gyeongnam', '광주': 'gwangju', '전북': 'jeonbuk', '전남': 'jeonnam',
+  '경남': 'gyeongnam', '전남광주': 'jeonnamgwangju', '전북': 'jeonbuk',
   '제주': 'jeju',
 };
 const REGION_ORDER = Object.keys(REGION_SLUGS);

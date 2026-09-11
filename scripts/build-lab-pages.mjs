@@ -28,7 +28,9 @@ const REGIONS = [
   ['서울', 'seoul'], ['경기', 'gyeonggi'], ['인천', 'incheon'], ['강원', 'gangwon'],
   ['대전', 'daejeon'], ['충남', 'chungnam'], ['충북', 'chungbuk'], ['세종', 'sejong'],
   ['대구', 'daegu'], ['경북', 'gyeongbuk'], ['부산', 'busan'], ['울산', 'ulsan'],
-  ['경남', 'gyeongnam'], ['광주', 'gwangju'], ['전북', 'jeonbuk'], ['전남', 'jeonnam'],
+  // 2026-07-01 전남광주통합특별시 출범으로 광주·전남이 하나가 됐다.
+  // 옛 주소 /labs/gwangju · /labs/jeonnam 은 netlify.toml 에서 이리로 넘긴다.
+  ['경남', 'gyeongnam'], ['전남광주', 'jeonnamgwangju'], ['전북', 'jeonbuk'],
   ['제주', 'jeju'],
 ];
 const SLUG_BY_REGION = new Map(REGIONS);
