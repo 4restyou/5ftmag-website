@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Fri, 11 Sep 2026 12:18:09 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 12 Sep 2026 12:16:44 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>이세현 사진전 《잔광》, 꺼진 자리에 남은 빛</title>
+      <link>https://www.5ftmag.com/stories/lee-sehyun-afterglow.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/lee-sehyun-afterglow.html</guid>
+      <pubDate>Sat, 12 Sep 2026 00:00:00 GMT</pubDate>
+      <description>9월 20일까지 SPACE LEESEEN. 노근리 탄흔과 코발트 광산, 1980년 5월의 광주에 붉고 푸른 빛을 쏘아 찍었다.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>제7회 그랑핸드 필름사진상 — 향으로 기억되는 순간들</title>
       <link>https://www.5ftmag.com/stories/granhand-fpag-7.html</link>
