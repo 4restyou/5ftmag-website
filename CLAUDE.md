@@ -124,6 +124,14 @@ DB 관련 작업 전에 반드시 인지. 진단 이력·할 일은 `docs/mainte
 - 템플릿(`scripts/templates/`)이 옛 버전을 물고 있으면 새로 만드는 페이지마다 stale 버전이 전파되므로 반드시 함께 갱신한다(bump-version 이 자동 포함).
 - 확인: `grep -rho "파일명?v=[0-9a-z-]*" --include="*.html" . | sort | uniq -c` 로 단일 버전인지 본다.
 
+### 이미지는 같은 경로에 덮어쓰지 않는다
+
+`netlify.toml` 의 `/img/*` 헤더가 `max-age=31536000, immutable` 이다. `immutable` 은 "이 URL 의 내용은 바뀌지 않는다" 는 약속이라, 이미 그 이미지를 받아 본 브라우저는 강제 새로고침(`⌘+Shift+R`)으로도 재검증하지 않는다. 같은 경로에 새 파일을 올려도 옛 이미지가 계속 보인다. `/.netlify/images?url=...` 변환 경로도 원본 URL 을 기준으로 캐시하므로 마찬가지다.
+
+이미지는 `?v=` 쿼리를 쓰지 않는다. 그래서 **내용을 바꿀 때는 파일명을 바꾸고 참조를 함께 고친다.** 실제로 《잔광》 기사의 포스터를 캡처 크롭에서 원본으로 교체했을 때, 저장소는 새 파일인데 화면에는 옛 것이 계속 나왔다(#711 → #712). `-1` 을 `-poster` 로 바꿔 해결했다.
+
+참조를 고칠 곳은 셋이다. 기사 HTML(`og:image` · `twitter:image` · JSON-LD `image` · `picture` 의 `source`/`img`), `data/stories.json` 의 `thumbnail`, 그리고 그 이미지를 쓰는 다른 페이지. `grep -rn "<옛 파일명>" stories/ data/` 로 0 이 되는지 확인한다.
+
 ## 글쓰기 규칙
 
 - 제목 / 본문에 em-dash (`—`) 사용 금지. 마침표·쉼표·괄호로 풀어쓴다.
