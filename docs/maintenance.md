@@ -27,6 +27,37 @@
 
 코드로 자동화 못 하거나, 잘못 건드리면 라이브가 깨지는 항목.
 
+### 0. feeds-sync 가 main 에 푸시하지 못한다 (2026-09-12 확인)
+
+`.github/workflows/feeds-sync.yml` 은 관리 페이지의 공개/비공개 토글이 `data/stories.json`
+하나만 커밋했을 때 `rss.xml`·`sitemap.xml` 을 재생성해 뒤따라 커밋하려고 만든 것이다.
+그런데 지금까지 한 번도 성공한 적이 없다. 5회 실행이 전부 실패했다.
+
+실패 로그는 이렇다.
+
+```
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote: - Required status check "validate" is expected.
+```
+
+main 브랜치 보호 규칙이 `validate` 체크를 필수로 두고 있어서, github-actions 봇의 직접
+푸시가 거부된다. 워크플로우 코드로는 풀 수 없다.
+
+원인이 하나 더 있었고 그것은 고쳤다. `rss.xml` 의 `lastBuildDate` 에 빌드 시각이 들어가서
+재생성할 때마다 반드시 달라졌다. 드리프트 판정에서 이 줄을 빼는 수정을 넣었으므로, 발행
+PR 에 두 파일을 함께 커밋해 두면 feeds-sync 는 "드리프트 없음" 으로 깨끗하게 끝난다.
+남은 것은 토글 시나리오뿐이다.
+
+**운영자가 고를 것**
+
+1. GitHub → Settings → Branches → main 규칙에서 GitHub Actions 를 우회 대상으로 추가한다.
+   워크플로우 수정 없이 끝나지만 봇이 main 에 직접 쓰는 것을 허용하게 된다.
+2. 워크플로우가 직접 푸시하는 대신 PR 을 자동으로 만들게 바꾼다. 보호 규칙은 그대로
+   두지만 토글할 때마다 PR 이 하나씩 쌓이고 누군가 머지해야 한다.
+
+그때까지는 발행 작업에서 `npm run build:rss && npm run build:sitemap` 을 돌려 두 파일을
+PR 에 함께 커밋하는 기존 방식을 유지한다. 실제로 그렇게 하고 있어서 라이브 피드는 정상이다.
+
 ### 1. prod ↔ workroom 스키마 불일치 확인  ⬅ 가장 위험
 
 메시지 작업 중 발견: Supabase 의 두 워크스페이스 스키마가 다르다.
