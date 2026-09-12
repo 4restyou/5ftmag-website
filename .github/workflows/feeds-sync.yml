@@ -34,7 +34,11 @@ jobs:
         run: npm run build:rss && npm run build:sitemap
       - name: 바뀐 것이 있으면 커밋
         run: |
-          if git diff --quiet -- rss.xml sitemap.xml; then
+          # rss.xml 의 lastBuildDate 에는 빌드한 시각이 들어가므로 재생성할 때마다 반드시
+          # 달라진다. 이 한 줄만 바뀐 것을 드리프트로 읽으면, 두 파일을 PR 에 이미 함께
+          # 커밋해 둔 뒤에도 커밋을 만들어 보호 브랜치에 푸시하려다 실패한다. 그래서
+          # 판정에서 이 줄을 뺀다.
+          if [ -z "$(git diff -U0 -- rss.xml sitemap.xml | grep -E '^[+-][^+-]' | grep -v lastBuildDate)" ]; then
             echo "드리프트 없음 — 커밋하지 않는다"
             exit 0
           fi
