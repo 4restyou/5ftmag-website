@@ -38,8 +38,10 @@ createServer((req, res) => {
   }
   p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/(css|js|img|data)\//, '/$2/');
   p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/pretendard\.css$/, '/pretendard.css');
-  if (/^\/film\/[^/]+$/.test(p)) {
+  if (/^\/film\/[^/.]+$/.test(p)) {
     // netlify.toml 과 같게: /film/<slug> 는 생성된 상세 페이지를 그대로 서빙한다.
+    // 점을 뺀 것은 /film/x.html 에 .html 을 또 붙여 404 를 내던 것을 막기 위해서다
+    // (contributor 에서 먼저 겪었던 것과 같은 버그).
     p = `${p}.html`;
   } else if (/^\/contributor\/[^/.]+$/.test(p)) {
     // netlify.toml 과 같게: 생성된 작가 페이지가 있으면 그것을 서빙하고,
