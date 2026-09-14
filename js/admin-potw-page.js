@@ -108,11 +108,21 @@ function renderTable() {
       </td>
       <td class="note${r.featured_note ? '' : ' none'}">${r.featured_note ? escapeHtml(r.featured_note) : '없음'}</td>
       <td class="col-actions">
+        <button type="button" class="row-btn icon" data-act="up" title="위 줄과 게재일을 맞바꿉니다" aria-label="위 줄과 자리 바꾸기">↑</button>
+        <button type="button" class="row-btn icon" data-act="down" title="아래 줄과 게재일을 맞바꿉니다" aria-label="아래 줄과 자리 바꾸기">↓</button>
         <button type="button" class="row-btn" data-act="edit">날짜 변경</button>
         <button type="button" class="row-btn danger" data-act="clear">선정 해제</button>
       </td>
     </tr>`;
   }).join('');
+
+  // 맨 위는 더 앞당길 수 없고 맨 아래는 더 미룰 수 없다. 눌러도 되는 것처럼
+  // 보이면 눌러 보고 아무 일이 없어서 고장으로 읽힌다.
+  const trs = tbody.querySelectorAll('tr[data-id]');
+  if (trs.length) {
+    trs[0].querySelector('[data-act="up"]').disabled = true;
+    trs[trs.length - 1].querySelector('[data-act="down"]').disabled = true;
+  }
 }
 
 // 접근 권한 — 공통 게이트(js/admin-guard.js) 위임.
@@ -140,6 +150,28 @@ $('tbody').addEventListener('click', async (e) => {
       note: tr.dataset.note,
     });
     if (done) await reload();
+    return;
+  }
+
+  if (btn.dataset.act === 'up' || btn.dataset.act === 'down') {
+    // 목록은 게재일 내림차순이라 위 줄이 더 나중 날짜다. 그래서 ↑ 는 실제로
+    // "미루기" 이고 ↓ 가 "앞당기기" 다. 버튼 이름을 그렇게 붙이면 화면에서
+    // 보이는 이동 방향과 어긋나 헷갈리므로, 버튼은 화면상의 자리 이동만
+    // 뜻하게 두고 무엇이 바뀌는지는 툴팁으로 적었다.
+    const dir = btn.dataset.act === 'up' ? -1 : 1;
+    const rows = [...tr.parentElement.querySelectorAll('tr[data-id]')];
+    const i = rows.indexOf(tr);
+    const other = rows[i + dir];
+    if (!other) return;
+
+    const a = { id, date: tr.dataset.date };
+    const b = { id: other.dataset.id, date: other.dataset.date };
+    btn.disabled = true;
+    const { error } = await db().review.swapFeaturedDates(a.id, a.date, b.id, b.date);
+    btn.disabled = false;
+    if (error) { window.notify?.('자리를 바꾸지 못했어요. (' + (error.message || '권한을 확인해 주세요') + ')', 'danger'); return; }
+    window.notify?.(`게재일을 맞바꿨어요. ${a.date} ↔ ${b.date}`, 'info');
+    await reload();
     return;
   }
 
