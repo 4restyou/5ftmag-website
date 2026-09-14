@@ -1,6 +1,6 @@
 # 5ft magazine (오피트)
 
-> 필름 사진 전문 매거진입니다. 발행처는 4rest, 광주에 있습니다. 필름 사진에 관한 기사, 필름 158종의 카탈로그, 전국 필름 현상소 92곳의 주소와 현상 가격, 이북과 종이 매거진, 중고 장터, 독자 사진 투고를 다룹니다. 모든 내용은 한국어입니다.
+> 필름 사진 전문 매거진입니다. 발행처는 4rest, 광주에 있습니다. 필름 사진에 관한 기사, 필름 159종의 카탈로그, 전국 필름 현상소 92곳의 주소와 현상 가격, 이북과 종이 매거진, 중고 장터, 독자 사진 투고를 다룹니다. 모든 내용은 한국어입니다.
 
 사이트 주소: https://www.5ftmag.com/
 전체 주소 목록: https://www.5ftmag.com/sitemap.xml
@@ -9,7 +9,7 @@ RSS: https://www.5ftmag.com/rss.xml
 ## 주요 페이지
 
 - [기사 목록](https://www.5ftmag.com/stories.html): 필름 사진, 사진가, 필름 제품, 전시를 다룬 기사 모음
-- [필름 카탈로그](https://www.5ftmag.com/films.html): 필름 158종의 감도·종류·포맷과 독자들이 찍은 사진
+- [필름 카탈로그](https://www.5ftmag.com/films.html): 필름 159종의 감도·종류·포맷과 독자들이 찍은 사진
 - [현상소 목록](https://www.5ftmag.com/labs.html): 전국 필름 현상소 92곳의 주소·스캔 화질·현상 가격
 - [필자 목록](https://www.5ftmag.com/authors.html): 이 매거진에 글을 쓴 10명(팀)의 아카이브
 - [매거진](https://www.5ftmag.com/books.html): 종이 매거진과 이북
@@ -18,6 +18,8 @@ RSS: https://www.5ftmag.com/rss.xml
 
 ## 최근 기사
 
+- [이세현 사진전 《잔광》, 꺼진 자리에 남은 빛](https://www.5ftmag.com/stories/lee-sehyun-afterglow.html): 9월 20일까지 스페이스 이신. 노근리 탄흔, 경산 코발트 광산, 옛 광주 적십자병원에 붉고 푸른 빛을 쏘아 찍은 「푸른 낯, 붉은 밤」 연작. (5ft.mag 편집부, 2026-09-12)
+- [제7회 그랑핸드 필름사진상 — 향으로 기억되는 순간들](https://www.5ftmag.com/stories/granhand-fpag-7.html): 접수는 9월 16일부터 22일까지 이레뿐이다. 필름으로 찍은 사진 한 장이면 된다. 지난해에는 1,000명이 냈다. (5ft.mag 편집부, 2026-09-11)
 - [2026 / 9, 이달의 사진 전시](https://www.5ftmag.com/stories/sep-2026-exhibitions.html): 9월엔 사진가의 확대기 여섯 대가 미술관이 된다. 김포 제리 율스만 기념관 개관, 대구사진비엔날레 특별전, 대전포토페스티벌 〈노동〉, 인천국제현대사진전까지. 이번 달은 서울 바깥이 바쁘다. (5ft.mag 편집부, 2026-08-30)
 - [박스 스피드를 다시 매겼다](https://www.5ftmag.com/stories/harman-phoenix-125.html): 하만이 단종했던 오리지널 Phoenix 를 ISO 125 로 다시 내놓는다. 사용자들이 실제로 노출하던 감도에 맞춰 박스 스피드를 바꾼 드문 사례다. 후속작 Phoenix II 와는 다른 제품이다. (Film Social Club, 2026-08-24)
 - [후지 84에서 68, 코닥 81에서 71](https://www.5ftmag.com/stories/japan-film-survey-2025.html): 일본 필름 사진가 1,337명 설문. 코닥이 후지를 앞섰지만 두 브랜드 모두 사용률이 떨어졌다. 경력 10년 이상의 40%가 촬영을 줄인 자리를 신규 유입이 채웠다. 현상소를 고르는 첫 기준은 가격(24%)이 아니라 현상·스캔 품질(41%)이다. 국내 현상소 92곳 가격도 함께 집계했… (5ft.mag 편집부, 2026-08-24)
@@ -46,8 +48,6 @@ RSS: https://www.5ftmag.com/rss.xml
 - [비오톱 서울 — SPC 사진첩 ISSUE.02](https://www.5ftmag.com/stories/spc-issue02.html): 상경 후 코로나의 한가운데에서, 외부인의 시선으로 바라본 서울이라는 비오톱. 김도균의 SPC 사진첩 ISSUE.02. (Street Photography Club, 2026-06-12)
 - [빛, 먼지, 사람 — SPC 사진첩 ISSUE.03](https://www.5ftmag.com/stories/spc-issue03.html): 사건이 아니라 상태. 반복해서 마주친 빛·먼지·사람이 겹치는 순간들을 모은 한 권. 홍민우의 SPC 사진첩 ISSUE.03. (Street Photography Club, 2026-06-12)
 - [골문 앞의 ISO 400, 일포드 풋볼 에디션](https://www.5ftmag.com/stories/ilford-football.html): 월드컵 개막에 맞춰 일포드가 HP5 Plus 와 XP2 Super 풋볼 컬렉터스 에디션을 내놨다. 유제는 그대로, 상자에 Expired Film Club 의 흑백 축구 사진이 입혀졌다. (5ft.mag 편집부, 2026-06-11)
-- [세 발짝의 거리, 아츠시 니시지마](https://www.5ftmag.com/stories/nishijima.html): 요르고스 란티모스의 현장을 10년 가까이 기록해 온 스틸 포토그래퍼. 『가여운 것들』 곁에서 그는 디지털 대신 필름 카메라를 들었다. (5ft.mag 편집부, 2026-06-10)
-- [제4회 후지필름 포토페스타 2026 — 노들섬에 〈사이의 시간〉](https://www.5ftmag.com/stories/fpfi-2026.html): 시리즈 15명·싱글 20명, 두 갤러리·아홉 날. 6월 노들섬에서 사진의 '잠시 멈춘 시간' 을 본다. (5ft.mag 편집부, 2026-06-08)
 
 ## 지역별 현상소
 
@@ -80,6 +80,7 @@ RSS: https://www.5ftmag.com/rss.xml
 - [Agfa APX 100](https://www.5ftmag.com/film/agfaapx100.html): ISO 100, Black & White, 35mm
 - [Agfa APX 400](https://www.5ftmag.com/film/agfaapx400.html): ISO 400, Black & White, 35mm
 - [Agfa CT Precisa 100](https://www.5ftmag.com/film/agfactprecisa100.html): ISO 100, Slide (E-6), 35mm
+- [Agfa Scala 200X](https://www.5ftmag.com/film/agfascala200x.html): ISO 200, B&W Slide (AP-44), 35mm, 120, 4x5
 - [Agfa Ultra 100](https://www.5ftmag.com/film/agfaultra100.html): ISO 100, Color Negative, 35mm
 - [Agfa Vista 100](https://www.5ftmag.com/film/agfavista100.html): ISO 100, Color Negative, 35mm
 - [Agfa Vista 200](https://www.5ftmag.com/film/agfavista200.html): ISO 200, Color Negative, 35mm

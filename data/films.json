@@ -1860,6 +1860,34 @@
     "canThumbnail": "img/films/agfactprecisa100-can.webp",
     "canThumbnailStatus": "set"
   },
+  "agfascala200x": {
+    "slug": "agfascala200x",
+    "tier": "library",
+    "brand": "AGFA",
+    "name": "Scala 200X",
+    "displayName": "Agfa Scala 200X",
+    "aliases": [
+      "Scala 200X",
+      "Scala200X",
+      "Scala 200",
+      "Agfa Scala",
+      "Agfa Scala 200X",
+      "AGFA Scala 200x",
+      "AgfaPhoto Scala 200X",
+      "아그파 스칼라",
+      "아그파 스칼라 200X",
+      "스칼라 200X",
+      "스칼라200X",
+      "agfascala200x",
+      "scala200x"
+    ],
+    "desc": "상업적으로 나온 유일한 흑백 슬라이드 필름이에요. 현상하면 네거티브가 아니라 포지티브가 나와서 라이트박스에 올리면 그대로 보입니다. 전용 공정 AP-44 를 써야 해서 지정 현상소에서만 맡길 수 있었어요. 입자가 아주 곱고 검정이 깊은 대신 중간톤이 얇다는 평이 함께 따라다닙니다. ISO 200 이 기준이고 100 에서 1600 까지 조절할 수 있었어요. 2005년 단종.",
+    "iso": "200",
+    "type": "B&W Slide (AP-44)",
+    "format": "35mm, 120, 4x5",
+    "photographers": [],
+    "photos": []
+  },
   "konicacenturia400": {
     "slug": "konicacenturia400",
     "tier": "library",
