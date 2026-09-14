@@ -112,3 +112,23 @@ describe('글 목록 로딩 경로', () => {
     }
   });
 });
+
+// 이주의 사진 선정은 prompt() 로 날짜를 타이핑하게 하다가 달력 모달로 바꿨다.
+// 폰에서 특히 불편했고 오타로 날짜가 틀리기 쉬웠다. 되돌아가지 않게 묶어 둔다.
+describe('이주의 사진 날짜 입력', () => {
+  const code = fs.readFileSync(path.resolve(process.cwd(), 'js/potw-picker.js'), 'utf8');
+  // 주석에 "예전에는 prompt() 로" 라고 적어 두었으므로 주석 줄은 빼고 본다.
+  const body = code.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
+
+  it('prompt() 로 날짜를 받지 않는다', () => {
+    expect(body).not.toMatch(/\bprompt\s*\(/);
+  });
+
+  it('달력 입력을 쓴다', () => {
+    expect(code).toContain('type="date"');
+  });
+
+  it('비어 있는 다음 자리를 기본값으로 채운다', () => {
+    expect(code).toMatch(/suggested:\s*opts\.current\s*\|\|\s*await suggestDate/);
+  });
+});

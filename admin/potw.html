@@ -81,6 +81,9 @@
     .badge.past { background: var(--bg-sub); color: var(--text-muted); }
     .gap-note { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin: 0; }
     .gap-note strong { color: var(--text); }
+    .row-btn.icon { padding: 6px 10px; font-size: 14px; line-height: 1; }
+    .row-btn:disabled { opacity: .35; cursor: default; }
+    .row-btn:disabled:hover { border-color: var(--border); color: var(--text); }
     @media (max-width: 720px) {
       .sum { grid-template-columns: 1fr; }
       .adm-table thead { display: none; }
@@ -203,14 +206,14 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20260907-entitlement" defer></script>
-  <script src="../js/db-client.js?v=20260914-visibility" defer></script>
+  <script src="../js/db-client.js?v=20260914-potwreorder" defer></script>
 <script src="../js/util.js?v=20260914-visibility" defer></script>
 <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="../js/site-common.js?v=20260820-authkeep" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/potw-picker.js?v=20260907-potwpick" defer></script>
-<script src="../js/admin-potw-page.js?v=20260914-potwadmin" defer></script>
+<script src="../js/potw-picker.js?v=20260914-potwreorder" defer></script>
+<script src="../js/admin-potw-page.js?v=20260914-potwreorder" defer></script>
 
 </body>
 </html>

@@ -857,6 +857,33 @@
       const { error: nErr } = await this.notifyFeatured(row, dateStr);
       return { notified: !nErr, notifyError: nErr || null };
     },
+    // 두 사진의 게재일을 맞바꾼다. 관리 화면의 위/아래 화살표가 쓴다.
+    //
+    // note 는 건드리지 않는다. setFeatured 는 note 를 덮어쓰므로 여기서는
+    // featured_at 만 바꾼다. 알림도 보내지 않는다. 이미 뽑힌 사람들끼리
+    // 자리를 바꾼 것이라 다시 알릴 일이 아니다.
+    //
+    // 두 번의 update 라 중간에 실패하면 두 사진이 같은 날짜를 갖게 된다.
+    // 그러면 홈이 나중에 등록한 쪽을 걸어서 화면이 헷갈리므로, 두 번째가
+    // 실패하면 첫 번째를 되돌린다.
+    async swapFeaturedDates(idA, dateA, idB, dateB) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const ok = (d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d || ''));
+      if (!idA || !idB || !ok(dateA) || !ok(dateB)) {
+        return { error: { message: '바꿀 두 날짜가 올바르지 않습니다' } };
+      }
+      const { error: e1 } = await c.from('reader_submissions')
+        .update({ featured_at: dateB }).eq('id', idA).select('id');
+      if (e1) return { error: e1 };
+
+      const { error: e2 } = await c.from('reader_submissions')
+        .update({ featured_at: dateA }).eq('id', idB).select('id');
+      if (e2) {
+        await c.from('reader_submissions').update({ featured_at: dateA }).eq('id', idA);
+        return { error: e2 };
+      }
+      return { error: null };
+    },
     async clearFeatured(id) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       return c.from('reader_submissions').update({
