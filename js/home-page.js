@@ -260,8 +260,7 @@
   }
 
   if (storyList) {
-    fetch('data/stories.json')
-      .then(res => res.json())
+    window.MagUtil.loadStories()
       .then(data => {
         // 발행된 글만, 최신순
         const all = data

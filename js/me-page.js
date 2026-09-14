@@ -752,8 +752,7 @@ async function loadFavArticles() {
   }
   if (!STATE.storiesData) {
     try {
-      const res = await fetch('data/stories.json');
-      STATE.storiesData = await res.json();
+      STATE.storiesData = await window.MagUtil.loadStories();
     } catch (_) {
       STATE.storiesData = [];
     }

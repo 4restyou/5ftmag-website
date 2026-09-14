@@ -239,9 +239,8 @@
   // 필름별 글 수 사전 집계 (films-page 부팅 전에 백그라운드로). 실패해도 카드는 그냥 배지 없이 나옴.
   async function loadArticleCountsByFilm() {
     try {
-      const res = await fetch('/data/stories.json', { credentials: 'same-origin' });
-      if (!res.ok) return;
-      const arr = await res.json();
+      const arr = await window.MagUtil.loadStories();
+      if (!Array.isArray(arr) || !arr.length) return;
       const counts = {};
       for (const story of arr) {
         if (!window.MagUtil.isPublishedContent(story)) continue;

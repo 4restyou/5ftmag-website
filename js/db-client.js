@@ -1891,6 +1891,30 @@
   // ── Article drafts (편집부 에디터 저장소) ──
   const ARTICLE_MEDIA_BUCKET = 'article-media';
   const articles = {
+    // ── 글 공개/비공개 ──
+    // data/stories.json 의 published 가 기본값이고, story_visibility 에 행이 있으면
+    // 그것이 이긴다. 목록 화면은 js/util.js 의 loadStories() 가 합쳐서 준다.
+    async visibility() {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.from('story_visibility').select('story_id, published');
+      if (error) { console.warn('[articles.visibility]', error.message); return []; }
+      return data || [];
+    },
+    // 기본값과 같아지면 행을 지운다. 그래야 원본이 둘로 갈라지지 않고
+    // 이 테이블에는 "기본값에서 벗어난 글" 만 남는다.
+    async setPublished(storyId, published, defaultPublished) {
+      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const id = String(storyId || '').trim();
+      if (!id) return { error: { message: '글 id 가 없습니다' } };
+
+      if (published === (defaultPublished !== false)) {
+        const { error } = await c.from('story_visibility').delete().eq('story_id', id);
+        return { error: error || null, cleared: true };
+      }
+      const { error } = await c.from('story_visibility')
+        .upsert({ story_id: id, published: !!published }, { onConflict: 'story_id' });
+      return { error: error || null, cleared: false };
+    },
     async listDrafts(limit = 50) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.from('article_drafts')

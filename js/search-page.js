@@ -188,7 +188,7 @@
     const dbReady = db() && db().isReady && db().isReady();
 
     const [storiesArr, filmsObj, contributorsArr, webzineArr, labsArr, marketArr] = await Promise.all([
-      fetchJsonSafe('/data/stories.json'),
+      window.MagUtil.loadStories(),
       fetchJsonSafe('/data/films.json'),
       // 빌드 때 승인 사진에서 뽑은 작가 목록. 사진 전체를 받아오지 않고도
       // 아이디로 찾을 수 있다.
