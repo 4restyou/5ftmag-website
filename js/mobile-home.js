@@ -963,7 +963,7 @@
     bindControls();
     bindStickyShrink();
     const [stories, films, theme] = await Promise.all([
-      fetchJson('/data/stories.json'),
+      window.MagUtil.loadStories(),
       loadFilmsCatalog(),
       fetchJson('/data/current-theme.json'),
     ]);

@@ -11,7 +11,7 @@
   try {
     [authors, stories] = await Promise.all([
       fetch('/data/authors.json').then((r) => r.json()),
-      fetch('/data/stories.json').then((r) => r.json()),
+      window.MagUtil.loadStories(),
     ]);
   } catch (_) {
     return;

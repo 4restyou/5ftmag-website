@@ -45,6 +45,77 @@
     return date <= today;
   }
 
+  // ── 글 목록 로딩 ──
+  //
+  // data/stories.json 은 배포 산출물이라 공개 여부를 바꾸려면 재배포가 필요했다.
+  // 그래서 공개 여부만 Supabase(story_visibility)로 옮기고, 여기서 둘을 합친다.
+  // JSON 의 published 가 기본값이고 DB 에 행이 있으면 그것이 이긴다.
+  //
+  // 목록을 읽는 페이지가 일곱이라 각자 fetch 하던 것을 이 함수 하나로 모았다.
+  // 한 곳만 고치면 "홈에는 없는데 검색에는 나오는" 상태가 되기 때문이다.
+  //
+  // Supabase 설정을 db-client.js 에서 가져오지 않고 여기 둔 이유: db-client 는
+  // supabase UMD CDN 에 의존하고 페이지마다 로드 순서가 달라서, 목록 렌더가
+  // 그 둘에 묶이면 안 된다. 두 곳이 갈라지지 않게 tests/unit/story-override.spec.mjs
+  // 가 값이 같은지 검사한다.
+  const SB_URL  = 'https://pucpqsfwqouqohwsvmnd.supabase.co';
+  const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1Y3Bxc2Z3cW91cW9od3N2bW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjYyMDUsImV4cCI6MjA5Mzc0MjIwNX0.adLzT0UrX3e1IbkQ70G6LeFWeKbuGaa0PTL6AmrSBD8';
+  const OVERRIDE_TIMEOUT_MS = 1500;
+
+  // 오버라이드를 stories 배열에 덮어쓴다. 순수 함수 — 원본을 바꾸지 않는다.
+  function applyVisibility(list, rows) {
+    if (!Array.isArray(list)) return [];
+    if (!Array.isArray(rows) || !rows.length) return list;
+    const map = new Map();
+    for (const r of rows) {
+      if (r && r.story_id != null) map.set(String(r.story_id), r.published !== false);
+    }
+    if (!map.size) return list;
+    return list.map(function (s) {
+      const key = String(s && s.id != null ? s.id : '');
+      return map.has(key) ? Object.assign({}, s, { published: map.get(key) }) : s;
+    });
+  }
+
+  // 오버라이드 조회. 실패하거나 느리면 빈 배열로 떨어져 JSON 기본값을 쓴다.
+  // 목록이 DB 때문에 멈추면 안 된다.
+  function fetchVisibility() {
+    let ctl = null;
+    let timer = null;
+    try {
+      if (typeof AbortController !== 'undefined') {
+        ctl = new AbortController();
+        timer = setTimeout(function () { ctl.abort(); }, OVERRIDE_TIMEOUT_MS);
+      }
+    } catch (_) { ctl = null; }
+    const done = function () { if (timer) clearTimeout(timer); };
+    return fetch(SB_URL + '/rest/v1/story_visibility?select=story_id,published', {
+      headers: { apikey: SB_ANON, accept: 'application/json' },
+      signal: ctl ? ctl.signal : undefined,
+    })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { done(); return Array.isArray(rows) ? rows : []; })
+      .catch(function () { done(); return []; });
+  }
+
+  // 한 페이지에서 여러 번 불러도 요청은 한 번이다.
+  let storiesPromise = null;
+  function loadStories() {
+    if (storiesPromise) return storiesPromise;
+    storiesPromise = Promise.all([
+      // 두 요청을 동시에 띄운다. 오버라이드는 대개 비어 있어 stories.json 보다
+      // 빨리 오므로 추가 지연이 사실상 없다.
+      fetch('/data/stories.json').then(function (r) { return r.ok ? r.json() : []; }),
+      fetchVisibility(),
+    ]).then(function (pair) {
+      return applyVisibility(pair[0], pair[1]);
+    }).catch(function () {
+      storiesPromise = null;   // 다음 호출에서 다시 시도한다
+      return [];
+    });
+    return storiesPromise;
+  }
+
   // 가격 표기 통합. 페이지마다 따로 구현돼 같은 금액이 다르게 보이던 것을 하나로.
   //   opts.empty    — 값이 없거나 0 이하일 때 표시 (기본 '')
   //   opts.keepText — 숫자가 아닌 값("가격 협의" 등)을 원문 그대로 살릴지 (기본 false)
@@ -114,5 +185,8 @@
     isPublishedContent: isPublishedContent,
     formatPrice: formatPrice,
     pickByAuthorRoundRobin: pickByAuthorRoundRobin,
+    applyVisibility: applyVisibility,
+    loadStories: loadStories,
+    supabaseConfig: { url: SB_URL, anonKey: SB_ANON },
   });
 })();

@@ -192,7 +192,7 @@ describe('window.MagUtil.pickByAuthorRoundRobin', () => {
 describe('window.MagUtil shape', () => {
   it('exposes the shared browser utilities', () => {
     expect(Object.keys(window.MagUtil).sort()).toEqual(
-      ['escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'normalizeFilmLabel', 'pickByAuthorRoundRobin', 'seoulTodayIso']
+      ['applyVisibility', 'escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'loadStories', 'normalizeFilmLabel', 'pickByAuthorRoundRobin', 'seoulTodayIso', 'supabaseConfig']
     );
   });
 

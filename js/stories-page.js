@@ -308,12 +308,9 @@
       .catch(() => {});
   }
 
-  fetch('data/stories.json')
-    .then(res => {
-      if (!res.ok) throw new Error('데이터를 불러올 수 없습니다.');
-      return res.json();
-    })
+  window.MagUtil.loadStories()
     .then(data => {
+      if (!Array.isArray(data) || !data.length) throw new Error('데이터를 불러올 수 없습니다.');
       // 발행된 글만, 최신순 정렬
       allStories = data
         .filter(window.MagUtil.isPublishedContent)

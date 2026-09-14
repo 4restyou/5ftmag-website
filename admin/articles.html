@@ -52,11 +52,6 @@
     .articles-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
 
     .articles-list { display: flex; flex-direction: column; gap: 8px; }
-    .pat-help { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
-    .pat-status { font-size: 13px; line-height: 1.6; margin: 10px 0 0; padding: 10px 12px; border-radius: 4px; white-space: pre-line; }
-    .pat-status.is-ok   { background: var(--color-success-bg); color: var(--color-success-text); }
-    .pat-status.is-bad  { background: var(--color-danger-bg);  color: var(--color-danger-text); }
-    .pat-status.is-busy { background: var(--bg-sub);           color: var(--text-muted); }
     .article-row {
       display: grid;
       grid-template-columns: 64px 1fr auto auto auto auto;
@@ -153,33 +148,6 @@
     }
 
     /* PAT modal — minimal */
-    .ae-modal {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: none; align-items: center; justify-content: center;
-      z-index: 200;
-    }
-    .ae-modal.is-open { display: flex; }
-    .ae-modal-card {
-      background: var(--bg); padding: 24px;
-      border-radius: 12px; max-width: 420px; width: 90%;
-      border: 1px solid var(--border);
-    }
-    .ae-modal-card h3 { margin: 0 0 8px; font-size: 18px; }
-    .ae-modal-card p { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin: 0 0 16px; }
-    .ae-modal-card input {
-      width: 100%; padding: 10px 12px;
-      border: 1px solid var(--border); border-radius: 8px;
-      background: var(--bg); color: var(--text); font: inherit; font-size: 14px;
-      margin-bottom: 16px;
-    }
-    .ae-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-    .ae-modal-actions button {
-      font: inherit; font-size: 13px; padding: 8px 16px;
-      border: 1px solid var(--border); border-radius: 8px;
-      background: transparent; color: var(--text); cursor: pointer;
-    }
-    .ae-modal-actions button.ae-primary {
       background: var(--text); color: var(--bg); border-color: var(--text);
     }
   </style>
@@ -271,30 +239,16 @@
   <div class="articles-list" id="articlesList"></div>
 </main>
 
-<div id="patModal" class="ae-modal" role="dialog" aria-labelledby="patModalTitle">
-  <div class="ae-modal-card">
-    <h3 id="patModalTitle">GitHub Personal Access Token</h3>
-    <p>토큰은 현재 탭에서만 유지되며, 탭을 닫으면 삭제됩니다. 저장하면 바로 확인해 드립니다. <a href="https://github.com/settings/tokens/new?scopes=repo&description=5ft.mag%20admin" target="_blank" rel="noopener">토큰 발급 ↗</a></p>
-    <p class="pat-help">Classic 토큰이면 <strong>repo</strong> 권한, Fine-grained 토큰이면 이 저장소에 <strong>Contents: Read and write</strong> 가 있어야 합니다.</p>
-    <input id="patInput" type="password" placeholder="ghp_... 또는 github_pat_..." autocomplete="off" />
-    <p id="patStatus" class="pat-status" hidden></p>
-    <div class="ae-modal-actions">
-      <button type="button" id="patCancel">취소</button>
-      <button type="button" id="patApply" class="ae-primary">확인하고 저장</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20260907-entitlement" defer></script>
-  <script src="../js/db-client.js?v=20260907-potwpick" defer></script>
-<script src="../js/util.js?v=20260817-photodiv" defer></script>
+  <script src="../js/db-client.js?v=20260914-visibility" defer></script>
+<script src="../js/util.js?v=20260914-visibility" defer></script>
 <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="../js/site-common.js?v=20260820-authkeep" defer></script>
-<script src="../js/admin-articles-page.js?v=20260824-patcheck" defer></script>
+<script src="../js/admin-articles-page.js?v=20260914-visibility" defer></script>
 
 </body>
 </html>
