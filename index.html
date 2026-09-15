@@ -220,15 +220,6 @@
   <!-- 우: PHOTO + NEWS + PARTNERS + AD -->
   <div class="panel" id="photo">
 
-    <!-- ── 소식 ── -->
-    <div class="sub-section-head">
-      <h3>News</h3>
-      <span class="label">매거진 소식</span>
-    </div>
-    <div class="news-list" id="newsList">
-      <!-- 자바스크립트가 data/news.json을 읽어서 자동 생성 -->
-    </div>
-
     <!-- ── 이주의 사진 ──
          편집부가 승인된 독자 사진 하나를 골라 건다. "이번 주에 올라온 사진" 이
          아니라 "이번 주에 선정된 사진" 이라, 제출일과 선정일은 무관하다.
@@ -302,6 +293,19 @@
       <ul class="home-film-suggest" id="homeFilmSuggest" role="listbox" aria-label="필름 추천 목록" hidden></ul>
       <a class="home-film-pick" id="homeFilmPick" href="films.html" hidden></a>
     </section>
+
+    <!-- ── 소식 ──
+         Film Finder 뒤, Partners 앞에 둔다. News 와 Partners 는 둘 다 "우리가
+         누구인지" 를 말하는 자리라 붙여 놓았다. 오른쪽 칼럼은 콘텐츠(이주의
+         사진·Photo) → 도구(Film Finder) → 소개(News·Partners) → 행동
+         (Newsletter) 순으로 읽힌다. -->
+    <div class="sub-section-head">
+      <h3>News</h3>
+      <span class="label">매거진 소식</span>
+    </div>
+    <div class="news-list" id="newsList">
+      <!-- 자바스크립트가 data/news.json을 읽어서 자동 생성 -->
+    </div>
 
     <!-- ── 협력사 ── -->
     <div class="sub-section-head">
