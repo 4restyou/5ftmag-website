@@ -1,7 +1,7 @@
 {
   "source": "supabase:public.labs",
   "type": "film-lab",
-  "count": 92,
+  "count": 96,
   "labs": [
     {
       "name": "갤러리사진관",
@@ -894,7 +894,7 @@
       "lat": 37.565159,
       "lng": 126.9228079,
       "scanRes": "3088*2048",
-      "features": null,
+      "features": "2026년 7월 10일 가격이 바뀌었다. 방문 전에 홈페이지에서 확인하는 편이 낫다.",
       "url": "https://ynfilm.co.kr",
       "prices": {
         "bw": {
@@ -904,7 +904,7 @@
           },
           "135": {
             "high": null,
-            "basic": 9000
+            "basic": null
           }
         },
         "etc": {
@@ -918,7 +918,7 @@
           },
           "135": {
             "high": 8000,
-            "basic": 6000
+            "basic": null
           }
         },
         "slide": {
@@ -928,7 +928,7 @@
           },
           "135": {
             "high": null,
-            "basic": 14000
+            "basic": null
           }
         },
         "cinema": {
@@ -1878,7 +1878,7 @@
     {
       "name": "포토피아",
       "region": "서울",
-      "address": "서울 중구 수표로6길 10",
+      "address": "서울 중구 수표로6길 9",
       "lat": 37.5627298,
       "lng": 126.9909643,
       "scanRes": "2728*1830",
@@ -1982,7 +1982,7 @@
     {
       "name": "필름로그 서울",
       "region": "서울",
-      "address": "서울 중구 퇴계로53길 6-17 1층",
+      "address": "서울 중구 퇴계로68길 10 1층",
       "lat": 37.5642554,
       "lng": 127.0043472,
       "scanRes": "1545*1024",
@@ -2398,7 +2398,7 @@
     {
       "name": "카메라 사진관",
       "region": "인천",
-      "address": "인천 남동구 문화서로3번길 23 1층 카메라사진관",
+      "address": "인천 남동구 성말로44번길 11-13 상상빌딩 B동 2층",
       "lat": 37.4465109,
       "lng": 126.6941594,
       "scanRes": null,
@@ -4737,12 +4737,12 @@
     },
     {
       "name": "책방무사",
-      "region": "제주",
-      "address": "제주 서귀포시 성산읍 수시로10번길 3",
+      "region": "서울",
+      "address": "서울 마포구 서강로 121 맹그로브 신촌 1층 106호",
       "lat": 33.4461341,
       "lng": 126.8866129,
       "scanRes": null,
-      "features": "스캐너 선택 가능, 필름로그 연계 현상소.",
+      "features": "제주에서 서울 신촌으로 옮겼다. 스캐너 선택 가능.",
       "url": "http://www.filmlog.co.kr/",
       "prices": {
         "bw": {
@@ -4784,6 +4784,206 @@
             "high": null,
             "basic": null
           }
+        }
+      }
+    },
+    {
+      "name": "STRIPE",
+      "region": "서울",
+      "address": "서울 중구 장충단로10길 20, 103호",
+      "scanRes": null,
+      "features": "흑백 전용. 현상 10,000원(로디날), 셀프 스캔 롤당 3,000원. 35mm·120·4×5 를 TIFF 로 받는다. 암실 렌탈은 반일 60,000원, 종일 110,000원. 운영자 인화는 RC 8×10 5,000원, FB 9,000원부터. 일포드 필름과 약품, 인화지를 판다. 평일 11시부터 18시까지, 예약제. 요금은 2025년 7월 기준.",
+      "url": "https://www.instagram.com/stripe_79",
+      "prices": {
+        "bw": {
+          "135": {
+            "basic": 10000,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "color": {
+          "135": {
+            "basic": null,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "slide": {
+          "135": {
+            "basic": null,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "라이트사",
+      "region": "강원",
+      "address": "강원 춘천시 서부대성로44번길 25-2",
+      "scanRes": null,
+      "features": "필름 현상을 받는다. 컬러 현상 9,000원, 스캔 4,000원. 명동 인성병원 인근 골목 초입에 있다. 요금은 2026년 9월 기준.",
+      "url": null,
+      "prices": {
+        "color": {
+          "135": {
+            "basic": 13000,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "bw": {
+          "135": {
+            "basic": null,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "slide": {
+          "135": {
+            "basic": null,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "준포토",
+      "region": "강원",
+      "address": "강원 춘천시 중앙로 86-1",
+      "scanRes": null,
+      "features": "필름 현상은 월요일과 목요일에만 작업한다. 현상 컬러 9,000원, 흑백 12,000원, 120 은 10,000원. 스캔 4,000원, 하프프레임 스캔 5,000원. 요금은 2026년 9월 기준.",
+      "url": null,
+      "prices": {
+        "color": {
+          "135": {
+            "basic": 13000,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "bw": {
+          "135": {
+            "basic": 16000,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "slide": {
+          "135": {
+            "basic": null,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
+        }
+      }
+    },
+    {
+      "name": "동인스튜디오",
+      "region": "강원",
+      "address": "강원 강릉시 하평3길 37 일송아파트",
+      "scanRes": null,
+      "features": "1995년부터 이어 온 사진관. 필름 현상과 인화, 대형 인화, 액자 제작을 함께 한다. 컬러 현상 5,000원, 스캔 5,000원. 요금은 2026년 9월 기준.",
+      "url": null,
+      "prices": {
+        "color": {
+          "135": {
+            "basic": 10000,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "bw": {
+          "135": {
+            "basic": null,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "slide": {
+          "135": {
+            "basic": null,
+            "high": null
+          },
+          "120": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "cinema": {
+          "135": {
+            "basic": null,
+            "high": null
+          }
+        },
+        "etc": {
+          "110": null,
+          "aps": null
         }
       }
     }
