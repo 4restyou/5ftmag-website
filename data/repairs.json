@@ -41,11 +41,11 @@
     },
     {
       "name": "삼성사",
-      "region": null,
-      "address": null,
+      "region": "서울",
+      "address": "서울 중구 퇴계로31길 13 필삼사빌딩 302호",
       "specialty": "펜탁스·콘탁스",
       "description": "부품 보유량이 압도적이라 콘탁스 문제 시 1순위. 다만 일부 기종(S2·S2B·TVS)은 부품 재고가 줄고 있다.",
-      "contact": null,
+      "contact": "02-2266-8162",
       "url": null
     },
     {
@@ -114,19 +114,19 @@
     {
       "name": "소니 신용산 서비스센터",
       "region": "서울",
-      "address": null,
-      "specialty": "미놀타",
-      "description": "미놀타 AS 계보(남대문에서 신용산으로 이전). TC-1은 이곳에서 수리할 수 있다.",
-      "contact": null,
-      "url": null
+      "address": "서울 용산구 한강대로 95 래미안 용산더센트럴 B동 409호",
+      "specialty": "소니 카메라 서비스",
+      "description": "신용산역 앞 공식 소니 서비스센터. 렌즈교환식 카메라(A/E Mount), 디지털 카메라, 캠코더와 시네마라인 일부(FX2·FX3·FX30)를 맡길 수 있다. 미놀타 계보 카메라는 방문 전 접수 가능 여부를 확인하는 편이 낫다.",
+      "contact": "02-318-5640",
+      "url": "https://www.sony.co.kr/scs/handler/Map-ViewMap?dealerascId=309"
     },
     {
       "name": "부산 신카메라",
       "region": "부산",
-      "address": null,
+      "address": "부산광역시 중구 남포동2가 남포길 47",
       "specialty": "니콘·올림푸스·콘탁스",
-      "description": "올림푸스 PEN F·FT, 콘탁스 케이블 등 수리. 2년 AS 보장에 문자 상담과 택배 접수, 카드결제도 가능하다.",
-      "contact": null,
+      "description": "남포동의 오래된 카메라 수리점. 필름카메라를 중심으로 올림푸스 PEN F·FT, 콘탁스 케이블 같은 오래된 기종 수리 이력이 알려져 있다. 방문 전 문자나 전화로 수리 가능 여부와 보증 조건을 확인하는 편이 낫다.",
+      "contact": "051-246-0360",
       "url": null
     },
     {
@@ -144,7 +144,7 @@
       "address": "경북 포항시 북구 용당로 127-1",
       "specialty": "중고 매입·판매",
       "description": "포항의 중고 카메라 상점. 매입과 판매를 함께 한다. 지역에서 급할 때 들르기 좋다.",
-      "contact": "010-9750-5171 · 0504-4642-6931",
+      "contact": "054-242-1882 · 010-9750-5171 · 0504-4642-6931",
       "url": "https://naver.me/GYGgan9L"
     },
     {
@@ -162,7 +162,7 @@
       "address": "대구 중구 국채보상로 580 대현프리몰 E-31",
       "specialty": "간단 정비",
       "description": "대구 중앙로 지하상가에 있다. 간단한 정비는 꼼꼼히 봐주고, 대구권에서 이름이 알려진 곳이다.",
-      "contact": "0507-1475-2848",
+      "contact": "053-428-2848 · 0507-1475-2848",
       "url": "https://naver.me/FUh2jXG0"
     },
     {
