@@ -1,4 +1,4 @@
-// /labs/<region>.html 지역별 현상소 페이지 생성.
+// /labs/<region>.html 지역별 현상소·수리점 페이지 생성.
 //
 // labs.html 도 카탈로그 전체를 자바스크립트로 그려서 정적 본문이 440자뿐이었다.
 // 현상소 92곳의 주소·스캔 화질·현상 가격이 전부 검색엔진과 AI 수집기에 보이지
@@ -8,7 +8,12 @@
 // 검색이 지역 단위로 일어나고("서울 필름 현상소"), 한 곳당 정보량은 한 페이지를
 // 채우기에 적다. 대신 지역 페이지 안에 각 현상소의 LocalBusiness 정보를 모두 싣는다.
 //
-// data/labs.json 이 원본이다(원본은 Supabase labs 테이블, build-labs.mjs 가 dump).
+// 수리점(repair_shops)도 같은 페이지에 싣는다. 수리점은 지금까지 자바스크립트로만
+// 그려서 "부산 카메라 수리점" 같은 검색에 한 줄도 걸리지 않았다. 목록이 있어도
+// 검색에서 찾을 수 없으면 없는 것과 같다.
+//
+// data/labs.json 과 data/repairs.json 이 원본이다(원본은 Supabase labs ·
+// repair_shops 테이블, build-labs.mjs · build-repairs.mjs 가 dump).
 
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
@@ -16,6 +21,7 @@ import path from 'node:path';
 import { ROOT, navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
 
 const LABS_JSON = path.join(ROOT, 'data/labs.json');
+const REPAIRS_JSON = path.join(ROOT, 'data/repairs.json');
 const OUT_DIR = path.join(ROOT, 'labs');
 const REFERENCE_PAGE = path.join(ROOT, 'labs.html');
 
@@ -105,6 +111,21 @@ function labCard(lab) {
       </article>`;
 }
 
+// 수리점 한 곳. 현상소와 같은 .lab-entry 마크업을 쓰고 담는 값만 다르다.
+// 가격표 대신 전문 분야와 연락처가 들어간다.
+function repairEntry(shop) {
+  const description = (shop.description || '').trim();
+  return `
+      <article class="lab-entry">
+        <h3 class="lab-entry-name">${esc(shop.name)}</h3>
+        ${shop.address ? `<p class="lab-entry-address">${esc(shop.address)}</p>` : ''}
+        ${shop.specialty ? `<p class="lab-entry-meta">전문 ${esc(shop.specialty)}</p>` : ''}
+        ${shop.contact ? `<p class="lab-entry-meta">연락처 ${esc(shop.contact)}</p>` : ''}
+        ${description ? `<p class="lab-entry-features">${esc(description).replace(/\n/g, '<br />')}</p>` : ''}
+        ${shop.url ? `<p class="lab-entry-link"><a href="${esc(shop.url)}" target="_blank" rel="noopener nofollow">홈페이지 ↗</a></p>` : ''}
+      </article>`;
+}
+
 function localBusiness(lab) {
   const node = {
     '@type': 'LocalBusiness',
@@ -119,7 +140,57 @@ function localBusiness(lab) {
   return node;
 }
 
-function jsonLd(region, labs, url) {
+// contact 는 "010-0000-0000 · 0504-...", "카톡 아이디" 처럼 자유 형식이다.
+// 전화번호로 읽히는 첫 토막만 telephone 에 넣고, 아니면 아예 넣지 않는다.
+// 구조화 데이터에 전화가 아닌 값을 전화로 적으면 검색 결과에 그대로 나간다.
+function telephoneOf(contact) {
+  const first = String(contact || '').split('·')[0].trim();
+  return /^[0-9][0-9-]{7,}$/.test(first) ? first : null;
+}
+
+// 현상소 쪽은 additionalType 에 위키데이터 항목을 달아 두었다. 수리점에는
+// 달지 않는다. 카메라 수리업에 맞는 항목을 확인하지 못했고, 구조화 데이터에
+// 엉뚱한 항목을 적으면 검색엔진이 업종을 잘못 읽는다. 업종은 knowsAbout 과
+// description 으로 전한다.
+function repairBusiness(shop) {
+  const node = {
+    '@type': 'LocalBusiness',
+    name: shop.name,
+  };
+  if (shop.address) {
+    node.address = {
+      '@type': 'PostalAddress', addressCountry: 'KR',
+      addressLocality: shop.region, streetAddress: shop.address,
+    };
+  }
+  if (shop.specialty) node.knowsAbout = shop.specialty;
+  if (shop.description) node.description = shop.description;
+  const tel = telephoneOf(shop.contact);
+  if (tel) node.telephone = tel;
+  if (shop.url) node.url = shop.url;
+  return node;
+}
+
+function itemList(name, items, toNode) {
+  return {
+    '@type': 'ItemList',
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem', position: index + 1, item: toNode(item),
+    })),
+  };
+}
+
+// 제목과 설명에 쓰는 한 줄. 수리점이 없는 지역은 예전과 같은 문구를 유지한다.
+function headline(region, labs, repairs) {
+  const parts = [];
+  if (labs.length) parts.push(`필름 현상소 ${labs.length}곳`);
+  if (repairs.length) parts.push(`카메라 수리점 ${repairs.length}곳`);
+  return `${region} ${parts.join(' · ')}`;
+}
+
+function jsonLd(region, labs, repairs, url) {
   const collection = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -127,13 +198,10 @@ function jsonLd(region, labs, url) {
     url,
     inLanguage: 'ko-KR',
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${ORIGIN}/` },
-    mainEntity: {
-      '@type': 'ItemList',
-      numberOfItems: labs.length,
-      itemListElement: labs.map((lab, index) => ({
-        '@type': 'ListItem', position: index + 1, item: localBusiness(lab),
-      })),
-    },
+    mainEntity: [
+      labs.length ? itemList(`${region} 필름 현상소`, labs, localBusiness) : null,
+      repairs.length ? itemList(`${region} 카메라 수리점`, repairs, repairBusiness) : null,
+    ].filter(Boolean),
   };
   const breadcrumb = {
     '@context': 'https://schema.org',
@@ -141,7 +209,7 @@ function jsonLd(region, labs, url) {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${ORIGIN}/` },
       { '@type': 'ListItem', position: 2, name: '필름 현상소', item: `${ORIGIN}/labs.html` },
-      { '@type': 'ListItem', position: 3, name: `${region} 필름 현상소`, item: url },
+      { '@type': 'ListItem', position: 3, name: headline(region, labs, repairs), item: url },
     ],
   };
   return [collection, breadcrumb]
@@ -149,15 +217,30 @@ function jsonLd(region, labs, url) {
     .join('\n');
 }
 
-function render(region, labs, others, versioned, outFile) {
+function render(region, labs, repairs, others, versioned, outFile) {
   const slug = SLUG_BY_REGION.get(region);
   const url = `${ORIGIN}/labs/${slug}.html`;
-  const title = `${region} 필름 현상소 ${labs.length}곳 | 5ft magazine`;
+  const title = `${headline(region, labs, repairs)} | 5ft magazine`;
   const cheapest = labs
     .map((lab) => lab.prices?.color?.['135']?.basic)
     .filter((value) => typeof value === 'number' && value > 0)
     .sort((a, b) => a - b)[0];
-  const description = `${region}의 필름 현상소 ${labs.length}곳을 주소, 스캔 화질, 컬러·흑백·슬라이드 현상 가격과 함께 정리했습니다.${cheapest ? ` 135 컬러 기본 현상은 ${cheapest.toLocaleString('ko-KR')}원부터입니다.` : ''}`;
+  const sentences = [];
+  if (labs.length) {
+    sentences.push(`${region}의 필름 현상소 ${labs.length}곳을 주소, 스캔 화질, 컬러·흑백·슬라이드 현상 가격과 함께 정리했습니다.`);
+    if (cheapest) sentences.push(`135 컬러 기본 현상은 ${cheapest.toLocaleString('ko-KR')}원부터입니다.`);
+  }
+  if (repairs.length) {
+    sentences.push(`${region}에서 카메라를 맡길 수 있는 수리점 ${repairs.length}곳의 전문 분야와 연락처도 함께 실었습니다.`);
+  }
+  const description = sentences.join(' ');
+  const heading = repairs.length
+    ? (labs.length ? `${region} 필름 현상소와 카메라 수리점` : `${region} 카메라 수리점`)
+    : `${region} 필름 현상소`;
+  const countLine = [
+    labs.length ? `현상소 ${labs.length}곳` : '',
+    repairs.length ? `수리점 ${repairs.length}곳` : '',
+  ].filter(Boolean).join(' · ');
 
   return `<!DOCTYPE html>
 <html lang="ko" data-theme="light">
@@ -194,7 +277,7 @@ function render(region, labs, others, versioned, outFile) {
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">
   <link rel="stylesheet" href="${versioned('css/lab-region.css')}">
-${jsonLd(region, labs, url)}
+${jsonLd(region, labs, repairs, url)}
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -221,14 +304,22 @@ ${jsonLd(region, labs, url)}
   </nav>
 
   <header class="lab-region-head">
-    <h1>${esc(region)} 필름 현상소</h1>
-    <p class="lab-region-count">${labs.length}곳</p>
+    <h1>${esc(heading)}</h1>
+    <p class="lab-region-count">${esc(countLine)}</p>
     <p class="lab-region-desc">${esc(description)}</p>
   </header>
 
   <div class="lab-region-list">
 ${labs.map(labCard).join('\n')}
   </div>
+${repairs.length ? `
+  <section class="lab-region-repairs" aria-labelledby="repairTitle">
+    <h2 id="repairTitle">${esc(region)} 카메라 수리점 ${repairs.length}곳</h2>
+    <p class="lab-region-sub">필름카메라를 맡길 수 있는 곳입니다. 취급 기종과 비용은 바뀔 수 있으니 가기 전에 물어보시는 편이 좋습니다.</p>
+    <div class="lab-region-list">
+${repairs.map(repairEntry).join('\n')}
+    </div>
+  </section>` : ''}
 
   <section class="lab-region-nav">
     <h2>다른 지역</h2>
@@ -263,11 +354,16 @@ ${others.map(([name, otherSlug, count]) => `      <li><a href="/labs/${esc(other
 // 크롤러가 읽을 내용이 없었다. 링크는 이 목록의 지역 필터로 보낸다.
 // 지역 페이지(/labs/<region>.html)는 검색 전용이라 독자가 그쪽으로 들어가지
 // 않게 하고, 색인은 sitemap 과 지역 페이지끼리의 상호 링크로 이뤄진다.
-async function writeLabIndex(byRegion) {
-  const html = [...byRegion.entries()].map(([region, labs]) => `    <div class="lab-index-region">
-      <h3><a href="./labs.html?region=${encodeURIComponent(region)}">${esc(region)}</a> <span>${labs.length}곳</span></h3>
+// labs.html 의 마커 한 쌍 사이를 채운다. 현상소와 수리점이 같은 모양이라
+// 마커 이름과 문구만 달리 받는다.
+async function writeIndex(marker, summary, sub, groups, itemHref) {
+  const line = (item) => (itemHref
+    ? `        <li><a href="${esc(itemHref(item))}">${esc(item.name)}</a></li>`
+    : `        <li>${esc(item.name)}</li>`);
+  const html = groups.map(([label, href, items]) => `    <div class="lab-index-region">
+      <h3><a href="${esc(href)}">${esc(label)}</a> <span>${items.length}곳</span></h3>
       <ul>
-${labs.map((lab) => `        <li>${esc(lab.name)}</li>`).join('\n')}
+${items.map(line).join('\n')}
       </ul>
     </div>`).join('\n');
 
@@ -275,19 +371,20 @@ ${labs.map((lab) => `        <li>${esc(lab.name)}</li>`).join('\n')}
   const source = await fs.readFile(page, 'utf-8');
   // details 로 접어 둔다. 접혀 있어도 마크업은 HTML 에 그대로 남아 크롤러가
   // 읽고 링크를 따라간다. 화면에서만 기본으로 감춘다.
-  const total = [...byRegion.values()].reduce((sum, list) => sum + list.length, 0);
-  const next = source.replace(
-    /<!-- LAB-INDEX:START -->[\s\S]*?<!-- LAB-INDEX:END -->/,
-    `<!-- LAB-INDEX:START -->
+  const pattern = new RegExp(`<!-- ${marker}:START -->[\\s\\S]*?<!-- ${marker}:END -->`);
+  if (!pattern.test(source)) {
+    console.warn(`[build-lab-pages] labs.html 에 ${marker} 마커가 없음, skip`);
+    return false;
+  }
+  const next = source.replace(pattern, `<!-- ${marker}:START -->
   <details class="lab-index-fold">
-    <summary>지역별 현상소 ${total}곳</summary>
-    <p class="lab-index-sub">지역 이름을 누르면 그 지역 현상소의 주소와 현상 가격을 한 번에 볼 수 있어요.</p>
+    <summary>${esc(summary)}</summary>
+    <p class="lab-index-sub">${esc(sub)}</p>
     <div class="lab-index-grid">
 ${html}
     </div>
   </details>
-  <!-- LAB-INDEX:END -->`,
-  );
+  <!-- ${marker}:END -->`);
   if (next !== source) {
     await fs.writeFile(page, next, 'utf-8');
     return true;
@@ -295,11 +392,30 @@ ${html}
   return false;
 }
 
+// name + region 으로 만든 슬러그. labs-page.js 의 itemSlug 와 같은 규칙이라
+// ?lab=<슬러그> 로 들어가면 그 수리점 상세가 바로 열린다. 목록 페이지는 항상
+// 현상소 탭으로 뜨지만, 슬러그가 수리점 쪽에서 찾아지면 탭이 따라 바뀐다.
+function itemSlug(item) {
+  return `${item.name}-${item.region || ''}`.toLowerCase()
+    .replace(/[^a-z0-9가-힣\s-]/g, '')
+    .replace(/\s+/g, '-').replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 (async function build() {
   const raw = await fs.readFile(LABS_JSON, 'utf-8').catch(() => null);
   if (!raw) {
     console.warn('[build-lab-pages] data/labs.json 없음, skip');
     return;
+  }
+  // 수리점은 없어도 현상소 페이지는 만든다. 반대로 파일이 비어 있을 때
+  // 마커 사이를 "0곳" 으로 덮어쓰지는 않는다 (아래 writeIndex 호출 조건).
+  const repairsRaw = await fs.readFile(REPAIRS_JSON, 'utf-8').catch(() => null);
+  const repairsParsed = repairsRaw ? JSON.parse(repairsRaw) : null;
+  const allRepairs = (Array.isArray(repairsParsed) ? repairsParsed : repairsParsed?.repairs || [])
+    .filter((shop) => shop?.name);
+  if (!allRepairs.length) {
+    console.warn('[build-lab-pages] data/repairs.json 이 비어 있음, 수리점 목록은 건드리지 않는다');
   }
   const referenceHtml = await fs.readFile(REFERENCE_PAGE, 'utf-8');
   const versioned = assetVersionReader(referenceHtml, {
@@ -310,25 +426,62 @@ ${html}
   const labs = (Array.isArray(parsed) ? parsed : parsed.labs || [])
     .filter((lab) => lab?.name && SLUG_BY_REGION.has(lab.region));
 
+  const byName = (a, b) => a.name.localeCompare(b.name, 'ko');
   const byRegion = new Map();
+  const repairsByRegion = new Map();
   for (const [region] of REGIONS) {
-    const inRegion = labs.filter((lab) => lab.region === region)
-      .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    const inRegion = labs.filter((lab) => lab.region === region).sort(byName);
     if (inRegion.length) byRegion.set(region, inRegion);
+    const shops = allRepairs.filter((shop) => shop.region === region).sort(byName);
+    if (shops.length) repairsByRegion.set(region, shops);
   }
+  // 지역이 비어 있는 수리점이 있다. 시드에 주소를 넣지 않은 네 곳이 그렇다.
+  // 지역 페이지에는 실을 자리가 없으므로 labs.html 목록에서만 따로 묶는다.
+  // 빠뜨리면 목록에서 통째로 사라진다.
+  const noRegion = allRepairs.filter((shop) => !SLUG_BY_REGION.has(shop.region)).sort(byName);
 
   await fs.mkdir(OUT_DIR, { recursive: true });
 
-  for (const [region, inRegion] of byRegion) {
+  // 수리점만 있고 현상소가 없는 지역도 페이지를 만든다.
+  const pageRegions = REGIONS.map(([region]) => region)
+    .filter((region) => byRegion.has(region) || repairsByRegion.has(region));
+
+  for (const region of pageRegions) {
     const others = [...byRegion.entries()]
       .filter(([name]) => name !== region)
       .map(([name, list]) => [name, SLUG_BY_REGION.get(name), list.length]);
     const outFile = path.join(OUT_DIR, `${SLUG_BY_REGION.get(region)}.html`);
-    await fs.writeFile(outFile, render(region, inRegion, others, versioned, outFile), 'utf-8');
+    const page = render(region, byRegion.get(region) || [], repairsByRegion.get(region) || [],
+      others, versioned, outFile);
+    await fs.writeFile(outFile, page, 'utf-8');
   }
 
-  const indexUpdated = await writeLabIndex(byRegion);
-  const skipped = labs.length - [...byRegion.values()].reduce((sum, list) => sum + list.length, 0);
-  console.log(`[build-lab-pages] ${byRegion.size}개 지역 페이지 생성 (현상소 ${labs.length}곳${skipped ? `, 지역 미분류 ${skipped}곳 제외` : ''}): ${path.relative(ROOT, OUT_DIR)}/`);
-  console.log(`[build-lab-pages] labs.html 지역 목록 ${indexUpdated ? '갱신' : '변경 없음'}`);
+  const labTotal = [...byRegion.values()].reduce((sum, list) => sum + list.length, 0);
+  const labIndexUpdated = await writeIndex(
+    'LAB-INDEX',
+    `지역별 현상소 ${labTotal}곳`,
+    '지역 이름을 누르면 그 지역 현상소의 주소와 현상 가격을 한 번에 볼 수 있어요.',
+    [...byRegion.entries()].map(([region, list]) =>
+      [region, `./labs.html?region=${encodeURIComponent(region)}`, list]),
+  );
+
+  // 수리점은 가게마다 ?lab=<슬러그> 링크를 단다. 현상소와 달리 지역이 비어
+  // 있는 곳이 있어서 지역 링크만으로는 닿지 않는 가게가 생기기 때문이다.
+  let repairIndexUpdated = false;
+  if (allRepairs.length) {
+    const groups = [...repairsByRegion.entries()].map(([region, list]) =>
+      [region, `./labs.html?region=${encodeURIComponent(region)}`, list]);
+    if (noRegion.length) groups.push(['지역 등록 전', './labs.html', noRegion]);
+    repairIndexUpdated = await writeIndex(
+      'REPAIR-INDEX',
+      `지역별 카메라 수리점 ${allRepairs.length}곳`,
+      '필름카메라를 맡길 수 있는 곳이에요. 이름을 누르면 전문 분야와 연락처가 열려요.',
+      groups,
+      (shop) => `./labs.html?lab=${encodeURIComponent(itemSlug(shop))}`,
+    );
+  }
+
+  const skipped = labs.length - labTotal;
+  console.log(`[build-lab-pages] ${pageRegions.length}개 지역 페이지 생성 (현상소 ${labs.length}곳${skipped ? `, 지역 미분류 ${skipped}곳 제외` : ''}, 수리점 ${allRepairs.length}곳): ${path.relative(ROOT, OUT_DIR)}/`);
+  console.log(`[build-lab-pages] labs.html 현상소 목록 ${labIndexUpdated ? '갱신' : '변경 없음'} · 수리점 목록 ${repairIndexUpdated ? '갱신' : '변경 없음'}`);
 })();

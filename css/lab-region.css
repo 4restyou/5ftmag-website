@@ -105,6 +105,22 @@
 .lab-entry-link { margin: 12px 0 0; font-size: 13px; }
 .lab-entry-link a { color: inherit; text-underline-offset: 3px; }
 
+/* 수리점 구획. 목록은 현상소와 같은 .lab-entry 를 쓰고 제목만 얹는다. */
+.lab-region-repairs { margin-top: 44px; }
+.lab-region-repairs h2 {
+  font-size: 17px;
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+.lab-region-sub {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  margin: 0;
+  word-break: keep-all;
+}
+
 .lab-region-nav { margin-top: 44px; }
 .lab-region-nav h2 {
   font-size: 17px;
