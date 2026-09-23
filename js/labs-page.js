@@ -156,13 +156,26 @@
     return staticLabs;
   }
 
+  let staticRepairsPromise = null;
+  async function loadStaticRepairs() {
+    if (!staticRepairsPromise) {
+      staticRepairsPromise = fetch('/data/repairs.json')
+        .then((res) => res.json())
+        .then((res) => Array.isArray(res.repairs) ? res.repairs : [])
+        .catch(() => []);
+    }
+    return staticRepairsPromise;
+  }
   async function loadRepairs() {
-    // 원본 = Supabase repair_shops 테이블. (정적 폴백 없음)
+    // 원본 = Supabase repair_shops 테이블. 실패 시 정적 data/repairs.json 으로
+    // 폴백한다(현상소와 같은 구조). 예전에는 폴백이 없어서 DB 가 안 열리면
+    // 수리실 탭이 통째로 비었다.
+    const staticRepairs = await loadStaticRepairs();
     try {
       const rows = await window.MagDB?.repairs?.list?.();
-      if (Array.isArray(rows)) return rows;
-    } catch (_) { /* 빈 목록으로 진행 */ }
-    return [];
+      if (Array.isArray(rows) && rows.length) return rows;
+    } catch (_) { /* 폴백으로 진행 */ }
+    return staticRepairs;
   }
 
   async function setTab(next) {
