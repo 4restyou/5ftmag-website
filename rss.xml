@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Sun, 13 Sep 2026 01:37:26 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 23 Sep 2026 13:06:33 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>롤라이플렉스가 손목 위로 올라왔다</title>
+      <link>https://www.5ftmag.com/stories/artra-rolleiflex.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/artra-rolleiflex.html</guid>
+      <pubDate>Wed, 23 Sep 2026 00:00:00 GMT</pubDate>
+      <description>Artra 가 롤라이플렉스 이안 반사식 카메라를 본뜬 손목시계 CAMERA DUAL ROLLEIFLEX 를 100개 한정으로 공개했다. 두 개의 다이얼이 위아래로 놓인 트윈 렌즈 배치를 그대로 옮겼다. 가격과 정식 출시는 10월 말에 발표된다.</description>
+      <category>GOODS</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>이세현 사진전 《잔광》, 꺼진 자리에 남은 빛</title>
       <link>https://www.5ftmag.com/stories/lee-sehyun-afterglow.html</link>
