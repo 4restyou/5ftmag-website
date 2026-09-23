@@ -6,7 +6,7 @@
     {
       "name": "카메라닥터",
       "region": "서울",
-      "address": null,
+      "address": "서울 중구 퇴계로27길 25 청림빌딩 3층",
       "specialty": "라이카·수동 RF",
       "description": "반도 김진철 실장이 독립해 충무로 사진집 건물에 오픈. 독립 후 더 저렴하고 빨라졌다.",
       "contact": null,
@@ -14,8 +14,8 @@
     },
     {
       "name": "홍성중앙카메라",
-      "region": null,
-      "address": null,
+      "region": "충남",
+      "address": "충남 홍성군 홍성읍 조양로 7",
       "specialty": "라이카·수동 RF",
       "description": "대기와 비용이 있는 편이지만 퀄리티는 최상급이다.",
       "contact": null,
@@ -23,12 +23,12 @@
     },
     {
       "name": "거인광학",
-      "region": null,
+      "region": "경기",
       "address": null,
       "specialty": "라이카·수동 RF",
-      "description": "대기 길고 비용 높은 편. 퀄리티는 월드클래스로 통한다.",
+      "description": "대기 길고 비용 높은 편. 퀄리티는 월드클래스로 통한다. 경기도 동탄 개인 작업실 기반이라 방문 접수는 받지 않고 택배 접수를 원칙으로 한다.",
       "contact": null,
-      "url": null
+      "url": "https://gigantoptik.com"
     },
     {
       "name": "빛그림 수리실",
@@ -59,11 +59,11 @@
     },
     {
       "name": "충일카메라",
-      "region": null,
-      "address": null,
+      "region": "서울",
+      "address": "서울 중구 수표로6길 10 유진빌딩 201호",
       "specialty": "캐논·니콘 SLR·RF·핫셀블라드",
       "description": "컴팩트는 받지 않음. SLR·RF 수동기 전천후에 계측기기도 잘 갖췄고, 핫셀블라드 수리도 가능하다.",
-      "contact": null,
+      "contact": "02-2263-7583",
       "url": null
     },
     {
@@ -71,44 +71,44 @@
       "region": "경기",
       "address": null,
       "specialty": "핫셀블라드",
-      "description": "폐업 후 일산에서 소규모로 다시 시작. 핫셀블라드 전문.",
+      "description": "과거 한국카메라AS에서 이어진 핫셀블라드 수리처로 알려졌지만, 최근 접수 여부는 확인이 필요하다.",
       "contact": null,
       "url": null
     },
     {
       "name": "충무로카메라AS",
       "region": "서울",
-      "address": null,
+      "address": "서울 중구 수표로 13",
       "specialty": "컴팩트 자동카메라",
       "description": "까다로운 컴팩트 자동 수리에 강하고 친절하다. 비용은 조금 높은 편.",
-      "contact": null,
-      "url": null
+      "contact": "02-778-1908",
+      "url": "http://fixclub.co.kr"
     },
     {
       "name": "남대문 스피드",
       "region": "서울",
-      "address": null,
+      "address": "서울 중구 남대문로 2-1 3층 301호",
       "specialty": "컴팩트 자동카메라",
       "description": "친절하고 가격 좋고 꼼꼼하다. 다만 최근 작업 적체가 있는 편.",
-      "contact": null,
+      "contact": "0507-1427-2284 · 010-3515-7664",
       "url": null
     },
     {
       "name": "남대문 디포커스",
       "region": "서울",
-      "address": null,
+      "address": "서울 중구 남대문로 10-1 3층 302호",
       "specialty": "렌즈 클리닝·복잡 수리",
       "description": "렌즈 헤이즈·발삼·핀교정, 대구경 렌즈 클리닝, 플래시·전자회로 등 까다로운 수리. 선반·밀링으로 부품을 직접 깎기도 한다.",
-      "contact": null,
+      "contact": "02-779-4305 · 010-5246-4305",
       "url": null
     },
     {
       "name": "작은풍경",
       "region": "서울",
-      "address": null,
+      "address": "서울 종로구 인의동 112-2 세운스퀘어 테크노관 148호",
       "specialty": "간단 정비·클리닝",
       "description": "세운상가 1층. 클리닝·부품교체 같은 가벼운 정비에 단골 삼기 좋다. 친절하고 빠르다.",
-      "contact": null,
+      "contact": "02-2267-0607",
       "url": null
     },
     {
@@ -123,20 +123,20 @@
     {
       "name": "부산 신카메라",
       "region": "부산",
-      "address": "부산 중구 남포동2가 남포길 47",
+      "address": "부산 중구 남포길 47",
       "specialty": "니콘·올림푸스·콘탁스",
-      "description": "남포동의 오래된 카메라 수리점. 필름카메라를 중심으로 올림푸스 PEN F·FT, 콘탁스 케이블 같은 오래된 기종 수리 이력이 알려져 있다. 방문 전 문자나 전화로 수리 가능 여부와 보증 조건을 확인하는 편이 낫다.",
+      "description": "남포동의 오래된 카메라 수리점. 올림푸스 PEN F·FT, 콘탁스 케이블 등 수리 이력이 알려져 있다. 2년 AS 보장, 문자 상담, 택배 접수, 카드결제 안내가 전해진다. 접수 전 현재 조건을 전화로 확인하세요.",
       "contact": "051-246-0360",
       "url": null
     },
     {
       "name": "폴라존",
       "region": "서울",
-      "address": null,
+      "address": "서울 마포구 어울마당로 39 3층",
       "specialty": "폴라로이드",
-      "description": "홍대. 폴라로이드 카메라 전문.",
-      "contact": null,
-      "url": null
+      "description": "홍대. 폴라로이드 카메라 전문. 클래식 폴라로이드 사용 가능 테스트와 수리를 함께 안내한다.",
+      "contact": "02-2285-5639",
+      "url": "https://polazone.com"
     },
     {
       "name": "권카메라",
