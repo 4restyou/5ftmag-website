@@ -213,10 +213,23 @@ async function deleteRow() {
 async function refreshPagesStatus(row) {
   const path = row.pages_path || row.slug;
   $('pagesStatus').textContent = 'PDF 확인 중…';
-  const has = await db().ebooks.hasPdf(path);
-  $('pagesStatus').textContent = has
-    ? `PDF 업로드됨 (총 ${row.page_count || '?'}쪽, 무료 미리보기 ${Math.max(1, Math.ceil((row.page_count || 0) / 3))}쪽)`
-    : '아직 PDF 가 업로드되지 않았어요.';
+  // full 과 preview 를 따로 본다. 하나만 빠진 상태를 여기서 잡지 못하면
+  // 독자 화면에서만 막히고 편집부는 모른 채 지나간다.
+  const st = await db().ebooks.pdfStatus(path);
+  const freeN = Math.max(1, Math.ceil((row.page_count || 0) / 3));
+  if (st.error) {
+    $('pagesStatus').textContent = `PDF 상태를 확인하지 못했어요 (${st.error}). 경로: ${path}`;
+    return;
+  }
+  if (st.full && st.preview) {
+    $('pagesStatus').textContent = `PDF 업로드됨 (총 ${row.page_count || '?'}쪽, 무료 미리보기 ${freeN}쪽)`;
+  } else if (st.full) {
+    $('pagesStatus').textContent = `⚠ 미리보기 PDF 가 없어요. 구매하지 않은 방문자가 열지 못합니다. 다시 업로드해 주세요. (경로: ${path})`;
+  } else if (st.preview) {
+    $('pagesStatus').textContent = `⚠ 전체 PDF 가 없어요. 구매자가 열지 못합니다. 다시 업로드해 주세요. (경로: ${path})`;
+  } else {
+    $('pagesStatus').textContent = `아직 PDF 가 업로드되지 않았어요. (경로: ${path})`;
+  }
 }
 
 async function uploadPages() {
