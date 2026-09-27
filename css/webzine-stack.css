@@ -45,7 +45,13 @@ body.wz-mode-detail .wz-stage, body.wz-mode-detail .wz-mood, body.wz-mode-detail
 body.wz-mode-detail .wz-stage { transform: scale(.985); }
 body.wz-mode-detail { overflow: hidden; }
 
-.wz-intro { padding: 60px 40px 8px; text-align: center; background: none; }
+/* 소개 영역도 <header> 라 공통 규칙대로 화면 위에 붙는다(sticky). 선은 지우고, 헤더 아래에 붙게 한 뒤,
+   뒤로 지나가는 책을 블러와 어두운 그라데이션으로 눌러 글자가 읽히고 공간감이 생기게 한다. 아래 가장자리는 마스크로 부드럽게 푼다 */
+.wz-intro { position: sticky; top: var(--header-h, 72px); z-index: 1000;   /* 책(z 100 이하)보다 위 */ padding: 52px 40px 30px; text-align: center; border: 0;
+  background: linear-gradient(180deg, rgba(22, 18, 26, .62), rgba(22, 18, 26, .38) 70%, rgba(22, 18, 26, 0));
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 30px), transparent); mask-image: linear-gradient(#000 calc(100% - 30px), transparent); }
+body.webzine-page .announcement-bar { border-bottom-color: transparent; }
 .wz-intro-inner { max-width: 660px; margin: 0 auto; }
 .wz-kicker { display: block; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: .24em; text-transform: uppercase; color: var(--wz-ink-4); margin-bottom: 16px; }
 .wz-page-title { font-size: clamp(40px, 6vw, 66px); font-weight: var(--fw-heading); letter-spacing: -.03em; line-height: 1; margin: 0 0 18px; color: var(--wz-ink); }
@@ -54,11 +60,18 @@ body.wz-mode-detail { overflow: hidden; }
 .wz-empty { text-align: center; color: var(--wz-ink-3); padding: 80px 24px; }
 
 /* ── 왼쪽 눈금: 책 수만큼. 지금 보이는 책이 길다. 목록에서도 소개 화면에서도 쓴다 ── */
-.wz-marks { position: fixed; left: max(10px, 1.6vw); top: 50%; transform: translateY(-50%); z-index: 2130; display: flex; flex-direction: column; gap: 9px; }
-.wz-mark { width: 14px; height: 1.5px; background: var(--wz-ink-4); border: 0; padding: 0; cursor: pointer; transition: width .25s var(--wz-e), background .25s; }
-.wz-mark.on { width: 24px; background: var(--wz-ink); }
+.wz-marks { position: fixed; left: max(10px, 1.6vw); top: 50%; transform: translateY(-50%); z-index: 2130; display: flex; flex-direction: column; gap: 9px; padding-right: 40px; color: var(--wz-fg, var(--wz-ink)); }
+.wz-mark { position: relative; width: 14px; height: 1.5px; color: inherit; background: currentColor; opacity: .3; border: 0; padding: 0; cursor: pointer; transition: width .3s var(--wz-e), opacity .25s; }
+.wz-mark::before { content: ""; position: absolute; left: 0; right: -30px; top: -5px; bottom: -5px; }   /* 눈금 사이 빈틈에서도 마우스가 잡히게 */
+.wz-mark.on { width: 24px; opacity: 1; }
+/* 마우스를 대면 그 주변이 부채꼴로 길어지고(--x 는 JS), 옆에 제목이 뜬다 */
+.wz-marks.is-hover .wz-mark { width: calc(14px + var(--x, 0) * 110px); opacity: calc(.3 + var(--x, 0) * .7); }
+.wz-marks.is-hover .wz-mark.on { opacity: 1; }
+.wz-mark-label { position: absolute; left: 150px; top: 0; color: inherit; transform: translateY(-50%); white-space: nowrap; font-size: 15px; font-weight: 600; letter-spacing: -.01em; opacity: 0; pointer-events: none; transition: opacity .2s, top .2s var(--wz-e); }
+.wz-mark-label.show { opacity: 1; }
+.wz-mark-label small { font-weight: 400; opacity: .6; margin-right: 8px; }
 .wz-mark:focus-visible { outline: 2px solid #c9a227; outline-offset: 3px; }
-.wz-back { position: fixed; left: max(10px, 1.6vw); top: 22px; z-index: 2130; width: 34px; height: 34px; border: 0; background: none;
+.wz-back { position: fixed; left: max(6px, calc(1.6vw - 6px)); top: 12px; z-index: 2130; width: 34px; height: 34px; border: 0; background: none;
   color: var(--wz-fg, var(--wz-ink)); font-size: 22px; line-height: 1; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
 body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opacity .3s; }
 .wz-back:focus-visible { outline: 2px solid #c9a227; outline-offset: 2px; border-radius: 6px; }
@@ -198,9 +211,9 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-f-spine { left: 0; top: 0; width: var(--T); height: var(--H); transform-origin: 0 50%; transform: translateZ(calc(var(--T) / -2)) rotateY(-90deg); background: var(--c);
   display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 14px 0 12px; color: var(--ct); }
 .wz-f-spine::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(90deg, rgba(255, 255, 255, .1), rgba(0, 0, 0, .02) 40%, rgba(0, 0, 0, .3)); }
-.wz-f-spine .wz-sp-pub, .wz-f-spine .wz-sp-title { writing-mode: vertical-rl; white-space: nowrap; }
-.wz-f-spine .wz-sp-pub { font-size: max(8px, calc(var(--T) * .26)); letter-spacing: .04em; opacity: .85; font-style: italic; }
-.wz-f-spine .wz-sp-title { font-size: max(9px, calc(var(--T) * .34)); font-weight: 600; flex: 1; display: flex; align-items: center; margin: 12px 0; overflow: hidden; }
+.wz-f-spine .wz-sp-pub, .wz-f-spine .wz-sp-title { writing-mode: vertical-rl; text-orientation: sideways; white-space: nowrap; }
+.wz-f-spine .wz-sp-pub { font-size: clamp(8px, calc(var(--T) * .17), 11px); letter-spacing: .04em; opacity: .85; font-style: italic; }
+.wz-f-spine .wz-sp-title { font-size: clamp(9px, calc(var(--T) * .22), 15px); font-weight: 600; flex: 1; display: flex; align-items: center; margin: 12px 0; overflow: hidden; text-overflow: ellipsis; }
 .wz-f-spine .wz-sp-mark { width: calc(var(--T) * .32); height: calc(var(--T) * .32); background: currentColor; -webkit-mask: var(--wz-mark) center / contain no-repeat; mask: var(--wz-mark) center / contain no-repeat; opacity: .8; }
 .wz-f-fore { right: 0; top: var(--ov); width: calc(var(--T) - var(--ov) * 2); height: calc(var(--H) - var(--ov) * 2); transform-origin: 100% 50%; transform: translateZ(calc(var(--T) / -2 + var(--ov))) rotateY(90deg); background: var(--wz-pages); --pg-dir: to bottom; }
 .wz-f-top { left: 0; top: var(--ov); width: calc(var(--W) - var(--ov)); height: calc(var(--T) - var(--ov) * 2); transform-origin: 50% 0; transform: translateZ(calc(var(--T) / -2 + var(--ov))) rotateX(90deg); background: var(--wz-pages); --pg-dir: to bottom; }
