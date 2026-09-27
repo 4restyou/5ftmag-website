@@ -20,11 +20,12 @@ import {
   shouldRevalidate,
   smartstoreProductOrderId,
 } from '../_shared/entitlement.ts';
-import {
-  commerceToken,
-  naverCommerceConfigured,
-  queryProductOrders,
-} from '../_shared/naver-commerce.ts';
+// 네이버 커머스 모듈은 스마트스토어 열람권을 다시 확인할 때만 필요하다.
+// 최상위에서 부르면 미리보기를 여는 독자에게도 외부 의존이 먼저 걸린다.
+// 그 한 번이 실패하면 함수가 뜨지 못해 500 이 나고 CORS 헤더도 안 붙는다.
+async function naverCommerce() {
+  return await import('../_shared/naver-commerce.ts');
+}
 import {
   lookupPayment,
   portoneConfigured,
@@ -110,10 +111,18 @@ async function verifyAutomaticEntitlement(
 
   if (entitlement.source === 'smartstore') {
     const productOrderNo = smartstoreProductOrderId(entitlement.order_ref);
-    if (!naverCommerceConfigured() || !productOrderNo) return null;
-    const token = await commerceToken();
+    if (!productOrderNo) return null;
+    let naver;
+    try {
+      naver = await naverCommerce();
+    } catch (e) {
+      console.error('[ebook-page] naver-commerce 로드 실패', (e as Error)?.message || e);
+      return null; // 확인 불가 — 기존 구매자의 열람권은 유지한다
+    }
+    if (!naver.naverCommerceConfigured()) return null;
+    const token = await naver.commerceToken();
     if (!token) return null;
-    const result = await queryProductOrders(token, [productOrderNo]);
+    const result = await naver.queryProductOrders(token, [productOrderNo]);
     const row = result.orders[0];
     if (result.status !== 200 || !row) return null;
     // The product relation was verified at grant time; only its payment lifecycle
@@ -128,7 +137,20 @@ async function verifyAutomaticEntitlement(
   return true;
 }
 
+// 핸들러 안에서 예외가 나면 런타임이 기본 500 을 내보내는데 거기엔 CORS
+// 헤더가 없다. 브라우저에는 "Failed to fetch" 만 남아 원인을 알 수 없다.
+// 한 겹 감싸서 무슨 일이 있어도 CORS 헤더와 코드가 함께 나가게 한다.
 Deno.serve(async (req) => {
+  const reqOrigin = req.headers.get('origin');
+  try {
+    return await handle(req);
+  } catch (e) {
+    console.error('[ebook-page] unhandled', (e as Error)?.message || e);
+    return json({ error: 'server error' }, 500, reqOrigin);
+  }
+});
+
+async function handle(req: Request): Promise<Response> {
   const origin = req.headers.get('origin');
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
   if (req.method !== 'GET') return json({ error: 'method' }, 405, origin);
@@ -190,4 +212,4 @@ Deno.serve(async (req) => {
     page_count: total,
     free_pages: freeLimit,
   }, 200, origin);
-});
+}
