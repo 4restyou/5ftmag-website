@@ -197,6 +197,18 @@
   }
 
   function setMark(i) { markEls.forEach((m, k) => m.classList.toggle('on', k === i)); }
+  // 눈금 위 마우스: 가까울수록 길게(6칸 안에서 부채꼴), 옆에 제목
+  function hoverMark(i) {
+    const label = marks.querySelector('.wz-mark-label');
+    marks.classList.toggle('is-hover', i >= 0);
+    markEls.forEach((m, k) => m.style.setProperty('--x', i < 0 ? '0' : Math.max(0, 1 - Math.abs(k - i) / 6).toFixed(3)));
+    if (!label) return;
+    if (i < 0) { label.classList.remove('show'); return; }
+    const m = markEls[i];
+    label.innerHTML = `<small>${esc(m.dataset.pub)}</small>${esc(m.dataset.title)}`;
+    label.style.top = (m.offsetTop + m.offsetHeight / 2) + 'px';
+    label.classList.add('show');
+  }
   function setBookColor(i, color, aspect, accent) {
     const it = issues[i];
     if (color) it._c = color;
@@ -218,8 +230,14 @@
     b.classList.toggle('show', d.scrollHeight - d.clientHeight > 4);
   }
 
+  // ← 는 눈금 바로 위에. 눈금이 길어지면 그만큼 따라 올라간다. 폰(눈금 없음)에서는 CSS 대로 왼쪽 위
+  function placeBack() {
+    if (getComputedStyle(marks).display === 'none') { backBtn.style.top = ''; return; }
+    backBtn.style.top = Math.max(8, marks.getBoundingClientRect().top - 46) + 'px';
+  }
   function openDetail(i, viaKeyboard) {
     if (closing) return;
+    placeBack();
     inDetail = true; current = i; savedScroll = window.scrollY;
     rows.forEach((r, k) => r.classList.toggle('lifted', k === i));
     // 눕힌 자세로 되돌린 뒤(전환 없이) 한 프레임 뒤에 일어선다. 그냥 클래스만 바꾸면 되돌아가던 전환이 반쯤에서 뒤집혀 순간이동처럼 보인다
@@ -230,6 +248,7 @@
     detail.classList.add('on'); detail.setAttribute('aria-hidden', 'false');
     detail.scrollTop = pages[i].offsetTop;
     backBtn.style.setProperty('--wz-fg', pages[i].style.getPropertyValue('--wz-fg'));
+    marks.style.setProperty('--wz-fg', pages[i].style.getPropertyValue('--wz-fg'));
     requestAnimationFrame(() => requestAnimationFrame(() => { pages[i].classList.add('on'); measureDesc(pages[i]); }));
     setMark(i);
     if (viaKeyboard) backBtn.focus({ preventScroll: true });   // 마우스로 열었을 땐 초점 테두리를 띄우지 않는다
@@ -243,6 +262,7 @@
     setTimeout(() => {
       inDetail = false;
       document.body.classList.remove('wz-mode-detail');
+      marks.style.removeProperty('--wz-fg');
       detail.classList.remove('on'); detail.setAttribute('aria-hidden', 'true');
       window.scrollTo(0, savedScroll);
       rows[current].scrollIntoView({ behavior: 'auto', block: 'center' });
@@ -308,6 +328,8 @@
 
       const m = document.createElement('button');
       m.className = 'wz-mark'; m.type = 'button'; m.setAttribute('aria-label', it.title + '로 이동');
+      m.dataset.pub = pubOf(it); m.dataset.title = it.title + (it.issue_label ? ' ' + it.issue_label : '');
+      m.addEventListener('mouseenter', () => hoverMark(i));
       m.addEventListener('click', () => {
         if (inDetail) page.scrollIntoView({ behavior: 'smooth', block: 'start' });
         else row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -315,6 +337,10 @@
       marks.appendChild(m);
     });
 
+    const label = document.createElement('span');
+    label.className = 'wz-mark-label'; label.setAttribute('aria-hidden', 'true');
+    marks.appendChild(label);
+    marks.addEventListener('mouseleave', () => hoverMark(-1));
     rows = Array.from(stack.querySelectorAll('.wz-row'));
     hits = rows.map(r => r.querySelector('.wz-hit'));
     pages = Array.from(pagesEl.querySelectorAll('.wz-dpage'));
@@ -344,7 +370,7 @@
           setTimeout(() => { if (en.target.classList.contains('on')) en.target.classList.add('settled'); }, 1400);
           measureDesc(en.target);
         }
-        if (en.isIntersecting && inDetail) { current = i; setMark(i); backBtn.style.setProperty('--wz-fg', en.target.style.getPropertyValue('--wz-fg')); }
+        if (en.isIntersecting && inDetail) { current = i; setMark(i); backBtn.style.setProperty('--wz-fg', en.target.style.getPropertyValue('--wz-fg')); marks.style.setProperty('--wz-fg', en.target.style.getPropertyValue('--wz-fg')); }
       });
     }, { root: detail, threshold: .5 });
     pages.forEach(p => pio.observe(p));
@@ -362,7 +388,7 @@
   backBtn.addEventListener('click', (e) => closeDetail(e.detail === 0));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.wz-reader')) closeDetail(true); });
   let resizeT = null;
-  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => pages.forEach(measureDesc), 120); });
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { pages.forEach(measureDesc); placeBack(); }, 120); });
 
   (async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
