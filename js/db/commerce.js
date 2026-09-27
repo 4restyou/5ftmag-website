@@ -217,6 +217,16 @@
       const { data } = await c.storage.from('ebook-pages').list(pagesPath, { limit: 100 });
       return (data || []).some(o => o.name === 'full.pdf');
     },
+    // full 과 preview 를 따로 확인한다. 예전에는 full 만 봐서, 미리보기만
+    // 빠진 상태를 admin 에서 "업로드됨" 으로 읽고 넘어갔다. 그러면 구매하지
+    // 않은 방문자만 막히고 편집부는 눈치채지 못한다.
+    async pdfStatus(pagesPath) {
+      const c = client(); if (!c) return { full: false, preview: false, error: 'unavailable' };
+      const { data, error } = await c.storage.from('ebook-pages').list(pagesPath, { limit: 100 });
+      if (error) return { full: false, preview: false, error: error.message || 'list failed' };
+      const names = (data || []).map(o => o.name);
+      return { full: names.includes('full.pdf'), preview: names.includes('preview.pdf') };
+    },
     // 표지 — 웹진과 같은 공개 버킷에 ebooks/ 경로로 업로드. 공개 URL 반환.
     // 기존 webzine 네임스페이스(uploadFile/publicUrl)를 재사용한다.
     async uploadCover(slug, file) {
@@ -247,9 +257,14 @@
       try {
         const res = await fetch(u, { headers });
         const data = await res.json().catch(() => null);
-        if (!res.ok) return data || null;
+        // 서버가 응답했는데 본문이 비면 호출자가 네트워크 실패와 구분하지
+        // 못한다. 상태 코드만이라도 실어 보낸다.
+        if (!res.ok) return data || { error: 'http ' + res.status };
         return data;
-      } catch (_) { return null; }
+      } catch (e) {
+        console.error('[ebook] getAccess fetch 실패', e?.message || e);
+        return null;
+      }
     },
     // 결제 검증 — PortOne 결제 후 paymentId 를 Edge Function(ebook-purchase)에 보내
     // 위변조 확인 + 열람권 부여. { ok:true } 또는 { error }.

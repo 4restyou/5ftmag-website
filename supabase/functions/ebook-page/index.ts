@@ -171,8 +171,17 @@ Deno.serve(async (req) => {
   const { data: signed, error: signErr } = await admin.storage
     .from(BUCKET).createSignedUrl(`${pagesPath}/${file}`, TTL);
   if (signErr || !signed?.signedUrl) {
-    // preview 가 없으면(구버전) full 시도 불가 — 안내
-    return json({ error: 'file unavailable', entitled, page_count: total, free_pages: freeLimit }, 404, origin);
+    // 어느 파일이 없는지 함께 돌려준다. 예전에는 원인을 구분하지 않아
+    // 화면에 늘 "PDF 가 등록되지 않았어요" 만 떴고, 열람권자만 막힌 것인지
+    // 모두가 막힌 것인지 가려낼 수 없었다.
+    console.error('[ebook-page] signed url failed', slug, file, signErr?.message || 'no url');
+    return json({
+      error: 'file unavailable',
+      missing: file,
+      entitled,
+      page_count: total,
+      free_pages: freeLimit,
+    }, 404, origin);
   }
 
   return json({

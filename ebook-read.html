@@ -18,6 +18,8 @@
     .ebook-gate { max-width: 520px; margin: 0 auto; padding: 80px 24px; text-align: center; color: var(--text-muted); }
     .ebook-gate h2 { color: var(--text); font-size: 20px; margin: 0 0 10px; }
     .ebook-gate p { font-size: 14px; line-height: 1.7; margin: 0 0 8px; }
+    /* 막혔을 때 원인 코드. 신고 캡처 한 장으로 어디를 볼지 가려내려고 둔다. */
+    .ebook-gate-code { font-size: 12px; opacity: 0.65; margin-top: 14px; }
     /* 본문을 가리지 않는 고정 높이의 구매 영역. */
     .wz-reader-cta-wrap {
       order: 2; flex: 0 0 auto; height: calc(104px + env(safe-area-inset-bottom, 0px));
@@ -98,7 +100,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db/commerce.js?v=20260907-entitlement" defer></script>
+<script src="./js/db/commerce.js?v=20260927-ebookdiag" defer></script>
   <script src="./js/db-client.js?v=20260914-potwreorder" defer></script>
 <script src="./js/util.js?v=20260914-visibility" defer></script>
 <script src="./js/site-telemetry.js?v=20260907-security" defer></script>
@@ -106,6 +108,6 @@
   <script src="./js/site-common.js?v=20260820-authkeep" defer></script>
 <script src="./js/webzine-reader.js?v=20260907-security" defer></script>
 <script src="./js/ebook-checkout.js?v=20260907-entitlement" defer></script>
-<script src="./js/ebook-reader-page.js?v=20260907-security" defer></script>
+<script src="./js/ebook-reader-page.js?v=20260927-ebookdiag" defer></script>
 </body>
 </html>
