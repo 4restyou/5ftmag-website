@@ -485,7 +485,7 @@ test('글 공유 영역은 X와 카카오스토리 없이 정돈된 버튼만 �
   expect(labels).not.toContain('카카오스토리');
 });
 
-test('Webzine 책장 인터랙션은 책을 열고 이동 상태를 정리한다', async ({ page }) => {
+test('이전 책장(books-classic) 인터랙션은 책을 열고 이동 상태를 정리한다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
@@ -516,7 +516,7 @@ test('Webzine 책장 인터랙션은 책을 열고 이동 상태를 정리한다
     };
   });
 
-  await page.goto('/books.html');
+  await page.goto('/books-classic.html');
   await expect(page.locator('.wz-slot')).toHaveCount(3);
   await expect(page.locator('.wz-slot.is-center .wz-book3d')).toHaveCSS('--by', '74deg');
   await page.locator('.wz-book-btn').first().click();
@@ -526,6 +526,51 @@ test('Webzine 책장 인터랙션은 책을 열고 이동 상태를 정리한다
   await expect(page.locator('.wz-flow.is-moving')).toHaveCount(0);
   const transform = await page.locator('.wz-track').first().evaluate(el => getComputedStyle(el).transform);
   expect(transform === 'none' || transform.startsWith('matrix3d') || transform.startsWith('matrix')).toBeTruthy();
+});
+
+test('세로 책장(books)은 유무료를 한 줄로 쌓고, 책을 누르면 소개 화면으로 갔다가 돌아온다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.addInitScript(() => {
+    window.MagDB = {
+      isReady: () => true,
+      auth: { getSession: async () => null, signInWithGoogle: () => {} },
+      favorites: { idsForType: async () => new Set(), toggle: async () => ({ error: null }) },
+      webzine: {
+        publicUrl: path => path,
+        listPublished: async () => [
+          { id: 'w1', slug: 'one', title: '첫 번째 웹진', issue_label: 'Vol.01', category: '5ft.mag', created_at: '2026-01-01', published: true, description: '테스트 설명', pdf_path: 'one.pdf' },
+          { id: 'w2', slug: 'two', title: '두 번째 웹진', issue_label: 'Vol.02', category: '5ft.mag', created_at: '2026-03-01', published: true, description: '테스트 설명' },
+        ],
+      },
+      ebooks: {
+        listPublished: async () => [
+          { id: 'e1', slug: 'spc-01', title: '사진첩 하나', kind: 'spc', price: 4900, excerpt: '유료 설명', cover_image: '', created_at: '2026-02-01', published: true },
+        ],
+      },
+    };
+  });
+
+  await page.goto('/books.html');
+  const rows = page.locator('.wz-row');
+  await expect(rows).toHaveCount(3);
+  // 올린 순서(최신이 위): 웹진 2 → 이북 → 웹진 1. 유료는 양장(cloth), 무료는 종이(kraft)
+  await expect(rows.nth(0)).toHaveClass(/kraft/);
+  await expect(rows.nth(0).locator('.wz-title')).toContainText('두 번째 웹진');
+  await expect(rows.nth(1)).toHaveClass(/cloth/);
+  await expect(rows.nth(1).locator('.wz-title')).toContainText('사진첩 하나');
+
+  await rows.nth(1).locator('.wz-hit').click();
+  await expect(page.locator('body')).toHaveClass(/wz-mode-detail/);
+  const open = page.locator('.wz-dpage.on');
+  await expect(open).toHaveCount(1);
+  await expect(open.locator('.wz-meta h2')).toContainText('사진첩 하나');
+  await expect(open.locator('.wz-kind')).toContainText('유료');
+  await expect(open.locator('.wz-act').first()).toHaveAttribute('href', /ebook-read\.html\?slug=spc-01/);
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('body')).not.toHaveClass(/wz-mode-detail/, { timeout: 3000 });
+  await expect(page.locator('.wz-detail')).not.toHaveClass(/\bon\b/);
 });
 
 test('마켓 등록 저장이 지연되면 에러를 보여주고 버튼을 복구한다', async ({ page }) => {
