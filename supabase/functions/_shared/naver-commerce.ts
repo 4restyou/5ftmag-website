@@ -1,5 +1,22 @@
-import * as bcrypt from 'https://esm.sh/bcryptjs@2.4.3';
 import { parseProductOrderIds } from './entitlement.ts';
+
+// bcryptjs 는 네이버 커머스 토큰 서명에만 쓴다. 최상위에서 import 하면
+// 이 모듈을 부르는 모든 함수가 시작할 때 외부 CDN 을 먼저 받아야 하고,
+// 그 한 번이 실패하면 함수가 뜨지도 못한 채 500 을 낸다. 그때는 CORS
+// 헤더조차 붙지 않아 브라우저에는 원인이 안 보인다. 실제로 이북 뷰어가
+// 그렇게 막혔다. 서명이 필요한 순간에만 받는다.
+type BcryptModule = { hashSync(data: string, salt: string): string };
+let bcryptMod: BcryptModule | null = null;
+async function bcryptHash(data: string, salt: string): Promise<string | null> {
+  try {
+    const mod = bcryptMod ?? (await import('https://esm.sh/bcryptjs@2.4.3')) as BcryptModule;
+    bcryptMod = mod;
+    return mod.hashSync(data, salt);
+  } catch (e) {
+    console.error('[naver-commerce] bcryptjs 로드 실패', (e as Error)?.message || e);
+    return null;
+  }
+}
 
 const CLIENT_ID = Deno.env.get('NAVER_COMMERCE_CLIENT_ID') || '';
 const CLIENT_SECRET = Deno.env.get('NAVER_COMMERCE_CLIENT_SECRET') || '';
@@ -64,7 +81,9 @@ async function naverFetch(
 export async function commerceToken(): Promise<string | null> {
   if (!naverCommerceConfigured()) return null;
   const timestamp = Date.now();
-  const sign = btoa(bcrypt.hashSync(`${CLIENT_ID}_${timestamp}`, CLIENT_SECRET));
+  const hashed = await bcryptHash(`${CLIENT_ID}_${timestamp}`, CLIENT_SECRET);
+  if (!hashed) return null;
+  const sign = btoa(hashed);
   const body = new URLSearchParams({
     client_id: CLIENT_ID,
     timestamp: String(timestamp),
