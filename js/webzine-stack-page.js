@@ -75,14 +75,44 @@
     l = Math.min(0.5, Math.max(0.26, l));
     return hex(hslToRgb(h, s, l));
   }
+  // 박 색: 표지에서 바탕색과 색상(hue)이 다른 색 가운데, 바탕과 밝기 대비가 크고 위·아래 가장자리(제목 자리)에
+  // 많이 쓰인 것. 표지의 제목 글씨 색이 대체로 이것이다(사진 속 큰 색면이 이기지 않게 가운데는 가중치를 낮춘다).
+  // 책등(바탕색)에서 읽히도록 밝기를 .52~.74 로 맞춘다.
+  function pickAccent(d, S, baseHex) {
+    const n = parseInt(baseHex.slice(1), 16);
+    const [bh, , bl] = rgbToHsl(n >> 16 & 255, n >> 8 & 255, n & 255);
+    const bins = new Array(24).fill(null);
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 128) continue;
+      const [h, s, l] = rgbToHsl(d[i], d[i + 1], d[i + 2]);
+      if (s < .2 || l < .15 || l > .93) continue;
+      const y = Math.floor(i / 4 / S) / S, edge = (y < .3 || y > .7) ? 2 : 1;
+      const w = s * (.2 + Math.abs(l - bl)) * edge;
+      const k = Math.floor(h / 15) % 24;
+      const bin = bins[k] || (bins[k] = { w: 0, px: 0, r: 0, g: 0, b: 0 });
+      bin.w += w; bin.px++; bin.r += d[i] * w; bin.g += d[i + 1] * w; bin.b += d[i + 2] * w;
+    }
+    const hueDist = (k) => { const dh = Math.abs(k * 15 + 7.5 - bh); return Math.min(dh, 360 - dh); };
+    let best = -1;
+    bins.forEach((bin, k) => { if (bin && hueDist(k) > 20 && (best < 0 || bin.w > bins[best].w)) best = k; });
+    if (best < 0 || bins[best].px < S * S * .004) return null;   // 바탕과 같은 색뿐이거나 너무 적으면(표지 0.4% 미만) 기본 박을 쓴다
+    const bin = bins[best];
+    let [h, s, l] = rgbToHsl(bin.r / bin.w, bin.g / bin.w, bin.b / bin.w);
+    s = Math.max(.45, s);
+    // 책등 바탕과 밝기 차가 .3 은 나야 읽힌다. 원래 밝은 쪽이면 더 밝게, 어두운 쪽이면 더 어둡게 민다
+    if (Math.abs(l - bl) < .3) l = (l >= bl - .05) ? bl + .3 : bl - .3;
+    l = Math.min(.88, Math.max(.18, l));
+    return hex(hslToRgb(h, s, l));
+  }
   function pickColor(url) {
     return new Promise((resolve) => {
       if (!url) { resolve(null); return; }
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
+        const aspect = (img.naturalWidth && img.naturalHeight) ? img.naturalWidth / img.naturalHeight : 0;
         try {
-          const S = 24, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+          const S = 48, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
           const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, S, S);
           const d = ctx.getImageData(0, 0, S, S).data;
           let r = 0, g = 0, b = 0, w = 0;
@@ -92,9 +122,9 @@
             const k = 0.25 + (mx ? (mx - mn) / mx : 0);
             r += R * k; g += G * k; b += B * k; w += k;
           }
-          const aspect = (img.naturalWidth && img.naturalHeight) ? img.naturalWidth / img.naturalHeight : 0;
-          resolve({ color: w ? vivid(r / w, g / w, b / w) : null, aspect });
-        } catch (_) { resolve({ color: null, aspect: (img.naturalWidth && img.naturalHeight) ? img.naturalWidth / img.naturalHeight : 0 }); }
+          const color = w ? vivid(r / w, g / w, b / w) : null;
+          resolve({ color, accent: color ? pickAccent(d, S, color) : null, aspect });
+        } catch (_) { resolve({ color: null, accent: null, aspect }); }
       };
       img.onerror = () => resolve(null);
       img.src = url;
@@ -167,11 +197,16 @@
   }
 
   function setMark(i) { markEls.forEach((m, k) => m.classList.toggle('on', k === i)); }
-  function setBookColor(i, color, aspect) {
+  function setBookColor(i, color, aspect, accent) {
     const it = issues[i];
     if (color) it._c = color;
     const c = it._c, ct = fgFor(c);
-    [rows[i], pages[i]].forEach(el => { if (!el) return; el.style.setProperty('--c', c); el.style.setProperty('--ct', ct); if (aspect) el.style.setProperty('--ar', aspect.toFixed(4)); });
+    [rows[i], pages[i]].forEach(el => {
+      if (!el) return;
+      el.style.setProperty('--c', c); el.style.setProperty('--ct', ct);
+      if (aspect) el.style.setProperty('--ar', aspect.toFixed(4));
+      if (accent) el.style.setProperty('--foil', accent);
+    });
     if (pages[i]) pages[i].style.setProperty('--wz-fg', ct);
   }
 
@@ -364,7 +399,7 @@
       pickColor(cu).then(c => {
         if (!c) return;
         // 표지 비율(가로/세로)로 책 가로를 잡는다. 세로 사진첩은 좁고 길게, A판은 그대로
-        setBookColor(i, c.color, (c.aspect && isFinite(c.aspect) && c.aspect < 1.2) ? c.aspect : 0);
+        setBookColor(i, c.color, (c.aspect && isFinite(c.aspect) && c.aspect < 1.2) ? c.aspect : 0, c.accent);
         if (!inDetail && markEls[i] && markEls[i].classList.contains('on')) root.style.setProperty('--wz-mood', issues[i]._c);
       });
     });
