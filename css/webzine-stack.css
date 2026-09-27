@@ -61,13 +61,13 @@ body.webzine-page .announcement-bar { border-bottom-color: transparent; }
 
 /* ── 왼쪽 눈금: 책 수만큼. 지금 보이는 책이 길다. 목록에서도 소개 화면에서도 쓴다 ── */
 .wz-marks { position: fixed; left: max(10px, 1.6vw); top: 50%; transform: translateY(-50%); z-index: 2130; display: flex; flex-direction: column; gap: 9px; padding-right: 40px; color: var(--wz-fg, var(--wz-ink)); }
-.wz-mark { position: relative; width: 14px; height: 1.5px; color: inherit; background: currentColor; opacity: .3; border: 0; padding: 0; cursor: pointer; transition: width .3s var(--wz-e), opacity .25s; }
+.wz-mark { position: relative; width: 14px; height: 1.5px; color: inherit; background: currentColor; opacity: .3; border: 0; padding: 0; cursor: pointer; transition: width .35s cubic-bezier(.3, .8, .3, 1), opacity .25s; }
 .wz-mark::before { content: ""; position: absolute; left: 0; right: -30px; top: -5px; bottom: -5px; }   /* 눈금 사이 빈틈에서도 마우스가 잡히게 */
 .wz-mark.on { width: 24px; opacity: 1; }
 /* 마우스를 대면 그 주변이 부채꼴로 길어지고(--x 는 JS), 옆에 제목이 뜬다 */
-.wz-marks.is-hover .wz-mark { width: calc(14px + var(--x, 0) * 110px); opacity: calc(.3 + var(--x, 0) * .7); }
+.wz-marks.is-hover .wz-mark { width: calc(14px + var(--x, 0) * 40px); opacity: calc(.3 + var(--x, 0) * .7); }
 .wz-marks.is-hover .wz-mark.on { opacity: 1; }
-.wz-mark-label { position: absolute; left: 150px; top: 0; color: inherit; transform: translateY(-50%); white-space: nowrap; font-size: 15px; font-weight: 600; letter-spacing: -.01em; opacity: 0; pointer-events: none; transition: opacity .2s, top .2s var(--wz-e); }
+.wz-mark-label { position: absolute; left: 70px; top: 0; color: inherit; transform: translateY(-50%); white-space: nowrap; font-size: 13.5px; font-weight: 600; letter-spacing: -.01em; opacity: 0; pointer-events: none; transition: opacity .2s, top .2s var(--wz-e); }
 .wz-mark-label.show { opacity: 1; }
 .wz-mark-label small { font-weight: 400; opacity: .6; margin-right: 8px; }
 .wz-mark:focus-visible { outline: 2px solid #c9a227; outline-offset: 3px; }

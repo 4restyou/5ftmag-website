@@ -75,6 +75,27 @@
     l = Math.min(0.5, Math.max(0.26, l));
     return hex(hslToRgb(h, s, l));
   }
+  // 책 색(책등·배경): 표지 바깥 테두리 띠(10%)만 보고, 평균이 아니라 가장 넓게 쓰인 색을 고른다.
+  // 전체 평균은 위가 노랑·아래가 파랑인 표지에서 둘이 섞인 올리브가 나오는 식으로 표지와 딴 색이 됐다.
+  // 색상 15도 단위로 묶고(무채색은 따로 한 묶음), 픽셀이 가장 많은 묶음의 평균색을 쓴다.
+  function pickBase(d, S) {
+    const band = Math.max(2, Math.round(S * .1));
+    const bins = new Array(25).fill(null);
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+      if (x >= band && x < S - band && y >= band && y < S - band) continue;
+      const i = (y * S + x) * 4;
+      if (d[i + 3] < 128) continue;
+      const [h, s, l] = rgbToHsl(d[i], d[i + 1], d[i + 2]);
+      const k = (s < .18 || l < .08 || l > .95) ? 24 : Math.floor(h / 15) % 24;
+      const bin = bins[k] || (bins[k] = { n: 0, r: 0, g: 0, b: 0 });
+      bin.n++; bin.r += d[i]; bin.g += d[i + 1]; bin.b += d[i + 2];
+    }
+    let best = -1;
+    bins.forEach((bin, k) => { if (bin && (best < 0 || bin.n > bins[best].n)) best = k; });
+    if (best < 0) return null;
+    const bin = bins[best];
+    return vivid(bin.r / bin.n, bin.g / bin.n, bin.b / bin.n);
+  }
   // 박 색: 표지에서 바탕색과 색상(hue)이 다른 색 가운데, 바탕과 밝기 대비가 크고 위·아래 가장자리(제목 자리)에
   // 많이 쓰인 것. 표지의 제목 글씨 색이 대체로 이것이다(사진 속 큰 색면이 이기지 않게 가운데는 가중치를 낮춘다).
   // 책등(바탕색)에서 읽히도록 밝기를 .52~.74 로 맞춘다.
@@ -115,14 +136,7 @@
           const S = 48, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
           const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, S, S);
           const d = ctx.getImageData(0, 0, S, S).data;
-          let r = 0, g = 0, b = 0, w = 0;
-          for (let i = 0; i < d.length; i += 4) {
-            if (d[i + 3] < 128) continue;
-            const R = d[i], G = d[i + 1], B = d[i + 2], mx = Math.max(R, G, B), mn = Math.min(R, G, B);
-            const k = 0.25 + (mx ? (mx - mn) / mx : 0);
-            r += R * k; g += G * k; b += B * k; w += k;
-          }
-          const color = w ? vivid(r / w, g / w, b / w) : null;
+          const color = pickBase(d, S);
           resolve({ color, accent: color ? pickAccent(d, S, color) : null, aspect });
         } catch (_) { resolve({ color: null, accent: null, aspect }); }
       };
@@ -201,7 +215,7 @@
   function hoverMark(i) {
     const label = marks.querySelector('.wz-mark-label');
     marks.classList.toggle('is-hover', i >= 0);
-    markEls.forEach((m, k) => m.style.setProperty('--x', i < 0 ? '0' : Math.max(0, 1 - Math.abs(k - i) / 6).toFixed(3)));
+    markEls.forEach((m, k) => { const t = (k - i) / 2.4; m.style.setProperty('--x', i < 0 ? '0' : Math.exp(-t * t).toFixed(3)); });
     if (!label) return;
     if (i < 0) { label.classList.remove('show'); return; }
     const m = markEls[i];
