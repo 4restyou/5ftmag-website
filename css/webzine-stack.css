@@ -25,7 +25,7 @@ html {
   --wz-bg: var(--wz-base);
 }
 body { background: var(--wz-base); color: var(--wz-ink); overflow-x: hidden; }
-header { background: var(--wz-base); border-bottom-color: transparent; }
+body > header { background: var(--wz-base); border-bottom-color: transparent; }   /* 사이트 헤더만. .wz-intro 도 <header> 라 태그 선택자면 소개 영역이 검게 막힌다 */
 footer { background: var(--wz-base); border-top-color: transparent; color: rgba(255, 255, 255, .8); position: relative; z-index: 1; }
 
 /* 페이지 진입 veil: 밝은 화면에서 다크로 스르륵 */
@@ -45,7 +45,7 @@ body.wz-mode-detail .wz-stage, body.wz-mode-detail .wz-mood, body.wz-mode-detail
 body.wz-mode-detail .wz-stage { transform: scale(.985); }
 body.wz-mode-detail { overflow: hidden; }
 
-.wz-intro { padding: 60px 40px 8px; text-align: center; }
+.wz-intro { padding: 60px 40px 8px; text-align: center; background: none; }
 .wz-intro-inner { max-width: 660px; margin: 0 auto; }
 .wz-kicker { display: block; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: .24em; text-transform: uppercase; color: var(--wz-ink-4); margin-bottom: 16px; }
 .wz-page-title { font-size: clamp(40px, 6vw, 66px); font-weight: var(--fw-heading); letter-spacing: -.03em; line-height: 1; margin: 0 0 18px; color: var(--wz-ink); }
@@ -58,7 +58,7 @@ body.wz-mode-detail { overflow: hidden; }
 .wz-mark { width: 14px; height: 1.5px; background: var(--wz-ink-4); border: 0; padding: 0; cursor: pointer; transition: width .25s var(--wz-e), background .25s; }
 .wz-mark.on { width: 24px; background: var(--wz-ink); }
 .wz-mark:focus-visible { outline: 2px solid #c9a227; outline-offset: 3px; }
-.wz-back { position: fixed; left: max(8px, 1.3vw); top: calc(50% - 74px); z-index: 2130; width: 34px; height: 34px; border: 0; background: none;
+.wz-back { position: fixed; left: max(10px, 1.6vw); top: 22px; z-index: 2130; width: 34px; height: 34px; border: 0; background: none;
   color: var(--wz-fg, var(--wz-ink)); font-size: 22px; line-height: 1; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
 body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opacity .3s; }
 .wz-back:focus-visible { outline: 2px solid #c9a227; outline-offset: 2px; border-radius: 6px; }
@@ -128,7 +128,6 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 
 /* ── 박 후가공 글자: 금속 그라데이션을 글자에 클립하고, 책이 움직일 때(--sweep) 하이라이트가 훑고 지나간다 ── */
 .wz-foil {
-  --foil: #d9bd6e;
   background-image: linear-gradient(100deg,
     color-mix(in srgb, var(--foil) 72%, #1a1206) 0%, var(--foil) 30%, color-mix(in srgb, var(--foil) 28%, #fff) 48%,
     var(--foil) 64%, color-mix(in srgb, var(--foil) 72%, #1a1206) 100%);
@@ -137,10 +136,10 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   filter: drop-shadow(0 .6px 0 rgba(0, 0, 0, .5));
   transition: background-position .8s var(--wz-e);
 }
-.cloth .wz-foil { --foil: #d9bd6e; }                                   /* 양장: 금박 */
-.kraft .wz-foil { --foil: color-mix(in srgb, var(--c) 28%, #fff); }    /* 종이: 그 책 색의 톤온톤 박 */
-.cloth .wz-spine .wz-mark5, .cloth .wz-sp-mark { color: #d9bd6e; }
-.kraft .wz-spine .wz-mark5, .kraft .wz-sp-mark { color: color-mix(in srgb, var(--c) 28%, #fff); }
+.wz-row.cloth, .wz-dpage.cloth { --foil: #d9bd6e; }                                   /* 양장 기본: 금박 */
+.wz-row.kraft, .wz-dpage.kraft { --foil: color-mix(in srgb, var(--c) 28%, #fff); }    /* 종이 기본: 그 책 색의 톤온톤 박 */
+/* 표지가 있으면 JS 가 표지에서 바탕색과 다른 눈에 띄는 색을 뽑아 --foil 을 덮어쓴다(해소의 바다는 빨강, Sun Dust People 은 하늘색) */
+.wz-spine .wz-mark5, .wz-sp-mark { color: var(--foil); }
 
 /* ── 재질 ── */
 .cloth .wz-mat::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background-image: var(--wz-weave); background-size: 22px 22px; mix-blend-mode: multiply; opacity: .46; }
