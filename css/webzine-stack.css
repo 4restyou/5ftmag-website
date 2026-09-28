@@ -319,6 +319,16 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 
 /* ── 책 읽기(flipbook 리더, webzine-reader.js) ── */
 .wz-reader { position: fixed; inset: 0; z-index: 2200; background: #0b0a0d; display: flex; flex-direction: column; }
+/* 유료 미리보기의 구매 영역(ebook-read.html 과 같은 모양). 본문을 가리지 않는 고정 높이 */
+.wz-reader-cta-wrap { order: 2; flex: 0 0 auto; height: calc(104px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box;
+  padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; }
+.wz-reader:has(.wz-reader-cta-wrap) .wz-reader-stage { min-height: 0; }
+.wz-reader-cta-note { margin: 0; font-size: 13px; line-height: 20px; font-weight: 600; color: #fff; }
+.wz-reader-cta { font: inherit; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: 0; width: min(100%, 340px); min-height: 44px;
+  padding: 11px 16px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, .5); background: transparent; color: #fff; cursor: pointer; }
+.wz-reader.is-preview-end .wz-reader-cta { background: var(--accent, #c9a227); color: #111; border-color: var(--accent, #c9a227); }
+.wz-reader-cta:hover { border-color: var(--accent, #c9a227); }
+.wz-reader-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .wz-reader-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 18px; border-bottom: 1px solid rgba(255, 255, 255, .08); color: #fff; }
 .wz-reader-title { font-size: 14px; font-weight: var(--fw-heading); opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wz-reader-tools { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }

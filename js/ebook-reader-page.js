@@ -71,6 +71,8 @@
     // 책장 뷰어(무료 웹진과 동일) 열기
     gate('');
     window.WebzineReader.open(access.url, product.title, opts);
+    // 책장에서 "구매하고 전체 보기" 로 왔으면(?buy=1) 결제 창을 바로 띄운다
+    if (!access.entitled && new URLSearchParams(location.search).get('buy') === '1') setTimeout(onBuy, 300);
   }
 
   init();

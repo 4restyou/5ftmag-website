@@ -185,7 +185,7 @@
     if (it._ebook) {
       const href = `ebook-read.html?slug=${encodeURIComponent(it.slug)}`;
       return `<a class="wz-act" href="${href}"><span>미리보기</span><i>↗</i></a>` +
-        (it.price ? `<a class="wz-act" href="${href}"><span>구매하고 전체 보기<b>${it.price.toLocaleString('ko-KR')}원</b></span><i>↗</i></a>` : '');
+        (it.price ? `<a class="wz-act wz-buy" href="${href}&amp;buy=1"><span>구매하고 전체 보기<b>${it.price.toLocaleString('ko-KR')}원</b></span><i>↗</i></a>` : '');
     }
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
     return read ? `<a class="wz-act wz-read" href="${read}" target="_blank" rel="noopener"><span>읽기</span><i>→</i></a>` : '';
@@ -413,14 +413,33 @@
         a.addEventListener('click', (e) => {
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;   // 새 탭 열기는 그대로
           e.preventDefault();
-          const go = (a.classList.contains('wz-read') && window.WebzineReader)
-            ? () => window.WebzineReader.open(a.href, it.title, { onClose: () => page.classList.remove('opening') })
-            : () => {
-              const fade = document.createElement('div'); fade.className = 'wz-pagefade'; document.body.appendChild(fade);
-              // 돌아올 때 목록이 아니라 이 책의 소개 화면으로 오도록 지금 주소에 책을 적어 둔다
-              try { history.replaceState(null, '', 'books.html?issue=' + encodeURIComponent(it.slug)); } catch (_) {}
-              setTimeout(() => { location.href = a.href; }, 430);
+          const closed = () => page.classList.remove('opening');
+          // 다른 페이지(ebook-read)로 넘어갈 때: 어두운 막을 덮고, 돌아올 때 이 책의 소개 화면으로 오게 주소에 책을 적어 둔다
+          const leaveTo = (href) => {
+            const fade = document.createElement('div'); fade.className = 'wz-pagefade'; document.body.appendChild(fade);
+            try { history.replaceState(null, '', 'books.html?issue=' + encodeURIComponent(it.slug)); } catch (_) {}
+            setTimeout(() => { location.href = href; }, 430);
+          };
+          let go;
+          if (a.classList.contains('wz-read') && window.WebzineReader) {
+            go = () => window.WebzineReader.open(a.href, it.title, { onClose: closed });
+          } else if (it._ebook && !a.classList.contains('wz-buy') && window.WebzineReader && db().ebooks?.getAccess) {
+            // 유료 미리보기도 무료와 같이 이 페이지에서 연다. 열람 주소는 표지가 열리는 동안 미리 받아 둔다.
+            // 받지 못하면(서버·파일 문제) 원인을 보여 주는 ebook-read 로 넘긴다
+            const accessP = db().ebooks.getAccess(it.slug).catch(() => null);
+            go = async () => {
+              const acc = await accessP;
+              if (!acc || !acc.url) { leaveTo(a.href); return; }
+              const buyHref = 'ebook-read.html?slug=' + encodeURIComponent(it.slug) + '&buy=1';
+              const label = it.price ? it.price.toLocaleString('ko-KR') + '원 · 구매하고 전체 보기' : '구매하고 전체 보기';
+              window.WebzineReader.open(acc.url, it.title, {
+                onClose: closed,
+                cta: acc.entitled ? null : { label, note: '미리보기는 여기까지예요', onClick: () => leaveTo(buyHref) },
+              });
             };
+          } else {
+            go = () => leaveTo(a.href);
+          }
           openBookThen(page, go);
         });
       });
