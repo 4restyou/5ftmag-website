@@ -223,8 +223,12 @@
     label.style.top = (m.offsetTop + m.offsetHeight / 2) + 'px';
     label.classList.add('show');
   }
+  const HEX = /^#[0-9a-f]{6}$/i;
   function setBookColor(i, color, aspect, accent) {
     const it = issues[i];
+    // 관리 화면에서 직접 정한 색이 있으면 그것을 쓴다. 없으면 표지에서 뽑은 색
+    if (HEX.test(it.spine_color || '')) color = it.spine_color;
+    if (HEX.test(it.foil_color || '')) accent = it.foil_color;
     if (color) it._c = color;
     const c = it._c, ct = fgFor(c);
     [rows[i], pages[i]].forEach(el => {
@@ -416,6 +420,7 @@
       ebookItems = eb.map((e) => ({
         id: 'ebook-' + e.id, _ebook: true, slug: e.slug, title: e.title, kind: e.kind,
         cover_url: e.cover_image || '',
+        spine_color: e.spine_color || '', foil_color: e.foil_color || '',
         description: e.description || e.excerpt || '',
         issue_label: '', price: e.price, created_at: e.created_at,
       }));

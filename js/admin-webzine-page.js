@@ -87,6 +87,10 @@ function openModal(issue) {
   $('f-sort').value = issue?.sort_order ?? 0;
   $('f-cover').value = '';
   $('f-pdf').value = '';
+  $('f-spine').value = issue?.spine_color || '';
+  $('f-foil').value = issue?.foil_color || '';
+  STATE.colorPick?.refresh();
+  STATE.editingCover = issue?.cover_path || '';
   $('f-pub').checked = !!issue?.published;
   $('cover-hint').textContent = issue?.cover_path ? '현재 표지 있음 (새 파일 선택 시 교체)' : '';
   $('pdf-hint').textContent = issue?.pdf_path ? '현재 PDF 있음 (새 파일 선택 시 교체)' : '웹용으로 최적화한 PDF 권장(최대 60MB).';
@@ -107,6 +111,15 @@ function autofillFromFile(file) {
   const base = String(file.name || '').replace(/\.[^.]+$/, '');
   if (!$('f-slug').value.trim()) { $('f-slug').value = slugify(base); validateSlugLive(); }
   if (!$('f-title').value.trim()) { $('f-title').value = base.replace(/[-_]+/g, ' ').trim(); }
+}
+// 책장 색: 비우면 자동, 스포이드로 표지에서 찍거나 직접 적는다 (admin-color-pick.js)
+if (window.AdminColorPick) {
+  $('colorPick').innerHTML = window.AdminColorPick.markup({ spineId: 'f-spine', foilId: 'f-foil' });
+  STATE.colorPick = window.AdminColorPick.mount({
+    root: $('colorPick'),
+    fields: { spine: $('f-spine'), foil: $('f-foil') },
+    getImageSrc: () => { const f = ($('f-cover').files || [])[0]; return f ? URL.createObjectURL(f) : (STATE.editingCover ? db().webzine.publicUrl(STATE.editingCover) : ''); },
+  });
 }
 $('f-pdf').addEventListener('change', (e) => autofillFromFile((e.target.files || [])[0]));
 $('f-cover').addEventListener('change', (e) => autofillFromFile((e.target.files || [])[0]));
@@ -180,6 +193,8 @@ $('wzForm').addEventListener('submit', async (e) => {
       category: $('f-category').value.trim() || null,
       description: $('f-desc').value.trim() || null,
       cover_path, pdf_path,
+      spine_color: (window.AdminColorPick ? window.AdminColorPick.hex6($('f-spine').value) : $('f-spine').value.trim()) || null,
+      foil_color: (window.AdminColorPick ? window.AdminColorPick.hex6($('f-foil').value) : $('f-foil').value.trim()) || null,
       published: $('f-pub').checked,
       sort_order: Number($('f-sort').value) || 0,
       updated_at: new Date().toISOString(),
