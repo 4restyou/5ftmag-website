@@ -320,10 +320,15 @@
       page.style.setProperty('--shift-y', Math.round(window.innerHeight / 2 - (r.top + r.height / 2)) + 'px');
     }
     page.classList.add('opening');
-    setTimeout(go, 880);
+    // 표지가 열리기 시작하는 .3s 뒤, 반쯤 열려 첫 페이지가 드러나는 때(.55s)에 곧바로 이어 간다
+    setTimeout(go, 550);
   }
   // 뒤로 가기로 돌아왔을 때(bfcache) 표지가 열린 채 남지 않게
-  window.addEventListener('pageshow', () => pages.forEach(p => p.classList.remove('opening')));
+  // 뷰어에서 뒤로 돌아왔을 때(bfcache): 어두운 막을 걷고, 열려 있던 표지를 다시 덮는다
+  window.addEventListener('pageshow', () => {
+    document.querySelectorAll('.wz-pagefade').forEach(n => { n.classList.add('out'); setTimeout(() => n.remove(), 500); });
+    setTimeout(() => pages.forEach(p => p.classList.remove('opening')), 150);
+  });
 
   function setLikeBtn(btn, on) {
     if (!btn) return;
@@ -410,7 +415,12 @@
           e.preventDefault();
           const go = (a.classList.contains('wz-read') && window.WebzineReader)
             ? () => window.WebzineReader.open(a.href, it.title, { onClose: () => page.classList.remove('opening') })
-            : () => { location.href = a.href; };
+            : () => {
+              const fade = document.createElement('div'); fade.className = 'wz-pagefade'; document.body.appendChild(fade);
+              // 돌아올 때 목록이 아니라 이 책의 소개 화면으로 오도록 지금 주소에 책을 적어 둔다
+              try { history.replaceState(null, '', 'books.html?issue=' + encodeURIComponent(it.slug)); } catch (_) {}
+              setTimeout(() => { location.href = a.href; }, 430);
+            };
           openBookThen(page, go);
         });
       });
