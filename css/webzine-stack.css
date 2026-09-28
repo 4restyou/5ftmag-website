@@ -135,9 +135,16 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
     linear-gradient(0deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, .22) 100%),
     linear-gradient(105deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .08) 100%) !important; }
 .cloth .wz-spine::after { background: linear-gradient(180deg, rgba(255, 255, 255, .07) 0%, rgba(255, 255, 255, .04) 14%, rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .06) 72%, rgba(0, 0, 0, .26) 100%) !important; }
-/* 두 면 사이 1px 틈으로 배경이 비쳐 검은 선이 보이지 않게, 책등·표지를 서로 1px 씩 덮는다 */
-.wz-spine { box-shadow: 0 -1px 0 var(--c), 0 1px 0 var(--c); }
-.wz-cover { box-shadow: 0 1px 0 var(--c); }
+/* 누운 책의 모서리를 둥글게: 책등 네 모서리를 깎고, 책등 위·아래 가장자리와 양 끝에 둥근 면이 빛을 받고 꺾이는 명암을 준다.
+   이음새(책등 윗변)는 표지 쪽으로만 1px 덮어 틈이 안 보이게 한다(아래쪽엔 덮지 않는다) */
+.wz-spine { border-radius: calc(var(--th) * .09); box-shadow: 0 -1px 0 var(--c); }
+.wz-cover { border-radius: calc(var(--th) * .09) calc(var(--th) * .09) 0 0; }
+.wz-spine::before { border-radius: inherit; }
+.wz-spine::after { border-radius: inherit; }
+.wz-row .wz-spine::after {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, 0) 1.4%, rgba(0, 0, 0, 0) 98.6%, rgba(0, 0, 0, .22) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, .13) 0, rgba(255, 255, 255, .05) 9%, rgba(255, 255, 255, 0) 26%, rgba(0, 0, 0, 0) 64%, rgba(0, 0, 0, .1) 86%, rgba(0, 0, 0, .3) 100%) !important; }
 .wz-cover::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:
     linear-gradient(0deg, rgba(255, 255, 255, .06) 0, rgba(255, 255, 255, 0) 5%),
