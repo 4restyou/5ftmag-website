@@ -204,7 +204,8 @@
         <span class="wz-f wz-f-back wz-mat"></span>
         <span class="wz-f wz-f-top"></span><span class="wz-f wz-f-bottom"></span><span class="wz-f wz-f-fore"></span>
         <span class="wz-f wz-f-spine wz-mat"><span class="wz-sp-pub wz-foil">${esc(pubOf(it))}</span><span class="wz-sp-title wz-foil">${esc(it.title)}</span><span class="wz-sp-mark" aria-hidden="true"></span></span>
-        <span class="wz-f wz-f-front wz-mat${cu ? ' has-img' : ''}">${front}</span>
+        <span class="wz-f wz-f-page"></span>
+        <span class="wz-leaf"><span class="wz-f wz-f-front wz-mat${cu ? ' has-img' : ''}">${front}</span><span class="wz-f wz-f-inside wz-mat"></span></span>
       </div></div><div class="wz-sshadow" aria-hidden="true"></div></div>
       <div class="wz-meta">
         <span class="wz-kind">${it._ebook ? '유료 · 양장' : '무료 · 종이'}</span>
@@ -305,6 +306,25 @@
     }, 1050);
   }
 
+  const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  function openBookThen(page, go) {
+    if (page.classList.contains('opening')) return;
+    if (REDUCED) { go(); return; }
+    page.style.setProperty('--mx', '0'); page.style.setProperty('--my', '0');
+    const book = page.querySelector('.wz-sbook');
+    if (book) {
+      const r = book.getBoundingClientRect(), sc = 1.1;
+      // 커진 책의 책등(왼쪽 가장자리)이 화면 가운데, 세로 가운데가 화면 가운데
+      const spineX = r.left + r.width / 2 - (r.width * sc) / 2;
+      page.style.setProperty('--shift-x', Math.round(window.innerWidth / 2 - spineX) + 'px');
+      page.style.setProperty('--shift-y', Math.round(window.innerHeight / 2 - (r.top + r.height / 2)) + 'px');
+    }
+    page.classList.add('opening');
+    setTimeout(go, 880);
+  }
+  // 뒤로 가기로 돌아왔을 때(bfcache) 표지가 열린 채 남지 않게
+  window.addEventListener('pageshow', () => pages.forEach(p => p.classList.remove('opening')));
+
   function setLikeBtn(btn, on) {
     if (!btn) return;
     btn.classList.toggle('is-on', on);
@@ -383,8 +403,17 @@
       const it = issues[i];
       const more = page.querySelector('.wz-more');
       if (more) more.addEventListener('click', () => { page.querySelector('.wz-desc').classList.add('is-open'); more.classList.remove('show'); more.setAttribute('aria-expanded', 'true'); });
-      const read = page.querySelector('.wz-read');
-      if (read) read.addEventListener('click', (e) => { if (!window.WebzineReader) return; e.preventDefault(); window.WebzineReader.open(read.href, it.title); });
+      // 읽기(유료는 미리보기·구매)로 들어갈 때 책이 정면으로 돌아서 표지가 열린 뒤 넘어간다
+      page.querySelectorAll('.wz-act').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;   // 새 탭 열기는 그대로
+          e.preventDefault();
+          const go = (a.classList.contains('wz-read') && window.WebzineReader)
+            ? () => window.WebzineReader.open(a.href, it.title, { onClose: () => page.classList.remove('opening') })
+            : () => { location.href = a.href; };
+          openBookThen(page, go);
+        });
+      });
       // 세운 책을 눌러도 첫 줄(읽기, 유료는 미리보기)과 같다
       const first = page.querySelector('.wz-act');
       const stage3d = page.querySelector('.wz-stage3d');
