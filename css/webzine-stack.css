@@ -117,7 +117,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-spine .wz-issue { font-size: max(8px, calc(var(--w) * .015)); letter-spacing: .18em; opacity: .55; margin-left: 10px; white-space: nowrap; }
 @media (max-width: 560px) { .wz-spine .wz-issue { display: none; } }
 .wz-spine::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .2) 0%, rgba(255, 255, 255, .06) 28%, rgba(0, 0, 0, .08) 62%, rgba(0, 0, 0, .42) 100%); }
+  background: linear-gradient(180deg, rgba(255, 255, 255, .08) 0%, rgba(255, 255, 255, .03) 22%, rgba(0, 0, 0, .04) 60%, rgba(0, 0, 0, .26) 100%); }
 /* 표지 — 윗면(눕힌 책의 앞표지). 머리가 왼쪽 */
 .wz-cover { left: 0; top: calc(-1 * var(--d)); width: var(--w); height: var(--d); transform-origin: 50% 100%; transform: translateZ(calc(var(--d) / 2)) rotateX(90deg); background: var(--c); }
 .wz-cover img { position: absolute; left: 50%; top: 50%; width: var(--d); height: var(--w); transform: translate(-50%, -50%) rotate(-90deg); object-fit: cover; object-position: center top; display: block; -webkit-user-drag: none; }
@@ -128,20 +128,23 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .cloth .wz-cover::before { z-index: 2; }
 .cloth .wz-cover::after {
   background:
-    linear-gradient(0deg, rgba(0, 0, 0, .34) 0, rgba(0, 0, 0, .05) 1.6%, rgba(255, 255, 255, .14) 3%, rgba(255, 255, 255, 0) 4.6%,
-      rgba(0, 0, 0, 0) 5.4%, rgba(0, 0, 0, .3) 6.4%, rgba(0, 0, 0, .1) 7.1%, rgba(255, 255, 255, .2) 7.9%, rgba(255, 255, 255, 0) 10%),
-    linear-gradient(90deg, rgba(0, 0, 0, .28) 0, rgba(0, 0, 0, 0) 8px),
-    linear-gradient(270deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, 0) 7px),
-    linear-gradient(0deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, .3) 100%),
-    linear-gradient(105deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .14) 100%) !important; }
-.cloth .wz-spine::after { background: linear-gradient(180deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, .1) 18%, rgba(255, 255, 255, .02) 45%, rgba(0, 0, 0, .12) 75%, rgba(0, 0, 0, .45) 100%) !important; }
+    linear-gradient(0deg, rgba(255, 255, 255, .07) 0, rgba(255, 255, 255, 0) 4%,
+      rgba(0, 0, 0, 0) 5.2%, rgba(0, 0, 0, .1) 6.4%, rgba(0, 0, 0, 0) 8%),
+    linear-gradient(90deg, rgba(0, 0, 0, .14) 0, rgba(0, 0, 0, 0) 10px),
+    linear-gradient(270deg, rgba(0, 0, 0, .12) 0, rgba(0, 0, 0, 0) 10px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, .22) 100%),
+    linear-gradient(105deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .08) 100%) !important; }
+.cloth .wz-spine::after { background: linear-gradient(180deg, rgba(255, 255, 255, .07) 0%, rgba(255, 255, 255, .04) 14%, rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .06) 72%, rgba(0, 0, 0, .26) 100%) !important; }
+/* 두 면 사이 1px 틈으로 배경이 비쳐 검은 선이 보이지 않게, 책등·표지를 서로 1px 씩 덮는다 */
+.wz-spine { box-shadow: 0 -1px 0 var(--c), 0 1px 0 var(--c); }
+.wz-cover { box-shadow: 0 1px 0 var(--c); }
 .wz-cover::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, .28) 0, rgba(0, 0, 0, 0) 8px),
-    linear-gradient(270deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, 0) 7px),
-    linear-gradient(180deg, rgba(255, 255, 255, .12) 0, rgba(255, 255, 255, 0) 7px),
-    linear-gradient(0deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, .42) 100%),
-    linear-gradient(105deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .14) 100%); }
+    linear-gradient(0deg, rgba(255, 255, 255, .06) 0, rgba(255, 255, 255, 0) 5%),
+    linear-gradient(90deg, rgba(0, 0, 0, .14) 0, rgba(0, 0, 0, 0) 10px),
+    linear-gradient(270deg, rgba(0, 0, 0, .12) 0, rgba(0, 0, 0, 0) 10px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, .26) 100%),
+    linear-gradient(105deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .08) 100%); }
 /* 책배(뒤) · 옆면(페이지 결). 오버행: 표지보다 작다 */
 .wz-fore { left: 0; top: var(--ov); width: var(--w); height: calc(var(--th) - var(--ov) * 2); transform: translateZ(calc(var(--d) / -2 + var(--ov))) rotateY(180deg); background: var(--wz-pages); --pg-dir: to bottom; }
 .wz-side-l { left: 0; top: var(--ov); width: calc(var(--d) - var(--ov)); height: calc(var(--th) - var(--ov) * 2); transform-origin: 0 50%; transform: translateZ(calc(var(--d) / 2 - var(--ov))) rotateY(-90deg); background: var(--wz-pages); --pg-dir: to bottom; }
@@ -223,13 +226,13 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 /* 양장: 책등에서 조금 떨어진 곳에 판지가 접히는 경첩 홈이 세로로 파여 있고, 판지 가장자리는 살짝 둥글게 빛을 받는다 */
 .cloth .wz-f-front::after {
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, .38) 0, rgba(0, 0, 0, .06) 1.6%, rgba(255, 255, 255, .16) 3%, rgba(255, 255, 255, 0) 4.6%,
-      rgba(0, 0, 0, 0) 5.4%, rgba(0, 0, 0, .34) 6.4%, rgba(0, 0, 0, .12) 7.1%, rgba(255, 255, 255, .22) 7.9%, rgba(255, 255, 255, 0) 10%),
-    linear-gradient(180deg, rgba(255, 255, 255, .14) 0, rgba(255, 255, 255, 0) 1.2%),
-    linear-gradient(0deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, 0) 1.4%),
-    linear-gradient(270deg, rgba(0, 0, 0, .2) 0, rgba(0, 0, 0, 0) 1.6%),
-    linear-gradient(118deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 42%, rgba(0, 0, 0, .18) 100%); }
-.cloth .wz-f-spine::after { background: linear-gradient(90deg, rgba(0, 0, 0, .28), rgba(255, 255, 255, .14) 22%, rgba(255, 255, 255, .04) 50%, rgba(0, 0, 0, .12) 78%, rgba(0, 0, 0, .36)); }
+    linear-gradient(90deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, .04) 2%, rgba(255, 255, 255, .05) 3.4%, rgba(255, 255, 255, 0) 4.8%,
+      rgba(0, 0, 0, 0) 5.4%, rgba(0, 0, 0, .16) 6.5%, rgba(0, 0, 0, .05) 7.4%, rgba(255, 255, 255, .06) 8.2%, rgba(255, 255, 255, 0) 10.5%),
+    linear-gradient(180deg, rgba(255, 255, 255, .05) 0, rgba(255, 255, 255, 0) 1.4%),
+    linear-gradient(0deg, rgba(0, 0, 0, .12) 0, rgba(0, 0, 0, 0) 1.6%),
+    linear-gradient(270deg, rgba(0, 0, 0, .1) 0, rgba(0, 0, 0, 0) 1.8%),
+    linear-gradient(118deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, .12) 100%); }
+.cloth .wz-f-spine::after { background: linear-gradient(90deg, rgba(0, 0, 0, .2), rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .02) 50%, rgba(0, 0, 0, .08) 78%, rgba(0, 0, 0, .24)); }
 .wz-stage3d.is-link { cursor: pointer; }
 .wz-stage3d.is-link:focus-visible { outline: 2px solid #c9a227; outline-offset: 6px; border-radius: 6px; }
 .wz-f-back { inset: 0; transform: translateZ(calc(var(--T) / -2)) rotateY(180deg); background: var(--c); }
