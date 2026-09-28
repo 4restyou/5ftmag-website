@@ -207,7 +207,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   /* 누운 자세: 목록과 같다. rotateZ(-90) 으로 책등을 아래로 돌린 뒤 rotateX(84) 로 눕히면 책등이 앞을 보고 표지가 위로 간다(목록의 -6deg 시점 포함) */
   --ry: 0deg; --rx: 84deg; --rz: -90deg; --ty: 40px;
   position: relative; width: var(--W); height: var(--H); transform-style: preserve-3d;
-  transform: translateY(var(--ty)) rotateY(var(--ry)) rotateX(var(--rx)) rotateZ(var(--rz));
+  transform: translateY(var(--ty)) rotateY(var(--ry)) rotateX(var(--rx)) rotateZ(var(--rz)) scale(var(--sc, 1));
   transition: transform var(--wz-t2) var(--wz-e2);
 }
 .wz-dpage.on .wz-sbook { --ry: 30deg; --rx: 0deg; --rz: 0deg; --ty: 0px; }
@@ -221,7 +221,25 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   opacity: 0; transform: translateY(24px) scaleX(.6); transition: opacity var(--wz-t2) ease, transform var(--wz-t2) var(--wz-e2); }
 .wz-dpage.on .wz-sshadow { opacity: .8; transform: none; }
 .wz-f { position: absolute; backface-visibility: hidden; overflow: hidden; }
-.wz-f-front { inset: 0; transform: translateZ(calc(var(--T) / 2)); background: var(--c); }
+.wz-f-front { inset: 0; background: var(--c); }
+/* 앞표지는 책등 쪽 경첩을 축으로 열리는 한 장(.wz-leaf). 바깥은 표지, 안쪽은 면지. 그 밑에 첫 페이지 */
+.wz-leaf { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 0 50%;
+  transform: translateZ(calc(var(--T) / 2)) rotateY(var(--open, 0deg)); transition: transform .5s cubic-bezier(.45, 0, .2, 1); }
+.wz-f-inside { inset: 0; transform: rotateY(180deg); background: color-mix(in srgb, var(--c) 55%, #efe8da);
+  box-shadow: inset -18px 0 30px -18px rgba(0, 0, 0, .35); }
+.wz-f-page { top: var(--ov); bottom: var(--ov); left: 0; right: var(--ov); transform: translateZ(calc(var(--T) / 2 - 1px)); backface-visibility: visible;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .16), rgba(0, 0, 0, 0) 9%), #f4efe4; }
+/* 읽기로 들어갈 때: 정면으로 돌아서며 조금 커지고(.35s), 앞표지가 열린 뒤(.5s) 리더가 이어진다 */
+.wz-dpage.opening .wz-sbook { --ry: 0deg; --sc: 1.1; transition: transform .38s cubic-bezier(.3, .7, .3, 1); }
+.wz-dpage.opening .wz-tilt { transform: none; }
+/* 펼친 양면이 화면 가운데 오도록 책을 옮긴다(--shift 는 JS 가 책등이 화면 가운데 오게 잰다) */
+.wz-stage3d { transition: transform .45s cubic-bezier(.3, .7, .3, 1); }
+.wz-dpage.opening .wz-stage3d { transform: translate(var(--shift-x, 0px), var(--shift-y, 0px)); }
+.wz-dpage.opening .wz-leaf { --open: -158deg; transition-delay: .3s; }
+.wz-dpage.opening .wz-meta { opacity: 0; transform: translateX(12px); }
+.wz-meta { transition: opacity .3s ease, transform .3s ease; }
+.wz-reader { animation: wzReaderIn .35s ease both; }
+@keyframes wzReaderIn { from { opacity: 0; } to { opacity: 1; } }
 .wz-f-front img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; -webkit-user-drag: none; }
 .wz-f-front .wz-plain2 { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 8% 9%; color: var(--ct); }
 .wz-f-front .wz-plain2 b { font-size: calc(var(--W) * .07); font-weight: 700; letter-spacing: -.02em; line-height: 1.15; word-break: keep-all; }
