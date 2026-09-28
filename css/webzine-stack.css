@@ -225,9 +225,12 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 /* 앞표지는 책등 쪽 경첩을 축으로 열리는 한 장(.wz-leaf). 바깥은 표지, 안쪽은 면지. 그 밑에 첫 페이지 */
 .wz-leaf { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 0 50%;
   transform: translateZ(calc(var(--T) / 2)) rotateY(var(--open, 0deg)); transition: transform .5s cubic-bezier(.45, 0, .2, 1); }
-.wz-f-inside { inset: 0; transform: rotateY(180deg); background: color-mix(in srgb, var(--c) 55%, #efe8da);
+/* 표지 바깥면과 같은 자리에 두면 사파리가 앞뒤를 헷갈려 겹쳐 그린다. 안쪽면은 살짝 뒤로 */
+.wz-f-inside { inset: 0; transform: translateZ(-1.5px) rotateY(180deg); background: color-mix(in srgb, var(--c) 55%, #efe8da);
   box-shadow: inset -18px 0 30px -18px rgba(0, 0, 0, .35); }
-.wz-f-page { top: var(--ov); bottom: var(--ov); left: 0; right: var(--ov); transform: translateZ(calc(var(--T) / 2 - 1px)); backface-visibility: visible;
+/* 첫 페이지: 표지 바로 뒤 1px 이면 표지 위로 비쳐 뿌옇게 보였다. 판지 두께만큼 물리고, 표지가 열리기 전엔 숨긴다 */
+.wz-f-page { top: var(--ov); bottom: var(--ov); left: 0; right: var(--ov); transform: translateZ(calc(var(--T) / 2 - 4px)); backface-visibility: hidden;
+  visibility: hidden; transition: visibility 0s .3s;
   background: linear-gradient(90deg, rgba(0, 0, 0, .16), rgba(0, 0, 0, 0) 9%), #f4efe4; }
 /* 읽기로 들어갈 때: 정면으로 돌아서며 조금 커지고(.35s), 앞표지가 열린 뒤(.5s) 리더가 이어진다 */
 .wz-dpage.opening .wz-sbook { --ry: 0deg; --sc: 1.1; transition: transform .38s cubic-bezier(.3, .7, .3, 1); }
@@ -236,6 +239,10 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-stage3d { transition: transform .45s cubic-bezier(.3, .7, .3, 1); }
 .wz-dpage.opening .wz-stage3d { transform: translate(var(--shift-x, 0px), var(--shift-y, 0px)); }
 .wz-dpage.opening .wz-leaf { --open: -158deg; transition-delay: .3s; }
+.wz-dpage.opening .wz-f-page { visibility: visible; transition-delay: .28s; }
+/* 면지는 뒤집힌 면이라 숨김 처리에 기대지 않고, 표지가 90도를 넘긴 뒤에만 보인다(닫혀 있을 땐 앞표지 위로 비치던 것) */
+.wz-f-inside { visibility: hidden; transition: visibility 0s; }
+.wz-dpage.opening .wz-f-inside { visibility: visible; transition-delay: .52s; }
 .wz-dpage.opening .wz-meta { opacity: 0; transform: translateX(12px); }
 .wz-meta { transition: opacity .3s ease, transform .3s ease; }
 /* 표지가 반쯤 열려 첫 페이지가 드러나는 순간부터 리더가 겹쳐 떠오른다(표지는 그 아래서 마저 열린다) */

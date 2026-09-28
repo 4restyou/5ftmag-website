@@ -205,7 +205,7 @@
         <span class="wz-f wz-f-top"></span><span class="wz-f wz-f-bottom"></span><span class="wz-f wz-f-fore"></span>
         <span class="wz-f wz-f-spine wz-mat"><span class="wz-sp-pub wz-foil">${esc(pubOf(it))}</span><span class="wz-sp-title wz-foil">${esc(it.title)}</span><span class="wz-sp-mark" aria-hidden="true"></span></span>
         <span class="wz-f wz-f-page"></span>
-        <span class="wz-leaf"><span class="wz-f wz-f-front wz-mat${cu ? ' has-img' : ''}">${front}</span><span class="wz-f wz-f-inside wz-mat"></span></span>
+        <span class="wz-leaf"><span class="wz-f wz-f-inside wz-mat"></span><span class="wz-f wz-f-front wz-mat${cu ? ' has-img' : ''}">${front}</span></span>
       </div></div><div class="wz-sshadow" aria-hidden="true"></div></div>
       <div class="wz-meta">
         <span class="wz-kind">${it._ebook ? '유료 · 양장' : '무료 · 종이'}</span>
