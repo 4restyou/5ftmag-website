@@ -40,7 +40,7 @@ footer { background: var(--wz-base); border-top-color: transparent; color: rgba(
     radial-gradient(110% 70% at 50% 70%, color-mix(in srgb, var(--wz-mood) var(--wz-mood-b), transparent), transparent 74%);
   transition: background .6s ease, opacity .35s ease; }
 .wz-stage { position: relative; z-index: 1; min-height: calc(100vh - var(--header-h, 72px)); background: none; color: var(--wz-ink);
-  transition: opacity .35s ease, transform .5s var(--wz-e); }
+  transition: opacity .6s ease, transform .7s cubic-bezier(.3, .8, .3, 1); }   /* 소개 화면이 걷힐 때 천천히 떠오른다 */
 body.wz-mode-detail .wz-stage, body.wz-mode-detail .wz-mood, body.wz-mode-detail > footer { opacity: 0; pointer-events: none; }
 body.wz-mode-detail .wz-stage { transform: scale(.985); }
 body.wz-mode-detail { overflow: hidden; }
@@ -125,6 +125,16 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; padding: 22px 26px; color: var(--ct); }
 .wz-cover .wz-plain b { font-size: calc(var(--w) * .044); font-weight: 700; letter-spacing: -.02em; line-height: 1.15; word-break: keep-all; }
 .wz-cover .wz-plain span { font-size: 10px; letter-spacing: .22em; opacity: .55; text-transform: uppercase; margin-top: 8px; }
+.cloth .wz-cover::before { z-index: 2; }
+.cloth .wz-cover::after {
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, .34) 0, rgba(0, 0, 0, .05) 1.6%, rgba(255, 255, 255, .14) 3%, rgba(255, 255, 255, 0) 4.6%,
+      rgba(0, 0, 0, 0) 5.4%, rgba(0, 0, 0, .3) 6.4%, rgba(0, 0, 0, .1) 7.1%, rgba(255, 255, 255, .2) 7.9%, rgba(255, 255, 255, 0) 10%),
+    linear-gradient(90deg, rgba(0, 0, 0, .28) 0, rgba(0, 0, 0, 0) 8px),
+    linear-gradient(270deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, 0) 7px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, .3) 100%),
+    linear-gradient(105deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, .14) 100%) !important; }
+.cloth .wz-spine::after { background: linear-gradient(180deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, .1) 18%, rgba(255, 255, 255, .02) 45%, rgba(0, 0, 0, .12) 75%, rgba(0, 0, 0, .45) 100%) !important; }
 .wz-cover::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, .28) 0, rgba(0, 0, 0, 0) 8px),
@@ -155,8 +165,9 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-spine .wz-mark5, .wz-sp-mark { color: var(--foil); }
 
 /* ── 재질 ── */
-.cloth .wz-mat::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background-image: var(--wz-weave); background-size: 22px 22px; mix-blend-mode: multiply; opacity: .46; }
-.cloth .wz-mat.has-img::before { opacity: .16; }
+.cloth .wz-mat::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background-image: var(--wz-weave); background-size: 72px 72px; mix-blend-mode: multiply; opacity: .55; }
+.cloth .wz-mat.has-img::before { opacity: .42; }   /* 천에 인쇄한 표지: 그림 위로도 결이 비친다 */
+.cloth .wz-f-front.has-img img, .cloth .wz-cover.has-img img { filter: saturate(.92) contrast(.96); }
 .cloth .wz-spine .wz-title, .cloth .wz-spine .wz-pub, .cloth .wz-sp-title, .cloth .wz-sp-pub, .cloth .wz-meta h2 { font-family: Georgia, "Times New Roman", "Apple SD Gothic Neo", serif; }
 .cloth .wz-spine .wz-title { font-weight: 600; letter-spacing: 0; }
 .kraft .wz-mat::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background-image: var(--wz-kraft); background-size: 160px 160px; mix-blend-mode: multiply; opacity: .5; }
@@ -168,6 +179,8 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-detail { position: fixed; inset: 0; z-index: 2120; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
   scroll-snap-type: y proximity; opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility 0s .4s; }
 .wz-detail.on { opacity: 1; visibility: visible; transition: opacity .4s ease; }
+/* 닫을 때: 책이 눕는 동안 서서히 걷힌다(목록과 교차 페이드) */
+.wz-detail.on.closing { opacity: 0; pointer-events: none; transition: opacity .75s cubic-bezier(.4, 0, .2, 1) .12s; }
 .wz-dpage {
   --H: clamp(280px, 37vw, 495px); --ar: .707; --W: calc(var(--H) * var(--ar)); --T: calc(var(--H) * .10); --ov: 2px;
   --sweep: 4%;
@@ -207,6 +220,18 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   background:
     linear-gradient(90deg, rgba(0, 0, 0, .34) 0, rgba(0, 0, 0, .02) 2.5%, rgba(255, 255, 255, .14) 4%, rgba(255, 255, 255, 0) 7%),
     linear-gradient(118deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 42%, rgba(0, 0, 0, .16) 100%); }
+/* 양장: 책등에서 조금 떨어진 곳에 판지가 접히는 경첩 홈이 세로로 파여 있고, 판지 가장자리는 살짝 둥글게 빛을 받는다 */
+.cloth .wz-f-front::after {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, .38) 0, rgba(0, 0, 0, .06) 1.6%, rgba(255, 255, 255, .16) 3%, rgba(255, 255, 255, 0) 4.6%,
+      rgba(0, 0, 0, 0) 5.4%, rgba(0, 0, 0, .34) 6.4%, rgba(0, 0, 0, .12) 7.1%, rgba(255, 255, 255, .22) 7.9%, rgba(255, 255, 255, 0) 10%),
+    linear-gradient(180deg, rgba(255, 255, 255, .14) 0, rgba(255, 255, 255, 0) 1.2%),
+    linear-gradient(0deg, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, 0) 1.4%),
+    linear-gradient(270deg, rgba(0, 0, 0, .2) 0, rgba(0, 0, 0, 0) 1.6%),
+    linear-gradient(118deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 42%, rgba(0, 0, 0, .18) 100%); }
+.cloth .wz-f-spine::after { background: linear-gradient(90deg, rgba(0, 0, 0, .28), rgba(255, 255, 255, .14) 22%, rgba(255, 255, 255, .04) 50%, rgba(0, 0, 0, .12) 78%, rgba(0, 0, 0, .36)); }
+.wz-stage3d.is-link { cursor: pointer; }
+.wz-stage3d.is-link:focus-visible { outline: 2px solid #c9a227; outline-offset: 6px; border-radius: 6px; }
 .wz-f-back { inset: 0; transform: translateZ(calc(var(--T) / -2)) rotateY(180deg); background: var(--c); }
 .wz-f-spine { left: 0; top: 0; width: var(--T); height: var(--H); transform-origin: 0 50%; transform: translateZ(calc(var(--T) / -2)) rotateY(-90deg); background: var(--c);
   display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 14px 0 12px; color: var(--ct); }
