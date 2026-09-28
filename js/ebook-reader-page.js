@@ -59,7 +59,13 @@
 
     const priceLabel = product.price ? product.price.toLocaleString('ko-KR') + '원 · 구매하고 전체 보기' : '구매하고 전체 보기';
     const opts = {
-      onClose: () => { location.href = 'books.html'; },
+      // 책장(소개 화면)에서 왔으면 뒤로 가서 그 책의 소개 화면으로 돌아간다(표지가 다시 덮인다). 아니면 그 책의 소개 화면을 연다
+      onClose: () => {
+        let fromShelf = false;
+        try { fromShelf = new URL(document.referrer).origin === location.origin && /\/books(\.html)?$/.test(new URL(document.referrer).pathname); } catch (_) {}
+        if (fromShelf && history.length > 1) history.back();
+        else location.href = 'books.html?issue=' + encodeURIComponent(slug);
+      },
       cta: access.entitled ? null : { label: priceLabel, note: '미리보기는 여기까지예요', onClick: onBuy },
     };
     // 책장 뷰어(무료 웹진과 동일) 열기
