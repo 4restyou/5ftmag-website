@@ -20,15 +20,23 @@
   const coverUrl = (it) => (it.cover_url ? it.cover_url : (it.cover_path ? db().webzine.publicUrl(it.cover_path) : ''));
 
   // ── 재질 텍스처: 캔버스로 만든다(파일 없이). 양장은 사인파 높이맵을 조명한 천 짜임, 종이는 씨앗 고정 난수의 크라프트 입자 ──
+  // 양장 천(린넨): 실 한 올이 3px, 날실·씨실이 한 칸씩 번갈아 위로 올라오고(평직), 올마다 굵기·밝기가 조금씩 다르다.
+  // 높이맵을 왼쪽 위 빛으로 비춰 결을 세운다. CSS 에서 절반 크기로 깔아 레티나에서도 곱게 보인다
   function weaveTexture() {
-    const S = 80, c = document.createElement('canvas'); c.width = c.height = S;
+    const S = 144, P = 3, c = document.createElement('canvas'); c.width = c.height = S;
     const ctx = c.getContext('2d'), img = ctx.createImageData(S, S), h = new Float32Array(S * S), PI = Math.PI;
-    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++)
-      h[y * S + x] = 0.5 + Math.sin(x * PI * .5) * .18 + Math.sin(y * PI * .4) * .15 + Math.sin((x + y) * PI * .2) * .045;
+    let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    const warp = Array.from({ length: S / P }, () => (rnd() - .5) * .35), weft = Array.from({ length: S / P }, () => (rnd() - .5) * .35);
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+      const tx = Math.floor(x / P), ty = Math.floor(y / P), fx = (x % P + .5) / P, fy = (y % P + .5) / P;
+      const up = (tx + ty) % 2 === 0;
+      const v = up ? Math.sin(fx * PI) * (.85 + warp[tx]) : Math.sin(fy * PI) * (.85 + weft[ty]);
+      h[y * S + x] = .25 + v * .6 + (rnd() - .5) * .12;
+    }
     const at = (x, y) => h[((y + S) % S) * S + ((x + S) % S)];
     for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
       const i = (y * S + x) * 4, dx = at(x + 1, y) - at(x - 1, y), dy = at(x, y + 1) - at(x, y - 1);
-      const v = Math.max(0, Math.min(1, .5 - (dx + dy) * .62)), g = Math.round(150 + v * 105);
+      const v = Math.max(0, Math.min(1, .55 - (dx + dy) * .9 + (h[y * S + x] - .5) * .5)), g = Math.round(130 + v * 125);
       img.data[i] = img.data[i + 1] = img.data[i + 2] = g; img.data[i + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
@@ -275,21 +283,26 @@
     if (!inDetail || closing) return;
     closing = true;
     // 1) 세운 책이 먼저 눕는다 → 2) 소개 화면이 걷히고 목록이 돌아온다 → 3) 목록의 그 책이 들린 자세에서 내려앉는다
+    // 끊기지 않게 겹친다: 책이 눕기 시작하면 소개 화면이 서서히 투명해지고(.closing), 반쯤 누웠을 때 목록이 뒤에서 떠오른다
     pages[current].classList.remove('on');
     rows.forEach((r, k) => r.classList.toggle('lifted', k === current));
+    detail.classList.add('closing');
     setTimeout(() => {
       inDetail = false;
-      document.body.classList.remove('wz-mode-detail');
-      marks.style.removeProperty('--wz-fg');
-      detail.classList.remove('on'); detail.setAttribute('aria-hidden', 'true');
       window.scrollTo(0, savedScroll);
       rows[current].scrollIntoView({ behavior: 'auto', block: 'center' });
+      document.body.classList.remove('wz-mode-detail');
+      marks.style.removeProperty('--wz-fg');
       if (viaKeyboard) hits[current].focus({ preventScroll: true });
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        rows[current].classList.add('settling'); rows[current].classList.remove('lifted'); closing = false;
+        rows[current].classList.add('settling'); rows[current].classList.remove('lifted');
         setTimeout(() => rows[current].classList.remove('settling'), 1100);
       }));
-    }, 620);
+    }, 380);
+    setTimeout(() => {
+      detail.classList.remove('on', 'closing'); detail.setAttribute('aria-hidden', 'true');
+      closing = false;
+    }, 1050);
   }
 
   function setLikeBtn(btn, on) {
@@ -372,6 +385,16 @@
       if (more) more.addEventListener('click', () => { page.querySelector('.wz-desc').classList.add('is-open'); more.classList.remove('show'); more.setAttribute('aria-expanded', 'true'); });
       const read = page.querySelector('.wz-read');
       if (read) read.addEventListener('click', (e) => { if (!window.WebzineReader) return; e.preventDefault(); window.WebzineReader.open(read.href, it.title); });
+      // 세운 책을 눌러도 첫 줄(읽기, 유료는 미리보기)과 같다
+      const first = page.querySelector('.wz-act');
+      const stage3d = page.querySelector('.wz-stage3d');
+      if (first && stage3d) {
+        stage3d.classList.add('is-link');
+        stage3d.setAttribute('role', 'link'); stage3d.tabIndex = 0;
+        stage3d.setAttribute('aria-label', `${it.title} ${it._ebook ? '미리보기' : '읽기'}`);
+        stage3d.addEventListener('click', () => first.click());
+        stage3d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); first.click(); } });
+      }
       const likeBtn = page.querySelector('.wz-like');
       if (likeBtn) likeBtn.addEventListener('click', () => toggleLike(it, likeBtn));
       const shareBtn = page.querySelector('.wz-share');
