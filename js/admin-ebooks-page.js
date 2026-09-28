@@ -109,6 +109,9 @@ function openForm(row) {
   form.original_price.value = window.MoneyInput ? window.MoneyInput.format(row?.original_price) : (row?.original_price ?? '');
   form.excerpt.value = row?.excerpt || '';
   form.description.value = row?.description || '';
+  form.spine_color.value = row?.spine_color || '';
+  form.foil_color.value = row?.foil_color || '';
+  STATE.colorPick?.refresh();
   STATE.coverImage = row?.cover_image || '';   // 재업로드 안 하면 유지
   $('coverFile').value = '';
   const cp = $('coverPreview');
@@ -172,6 +175,8 @@ async function saveForm(e) {
     excerpt: f.excerpt.value.trim(),
     description: f.description.value,
     cover_image: coverImage,
+    spine_color: window.AdminColorPick ? window.AdminColorPick.hex6(f.spine_color.value) : f.spine_color.value.trim(),
+    foil_color: window.AdminColorPick ? window.AdminColorPick.hex6(f.foil_color.value) : f.foil_color.value.trim(),
     pages_path: slug,
     page_count: existing?.page_count || 0,
     store_url: f.store_url.value.trim(),
@@ -376,6 +381,15 @@ function slugFromFileName(name) {
   return String(name || '').replace(/\.[^.]+$/, '')   // 확장자 제거
     .normalize('NFKC').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+// 책장 색: 비우면 자동, 스포이드로 표지에서 찍거나 직접 적는다 (admin-color-pick.js)
+if (window.AdminColorPick) {
+  $('colorPick').innerHTML = window.AdminColorPick.markup({ spineId: 'spineColor', foilId: 'foilColor' });
+  STATE.colorPick = window.AdminColorPick.mount({
+    root: $('colorPick'),
+    fields: { spine: $('spineColor'), foil: $('foilColor') },
+    getImageSrc: () => { const f = ($('coverFile').files || [])[0]; return f ? URL.createObjectURL(f) : STATE.coverImage; },
+  });
 }
 $('coverFile').addEventListener('change', (e) => {
   const file = (e.target.files || [])[0];
