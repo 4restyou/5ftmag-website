@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Wed, 23 Sep 2026 13:27:24 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 29 Sep 2026 09:01:21 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>낸시 렉스로스, 흐림을 다룰 줄 알았던 사람</title>
+      <link>https://www.5ftmag.com/stories/nancy-rexroth-iowa.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/nancy-rexroth-iowa.html</guid>
+      <pubDate>Tue, 29 Sep 2026 00:00:00 GMT</pubDate>
+      <description>다이애나 카메라로 찍은 사진집 《IOWA》의 작가 낸시 렉스로스가 10월 2일 신시내티 미술관에서 첫 회고전을 연다. 흐린 사진은 우연이 아니었다. 촬영과 선별과 암실에서 그가 세운 기준이었다.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>롤라이플렉스가 손목 위로 올라왔다</title>
       <link>https://www.5ftmag.com/stories/artra-rolleiflex.html</link>
