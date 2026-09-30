@@ -198,8 +198,9 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
   transform: translateX(calc(var(--pull) * -10px)); transition: transform .2s ease-out, color .15s, border-color .15s; }
 .mh-end-arrow { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid currentColor; font-size: 18px;
   transform: scale(calc(1 + var(--pull) * .25)); transition: transform .2s ease-out, background .15s, color .15s; }
-.mh-end-card.is-ready { color: var(--text); border-color: var(--text); }
-.mh-end-card.is-ready .mh-end-arrow { background: var(--text); color: var(--bg); }
+/* 놓으면 이동: 꽉 찬 검정 대신 옅은 톤으로. 테두리는 점선에서 실선으로만 바꿔 준비됐다는 것만 알린다 */
+.mh-end-card.is-ready { color: var(--text); border-style: solid; border-color: color-mix(in srgb, var(--text) 35%, transparent); background: color-mix(in srgb, var(--text) 4%, transparent); }
+.mh-end-card.is-ready .mh-end-arrow { background: color-mix(in srgb, var(--text) 10%, transparent); border-color: color-mix(in srgb, var(--text) 45%, transparent); }
 .mh-new-strip .mh-end-card { min-width: 132px; }
 .mh-film-strip .mh-end-card { margin-bottom: 22px; }   /* 필름 카드 이름 줄 높이만큼 비워 썸네일과 높이를 맞춘다 */
 .mh-all-films {
