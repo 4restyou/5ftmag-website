@@ -4644,5 +4644,32 @@
     "format": "35mm",
     "photographers": [],
     "photos": []
+  },
+  "ilfocolor400plus": {
+    "slug": "ilfocolor400plus",
+    "tier": "library",
+    "brand": "ILFORD",
+    "name": "Ilfocolor 400 Plus",
+    "displayName": "Ilford Ilfocolor 400 Plus",
+    "aliases": [
+      "Ilfocolor 400 Plus",
+      "Ilfocolor 400",
+      "Ilford Ilfocolor 400",
+      "Ilford Ilfocolor 400 Plus",
+      "Ilfocolor Vintage Tone 400 Plus",
+      "Ilford Ilfocolor Vintage Tone 400",
+      "Ilfocolour 400",
+      "일포컬러 400",
+      "일포컬러400",
+      "일포드 일포컬러 400",
+      "ilfocolor400plus",
+      "ilfocolor400"
+    ],
+    "desc": "흑백으로 익숙한 일포드 이름을 단 컬러 네거티브예요. 지금은 Ilfocolor Vintage Tone 400 Plus 라는 이름으로 팔립니다. 색이 시안 쪽으로 살짝 기울어 녹색과 파랑은 가라앉고 빨강과 노랑이 도드라져, 이름대로 오래된 사진 같은 색이 나온다는 설명이 붙어요. C-41 현상, 데일라이트 밸런스, 35mm 24컷 · 36컷.",
+    "iso": "400",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": []
   }
 }
