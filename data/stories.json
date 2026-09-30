@@ -1,5 +1,20 @@
 [
   {
+    "id": "lee-gapchul",
+    "title": "이갑철, 초점이 빗나간 곳에서 기가 보였다",
+    "category": "photographer",
+    "categoryLabel": "PHOTOGRAPHER",
+    "author": "5ft.mag 편집부",
+    "date": "2026-09-30",
+    "issue": "",
+    "thumbnail": "img/stories/lee-gapchul/lee-gapchul-conflict-reaction.webp",
+    "excerpt": "기울어진 프레임, 흔들린 초점, 거친 흑백 입자. 이갑철은 거리의 불안에서 출발해 《충돌과 반동》의 의례와 《기》의 땅까지, 설명되지 않는 한국의 기운을 찍어 왔다.",
+    "films": [],
+    "page": "stories/lee-gapchul.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "nancy-rexroth-iowa",
     "title": "낸시 렉스로스, 흐림을 다룰 줄 알았던 사람",
     "category": "exhibition",
