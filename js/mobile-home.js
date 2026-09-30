@@ -330,6 +330,21 @@
       if (!card) return el.scrollLeft >= el.scrollWidth - el.clientWidth - 2;
       return card.getBoundingClientRect().right <= el.getBoundingClientRect().right + 1;
     };
+    // 「놓으면 이동」이 되는 순간 한 번 떨린다. 안드로이드는 vibrate, 아이폰 사파리는 vibrate 가 없어
+    // iOS 18 의 스위치 체크박스가 토글될 때 내는 햅틱을 빌린다(숨긴 스위치의 label 을 누른다). 둘 다 없으면 조용히 넘어간다
+    let tick = null;
+    const haptic = () => {
+      if (navigator.vibrate) { navigator.vibrate(12); return; }
+      if (!tick) {
+        tick = document.createElement('label');
+        tick.setAttribute('aria-hidden', 'true');
+        tick.style.cssText = 'position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;';
+        tick.innerHTML = '<input type="checkbox" switch tabindex="-1">';
+        tick.addEventListener('click', (e) => e.stopPropagation());   // 열린 메뉴 닫기 같은 문서 클릭 처리에 닿지 않게
+        document.body.appendChild(tick);
+      }
+      tick.click();
+    };
     const setPull = (px) => {
       const card = strip && strip.querySelector('.mh-end-card');
       if (!card) return;
@@ -340,6 +355,7 @@
         card.classList.toggle('is-ready', ready);
         const label = card.querySelector('.mh-end-label');
         if (label) label.textContent = ready ? label.dataset.ready : label.dataset.idle;
+        if (ready) haptic();
       }
     };
     root.addEventListener('touchstart', (e) => {

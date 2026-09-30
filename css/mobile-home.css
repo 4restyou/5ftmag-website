@@ -201,6 +201,11 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 /* 놓으면 이동: 꽉 찬 검정 대신 옅은 톤으로. 테두리는 점선에서 실선으로만 바꿔 준비됐다는 것만 알린다 */
 .mh-end-card.is-ready { color: var(--text); border-style: solid; border-color: color-mix(in srgb, var(--text) 35%, transparent); background: color-mix(in srgb, var(--text) 4%, transparent); }
 .mh-end-card.is-ready .mh-end-arrow { background: color-mix(in srgb, var(--text) 10%, transparent); border-color: color-mix(in srgb, var(--text) 45%, transparent); }
+/* 준비되는 순간 화살표가 앞으로 한 번 튄다. 햅틱이 없는 폰에서도 다 당겼다는 걸 눈으로 알 수 있게. transform(scale)과 겹치지 않게 translate 로 */
+@media (prefers-reduced-motion: no-preference) {
+  .mh-end-card.is-ready .mh-end-arrow { animation: mh-end-bump .32s ease-out; }
+}
+@keyframes mh-end-bump { 0% { translate: 0; } 40% { translate: 6px; } 100% { translate: 0; } }
 .mh-new-strip .mh-end-card { min-width: 132px; }
 .mh-film-strip .mh-end-card { margin-bottom: 22px; }   /* 필름 카드 이름 줄 높이만큼 비워 썸네일과 높이를 맞춘다 */
 .mh-all-films {
