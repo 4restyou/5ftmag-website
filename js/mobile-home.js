@@ -330,11 +330,12 @@
       if (!card) return el.scrollLeft >= el.scrollWidth - el.clientWidth - 2;
       return card.getBoundingClientRect().right <= el.getBoundingClientRect().right + 1;
     };
-    // 「놓으면 이동」이 되는 순간 한 번 떨린다. 안드로이드는 vibrate, 아이폰 사파리는 vibrate 가 없어
-    // iOS 18 의 스위치 체크박스가 토글될 때 내는 햅틱을 빌린다(숨긴 스위치의 label 을 누른다). 둘 다 없으면 조용히 넘어간다
+    // 햅틱. 안드로이드는 「놓으면 이동」이 되는 순간 vibrate 로 떨린다.
+    // 아이폰 사파리는 vibrate 가 없어 iOS 18+ 스위치 체크박스의 토글 햅틱을 빌린다(숨긴 스위치의 label 을 누른다).
+    // 다만 iOS 는 끄는 도중(touchmove)의 클릭엔 햅틱을 내지 않아, 손을 뗄 때(touchend) 울리고 잠깐 뒤 이동한다
+    const canVibrate = typeof navigator.vibrate === 'function';
     let tick = null;
-    const haptic = () => {
-      if (navigator.vibrate) { navigator.vibrate(12); return; }
+    const tapSwitch = () => {
       if (!tick) {
         tick = document.createElement('label');
         tick.setAttribute('aria-hidden', 'true');
@@ -355,7 +356,7 @@
         card.classList.toggle('is-ready', ready);
         const label = card.querySelector('.mh-end-label');
         if (label) label.textContent = ready ? label.dataset.ready : label.dataset.idle;
-        if (ready) haptic();
+        if (ready && canVibrate) navigator.vibrate(12);
       }
     };
     root.addEventListener('touchstart', (e) => {
@@ -373,7 +374,10 @@
       if (!strip) return;
       const go = ready, href = strip.dataset.more;
       setPull(0); strip = null; endX = null;
-      if (go && href) location.href = href;
+      if (!go || !href) return;
+      if (canVibrate) { location.href = href; return; }
+      tapSwitch();
+      setTimeout(() => { location.href = href; }, 60);   // 햅틱이 울릴 틈을 주고 넘어간다
     };
     root.addEventListener('touchend', finish, { passive: true });
     root.addEventListener('touchcancel', () => { if (strip) { setPull(0); strip = null; endX = null; } }, { passive: true });
