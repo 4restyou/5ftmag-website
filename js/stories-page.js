@@ -55,7 +55,9 @@
     return story.author ? `${label} · ${story.author}` : label;
   }
 
+  // 라벨 → 칸 표는 js/story-categories.js 하나에 둔다(에디터·검증과 공유). 없을 때만 아래 옛 규칙
   function storyFilterKey(story) {
+    if (window.StoryCategories) return window.StoryCategories.keyFor(story);
     const label = String(story.categoryLabel || '').toUpperCase();
     const category = String(story.category || '').toLowerCase();
     if (label.includes('PHOTOBOOK') || label === 'PHOTO') return 'photo';
