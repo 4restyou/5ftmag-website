@@ -225,6 +225,24 @@ for (const [asset, tags] of versionMap) {
   });
 }
 
+// 기사 칸: 모든 기사의 라벨이 js/story-categories.js 표에 있고, 그 칸의 칩이 stories.html 에 있으며,
+// 저장된 category 가 그 칸과 같아야 한다. 표에 없는 라벨은 Articles 필터에서 엉뚱한 칸에 섞이거나 사라진다.
+{
+  const { runInNewContext } = await import('vm');
+  const ctx = { window: {} };
+  runInNewContext(readFileSync(join(ROOT, 'js/story-categories.js'), 'utf8'), ctx);
+  const SC = ctx.window.StoryCategories;
+  const chips = new Set([...readFileSync(join(ROOT, 'stories.html'), 'utf8').matchAll(/class="[^"]*filter-chip[^"]*" data-category="([a-z]+)"/g)].map(m => m[1]));
+  const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
+  for (const s of stories) {
+    const label = SC.normLabel(s.categoryLabel);
+    const key = SC.LABEL_TO_KEY[label];
+    if (!key) { broken.push({ file: 'data/stories.json', ref: `${s.id}: 라벨 "${s.categoryLabel}"`, expected: 'js/story-categories.js 표에 없는 라벨' }); continue; }
+    if (!chips.has(key)) broken.push({ file: 'stories.html', ref: `칸 "${key}"`, expected: `${s.id} 가 쓰는 칸의 필터 칩이 없음` });
+    if (s.category !== key) broken.push({ file: 'data/stories.json', ref: `${s.id}: category "${s.category}"`, expected: `라벨 ${label} 의 칸은 "${key}"` });
+  }
+}
+
 // 결과 출력
 console.log(`\n자산 검증: ${htmlFiles.length} HTML / ${dataFiles.length} JSON / ${cssFiles.length} CSS 검사`);
 console.log(`  총 참조 ${refCount}개`);

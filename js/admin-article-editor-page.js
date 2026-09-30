@@ -573,7 +573,8 @@ ${bodyHtml}
     const entry = {
       id: m.slug,
       title: m.title,
-      category: m.category,
+      // 라벨이 정해진 칸이 있으면 그 칸으로 맞춘다(Articles 필터와 어긋나지 않게)
+      category: window.StoryCategories ? window.StoryCategories.keyFor({ categoryLabel: m.category_label, category: m.category }) : m.category,
       categoryLabel: m.category_label,
       author: m.byline,
       date: m.date_iso,
