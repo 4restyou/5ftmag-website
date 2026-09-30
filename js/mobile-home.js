@@ -6,8 +6,16 @@
 
 (function () {
   const MOBILE_MAX = 640;
-  // 최근 글 띠에 싣는 개수. 기간이 아니라 개수로 세는 이유는 아래 renderNewStories 참고.
+  // 최근 글 띠·추천 필름 띠에 싣는 개수(둘을 같게 맞춘다). 기간이 아니라 개수로 세는 이유는 아래 renderNewStories 참고.
   const RECENT_COUNT = 8;
+  // 띠 끝의 「전체 보기」 카드. 끝에서 이만큼 더 당겼다 놓으면 그 페이지로 간다
+  const PULL_TO_GO = 64;
+  function endCardHtml(href, label) {
+    return `<a class="mh-end-card" href="${esc(href)}" aria-label="${esc(label)}">
+      <span class="mh-end-arrow" aria-hidden="true">→</span>
+      <span class="mh-end-label" data-idle="${esc(label)}" data-ready="놓으면 이동">${esc(label)}</span>
+    </a>`;
+  }
 
   function isMobile() {
     if (window.MagPwa && window.MagPwa.isForceDesktop()) return false;
@@ -84,7 +92,7 @@
           <h2 class="mh-new-title">최근 글</h2>
           <a class="mh-new-more" href="/stories.html">전체 보기 →</a>
         </div>
-        <div class="mh-new-strip">${cards}</div>
+        <div class="mh-new-strip" data-more="/stories.html">${cards}${endCardHtml('/stories.html', '전체 글 보기')}</div>
       </section>
     `;
   }
@@ -311,6 +319,50 @@
     }, { passive: true });
   }
 
+  // ─── 띠 끝에서 한 번 더 당기면 「전체 보기」 로 ───
+  // 끝에 닿기만 해서는 넘어가지 않는다(훑다가 튕겨 나가지 않게). 끝에 닿은 뒤 손가락을
+  // PULL_TO_GO 만큼 더 밀면 끝 카드가 「놓으면 이동」 으로 바뀌고, 그때 손을 떼면 이동한다.
+  (function bindPullToMore() {
+    let strip = null, startX = 0, endX = null, ready = false;
+    // 스크롤 스냅이 좌우 여백만큼 덜 가서 멈추기도 해서, 스크롤 끝 대신 「끝 카드가 다 보이는가」로 판단한다
+    const atEnd = (el) => {
+      const card = el.querySelector('.mh-end-card');
+      if (!card) return el.scrollLeft >= el.scrollWidth - el.clientWidth - 2;
+      return card.getBoundingClientRect().right <= el.getBoundingClientRect().right + 1;
+    };
+    const setPull = (px) => {
+      const card = strip && strip.querySelector('.mh-end-card');
+      if (!card) return;
+      card.style.setProperty('--pull', Math.min(1, px / PULL_TO_GO).toFixed(3));
+      const now = px >= PULL_TO_GO;
+      if (now !== ready) {
+        ready = now;
+        card.classList.toggle('is-ready', ready);
+        const label = card.querySelector('.mh-end-label');
+        if (label) label.textContent = ready ? label.dataset.ready : label.dataset.idle;
+      }
+    };
+    root.addEventListener('touchstart', (e) => {
+      strip = e.target.closest && e.target.closest('[data-more]');
+      if (!strip) return;
+      startX = e.touches[0].clientX; endX = atEnd(strip) ? startX : null; ready = false;
+    }, { passive: true });
+    root.addEventListener('touchmove', (e) => {
+      if (!strip) return;
+      const x = e.touches[0].clientX;
+      if (endX === null && atEnd(strip)) endX = x;   // 끝에 닿은 지점부터 센다
+      setPull(endX === null ? 0 : Math.max(0, endX - x));
+    }, { passive: true });
+    const finish = () => {
+      if (!strip) return;
+      const go = ready, href = strip.dataset.more;
+      setPull(0); strip = null; endX = null;
+      if (go && href) location.href = href;
+    };
+    root.addEventListener('touchend', finish, { passive: true });
+    root.addEventListener('touchcancel', () => { if (strip) { setPull(0); strip = null; endX = null; } }, { passive: true });
+  })();
+
   // ─── 최근 본 필름 (localStorage) ───
   const recentModel = window.MobileHomeModel.create({
     getFilms: () => STATE.films,
@@ -327,7 +379,7 @@
   }
 
   function chooseRecommendations() {
-    STATE.recommendations = recentModel.recommendations(3);
+    STATE.recommendations = recentModel.recommendations(RECENT_COUNT);
   }
 
   function compactFilmGrid(films) {
@@ -342,7 +394,7 @@
           <h2>추천 필름</h2>
           <span>사진이 있는 필름 중 랜덤</span>
         </div>
-        ${compactFilmGrid(STATE.recommendations)}
+        <div class="mh-film-strip" data-more="/films.html">${STATE.recommendations.map(filmCardHtml).join('')}${endCardHtml('/films.html', '필름 전체 보기')}</div>
         <a class="mh-all-films" href="/films.html">${STATE.films.length}종 필름 전체 보기</a>
       </section>`;
   }

@@ -858,7 +858,10 @@ test('모바일 홈은 추천 필름과 현재 호 참여를 중심으로 압축
   await expect(page.locator('#photoGrid')).toBeHidden();
   // 중복되는 PC 참여 영역 대신 모바일 전용 추천·현재 호 CTA를 노출
   await expect(page.locator('.mh-recommended')).toBeVisible();
-  await expect(page.locator('.mh-recommended .mh-card')).toHaveCount(3);
+  // 추천 필름은 최근 글과 같은 개수(8)로 가로 띠. 띠 끝에 「필름 전체 보기」 카드
+  await expect(page.locator('.mh-recommended .mh-card')).toHaveCount(8);
+  await expect(page.locator('.mh-recommended .mh-end-card')).toHaveAttribute('href', '/films.html');
+  await expect(page.locator('.mh-new .mh-end-card')).toHaveAttribute('href', '/stories.html');
   await expect(page.locator('.mh-theme')).toBeVisible();
   await expect(page.locator('.mh-theme .rs-trigger')).toBeVisible();
   await expect(page.locator('.footer-partners')).toBeVisible();

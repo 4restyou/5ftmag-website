@@ -141,7 +141,7 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-new-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 var(--mh-pad) 10px; }
 .mh-new-title { font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin: 0; }
 .mh-new-more { font-size: 12px; color: var(--text-muted); text-decoration: none; }
-.mh-new-strip { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 18px; scroll-snap-type: x mandatory; }
+.mh-new-strip { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 18px; scroll-snap-type: x mandatory; scroll-padding-inline: var(--mh-pad); }
 .mh-new-strip::-webkit-scrollbar { display: none; }
 .mh-new-card { flex: 0 0 78%; max-width: 280px; scroll-snap-align: start; text-decoration: none; color: var(--text); background: var(--bg); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .mh-new-card .mh-new-thumb { aspect-ratio: 16/10; background: var(--border); overflow: hidden; }
@@ -185,6 +185,23 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-compact-grid .mh-card { width: 100%; min-width: 0; flex: none; text-align: left; }
 .mh-compact-grid .mh-card-thumb { width: 100%; height: auto; aspect-ratio: 1; }
 .mh-compact-grid .mh-card-name { font-size: 11px; line-height: 1.3; }
+/* 추천 필름: 최근 글과 같은 개수로 가로 띠. 한 화면에 세 장 조금 넘게 보여 옆으로 넘길 수 있다는 게 보인다 */
+.mh-film-strip { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory;
+  margin: 0 calc(-1 * var(--mh-pad)); padding: 0 var(--mh-pad) 2px; scroll-padding-inline: var(--mh-pad); }   /* 스냅해도 첫 카드가 제목 줄과 맞게 */
+.mh-film-strip::-webkit-scrollbar { display: none; }
+.mh-film-strip .mh-card { flex: 0 0 30%; min-width: 0; }
+.mh-film-strip .mh-card-thumb { width: 100%; height: auto; aspect-ratio: 1; }
+.mh-film-strip .mh-card-name { font-size: 11px; line-height: 1.3; }
+/* 띠 끝의 「전체 보기」 카드. 끝에서 더 당길수록(--pull 0→1) 화살표가 커지고 앞으로 나온다 */
+.mh-end-card { --pull: 0; flex: 0 0 auto; align-self: stretch; scroll-snap-align: end; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  min-width: 108px; padding: 0 14px; border-radius: 8px; border: 1px dashed var(--border); color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: var(--fw-heading);
+  transform: translateX(calc(var(--pull) * -10px)); transition: transform .2s ease-out, color .15s, border-color .15s; }
+.mh-end-arrow { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid currentColor; font-size: 18px;
+  transform: scale(calc(1 + var(--pull) * .25)); transition: transform .2s ease-out, background .15s, color .15s; }
+.mh-end-card.is-ready { color: var(--text); border-color: var(--text); }
+.mh-end-card.is-ready .mh-end-arrow { background: var(--text); color: var(--bg); }
+.mh-new-strip .mh-end-card { min-width: 132px; }
+.mh-film-strip .mh-end-card { margin-bottom: 22px; }   /* 필름 카드 이름 줄 높이만큼 비워 썸네일과 높이를 맞춘다 */
 .mh-all-films {
   display: flex; align-items: center; justify-content: center;
   height: 42px; margin-top: 14px; border: 1px solid var(--text); border-radius: var(--btn-radius);
