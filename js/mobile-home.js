@@ -5,6 +5,10 @@
 // 신규 글 + 사진이 있는 추천 필름 + 최근 본 필름 + 현재 호 참여 안내.
 
 (function () {
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const mhI18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const mt = mhI18n.t;
+  const murl = mhI18n.url;
   const MOBILE_MAX = 640;
   // 최근 글 띠·추천 필름 띠에 싣는 개수(둘을 같게 맞춘다). 기간이 아니라 개수로 세는 이유는 아래 renderNewStories 참고.
   const RECENT_COUNT = 8;
@@ -13,7 +17,7 @@
   function endCardHtml(href, label) {
     return `<a class="mh-end-card" href="${esc(href)}" aria-label="${esc(label)}">
       <span class="mh-end-arrow" aria-hidden="true">→</span>
-      <span class="mh-end-label" data-idle="${esc(label)}" data-ready="놓으면 이동">${esc(label)}</span>
+      <span class="mh-end-label" data-idle="${esc(label)}" data-ready="${mt('놓으면 이동', 'Release to open')}">${esc(label)}</span>
     </a>`;
   }
 
@@ -89,10 +93,10 @@
     return `
       <section class="mh-new">
         <div class="mh-new-head">
-          <h2 class="mh-new-title">최근 글</h2>
-          <a class="mh-new-more" href="/stories.html">전체 보기 →</a>
+          <h2 class="mh-new-title">${mt('최근 글', 'Latest')}</h2>
+          <a class="mh-new-more" href="${murl('/stories.html')}">${mt('전체 보기 →', 'See all →')}</a>
         </div>
-        <div class="mh-new-strip" data-more="/stories.html">${cards}${endCardHtml('/stories.html', '전체 글 보기')}</div>
+        <div class="mh-new-strip" data-more="${murl('/stories.html')}">${cards}${endCardHtml(murl('/stories.html'), mt('전체 글 보기', 'All articles'))}</div>
       </section>
     `;
   }
@@ -110,7 +114,7 @@
     const slug = f.slug || f.id;
     const name = f.displayName || f.name || '';
     return `
-      <button type="button" class="mh-card" data-film-slug="${escAttr(slug)}" aria-label="${esc(name)} 자세히 보기">
+      <button type="button" class="mh-card" data-film-slug="${escAttr(slug)}" aria-label="${mt(`${esc(name)} 자세히 보기`, `${esc(name)} details`)}">
         <div class="mh-card-thumb">${filmThumb(f) ? `<img src="${esc(filmThumb(f))}" alt="" loading="lazy" />` : ''}</div>
         <div class="mh-card-name">${esc(name)}</div>
       </button>
@@ -137,12 +141,12 @@
         // 다음 행동 제안: 다른 추천 필름 또는 전체로 돌아가기
         const all = films.filter(f => f.tier !== 'featured');
         const random = all.length ? all[Math.floor(Math.random() * all.length)] : null;
-        const suggest = random ? `<a class="mh-empty-link" href="/films.html?film=${encodeURIComponent(random.slug)}">${esc(random.displayName || random.name)} 한번 보실래요?</a>` : '';
+        const suggest = random ? `<a class="mh-empty-link" href="${murl('/films.html')}?film=${encodeURIComponent(random.slug)}">${mt(`${esc(random.displayName || random.name)} 한번 보실래요?`, `How about ${esc(random.displayName || random.name)}?`)}</a>` : '';
         return `
           <div class="mh-empty">
-            <p>조건에 맞는 필름이 없어요.</p>
+            <p>${mt('조건에 맞는 필름이 없어요.', 'No films match.')}</p>
             ${suggest}
-            <button type="button" class="mh-empty-btn" id="mhResetSearch">전체 보기로 돌아가기</button>
+            <button type="button" class="mh-empty-btn" id="mhResetSearch">${mt('전체 보기로 돌아가기', 'Back to all films')}</button>
           </div>`;
       }
       return `<div class="mh-search-grid">${list.map(filmCardHtml).join('')}</div>`;
@@ -411,11 +415,11 @@
     return `
       <section class="mh-compact-section mh-recommended">
         <div class="mh-compact-head">
-          <h2>추천 필름</h2>
-          <span>사진이 있는 필름 중 랜덤</span>
+          <h2>${mt('추천 필름', 'Film picks')}</h2>
+          <span>${mt('사진이 있는 필름 중 랜덤', 'Random films with photos')}</span>
         </div>
-        <div class="mh-film-strip" data-more="/films.html">${STATE.recommendations.map(filmCardHtml).join('')}${endCardHtml('/films.html', '필름 전체 보기')}</div>
-        <a class="mh-all-films" href="/films.html">${STATE.films.length}종 필름 전체 보기</a>
+        <div class="mh-film-strip" data-more="${murl('/films.html')}">${STATE.recommendations.map(filmCardHtml).join('')}${endCardHtml(murl('/films.html'), mt('필름 전체 보기', 'All films'))}</div>
+        <a class="mh-all-films" href="${murl('/films.html')}">${mt(`${STATE.films.length}종 필름 전체 보기`, `See all ${STATE.films.length} films`)}</a>
       </section>`;
   }
 
@@ -425,8 +429,8 @@
     return `
       <section class="mh-compact-section mh-recent">
         <div class="mh-compact-head">
-          <h2>최근 본 필름</h2>
-          <span>${recentFilms().length}개 기록</span>
+          <h2>${mt('최근 본 필름', 'Recently viewed')}</h2>
+          <span>${mt(`${recentFilms().length}개 기록`, `${recentFilms().length} films`)}</span>
         </div>
         ${compactFilmGrid(list)}
       </section>`;
@@ -440,7 +444,7 @@
     if (Array.isArray(_homeStrip) && !_homeStrip.length) return '';
     const cells = Array.isArray(_homeStrip)
       ? _homeStrip.map((r, i) => `
-        <button type="button" class="mh-photo-cell" data-strip-index="${i}" aria-label="${esc(r.film || '독자 사진')} 크게 보기">
+        <button type="button" class="mh-photo-cell" data-strip-index="${i}" aria-label="${mt(`${esc(r.film || '독자 사진')} 크게 보기`, `View ${esc(r.film || 'reader photo')}`)}">
           <img src="${esc(r.image)}" alt="" loading="lazy" />
         </button>`).join('')
       : Array.from({ length: 9 }).map(() => '<div class="mh-photo-cell mh-photo-cell-skel"></div>').join('');
@@ -492,18 +496,19 @@
   function renderThemeBlock() {
     const theme = STATE.theme;
     if (!theme?.active) return '';
-    const issue = theme.issue || theme.month || '다음 호';
+    const issue = theme.issue || theme.month || mt('다음 호', 'Next issue');
+    const loc = (k) => (mhI18n.isEn && theme[k + 'En']) || theme[k];
     return `
       <section class="mh-theme">
         <span class="mh-theme-tag">5FT MAGAZINE · ${esc(issue)}</span>
         <h2>${esc(theme.title || '')}</h2>
-        ${theme.subtitle ? `<p class="mh-theme-sub">${esc(theme.subtitle)}</p>` : ''}
-        ${theme.description ? `<p class="mh-theme-desc">${esc(theme.description)}</p>` : ''}
-        ${theme.film ? `<span class="mh-theme-film">메인 필름 · ${esc(theme.film)}</span>` : ''}
-        ${theme.submissionNote ? `<p class="mh-theme-reward">${esc(theme.submissionNote)}</p>` : ''}
+        ${theme.subtitle ? `<p class="mh-theme-sub">${esc(loc('subtitle'))}</p>` : ''}
+        ${theme.description ? `<p class="mh-theme-desc">${esc(loc('description'))}</p>` : ''}
+        ${theme.film ? `<span class="mh-theme-film">${mt('메인 필름', 'Main film')} · ${esc(theme.film)}</span>` : ''}
+        ${theme.submissionNote ? `<p class="mh-theme-reward">${esc(loc('submissionNote'))}</p>` : ''}
         <div class="mh-theme-actions">
-          <button type="button" class="rs-trigger" data-action="open-submission">${esc(issue)} 응모하기</button>
-          <a href="/books.html">지난 호 보기·구매</a>
+          <button type="button" class="rs-trigger" data-action="open-submission">${mt(`${esc(issue)} 응모하기`, `Submit to ${esc(issue)}`)}</button>
+          <a href="/books.html">${mt('지난 호 보기·구매', 'Back issues (Korean)')}</a>
         </div>
       </section>`;
   }
@@ -536,7 +541,7 @@
     wrap.setAttribute('aria-label', name);
     wrap.innerHTML = `
       <div class="mh-sheet" role="document">
-        <button type="button" class="mh-sheet-grip" aria-label="닫기"></button>
+        <button type="button" class="mh-sheet-grip" aria-label="${mt('닫기', 'Close')}"></button>
         <div class="mh-sheet-head">
           ${thumb ? `<div class="mh-sheet-thumb"><img src="${escAttr(thumb)}" alt="" /></div>` : ''}
           <div class="mh-sheet-meta">
@@ -552,9 +557,9 @@
         <div class="mh-sheet-cta">
           <button type="button" class="mh-sheet-upload" data-action="open-submission" data-prefill-film="${escAttr(name)}">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            사진 올리기
+            ${mt('사진 올리기', 'Upload a photo')}
           </button>
-          <a class="mh-sheet-go" href="/films.html?film=${encodeURIComponent(slug)}">전체 페이지에서 보기 →</a>
+          <a class="mh-sheet-go" href="${murl('/films.html')}?film=${encodeURIComponent(slug)}">${mt('전체 페이지에서 보기 →', 'Open full page →')}</a>
         </div>
       </div>
     `;
@@ -608,7 +613,7 @@
     const picked = shuffleInPlace(rows.slice()).slice(0, 9);
     container.removeAttribute('aria-busy');
     container.innerHTML = picked.map((row, i) => `
-      <button type="button" class="mh-sheet-photo" data-photo-index="${i}" aria-label="사진 ${i + 1} 크게 보기">
+      <button type="button" class="mh-sheet-photo" data-photo-index="${i}" aria-label="${mt(`사진 ${i + 1} 크게 보기`, `View photo ${i + 1}`)}">
         <img src="${escAttr(row.image)}" alt="" loading="lazy" />
       </button>
     `).join('');
@@ -625,8 +630,8 @@
     const name = f.displayName || f.name || '';
     container.outerHTML = `
       <div class="mh-sheet-empty">
-        <p>이 필름으로 올라온 사진이 아직 없어요.</p>
-        <button type="button" class="mh-sheet-empty-btn" data-action="open-submission" data-prefill-film="${escAttr(name)}">처음으로 올려보기</button>
+        <p>${mt('이 필름으로 올라온 사진이 아직 없어요.', 'No photos on this film yet.')}</p>
+        <button type="button" class="mh-sheet-empty-btn" data-action="open-submission" data-prefill-film="${escAttr(name)}">${mt('처음으로 올려보기', 'Be the first to upload')}</button>
       </div>`;
   }
 
@@ -653,9 +658,9 @@
     lb.setAttribute('role', 'dialog');
     lb.setAttribute('aria-modal', 'true');
     lb.innerHTML = `
-      <button type="button" class="mh-sheet-lb-close" aria-label="닫기">✕</button>
-      <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-prev" aria-label="이전">‹</button>
-      <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-next" aria-label="다음">›</button>
+      <button type="button" class="mh-sheet-lb-close" aria-label="${mt('닫기', 'Close')}">✕</button>
+      <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-prev" aria-label="${mt('이전', 'Previous')}">‹</button>
+      <button type="button" class="mh-sheet-lb-nav mh-sheet-lb-next" aria-label="${mt('다음', 'Next')}">›</button>
       <div class="mh-sheet-lb-stage"><img alt="" /></div>
       <div class="mh-sheet-lb-info">
         <div class="mh-sheet-lb-meta">
@@ -666,21 +671,21 @@
           <span class="mh-sheet-lb-counter"></span>
         </div>
         <div class="mh-sheet-lb-actions">
-          <button type="button" class="mh-sheet-lb-fav" aria-pressed="false" aria-label="즐겨찾기 추가" hidden>
+          <button type="button" class="mh-sheet-lb-fav" aria-pressed="false" aria-label="${mt('즐겨찾기 추가', 'Add to favorites')}" hidden>
             <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
               <path stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"
                     d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
             </svg>
           </button>
-          <button type="button" class="mh-sheet-lb-share" aria-label="공유" hidden>
+          <button type="button" class="mh-sheet-lb-share" aria-label="${mt('공유', 'Share')}" hidden>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
               <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>
             </svg>
           </button>
-          <button type="button" class="mh-sheet-lb-potw" hidden>이주의 사진으로 걸기</button>
-          <a class="mh-sheet-lb-link mh-sheet-lb-filmlink">필름 보기 →</a>
-          <a class="mh-sheet-lb-link mh-sheet-lb-contributor" hidden>촬영자 보기 →</a>
+          <button type="button" class="mh-sheet-lb-potw" hidden>${mt('이주의 사진으로 걸기', 'Set as Photo of the Week')}</button>
+          <a class="mh-sheet-lb-link mh-sheet-lb-filmlink">${mt('필름 보기 →', 'View film →')}</a>
+          <a class="mh-sheet-lb-link mh-sheet-lb-contributor" hidden>${mt('촬영자 보기 →', 'View photographer →')}</a>
         </div>
       </div>
     `;
@@ -739,11 +744,11 @@
       const filmSlug = (f?.slug || f?.id) || filmSlugByName(filmName);
       filmEl.textContent = filmName;
       filmEl.hidden = !filmName;
-      filmEl.href = filmSlug ? `/films.html?film=${encodeURIComponent(filmSlug)}` : '/films.html';
+      filmEl.href = filmSlug ? `${murl('/films.html')}?film=${encodeURIComponent(filmSlug)}` : murl('/films.html');
 
       cameraEl.textContent = r.camera || '';
       cameraEl.hidden = !r.camera;
-      cameraEl.href = r.camera ? `/films.html?camera=${encodeURIComponent(r.camera)}` : '/films.html';
+      cameraEl.href = r.camera ? `${murl('/films.html')}?camera=${encodeURIComponent(r.camera)}` : murl('/films.html');
 
       const note = (r.caption || '').trim();
       noteEl.textContent = note;
@@ -760,17 +765,17 @@
 
       counterEl.textContent = `${cur + 1} / ${rows.length}`;
       // 스크린리더에 변화 알림
-      try { window.srAnnounce?.(`사진 ${cur + 1}, 총 ${rows.length}장. ${r.author || ''}${r.film ? ', ' + r.film : ''}`.trim()); } catch (_) {}
+      try { window.srAnnounce?.(mt(`사진 ${cur + 1}, 총 ${rows.length}장. `, `Photo ${cur + 1} of ${rows.length}. `) + `${r.author || ''}${r.film ? ', ' + r.film : ''}`.trim()); } catch (_) {}
       lb.querySelector('.mh-sheet-lb-prev').disabled = cur === 0;
       lb.querySelector('.mh-sheet-lb-next').disabled = cur === rows.length - 1;
 
-      filmLinkEl.href = filmSlug ? `/films.html?film=${encodeURIComponent(filmSlug)}` : '/films.html';
+      filmLinkEl.href = filmSlug ? `${murl('/films.html')}?film=${encodeURIComponent(filmSlug)}` : murl('/films.html');
 
       const contribKey = contributorKeyOf(r);
       if (contribKey) {
         const params = new URLSearchParams({ contributor: contribKey });
         if (filmSlug) params.set('film', filmSlug);
-        contribLinkEl.href = `/films.html?${params.toString()}`;
+        contribLinkEl.href = `${murl('/films.html')}?${params.toString()}`;
         contribLinkEl.hidden = false;
       } else {
         contribLinkEl.hidden = true;
@@ -786,7 +791,7 @@
         const isFav = favIds.has(subId);
         favBtn.classList.toggle('is-fav', isFav);
         favBtn.setAttribute('aria-pressed', String(isFav));
-        favBtn.setAttribute('aria-label', isFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
+        favBtn.setAttribute('aria-label', isFav ? mt('즐겨찾기 해제', 'Remove from favorites') : mt('즐겨찾기 추가', 'Add to favorites'));
       }
     }
 
@@ -794,10 +799,10 @@
       if (favBtn.hidden || favBtn.classList.contains('is-busy')) return;
       const subId = favBtn.dataset.submissionId || '';
       if (!subId) return;
-      if (!window.MagDB?.isReady?.()) { window.notify?.('잠시 후 다시 시도해주세요.', 'info'); return; }
+      if (!window.MagDB?.isReady?.()) { window.notify?.(mt('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info'); return; }
       const sess = await window.MagDB.auth.getSession();
       if (!sess) {
-        if (!confirm('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?')) return;
+        if (!confirm(mt('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Favorites need an account. Sign in with Google?'))) return;
         window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
         return;
       }
@@ -812,7 +817,7 @@
         if (wasFav) favIds.add(subId); else favIds.delete(subId);
         favBtn.classList.toggle('is-fav', wasFav);
         favBtn.setAttribute('aria-pressed', String(wasFav));
-        window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
+        window.notify?.(mt('처리 실패: ', 'Failed: ') + (error.message || mt('잠시 후 다시 시도', 'please try again')), 'danger');
       }
     }
 
@@ -906,8 +911,8 @@
       const tip = document.createElement('div');
       tip.className = 'mh-onboard';
       tip.innerHTML = `
-        <span>여기서 사진을 올려요</span>
-        <button type="button" aria-label="닫기">✕</button>
+        <span>${mt('여기서 사진을 올려요', 'Upload your photos here')}</span>
+        <button type="button" aria-label="${mt('닫기', 'Close')}">✕</button>
       `;
       tip.querySelector('button').addEventListener('click', () => {
         try { localStorage.setItem(KEY, '1'); } catch {}
@@ -937,8 +942,8 @@
     const toast = document.createElement('div');
     toast.className = 'mh-pwa-toast';
     toast.innerHTML = `
-      <span>홈 화면에 추가하면 앱처럼 쓸 수 있어요. 공유 ↗ → "홈 화면에 추가"</span>
-      <button type="button" aria-label="닫기">알겠어요</button>
+      <span>${mt('홈 화면에 추가하면 앱처럼 쓸 수 있어요. 공유 ↗ → "홈 화면에 추가"', 'Add to your Home Screen to use it like an app. Share ↗ → "Add to Home Screen"')}</span>
+      <button type="button" aria-label="${mt('닫기', 'Close')}">${mt('알겠어요', 'Got it')}</button>
     `;
     toast.querySelector('button').addEventListener('click', () => {
       try { localStorage.setItem(KEY, '1'); } catch {}
@@ -962,7 +967,7 @@
       }
       await new Promise(r => setTimeout(r, 80));
     }
-    if (!api) { grid.innerHTML = '<div class="mh-empty"><p>사진을 불러오지 못했어요.</p></div>'; return; }
+    if (!api) { grid.innerHTML = `<div class="mh-empty"><p>${mt('사진을 불러오지 못했어요.', 'Could not load photos.')}</p></div>`; return; }
     if (!_photoCache) {
       try { _photoCache = await api.listApproved(180); }
       catch { _photoCache = []; }
@@ -981,11 +986,11 @@
     const shuffled = shuffleInPlace(filtered.slice());
     grid.removeAttribute('aria-busy');
     if (!shuffled.length) {
-      grid.outerHTML = '<div class="mh-empty"><p>조건에 맞는 사진이 없어요.</p></div>';
+      grid.outerHTML = `<div class="mh-empty"><p>${mt('조건에 맞는 사진이 없어요.', 'No photos match.')}</p></div>`;
       return;
     }
     grid.innerHTML = shuffled.map((r, i) => `
-      <button type="button" class="mh-photo-cell" data-photo-index="${i}" aria-label="${esc(r.film || '사진')} ${i + 1} 크게 보기">
+      <button type="button" class="mh-photo-cell" data-photo-index="${i}" aria-label="${mt(`${esc(r.film || '사진')} ${i + 1} 크게 보기`, `View ${esc(r.film || 'photo')} ${i + 1}`)}">
         <img src="${esc(r.image)}" alt="" loading="lazy" />
       </button>
     `).join('');

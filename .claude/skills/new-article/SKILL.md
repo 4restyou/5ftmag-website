@@ -69,6 +69,19 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
   CI 의 qa-smoke 가 커밋된 두 파일에 발행 글이 들어 있는지 검사하므로, 빠뜨리면 main 이 빨간색이 된다.
   비공개(`published: false`)로 넣는 경우엔 두 파일에 들어가지 않는 것이 정상이라 그대로 두면 된다.
 
+## 4.5. 영문판 (en/stories/)
+
+한국어 기사를 확정한 뒤 영문판을 같은 PR 에 넣는다. 영문 목록은 번역이 없는 기사를 한국어판으로 잇기 때문에 빠뜨려도 깨지지는 않지만, 영문판이 비게 된다.
+
+1. `node scripts/en-story-skeleton.mjs <id>` — 경로·언어 태그·공통 문구·「AI 번역」 안내를 바꾼 골격을 만든다.
+2. 남은 한국어를 영어로 옮긴다. 기준 예시는 `en/stories/lee-gapchul.html`. 규칙:
+   - 직역하지 않는다. byline 문체(편집부는 분석적, Film Social Club 은 가벼운 사담조)를 살린다. em dash 금지, 미국식 철자.
+   - 사실·수치·고유명사·인용은 그대로. 한국 인명은 개정 로마자 성-이름(이갑철 → Lee Gap-chul), 5ft.mag 편집부 → 5ft.mag Editors.
+   - 전시·책 제목은 공식 영문명이 있으면 그것, 없으면 옮기고 첫 등장에 원제를 괄호로 병기.
+   - `.author-name` 의 `data-author`(작가 카드 매칭 키), 링크, 이미지 경로, 「AI 번역」 안내 문단은 건드리지 않는다.
+3. `data/stories.json` 항목에 `titleEn`, `excerptEn`, `authorEn` 을 넣는다.
+4. `npm run shell:sync` (영문 페이지 셸·링크 연결) → `node scripts/en-check.mjs <id>` 가 `✓ 남은 한국어 없음` 인지 확인. CI 의 단위 테스트(en-site.spec)도 같은 검사를 한다.
+
 ## 5. 배포
 
 /ship 절차로 PR → 머지. 보고 시 기사 URL 과 "Articles 목록 맨 위 노출"을 안내하고, 임시 처리(핸들 미확보 등)가 있으면 명시한다.

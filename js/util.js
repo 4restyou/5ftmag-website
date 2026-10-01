@@ -98,6 +98,21 @@
       .catch(function () { done(); return []; });
   }
 
+  // 영문 페이지(<html lang="en">)에선 번역된 글(titleEn 이 있는 글)의 제목·요약·주소를 영문판으로 바꾼다.
+  // id·author 는 그대로 둔다(작가 매칭·관련 글 점수의 키). 표시용 작가명은 authorEn 이다.
+  function localizeStories(list, isEn) {
+    if (!isEn || !Array.isArray(list)) return list;
+    return list.map(function (s) {
+      if (!s || !s.titleEn) return s;
+      return Object.assign({}, s, {
+        title: s.titleEn,
+        excerpt: s.excerptEn || s.excerpt,
+        page: s.page ? 'en/' + s.page : s.page,
+        titleKo: s.title,
+      });
+    });
+  }
+
   // 한 페이지에서 여러 번 불러도 요청은 한 번이다.
   let storiesPromise = null;
   function loadStories() {
@@ -108,7 +123,7 @@
       fetch('/data/stories.json').then(function (r) { return r.ok ? r.json() : []; }),
       fetchVisibility(),
     ]).then(function (pair) {
-      return applyVisibility(pair[0], pair[1]);
+      return localizeStories(applyVisibility(pair[0], pair[1]), document.documentElement.lang === 'en');
     }).catch(function () {
       storiesPromise = null;   // 다음 호출에서 다시 시도한다
       return [];
@@ -186,6 +201,7 @@
     formatPrice: formatPrice,
     pickByAuthorRoundRobin: pickByAuthorRoundRobin,
     applyVisibility: applyVisibility,
+    localizeStories: localizeStories,
     loadStories: loadStories,
     supabaseConfig: { url: SB_URL, anonKey: SB_ANON },
   });

@@ -7,6 +7,8 @@
 // 의도적으로 의존성 없이 순수 문자열을 돌려줘, 각 페이지의 grid.innerHTML 에 그대로 꽂을 수 있게 한다.
 (function () {
   'use strict';
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const tr = (window.i18n || { t: (ko) => ko }).t;
 
   function esc(s) {
     const d = document.createElement('div');
@@ -27,7 +29,7 @@
       + `<div class="skeleton skeleton-line" style="width:40%"></div>`
       + `</div>`;
     return `<div class="mag-state mag-state--loading" role="status" aria-live="polite">`
-      + `<span class="sr-only">${esc(o.label || '불러오는 중…')}</span>`
+      + `<span class="sr-only">${esc(o.label || tr('불러오는 중…', 'Loading…'))}</span>`
       + card.repeat(count)
       + `</div>`;
   }
@@ -35,7 +37,7 @@
   // 빈 상태: 안내 + (선택) 다음 행동 버튼. action 이 있으면 data-state-action 으로 표시.
   function empty(opts) {
     const o = opts || {};
-    const title = o.title || '아직 표시할 내용이 없어요.';
+    const title = o.title || tr('아직 표시할 내용이 없어요.', 'Nothing to show yet.');
     const desc = o.desc ? `<p class="mag-state-desc">${esc(o.desc)}</p>` : '';
     const cta = o.actionLabel
       ? `<button type="button" class="mag-state-btn" data-state-action="${esc(o.action || 'reset')}">${esc(o.actionLabel)}</button>`
@@ -49,11 +51,11 @@
   // 에러 상태: 안내 + 다시 시도 버튼 (기본 라벨 '다시 시도').
   function error(opts) {
     const o = opts || {};
-    const title = o.title || '불러오지 못했어요.';
+    const title = o.title || tr('불러오지 못했어요.', 'Could not load.');
     const desc = o.desc ? `<p class="mag-state-desc">${esc(o.desc)}</p>`
-      : `<p class="mag-state-desc">네트워크 상태를 확인한 뒤 다시 시도해 주세요.</p>`;
+      : `<p class="mag-state-desc">${tr('네트워크 상태를 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.')}</p>`;
     const retry = o.noRetry ? ''
-      : `<button type="button" class="mag-state-btn" data-state-action="${esc(o.action || 'retry')}">${esc(o.actionLabel || '다시 시도')}</button>`;
+      : `<button type="button" class="mag-state-btn" data-state-action="${esc(o.action || 'retry')}">${esc(o.actionLabel || tr('다시 시도', 'Try again'))}</button>`;
     return `<div class="mag-state mag-state--error" role="alert">`
       + `<p class="mag-state-title">${esc(title)}</p>`
       + desc + retry

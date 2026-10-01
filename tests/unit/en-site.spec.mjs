@@ -4,9 +4,10 @@
 // 그래서 영문 페이지의 셸 링크가 상대경로로 나가면 눈에 띄지 않게 한국어판으로 새어 나간다.
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { navHtml, mobileNavHtml, footerPublisherHtml, alternatesHtml, isEnFile, ROOT } from '../../scripts/lib/site-shell.mjs';
+import { leftoverKorean } from '../../scripts/lib/en-text.mjs';
 
 const enAbout = join(ROOT, 'en/about.html');
 const koAbout = join(ROOT, 'about.html');
@@ -74,5 +75,53 @@ describe('js/i18n.js', () => {
     expect(i18n.url('/market.html')).toBe('/market.html');
     expect(i18n.url('/shop.html')).toBe('/shop.html');
     expect(i18n.url('/en/films.html')).toBe('/en/films.html');
+  });
+});
+
+describe('영문 기사', () => {
+  const enDir = join(ROOT, 'en/stories');
+  const pages = existsSync(enDir) ? readdirSync(enDir).filter((f) => f.endsWith('.html')) : [];
+
+  it('한국어가 남지 않았다(원제 병기·주석·작가 매칭 키 제외)', () => {
+    const left = pages.flatMap((f) => leftoverKorean(readFileSync(join(enDir, f), 'utf8')).map((l) => `${f}:${l.line} ${l.text.slice(0, 60)}`));
+    expect(left).toEqual([]);
+  });
+
+  it('언어·주소·AI 번역 안내·원문 링크를 갖췄다', () => {
+    for (const f of pages) {
+      const html = readFileSync(join(enDir, f), 'utf8');
+      expect(html, f).toMatch(/<html lang="en"/);
+      expect(html, f).toContain(`<link rel="canonical" href="https://www.5ftmag.com/en/stories/${f}">`);
+      expect(html, f).toMatch(/class="article-translation-note"[^]*?href="\/stories\/[^"]+" hreflang="ko"/);
+      expect(html, f).toMatch(/js\/i18n\.js\?v=/);
+    }
+  });
+
+  it('stories.json 의 영문 제목과 영문 페이지가 짝을 이룬다', () => {
+    const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
+    for (const s of stories.filter((x) => x.titleEn)) {
+      expect(existsSync(join(ROOT, 'en', s.page)), s.page).toBe(true);
+      expect(s.titleEn, s.id).toMatch(/[A-Za-z]/);
+    }
+  });
+});
+
+describe('MagUtil.localizeStories', () => {
+  const src = readFileSync(join(ROOT, 'js/util.js'), 'utf8');
+  new Function(src)();
+  const { localizeStories } = window.MagUtil;
+  const list = [
+    { id: 'a', title: '한국어', excerpt: '요약', page: 'stories/a.html', author: '김현아', titleEn: 'English', excerptEn: 'Summary' },
+    { id: 'b', title: '번역 전', excerpt: '요약', page: 'stories/b.html' },
+  ];
+
+  it('한국어 페이지에선 그대로 둔다', () => {
+    expect(localizeStories(list, false)).toBe(list);
+  });
+
+  it('영문 페이지에선 번역된 글만 영문 제목·요약·/en/ 주소로, 작가 키는 그대로', () => {
+    const [a, b] = localizeStories(list, true);
+    expect(a).toMatchObject({ title: 'English', excerpt: 'Summary', page: 'en/stories/a.html', author: '김현아', titleKo: '한국어' });
+    expect(b).toBe(list[1]);
   });
 });

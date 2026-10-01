@@ -3,6 +3,11 @@
   // ════════════════════════════
   // Stories: JSON 로딩 + 카드 자동 생성
   // ════════════════════════════
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const storiesI18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko };
+  const st = storiesI18n.t;
+  const monthLabel = (y, mo) => st(`${y}년 ${Number(mo)}월`, new Date(Number(y), Number(mo) - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }));
+
   const grid = document.getElementById('articlesGrid');
   const paginationBars = document.querySelectorAll('[data-pagination]');
   const pageSize = 12;
@@ -52,7 +57,8 @@
   // 카테고리 라벨 생성 (PHOTO · 박순렬 형태)
   function categoryLabel(story) {
     const label = story.categoryLabel || story.category.toUpperCase();
-    return story.author ? `${label} · ${story.author}` : label;
+    const author = storiesI18n.isEn ? (story.authorEn || story.author) : story.author;
+    return author ? `${label} · ${author}` : label;
   }
 
   // 라벨 → 칸 표는 js/story-categories.js 하나에 둔다(에디터·검증과 공유). 없을 때만 아래 옛 규칙
@@ -82,7 +88,7 @@
     const favHtml = `
       <span class="article-card-fav${isFav ? ' is-fav' : ''}" role="button" tabindex="0"
             data-action="toggle-article-fav" data-article-id="${escapeAttr(story.id)}"
-            aria-pressed="${isFav}" aria-label="${isFav ? '스크랩 해제' : '스크랩'}">
+            aria-pressed="${isFav}" aria-label="${isFav ? st('스크랩 해제', 'Remove from saved') : st('스크랩', 'Save')}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16l-6-4-6 4Z"/>
         </svg>
@@ -132,9 +138,9 @@
         ).join('');
 
       bar.innerHTML = `
-        <button type="button" class="nav-arrow ${currentPage === 1 ? 'disabled' : ''}" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>← 이전</button>
+        <button type="button" class="nav-arrow ${currentPage === 1 ? 'disabled' : ''}" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>${st('← 이전', '← Prev')}</button>
         <div class="page-numbers">${pages}</div>
-        <button type="button" class="nav-arrow ${currentPage === totalPages ? 'disabled' : ''}" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>다음 →</button>
+        <button type="button" class="nav-arrow ${currentPage === totalPages ? 'disabled' : ''}" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>${st('다음 →', 'Next →')}</button>
       `;
     });
   }
@@ -144,8 +150,8 @@
     if (stories.length === 0) {
       const hasFilter = currentSearchQuery || currentCategory !== 'all' || currentMonth !== 'all';
       grid.innerHTML = `<div class="no-results">
-        일치하는 글이 없습니다. 제목, 카테고리, 작가명을 줄여서 다시 검색해 보세요.
-        ${hasFilter ? '<button type="button" class="no-results-reset" id="noResultsReset">전체 글 보기</button>' : ''}
+        ${st('일치하는 글이 없습니다. 제목, 카테고리, 작가명을 줄여서 다시 검색해 보세요.', 'No matching articles. Try a shorter title, category or author name.')}
+        ${hasFilter ? `<button type="button" class="no-results-reset" id="noResultsReset">${st('전체 글 보기', 'Show all articles')}</button>` : ''}
       </div>`;
       document.getElementById('noResultsReset')?.addEventListener('click', resetFilters);
       renderPagination(0);
@@ -174,10 +180,10 @@
     const months = [...new Set(
       allStories.map(s => String(s.date || '').slice(0, 7)).filter(m => /^\d{4}-\d{2}$/.test(m))
     )].sort((a, b) => b.localeCompare(a));
-    sel.innerHTML = ['<option value="all">전체 기간</option>']
+    sel.innerHTML = [`<option value="all">${st('전체 기간', 'All dates')}</option>`]
       .concat(months.map(m => {
         const [y, mo] = m.split('-');
-        return `<option value="${m}">${y}년 ${Number(mo)}월</option>`;
+        return `<option value="${m}">${monthLabel(y, mo)}</option>`;
       })).join('');
     sel.value = currentMonth;
   }
@@ -247,7 +253,7 @@
     }
     if (currentMonth !== 'all') {
       const [y, mo] = currentMonth.split('-');
-      parts.push(`${y}년 ${Number(mo)}월`);
+      parts.push(monthLabel(y, mo));
     }
     if (currentFilmSlug) {
       parts.push(filmDisplayBySlug[currentFilmSlug] || currentFilmSlug);
@@ -268,12 +274,12 @@
     }
     const cnt = document.createElement('span');
     cnt.className = 'result-meta-count';
-    cnt.textContent = `${count.toLocaleString('ko-KR')}개`;
+    cnt.textContent = st(`${count.toLocaleString('ko-KR')}개`, `${count.toLocaleString('en-US')} ${count === 1 ? 'article' : 'articles'}`);
     countEl.appendChild(cnt);
     const reset = document.createElement('button');
     reset.type = 'button';
     reset.className = 'result-meta-reset';
-    reset.textContent = '초기화';
+    reset.textContent = st('초기화', 'Reset');
     reset.addEventListener('click', resetFilters);
     countEl.appendChild(reset);
   }
@@ -335,8 +341,8 @@
     .catch(err => {
       console.error(err);
       grid.innerHTML = window.MagState
-        ? window.MagState.error({ title: '글 목록을 불러오지 못했어요.' })
-        : '<div class="empty-state">글 목록을 불러오지 못했습니다.</div>';
+        ? window.MagState.error({ title: st('글 목록을 불러오지 못했어요.', 'Could not load articles.') })
+        : `<div class="empty-state">${st('글 목록을 불러오지 못했습니다.', 'Could not load articles.')}</div>`;
       window.MagState?.bindAction(grid, 'retry', () => location.reload());
     });
 
@@ -346,7 +352,7 @@
       const on = articleFavIds.has(id);
       el.classList.toggle('is-fav', on);
       el.setAttribute('aria-pressed', String(on));
-      el.setAttribute('aria-label', on ? '스크랩 해제' : '스크랩');
+      el.setAttribute('aria-label', on ? st('스크랩 해제', 'Remove from saved') : st('스크랩', 'Save'));
     });
   }
 
@@ -360,12 +366,12 @@
     const id = fav.dataset.articleId;
     if (!id) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
+      window.notify?.(st('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm('스크랩은 로그인이 필요해요. Google로 로그인할까요?')) return;
+      if (!confirm(st('스크랩은 로그인이 필요해요. Google로 로그인할까요?', 'Saving needs an account. Sign in with Google?'))) return;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return;
     }
@@ -378,7 +384,7 @@
     if (error) {
       if (wasFav) articleFavIds.add(id); else articleFavIds.delete(id);
       syncCardFavMarks();
-      window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
+      window.notify?.(st('처리 실패: ', 'Failed: ') + (error.message || st('잠시 후 다시 시도', 'please try again')), 'danger');
     }
   });
 

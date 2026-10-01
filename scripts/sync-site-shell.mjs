@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT as root, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, footerCopyHtml, alternatesHtml } from './lib/site-shell.mjs';
+import { ROOT as root, isEnFile, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, footerCopyHtml, alternatesHtml } from './lib/site-shell.mjs';
 
 const check = process.argv.includes('--check');
 const changed = [];
@@ -43,6 +43,17 @@ for (const file of walk(root)) {
       `$1$2${footerCopyHtml(file)}\n</footer>`,
     );
   }
+  // 영문 페이지 본문의 링크: 영문판이 있는 페이지(/x.html)는 /en/x.html 로 잇는다.
+  // 원문 링크(hreflang="ko")와 이미 /en/ 인 링크는 그대로 둔다. 영문 페이지가 새로 생기면 다시 돌려 이어 준다.
+  if (isEnFile(file)) {
+    next = next.replace(/<a\b([^>]*?)\bhref="(\/[^"#?]*)([^"]*)"([^>]*)>/g, (all, pre, p, rest, post) => {
+      if (/hreflang="ko"/.test(pre + post) || p.startsWith('/en/')) return all;
+      const page = p === '/' ? 'index.html' : p.slice(1);
+      if (!/\.html$/.test(page) || !fs.existsSync(path.join(root, 'en', page))) return all;
+      return `<a${pre}href="/en/${p === '/' ? '' : page}${rest}"${post}>`;
+    });
+  }
+
   // 언어 대응 링크는 canonical 바로 아래에 둔다. 매번 지우고 다시 넣어 공개 여부(en.publish)를 따른다.
   next = next.replace(/\n[ \t]*<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g, '');
   const alternates = alternatesHtml(file);

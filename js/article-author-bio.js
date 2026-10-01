@@ -4,6 +4,9 @@
 // .article-author .author-name 텍스트와 location.pathname 을 authors.json·stories.json 과 매칭.
 
 (async function () {
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
   const articleEl = document.querySelector('article');
   if (!articleEl) return;
 
@@ -43,10 +46,10 @@
     const sec = document.createElement('section');
     sec.className = 'article-films';
     sec.innerHTML = `
-      <h4 class="article-films-head">이 글에 나온 필름</h4>
+      <h4 class="article-films-head">${tr('이 글에 나온 필름', 'Films in this article')}</h4>
       <div class="article-films-chips">
         ${items.map((x) => `
-          <a class="article-film-chip" href="/films.html?film=${encodeURIComponent(x.slug)}">
+          <a class="article-film-chip" href="${i18n.url('/films.html')}?film=${encodeURIComponent(x.slug)}">
             ${escapeText(x.name)}
           </a>`).join('')}
       </div>`;
@@ -63,7 +66,8 @@
   function buildAuthorBio(authors, stories, currentPath) {
     const nameEl = document.querySelector('.article-author .author-name');
     if (!nameEl) return;
-    const authorName = nameEl.textContent.trim();
+    // 영문판은 표시 이름이 영어라 원래 이름을 data-author 에 둔다(scripts/en-story-skeleton.mjs)
+    const authorName = (nameEl.dataset.author || nameEl.textContent).trim();
     if (!authorName) return;
 
     const author = authors.find((a) => a.name === authorName);
@@ -89,9 +93,9 @@
     bioSection.className = 'article-author-bio';
     bioSection.innerHTML = `
       <a class="author-bio-card" href="/authors/${escapeAttr(author.slug)}.html">
-        <h3>${escapeText(author.name)}</h3>
-        <p>${escapeText(author.note || '')}</p>
-        <span class="author-bio-link">${author.count}개의 글 보기 →</span>
+        <h3>${escapeText(i18n.isEn ? (nameEl.textContent.trim() || author.name) : author.name)}</h3>
+        ${i18n.isEn ? '' : `<p>${escapeText(author.note || '')}</p>`}
+        <span class="author-bio-link">${tr(`${author.count}개의 글 보기 →`, `${author.count} articles →`)}</span>
       </a>`;
 
     let relatedSection = null;
@@ -99,8 +103,8 @@
       relatedSection = document.createElement('section');
       relatedSection.className = 'related-by-author';
       const relatedHeader = (sameAuthor.length > 0 && !relatedFromCategory)
-        ? `${escapeText(authorName)}의 다른 글`
-        : '함께 보면 좋은 글';
+        ? tr(`${escapeText(authorName)}의 다른 글`, `More from ${escapeText(nameEl.textContent.trim() || authorName)}`)
+        : tr('함께 보면 좋은 글', 'You might also like');
       relatedSection.innerHTML = `
         <h4 class="related-header">${relatedHeader}</h4>
         <div class="related-grid">
@@ -145,16 +149,16 @@
     function cell(story, dir) {
       const cls = dir === 'prev' ? 'prev-article' : 'next-article';
       if (story) {
-        const label = dir === 'prev' ? '← 이전 글' : '다음 글 →';
+        const label = dir === 'prev' ? tr('← 이전 글', '← Previous') : tr('다음 글 →', 'Next →');
         return `<a class="${cls}" href="/${escapeAttr(story.page)}">
           <span class="nav-label">${label}</span>
           <span class="nav-title">${escapeText(story.title)}</span>
         </a>`;
       }
-      const label = dir === 'prev' ? '← 목록으로' : '목록으로 →';
-      return `<a class="${cls}" href="/stories.html">
+      const label = dir === 'prev' ? tr('← 목록으로', '← Back to list') : tr('목록으로 →', 'Back to list →');
+      return `<a class="${cls}" href="${i18n.url('/stories.html')}">
         <span class="nav-label">${label}</span>
-        <span class="nav-title">Stories 전체 보기</span>
+        <span class="nav-title">${tr('Stories 전체 보기', 'All articles')}</span>
       </a>`;
     }
 
