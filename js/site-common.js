@@ -128,6 +128,10 @@
       if (film) return `${PUBLIC_SHARE_ORIGIN}/films?film=${encodeURIComponent(film)}`;
       return `${PUBLIC_SHARE_ORIGIN}/films`;
     }
+    // 영문 장터도 /market/<id> 짧은 주소가 한국어판으로 가므로 /en/market.html?id=… 로 둔다
+    if (/^\/en\/market\.html$/i.test(cleanPath)) {
+      return `${PUBLIC_SHARE_ORIGIN}/en/market.html${marketId ? `?id=${encodeURIComponent(marketId)}` : ''}`;
+    }
     if (/\/market\.html$/i.test(cleanPath)) {
       if (marketId) return `${PUBLIC_SHARE_ORIGIN}/market/${encodeURIComponent(marketId)}`;
       return `${PUBLIC_SHARE_ORIGIN}/market`;
