@@ -1561,6 +1561,7 @@
           photos: Array.isArray(r.photos) ? r.photos : [],
         };
         if (r.description_en)       entry.descEn = r.description_en;
+        if (r.description_ja)       entry.descJa = r.description_ja;
         if (r.issue)                entry.issue = r.issue;
         if (r.box_thumbnail)        entry.boxThumbnail = r.box_thumbnail;
         if (r.box_thumbnail_status) entry.boxThumbnailStatus = r.box_thumbnail_status;
@@ -1603,6 +1604,8 @@
       // 영문판 소개글. 넘긴 경우에만 쓴다(다른 호출부가 모르고 지우지 않게)
       const descEn = record.descriptionEn !== undefined ? record.descriptionEn : record.description_en;
       if (descEn !== undefined) payload.description_en = descEn || null;
+      const descJa = record.descriptionJa !== undefined ? record.descriptionJa : record.description_ja;
+      if (descJa !== undefined) payload.description_ja = descJa || null;
       return c.from('films').upsert(payload, { onConflict: 'slug' });
     },
     async setHidden(slug, hidden) {
@@ -1678,7 +1681,7 @@
                     : (typeof record.isHidden === 'boolean' ? record.isHidden : false),
       };
       // 영문판 표시값. 넘긴 경우에만 쓴다. 지역·이름 원문은 지도 검색·슬러그 키라 그대로 둔다
-      for (const k of ['name_en', 'address_en', 'features_en']) {
+      for (const k of ['name_en', 'address_en', 'features_en', 'name_ja', 'address_ja', 'features_ja']) {
         if (record[k] !== undefined) payload[k] = record[k] || null;
       }
       if (record.id) payload.id = record.id;
@@ -1728,7 +1731,8 @@
         contact:     record.contact ?? null,
         is_hidden:   typeof record.is_hidden === 'boolean' ? record.is_hidden : false,
       };
-      for (const k of ['name_en', 'address_en', 'specialty_en', 'description_en']) {
+      for (const k of ['name_en', 'address_en', 'specialty_en', 'description_en',
+                       'name_ja', 'address_ja', 'specialty_ja', 'description_ja']) {
         if (record[k] !== undefined) payload[k] = record[k] || null;
       }
       if (record.id) payload.id = record.id;
