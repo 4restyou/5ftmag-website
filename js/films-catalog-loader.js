@@ -33,11 +33,13 @@
   }
 
   // 영문 페이지(<html lang="en">)에선 소개글을 영문(descEn)으로 바꿔 둔다. 화면 코드는 desc 만 본다.
-  // 영문이 없는 필름은 한국어 소개글 그대로.
+  // 일문 페이지(<html lang="ja">)는 일문(descJa), 없으면 영문. 둘 다 없는 필름은 한국어 소개글 그대로.
   function localize(data) {
-    if (document.documentElement.lang !== 'en' || !data) return data;
+    const lang = document.documentElement.lang;
+    if ((lang !== 'en' && lang !== 'ja') || !data) return data;
     for (const entry of Object.values(data)) {
-      if (entry && entry.descEn) { entry.descKo = entry.desc; entry.desc = entry.descEn; }
+      const desc = entry && ((lang === 'ja' && entry.descJa) || entry.descEn);
+      if (desc) { entry.descKo = entry.desc; entry.desc = desc; }
     }
     return data;
   }

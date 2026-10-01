@@ -105,17 +105,17 @@
       <div class="wz-reader-bar">
         <span class="wz-reader-title">${esc(title)}</span>
         <div class="wz-reader-tools">
-          <button type="button" class="wz-reader-btn" data-zout aria-label="${T('축소', 'Zoom out')}">−</button>
-          <button type="button" class="wz-reader-btn" data-zin aria-label="${T('확대', 'Zoom in')}">+</button>
-          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-prev aria-label="${T('이전 페이지', 'Previous page')}">‹</button>
+          <button type="button" class="wz-reader-btn" data-zout aria-label="${T('축소', 'Zoom out', '縮小')}">−</button>
+          <button type="button" class="wz-reader-btn" data-zin aria-label="${T('확대', 'Zoom in', '拡大')}">+</button>
+          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-prev aria-label="${T('이전 페이지', 'Previous page', '前のページ')}">‹</button>
           <span class="wz-reader-pageno" data-pageno>· / ·</span>
-          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-next aria-label="${T('다음 페이지', 'Next page')}">›</button>
-          <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="${T('닫기', 'Close')}">✕</button>
+          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-next aria-label="${T('다음 페이지', 'Next page', '次のページ')}">›</button>
+          <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="${T('닫기', 'Close', '閉じる')}">✕</button>
         </div>
       </div>
-      ${readerOpts && readerOpts.cta ? `<div class="wz-reader-cta-wrap">${readerOpts.cta.note ? `<p class="wz-reader-cta-note" hidden>${esc(readerOpts.cta.note)}</p>` : ''}<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || T('전체 보기', 'View all'))}</button></div>` : ''}
+      ${readerOpts && readerOpts.cta ? `<div class="wz-reader-cta-wrap">${readerOpts.cta.note ? `<p class="wz-reader-cta-note" hidden>${esc(readerOpts.cta.note)}</p>` : ''}<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || T('전체 보기', 'View all', '全ページを見る'))}</button></div>` : ''}
       <div class="wz-reader-stage">
-        <div class="wz-reader-loading">${T('불러오는 중…', 'Loading…')}</div>
+        <div class="wz-reader-loading">${T('불러오는 중…', 'Loading…', '読み込み中…')}</div>
         <div class="wz-reader-zoom"><div class="wz-reader-book"></div></div>
       </div>`;
     document.body.appendChild(overlay);
@@ -245,7 +245,7 @@
       console.warn('[webzine-reader]', err && err.message);
       if (overlay === mine) {
         const el = overlay.querySelector('.wz-reader-loading');
-        if (el) { el.className = 'wz-reader-error'; el.innerHTML = `${T('불러오지 못했어요.', 'Could not load.')} <a href="${esc(url)}" target="_blank" rel="noopener">${T('새 탭에서 열기 →', 'Open in a new tab →')}</a>`; }
+        if (el) { el.className = 'wz-reader-error'; el.innerHTML = `${T('불러오지 못했어요.', 'Could not load.', '読み込めませんでした。')} <a href="${esc(url)}" target="_blank" rel="noopener">${T('새 탭에서 열기 →', 'Open in a new tab →', '新しいタブで開く →')}</a>`; }
       }
     } finally {
       busy = false;

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>マイページ | 5ft magazine</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon.svg">
+  <script src="/js/theme-init.js"></script>
+  <script src="/js/i18n.js?v=20261001-lang"></script>
+  <link rel="stylesheet" href="/pretendard.css" />
+  <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
+  <link rel="stylesheet" href="/css/common.css?v=20261001-lang">
+  <link rel="stylesheet" href="/css/me.css?v=20260725-profilefix">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/ja/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="/ja/stories.html">Articles</a></li>
+      <li><a href="/ja/films.html">Films</a></li>
+      <li><a href="/ja/books.html">Magazine</a></li>
+      <li><a href="/ja/market.html">Market</a></li>
+      <li><a href="/ja/labs.html">Labs</a></li>
+      <li><a href="/ja/about.html">About</a></li>
+      <li><a href="/ja/shop.html">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/ja/search.html" class="icon-btn" id="headerSearchBtn" aria-label="検索" title="検索"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="ダークモードに切り替え" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="メニューを開く" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="/ja/stories.html">Articles</a>
+    <a href="/ja/films.html">Films</a>
+    <a href="/ja/books.html">Magazine</a>
+    <a href="/ja/market.html">Market</a>
+    <a href="/ja/labs.html">Labs</a>
+    <a href="/ja/about.html">About</a>
+    <a href="/ja/shop.html">Shop</a>
+  </nav>
+</header>
+
+<div class="me-header">
+  <a href="/ja/" class="me-back">← 5ft magazine</a>
+  <div class="me-title-row">
+    <h1 class="me-title">マイページ</h1>
+    <div class="me-user" id="meUser"></div>
+  </div>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>ログインが必要です</h2>
+  <p>ログインすると、投稿した写真と出品をまとめて管理できます。</p>
+  <button class="gate-btn" id="gateLogin">Google でログイン</button>
+  <p class="gate-consent" style="font-size:12px; line-height:1.6; color:var(--text-muted); margin-top:14px; max-width:320px;">ログインすると、14歳以上であり、<a href="/ja/legal/terms.html" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">利用規約</a>・<a href="/ja/legal/privacy.html" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">プライバシーポリシー</a>に同意したものとみなします。14歳未満の方は登録できません。</p>
+</div>
+
+<div id="app" hidden>
+  <!-- 상위 페이지 탭 -->
+  <div class="me-pagetabs">
+    <button type="button" class="me-pagetab" data-section="profile">プロフィール</button>
+    <button type="button" class="me-pagetab active" data-section="photos">写真</button>
+    <button type="button" class="me-pagetab" data-section="market">出品</button>
+    <button type="button" class="me-pagetab" data-section="notifs">お知らせ <span class="me-pagetab-badge" id="notifsBadge" hidden></span></button>
+    <button type="button" class="me-pagetab" data-section="messages">メッセージ <span class="me-pagetab-badge" id="messagesBadge" hidden></span></button>
+    <button type="button" class="me-pagetab" data-section="my-comments">コメント</button>
+    <button type="button" class="me-pagetab" data-section="my-proposals">提案</button>
+    <button type="button" class="me-pagetab" data-section="fav-photos">いいねした写真</button>
+    <button type="button" class="me-pagetab" data-section="fav-films">いいねしたフィルム</button>
+    <button type="button" class="me-pagetab" data-section="fav-webzine">いいねした本</button>
+    <button type="button" class="me-pagetab" data-section="fav-contributors">いいねした写真家</button>
+    <button type="button" class="me-pagetab" data-section="fav-articles">スクラップした記事</button>
+  </div>
+
+  <!-- ─── 프로필 섹션 ─── -->
+  <section id="section-profile" hidden>
+    <form class="me-profile" id="profileForm" novalidate>
+      <div class="me-profile-avatar">
+        <img id="profileAvatarPreview" class="me-profile-avatar-img" alt="プロフィール写真" decoding="async" />
+        <div class="me-profile-avatar-side">
+          <label class="me-btn me-profile-avatar-btn">
+            写真を変更
+            <input type="file" id="profileAvatarInput" accept="image/jpeg,image/png,image/webp" hidden />
+          </label>
+          <p class="me-profile-hint">正方形の画像がおすすめです。最大2MB。</p>
+        </div>
+      </div>
+
+      <label class="me-profile-field">
+        <span class="me-profile-label">表示名</span>
+        <input type="text" id="profileName" maxlength="40" autocomplete="off"
+               placeholder="コメントやマーケットに表示される名前" />
+      </label>
+
+      <label class="me-profile-field">
+        <span class="me-profile-label">自己紹介</span>
+        <textarea id="profileBio" maxlength="500" rows="4"
+                  placeholder="簡単な自己紹介（最大500字）"></textarea>
+        <span class="me-profile-count"><span id="profileBioCount">0</span>/500</span>
+      </label>
+
+      <p class="me-profile-locked">ログインアカウント（メールアドレス）は Google アカウントで管理しています。ここでは変更できません。</p>
+
+      <div class="me-profile-foot">
+        <button type="submit" class="me-btn me-btn-primary" id="profileSave">保存</button>
+        <span class="me-profile-status" id="profileStatus" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- ─── 사진 섹션 ─── -->
+  <section id="section-photos">
+    <div class="me-tabs">
+      <button type="button" class="me-tab active" data-status="all">すべて <span class="count" id="cnt-all">·</span></button>
+      <button type="button" class="me-tab" data-status="pending">審査待ち <span class="count" id="cnt-pending">·</span></button>
+      <button type="button" class="me-tab" data-status="approved">公開中 <span class="count" id="cnt-approved">·</span></button>
+      <button type="button" class="me-tab" data-status="rejected">不採用 <span class="count" id="cnt-rejected">·</span></button>
+    </div>
+    <div class="me-list" id="list">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 매물 섹션 ─── -->
+  <section id="section-market" hidden>
+    <div class="me-market-toolbar">
+      <a href="/ja/market.html#new" class="me-btn me-btn-primary">+ 出品する</a>
+    </div>
+    <div class="me-list" id="marketList">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 알림 섹션 ─── -->
+  <section id="section-notifs" hidden>
+    <div class="me-notifs-toolbar">
+      <button type="button" class="me-btn" id="notifsMarkAll" hidden>すべて既読にする</button>
+    </div>
+    <div class="me-list" id="notifsList">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 메시지 섹션 ─── -->
+  <section id="section-messages" hidden>
+    <div class="me-msg-intro">編集部へのメッセージです。営業時間外は返信が遅れることがあります。</div>
+    <div class="me-msg-list" id="messagesList">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+    <div class="me-msg-compose">
+      <textarea id="messageBody" placeholder="メッセージを入力してください（最大2000字、Ctrl/Cmd + Enter で送信）" maxlength="2000"></textarea>
+      <div class="me-msg-compose-foot">
+        <span class="me-msg-compose-count" id="messageCount">0</span>
+        <button type="button" id="messageSend" class="me-btn">送信</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 내 댓글 섹션 ─── -->
+  <section id="section-my-comments" hidden>
+    <div class="me-list" id="myCommentsList">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 내 제안 섹션 ─── -->
+  <section id="section-my-proposals" hidden>
+    <div class="me-list" id="myProposalsList">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 사진 섹션 ─── -->
+  <section id="section-fav-photos" hidden>
+    <div class="me-fav-grid" id="favPhotosGrid">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 필름 섹션 ─── -->
+  <section id="section-fav-films" hidden>
+    <div class="me-fav-films-grid" id="favFilmsGrid">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 웹진 섹션 ─── -->
+  <section id="section-fav-webzine" hidden>
+    <div class="me-fav-films-grid" id="favWebzineGrid">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 작가 섹션 ─── -->
+  <section id="section-fav-contributors" hidden>
+    <div class="me-fav-contributors-grid" id="favContributorsGrid">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+
+  <!-- ─── 스크랩한 글 섹션 ─── -->
+  <section id="section-fav-articles" hidden>
+    <div class="me-fav-articles-list" id="favArticlesList">
+      <div class="me-empty">読み込み中…</div>
+    </div>
+  </section>
+</div>
+
+<div class="img-zoom" id="imgZoom"><img decoding="async" id="imgZoomTarget" alt="" /></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
+  <script src="/js/db-client.js?v=20261002-ja" defer></script>
+<script src="/js/util.js?v=20261002-ja" defer></script>
+  <script src="/js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
+  <script src="/js/site-common.js?v=20261002-ja" defer></script>
+<script src="/js/me-page.js?v=20261002-ja" defer></script>
+
+</body>
+</html>

@@ -51,13 +51,13 @@
   }
 
   function heicHelpMessage() {
-    return tr('이 브라우저에서는 HEIC/HEIF 사진을 읽지 못했어요. 사진 앱에서 JPG로 공유하거나, 아이폰 설정 → 카메라 → 포맷 → 호환성 우선으로 바꾼 뒤 다시 시도해 주세요.', 'This browser could not read the HEIC/HEIF photo. Share it as a JPG from your Photos app, or on iPhone go to Settings → Camera → Formats → Most Compatible, then try again.');
+    return tr('이 브라우저에서는 HEIC/HEIF 사진을 읽지 못했어요. 사진 앱에서 JPG로 공유하거나, 아이폰 설정 → 카메라 → 포맷 → 호환성 우선으로 바꾼 뒤 다시 시도해 주세요.', 'This browser could not read the HEIC/HEIF photo. Share it as a JPG from your Photos app, or on iPhone go to Settings → Camera → Formats → Most Compatible, then try again.', 'このブラウザでは HEIC/HEIF の写真を読み込めませんでした。写真アプリから JPG で共有するか、iPhone の「設定」→「カメラ」→「フォーマット」→「互換性優先」に変更してから、もう一度お試しください。');
   }
 
   function withTimeout(promise, ms, stage) {
     return new Promise((resolve, reject) => {
       const t = setTimeout(() => {
-        reject(new Error(tr(`${stage} 단계에서 ${Math.round(ms / 1000)}초 동안 응답이 없어 중단했습니다. 사진을 더 작게 줄이거나 다른 파일로 시도해 주세요.`, `${stage} stopped after ${Math.round(ms / 1000)} seconds with no response. Try a smaller photo or a different file.`)));
+        reject(new Error(tr(`${stage} 단계에서 ${Math.round(ms / 1000)}초 동안 응답이 없어 중단했습니다. 사진을 더 작게 줄이거나 다른 파일로 시도해 주세요.`, `${stage} stopped after ${Math.round(ms / 1000)} seconds with no response. Try a smaller photo or a different file.`, `${stage}の段階で${Math.round(ms / 1000)}秒間応答がなかったため中止しました。写真を小さくするか、別のファイルでお試しください。`)));
       }, ms);
       promise.then(
         v => { clearTimeout(t); resolve(v); },
@@ -117,7 +117,7 @@
         settled = true;
         try { w.terminate(); } catch (_) {}
         _worker = null;
-        reject(new Error(tr('사진 변환 응답이 지연되어 중단했습니다. 변환기를 다시 준비했으니 사진을 더 작게 줄이거나 다시 시도해 주세요.', 'Photo conversion took too long and was stopped. The converter has been reset. Try a smaller photo or try again.')));
+        reject(new Error(tr('사진 변환 응답이 지연되어 중단했습니다. 변환기를 다시 준비했으니 사진을 더 작게 줄이거나 다시 시도해 주세요.', 'Photo conversion took too long and was stopped. The converter has been reset. Try a smaller photo or try again.', '写真の変換に時間がかかりすぎたため中止しました。変換処理をリセットしたので、写真を小さくするか、もう一度お試しください。')));
       }, totalTimeoutMs);
       w.postMessage({
         file,
@@ -140,11 +140,11 @@
         return await withTimeout(
           createImageBitmap(file, { imageOrientation: 'from-image' }),
           decodeTimeoutMs,
-          tr('사진 디코드', 'Photo decoding')
+          tr('사진 디코드', 'Photo decoding', '写真のデコード')
         );
       } catch (_) {
         // 옵션 미지원 → 옵션 없이
-        return withTimeout(createImageBitmap(file), decodeTimeoutMs, tr('사진 디코드', 'Photo decoding'));
+        return withTimeout(createImageBitmap(file), decodeTimeoutMs, tr('사진 디코드', 'Photo decoding', '写真のデコード'));
       }
     }
     // 진짜 옛 브라우저 fallback — Image 태그
@@ -152,9 +152,9 @@
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(tr('사진을 읽지 못했어요. 다른 파일이거나 손상되었을 수 있습니다.', 'Could not read the photo. The file may be unsupported or damaged.'))); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(tr('사진을 읽지 못했어요. 다른 파일이거나 손상되었을 수 있습니다.', 'Could not read the photo. The file may be unsupported or damaged.', '写真を読み込めませんでした。対応していないファイルか、破損している可能性があります。'))); };
       img.src = url;
-    }), decodeTimeoutMs, tr('사진 디코드', 'Photo decoding'));
+    }), decodeTimeoutMs, tr('사진 디코드', 'Photo decoding', '写真のデコード'));
   }
 
   async function processInMain(file, opts, onProgress) {
@@ -176,10 +176,10 @@
     onProgress({ stage: 'encode', width: w, height: h });
     const blob = await withTimeout(new Promise((resolve, reject) => {
       canvas.toBlob(b => {
-        if (!b) return reject(new Error(tr('사진 인코딩 결과가 비어 있어요. 다른 파일로 다시 시도해 주세요.', 'Photo encoding returned nothing. Please try a different file.')));
+        if (!b) return reject(new Error(tr('사진 인코딩 결과가 비어 있어요. 다른 파일로 다시 시도해 주세요.', 'Photo encoding returned nothing. Please try a different file.', '写真のエンコード結果が空でした。別のファイルでもう一度お試しください。')));
         resolve(b);
       }, 'image/jpeg', opts.quality);
-    }), opts.encodeTimeoutMs, tr('사진 인코딩', 'Photo encoding'));
+    }), opts.encodeTimeoutMs, tr('사진 인코딩', 'Photo encoding', '写真のエンコード'));
     return { blob, width: w, height: h };
   }
 

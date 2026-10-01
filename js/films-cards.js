@@ -8,6 +8,7 @@
     escapeAttr,
     filterCategoryOf,
   } = window.FilmsUtils;
+  const tr = (window.i18n || { t: (ko) => ko }).t;
 
   function renderFilmCard(slug, film, context = 'library-grid', options = {}) {
     const rollLimit = options.rollLimit || 36;
@@ -35,7 +36,7 @@
         </picture>`;
     } else {
       imgHtml = `
-        <div class="film-thumb-pending" role="img" aria-label="${escapeAttr(film.displayName || film.name)} 썸네일 준비 중">
+        <div class="film-thumb-pending" role="img" aria-label="${escapeAttr(tr(`${film.displayName || film.name} 썸네일 준비 중`, `${film.displayName || film.name} thumbnail coming soon`, `${film.displayName || film.name} のサムネイルは準備中`))}">
           <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
             <rect x="14" y="8" width="36" height="44" rx="3" />
             <rect x="22" y="16" width="20" height="22" rx="1.5" class="film-thumb-pending-label" />
@@ -52,11 +53,11 @@
     if (isEditorialView) {
       const photoCount = film.photos?.length || 0;
       countLabel = `${photoCount} photos`;
-      cta = '사진 보기 →';
+      cta = tr('사진 보기 →', 'View photos →', '写真を見る →');
     } else {
       const readerCount = 0;
       countLabel = `${readerCount} / ${rollLimit}`;
-      cta = readerCount === 0 ? '첫 컷 채우기 →' : '컷 채우기 →';
+      cta = readerCount === 0 ? tr('첫 컷 채우기 →', 'Add the first frame →', '最初の1コマを投稿する →') : tr('컷 채우기 →', 'Add a frame →', '1コマ投稿する →');
     }
     const tierClass = isLibrary ? ' film-card-library' : '';
 
@@ -74,7 +75,7 @@
     const favHtml = `
       <span class="film-fav${isFav ? ' is-fav' : ''}" role="button" tabindex="0"
             data-action="toggle-film-fav" data-film-slug="${escapeAttr(slug)}"
-            aria-pressed="${isFav}" aria-label="${isFav ? '즐겨찾기 해제' : '즐겨찾기 추가'}">
+            aria-pressed="${isFav}" aria-label="${isFav ? tr('즐겨찾기 해제', 'Remove from favorites', 'お気に入りから外す') : tr('즐겨찾기 추가', 'Add to favorites', 'お気に入りに追加')}">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round"
                 d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>

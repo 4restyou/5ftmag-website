@@ -24,7 +24,7 @@
   function updateThemeButton(btn) {
     if (!btn) return;
     const isDark = document.documentElement.dataset.theme === 'dark';
-    btn.setAttribute('aria-label', isDark ? tr('라이트 모드로 전환', 'Switch to light mode') : tr('다크 모드로 전환', 'Switch to dark mode'));
+    btn.setAttribute('aria-label', isDark ? tr('라이트 모드로 전환', 'Switch to light mode', 'ライトモードに切り替え') : tr('다크 모드로 전환', 'Switch to dark mode', 'ダークモードに切り替え'));
     btn.setAttribute('aria-pressed', String(isDark));
     btn.setAttribute('type', 'button');
     btn.innerHTML = isDark
@@ -38,7 +38,7 @@
   function updateMenuButton(btn, nav) {
     if (!btn || !nav) return;
     const isOpen = nav.classList.contains('open');
-    btn.setAttribute('aria-label', isOpen ? tr('메뉴 닫기', 'Close menu') : tr('메뉴 열기', 'Open menu'));
+    btn.setAttribute('aria-label', isOpen ? tr('메뉴 닫기', 'Close menu', 'メニューを閉じる') : tr('메뉴 열기', 'Open menu', 'メニューを開く'));
     btn.setAttribute('aria-expanded', String(isOpen));
     btn.setAttribute('aria-controls', nav.id || 'mobileNav');
     btn.setAttribute('type', 'button');
@@ -114,10 +114,11 @@
     const contributor = url.searchParams.get('contributor');
     const marketId = url.searchParams.get('id');
 
-    // 영문 카탈로그는 /camera/·/contributor/ 짧은 주소가 한국어판으로 가므로 /en/films?… 로 둔다
-    if (/^\/en\/films\.html$/i.test(cleanPath)) {
+    // 외국어 카탈로그는 /camera/·/contributor/ 짧은 주소가 한국어판으로 가므로 /en/films?… · /ja/films?… 로 둔다
+    const foreignFilms = cleanPath.match(/^\/(en|ja)\/films\.html$/i);
+    if (foreignFilms) {
       const query = url.searchParams.toString();
-      return `${PUBLIC_SHARE_ORIGIN}/en/films${query ? `?${query}` : ''}`;
+      return `${PUBLIC_SHARE_ORIGIN}/${foreignFilms[1].toLowerCase()}/films${query ? `?${query}` : ''}`;
     }
     if (/\/films\.html$/i.test(cleanPath)) {
       if (camera) return `${PUBLIC_SHARE_ORIGIN}/camera/${encodeURIComponent(camera)}`;
@@ -128,9 +129,10 @@
       if (film) return `${PUBLIC_SHARE_ORIGIN}/films?film=${encodeURIComponent(film)}`;
       return `${PUBLIC_SHARE_ORIGIN}/films`;
     }
-    // 영문 장터도 /market/<id> 짧은 주소가 한국어판으로 가므로 /en/market.html?id=… 로 둔다
-    if (/^\/en\/market\.html$/i.test(cleanPath)) {
-      return `${PUBLIC_SHARE_ORIGIN}/en/market.html${marketId ? `?id=${encodeURIComponent(marketId)}` : ''}`;
+    // 외국어 장터도 /market/<id> 짧은 주소가 한국어판으로 가므로 /en/market.html?id=… 처럼 둔다
+    const foreignMarket = cleanPath.match(/^\/(en|ja)\/market\.html$/i);
+    if (foreignMarket) {
+      return `${PUBLIC_SHARE_ORIGIN}/${foreignMarket[1].toLowerCase()}/market.html${marketId ? `?id=${encodeURIComponent(marketId)}` : ''}`;
     }
     if (/\/market\.html$/i.test(cleanPath)) {
       if (marketId) return `${PUBLIC_SHARE_ORIGIN}/market/${encodeURIComponent(marketId)}`;
@@ -145,7 +147,7 @@
 
   function copyCurrentLink(btn) {
     copyTextToClipboard(prettyShareUrl(window.location.href)).then(function (ok) {
-      setCopyButtonState(btn, ok ? tr('복사 완료', 'Copied') : tr('복사 실패', 'Copy failed'));
+      setCopyButtonState(btn, ok ? tr('복사 완료', 'Copied', 'コピーしました') : tr('복사 실패', 'Copy failed', 'コピーできませんでした'));
     });
   }
   // 글로벌로도 노출 (기존 onclick="copyLink()" 호환)
@@ -458,7 +460,7 @@
     const a = document.createElement('a');
     a.className = 'skip-link';
     a.href = '#' + main.id;
-    a.textContent = tr('본문으로 건너뛰기', 'Skip to content');
+    a.textContent = tr('본문으로 건너뛰기', 'Skip to content', '本文へスキップ');
     document.body.insertBefore(a, document.body.firstChild);
   }
 
@@ -523,7 +525,7 @@
     const existing = _liveToasts.find((t) => t.key === key);
     if (existing) {
       existing.count += 1;
-      existing.countEl.textContent = tr(`${existing.count}건`, `×${existing.count}`);
+      existing.countEl.textContent = tr(`${existing.count}건`, `×${existing.count}`, `${existing.count}件`);
       existing.countEl.hidden = false;
       // 타이머 연장 — 마지막 건 기준으로 다시 센다
       if (existing.timer) clearTimeout(existing.timer);
@@ -636,8 +638,8 @@
 
   function inferToastType(text, fallback = 'default') {
     const s = String(text ?? '');
-    if (/실패|오류|거부|에러|못했어요|중단|시간 초과|불가|잘못|만료|삭제하지 못|저장하지 못|처리 실패|복사 실패|failed|error|denied|expired|could not|couldn't/i.test(s)) return 'danger';
-    if (/접수|완료|저장|등록|로그인|승인|성공|복사 완료|새 알림|들어왔어요|saved|copied|signed|success|done|received/i.test(s)) return 'info';
+    if (/실패|오류|거부|에러|못했어요|중단|시간 초과|불가|잘못|만료|삭제하지 못|저장하지 못|처리 실패|복사 실패|failed|error|denied|expired|could not|couldn't|できませんでした|失敗|エラー|期限切れ/i.test(s)) return 'danger';
+    if (/접수|완료|저장|등록|로그인|승인|성공|복사 완료|새 알림|들어왔어요|saved|copied|signed|success|done|received|しました|受け付けました|保存|登録|ログイン|完了/i.test(s)) return 'info';
     return fallback;
   }
 
@@ -674,10 +676,10 @@
     if (links.querySelector('[data-legal]')) return; // 이미 inject 됨
     const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
     const entries = [
-      [tr('이용약관', 'Terms'), i18n.isEn ? i18n.url('/legal/terms.html') : base + 'legal/terms.html'],
-      [tr('개인정보', 'Privacy'), i18n.isEn ? i18n.url('/legal/privacy.html') : base + 'legal/privacy.html'],
-      [tr('저작권', 'Copyright'),  base + 'legal/copyright.html'],
-      [tr('취소·환불', 'Refunds'), base + 'legal/refund.html'],
+      [tr('이용약관', 'Terms', '利用規約'), i18n.isEn ? i18n.url('/legal/terms.html') : base + 'legal/terms.html'],
+      [tr('개인정보', 'Privacy', 'プライバシー'), i18n.isEn ? i18n.url('/legal/privacy.html') : base + 'legal/privacy.html'],
+      [tr('저작권', 'Copyright', '著作権'),  base + 'legal/copyright.html'],
+      [tr('취소·환불', 'Refunds', 'キャンセル・返金'), base + 'legal/refund.html'],
     ];
     entries.forEach(([label, href]) => {
       const a = document.createElement('a');
@@ -785,11 +787,11 @@
     const adminHref = authPathTo('admin/submissions.html');
     const items = [];
     if (!loggedIn) {
-      items.push({ label: tr('로그인', 'Sign in'), action: 'auth-login' });
+      items.push({ label: tr('로그인', 'Sign in', 'ログイン'), action: 'auth-login' });
     } else {
-      if (isEditor) items.push({ label: tr('관리', 'Admin'), href: adminHref });
-      items.push({ label: tr('내 정보', 'My page'), href: meHref });
-      items.push({ label: tr('로그아웃', 'Sign out'), action: 'auth-logout' });
+      if (isEditor) items.push({ label: tr('관리', 'Admin', '管理'), href: adminHref });
+      items.push({ label: tr('내 정보', 'My page', 'マイページ'), href: meHref });
+      items.push({ label: tr('로그아웃', 'Sign out', 'ログアウト'), action: 'auth-logout' });
     }
     function accountIconSvg() {
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
@@ -803,7 +805,7 @@
         const a = document.createElement('a');
         a.href = '#';
         a.dataset.action = 'auth-login';
-        a.textContent = tr('로그인', 'Sign in');
+        a.textContent = tr('로그인', 'Sign in', 'ログイン');
         li.appendChild(a);
         if (shopLi && shopLi.parentNode === mainNav) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
         else mainNav.appendChild(li);
@@ -812,12 +814,12 @@
         li.setAttribute('data-nav-auth', '1');
         li.className = 'nav-account';
         const menuItems = [
-          { label: tr('내 정보', 'My page'), href: meHref },
-          ...(isEditor ? [{ label: tr('관리', 'Admin'), href: adminHref }] : []),
-          { label: tr('로그아웃', 'Sign out'), action: 'auth-logout' },
+          { label: tr('내 정보', 'My page', 'マイページ'), href: meHref },
+          ...(isEditor ? [{ label: tr('관리', 'Admin', '管理'), href: adminHref }] : []),
+          { label: tr('로그아웃', 'Sign out', 'ログアウト'), action: 'auth-logout' },
         ];
         li.innerHTML = `
-          <button type="button" class="icon-btn nav-account-btn" data-action="nav-account-toggle" aria-label="${tr('계정 메뉴 열기', 'Open account menu')}" aria-expanded="false">
+          <button type="button" class="icon-btn nav-account-btn" data-action="nav-account-toggle" aria-label="${tr('계정 메뉴 열기', 'Open account menu', 'アカウントメニューを開く')}" aria-expanded="false">
             ${accountIconSvg()}
           </button>
           <div class="nav-account-menu" role="menu" hidden>
@@ -878,7 +880,7 @@
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
+      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
       return;
     }
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
@@ -890,15 +892,15 @@
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
+      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
       return;
     }
     try {
       await window.MagDB.auth.signOut();
       writeEditorCache(false);
-      window.notify?.(tr('로그아웃 되었습니다.', 'Signed out.'), 'info');
+      window.notify?.(tr('로그아웃 되었습니다.', 'Signed out.', 'ログアウトしました。'), 'info');
     } catch (err) {
-      window.notify?.(tr('로그아웃 실패: ', 'Sign-out failed: ') + (err?.message || tr('잠시 후 다시 시도', 'please try again')), 'danger');
+      window.notify?.(tr('로그아웃 실패: ', 'Sign-out failed: ', 'ログアウトできませんでした: ') + (err?.message || tr('잠시 후 다시 시도', 'please try again', 'もう一度お試しください')), 'danger');
     }
   });
 
@@ -921,7 +923,7 @@
     bell.id = 'notifBell';
     bell.type = 'button';
     bell.className = 'icon-btn notif-bell';
-    bell.setAttribute('aria-label', tr('알림 열기', 'Open notifications'));
+    bell.setAttribute('aria-label', tr('알림 열기', 'Open notifications', '通知を開く'));
     bell.setAttribute('aria-expanded', 'false');
     bell.innerHTML = bellIconSvg() + '<span class="notif-badge" id="notifBadge" hidden></span>';
     if (themeBtn) navRight.insertBefore(bell, themeBtn);
@@ -965,17 +967,17 @@
       guestPanel.id = 'notifPanel';
       guestPanel.className = 'notif-panel';
       guestPanel.setAttribute('role', 'dialog');
-      guestPanel.setAttribute('aria-label', tr('알림', 'Notifications'));
+      guestPanel.setAttribute('aria-label', tr('알림', 'Notifications', '通知'));
       guestPanel.hidden = true;
       guestPanel.innerHTML = `
         <div class="notif-panel-head">
-          <span class="notif-panel-title">${tr('알림', 'Notifications')}</span>
+          <span class="notif-panel-title">${tr('알림', 'Notifications', '通知')}</span>
         </div>
         <div class="notif-panel-guest">
-          <p class="notif-panel-guest-title">${tr('로그인하면 알림을 받을 수 있어요', 'Sign in to get notifications')}</p>
-          <p class="notif-panel-guest-body">${tr('댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.', 'Comment replies, photo approvals and new articles.<br/>You can also get them as push notifications.')}</p>
-          <button type="button" class="notif-panel-guest-btn" data-action="auth-login">${tr('Google로 로그인', 'Sign in with Google')}</button>
-          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">${tr('로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.', 'By signing in, you confirm you are 14 or older and agree to the <a href="/en/legal/terms.html" style="color:inherit; text-decoration:underline;">Terms</a> and <a href="/en/legal/privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a>.')}</p>
+          <p class="notif-panel-guest-title">${tr('로그인하면 알림을 받을 수 있어요', 'Sign in to get notifications', 'ログインすると通知を受け取れます')}</p>
+          <p class="notif-panel-guest-body">${tr('댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.', 'Comment replies, photo approvals and new articles.<br/>You can also get them as push notifications.', 'コメントへの返信、写真の承認、新着記事をお知らせします。<br/>端末へのプッシュ通知でも受け取れます。')}</p>
+          <button type="button" class="notif-panel-guest-btn" data-action="auth-login">${tr('Google로 로그인', 'Sign in with Google', 'Googleでログイン')}</button>
+          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">${tr('로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.', 'By signing in, you confirm you are 14 or older and agree to the <a href="/en/legal/terms.html" style="color:inherit; text-decoration:underline;">Terms</a> and <a href="/en/legal/privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a>.', 'ログインすると、14歳以上であり、<a href="/ja/legal/terms.html" style="color:inherit; text-decoration:underline;">利用規約</a>と<a href="/ja/legal/privacy.html" style="color:inherit; text-decoration:underline;">プライバシーポリシー</a>に同意したものとみなされます。')}</p>
         </div>`;
       document.body.appendChild(guestPanel);
       bell.addEventListener('click', (e) => {
@@ -1001,28 +1003,28 @@
     panel.id = 'notifPanel';
     panel.className = 'notif-panel';
     panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-label', tr('알림', 'Notifications'));
+    panel.setAttribute('aria-label', tr('알림', 'Notifications', '通知'));
     panel.hidden = true;
     panel.innerHTML = `
       <div class="notif-panel-head">
-        <span class="notif-panel-title">${tr('알림', 'Notifications')}</span>
-        <button type="button" class="notif-panel-allread" id="notifAllRead">${tr('전체 읽음', 'Mark all read')}</button>
+        <span class="notif-panel-title">${tr('알림', 'Notifications', '通知')}</span>
+        <button type="button" class="notif-panel-allread" id="notifAllRead">${tr('전체 읽음', 'Mark all read', 'すべて既読にする')}</button>
       </div>
       <div class="notif-panel-push" id="notifPushRow" hidden>
         <div class="notif-panel-push-summary">
-          <span class="notif-panel-push-label">${tr('기기에 푸시 알림 받기', 'Push notifications on this device')}</span>
-          <button type="button" class="notif-panel-push-toggle" id="notifPushToggle" aria-pressed="false">${tr('켜기', 'Turn on')}</button>
+          <span class="notif-panel-push-label">${tr('기기에 푸시 알림 받기', 'Push notifications on this device', 'この端末でプッシュ通知を受け取る')}</span>
+          <button type="button" class="notif-panel-push-toggle" id="notifPushToggle" aria-pressed="false">${tr('켜기', 'Turn on', 'オンにする')}</button>
         </div>
         <div class="notif-panel-push-detail" id="notifPushDetail" hidden>
-          <p class="notif-panel-push-help">${tr('댓글 답글 · 사진 승인 · 새 글이 OS 알림으로 와요. 언제든 끌 수 있어요.', 'Replies, photo approvals and new articles arrive as system notifications. You can turn them off anytime.')}</p>
+          <p class="notif-panel-push-help">${tr('댓글 답글 · 사진 승인 · 새 글이 OS 알림으로 와요. 언제든 끌 수 있어요.', 'Replies, photo approvals and new articles arrive as system notifications. You can turn them off anytime.', 'コメントへの返信、写真の承認、新着記事がOSの通知で届きます。いつでもオフにできます。')}</p>
           <div class="notif-panel-push-actions">
-            <button type="button" class="notif-panel-push-confirm" id="notifPushConfirm">${tr('지금 켜기', 'Turn on now')}</button>
-            <button type="button" class="notif-panel-push-cancel" id="notifPushCancel">${tr('나중에', 'Later')}</button>
+            <button type="button" class="notif-panel-push-confirm" id="notifPushConfirm">${tr('지금 켜기', 'Turn on now', '今すぐオンにする')}</button>
+            <button type="button" class="notif-panel-push-cancel" id="notifPushCancel">${tr('나중에', 'Later', 'あとで')}</button>
           </div>
         </div>
       </div>
       <div class="notif-panel-list" id="notifList">
-        <div class="notif-panel-empty">${tr('불러오는 중…', 'Loading…')}</div>
+        <div class="notif-panel-empty">${tr('불러오는 중…', 'Loading…', '読み込み中…')}</div>
       </div>`;
     document.body.appendChild(panel);
 
@@ -1063,10 +1065,10 @@
     function fmtAgo(iso) {
       const d = new Date(iso);
       const diff = Math.floor((Date.now() - d.getTime()) / 1000);
-      if (diff < 60) return tr('방금 전', 'just now');
-      if (diff < 3600)   return Math.floor(diff / 60) + tr('분 전', 'm ago');
-      if (diff < 86400)  return Math.floor(diff / 3600) + tr('시간 전', 'h ago');
-      if (diff < 604800) return Math.floor(diff / 86400) + tr('일 전', 'd ago');
+      if (diff < 60) return tr('방금 전', 'just now', 'たった今');
+      if (diff < 3600)   return Math.floor(diff / 60) + tr('분 전', 'm ago', '分前');
+      if (diff < 86400)  return Math.floor(diff / 3600) + tr('시간 전', 'h ago', '時間前');
+      if (diff < 604800) return Math.floor(diff / 86400) + tr('일 전', 'd ago', '日前');
       return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
     }
     function escapeHtml(s) {
@@ -1087,10 +1089,10 @@
       panel.hidden = false;
       bell.setAttribute('aria-expanded', 'true');
       const list = document.getElementById('notifList');
-      list.innerHTML = `<div class="notif-panel-empty">${tr('불러오는 중…', 'Loading…')}</div>`;
+      list.innerHTML = `<div class="notif-panel-empty">${tr('불러오는 중…', 'Loading…', '読み込み中…')}</div>`;
       const rows = await window.MagDB.notifications.list({ limit: 30 });
       if (!rows.length) {
-        list.innerHTML = `<div class="notif-panel-empty">${tr('새 알림이 없어요.', 'No new notifications.')}</div>`;
+        list.innerHTML = `<div class="notif-panel-empty">${tr('새 알림이 없어요.', 'No new notifications.', '新しい通知はありません。')}</div>`;
         return;
       }
       list.innerHTML = rows.map(n => `
@@ -1159,7 +1161,7 @@
       const batch = _burst;
       _burst = [];
       if (!batch.length || typeof window.showToast !== 'function') return;
-      const msg = batch.length === 1 ? (batch[0] || tr('새 알림', 'New notification')) : tr(`새 알림 ${batch.length}건`, `${batch.length} new notifications`);
+      const msg = batch.length === 1 ? (batch[0] || tr('새 알림', 'New notification', '新しい通知')) : tr(`새 알림 ${batch.length}건`, `${batch.length} new notifications`, `新しい通知 ${batch.length}件`);
       window.showToast(msg, { type: 'info', duration: 4200 });
     };
     try {
@@ -1188,7 +1190,7 @@
     if (isIos && !standalone) {
       row.hidden = false;
       btn.disabled = true;
-      btn.textContent = tr('iOS는 홈 화면 추가 후', 'iOS: add to Home Screen first');
+      btn.textContent = tr('iOS는 홈 화면 추가 후', 'iOS: add to Home Screen first', 'iOSはホーム画面に追加してから');
       btn.setAttribute('aria-disabled', 'true');
       return;
     }
@@ -1196,7 +1198,7 @@
 
     async function reflect() {
       const active = await window.MagDB.push.isActive();
-      btn.textContent = active ? tr('끄기', 'Turn off') : tr('켜기', 'Turn on');
+      btn.textContent = active ? tr('끄기', 'Turn off', 'オフにする') : tr('켜기', 'Turn on', 'オンにする');
       btn.setAttribute('aria-pressed', String(active));
       btn.classList.toggle('is-on', active);
     }
@@ -1210,8 +1212,8 @@
       btn.classList.add('is-busy');
       try {
         const result = await window.MagDB.push.subscribe();
-        if (result?.error) showToast(result.error.message || tr('푸시 알림 구독 실패', 'Push subscription failed'), { type: 'danger', duration: 6000 });
-        else showToast(tr('푸시 알림을 켰어요.', 'Push notifications on.'), { type: 'info', duration: 2400 });
+        if (result?.error) showToast(result.error.message || tr('푸시 알림 구독 실패', 'Push subscription failed', 'プッシュ通知を登録できませんでした'), { type: 'danger', duration: 6000 });
+        else showToast(tr('푸시 알림을 켰어요.', 'Push notifications on.', 'プッシュ通知をオンにしました。'), { type: 'info', duration: 2400 });
       } catch (e) {
         showToast(`[핸들러 예외] ${e?.message || e}`, { type: 'danger', duration: 6000 });
       } finally {
@@ -1229,7 +1231,7 @@
         btn.classList.add('is-busy');
         try {
           await window.MagDB.push.unsubscribe();
-          showToast(tr('푸시 알림을 껐어요.', 'Push notifications off.'), { type: 'info', duration: 2400 });
+          showToast(tr('푸시 알림을 껐어요.', 'Push notifications off.', 'プッシュ通知をオフにしました。'), { type: 'info', duration: 2400 });
         } finally {
           btn.classList.remove('is-busy');
           reflect();
@@ -1293,8 +1295,8 @@
     btn.className = 'article-fav';
     btn.dataset.articleId = articleId;
     btn.setAttribute('aria-pressed', 'false');
-    btn.setAttribute('aria-label', tr('스크랩 추가', 'Save article'));
-    btn.innerHTML = bookmarkIconSvg() + `<span class="article-fav-label">${tr('스크랩', 'Save')}</span>`;
+    btn.setAttribute('aria-label', tr('스크랩 추가', 'Save article', '記事を保存'));
+    btn.innerHTML = bookmarkIconSvg() + `<span class="article-fav-label">${tr('스크랩', 'Save', '保存')}</span>`;
     const shareLabel = shareBar.querySelector('.share-label');
     if (shareLabel && shareLabel.nextSibling) {
       shareBar.insertBefore(btn, shareLabel.nextSibling);
@@ -1322,12 +1324,12 @@
     btn.addEventListener('click', async () => {
       if (btn.classList.contains('is-busy')) return;
       if (!window.MagDB || !window.MagDB.isReady()) {
-        window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
+        window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
         return;
       }
       const sess = await window.MagDB.auth.getSession();
       if (!sess) {
-        if (!confirm(tr('스크랩은 로그인이 필요해요. Google로 로그인할까요?', 'Saving needs an account. Sign in with Google?'))) return;
+        if (!confirm(tr('스크랩은 로그인이 필요해요. Google로 로그인할까요?', 'Saving needs an account. Sign in with Google?', '保存するにはログインが必要です。Googleでログインしますか？'))) return;
         window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
         return;
       }
@@ -1338,16 +1340,16 @@
       btn.classList.remove('is-busy');
       if (error) {
         setArticleFavState(btn, wasFav);
-        window.notify?.(tr('처리 실패: ', 'Failed: ') + (error.message || tr('잠시 후 다시 시도', 'please try again')), 'danger');
+        window.notify?.(tr('처리 실패: ', 'Failed: ', '処理できませんでした: ') + (error.message || tr('잠시 후 다시 시도', 'please try again', 'もう一度お試しください')), 'danger');
       }
     });
   }
   function setArticleFavState(btn, on) {
     btn.classList.toggle('is-fav', on);
     btn.setAttribute('aria-pressed', String(on));
-    btn.setAttribute('aria-label', on ? tr('스크랩 해제', 'Remove from saved') : tr('스크랩 추가', 'Save article'));
+    btn.setAttribute('aria-label', on ? tr('스크랩 해제', 'Remove from saved', '保存を解除') : tr('스크랩 추가', 'Save article', '記事を保存'));
     const label = btn.querySelector('.article-fav-label');
-    if (label) label.textContent = on ? tr('스크랩됨', 'Saved') : tr('스크랩', 'Save');
+    if (label) label.textContent = on ? tr('스크랩됨', 'Saved', '保存済み') : tr('스크랩', 'Save', '保存');
   }
 
   // ════════════════════════════════════════════════
@@ -1368,7 +1370,7 @@
       const nativeBtn = document.createElement('button');
       nativeBtn.type = 'button';
       nativeBtn.className = 'share-channel share-channel--native';
-      nativeBtn.textContent = tr('공유하기', 'Share');
+      nativeBtn.textContent = tr('공유하기', 'Share', '共有');
       nativeBtn.addEventListener('click', () => {
         navigator.share({ title, url: shareUrl }).catch(() => {});
       });
@@ -1489,7 +1491,7 @@
         <div class="announcement-bar-track" aria-live="polite">
           <span class="announcement-bar-text"></span>
         </div>
-        <button type="button" class="announcement-bar-close" aria-label="${tr('공지 닫기', 'Close notice')}">×</button>
+        <button type="button" class="announcement-bar-close" aria-label="${tr('공지 닫기', 'Close notice', 'お知らせを閉じる')}">×</button>
       </div>
     `;
     bar.querySelector('.announcement-bar-text').innerHTML = renderAnnouncementBody(data.body);
@@ -1534,8 +1536,8 @@
     bar.setAttribute('role', 'status');
     bar.innerHTML = `
       <div class="inapp-notice-inner">
-        <span class="inapp-notice-text">${tr('<strong>Google 로그인이 차단되었나요?</strong> 인앱 브라우저에선 Google 정책상 차단돼요. 우측 메뉴(⋮ 또는 ⋯) → <strong>Chrome · Safari 등 외부 브라우저로 열기</strong>를 눌러주세요.', '<strong>Google sign-in blocked?</strong> Google does not allow sign-in inside in-app browsers. Use the menu (⋮ or ⋯) and choose <strong>Open in Chrome or Safari</strong>.')}</span>
-        <button type="button" class="inapp-notice-close" aria-label="${tr('안내 닫기', 'Close')}">×</button>
+        <span class="inapp-notice-text">${tr('<strong>Google 로그인이 차단되었나요?</strong> 인앱 브라우저에선 Google 정책상 차단돼요. 우측 메뉴(⋮ 또는 ⋯) → <strong>Chrome · Safari 등 외부 브라우저로 열기</strong>를 눌러주세요.', '<strong>Google sign-in blocked?</strong> Google does not allow sign-in inside in-app browsers. Use the menu (⋮ or ⋯) and choose <strong>Open in Chrome or Safari</strong>.', '<strong>Googleログインがブロックされましたか？</strong> アプリ内ブラウザでは、Googleのポリシーによりログインできません。右上のメニュー（⋮ または ⋯）から<strong>ChromeやSafariなど外部ブラウザで開く</strong>を選んでください。')}</span>
+        <button type="button" class="inapp-notice-close" aria-label="${tr('안내 닫기', 'Close', '閉じる')}">×</button>
       </div>
     `;
     header.insertAdjacentElement('afterend', bar);

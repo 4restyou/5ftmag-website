@@ -46,7 +46,7 @@
     const sec = document.createElement('section');
     sec.className = 'article-films';
     sec.innerHTML = `
-      <h4 class="article-films-head">${tr('이 글에 나온 필름', 'Films in this article')}</h4>
+      <h4 class="article-films-head">${tr('이 글에 나온 필름', 'Films in this article', 'この記事に登場するフィルム')}</h4>
       <div class="article-films-chips">
         ${items.map((x) => `
           <a class="article-film-chip" href="${i18n.url('/films.html')}?film=${encodeURIComponent(x.slug)}">
@@ -92,10 +92,10 @@
     const bioSection = document.createElement('section');
     bioSection.className = 'article-author-bio';
     bioSection.innerHTML = `
-      <a class="author-bio-card" href="/authors/${escapeAttr(author.slug)}.html">
+      <a class="author-bio-card" href="${i18n.url(`/authors/${escapeAttr(author.slug)}.html`)}">
         <h3>${escapeText(i18n.isEn ? (nameEl.textContent.trim() || author.name) : author.name)}</h3>
         ${i18n.isEn ? '' : `<p>${escapeText(author.note || '')}</p>`}
-        <span class="author-bio-link">${tr(`${author.count}개의 글 보기 →`, `${author.count} articles →`)}</span>
+        <span class="author-bio-link">${tr(`${author.count}개의 글 보기 →`, `${author.count} articles →`, `${author.count}本の記事を見る →`)}</span>
       </a>`;
 
     let relatedSection = null;
@@ -103,8 +103,8 @@
       relatedSection = document.createElement('section');
       relatedSection.className = 'related-by-author';
       const relatedHeader = (sameAuthor.length > 0 && !relatedFromCategory)
-        ? tr(`${escapeText(authorName)}의 다른 글`, `More from ${escapeText(nameEl.textContent.trim() || authorName)}`)
-        : tr('함께 보면 좋은 글', 'You might also like');
+        ? tr(`${escapeText(authorName)}의 다른 글`, `More from ${escapeText(nameEl.textContent.trim() || authorName)}`, `${escapeText(nameEl.textContent.trim() || authorName)}のほかの記事`)
+        : tr('함께 보면 좋은 글', 'You might also like', 'あわせて読みたい');
       relatedSection.innerHTML = `
         <h4 class="related-header">${relatedHeader}</h4>
         <div class="related-grid">
@@ -149,16 +149,16 @@
     function cell(story, dir) {
       const cls = dir === 'prev' ? 'prev-article' : 'next-article';
       if (story) {
-        const label = dir === 'prev' ? tr('← 이전 글', '← Previous') : tr('다음 글 →', 'Next →');
+        const label = dir === 'prev' ? tr('← 이전 글', '← Previous', '← 前の記事') : tr('다음 글 →', 'Next →', '次の記事 →');
         return `<a class="${cls}" href="/${escapeAttr(story.page)}">
           <span class="nav-label">${label}</span>
           <span class="nav-title">${escapeText(story.title)}</span>
         </a>`;
       }
-      const label = dir === 'prev' ? tr('← 목록으로', '← Back to list') : tr('목록으로 →', 'Back to list →');
+      const label = dir === 'prev' ? tr('← 목록으로', '← Back to list', '← 一覧へ') : tr('목록으로 →', 'Back to list →', '一覧へ →');
       return `<a class="${cls}" href="${i18n.url('/stories.html')}">
         <span class="nav-label">${label}</span>
-        <span class="nav-title">${tr('Stories 전체 보기', 'All articles')}</span>
+        <span class="nav-title">${tr('Stories 전체 보기', 'All articles', 'すべての記事')}</span>
       </a>`;
     }
 

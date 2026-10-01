@@ -1,14 +1,14 @@
 'use strict';
 
-const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
 
 const CATEGORIES = [
-  { key: 'all',       label: i18n.t('전체', 'All') },
-  { key: 'film',      label: i18n.t('필름', 'Film') },
-  { key: 'camera',    label: i18n.t('카메라', 'Cameras') },
-  { key: 'lens',      label: i18n.t('렌즈', 'Lenses') },
-  { key: 'accessory', label: i18n.t('액세서리', 'Accessories') },
-  { key: 'etc',       label: i18n.t('기타', 'Other') },
+  { key: 'all',       label: i18n.t('전체', 'All', 'すべて') },
+  { key: 'film',      label: i18n.t('필름', 'Film', 'フィルム') },
+  { key: 'camera',    label: i18n.t('카메라', 'Cameras', 'カメラ') },
+  { key: 'lens',      label: i18n.t('렌즈', 'Lenses', 'レンズ') },
+  { key: 'accessory', label: i18n.t('액세서리', 'Accessories', 'アクセサリー') },
+  { key: 'etc',       label: i18n.t('기타', 'Other', 'その他') },
 ];
 
 const STATE = {
@@ -51,13 +51,13 @@ function fmtPrice(v) {
   if (!raw) return '';
   const n = Number(raw.replace(/[^0-9.-]/g, ''));
   if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
-  return n.toLocaleString('en-US') + ' won';
+  return i18n.lang === 'ja' ? n.toLocaleString('ja-JP') + 'ウォン' : n.toLocaleString('en-US') + ' won';
 }
 function categoryLabel(k) {
   return (CATEGORIES.find(c => c.key === k) || {}).label || k;
 }
 function statusLabel(s) {
-  return s === 'available' ? i18n.t('판매중', 'For sale') : s === 'reserved' ? i18n.t('예약중', 'Reserved') : s === 'sold' ? i18n.t('판매완료', 'Sold') : s;
+  return s === 'available' ? i18n.t('판매중', 'For sale', '販売中') : s === 'reserved' ? i18n.t('예약중', 'Reserved', '予約中') : s === 'sold' ? i18n.t('판매완료', 'Sold', '売約済み') : s;
 }
 function uuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -67,7 +67,7 @@ function uuid() {
 }
 function withTimeout(promise, ms, label) {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(i18n.t(`${label} 응답이 늦어지고 있습니다.`, `${label} is taking too long to respond.`))), ms);
+    const timer = setTimeout(() => reject(new Error(i18n.t(`${label} 응답이 늦어지고 있습니다.`, `${label} is taking too long to respond.`, `${label}の応答に時間がかかっています。`))), ms);
     promise.then(
       value => { clearTimeout(timer); resolve(value); },
       error => { clearTimeout(timer); reject(error); }
@@ -97,24 +97,24 @@ function reportMarketUploadFailure(stage, err, meta = {}) {
 }
 function renderMarketLoadError(message) {
   $('marketGrid').innerHTML = window.MagState
-    ? window.MagState.error({ title: message || i18n.t('마켓 데이터를 불러오지 못했어요.', 'Could not load the market.'), action: 'retry-market', actionLabel: i18n.t('다시 불러오기', 'Try again') })
-    : `<div class="market-empty">${escapeHtml(message || i18n.t('마켓 데이터를 불러오지 못했습니다.', 'Could not load the market.'))}<br /><button type="button" class="market-retry-btn" data-action="retry-market">${i18n.t('다시 불러오기', 'Try again')}</button></div>`;
+    ? window.MagState.error({ title: message || i18n.t('마켓 데이터를 불러오지 못했어요.', 'Could not load the market.', 'マーケットのデータを読み込めませんでした。'), action: 'retry-market', actionLabel: i18n.t('다시 불러오기', 'Try again', '再読み込み') })
+    : `<div class="market-empty">${escapeHtml(message || i18n.t('마켓 데이터를 불러오지 못했습니다.', 'Could not load the market.', 'マーケットのデータを読み込めませんでした。'))}<br /><button type="button" class="market-retry-btn" data-action="retry-market">${i18n.t('다시 불러오기', 'Try again', '再読み込み')}</button></div>`;
 }
 
 // ═════════════════════════════════════════
 // 데이터 로드 + 렌더
 // ═════════════════════════════════════════
 async function loadList() {
-  $('marketGrid').innerHTML = window.MagState ? window.MagState.loading({ count: 8, variant: 'square' }) : `<div class="market-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
+  $('marketGrid').innerHTML = window.MagState ? window.MagState.loading({ count: 8, variant: 'square' }) : `<div class="market-empty">${i18n.t('불러오는 중…', 'Loading…', '読み込み中…')}</div>`;
   try {
-    const rows = await withTimeout(db().market.list({ limit: 500 }), 9000, i18n.t('마켓 목록', 'Market listings'));
+    const rows = await withTimeout(db().market.list({ limit: 500 }), 9000, i18n.t('마켓 목록', 'Market listings', 'マーケット一覧'));
     STATE.rows = Array.isArray(rows) ? rows : [];
     renderFilterChips();
     renderGrid();
   } catch (e) {
     STATE.rows = [];
     renderFilterChips();
-    renderMarketLoadError(`${e.message || i18n.t('마켓 데이터를 불러오지 못했습니다.', 'Could not load the market.')} ${i18n.t('네트워크 상태를 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.')}`);
+    renderMarketLoadError(`${e.message || i18n.t('마켓 데이터를 불러오지 못했습니다.', 'Could not load the market.', 'マーケットのデータを読み込めませんでした。')} ${i18n.t('네트워크 상태를 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.', '通信状況を確認してから、もう一度お試しください。')}`);
   }
 }
 
@@ -149,7 +149,7 @@ function renderStatusToggle() {
   if (!btn) return;
   const labelEl = btn.querySelector('.market-status-toggle-label');
   btn.setAttribute('aria-pressed', STATE.hideSold ? 'true' : 'false');
-  if (labelEl) labelEl.textContent = STATE.hideSold ? i18n.t('판매중만', 'For sale only') : i18n.t('전체 보기', 'Show all');
+  if (labelEl) labelEl.textContent = STATE.hideSold ? i18n.t('판매중만', 'For sale only', '販売中のみ') : i18n.t('전체 보기', 'Show all', 'すべて表示');
 }
 
 function applyFilters() {
@@ -173,14 +173,14 @@ function renderGrid() {
     if (window.MagState) {
       grid.innerHTML = STATE.search || STATE.filter !== 'all' || STATE.hideSold
         ? window.MagState.empty({
-            title: i18n.t('조건에 맞는 매물이 없어요.', 'No items match your filters.'),
-            desc: i18n.t('검색어를 줄이거나 카테고리를 바꿔보세요.', 'Try a shorter search or a different category.'),
-            actionLabel: hasFilter ? i18n.t('전체 보기', 'Show all') : '',
+            title: i18n.t('조건에 맞는 매물이 없어요.', 'No items match your filters.', '条件に合う出品はありません。'),
+            desc: i18n.t('검색어를 줄이거나 카테고리를 바꿔보세요.', 'Try a shorter search or a different category.', '検索語を短くするか、カテゴリーを変えてみてください。'),
+            actionLabel: hasFilter ? i18n.t('전체 보기', 'Show all', 'すべて表示') : '',
             action: 'reset-market',
           })
         : window.MagState.empty({
-            title: i18n.t('아직 올라온 매물이 없어요.', 'No items listed yet.'),
-            desc: i18n.t('카메라, 필름, 액세서리를 첫 매물로 올려보세요.', 'Be the first to list a camera, film or accessory.'),
+            title: i18n.t('아직 올라온 매물이 없어요.', 'No items listed yet.', 'まだ出品はありません。'),
+            desc: i18n.t('카메라, 필름, 액세서리를 첫 매물로 올려보세요.', 'Be the first to list a camera, film or accessory.', 'カメラやフィルム、アクセサリーを最初に出品してみませんか。'),
           });
       if (hasFilter) {
         window.MagState.bindAction(grid, 'reset-market', () => {
@@ -191,7 +191,7 @@ function renderGrid() {
       }
     } else {
       grid.innerHTML = '<div class="market-empty">' +
-        (STATE.search ? i18n.t(`"${escapeHtml(STATE.search)}"에 맞는 매물이 없습니다.`, `No items match "${escapeHtml(STATE.search)}".`) : i18n.t('아직 올라온 매물이 없습니다.', 'No items listed yet.')) + '</div>';
+        (STATE.search ? i18n.t(`"${escapeHtml(STATE.search)}"에 맞는 매물이 없습니다.`, `No items match "${escapeHtml(STATE.search)}".`, `「${escapeHtml(STATE.search)}」に合う出品はありません。`) : i18n.t('아직 올라온 매물이 없습니다.', 'No items listed yet.', 'まだ出品はありません。')) + '</div>';
     }
     return;
   }
@@ -229,7 +229,7 @@ function renderCard(r) {
         <span class="market-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
         <span class="market-card-share" role="button" tabindex="0"
               data-action="share" data-id="${escapeAttr(r.id)}"
-              aria-label="${i18n.t('이 매물 링크 공유', 'Share a link to this item')}" title="${i18n.t('링크 공유', 'Share link')}">
+              aria-label="${i18n.t('이 매물 링크 공유', 'Share a link to this item', 'この出品のリンクを共有')}" title="${i18n.t('링크 공유', 'Share link', 'リンクを共有')}">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="6" cy="12" r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="17" cy="6"  r="2.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -258,19 +258,19 @@ function renderCard(r) {
 //   - openDetail / closeDetail 에서 history.replaceState 로 URL 동기화
 //   - shareListing 은 navigator.share 우선, fallback 으로 클립보드 복사
 // ═════════════════════════════════════════
-// 영문판은 /market/<id> 짧은 주소가 한국어판으로 가므로 /en/market.html?id=<id> 를 쓴다
+// 외국어판은 /market/<id> 짧은 주소가 한국어판으로 가므로 /en/(/ja/)market.html?id=<id> 를 쓴다
 function detailPath(id) {
-  return i18n.isEn ? `/en/market.html?id=${encodeURIComponent(id)}` : `/market/${encodeURIComponent(id)}`;
+  return i18n.isEn ? `/${i18n.lang}/market.html?id=${encodeURIComponent(id)}` : `/market/${encodeURIComponent(id)}`;
 }
-const LIST_PATH = i18n.isEn ? '/en/market.html' : '/market';
+const LIST_PATH = i18n.isEn ? `/${i18n.lang}/market.html` : '/market';
 function listingUrl(id) {
   const path = detailPath(id);
   return window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
 }
 async function shareListing(id) {
   const row = STATE.rows.find(r => r.id === id) || await db().market.getOne(id).catch(() => null);
-  const title = row?.title ? `${row.title} · 5ft.mag Market` : i18n.t('5ft.mag Market 매물', '5ft.mag Market listing');
-  const text  = row ? i18n.t(`${row.title} — ${row.price}`, `${row.title} · ${row.price}`) : i18n.t('5ft.mag 중고 장터에서 본 매물', 'Spotted on the 5ft.mag used market');
+  const title = row?.title ? `${row.title} · 5ft.mag Market` : i18n.t('5ft.mag Market 매물', '5ft.mag Market listing', '5ft.mag Market の出品');
+  const text  = row ? i18n.t(`${row.title} — ${row.price}`, `${row.title} · ${row.price}`, `${row.title} · ${row.price}`) : i18n.t('5ft.mag 중고 장터에서 본 매물', 'Spotted on the 5ft.mag used market', '5ft.mag 中古マーケットで見つけた出品');
   const url   = listingUrl(id);
   // 1) navigator.share (모바일 네이티브 시트)
   if (navigator.share) {
@@ -282,7 +282,7 @@ async function shareListing(id) {
   }
   // 2) 클립보드 fallback
   const ok = await window.copyTextToClipboard?.(url);
-  showShareToast(ok ? i18n.t('링크 복사 완료', 'Link copied') : i18n.t('복사 실패 — 주소창에서 직접 복사해주세요', 'Could not copy. Copy the link from the address bar.'), ok ? 'info' : 'danger');
+  showShareToast(ok ? i18n.t('링크 복사 완료', 'Link copied', 'リンクをコピーしました') : i18n.t('복사 실패 — 주소창에서 직접 복사해주세요', 'Could not copy. Copy the link from the address bar.', 'コピーできませんでした。アドレスバーから直接コピーしてください。'), ok ? 'info' : 'danger');
 }
 function showShareToast(msg, type = 'info') {
   // 글로벌 토스트로 위임 — site-common.js 가 toast host 관리
@@ -340,24 +340,24 @@ function renderDetail(r) {
   const idx = STATE.galleryIndex;
   const mainUrl = paths[idx] ? db().market.publicUrl(paths[idx]) : '';
   const nav = paths.length > 1 ? `
-    <button type="button" class="mkt-gallery-nav prev" data-action="prev" aria-label="${i18n.t('이전 사진', 'Previous photo')}">‹</button>
-    <button type="button" class="mkt-gallery-nav next" data-action="next" aria-label="${i18n.t('다음 사진', 'Next photo')}">›</button>
+    <button type="button" class="mkt-gallery-nav prev" data-action="prev" aria-label="${i18n.t('이전 사진', 'Previous photo', '前の写真')}">‹</button>
+    <button type="button" class="mkt-gallery-nav next" data-action="next" aria-label="${i18n.t('다음 사진', 'Next photo', '次の写真')}">›</button>
   ` : '';
   const thumbs = paths.length > 1 ? `
     <div class="mkt-gallery-thumbs">
       ${paths.map((p, i) => `
-        <button type="button" class="mkt-gallery-thumb${i === idx ? ' is-active' : ''}" data-action="thumb" data-i="${i}" aria-label="${i18n.t(`${i + 1}번째 사진 보기`, `View photo ${i + 1}`)}">
+        <button type="button" class="mkt-gallery-thumb${i === idx ? ' is-active' : ''}" data-action="thumb" data-i="${i}" aria-label="${i18n.t(`${i + 1}번째 사진 보기`, `View photo ${i + 1}`, `${i + 1}枚目の写真を見る`)}">
           <img src="${escapeAttr(db().market.publicUrl(p))}" alt="" />
         </button>`).join('')}
     </div>` : '';
 
-  const author = r.display_name || i18n.t('회원', 'Member');
+  const author = r.display_name || i18n.t('회원', 'Member', '会員');
   const isMine = STATE.user && STATE.user.id === r.user_id;
   const isAuthed = !!STATE.user;
-  const deliveryLabel = ({ courier: i18n.t('택배', 'Shipping'), direct: i18n.t('직거래', 'In person'), both: i18n.t('택배·직거래', 'Shipping or in person') })[r.delivery_method] || r.delivery_method || '';
+  const deliveryLabel = ({ courier: i18n.t('택배', 'Shipping', '配送'), direct: i18n.t('직거래', 'In person', '手渡し'), both: i18n.t('택배·직거래', 'Shipping or in person', '配送・手渡し') })[r.delivery_method] || r.delivery_method || '';
 
   $('mktDetailCard').innerHTML = `
-    <button type="button" class="mkt-modal-close" data-action="close" aria-label="${i18n.t('닫기', 'Close')}">✕</button>
+    <button type="button" class="mkt-modal-close" data-action="close" aria-label="${i18n.t('닫기', 'Close', '閉じる')}">✕</button>
     <div class="mkt-gallery">
       <div class="mkt-gallery-main">
         ${mainUrl ? `<img src="${escapeAttr(mainUrl)}" alt="${escapeAttr(r.title)}" />` : ''}
@@ -377,23 +377,23 @@ function renderDetail(r) {
       </div>
       ${r.description ? `<div class="mkt-detail-desc">${nl2br(r.description)}</div>` : ''}
       <div class="mkt-detail-contact">
-        <strong>${i18n.t('판매자 연락처', 'Seller contact')}</strong>
+        <strong>${i18n.t('판매자 연락처', 'Seller contact', '出品者の連絡先')}</strong>
         ${isAuthed ? `
-          ${r.seller_name ? `<div>${i18n.t('이름', 'Name')} · ${escapeHtml(r.seller_name)}</div>` : ''}
-          ${r.phone ? `<div>${i18n.t('핸드폰', 'Phone')} · ${escapeHtml(r.phone)}</div>` : ''}
-          ${r.contact ? `<div>${i18n.t('기타', 'Other')} · ${nl2br(r.contact)}</div>` : ''}
+          ${r.seller_name ? `<div>${i18n.t('이름', 'Name', '名前')} · ${escapeHtml(r.seller_name)}</div>` : ''}
+          ${r.phone ? `<div>${i18n.t('핸드폰', 'Phone', '携帯電話')} · ${escapeHtml(r.phone)}</div>` : ''}
+          ${r.contact ? `<div>${i18n.t('기타', 'Other', 'その他')} · ${nl2br(r.contact)}</div>` : ''}
         ` : `
-          <div class="mkt-detail-contact-locked">${i18n.t('로그인하면 판매자의 이름·핸드폰·연락처를 확인할 수 있어요.', 'Log in to see the seller\'s name, phone and contact details.')}</div>
+          <div class="mkt-detail-contact-locked">${i18n.t('로그인하면 판매자의 이름·핸드폰·연락처를 확인할 수 있어요.', 'Log in to see the seller\'s name, phone and contact details.', 'ログインすると、出品者の名前・携帯電話・連絡先を確認できます。')}</div>
         `}
       </div>
-      <div class="mkt-detail-author">${i18n.t('올린 사람', 'Listed by')} · ${escapeHtml(author)}</div>
+      <div class="mkt-detail-author">${i18n.t('올린 사람', 'Listed by', '出品者')} · ${escapeHtml(author)}</div>
       <div class="mkt-detail-actions">
         ${isMine ? `
-          <button type="button" class="mkt-action-btn is-primary" data-action="edit">${i18n.t('수정', 'Edit')}</button>
+          <button type="button" class="mkt-action-btn is-primary" data-action="edit">${i18n.t('수정', 'Edit', '編集')}</button>
           <div class="mkt-status-control">
             <button type="button" class="mkt-action-btn mkt-status-trigger" data-action="status-toggle"
                     aria-haspopup="menu" aria-expanded="false">
-              ${i18n.t('상태', 'Status')} · <strong>${escapeHtml(statusLabel(r.status))}</strong>
+              ${i18n.t('상태', 'Status', 'ステータス')} · <strong>${escapeHtml(statusLabel(r.status))}</strong>
               <svg viewBox="0 0 12 8" width="9" height="6" aria-hidden="true" style="margin-left:4px;vertical-align:middle;">
                 <path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -409,11 +409,11 @@ function renderDetail(r) {
               `).join('')}
             </div>
           </div>
-          <button type="button" class="mkt-action-btn" data-action="share">${i18n.t('링크 공유', 'Share link')}</button>
-          <button type="button" class="mkt-action-btn is-danger" data-action="delete">${i18n.t('삭제', 'Delete')}</button>
+          <button type="button" class="mkt-action-btn" data-action="share">${i18n.t('링크 공유', 'Share link', 'リンクを共有')}</button>
+          <button type="button" class="mkt-action-btn is-danger" data-action="delete">${i18n.t('삭제', 'Delete', '削除')}</button>
         ` : `
-          <button type="button" class="mkt-action-btn is-primary" data-action="share">${i18n.t('링크 공유', 'Share link')}</button>
-          <button type="button" class="mkt-action-btn" data-action="report">${i18n.t('신고하기', 'Report')}</button>
+          <button type="button" class="mkt-action-btn is-primary" data-action="share">${i18n.t('링크 공유', 'Share link', 'リンクを共有')}</button>
+          <button type="button" class="mkt-action-btn" data-action="report">${i18n.t('신고하기', 'Report', '通報する')}</button>
         `}
       </div>
     </div>`;
@@ -465,32 +465,32 @@ function bindDetailHandlers(r) {
         const result = await db().market.updateMine(r.id, { status: next });
         if (result?.error) {
           el.disabled = false;
-          return window.notify?.(i18n.t('상태를 바꾸지 못했어요. 새로고침 후 다시 시도해 주세요. (', 'Could not change the status. Refresh and try again. (') + result.error.message + ')', 'danger');
+          return window.notify?.(i18n.t('상태를 바꾸지 못했어요. 새로고침 후 다시 시도해 주세요. (', 'Could not change the status. Refresh and try again. (', 'ステータスを変更できませんでした。再読み込みしてから、もう一度お試しください。(') + result.error.message + ')', 'danger');
         }
         r.status = next;
         await loadList();
         renderDetail(r);
         $('mktDetailModal').classList.add('open');
-        window.notify?.(i18n.t(`상태를 '${statusLabel(next)}' 로 바꿨어요.`, `Status changed to "${statusLabel(next)}".`), 'info');
+        window.notify?.(i18n.t(`상태를 '${statusLabel(next)}' 로 바꿨어요.`, `Status changed to "${statusLabel(next)}".`, `ステータスを「${statusLabel(next)}」に変更しました。`), 'info');
         return;
       }
       if (a === 'delete') {
-        if (!confirm(i18n.t('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.', 'Delete this listing? Its photos will be deleted too.'))) return;
+        if (!confirm(i18n.t('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.', 'Delete this listing? Its photos will be deleted too.', 'この出品を削除しますか？登録した写真ファイルも一緒に削除されます。'))) return;
         el.disabled = true;
         const { error } = await db().market.deleteMine(r.id);
-        if (error) { el.disabled = false; return window.notify?.(i18n.t('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (', 'Could not delete the listing. Check your permissions or connection. (') + error.message + ')', 'danger'); }
+        if (error) { el.disabled = false; return window.notify?.(i18n.t('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (', 'Could not delete the listing. Check your permissions or connection. (', '出品を削除できませんでした。権限または通信状況を確認してください。(') + error.message + ')', 'danger'); }
         if (r.storage_paths?.length) await db().market.removePhotos(r.storage_paths);
         closeDetail();
-        window.notify?.(i18n.t('매물을 삭제했어요.', 'Listing deleted.'), 'info');
+        window.notify?.(i18n.t('매물을 삭제했어요.', 'Listing deleted.', '出品を削除しました。'), 'info');
         return loadList();
       }
       if (a === 'report') {
-        if (!STATE.user) return window.notify?.(i18n.t('신고는 로그인 후에 가능해요. 로그인하면 보던 매물로 다시 돌아옵니다.', 'Log in to report a listing. You will come back to this item after logging in.'), 'info');
-        const reason = prompt(i18n.t('신고 사유를 적어주세요 (300자 이내):', 'Why are you reporting this listing? (300 characters max)'), '');
+        if (!STATE.user) return window.notify?.(i18n.t('신고는 로그인 후에 가능해요. 로그인하면 보던 매물로 다시 돌아옵니다.', 'Log in to report a listing. You will come back to this item after logging in.', '通報はログイン後にできます。ログインすると、見ていた出品に戻ります。'), 'info');
+        const reason = prompt(i18n.t('신고 사유를 적어주세요 (300자 이내):', 'Why are you reporting this listing? (300 characters max)', '通報の理由を入力してください（300字以内）：'), '');
         if (!reason) return;
         const { error } = await db().market.report(r.id, reason);
-        if (error) return window.notify?.(i18n.t('신고를 접수하지 못했어요. 잠시 뒤 다시 시도해 주세요. (', 'Could not send your report. Try again in a moment. (') + error.message + ')', 'danger');
-        window.notify?.(i18n.t('신고가 접수되었습니다. 편집부에서 검토할게요.', 'Report received. Our editors will review it.'), 'info');
+        if (error) return window.notify?.(i18n.t('신고를 접수하지 못했어요. 잠시 뒤 다시 시도해 주세요. (', 'Could not send your report. Try again in a moment. (', '通報を受け付けられませんでした。しばらくしてから、もう一度お試しください。(') + error.message + ')', 'danger');
+        window.notify?.(i18n.t('신고가 접수되었습니다. 편집부에서 검토할게요.', 'Report received. Our editors will review it.', '通報を受け付けました。編集部で確認します。'), 'info');
       }
     });
   });
@@ -530,10 +530,10 @@ function closeForm() {
 function renderGate() {
   $('mktFormCard').innerHTML = `
     <div class="mkt-gate">
-      <h2>${i18n.t('로그인이 필요해요', 'Please log in')}</h2>
-      <p>${i18n.t('로그인하면 지금 화면으로 돌아와 매물 올리기를 이어갈 수 있어요.', 'After logging in, you will come back here to finish your listing.')}</p>
-      <button type="button" class="mkt-btn mkt-btn-primary" data-action="login">${i18n.t('Google로 계속하기', 'Continue with Google')}</button>
-      <button type="button" class="mkt-btn-link" data-action="close" style="margin-left:8px;">${i18n.t('취소', 'Cancel')}</button>
+      <h2>${i18n.t('로그인이 필요해요', 'Please log in', 'ログインが必要です')}</h2>
+      <p>${i18n.t('로그인하면 지금 화면으로 돌아와 매물 올리기를 이어갈 수 있어요.', 'After logging in, you will come back here to finish your listing.', 'ログインすると、この画面に戻って出品を続けられます。')}</p>
+      <button type="button" class="mkt-btn mkt-btn-primary" data-action="login">${i18n.t('Google로 계속하기', 'Continue with Google', 'Google で続ける')}</button>
+      <button type="button" class="mkt-btn-link" data-action="close" style="margin-left:8px;">${i18n.t('취소', 'Cancel', 'キャンセル')}</button>
     </div>`;
   $('mktFormCard').querySelectorAll('[data-action]').forEach(el => {
     el.addEventListener('click', async () => {
@@ -547,27 +547,27 @@ function renderGate() {
 function renderForm(existing) {
   const e = existing || {};
   $('mktFormCard').innerHTML = `
-    <button type="button" class="mkt-modal-close" data-action="close" aria-label="${i18n.t('닫기', 'Close')}">✕</button>
+    <button type="button" class="mkt-modal-close" data-action="close" aria-label="${i18n.t('닫기', 'Close', '閉じる')}">✕</button>
     <form class="mkt-form" id="mktForm">
-      <h2 class="mkt-form-title">${existing ? i18n.t('매물 수정', 'Edit listing') : i18n.t('매물 올리기', 'List an item')}</h2>
+      <h2 class="mkt-form-title">${existing ? i18n.t('매물 수정', 'Edit listing', '出品を編集') : i18n.t('매물 올리기', 'List an item', '出品する')}</h2>
 
       <div class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('사진', 'Photos')} <em>*</em> <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">${i18n.t('(최대 3장, 5MB 이하)', '(up to 3, 5MB each)')}</small></span>
+        <span class="mkt-field-label">${i18n.t('사진', 'Photos', '写真')} <em>*</em> <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">${i18n.t('(최대 3장, 5MB 이하)', '(up to 3, 5MB each)', '（最大3枚、各5MBまで）')}</small></span>
         <div class="mkt-photo-row" id="mktPhotoRow"></div>
       </div>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('제목', 'Title')} <em>*</em></span>
-        <input type="text" name="title" maxlength="60" required value="${escapeAttr(e.title || '')}" placeholder="${i18n.t('예: Pentax 17 미사용 박풀세트', 'e.g. Pentax 17, unused, full box')}" />
+        <span class="mkt-field-label">${i18n.t('제목', 'Title', 'タイトル')} <em>*</em></span>
+        <input type="text" name="title" maxlength="60" required value="${escapeAttr(e.title || '')}" placeholder="${i18n.t('예: Pentax 17 미사용 박풀세트', 'e.g. Pentax 17, unused, full box', '例：Pentax 17 未使用 箱・付属品完備')}" />
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('가격', 'Price')} <em>*</em></span>
-        <input type="text" name="price" maxlength="40" required value="${escapeAttr(e.price || '')}" placeholder="${i18n.t('예: 25만원 / 5만원 (택포)', 'e.g. 250,000 won / 50,000 won (shipping incl.)')}" />
+        <span class="mkt-field-label">${i18n.t('가격', 'Price', '価格')} <em>*</em></span>
+        <input type="text" name="price" maxlength="40" required value="${escapeAttr(e.price || '')}" placeholder="${i18n.t('예: 25만원 / 5만원 (택포)', 'e.g. 250,000 won / 50,000 won (shipping incl.)', '例：25万ウォン / 5万ウォン（送料込み）')}" />
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('카테고리', 'Category')} <em>*</em></span>
+        <span class="mkt-field-label">${i18n.t('카테고리', 'Category', 'カテゴリー')} <em>*</em></span>
         <select name="category" required>
           ${CATEGORIES.filter(c => c.key !== 'all').map(c => `
             <option value="${escapeAttr(c.key)}" ${e.category === c.key ? 'selected' : ''}>${escapeHtml(c.label)}</option>
@@ -576,57 +576,57 @@ function renderForm(existing) {
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('설명', 'Description')} <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">${i18n.t('(1000자 이내)', '(1,000 characters max)')}</small></span>
-        <textarea name="description" maxlength="1000" placeholder="${i18n.t('상태, 사용 기간, 거래 방식 등 자유롭게 적어주세요.', 'Condition, how long you used it, how you want to sell, anything else.')}">${escapeHtml(e.description || '')}</textarea>
+        <span class="mkt-field-label">${i18n.t('설명', 'Description', '説明')} <small style="font-weight:normal; color: var(--text-muted); letter-spacing: 0;">${i18n.t('(1000자 이내)', '(1,000 characters max)', '（1,000字以内）')}</small></span>
+        <textarea name="description" maxlength="1000" placeholder="${i18n.t('상태, 사용 기간, 거래 방식 등 자유롭게 적어주세요.', 'Condition, how long you used it, how you want to sell, anything else.', '状態や使用期間、取引方法など、自由に書いてください。')}">${escapeHtml(e.description || '')}</textarea>
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('지역', 'Location')} <em>*</em></span>
-        <input type="text" name="location" maxlength="60" required value="${escapeAttr(e.location || '')}" placeholder="${i18n.t('예: 서울 마포 / 경기 성남 / 전국 (택배)', 'e.g. Seoul Mapo / Seongnam / Nationwide (shipping)')}" />
+        <span class="mkt-field-label">${i18n.t('지역', 'Location', '地域')} <em>*</em></span>
+        <input type="text" name="location" maxlength="60" required value="${escapeAttr(e.location || '')}" placeholder="${i18n.t('예: 서울 마포 / 경기 성남 / 전국 (택배)', 'e.g. Seoul Mapo / Seongnam / Nationwide (shipping)', '例：ソウル 麻浦 / 京畿 城南 / 全国（配送）')}" />
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('거래 방식', 'Delivery')} <em>*</em></span>
+        <span class="mkt-field-label">${i18n.t('거래 방식', 'Delivery', '取引方法')} <em>*</em></span>
         <select name="delivery_method" required>
-          <option value="" ${!e.delivery_method ? 'selected' : ''} disabled>${i18n.t('선택해주세요', 'Choose one')}</option>
-          <option value="courier" ${e.delivery_method === 'courier' ? 'selected' : ''}>${i18n.t('택배', 'Shipping')}</option>
-          <option value="direct"  ${e.delivery_method === 'direct'  ? 'selected' : ''}>${i18n.t('직거래', 'In person')}</option>
-          <option value="both"    ${e.delivery_method === 'both'    ? 'selected' : ''}>${i18n.t('택배·직거래 둘 다', 'Shipping or in person')}</option>
+          <option value="" ${!e.delivery_method ? 'selected' : ''} disabled>${i18n.t('선택해주세요', 'Choose one', '選択してください')}</option>
+          <option value="courier" ${e.delivery_method === 'courier' ? 'selected' : ''}>${i18n.t('택배', 'Shipping', '配送')}</option>
+          <option value="direct"  ${e.delivery_method === 'direct'  ? 'selected' : ''}>${i18n.t('직거래', 'In person', '手渡し')}</option>
+          <option value="both"    ${e.delivery_method === 'both'    ? 'selected' : ''}>${i18n.t('택배·직거래 둘 다', 'Shipping or in person', '配送・手渡しどちらも可')}</option>
         </select>
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('이름', 'Name')} <em>*</em></span>
-        <input type="text" name="seller_name" maxlength="60" required value="${escapeAttr(e.seller_name || '')}" placeholder="${i18n.t('실명 또는 통상 사용하는 이름', 'Your real name or the name you usually go by')}" />
-        <span class="mkt-field-hint">${i18n.t('구매자가 받을 사람을 확인할 수 있도록 적어주세요. (로그인한 사용자에게만 공개)', 'So buyers know who they are dealing with. (Visible to logged-in members only)')}</span>
+        <span class="mkt-field-label">${i18n.t('이름', 'Name', '名前')} <em>*</em></span>
+        <input type="text" name="seller_name" maxlength="60" required value="${escapeAttr(e.seller_name || '')}" placeholder="${i18n.t('실명 또는 통상 사용하는 이름', 'Your real name or the name you usually go by', '本名、または普段使っている名前')}" />
+        <span class="mkt-field-hint">${i18n.t('구매자가 받을 사람을 확인할 수 있도록 적어주세요. (로그인한 사용자에게만 공개)', 'So buyers know who they are dealing with. (Visible to logged-in members only)', '購入者が取引相手を確認できるように入力してください。（ログイン中の会員にのみ公開）')}</span>
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('핸드폰 번호', 'Phone number')} <em>*</em></span>
-        <input type="tel" name="phone" maxlength="20" required value="${escapeAttr(e.phone || '')}" placeholder="${i18n.t('예: 010-1234-5678', 'e.g. 010-1234-5678')}" pattern="[0-9\-\s]{9,20}" />
-        <span class="mkt-field-hint">${i18n.t('로그인한 사용자에게만 공개됩니다.', 'Visible to logged-in members only.')}</span>
+        <span class="mkt-field-label">${i18n.t('핸드폰 번호', 'Phone number', '携帯電話番号')} <em>*</em></span>
+        <input type="tel" name="phone" maxlength="20" required value="${escapeAttr(e.phone || '')}" placeholder="${i18n.t('예: 010-1234-5678', 'e.g. 010-1234-5678', '例：010-1234-5678')}" pattern="[0-9\-\s]{9,20}" />
+        <span class="mkt-field-hint">${i18n.t('로그인한 사용자에게만 공개됩니다.', 'Visible to logged-in members only.', 'ログイン中の会員にのみ公開されます。')}</span>
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('기타 연락처', 'Other contact')} <em>*</em></span>
-        <textarea name="contact" maxlength="100" required placeholder="${i18n.t('카톡 ID, 인스타 DM 등 — 핸드폰 외 추가로 받을 수 있는 방법', 'KakaoTalk ID, Instagram DM, or another way to reach you besides phone')}">${escapeHtml(e.contact || '')}</textarea>
-        <span class="mkt-field-hint">${i18n.t('로그인한 사용자에게만 공개됩니다.', 'Visible to logged-in members only.')}</span>
+        <span class="mkt-field-label">${i18n.t('기타 연락처', 'Other contact', 'その他の連絡先')} <em>*</em></span>
+        <textarea name="contact" maxlength="100" required placeholder="${i18n.t('카톡 ID, 인스타 DM 등 — 핸드폰 외 추가로 받을 수 있는 방법', 'KakaoTalk ID, Instagram DM, or another way to reach you besides phone', 'カカオトーク ID、Instagram DM など、携帯電話以外の連絡方法')}">${escapeHtml(e.contact || '')}</textarea>
+        <span class="mkt-field-hint">${i18n.t('로그인한 사용자에게만 공개됩니다.', 'Visible to logged-in members only.', 'ログイン中の会員にのみ公開されます。')}</span>
       </label>
 
       <label class="mkt-safety-check">
         <input type="checkbox" name="safety_agree" ${existing ? 'checked' : ''} />
-        <span>${i18n.t('거래는 개인 간 직접 진행되며, 도난품·가품·불법 물품을 올리지 않는다는 점을 확인했습니다.', 'I understand that deals happen directly between members, and I will not list stolen, counterfeit or illegal items.')}</span>
+        <span>${i18n.t('거래는 개인 간 직접 진행되며, 도난품·가품·불법 물품을 올리지 않는다는 점을 확인했습니다.', 'I understand that deals happen directly between members, and I will not list stolen, counterfeit or illegal items.', '取引は会員同士で直接行うものであり、盗品・偽物・違法な品物を出品しないことを確認しました。')}</span>
       </label>
 
       <div class="mkt-form-actions">
-        <button type="button" class="mkt-btn mkt-btn-secondary" data-action="close">${i18n.t('취소', 'Cancel')}</button>
-        <button type="submit" class="mkt-btn mkt-btn-primary" id="mktFormSubmit">${existing ? i18n.t('저장', 'Save') : i18n.t('올리기', 'Post')}</button>
+        <button type="button" class="mkt-btn mkt-btn-secondary" data-action="close">${i18n.t('취소', 'Cancel', 'キャンセル')}</button>
+        <button type="submit" class="mkt-btn mkt-btn-primary" id="mktFormSubmit">${existing ? i18n.t('저장', 'Save', '保存') : i18n.t('올리기', 'Post', '出品する')}</button>
       </div>
       <div class="mkt-upload-status" id="mktUploadStatus" aria-live="polite" hidden>
         <span class="mkt-upload-dot" aria-hidden="true"></span>
         <span>
-          <strong id="mktUploadTitle">${i18n.t('업로드 준비 중', 'Getting ready to upload')}</strong>
-          <small id="mktUploadDetail">${i18n.t('창을 닫지 말고 잠시만 기다려 주세요.', 'Please keep this window open.')}</small>
+          <strong id="mktUploadTitle">${i18n.t('업로드 준비 중', 'Getting ready to upload', 'アップロードの準備中')}</strong>
+          <small id="mktUploadDetail">${i18n.t('창을 닫지 말고 잠시만 기다려 주세요.', 'Please keep this window open.', '画面を閉じずに、少しお待ちください。')}</small>
         </span>
       </div>
       <p class="mkt-form-error" id="mktFormError" aria-live="polite"></p>
@@ -673,12 +673,12 @@ function renderPhotoSlots() {
       slots.push(`
         <div class="mkt-photo-slot" data-i="${i}">
           <img src="${escapeAttr(p.previewUrl)}" alt="" />
-          <button type="button" class="mkt-photo-remove" data-action="remove" data-i="${i}" aria-label="${i18n.t('삭제', 'Remove')}">✕</button>
+          <button type="button" class="mkt-photo-remove" data-action="remove" data-i="${i}" aria-label="${i18n.t('삭제', 'Remove', '削除')}">✕</button>
         </div>`);
     } else {
       slots.push(`
         <label class="mkt-photo-slot" data-i="${i}">
-          + ${i18n.t('추가', 'Add')}
+          + ${i18n.t('추가', 'Add', '追加')}
           <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" data-i="${i}" />
         </label>`);
     }
@@ -691,29 +691,29 @@ function renderPhotoSlots() {
       const slot = el.closest('.mkt-photo-slot');
       const origLabel = slot?.firstChild?.nodeValue;
       try {
-        if (slot) slot.firstChild.nodeValue = i18n.t(`변환 중… (${fmtBytes(file.size)}) `, `Converting… (${fmtBytes(file.size)}) `);
-        setMarketUploadStatus('progress', i18n.t('사진을 준비하는 중', 'Preparing photo'), i18n.t(`${fmtBytes(file.size)} 파일을 웹용 이미지로 줄이고 있어요.`, `Shrinking a ${fmtBytes(file.size)} file for the web.`));
+        if (slot) slot.firstChild.nodeValue = i18n.t(`변환 중… (${fmtBytes(file.size)}) `, `Converting… (${fmtBytes(file.size)}) `, `変換中…（${fmtBytes(file.size)}） `);
+        setMarketUploadStatus('progress', i18n.t('사진을 준비하는 중', 'Preparing photo', '写真を準備しています'), i18n.t(`${fmtBytes(file.size)} 파일을 웹용 이미지로 줄이고 있어요.`, `Shrinking a ${fmtBytes(file.size)} file for the web.`, `${fmtBytes(file.size)} のファイルをウェブ用の画像に縮小しています。`));
         const { blob } = await withNetworkTimeout(
           resizeToJpeg(file, ({ stage, width: w, height: h }) => {
             if (!slot) return;
             if (stage === 'decode') {
-              slot.firstChild.nodeValue = i18n.t(`사진 읽는 중… (${fmtBytes(file.size)}) `, `Reading photo… (${fmtBytes(file.size)}) `);
-              setMarketUploadStatus('progress', i18n.t('사진을 읽는 중', 'Reading photo'), i18n.t('큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.', 'Large photos can take a few seconds here.'));
+              slot.firstChild.nodeValue = i18n.t(`사진 읽는 중… (${fmtBytes(file.size)}) `, `Reading photo… (${fmtBytes(file.size)}) `, `写真を読み込み中…（${fmtBytes(file.size)}） `);
+              setMarketUploadStatus('progress', i18n.t('사진을 읽는 중', 'Reading photo', '写真を読み込んでいます'), i18n.t('큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.', 'Large photos can take a few seconds here.', '大きな写真はここで数秒かかることがあります。'));
             } else if (stage === 'resize') {
-              slot.firstChild.nodeValue = i18n.t(`크기 줄이는 중… (${w}×${h}) `, `Resizing… (${w}×${h}) `);
-              setMarketUploadStatus('progress', i18n.t('사진 크기 줄이는 중', 'Resizing photo'), i18n.t(`${w}×${h} 크기로 변환하고 있어요.`, `Resizing to ${w}×${h}.`));
+              slot.firstChild.nodeValue = i18n.t(`크기 줄이는 중… (${w}×${h}) `, `Resizing… (${w}×${h}) `, `サイズ変更中…（${w}×${h}） `);
+              setMarketUploadStatus('progress', i18n.t('사진 크기 줄이는 중', 'Resizing photo', '写真のサイズを変更しています'), i18n.t(`${w}×${h} 크기로 변환하고 있어요.`, `Resizing to ${w}×${h}.`, `${w}×${h} に変換しています。`));
             } else if (stage === 'encode') {
-              slot.firstChild.nodeValue = i18n.t(`인코딩 중… (${w}×${h}) `, `Encoding… (${w}×${h}) `);
-              setMarketUploadStatus('progress', i18n.t('사진을 압축하는 중', 'Compressing photo'), i18n.t('업로드 전에 용량을 줄이고 있어요.', 'Making the file smaller before upload.'));
+              slot.firstChild.nodeValue = i18n.t(`인코딩 중… (${w}×${h}) `, `Encoding… (${w}×${h}) `, `エンコード中…（${w}×${h}） `);
+              setMarketUploadStatus('progress', i18n.t('사진을 압축하는 중', 'Compressing photo', '写真を圧縮しています'), i18n.t('업로드 전에 용량을 줄이고 있어요.', 'Making the file smaller before upload.', 'アップロードの前にファイルサイズを小さくしています。'));
             }
           }),
           MARKET_TIMEOUTS.imageProcess,
-          i18n.t('사진 변환', 'Photo conversion')
+          i18n.t('사진 변환', 'Photo conversion', '写真の変換')
         );
-        if (blob.size > MAX_UPLOAD_BYTES) throw new Error(i18n.t('파일이 너무 큽니다 (5MB 이하).', 'File is too large (5MB max).'));
+        if (blob.size > MAX_UPLOAD_BYTES) throw new Error(i18n.t('파일이 너무 큽니다 (5MB 이하).', 'File is too large (5MB max).', 'ファイルが大きすぎます（5MBまで）。'));
         const blobUrl = URL.createObjectURL(blob);
         STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl, originalBytes: file.size };
-        setMarketUploadStatus('done', i18n.t('사진 준비 완료', 'Photo ready'), i18n.t('계속해서 매물 정보를 입력해 주세요.', 'Go ahead and fill in the details.'));
+        setMarketUploadStatus('done', i18n.t('사진 준비 완료', 'Photo ready', '写真の準備ができました'), i18n.t('계속해서 매물 정보를 입력해 주세요.', 'Go ahead and fill in the details.', '続けて出品情報を入力してください。'));
         renderPhotoSlots();
       } catch (err) {
         reportMarketUploadFailure('image-process', err, {
@@ -721,8 +721,8 @@ function renderPhotoSlots() {
           photoCount: STATE.formPhotos.length,
         });
         if (slot && origLabel) slot.firstChild.nodeValue = origLabel;
-        setMarketUploadStatus('error', i18n.t('사진 준비 실패', 'Photo failed'), i18n.t('다른 사진을 선택하거나 네트워크 상태를 확인해 주세요.', 'Pick another photo or check your connection.'));
-        window.notify?.(err.message || i18n.t('사진을 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.', 'Could not prepare the photo. Try a different one.'), 'danger');
+        setMarketUploadStatus('error', i18n.t('사진 준비 실패', 'Photo failed', '写真を準備できませんでした'), i18n.t('다른 사진을 선택하거나 네트워크 상태를 확인해 주세요.', 'Pick another photo or check your connection.', '別の写真を選ぶか、通信状況を確認してください。'));
+        window.notify?.(err.message || i18n.t('사진을 준비하지 못했어요. 다른 사진으로 다시 시도해 주세요.', 'Could not prepare the photo. Try a different one.', '写真を準備できませんでした。別の写真でもう一度お試しください。'), 'danger');
       }
     });
   });
@@ -740,7 +740,7 @@ function renderPhotoSlots() {
 // 이미지 변환 — js/image-processor.js (Worker + HEIC 가드 + timeout) 위임
 function resizeToJpeg(file, onProgress) {
   if (typeof window.processImageForUpload !== 'function') {
-    return Promise.reject(new Error(i18n.t('이미지 변환 모듈이 로드되지 않았어요. 새로고침 후 다시 시도해 주세요.', 'The image converter did not load. Refresh and try again.')));
+    return Promise.reject(new Error(i18n.t('이미지 변환 모듈이 로드되지 않았어요. 새로고침 후 다시 시도해 주세요.', 'The image converter did not load. Refresh and try again.', '画像変換モジュールを読み込めませんでした。再読み込みしてから、もう一度お試しください。')));
   }
   return window.processImageForUpload(file, {
     maxLongSide: MAX_LONG_SIDE,
@@ -756,7 +756,7 @@ function fmtBytes(n) {
 }
 function withNetworkTimeout(promise, ms, label) {
   return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error(i18n.t(`${label} 시간 초과 (${Math.round(ms/1000)}초). 네트워크 상태 확인 후 다시 시도해 주세요.`, `${label} timed out (${Math.round(ms/1000)}s). Check your connection and try again.`))), ms);
+    const t = setTimeout(() => reject(new Error(i18n.t(`${label} 시간 초과 (${Math.round(ms/1000)}초). 네트워크 상태 확인 후 다시 시도해 주세요.`, `${label} timed out (${Math.round(ms/1000)}s). Check your connection and try again.`, `${label}がタイムアウトしました（${Math.round(ms/1000)}秒）。通信状況を確認してから、もう一度お試しください。`))), ms);
     promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
   });
 }
@@ -795,8 +795,8 @@ async function onSubmit(e) {
   err.textContent = '';
   const form = e.target;
   const submit = $('mktFormSubmit');
-  submit.disabled = true; submit.textContent = i18n.t('내용 확인 중…', 'Checking…');
-  setMarketUploadStatus('progress', i18n.t('내용 확인 중', 'Checking your listing'), i18n.t('필수 입력값과 사진을 확인하고 있어요.', 'Checking required fields and photos.'));
+  submit.disabled = true; submit.textContent = i18n.t('내용 확인 중…', 'Checking…', '内容を確認中…');
+  setMarketUploadStatus('progress', i18n.t('내용 확인 중', 'Checking your listing', '内容を確認しています'), i18n.t('필수 입력값과 사진을 확인하고 있어요.', 'Checking required fields and photos.', '必須項目と写真を確認しています。'));
   let uploadStage = 'validate';
   const uploadMeta = {
     inputBytes: STATE.formPhotos.reduce((sum, p) => sum + (Number(p?.originalBytes) || Number(p?.blob?.size) || 0), 0),
@@ -804,7 +804,7 @@ async function onSubmit(e) {
     photoCount: STATE.formPhotos.length,
   };
   try {
-    if (!STATE.formPhotos.length) throw new Error(i18n.t('상품 상태를 볼 수 있는 사진을 1장 이상 올려주세요.', 'Add at least one photo that shows the item\'s condition.'));
+    if (!STATE.formPhotos.length) throw new Error(i18n.t('상품 상태를 볼 수 있는 사진을 1장 이상 올려주세요.', 'Add at least one photo that shows the item\'s condition.', '商品の状態がわかる写真を1枚以上追加してください。'));
     const fd = new FormData(form);
     const title           = String(fd.get('title') || '').trim();
     const price           = String(fd.get('price') || '').trim();
@@ -828,45 +828,45 @@ async function onSubmit(e) {
         field.scrollIntoView({ behavior: 'smooth', block: 'center' });
         field.focus({ preventScroll: true });
       }
-      throw new Error(i18n.t('필수 항목(제목·가격·카테고리·지역·거래 방식·이름·핸드폰·기타 연락처)을 모두 입력해 주세요.', 'Please fill in all required fields (title, price, category, location, delivery, name, phone, other contact).'));
+      throw new Error(i18n.t('필수 항목(제목·가격·카테고리·지역·거래 방식·이름·핸드폰·기타 연락처)을 모두 입력해 주세요.', 'Please fill in all required fields (title, price, category, location, delivery, name, phone, other contact).', '必須項目（タイトル・価格・カテゴリー・地域・取引方法・名前・携帯電話・その他の連絡先）をすべて入力してください。'));
     }
-    if (!['courier','direct','both'].includes(delivery_method)) throw new Error(i18n.t('거래 방식을 다시 선택해 주세요.', 'Please choose a delivery option again.'));
-    if (!/[0-9]{8,}/.test(phone.replace(/[^0-9]/g, ''))) throw new Error(i18n.t('핸드폰 번호 형식을 확인해 주세요. (숫자 8자리 이상)', 'Check your phone number. (At least 8 digits)'));
-    if (fd.get('safety_agree') !== 'on') throw new Error(i18n.t('개인 간 거래 확인사항에 동의해야 매물을 올릴 수 있어요.', 'You need to agree to the private sale terms to post a listing.'));
+    if (!['courier','direct','both'].includes(delivery_method)) throw new Error(i18n.t('거래 방식을 다시 선택해 주세요.', 'Please choose a delivery option again.', '取引方法をもう一度選択してください。'));
+    if (!/[0-9]{8,}/.test(phone.replace(/[^0-9]/g, ''))) throw new Error(i18n.t('핸드폰 번호 형식을 확인해 주세요. (숫자 8자리 이상)', 'Check your phone number. (At least 8 digits)', '携帯電話番号の形式を確認してください。（数字8桁以上）'));
+    if (fd.get('safety_agree') !== 'on') throw new Error(i18n.t('개인 간 거래 확인사항에 동의해야 매물을 올릴 수 있어요.', 'You need to agree to the private sale terms to post a listing.', '個人間取引の確認事項に同意すると出品できます。'));
 
     // 사진 업로드 — 신규 추가된 것만
     uploadStage = 'auth';
-    setMarketUploadStatus('progress', i18n.t('로그인 상태 확인 중', 'Checking your login'), i18n.t('매물 등록 권한을 확인하고 있어요.', 'Making sure you can post listings.'));
+    setMarketUploadStatus('progress', i18n.t('로그인 상태 확인 중', 'Checking your login', 'ログイン状態を確認しています'), i18n.t('매물 등록 권한을 확인하고 있어요.', 'Making sure you can post listings.', '出品の権限を確認しています。'));
     // 1) localStorage JWT 를 sync 로 파싱해서 Supabase 호출 없이 user.id 확보.
     // 2) 토큰이 없거나 만료됐을 때만 db.auth.getSession() 으로 fallback.
     //    실제 권한은 RLS 가 백엔드에서 확인하므로 사전 검증 우회는 안전.
     let user = readLocalJwtUser();
     if (!user) {
-      const session = await withNetworkTimeout(db().auth.getSession(), MARKET_TIMEOUTS.auth, i18n.t('로그인 확인', 'Login check'));
+      const session = await withNetworkTimeout(db().auth.getSession(), MARKET_TIMEOUTS.auth, i18n.t('로그인 확인', 'Login check', 'ログインの確認'));
       user = session?.user || null;
     }
-    if (!user) throw new Error(i18n.t('로그인이 만료되었어요. 다시 로그인한 뒤 저장해 주세요.', 'Your login has expired. Log in again and save.'));
+    if (!user) throw new Error(i18n.t('로그인이 만료되었어요. 다시 로그인한 뒤 저장해 주세요.', 'Your login has expired. Log in again and save.', 'ログインの有効期限が切れました。もう一度ログインしてから保存してください。'));
     const finalPaths = [];
     const uploadedNew = [];
     for (const p of STATE.formPhotos) {
       if (p.existingPath) { finalPaths.push(p.existingPath); continue; }
       const totalNew = STATE.formPhotos.filter(x => !x.existingPath).length;
-      submit.textContent = i18n.t(`사진 업로드 중… (${uploadedNew.length + 1}/${totalNew} · ${fmtBytes(p.blob?.size)})`, `Uploading photos… (${uploadedNew.length + 1}/${totalNew} · ${fmtBytes(p.blob?.size)})`);
-      setMarketUploadStatus('progress', i18n.t('사진 업로드 중', 'Uploading photos'), i18n.t(`${uploadedNew.length + 1}/${totalNew}번째 사진 ${fmtBytes(p.blob?.size)} 파일을 서버에 보내고 있어요.`, `Sending photo ${uploadedNew.length + 1} of ${totalNew} (${fmtBytes(p.blob?.size)}).`));
+      submit.textContent = i18n.t(`사진 업로드 중… (${uploadedNew.length + 1}/${totalNew} · ${fmtBytes(p.blob?.size)})`, `Uploading photos… (${uploadedNew.length + 1}/${totalNew} · ${fmtBytes(p.blob?.size)})`, `写真をアップロード中…（${uploadedNew.length + 1}/${totalNew} · ${fmtBytes(p.blob?.size)}）`);
+      setMarketUploadStatus('progress', i18n.t('사진 업로드 중', 'Uploading photos', '写真をアップロードしています'), i18n.t(`${uploadedNew.length + 1}/${totalNew}번째 사진 ${fmtBytes(p.blob?.size)} 파일을 서버에 보내고 있어요.`, `Sending photo ${uploadedNew.length + 1} of ${totalNew} (${fmtBytes(p.blob?.size)}).`, `${uploadedNew.length + 1}/${totalNew}枚目の写真（${fmtBytes(p.blob?.size)}）をサーバーに送信しています。`));
       uploadStage = 'storage';
       uploadMeta.uploadBytes = p.blob?.size || 0;
       const path = `${user.id}/${Date.now()}-${uuid()}.jpg`;
       const { error: upErr } = await withNetworkTimeout(
         db().market.uploadPhoto(path, p.blob),
         MARKET_TIMEOUTS.upload,
-        i18n.t('사진 업로드', 'Photo upload')
+        i18n.t('사진 업로드', 'Photo upload', '写真のアップロード')
       ).catch(err => ({ error: { message: err.message } }));
       if (upErr) {
         // 실패 시 이번 세션에서 올린 것들 정리
         if (uploadedNew.length) {
           await withNetworkTimeout(db().market.removePhotos(uploadedNew), MARKET_TIMEOUTS.cleanup, '업로드 파일 정리').catch(() => null);
         }
-        throw new Error(i18n.t('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (', 'The photo upload did not finish. Check your connection and try again. (') + upErr.message + ')');
+        throw new Error(i18n.t('사진 업로드가 완료되지 않았어요. 네트워크를 확인한 뒤 다시 시도해 주세요. (', 'The photo upload did not finish. Check your connection and try again. (', '写真のアップロードが完了しませんでした。通信状況を確認してから、もう一度お試しください。(') + upErr.message + ')');
       }
       finalPaths.push(path);
       uploadedNew.push(path);
@@ -875,25 +875,25 @@ async function onSubmit(e) {
     const record = { title, price, category, description, location, delivery_method, seller_name, phone, contact, storage_paths: finalPaths };
 
     if (STATE.editId) {
-      submit.textContent = i18n.t('수정 저장 중…', 'Saving changes…');
-      setMarketUploadStatus('progress', i18n.t('수정 내용 저장 중', 'Saving changes'), i18n.t('사진 경로와 매물 정보를 함께 저장하고 있어요.', 'Saving your photos and listing details.'));
+      submit.textContent = i18n.t('수정 저장 중…', 'Saving changes…', '変更を保存中…');
+      setMarketUploadStatus('progress', i18n.t('수정 내용 저장 중', 'Saving changes', '変更内容を保存しています'), i18n.t('사진 경로와 매물 정보를 함께 저장하고 있어요.', 'Saving your photos and listing details.', '写真と出品情報をまとめて保存しています。'));
       uploadStage = 'write';
       // 수정: 제거된 사진 (formPhotos 에서 빠진 existingPath) 들 storage 정리
       const existing = STATE.rows.find(r => r.id === STATE.editId);
       const droppedPaths = (existing?.storage_paths || []).filter(p => !finalPaths.includes(p));
-      const { error } = await withNetworkTimeout(db().market.updateMine(STATE.editId, record), MARKET_TIMEOUTS.write, i18n.t('수정 저장', 'Saving changes'));
-      if (error) throw new Error(i18n.t('수정 내용을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (', 'Could not save your changes. Try again in a moment. (') + error.message + ')');
+      const { error } = await withNetworkTimeout(db().market.updateMine(STATE.editId, record), MARKET_TIMEOUTS.write, i18n.t('수정 저장', 'Saving changes', '変更の保存'));
+      if (error) throw new Error(i18n.t('수정 내용을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요. (', 'Could not save your changes. Try again in a moment. (', '変更内容を保存できませんでした。しばらくしてから、もう一度お試しください。(') + error.message + ')');
       if (droppedPaths.length) await withNetworkTimeout(db().market.removePhotos(droppedPaths), MARKET_TIMEOUTS.cleanup, '삭제 사진 정리').catch(() => null);
     } else {
-      submit.textContent = i18n.t('매물 등록 중…', 'Posting…');
-      setMarketUploadStatus('progress', i18n.t('매물 등록 중', 'Posting your listing'), i18n.t('사진 경로와 매물 정보를 함께 저장하고 있어요.', 'Saving your photos and listing details.'));
+      submit.textContent = i18n.t('매물 등록 중…', 'Posting…', '出品中…');
+      setMarketUploadStatus('progress', i18n.t('매물 등록 중', 'Posting your listing', '出品を登録しています'), i18n.t('사진 경로와 매물 정보를 함께 저장하고 있어요.', 'Saving your photos and listing details.', '写真と出品情報をまとめて保存しています。'));
       uploadStage = 'write';
-      const { error } = await withNetworkTimeout(db().market.create(record), MARKET_TIMEOUTS.write, i18n.t('매물 등록', 'Posting'));
+      const { error } = await withNetworkTimeout(db().market.create(record), MARKET_TIMEOUTS.write, i18n.t('매물 등록', 'Posting', '出品の登録'));
       if (error) {
         if (uploadedNew.length) {
           await withNetworkTimeout(db().market.removePhotos(uploadedNew), MARKET_TIMEOUTS.cleanup, '업로드 파일 정리').catch(() => null);
         }
-        throw new Error(i18n.t('매물을 등록하지 못했어요. 입력 내용과 네트워크를 확인해 주세요. (', 'Could not post the listing. Check your details and connection. (') + error.message + ')');
+        throw new Error(i18n.t('매물을 등록하지 못했어요. 입력 내용과 네트워크를 확인해 주세요. (', 'Could not post the listing. Check your details and connection. (', '出品できませんでした。入力内容と通信状況を確認してください。(') + error.message + ')');
       }
     }
 
@@ -901,10 +901,10 @@ async function onSubmit(e) {
     await loadList();
   } catch (e) {
     if (uploadStage !== 'validate') reportMarketUploadFailure(uploadStage, e, uploadMeta);
-    setMarketUploadStatus('error', i18n.t('저장이 중단됐어요', 'Save stopped'), i18n.t('입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.', 'Your entries are kept. Read the message and try again.'));
-    err.textContent = e.message || i18n.t('저장을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.', 'Could not finish saving. Check your entries and try again.');
+    setMarketUploadStatus('error', i18n.t('저장이 중단됐어요', 'Save stopped', '保存が中断されました'), i18n.t('입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.', 'Your entries are kept. Read the message and try again.', '入力した内容はそのまま残っています。メッセージを確認してから、もう一度お試しください。'));
+    err.textContent = e.message || i18n.t('저장을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.', 'Could not finish saving. Check your entries and try again.', '保存を完了できませんでした。入力内容を確認してから、もう一度お試しください。');
     submit.disabled = false;
-    submit.textContent = STATE.editId ? i18n.t('저장', 'Save') : i18n.t('올리기', 'Post');
+    submit.textContent = STATE.editId ? i18n.t('저장', 'Save', '保存') : i18n.t('올리기', 'Post', '出品する');
   }
 }
 
@@ -975,7 +975,7 @@ document.addEventListener('click', (e) => {
     await new Promise(r => setTimeout(r, 50));
   }
   if (!db() || !db().isReady()) {
-    renderMarketLoadError(i18n.t('마켓 연결을 준비하지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.', 'Could not connect to the market. If this keeps happening after a refresh, let our editors know.'));
+    renderMarketLoadError(i18n.t('마켓 연결을 준비하지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.', 'Could not connect to the market. If this keeps happening after a refresh, let our editors know.', 'マーケットへの接続を準備できませんでした。再読み込みしても続く場合は、編集部にお知らせください。'));
     return;
   }
   const session = await db().auth.getSession();

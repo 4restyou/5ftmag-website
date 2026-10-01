@@ -17,6 +17,8 @@ const FILMS_JSON = path.join(ROOT, 'data/films.json');
 const OUT_DIR = path.join(ROOT, 'film');
 const EN_OUT_DIR = path.join(ROOT, 'en/film');
 const EN_INDEX_PAGE = path.join(ROOT, 'en/films.html');
+const JA_OUT_DIR = path.join(ROOT, 'ja/film');
+const JA_INDEX_PAGE = path.join(ROOT, 'ja/films.html');
 const REFERENCE_PAGE = path.join(ROOT, 'films.html');
 const STORIES_JSON = path.join(ROOT, 'data/stories.json');
 
@@ -53,11 +55,24 @@ const TEXT = {
     search: 'Search', dark: 'Switch to dark mode', menu: 'Open menu',
     indexSummary: (n) => `All ${n} films`, indexSub: 'The film catalog, sorted by brand. Tap a name to see its specs and description.', other: 'Other',
   },
+  ja: {
+    lang: 'ja', locale: 'ja_JP', inLanguage: 'ja-JP', prefix: '/ja',
+    spec: ['ブランド', '感度', '種類', 'フォーマット', '掲載号'],
+    fallbackDesc: (parts) => `${parts} のフィルム。5ft.mag のフィルムカタログで仕様と読者の作例をご覧いただけます。`,
+    category: '写真フィルム', catalog: 'フィルムカタログ', crumb: '現在地',
+    aliases: '別名',
+    shotOn: (n) => `${n} で撮った写真`, photoAlt: (n, a) => `${n} で撮った写真${a ? `。撮影 ${a}` : ''}`,
+    articles: (n) => `${n} を取り上げた記事`, sameBrand: (b) => `${b} のほかのフィルム`, thumbAlt: (n) => `${n} フィルム`,
+    cta: 'カタログでは、このフィルムで撮った写真を撮影者やカメラごとに見られます。ご自身の写真を投稿することもできます。',
+    ctaView: 'カタログで見る', ctaAll: 'フィルム一覧',
+    search: '検索', dark: 'ダークモードに切り替え', menu: 'メニューを開く',
+    indexSummary: (n) => `フィルム一覧（全${n}種）`, indexSub: 'ブランド別に整理したフィルムカタログです。名前を押すと仕様と説明をご覧いただけます。', other: 'その他',
+  },
 };
 const HANGUL = /[가-힣]/;
 // 대표 필름 사진의 촬영자(고정 작가). 영문판은 로마자 표기로(en/about.html 과 같은 표기)
 const PERSON_EN = { '박순렬': 'Park Soon Yeol', '노애경': 'Noh Ae-gyeong', '장형수': 'Jang Hyeong-su' };
-const personOf = (name, T) => (T.lang === 'en' && PERSON_EN[name]) || name;
+const personOf = (name, T) => (T.lang !== 'ko' && PERSON_EN[name]) || name;
 
 function esc(s) {
   return String(s ?? '')
@@ -95,7 +110,7 @@ function displayNameOf(film) {
 
 // 검색·공유에 쓰이는 한 줄 설명. desc 가 비면 규격으로 대체한다.
 function descOf(film, T) {
-  return ((T.lang === 'en' && film.descEn) || film.desc || '').trim();
+  return ((T.lang === 'ja' && (film.descJa || film.descEn)) || (T.lang === 'en' && film.descEn) || film.desc || '').trim();
 }
 
 function descriptionOf(film, T = TEXT.ko) {
@@ -114,7 +129,7 @@ function aliasesOf(film, T = TEXT.ko) {
   for (const alias of film.aliases || []) {
     const key = String(alias).trim().toLowerCase();
     if (!key || seen.has(key)) continue;
-    if (T.lang === 'en' && HANGUL.test(key)) continue;   // 영문판엔 한글 별칭을 싣지 않는다
+    if (T.lang !== 'ko' && HANGUL.test(key)) continue;   // 외국어판엔 한글 별칭을 싣지 않는다
     seen.add(key);
     out.push(String(alias).trim());
   }
@@ -280,6 +295,10 @@ ${photo.author ? `            <figcaption>${esc(personOf(photo.author, T))}</fig
         <h2>${esc(T.articles(name))}</h2>
         <ul class="film-detail-articles">
 ${articles.map((st) => {
+    // 일문판은 번역된 글이면 일문 제목·일문 페이지로
+    if (T.lang === 'ja' && st.titleJa) {
+      return `          <li><a href="/ja/${esc(st.page)}">${esc(st.titleJa)}</a><span>${esc(st.categoryLabel || '')}</span></li>`;
+    }
     // 영문판은 번역된 글이면 영문 제목·영문 페이지로
     const en = T.lang === 'en' && st.titleEn;
     return `          <li><a href="/${en ? 'en/' : ''}${esc(st.page)}">${esc(en ? st.titleEn : st.title)}</a><span>${esc(st.categoryLabel || '')}</span></li>`;
@@ -325,7 +344,7 @@ ${sameBrand.map((other) => `          <li><a href="${P}/film/${esc(other.slug)}.
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js"></script>${T.lang === 'en' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
+  <script src="/js/theme-init.js"></script>${T.lang !== 'ko' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">
@@ -416,7 +435,7 @@ ${articleHtml}
   const versioned = assetVersionReader(referenceHtml, {
     'css/film-detail.css': await contentHash('css/film-detail.css'),
     'js/film-detail.js': await contentHash('js/film-detail.js'),
-    // i18n.js 는 영문 페이지만 싣는다. 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
+    // i18n.js 는 외국어 페이지만 싣는다. 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
     'js/i18n.js': ((await fs.readFile(path.join(ROOT, 'en/about.html'), 'utf-8').catch(() => '')).match(/js\/i18n\.js\?v=([0-9A-Za-z-]+)/) || [])[1],
     // potw-picker.js 는 여기 넣지 않는다. films.html 에도 실려 bump-version 이
     // 관리하므로, 자체 해시를 붙이면 버전이 갈라져 단일 버전 가드에 걸린다.
@@ -452,13 +471,14 @@ ${articleHtml}
 
   await fs.mkdir(OUT_DIR, { recursive: true });
   await fs.mkdir(EN_OUT_DIR, { recursive: true });
+  await fs.mkdir(JA_OUT_DIR, { recursive: true });
 
   const written = [];
   for (const film of films) {
     const sameBrand = (byBrand.get(film.brand) || [])
       .filter((other) => other.slug !== film.slug)
       .slice(0, SAME_BRAND_LIMIT);
-    for (const [dir, T] of [[OUT_DIR, TEXT.ko], [EN_OUT_DIR, TEXT.en]]) {
+    for (const [dir, T] of [[OUT_DIR, TEXT.ko], [EN_OUT_DIR, TEXT.en], [JA_OUT_DIR, TEXT.ja]]) {
       const outFile = path.join(dir, `${film.slug}.html`);
       await fs.writeFile(outFile, render(film, sameBrand, versioned, outFile, byFilm.get(film.slug), T), 'utf-8');
       written.push(outFile);
@@ -473,6 +493,7 @@ ${articleHtml}
   }
   const indexUpdated = await writeFilmIndex(films);
   await writeFilmIndex(films, TEXT.en, EN_INDEX_PAGE);
+  await writeFilmIndex(films, TEXT.ja, JA_INDEX_PAGE);
   console.log(`[build-film-pages] ${films.length}개 필름 상세 페이지 생성: ${path.relative(ROOT, OUT_DIR)}/`);
   console.log(`[build-film-pages] films.html 전체 목록 ${indexUpdated ? '갱신' : '변경 없음'}`);
   console.log(`[build-film-pages] 기사가 연결된 필름 ${byFilm.size}종`);

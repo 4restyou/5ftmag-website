@@ -7,7 +7,7 @@
   const escapeAttr = window.MagUtil.escapeAttr;
 
   // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const homeI18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const homeI18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
   const ht = homeI18n.t;
   const hurl = (u) => homeI18n.url(homeI18n.isEn && u && !/^(?:[a-z]+:|\/|#)/i.test(u) ? '/' + u : u);
 
@@ -82,10 +82,10 @@
         if (readerShots.length) {
           const shot = readerShots[Math.floor(Math.random() * readerShots.length)];
           imgSrc = shot.src;
-          alt = shot.author ? ht(`${shot.author} 님이 이 필름으로 찍은 사진`, `Photo taken on this film by ${shot.author}`) : '';
+          alt = shot.author ? ht(`${shot.author} 님이 이 필름으로 찍은 사진`, `Photo taken on this film by ${shot.author}`, `${shot.author}さんがこのフィルムで撮った写真`) : '';
         } else if (editorial) {
           imgSrc = editorial.src;
-          alt = editorial.author ? ht(`${editorial.author} 님이 이 필름으로 찍은 사진`, `Photo taken on this film by ${editorial.author}`) : '';
+          alt = editorial.author ? ht(`${editorial.author} 님이 이 필름으로 찍은 사진`, `Photo taken on this film by ${editorial.author}`, `${editorial.author}さんがこのフィルムで撮った写真`) : '';
         } else {
           imgSrc = film.canThumbnail;
           isCan = true;
@@ -95,7 +95,7 @@
         homeFilmPick.innerHTML = `
           <img class="home-film-pick-thumb${isCan ? ' is-can' : ''}" src="${escapeAttr(imgSrc)}" alt="${escapeAttr(alt)}" loading="lazy">
           <span class="home-film-pick-copy">
-            <span class="home-film-pick-label">${ht('오늘의 추천 필름', "Today's film pick")}</span>
+            <span class="home-film-pick-label">${ht('오늘의 추천 필름', "Today's film pick", '今日のおすすめフィルム')}</span>
             <span class="home-film-pick-name">${escapeHtml(film.displayName || film.name || slug)}</span>
           </span>
           <span class="home-film-pick-arrow" aria-hidden="true">→</span>`;
@@ -296,13 +296,13 @@
           for (let p = 1; p <= totalPages; p++) {
             const href = hurl(p === 1 ? 'stories.html' : `stories.html?page=${p}`);
             // 메인은 1페이지(최신 12개)에 해당하는 카드를 보여 주므로 1페이지를 'cur'로 강조
-            html += `<a href="${href}" class="page-num${p === 1 ? ' cur' : ''}" aria-label="${ht(`${p}페이지`, `Page ${p}`)}">${p}</a>`;
+            html += `<a href="${href}" class="page-num${p === 1 ? ' cur' : ''}" aria-label="${ht(`${p}페이지`, `Page ${p}`, `${p}ページ`)}">${p}</a>`;
           }
           numNav.innerHTML = html;
         }
 
         if (stories.length === 0) {
-          storyList.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">${ht('아직 공개된 글이 없습니다. 새 이슈가 발행되면 이곳에 먼저 쌓입니다.', 'No articles yet. New pieces will show up here first.')}</div>`;
+          storyList.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">${ht('아직 공개된 글이 없습니다. 새 이슈가 발행되면 이곳에 먼저 쌓입니다.', 'No articles yet. New pieces will show up here first.', 'まだ公開された記事はありません。新しい号が出ると、まずここに並びます。')}</div>`;
           return;
         }
 
@@ -340,7 +340,7 @@
       })
       .catch(err => {
         console.error('Stories 로딩 실패:', err);
-        storyList.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">${ht('글 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.', 'Could not load articles. Check your connection and refresh.')}</div>`;
+        storyList.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">${ht('글 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.', 'Could not load articles. Check your connection and refresh.', '記事一覧を読み込めませんでした。ネットワーク接続を確認して、再読み込みしてください。')}</div>`;
       });
   }
 
@@ -382,7 +382,7 @@
           .slice(0, 4);
 
         if (news.length === 0) {
-          newsList.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">${ht('아직 등록된 소식이 없습니다.', 'No news yet.')}</div>`;
+          newsList.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">${ht('아직 등록된 소식이 없습니다.', 'No news yet.', 'まだお知らせはありません。')}</div>`;
           return;
         }
 
@@ -391,7 +391,7 @@
           const target = isExternal ? ' target="_blank" rel="noopener"' : '';
           const thumb = n.thumbnail || `https://picsum.photos/seed/news${n.id}/200/200`;
           const date = n.date ? n.date.replace(/-/g, '.') : '';
-          const title = homeI18n.isEn ? (n.titleEn || n.title) : n.title;
+          const title = homeI18n.isEn ? ((homeI18n.lang === 'ja' && n.titleJa) || n.titleEn || n.title) : n.title;
           return `
             <a href="${escapeAttr(isExternal ? (n.link || '#') : hurl(n.link || '#'))}"${target} class="news-card">
               <div class="news-thumb">
@@ -408,7 +408,7 @@
       })
       .catch(err => {
         console.error('News 로딩 실패:', err);
-        newsList.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">${ht('소식 데이터를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.', 'Could not load news. Please check back shortly.')}</div>`;
+        newsList.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">${ht('소식 데이터를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.', 'Could not load news. Please check back shortly.', 'お知らせを読み込めませんでした。しばらくしてからもう一度ご確認ください。')}</div>`;
       });
   }
 
@@ -421,18 +421,18 @@
       .then(theme => {
         if (!theme || !theme.active) return;
         slot.hidden = false;
-        const tag = ht((theme.issue || theme.month || '다음 호') + ' 주제', (theme.issue || theme.month || 'Next issue') + ' theme');
-        const loc = (k) => (homeI18n.isEn && theme[k + 'En']) || theme[k];
+        const tag = ht((theme.issue || theme.month || '다음 호') + ' 주제', (theme.issue || theme.month || 'Next issue') + ' theme', (theme.issue || theme.month || '次号') + ' テーマ');
+        const loc = (k) => (homeI18n.lang === 'ja' && theme[k + 'Ja']) || (homeI18n.isEn && theme[k + 'En']) || theme[k];
         slot.innerHTML = `
           <span class="ni-tag">${escapeStr(tag)}</span>
           <h2 class="ni-title">${escapeStr(theme.title || '')}</h2>
           ${theme.subtitle ? `<p class="ni-sub">${escapeStr(loc('subtitle'))}</p>` : ''}
           <p class="ni-desc">${escapeStr(loc('description') || '')}</p>
           ${theme.submissionNote ? `<p class="ni-desc">${escapeStr(loc('submissionNote'))}</p>` : ''}
-          ${theme.film ? `<p class="ni-film">${ht('메인 필름', 'Main film')} · ${escapeStr(theme.film)}</p>` : ''}
+          ${theme.film ? `<p class="ni-film">${ht('메인 필름', 'Main film', 'メインフィルム')} · ${escapeStr(theme.film)}</p>` : ''}
           <button type="button" class="ni-cta" data-action="open-submission">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-            ${ht('지금 응모하기', 'Submit now')}
+            ${ht('지금 응모하기', 'Submit now', '今すぐ応募する')}
           </button>`;
       })
       .catch(() => {});
@@ -675,7 +675,7 @@
 
         function renderPhotoGrid(list) {
           if (list.length === 0) {
-            photoGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">${photoMode === 'recent' ? ht('아직 승인된 독자 사진이 없습니다. 곧 채워질 거예요.', 'No approved reader photos yet. They are on the way.') : ht('아직 공개된 독자 사진이 없습니다. 첫 컷이 승인되면 이곳에 표시됩니다.', 'No reader photos yet. The first approved frame will appear here.')}</div>`;
+            photoGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px;">${photoMode === 'recent' ? ht('아직 승인된 독자 사진이 없습니다. 곧 채워질 거예요.', 'No approved reader photos yet. They are on the way.', 'まだ承認された読者の写真はありません。もうすぐ並びます。') : ht('아직 공개된 독자 사진이 없습니다. 첫 컷이 승인되면 이곳에 표시됩니다.', 'No reader photos yet. The first approved frame will appear here.', 'まだ公開された読者の写真はありません。最初の一枚が承認されると、ここに表示されます。')}</div>`;
             return;
           }
           photoGrid.innerHTML = renderPhotoCellsHtml(list);
@@ -722,7 +722,7 @@
       })
       .catch(err => {
         console.error('Photo 그리드 로딩 실패:', err);
-        photoGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">${ht('사진 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.', 'Could not load photos. Check your connection and refresh.')}</div>`;
+        photoGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">${ht('사진 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.', 'Could not load photos. Check your connection and refresh.', '写真一覧を読み込めませんでした。ネットワーク接続を確認して、再読み込みしてください。')}</div>`;
       });
   }
 
@@ -741,7 +741,7 @@
 
       // 간단한 이메일 형식 검증
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        newsletterMessage.textContent = ht('올바른 이메일 주소를 입력해주세요.', 'Please enter a valid email address.');
+        newsletterMessage.textContent = ht('올바른 이메일 주소를 입력해주세요.', 'Please enter a valid email address.', '正しいメールアドレスを入力してください。');
         newsletterMessage.className = 'nl-message error';
         return;
       }
@@ -754,12 +754,12 @@
       if (submitBtn) submitBtn.disabled = false;
 
       if (error) {
-        newsletterMessage.textContent = ht('잠시 후 다시 시도해주세요. 계속 안 되면 hello@5ftmag.com 으로 알려주세요.', 'Please try again in a moment. If it keeps failing, email hello@5ftmag.com.');
+        newsletterMessage.textContent = ht('잠시 후 다시 시도해주세요. 계속 안 되면 hello@5ftmag.com 으로 알려주세요.', 'Please try again in a moment. If it keeps failing, email hello@5ftmag.com.', 'しばらくしてからもう一度お試しください。うまくいかない場合は hello@5ftmag.com までお知らせください。');
         newsletterMessage.className = 'nl-message error';
         return;
       }
 
-      newsletterMessage.textContent = ht('구독 신청이 완료됐어요. 새 이슈 안내 메일에 언제든 해지할 수 있는 링크를 함께 보내드릴게요.', 'You are subscribed. Every issue email includes a link to unsubscribe anytime.');
+      newsletterMessage.textContent = ht('구독 신청이 완료됐어요. 새 이슈 안내 메일에 언제든 해지할 수 있는 링크를 함께 보내드릴게요.', 'You are subscribed. Every issue email includes a link to unsubscribe anytime.', '購読を受け付けました。新しい号のお知らせメールには、いつでも解除できるリンクを添えてお送りします。');
       newsletterMessage.className = 'nl-message success';
       newsletterEmail.value = '';
 
@@ -788,7 +788,7 @@
     if (!pick || !pick.image) return;
 
     const author = pick.submitterName || pick.instagram || '';
-    const altText = [author, pick.film].filter(Boolean).join(', ') || ht('이주의 사진', 'Photo of the Week');
+    const altText = [author, pick.film].filter(Boolean).join(', ') || ht('이주의 사진', 'Photo of the Week', '今週の一枚');
 
     // 라이트박스·♡·공유는 Photo 그리드 것을 그대로 쓴다. 한 장짜리 목록으로 넘긴다.
     const openIt = () => openPhotoLightbox([{
@@ -824,9 +824,9 @@
       mSec.innerHTML = `
         <div class="mh-potw-inner">
           <h3 class="mh-potw-head" id="mhPotwHead">
-            <span class="mh-potw-title">${ht('이주의 사진', 'Photo of the Week')}</span>
-            <span class="mh-potw-sub">${ht('편집부가 고른 한 장', 'Picked by the editors')}</span>
-            <button type="button" class="mh-potw-close" aria-label="${ht('이주의 사진 접기', 'Collapse Photo of the Week')}">✕</button>
+            <span class="mh-potw-title">${ht('이주의 사진', 'Photo of the Week', '今週の一枚')}</span>
+            <span class="mh-potw-sub">${ht('편집부가 고른 한 장', 'Picked by the editors', '編集部が選んだ一枚')}</span>
+            <button type="button" class="mh-potw-close" aria-label="${ht('이주의 사진 접기', 'Collapse Photo of the Week', '今週の一枚をたたむ')}">✕</button>
           </h3>
           <button type="button" class="mh-potw-shot">
             <img src="${esc(pick.image)}" alt="${esc(altText)}" decoding="async" />
@@ -838,7 +838,7 @@
           </p>
         </div>
         <button type="button" class="mh-potw-reopen" hidden aria-expanded="false">
-          ${ht('이주의 사진', 'Photo of the Week')}<span class="mh-potw-caret" aria-hidden="true">▾</span>
+          ${ht('이주의 사진', 'Photo of the Week', '今週の一枚')}<span class="mh-potw-caret" aria-hidden="true">▾</span>
         </button>`;
       mSec.querySelector('.mh-potw-shot').addEventListener('click', openIt);
 
@@ -977,7 +977,7 @@
     const isFav = photoFavIds.has(subId);
     photoLbFav.classList.toggle('is-fav', isFav);
     photoLbFav.setAttribute('aria-pressed', String(isFav));
-    photoLbFav.setAttribute('aria-label', isFav ? ht('즐겨찾기 해제', 'Remove from favorites') : ht('즐겨찾기 추가', 'Add to favorites'));
+    photoLbFav.setAttribute('aria-label', isFav ? ht('즐겨찾기 해제', 'Remove from favorites', 'お気に入りから削除') : ht('즐겨찾기 추가', 'Add to favorites', 'お気に入りに追加'));
   }
 
   async function togglePhotoLbFav() {
@@ -986,12 +986,12 @@
     const subId = photoLbFav.dataset.submissionId || '';
     if (!subId) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(ht('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
+      window.notify?.(ht('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm(ht('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Favorites need an account. Sign in with Google?'))) return;
+      if (!confirm(ht('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Favorites need an account. Sign in with Google?', 'お気に入りにはログインが必要です。Googleでログインしますか？'))) return;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return;
     }
@@ -1006,7 +1006,7 @@
       if (wasFav) photoFavIds.add(subId); else photoFavIds.delete(subId);
       photoLbFav.classList.toggle('is-fav', wasFav);
       photoLbFav.setAttribute('aria-pressed', String(wasFav));
-      window.notify?.(ht('처리 실패: ', 'Failed: ') + (error.message || ht('잠시 후 다시 시도', 'please try again')), 'danger');
+      window.notify?.(ht('처리 실패: ', 'Failed: ', '処理できませんでした: ') + (error.message || ht('잠시 후 다시 시도', 'please try again', 'もう一度お試しください')), 'danger');
     }
   }
   if (photoLbFav) photoLbFav.addEventListener('click', togglePhotoLbFav);
@@ -1025,7 +1025,7 @@
       : src;
     photoLbImg.onerror = () => { photoLbImg.onerror = null; photoLbImg.src = src; };
     photoLbImg.src = webpSrc;
-    photoLbImg.alt = [p.author, p.filmName].filter(Boolean).join(' · ') || ht('필름 사진', 'Film photo');
+    photoLbImg.alt = [p.author, p.filmName].filter(Boolean).join(' · ') || ht('필름 사진', 'Film photo', 'フィルム写真');
 
     photoLbAuthor.textContent = p.author || '';
     photoLbFilm.textContent = p.filmName || '';
@@ -1049,7 +1049,7 @@
       photoLbNote.hidden = !note;
     }
     photoLbCounter.textContent = `${index + 1} / ${currentPhotos.length}`;
-    try { window.srAnnounce?.(ht(`사진 ${index + 1}, 총 ${currentPhotos.length}장. `, `Photo ${index + 1} of ${currentPhotos.length}. `) + `${p.author || ''}${p.filmName ? ', ' + p.filmName : ''}`.trim()); } catch (_) {}
+    try { window.srAnnounce?.(ht(`사진 ${index + 1}, 총 ${currentPhotos.length}장. `, `Photo ${index + 1} of ${currentPhotos.length}. `, `写真 ${index + 1}枚目、全${currentPhotos.length}枚。 `) + `${p.author || ''}${p.filmName ? ', ' + p.filmName : ''}`.trim()); } catch (_) {}
     syncPhotoLbFav();
     syncPhotoLbPotw();
 
@@ -1057,7 +1057,7 @@
       photoLbLink.href = filmLinkFor(p);
       photoLbLink.removeAttribute('target');
       photoLbLink.removeAttribute('rel');
-      photoLbLink.textContent = ht('필름 보기 →', 'View film →');
+      photoLbLink.textContent = ht('필름 보기 →', 'View film →', 'フィルムを見る →');
     }
     if (photoLbContributorLink) {
       photoLbContributorLink.href = contributorLinkFor(p);

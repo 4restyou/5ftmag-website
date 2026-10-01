@@ -1,5 +1,6 @@
 (function () {
   'use strict';
+  const tr = (window.i18n || { t: (ko) => ko }).t;
 
   function normalizeCameraLabel(s) {
     return String(s ?? '').trim().replace(/\s+/g, ' ');
@@ -206,7 +207,7 @@
       container.innerHTML = '';
       return;
     }
-    container.innerHTML = '<span class="rs-recent-cameras-label">최근 사용</span>'
+    container.innerHTML = `<span class="rs-recent-cameras-label">${tr('최근 사용', 'Recent', '最近使用')}</span>`
       + recent.map(camera => `<button type="button" class="rs-recent-camera" data-camera="${escapeAttr(camera)}">${escapeHtml(camera)}</button>`).join('');
     container.hidden = false;
   }
@@ -238,7 +239,7 @@
         if (!v) { hint.hidden = true; return; }
         const matches = similarCameras(v, list, 6);
         if (!matches.length) { hint.hidden = true; return; }
-        hint.innerHTML = '<span class="rs-camera-hint-label">혹시 이 카메라?</span> '
+        hint.innerHTML = `<span class="rs-camera-hint-label">${tr('혹시 이 카메라?', 'Did you mean?', 'このカメラですか？')}</span> `
           + matches.map(m => {
               const formatted = formatCameraName(m);
               const labelHtml = m.brand

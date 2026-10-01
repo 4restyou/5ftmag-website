@@ -8,7 +8,7 @@
   'use strict';
 
   // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n || { isEn: false, lang: 'ko', locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
   const tr = i18n.t;
 
   const listEl = document.getElementById('labsList');
@@ -41,14 +41,26 @@
     '경남': 'Gyeongnam', '전남광주': 'Gwangju · Jeonnam',
     '전북': 'Jeonbuk', '제주': 'Jeju', '기타': 'Other',
   };
+  const REGION_JA = {
+    '서울': 'ソウル', '경기': '京畿', '인천': '仁川', '강원': '江原',
+    '대전': '大田', '충남': '忠南', '충북': '忠北', '세종': '世宗',
+    '대구': '大邱', '경북': '慶北', '부산': '釜山', '울산': '蔚山',
+    '경남': '慶南', '전남광주': '全南光州',
+    '전북': '全北', '제주': '済州', '기타': 'その他',
+  };
   function regionLabel(r) {
     if (!r) return '';
+    if (i18n.lang === 'ja') return REGION_JA[r] || REGION_EN[r] || r;
     return i18n.isEn ? (REGION_EN[r] || r) : r;
   }
-  // 화면에 보이는 값만 영문 칸(name_en / nameEn)을 쓰고, 없으면 한국어 원문.
+  // 화면에 보이는 값만 외국어 칸(name_en / nameEn, 일문판은 name_ja / nameJa 먼저)을 쓰고, 없으면 한국어 원문.
   // 슬러그·지역·지도 검색 주소는 원문 그대로 쓴다.
   function shown(item, key) {
     if (!item) return '';
+    if (i18n.lang === 'ja') {
+      const v = item[key + 'Ja'] ?? item[`${key}_ja`];
+      if (v != null && v !== '') return v;
+    }
     if (i18n.isEn) {
       const camel = key + 'En';
       const v = item[camel] ?? item[`${key}_en`];
@@ -60,17 +72,17 @@
   const TAB = {
     labs: {
       intro: tr('전국 필름 현상소를 한자리에 모았어요. 지역과 컬러·흑백·슬라이드 현상 가격, 스캔 화질, 홈페이지를 비교하고 <span class="accent">지도에서 위치까지</span> 확인할 수 있는 목록이에요.',
-        'Film labs across Korea in one place. Compare region, color, B&amp;W and slide developing prices, scan resolution and websites, and <span class="accent">find each lab on the map</span>.'),
-      placeholder: tr('현상소·지역·특징으로 검색…', 'Search labs, regions, features…'),
-      empty: tr('조건에 맞는 현상소가 없습니다. 지역이나 검색어를 바꿔보세요.', 'No labs match. Try another region or search term.'),
-      loadFail: tr('현상소 목록을 불러오지 못했어요.', 'Could not load the lab list.'),
+        'Film labs across Korea in one place. Compare region, color, B&amp;W and slide developing prices, scan resolution and websites, and <span class="accent">find each lab on the map</span>.', '韓国全国のフィルム現像所をまとめました。地域、カラー・モノクロ・スライド現像の料金、スキャン解像度、ウェブサイトを比べて、<span class="accent">地図で場所まで</span>確認できます。'),
+      placeholder: tr('현상소·지역·특징으로 검색…', 'Search labs, regions, features…', '現像所・地域・特徴で検索…'),
+      empty: tr('조건에 맞는 현상소가 없습니다. 지역이나 검색어를 바꿔보세요.', 'No labs match. Try another region or search term.', '条件に合う現像所がありません。地域や検索語を変えてみてください。'),
+      loadFail: tr('현상소 목록을 불러오지 못했어요.', 'Could not load the lab list.', '現像所の一覧を読み込めませんでした。'),
     },
     repairs: {
       intro: tr('전국 카메라 수리실을 모았어요. 라이카·올드카메라·SLR·컴팩트 등 <span class="accent">전문 분야와 지역</span>을 비교할 수 있어요. 주소가 등록된 곳은 지도에서 위치도 확인할 수 있습니다.',
-        'Camera repair shops across Korea. Compare <span class="accent">specialties and regions</span>, from Leica and vintage cameras to SLRs and compacts. Shops with an address also appear on the map.'),
-      placeholder: tr('수리실·지역·전문분야로 검색…', 'Search repair shops, regions, specialties…'),
-      empty: tr('조건에 맞는 수리실이 없습니다. 지역이나 검색어를 바꿔보세요.', 'No repair shops match. Try another region or search term.'),
-      loadFail: tr('수리실 목록을 불러오지 못했어요.', 'Could not load the repair shop list.'),
+        'Camera repair shops across Korea. Compare <span class="accent">specialties and regions</span>, from Leica and vintage cameras to SLRs and compacts. Shops with an address also appear on the map.', '韓国全国のカメラ修理店をまとめました。ライカ、オールドカメラ、一眼レフ、コンパクトなど、<span class="accent">専門分野と地域</span>を比べられます。住所が登録されている店は地図でも場所を確認できます。'),
+      placeholder: tr('수리실·지역·전문분야로 검색…', 'Search repair shops, regions, specialties…', '修理店・地域・専門分野で検索…'),
+      empty: tr('조건에 맞는 수리실이 없습니다. 지역이나 검색어를 바꿔보세요.', 'No repair shops match. Try another region or search term.', '条件に合う修理店がありません。地域や検索語を変えてみてください。'),
+      loadFail: tr('수리실 목록을 불러오지 못했어요.', 'Could not load the repair shop list.', '修理店の一覧を読み込めませんでした。'),
     },
   };
 
@@ -99,7 +111,7 @@
   function won(v) {
     if (v == null || v === '') return null;
     return typeof v === 'number'
-      ? tr(`${v.toLocaleString('ko-KR')}원`, `${v.toLocaleString(i18n.locale)} won`)
+      ? tr(`${v.toLocaleString('ko-KR')}원`, `${v.toLocaleString(i18n.locale)} won`, `${v.toLocaleString(i18n.locale)}ウォン`)
       : String(v);
   }
   function slugify(s) {
@@ -154,6 +166,9 @@
       nameEn: r.name_en ?? r.nameEn ?? null,
       addressEn: r.address_en ?? r.addressEn ?? null,
       featuresEn: r.features_en ?? r.featuresEn ?? null,
+      nameJa: r.name_ja ?? r.nameJa ?? null,
+      addressJa: r.address_ja ?? r.addressJa ?? null,
+      featuresJa: r.features_ja ?? r.featuresJa ?? null,
     };
   }
 
@@ -270,7 +285,7 @@
     }
     const chip = (key, label, n) =>
       `<button type="button" class="ft-chip filter-chip${key === region ? ' active' : ''}" data-region="${escapeAttr(key)}">${escapeHtml(label)}<span class="ft-chip-count labs-chip-count">${n}</span></button>`;
-    let html = chip('all', tr('전체', 'All'), data.length);
+    let html = chip('all', tr('전체', 'All', 'すべて'), data.length);
     for (const r of regions) html += chip(r, regionLabel(r), data.filter((l) => l.region === r).length);
     filterEl.innerHTML = html;
     filterEl.querySelectorAll('.filter-chip').forEach((b) => {
@@ -316,7 +331,7 @@
     const keys = [...groups.keys()].sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b, 'ko'));
     return keys.map((k) => {
       const grp = groups.get(k).sort(byName);
-      return `<h2 class="labs-region-divider">${escapeHtml(regionLabel(k))}<span class="labs-region-divider-count">${tr(`${grp.length}곳`, `${grp.length}`)}</span></h2>`
+      return `<h2 class="labs-region-divider">${escapeHtml(regionLabel(k))}<span class="labs-region-divider-count">${tr(`${grp.length}곳`, `${grp.length}`, `${grp.length}か所`)}</span></h2>`
         + grp.map(card).join('');
     }).join('');
   }
@@ -324,30 +339,30 @@
   function priceChips(p) {
     if (!p) return '';
     const items = [
-      [tr('컬러', 'Color'), p.color && p.color['135'] && p.color['135'].basic],
-      [tr('흑백', 'B&W'), p.bw && p.bw['135'] && p.bw['135'].basic],
-      [tr('슬라이드', 'Slide'), p.slide && p.slide['135'] && p.slide['135'].basic],
-      [tr('영화용', 'Cine'), p.cinema && p.cinema['135'] && p.cinema['135'].basic],
+      [tr('컬러', 'Color', 'カラー'), p.color && p.color['135'] && p.color['135'].basic],
+      [tr('흑백', 'B&W', 'モノクロ'), p.bw && p.bw['135'] && p.bw['135'].basic],
+      [tr('슬라이드', 'Slide', 'スライド'), p.slide && p.slide['135'] && p.slide['135'].basic],
+      [tr('영화용', 'Cine', '映画用'), p.cinema && p.cinema['135'] && p.cinema['135'].basic],
     ].filter(([, v]) => v != null && v !== '');
     if (!items.length) return '';
     return `<div class="lab-prices">${items
       .map(([k, v]) => `<span class="lab-price"><span class="lab-price-k">${escapeHtml(k)}</span> ${escapeHtml(won(v))}</span>`)
-      .join('')}<span class="lab-price-note">${tr('135 기본 기준', '135, standard scan')}</span></div>`;
+      .join('')}<span class="lab-price-note">${tr('135 기본 기준', '135, standard scan', '135・標準スキャン')}</span></div>`;
   }
   function labCardSummary(lab) {
     const p = lab?.prices || {};
     const items = [
-      [tr('컬러', 'Color'), p.color && p.color['135'] && p.color['135'].basic],
-      [tr('흑백', 'B&W'), p.bw && p.bw['135'] && p.bw['135'].basic],
-      [tr('슬라이드', 'Slide'), p.slide && p.slide['135'] && p.slide['135'].basic],
-      [tr('영화용', 'Cine'), p.cinema && p.cinema['135'] && p.cinema['135'].basic],
+      [tr('컬러', 'Color', 'カラー'), p.color && p.color['135'] && p.color['135'].basic],
+      [tr('흑백', 'B&W', 'モノクロ'), p.bw && p.bw['135'] && p.bw['135'].basic],
+      [tr('슬라이드', 'Slide', 'スライド'), p.slide && p.slide['135'] && p.slide['135'].basic],
+      [tr('영화용', 'Cine', '映画用'), p.cinema && p.cinema['135'] && p.cinema['135'].basic],
     ].filter(([, v]) => v != null && v !== '');
     if (items.length) {
       return `<span class="lab-card-summary">${items
         .map(([k, v]) => `<span>${escapeHtml(k)} <strong>${escapeHtml(won(v))}</strong></span>`)
-        .join('')}<span class="lab-card-summary-note">${tr('135 기준', '135')}</span></span>`;
+        .join('')}<span class="lab-card-summary-note">${tr('135 기준', '135', '135基準')}</span></span>`;
     }
-    const fallback = [lab.scanRes && tr(`기본 스캔 ${lab.scanRes}`, `Standard scan ${lab.scanRes}`), shown(lab, 'features')]
+    const fallback = [lab.scanRes && tr(`기본 스캔 ${lab.scanRes}`, `Standard scan ${lab.scanRes}`, `標準スキャン ${lab.scanRes}`), shown(lab, 'features')]
       .filter(Boolean)
       .join(' · ');
     return fallback ? `<span class="lab-card-summary">${escapeHtml(fallback)}</span>` : '';
@@ -391,12 +406,12 @@
       ? `https://map.naver.com/p/search/${encodeURIComponent(lab.address)}`
       : null;
     const links = [];
-    if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">${tr('지도에서 보기 ↗', 'Naver Map (Korean) ↗')}</a>`);
-    if (lab.url) links.push(`<a href="${escapeAttr(lab.url)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗')}</a>`);
+    if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">${tr('지도에서 보기 ↗', 'Naver Map (Korean) ↗', 'NAVERマップ（韓国語） ↗')}</a>`);
+    if (lab.url) links.push(`<a href="${escapeAttr(lab.url)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗', 'ウェブサイト・SNS ↗')}</a>`);
     return `
       ${lab.address ? `<p class="lab-addr">${escapeHtml(shown(lab, 'address'))}</p>` : ''}
       ${priceChips(lab.prices)}
-      ${lab.scanRes ? `<p class="lab-meta">${tr('기본 스캔', 'Standard scan')} ${escapeHtml(lab.scanRes)}</p>` : ''}
+      ${lab.scanRes ? `<p class="lab-meta">${tr('기본 스캔', 'Standard scan', '標準スキャン')} ${escapeHtml(lab.scanRes)}</p>` : ''}
       ${lab.features ? `<p class="lab-features">${escapeHtml(shown(lab, 'features'))}</p>` : ''}
       ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
     `;
@@ -407,12 +422,12 @@
       ? `https://map.naver.com/p/search/${encodeURIComponent(s.address)}`
       : null;
     const links = [];
-    if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">${tr('지도에서 보기 ↗', 'Naver Map (Korean) ↗')}</a>`);
-    if (s.url) links.push(`<a href="${escapeAttr(s.url)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗')}</a>`);
+    if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">${tr('지도에서 보기 ↗', 'Naver Map (Korean) ↗', 'NAVERマップ（韓国語） ↗')}</a>`);
+    if (s.url) links.push(`<a href="${escapeAttr(s.url)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗', 'ウェブサイト・SNS ↗')}</a>`);
     return `
       ${s.address ? `<p class="lab-addr">${escapeHtml(shown(s, 'address'))}</p>` : ''}
-      ${s.specialty ? `<p class="lab-meta">${tr('전문', 'Specialty:')} ${escapeHtml(shown(s, 'specialty'))}</p>` : ''}
-      ${s.contact ? `<p class="lab-meta">${tr('연락처', 'Contact:')} ${escapeHtml(s.contact)}</p>` : ''}
+      ${s.specialty ? `<p class="lab-meta">${tr('전문', 'Specialty:', '専門：')} ${escapeHtml(shown(s, 'specialty'))}</p>` : ''}
+      ${s.contact ? `<p class="lab-meta">${tr('연락처', 'Contact:', '連絡先：')} ${escapeHtml(s.contact)}</p>` : ''}
       ${s.description ? `<p class="lab-features">${escapeHtml(shown(s, 'description'))}</p>` : ''}
       ${links.length ? `<div class="lab-links">${links.join('')}</div>` : ''}
     `;
@@ -465,7 +480,7 @@
       const policy = document.permissionsPolicy || document.featurePolicy;
       if (policy && !policy.allowsFeature('geolocation')) {
         const msg = tr('이 화면에서는 위치 접근이 제한되어 있어요. 외부 브라우저에서 열거나 지역을 선택해 주세요.',
-          'Location access is blocked here. Open this page in your browser or pick a region.');
+          'Location access is blocked here. Open this page in your browser or pick a region.', 'この画面では位置情報が使えません。外部ブラウザで開くか、地域を選んでください。');
         window.notify ? window.notify(msg, 'info') : alert(msg);
         return;
       }
@@ -494,9 +509,9 @@
           btn.classList.remove('is-loading');
           const msg = err && err.code === 1
             ? tr('위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해 주세요.',
-              'Location permission is off. Allow location access in your browser settings.')
+              'Location permission is off. Allow location access in your browser settings.', '位置情報の許可がオフになっています。ブラウザの設定で位置情報へのアクセスを許可してください。')
             : tr('현재 위치를 가져오지 못했어요. 잠시 후 다시 시도해 주세요.',
-              'Could not get your location. Please try again in a moment.');
+              'Could not get your location. Please try again in a moment.', '現在地を取得できませんでした。しばらくしてからもう一度お試しください。');
           window.notify ? window.notify(msg, 'info') : alert(msg);
         },
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
@@ -510,9 +525,9 @@
       ? `https://map.naver.com/p/search/${encodeURIComponent(item.address)}`
       : null;
     const links = [];
-    links.push(`<button type="button" class="labs-map-info-button" data-labs-map-detail="${escapeAttr(slug)}">${tr('자세히', 'Details')}</button>`);
-    if (naverMap) links.push(`<a href="${escapeAttr(naverMap)}" target="_blank" rel="noopener">${tr('길찾기 ↗', 'Directions ↗')}</a>`);
-    if (item.url) links.push(`<a href="${escapeAttr(item.url)}" target="_blank" rel="noopener">${tr('홈페이지 ↗', 'Website ↗')}</a>`);
+    links.push(`<button type="button" class="labs-map-info-button" data-labs-map-detail="${escapeAttr(slug)}">${tr('자세히', 'Details', '詳細')}</button>`);
+    if (naverMap) links.push(`<a href="${escapeAttr(naverMap)}" target="_blank" rel="noopener">${tr('길찾기 ↗', 'Directions ↗', '経路案内 ↗')}</a>`);
+    if (item.url) links.push(`<a href="${escapeAttr(item.url)}" target="_blank" rel="noopener">${tr('홈페이지 ↗', 'Website ↗', 'ウェブサイト ↗')}</a>`);
     return `<div class="labs-map-info">
       <strong>${escapeHtml(shown(item, 'name'))}</strong>
       ${item.address ? `<span class="labs-map-info-addr">${escapeHtml(shown(item, 'address'))}</span>` : ''}
@@ -602,7 +617,7 @@
     if (!wrap || !btn) return;
     const shouldShow = total > mobileVisible;
     wrap.hidden = !shouldShow;
-    if (shouldShow) btn.textContent = tr(`더 보기 (${total - mobileVisible})`, `Show more (${total - mobileVisible})`);
+    if (shouldShow) btn.textContent = tr(`더 보기 (${total - mobileVisible})`, `Show more (${total - mobileVisible})`, `もっと見る（${total - mobileVisible}）`);
   }
 
   function resetLabsFilter() {
@@ -617,7 +632,7 @@
   function renderLabsCount(count) {
     if (!countEl) return;
     const hasFilter = region !== 'all' || !!query;
-    const countLabel = tr(`${count}곳`, count === 1 ? '1 place' : `${count} places`);
+    const countLabel = tr(`${count}곳`, count === 1 ? '1 place' : `${count} places`, `${count}か所`);
     if (!hasFilter) { countEl.textContent = countLabel; return; }
     countEl.innerHTML = '';
     const parts = [];
@@ -634,7 +649,7 @@
     const reset = document.createElement('button');
     reset.type = 'button';
     reset.className = 'labs-count-reset';
-    reset.textContent = tr('초기화', 'Reset');
+    reset.textContent = tr('초기화', 'Reset', 'リセット');
     reset.addEventListener('click', resetLabsFilter);
     countEl.appendChild(reset);
   }
@@ -648,7 +663,7 @@
       const hasFilter = region !== 'all' || !!query;
       listEl.innerHTML = MagState.empty({
         title: TAB[tab].empty,
-        actionLabel: hasFilter ? tr('전체 보기', 'Show all') : '',
+        actionLabel: hasFilter ? tr('전체 보기', 'Show all', 'すべて表示') : '',
         action: 'reset',
       });
       if (hasFilter) {
@@ -706,15 +721,15 @@
     modal.innerHTML = `
       <div class="labs-modal-backdrop" data-close></div>
       <div class="labs-modal-box" role="document">
-        <button type="button" class="labs-modal-close" data-close aria-label="${tr('닫기', 'Close')}">✕</button>
+        <button type="button" class="labs-modal-close" data-close aria-label="${tr('닫기', 'Close', '閉じる')}">✕</button>
         <div class="labs-modal-head">
           <h2 id="labsModalTitle" class="labs-modal-name"></h2>
           <span class="lab-region labs-modal-region"></span>
         </div>
-        <div class="labs-modal-map" aria-label="${tr('위치 미니맵', 'Location map')}" hidden></div>
+        <div class="labs-modal-map" aria-label="${tr('위치 미니맵', 'Location map', '位置のミニマップ')}" hidden></div>
         <div class="labs-modal-body"></div>
         <div class="labs-modal-actions">
-          <button type="button" class="lab-share-btn" data-share-modal>${tr('공유', 'Share')}</button>
+          <button type="button" class="lab-share-btn" data-share-modal>${tr('공유', 'Share', '共有')}</button>
         </div>
       </div>
     `;
@@ -743,9 +758,9 @@
     const showEmpty = (reason) => {
       console.warn('[labs] modal map skip:', reason, item.name, item.address);
       mapEl.classList.add('labs-modal-map-empty');
-      mapEl.innerHTML = `<span class="labs-modal-map-msg">${tr('지도 표시 실패', 'Map unavailable')} (${reason})</span>`;
+      mapEl.innerHTML = `<span class="labs-modal-map-msg">${tr('지도 표시 실패', 'Map unavailable', '地図を表示できません')} (${reason})</span>`;
     };
-    if (!window.naver || !naver.maps) { showEmpty(tr('SDK 미로드', 'SDK not loaded')); return; }
+    if (!window.naver || !naver.maps) { showEmpty(tr('SDK 미로드', 'SDK not loaded', 'SDK未読み込み')); return; }
     // 좌표 source 우선순위: 1) item.lat/lng (DB·정적 JSON), 2) 메인 지도 geocode 캐시(markerBySlug),
     // 3) item.address 직접 geocode (admin 등록 후 좌표 없는 lab 대응).
     let coord = await resolveItemCoord(item);
@@ -758,7 +773,7 @@
         lat = pos.lat(); lng = pos.lng();
       }
     }
-    if (!isValidCoord({ lat, lng })) { showEmpty(tr('좌표 없음', 'no coordinates')); return; }
+    if (!isValidCoord({ lat, lng })) { showEmpty(tr('좌표 없음', 'no coordinates', '座標なし')); return; }
     // 모달 transition 후 size 측정되도록 다음 frame 에서 생성.
     requestAnimationFrame(() => {
       try {
@@ -769,7 +784,7 @@
         });
         modalMapMarker = new naver.maps.Marker({ position: center, map: modalMap, title: shown(item, 'name') });
       } catch (e) {
-        showEmpty(tr('생성 오류 ', 'init error ') + (e?.message || e));
+        showEmpty(tr('생성 오류 ', 'init error ', '初期化エラー ') + (e?.message || e));
       }
     });
   }
@@ -807,9 +822,9 @@
     const url = window.prettyShareUrl ? window.prettyShareUrl(u.toString()) : u.toString();
     try {
       await navigator.clipboard.writeText(url);
-      showLabsToast(tr('링크가 복사됐어요', 'Link copied'));
+      showLabsToast(tr('링크가 복사됐어요', 'Link copied', 'リンクをコピーしました'));
     } catch {
-      prompt(tr('아래 링크를 복사하세요', 'Copy the link below'), url);
+      prompt(tr('아래 링크를 복사하세요', 'Copy the link below', '下のリンクをコピーしてください'), url);
     }
   }
   function showLabsToast(msg) {
@@ -905,7 +920,7 @@
       });
     }
     if (mapSectionEl) mapSectionEl.hidden = view !== 'map';
-    if (listSectionEl) listSectionEl.setAttribute('aria-label', view === 'map' ? tr('현재 지도 결과 목록', 'Results on the map') : tr('현상소·수리실 목록', 'Labs and repair shops'));
+    if (listSectionEl) listSectionEl.setAttribute('aria-label', view === 'map' ? tr('현재 지도 결과 목록', 'Results on the map', '地図に表示中の結果') : tr('현상소·수리실 목록', 'Labs and repair shops', '現像所・修理店の一覧'));
     if (view === 'map') {
       if (!mapReady) initMap();
       if (!mapReady) { setView('list'); return; }

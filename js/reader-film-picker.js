@@ -108,7 +108,7 @@
       setMode('request');
       closeDropdown();
       optionList?.querySelectorAll('.rs-film-option.is-selected').forEach(el => el.classList.remove('is-selected'));
-      if (selectedLabel) selectedLabel.textContent = tr('필름을 선택해 주세요', 'Choose a film');
+      if (selectedLabel) selectedLabel.textContent = tr('필름을 선택해 주세요', 'Choose a film', 'フィルムを選んでください');
       if (filmInput) filmInput.value = reqInput?.value?.trim() || '';
       setTimeout(() => reqInput?.focus(), 50);
       syncThemeCheckbox(filmInput?.value || '');
