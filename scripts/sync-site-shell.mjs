@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT as root, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, footerCopyHtml } from './lib/site-shell.mjs';
+import { ROOT as root, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, footerCopyHtml, alternatesHtml } from './lib/site-shell.mjs';
 
 const check = process.argv.includes('--check');
 const changed = [];
@@ -32,17 +32,21 @@ for (const file of walk(root)) {
   // 주소가 옛 주소로 남거나 연도가 2024 로 굳거나, legal 페이지처럼 저작권 줄이
   // 아예 빠져서 푸터 정렬이 달라지는 일이 있었다.
   if (/<span class="footer-publisher">[\s\S]*?<\/span>/.test(next)) {
-    next = next.replace(/<span class="footer-publisher">[\s\S]*?<\/span>/, footerPublisherHtml());
+    next = next.replace(/<span class="footer-publisher">[\s\S]*?<\/span>/, footerPublisherHtml(file));
   }
   if (/<span class="footer-copy">[\s\S]*?<\/span>/.test(next)) {
-    next = next.replace(/<span class="footer-copy">[\s\S]*?<\/span>/, footerCopyHtml());
+    next = next.replace(/<span class="footer-copy">[\s\S]*?<\/span>/, footerCopyHtml(file));
   } else if (/<div class="footer-links">[\s\S]*?<\/div>\s*<\/footer>/.test(next)) {
     // 저작권 줄이 없는 페이지에는 푸터 링크 뒤에 새로 넣는다.
     next = next.replace(
       /(<div class="footer-links">[\s\S]*?<\/div>)(\s*)<\/footer>/,
-      `$1$2${footerCopyHtml()}\n</footer>`,
+      `$1$2${footerCopyHtml(file)}\n</footer>`,
     );
   }
+  // 언어 대응 링크는 canonical 바로 아래에 둔다. 매번 지우고 다시 넣어 공개 여부(en.publish)를 따른다.
+  next = next.replace(/\n[ \t]*<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g, '');
+  const alternates = alternatesHtml(file);
+  if (alternates) next = next.replace(/(<link rel="canonical" href="[^"]*">)/, `$1\n${alternates}`);
   if (next !== source) {
     changed.push(path.relative(root, file));
     if (!check) fs.writeFileSync(file, next);

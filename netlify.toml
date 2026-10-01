@@ -201,6 +201,54 @@
 # 외부 프록시가 아니라 Netlify 가 직접 실행·서빙하므로 Content-Type(text/html)
 # 이 그대로 지켜진다. 별도 redirect/headers 설정은 필요 없다.
 
+# 영문판(/en/). 한국어판과 같은 짧은 주소를 쓴다. 지역 별칭(gwangju·jeonnam)은 한국어판과 같이 301.
+[[redirects]]
+  from = "/en/stories"
+  to = "/en/stories.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/stories/:slug"
+  to = "/en/stories/:slug.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/films"
+  to = "/en/films.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/film/:slug"
+  to = "/en/film/:slug.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/labs"
+  to = "/en/labs.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/labs/gwangju"
+  to = "/en/labs/jeonnamgwangju"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/labs/jeonnam"
+  to = "/en/labs/jeonnamgwangju"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/labs/:region"
+  to = "/en/labs/:region.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/about"
+  to = "/en/about.html"
+  status = 200
+
 [[redirects]]
   from = "/stories"
   to = "/stories.html"
