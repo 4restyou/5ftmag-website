@@ -1,7 +1,12 @@
-# 관리 페이지(admin/articles.html) 의 공개/비공개 토글은 GitHub Contents API 로
-# data/stories.json 한 파일만 커밋한다. 그런데 qa-smoke 는 발행 글이 rss.xml·
-# sitemap.xml 에도 들어가 있는지 검사하므로, 토글할 때마다 main 의 CI 가 드리프트로
-# 실패했다. 이 워크플로우가 토글 직후 두 파일을 재생성해 뒤따라 커밋한다.
+# 관리 페이지(admin/articles.html) 의 공개/비공개 토글이나 main 에 바로 올린 기사 커밋은
+# data/stories.json 만 바꾼다. 그런데 qa-smoke 는 발행 글이 rss.xml·sitemap.xml 에도 들어가
+# 있는지 검사하므로, 그때마다 main 의 CI 가 드리프트로 실패했다. 이 워크플로우가 두 파일을
+# 재생성해 뒤따라 올린다.
+#
+# main 은 보호 브랜치라 「validate」 검사를 통과한 커밋만 받는다. 이 워크플로우가 만든 커밋은
+# 그대로 푸시하면 거절된다(2026-10-01 확인). 그래서 커밋을 임시 브랜치에 올리고, 그 브랜치에서
+# CI(test.yml)를 직접 돌려 통과시킨 뒤 같은 커밋을 main 에 fast-forward 로 올린다.
+# GITHUB_TOKEN 으로 만든 PR·푸시는 CI 를 깨우지 않지만 workflow_dispatch 는 깨운다.
 #
 # 두 빌더는 로컬 파일(data/*.json)만 읽으므로 DB 접근이나 시크릿이 필요 없다.
 name: feeds-sync
@@ -15,6 +20,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: feeds-sync
@@ -46,9 +52,29 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add rss.xml sitemap.xml
           git commit -m "chore(feeds): rss·sitemap 을 stories.json 에 맞춘다"
-          # 토글이 연달아 들어오면 main 이 앞서 있을 수 있으므로 rebase 후 푸시한다.
-          for i in 1 2 3; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
-            echo "푸시 재시도 $i"; sleep 5
+          echo "LAND=1" >> "$GITHUB_ENV"
+      - name: 임시 브랜치에서 CI 를 통과시킨 뒤 main 에 올린다
+        if: env.LAND == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BR="bot/feeds-sync-${GITHUB_RUN_ID}"
+          git push origin "HEAD:refs/heads/$BR"
+          gh workflow run test.yml --ref "$BR"
+          # 방금 띄운 실행을 찾는다(목록에 뜨기까지 몇 초 걸린다)
+          RUN=""
+          for i in $(seq 1 30); do
+            RUN=$(gh run list --workflow test.yml --branch "$BR" --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId')
+            [ -n "$RUN" ] && break
+            sleep 5
           done
-          exit 1
+          [ -n "$RUN" ] || { echo "CI 실행을 찾지 못했다"; git push origin --delete "$BR"; exit 1; }
+          if ! gh run watch "$RUN" --exit-status --interval 20; then
+            echo "CI 실패 — main 에 올리지 않는다: https://github.com/${GITHUB_REPOSITORY}/actions/runs/$RUN"
+            git push origin --delete "$BR"
+            exit 1
+          fi
+          # 검사를 통과한 같은 커밋을 main 에 fast-forward 로 올린다. 그사이 main 이 앞서 갔으면
+          # 이 커밋은 버린다(main 의 새 커밋이 다시 이 워크플로우를 깨운다).
+          git push origin "HEAD:main" || echo "main 이 앞서 있어 이번 갱신은 건너뛴다(다음 실행이 맞춘다)"
+          git push origin --delete "$BR"
