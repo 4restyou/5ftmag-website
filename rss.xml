@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Wed, 30 Sep 2026 08:28:09 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 01 Oct 2026 01:35:05 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>2026 / 10, 이달의 사진 전시</title>
+      <link>https://www.5ftmag.com/stories/oct-2026-exhibitions.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/oct-2026-exhibitions.html</guid>
+      <pubDate>Thu, 01 Oct 2026 00:00:00 GMT</pubDate>
+      <description>10월의 사진 전시는 우포늪, 광산, 도시, 지역 사진제를 따라 움직인다. 정봉채, 민병헌, 사진진주 2026, 이인미와 캐논갤러리 전시까지. 지난달 다룬 전시는 링크로 정리했다.</description>
+      <category>EXHIBITION</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>이갑철, 초점이 빗나간 곳에서 기가 보였다</title>
       <link>https://www.5ftmag.com/stories/lee-gapchul.html</link>
