@@ -8,6 +8,10 @@ name: en-missing
 
 on:
   workflow_dispatch:
+  # 이 파일을 고치는 PR 에서도 돈다(수동 실행 권한이 없는 환경에서 로그를 보려고)
+  pull_request:
+    paths:
+      - '.github/workflows/en-missing.yml'
 
 permissions:
   contents: read
