@@ -13,6 +13,10 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+
   const STYLE_ID = 'fnp-style';
   const ROOT_ID = 'fnp-root';
   const MAX_SHOWN = 60;
@@ -72,19 +76,19 @@
     root.hidden = true;
     root.setAttribute('role', 'dialog');
     root.setAttribute('aria-modal', 'true');
-    root.setAttribute('aria-label', '필름 고르기');
+    root.setAttribute('aria-label', tr('필름 고르기', 'Choose a film'));
     root.innerHTML = `
       <div class="fnp-panel">
         <div class="fnp-head">
-          <h2>필름 고르기</h2>
-          <p>카탈로그에 있는 이름으로 골라야 사진이 그 필름에 붙습니다.</p>
-          <input type="text" class="fnp-search" placeholder="필름 이름으로 검색 (예: 포트라, vision, 400)" autocomplete="off" />
+          <h2>${tr('필름 고르기', 'Choose a film')}</h2>
+          <p>${tr('카탈로그에 있는 이름으로 골라야 사진이 그 필름에 붙습니다.', 'Pick a name from the catalog so the photo is linked to that film.')}</p>
+          <input type="text" class="fnp-search" placeholder="${tr('필름 이름으로 검색 (예: 포트라, vision, 400)', 'Search by film name (e.g. portra, vision, 400)')}" autocomplete="off" />
         </div>
         <div class="fnp-list"></div>
         <div class="fnp-foot">
           <p class="fnp-warn" hidden></p>
-          <button type="button" class="fnp-btn" data-fnp="cancel">취소</button>
-          <button type="button" class="fnp-btn" data-fnp="raw">입력한 그대로 저장</button>
+          <button type="button" class="fnp-btn" data-fnp="cancel">${tr('취소', 'Cancel')}</button>
+          <button type="button" class="fnp-btn" data-fnp="raw">${tr('입력한 그대로 저장', 'Save as typed')}</button>
         </div>
       </div>`;
     document.body.appendChild(root);
@@ -128,10 +132,10 @@
             <span class="fnp-item-name">${esc(entry.name)}</span>
             <span class="fnp-item-spec">${esc(entry.spec)}</span>
           </button>`).join('')
-        : '<p class="fnp-empty">카탈로그에 없는 필름입니다. 그대로 저장하면 이 사진은 카탈로그의 어느 필름에도 붙지 않습니다.</p>';
+        : `<p class="fnp-empty">${tr('카탈로그에 없는 필름입니다. 그대로 저장하면 이 사진은 카탈로그의 어느 필름에도 붙지 않습니다.', "This film isn't in the catalog. If you save it as typed, the photo won't be linked to any film in the catalog.")}</p>`;
       const typed = search.value.trim();
       warn.hidden = !typed || matchesCatalog(typed);
-      if (!warn.hidden) warn.textContent = '이 표기는 카탈로그의 필름과 맞지 않습니다. 그대로 저장하면 카탈로그에 나타나지 않습니다.';
+      if (!warn.hidden) warn.textContent = tr('이 표기는 카탈로그의 필름과 맞지 않습니다. 그대로 저장하면 카탈로그에 나타나지 않습니다.', "This name doesn't match any film in the catalog. If you save it as typed, it won't appear in the catalog.");
       rawBtn.disabled = !typed;
     }
 

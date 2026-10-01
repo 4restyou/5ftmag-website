@@ -7,6 +7,10 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+
   const MAX_LONG_SIDE = 1600;
   const JPEG_QUALITY = 0.76;
   const LS_KEY = '5ft_submission_meta';
@@ -219,7 +223,7 @@
   // ════════════════════════════════════════════════════════════
   function resizeToJpeg(file, onProgress, options = {}) {
     if (typeof window.processImageForUpload !== 'function') {
-      return Promise.reject(new Error('이미지 변환 모듈이 로드되지 않았어요. 새로고침 후 다시 시도해 주세요.'));
+      return Promise.reject(new Error(tr('이미지 변환 모듈이 로드되지 않았어요. 새로고침 후 다시 시도해 주세요.', 'The image converter did not load. Please refresh and try again.')));
     }
     return window.processImageForUpload(file, {
       maxLongSide: options.maxLongSide || MAX_LONG_SIDE,
@@ -284,7 +288,7 @@
     wrap.innerHTML = `
       <div class="rs-modal-backdrop" data-action="rs-close"></div>
       <div class="rs-modal-card">
-        <button type="button" class="rs-modal-close" data-action="rs-close" aria-label="닫기">✕</button>
+        <button type="button" class="rs-modal-close" data-action="rs-close" aria-label="${tr('닫기', 'Close')}">✕</button>
         <div class="rs-modal-body">
           <!-- 채워짐 -->
         </div>
@@ -311,7 +315,7 @@
   let submissionBusy = false;
   function closeModal() {
     if (submissionBusy) {
-      showError('제출 처리 중입니다. 입력 내용을 보존하려면 결과가 나올 때까지 잠시 기다려 주세요.');
+      showError(tr('제출 처리 중입니다. 입력 내용을 보존하려면 결과가 나올 때까지 잠시 기다려 주세요.', 'Your submission is in progress. Please wait for the result so your entries are kept.'));
       return;
     }
     const wrap = document.getElementById('rs-modal');
@@ -329,10 +333,10 @@
   // ════════════════════════════════════════════════════════════
   function renderLoginPrompt() {
     return `
-      <h2 id="rs-modal-title" class="rs-title">사진 올리기</h2>
+      <h2 id="rs-modal-title" class="rs-title">${tr('사진 올리기', 'Upload a photo')}</h2>
       <p class="rs-desc">
-        로그인하면 지금 보던 화면으로 돌아와 사진 올리기를 이어갈 수 있어요.<br />
-        사진은 편집부 검토 후 보통 24~48시간 안에 Reader's Roll에 반영됩니다.
+        ${tr('로그인하면 지금 보던 화면으로 돌아와 사진 올리기를 이어갈 수 있어요.', 'Sign in and you will come back to this page to finish uploading.')}<br />
+        ${tr("사진은 편집부 검토 후 보통 24~48시간 안에 Reader's Roll에 반영됩니다.", "The editors review each photo, and it usually appears in Reader's Roll within 24 to 48 hours.")}
       </p>
       <button type="button" class="rs-btn rs-btn-google" data-action="rs-login-google">
         <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">
@@ -341,7 +345,7 @@
           <path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.3-1.71V4.96H.96A8.99 8.99 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3-2.33z"/>
           <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.97 8.97 0 0 0 9 0C5.48 0 2.44 2.02.96 4.96l3 2.34C4.67 5.16 6.66 3.58 9 3.58z"/>
         </svg>
-        Google로 계속하기
+        ${tr('Google로 계속하기', 'Continue with Google')}
       </button>`;
   }
 
@@ -350,8 +354,8 @@
       try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
       catch { return {}; }
     })();
-    const themeIssue = theme?.issue || theme?.month || '다음 호';
-    const themeFilm = theme?.film ? ` · 메인 필름: <strong>${escapeHtml(theme.film)}</strong>` : '';
+    const themeIssue = theme?.issue || theme?.month || tr('다음 호', 'Next issue');
+    const themeFilm = theme?.film ? ` · ${tr('메인 필름', 'Main film')}: <strong>${escapeHtml(theme.film)}</strong>` : '';
     // 테마 main film 의 canonical 이름 — 체크박스 ↔ 필름 picker 바인딩 기준
     const themeCanonical = (() => {
       if (!theme?.film) return '';
@@ -401,7 +405,8 @@
     // 클래스 .rs-theme / data-theme-canonical / #rs-theme-hint 는 film-picker 의
     // syncThemeCheckbox 가 셀렉터로 의존하므로 그대로 유지.
     // 응모 값은 hidden input(name="theme_apply") 으로, JS 가 film 일치 시 value 채움.
-    const themeSubtitle = theme && theme.subtitle ? ` · "${theme.subtitle}"` : '';
+    const themeSubtitleText = theme ? (i18n.isEn && theme.subtitleEn) || theme.subtitle : '';
+    const themeSubtitle = themeSubtitleText ? ` · "${themeSubtitleText}"` : '';
     const themeBlock = (theme && theme.active) ? `
       <details class="rs-theme rs-theme-compact" data-theme-canonical="${escapeAttr(themeCanonical)}">
         <summary class="rs-theme-summary">
@@ -411,7 +416,7 @@
               <svg class="rs-theme-status-on" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
             </span>
             <span class="rs-theme-line">
-              <strong class="rs-theme-line-title">${escapeHtml(themeIssue)} 응모 자동 포함</strong>
+              <strong class="rs-theme-line-title">${tr(`${escapeHtml(themeIssue)} 응모 자동 포함`, `Auto-entered for ${escapeHtml(themeIssue)}`)}</strong>
               <small class="rs-theme-line-sub">${themeCanonical ? escapeHtml(themeCanonical) + ' · ' : ''}"${escapeHtml(theme.title)}"</small>
             </span>
           </span>
@@ -420,11 +425,11 @@
           </span>
         </summary>
         <div class="rs-theme-detail">
-          <p class="rs-theme-desc">${escapeHtml(theme.description || '')}${themeSubtitle}${themeFilm}</p>
+          <p class="rs-theme-desc">${escapeHtml((i18n.isEn && theme.descriptionEn) || theme.description || '')}${themeSubtitle}${themeFilm}</p>
         </div>
         <input type="hidden" name="theme_apply" value="${initialThemeChecked ? escapeAttr(theme.month) : ''}" />
       </details>
-      ${themeCanonical ? `<p class="rs-theme-hint" id="rs-theme-hint" hidden>이번 호 응모는 <strong>${escapeHtml(themeCanonical)}</strong> 사진을 골랐을 때 자동 포함돼요.</p>` : ''}
+      ${themeCanonical ? `<p class="rs-theme-hint" id="rs-theme-hint" hidden>${tr(`이번 호 응모는 <strong>${escapeHtml(themeCanonical)}</strong> 사진을 골랐을 때 자동 포함돼요.`, `Your photo is entered for this issue automatically when you choose <strong>${escapeHtml(themeCanonical)}</strong>.`)}</p>` : ''}
     ` : '';
 
     const groupsHtml = brandKeys.map(brand => `
@@ -447,52 +452,52 @@
       </div>`).join('');
 
     return `
-      <h2 id="rs-modal-title" class="rs-title">사진 올리기</h2>
-      <p class="rs-desc">한 컷을 보내주세요. 편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).</p>
+      <h2 id="rs-modal-title" class="rs-title">${tr('사진 올리기', 'Upload a photo')}</h2>
+      <p class="rs-desc">${tr("한 컷을 보내주세요. 편집부 검토 후 Reader's Roll에 게시됩니다 (보통 24~48시간).", "Send us one frame. The editors review it before it goes up on Reader's Roll (usually within 24 to 48 hours).")}</p>
       <form class="rs-form" id="rs-form">
         <label class="rs-field rs-photo-field">
-          <span class="rs-label">사진 <em>*</em></span>
+          <span class="rs-label">${tr('사진', 'Photo')} <em>*</em></span>
           <input class="rs-file-input" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" required />
-          <span class="rs-dropzone" id="rs-dropzone" role="button" tabindex="0" aria-label="사진 파일 선택">
-            <span class="rs-dropzone-title">사진을 끌어오거나 클릭해서 선택</span>
-            <span class="rs-dropzone-meta">JPG / PNG / WebP · 1장</span>
-            <span class="rs-dropzone-file" id="rs-file-name">선택된 사진 없음</span>
+          <span class="rs-dropzone" id="rs-dropzone" role="button" tabindex="0" aria-label="${tr('사진 파일 선택', 'Choose a photo file')}">
+            <span class="rs-dropzone-title">${tr('사진을 끌어오거나 클릭해서 선택', 'Drag a photo here or click to choose')}</span>
+            <span class="rs-dropzone-meta">JPG / PNG / WebP · ${tr('1장', '1 photo')}</span>
+            <span class="rs-dropzone-file" id="rs-file-name">${tr('선택된 사진 없음', 'No photo selected')}</span>
           </span>
-          <span class="rs-hint">자동으로 웹용 크기로 줄여 업로드합니다.</span>
+          <span class="rs-hint">${tr('자동으로 웹용 크기로 줄여 업로드합니다.', 'We resize it for the web automatically before uploading.')}</span>
           <div class="rs-preview" id="rs-preview"></div>
         </label>
         <label class="rs-field">
-          <span class="rs-label">이름 <small>(선택)</small></span>
-          <input type="text" name="submitter_name" placeholder="인스타그램이 없을 때 표시할 이름" value="${escapeAttr(meta.submitterName || '')}" maxlength="40" autocomplete="name" />
+          <span class="rs-label">${tr('이름', 'Name')} <small>${tr('(선택)', '(optional)')}</small></span>
+          <input type="text" name="submitter_name" placeholder="${tr('인스타그램이 없을 때 표시할 이름', 'Name to show if you have no Instagram')}" value="${escapeAttr(meta.submitterName || '')}" maxlength="40" autocomplete="name" />
         </label>
         <label class="rs-field">
-          <span class="rs-label">인스타그램 ID <small>(선택)</small></span>
+          <span class="rs-label">${tr('인스타그램 ID', 'Instagram ID')} <small>${tr('(선택)', '(optional)')}</small></span>
           <input type="text" name="instagram" placeholder="@your_id" value="${escapeAttr(meta.instagram || '')}" maxlength="60" autocomplete="off" />
-          <span class="rs-hint">이름과 인스타그램 ID 중 하나는 꼭 입력해 주세요.</span>
+          <span class="rs-hint">${tr('이름과 인스타그램 ID 중 하나는 꼭 입력해 주세요.', 'Please enter your name or your Instagram ID.')}</span>
         </label>
 
         <div class="rs-field">
-          <span class="rs-label">필름 <em>*</em></span>
+          <span class="rs-label">${tr('필름', 'Film')} <em>*</em></span>
           <div class="rs-film-picker" id="rs-film-picker" data-mode="${initialRequestMode ? 'request' : 'catalog'}">
             <!-- 카탈로그 모드: picker 버튼 + 드롭다운 -->
             <button type="button" class="rs-film-trigger" id="rs-film-trigger" aria-haspopup="listbox" aria-expanded="false">
-              <span class="rs-film-selected" id="rs-film-selected">${initialSelectedName ? escapeHtml(initialSelectedName) : '필름을 선택해 주세요'}</span>
+              <span class="rs-film-selected" id="rs-film-selected">${initialSelectedName ? escapeHtml(initialSelectedName) : tr('필름을 선택해 주세요', 'Choose a film')}</span>
               <span class="rs-film-caret" aria-hidden="true">▾</span>
             </button>
             <div class="rs-film-dropdown" id="rs-film-dropdown" hidden>
-              <input type="text" class="rs-film-search" id="rs-film-search" placeholder="🔍 브랜드 · 필름명 · ISO 검색" autocomplete="off" />
+              <input type="text" class="rs-film-search" id="rs-film-search" placeholder="${tr('🔍 브랜드 · 필름명 · ISO 검색', '🔍 Search brand, film or ISO')}" autocomplete="off" />
               <div class="rs-film-list" id="rs-film-list" role="listbox">
                 ${groupsHtml}
               </div>
               <button type="button" class="rs-film-request-toggle" id="rs-film-request-toggle">
-                목록에 없어요 — 필름 신청하기 →
+                ${tr('목록에 없어요 — 필름 신청하기 →', 'Not in the list? Request a film →')}
               </button>
             </div>
             <!-- 신청 모드: 자유 텍스트 입력 -->
             <div class="rs-film-request" id="rs-film-request">
-              <input type="text" id="rs-film-request-input" placeholder="예: Foma Retropan 320" maxlength="80" value="${escapeAttr(initialRequestText)}" />
-              <span class="rs-hint">목록에 없는 필름. 편집부 검토 후 라이브러리에 추가될 수 있어요.</span>
-              <button type="button" class="rs-film-request-cancel" id="rs-film-request-cancel">← 목록에서 선택하기</button>
+              <input type="text" id="rs-film-request-input" placeholder="${tr('예: Foma Retropan 320', 'e.g. Foma Retropan 320')}" maxlength="80" value="${escapeAttr(initialRequestText)}" />
+              <span class="rs-hint">${tr('목록에 없는 필름. 편집부 검토 후 라이브러리에 추가될 수 있어요.', 'This film is not in the list. The editors may add it to the library after review.')}</span>
+              <button type="button" class="rs-film-request-cancel" id="rs-film-request-cancel">${tr('← 목록에서 선택하기', '← Choose from the list')}</button>
             </div>
             <!-- 실제 form value -->
             <input type="hidden" name="film" id="rs-film-input" value="${escapeAttr(initialSelectedName || initialRequestText)}" required />
@@ -500,40 +505,40 @@
         </div>
 
         <label class="rs-field">
-          <span class="rs-label">카메라 <small>(선택)</small></span>
+          <span class="rs-label">${tr('카메라', 'Camera')} <small>${tr('(선택)', '(optional)')}</small></span>
           <input type="text" name="camera" id="rs-camera-input"
-                 placeholder="목록에서 고르거나 직접 입력 (예: Leica M6)"
+                 placeholder="${tr('목록에서 고르거나 직접 입력 (예: Leica M6)', 'Pick from the list or type it in (e.g. Leica M6)')}"
                  value="${escapeAttr(meta.camera || '')}" maxlength="60" autocomplete="off" />
           <div class="rs-recent-cameras" id="rs-recent-cameras" hidden></div>
           <div class="rs-camera-hint" id="rs-camera-hint" hidden></div>
         </label>
         <label class="rs-field">
-          <span class="rs-label">한 줄 메모 <small>(선택, 200자)</small></span>
-          <textarea name="caption" rows="2" maxlength="200" placeholder="이 컷에 얽힌 짧은 이야기"></textarea>
+          <span class="rs-label">${tr('한 줄 메모', 'Short note')} <small>${tr('(선택, 200자)', '(optional, 200 characters)')}</small></span>
+          <textarea name="caption" rows="2" maxlength="200" placeholder="${tr('이 컷에 얽힌 짧은 이야기', 'A short story behind this frame')}"></textarea>
         </label>
         ${themeBlock}
         <label class="rs-checkbox">
           <input type="checkbox" name="consent" required />
-          <span>이 사진의 저작권은 본인에게 있으며, 5ft magazine 사이트 / SNS / 종이 매거진 게재에 동의합니다. <em>*</em>${theme && theme.active ? `<small class="rs-consent-note">• 주제 필름(${escapeHtml(themeCanonical || theme.title)})과 일치하면 다음 호 응모에도 자동 포함됩니다.</small>` : ''}</span>
+          <span>${tr('이 사진의 저작권은 본인에게 있으며, 5ft magazine 사이트 / SNS / 종이 매거진 게재에 동의합니다.', 'I own the copyright to this photo and agree to its publication on the 5ft magazine website, social media and print magazine. (The Korean terms apply.)')} <em>*</em>${theme && theme.active ? `<small class="rs-consent-note">${tr(`• 주제 필름(${escapeHtml(themeCanonical || theme.title)})과 일치하면 다음 호 응모에도 자동 포함됩니다.`, `• If it matches the theme film (${escapeHtml(themeCanonical || theme.title)}), it is also entered for the next issue automatically.`)}</small>` : ''}</span>
         </label>
         <div class="rs-actions">
-          <button type="button" class="rs-btn-link" data-action="rs-close">취소</button>
-          <button type="submit" class="rs-btn rs-btn-primary">검토 요청 보내기</button>
+          <button type="button" class="rs-btn-link" data-action="rs-close">${tr('취소', 'Cancel')}</button>
+          <button type="submit" class="rs-btn rs-btn-primary">${tr('검토 요청 보내기', 'Send for review')}</button>
         </div>
         <div class="rs-upload-status" id="rs-upload-status" aria-live="polite" hidden>
           <span class="rs-upload-dot" aria-hidden="true"></span>
           <span class="rs-upload-copy">
-            <strong id="rs-upload-title">업로드 준비 중</strong>
-            <small id="rs-upload-detail">창을 닫지 말고 잠시만 기다려 주세요.</small>
+            <strong id="rs-upload-title">${tr('업로드 준비 중', 'Getting ready to upload')}</strong>
+            <small id="rs-upload-detail">${tr('창을 닫지 말고 잠시만 기다려 주세요.', 'Please keep this window open for a moment.')}</small>
           </span>
         </div>
         <p class="rs-error" id="rs-error" aria-live="polite"></p>
         <div class="rs-emergency" id="rs-emergency" hidden aria-live="polite"
              style="margin-top:12px;padding:12px 14px;border:1px solid #d8c2a5;background:#fbf6ee;border-radius:8px;font-size:13px;line-height:1.55;color:#5a3e1f;">
-          <strong style="display:block;margin-bottom:4px;">사진이 계속 안 올라가요?</strong>
-          와이파이가 더 안정적인 곳에서 다시 시도해 보시거나, 아래로 사진을 보내주시면 직접 등록해 드릴게요.
+          <strong style="display:block;margin-bottom:4px;">${tr('사진이 계속 안 올라가요?', 'Photo still will not upload?')}</strong>
+          ${tr('와이파이가 더 안정적인 곳에서 다시 시도해 보시거나, 아래로 사진을 보내주시면 직접 등록해 드릴게요.', 'Try again somewhere with steadier Wi-Fi, or send the photo to us below and we will add it for you.')}
           <div style="margin-top:6px;">
-            · <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener" style="color:#5a3e1f;text-decoration:underline;">@5ft.magazine 인스타 DM</a><br>
+            · <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener" style="color:#5a3e1f;text-decoration:underline;">${tr('@5ft.magazine 인스타 DM', '@5ft.magazine Instagram DM')}</a><br>
             · <a href="mailto:4rest_design@naver.com?subject=Reader's Roll 사진 제출" style="color:#5a3e1f;text-decoration:underline;">4rest_design@naver.com</a>
           </div>
         </div>
@@ -542,22 +547,22 @@
 
   function renderSubmittedConfirm(meta) {
     // 페이지 깊이에 따라 me.html 상대 경로 보정
-    const meHref = /\/(stories|admin)\//.test(location.pathname) ? '../me.html' : 'me.html';
+    const meHref = i18n.isEn ? i18n.url('/me.html') : (/\/(stories|admin)\//.test(location.pathname) ? '../me.html' : 'me.html');
     return `
-      <h2 id="rs-modal-title" class="rs-title">제출 완료 🎞</h2>
+      <h2 id="rs-modal-title" class="rs-title">${tr('제출 완료 🎞', 'Submitted 🎞')}</h2>
       <p class="rs-desc">
-        보내주신 한 컷 잘 받았습니다.<br />
-        편집부 검토 후 Reader's Roll에 게시될 거예요 (보통 24~48시간).
+        ${tr('보내주신 한 컷 잘 받았습니다.', 'We got your frame.')}<br />
+        ${tr("편집부 검토 후 Reader's Roll에 게시될 거예요 (보통 24~48시간).", "After the editors review it, it will go up on Reader's Roll (usually within 24 to 48 hours).")}
       </p>
       <p class="rs-desc-sub">
         ${meta.author ? `<strong>${escapeHtml(meta.author)}</strong>` : ''}
         ${meta.author && meta.film ? ' · ' : ''}
-        ${meta.film ? `필름: <strong>${escapeHtml(meta.film)}</strong>` : ''}
+        ${meta.film ? `${tr('필름', 'Film')}: <strong>${escapeHtml(meta.film)}</strong>` : ''}
       </p>
       <div class="rs-actions" style="justify-content: center; gap: 12px; flex-wrap: wrap;">
-        <a href="${meHref}" class="rs-btn-link">내 사진 보기 →</a>
-        <button type="button" class="rs-btn-link" data-action="rs-close">닫기</button>
-        <button type="button" class="rs-btn rs-btn-primary" data-action="open-submission">+ 다음 사진 올리기</button>
+        <a href="${meHref}" class="rs-btn-link">${tr('내 사진 보기 →', 'See my photos →')}</a>
+        <button type="button" class="rs-btn-link" data-action="rs-close">${tr('닫기', 'Close')}</button>
+        <button type="button" class="rs-btn rs-btn-primary" data-action="open-submission">${tr('+ 다음 사진 올리기', '+ Upload another photo')}</button>
       </div>`;
   }
 
@@ -645,7 +650,7 @@
     setTriggerLoading(triggerEl, true);
     try {
       if (!db() || !db().isReady()) {
-        window.notify?.('잠시 후 다시 시도해주세요. (DB 연결 준비 중)', 'info');
+        window.notify?.(tr('잠시 후 다시 시도해주세요. (DB 연결 준비 중)', 'Please try again in a moment. (Connecting to the database)'), 'info');
         return;
       }
       const prefillFilm = triggerEl?.dataset?.prefillFilm || '';
@@ -664,7 +669,7 @@
       try {
         await ensureUploadDeps();
       } catch (_) {
-        window.notify?.('업로드 도구를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.', 'danger');
+        window.notify?.(tr('업로드 도구를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.', 'Could not load the upload tools. Please refresh and try again.'), 'danger');
         return;
       }
       // 8초 외부 timeout — 안쪽 fetchWithTimeout 이 우회되는 극단적 케이스 대비
@@ -674,11 +679,11 @@
       try {
         [theme, films] = await Promise.race([dataPromise, guard]);
       } catch (_) {
-        window.notify?.('사진 폼을 여는 데 시간이 너무 걸려요. 새로고침 후 다시 시도해 주세요.', 'danger');
+        window.notify?.(tr('사진 폼을 여는 데 시간이 너무 걸려요. 새로고침 후 다시 시도해 주세요.', 'The upload form is taking too long to open. Please refresh and try again.'), 'danger');
         return;
       }
       if (!films || !Object.keys(films).length) {
-        window.notify?.('필름 목록을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.', 'danger');
+        window.notify?.(tr('필름 목록을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.', 'Could not load the film list. Please try again in a moment.'), 'danger');
         return;
       }
       openModal(renderSubmissionForm(theme, savedPrefill, films));
@@ -732,7 +737,7 @@
   function readSubmissionFields(form) {
     const fd = new FormData(form);
     const file = fd.get('photo');
-    if (!file || !file.size) throw new Error('올릴 사진을 1장 선택해 주세요.');
+    if (!file || !file.size) throw new Error(tr('올릴 사진을 1장 선택해 주세요.', 'Please choose one photo to upload.'));
 
     const submitterName = String(fd.get('submitter_name') || '').trim();
     const instagram = String(fd.get('instagram') || '').trim();
@@ -745,9 +750,9 @@
   }
 
   function validateAndNormalizeSubmissionFields(fields, films) {
-    if (!fields.submitterName && !fields.instagram) throw new Error('이름이나 인스타그램 ID 중 하나는 입력해 주세요.');
-    if (!fields.film) throw new Error('촬영한 필름을 선택하거나 직접 신청해 주세요.');
-    if (!fields.consent) throw new Error('사이트와 매거진에 게재해도 되는 사진인지 확인 체크가 필요해요.');
+    if (!fields.submitterName && !fields.instagram) throw new Error(tr('이름이나 인스타그램 ID 중 하나는 입력해 주세요.', 'Please enter your name or your Instagram ID.'));
+    if (!fields.film) throw new Error(tr('촬영한 필름을 선택하거나 직접 신청해 주세요.', 'Choose the film you shot on, or request it.'));
+    if (!fields.consent) throw new Error(tr('사이트와 매거진에 게재해도 되는 사진인지 확인 체크가 필요해요.', 'Please check the box to confirm the photo can be published on the site and in the magazine.'));
 
     if (films) {
       const m = findFilmMatch(fields.film, films);
@@ -814,39 +819,39 @@
     const lower = msg.toLowerCase();
     if (hasUploadedPhoto || stage === 'database') {
       return {
-        title: '사진 저장은 완료됐어요',
-        detail: '사진 파일은 이미 올라갔습니다. 아래 버튼을 누르면 처음 제출한 내용으로 저장 결과를 확인하고, 기록이 없을 때만 다시 저장합니다.',
-        button: '제출 기록 다시 저장',
+        title: tr('사진 저장은 완료됐어요', 'Your photo is saved'),
+        detail: tr('사진 파일은 이미 올라갔습니다. 아래 버튼을 누르면 처음 제출한 내용으로 저장 결과를 확인하고, 기록이 없을 때만 다시 저장합니다.', 'The photo file is already uploaded. Press the button below to check the saved record for your original submission. It is saved again only if no record exists.'),
+        button: tr('제출 기록 다시 저장', 'Save submission again'),
       };
     }
-    if (stage === 'auth' || msg.includes('로그인') || msg.includes('세션')) {
+    if (stage === 'auth' || msg.includes('로그인') || msg.includes('세션') || (i18n.isEn && (lower.includes('sign in') || lower.includes('session')))) {
       return {
-        title: '로그인이 필요해요',
-        detail: '로그인이 풀렸거나 권한 확인이 오래 걸렸습니다. 다시 로그인한 뒤 이어서 제출해 주세요.',
-        button: '다시 시도',
+        title: tr('로그인이 필요해요', 'Please sign in'),
+        detail: tr('로그인이 풀렸거나 권한 확인이 오래 걸렸습니다. 다시 로그인한 뒤 이어서 제출해 주세요.', 'You were signed out, or the permission check took too long. Sign in again and continue your submission.'),
+        button: tr('다시 시도', 'Try again'),
       };
     }
     if (stage === 'storage') {
-      const timedOut = msg.includes('시간 초과') || lower.includes('timeout') || msg.includes('네트워크');
+      const timedOut = msg.includes('시간 초과') || lower.includes('timeout') || msg.includes('네트워크') || (i18n.isEn && (lower.includes('timed out') || lower.includes('network')));
       return {
-        title: timedOut ? '사진 전송 시간이 초과됐어요' : '사진 전송에 실패했어요',
+        title: timedOut ? tr('사진 전송 시간이 초과됐어요', 'Photo upload timed out') : tr('사진 전송에 실패했어요', 'Photo upload failed'),
         detail: timedOut
-          ? '모바일 네트워크가 불안정하면 오래 걸릴 수 있어요. 와이파이나 더 안정적인 환경에서 다시 시도해 주세요.'
-          : '사진을 서버로 보내는 중 문제가 생겼습니다. 입력 내용은 유지되니 다시 시도해 주세요.',
-        button: '사진 다시 보내기',
+          ? tr('모바일 네트워크가 불안정하면 오래 걸릴 수 있어요. 와이파이나 더 안정적인 환경에서 다시 시도해 주세요.', 'An unstable mobile network can slow things down. Try again on Wi-Fi or a steadier connection.')
+          : tr('사진을 서버로 보내는 중 문제가 생겼습니다. 입력 내용은 유지되니 다시 시도해 주세요.', 'Something went wrong while sending the photo. Your entries are kept, so please try again.'),
+        button: tr('사진 다시 보내기', 'Send photo again'),
       };
     }
     if (stage === 'decode' || stage === 'resize' || stage === 'encode') {
       return {
-        title: '사진 변환에 실패했어요',
-        detail: '이미지를 웹용 크기로 줄이는 중 문제가 생겼습니다. 다른 사진 파일이나 더 작은 파일로 다시 시도해 주세요.',
-        button: '다시 시도',
+        title: tr('사진 변환에 실패했어요', 'Photo conversion failed'),
+        detail: tr('이미지를 웹용 크기로 줄이는 중 문제가 생겼습니다. 다른 사진 파일이나 더 작은 파일로 다시 시도해 주세요.', 'Something went wrong while resizing the image for the web. Try a different or smaller photo file.'),
+        button: tr('다시 시도', 'Try again'),
       };
     }
     return {
-      title: '제출이 중단됐어요',
-      detail: '입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.',
-      button: '검토 요청 보내기',
+      title: tr('제출이 중단됐어요', 'Submission stopped'),
+      detail: tr('입력한 내용은 유지됩니다. 메시지를 확인한 뒤 다시 시도해 주세요.', 'Your entries are kept. Check the message and try again.'),
+      button: tr('검토 요청 보내기', 'Send for review'),
     };
   }
 
@@ -858,7 +863,7 @@
     let uploadState = {};
 
     if (!window.ReaderCameraInput?.bindCameraInput) {
-      showError('카메라 입력 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
+      showError(tr('카메라 입력 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the camera input. Please refresh and try again.'));
       return;
     }
     // 카메라 입력 — 최근 사용 + 유사 모델 힌트
@@ -871,7 +876,7 @@
     });
 
     if (!window.ReaderUploadFormUi?.createUploadUi) {
-      showError('업로드 폼 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
+      showError(tr('업로드 폼 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the upload form. Please refresh and try again.'));
       return;
     }
     const uploadUi = window.ReaderUploadFormUi.createUploadUi({ form, showError });
@@ -898,7 +903,7 @@
     }
 
     if (!window.ReaderFilmPicker?.bindFilmPicker) {
-      showError('필름 선택 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
+      showError(tr('필름 선택 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the film picker. Please refresh and try again.'));
       return;
     }
     window.ReaderFilmPicker.bindFilmPicker({
@@ -920,8 +925,8 @@
       const controls = Array.from(form.querySelectorAll('input, select, textarea, button'));
       const disabledBefore = controls.map(el => el.disabled);
       submitBtn.disabled = true;
-      submitBtn.textContent = '업로드 중…';
-      setUploadStatus('progress', '제출 준비 중', '사진과 입력 내용을 확인하고 있어요.');
+      submitBtn.textContent = tr('업로드 중…', 'Uploading…');
+      setUploadStatus('progress', tr('제출 준비 중', 'Preparing your submission'), tr('사진과 입력 내용을 확인하고 있어요.', 'Checking your photo and entries.'));
       startSlowUploadHints();
       let uploadStage = 'validate';
       const uploadMeta = { inputBytes: 0, uploadBytes: 0 };
@@ -933,7 +938,7 @@
       try {
         let fields = readSubmissionFields(form);
         const { file } = fields;
-        if (!isAcceptedImage(file)) throw new Error('JPG, PNG, WebP, HEIC 같은 이미지 파일만 올릴 수 있어요.');
+        if (!isAcceptedImage(file)) throw new Error(tr('JPG, PNG, WebP, HEIC 같은 이미지 파일만 올릴 수 있어요.', 'Only image files such as JPG, PNG, WebP or HEIC can be uploaded.'));
         uploadMeta.inputBytes = file.size;
         uploadMeta.fileName = file.name || '';
         uploadMeta.fileType = file.type || '';
@@ -943,7 +948,7 @@
         controls.forEach(el => { el.disabled = true; });
 
         if (!window.ReaderUploadFlow?.uploadPhoto) {
-          throw new Error('사진 업로드 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.');
+          throw new Error(tr('사진 업로드 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the photo uploader. Please refresh and try again.'));
         }
 
         let uploadResult = null;
@@ -953,7 +958,7 @@
           uploadMeta.triedPaths = pendingUploadedPhoto.triedPaths || [pendingUploadedPhoto.path];
           uploadMeta.lastSuccessfulPath = pendingUploadedPhoto.path;
           uploadMeta.lastSuccessfulKind = pendingUploadedPhoto.lastSuccessfulKind || 'previous';
-          markProgress('database', '제출 기록 다시 저장 중', '사진은 이미 올라갔어요. 사진 정보만 다시 저장하고 있어요.');
+          markProgress('database', tr('제출 기록 다시 저장 중', 'Saving your submission again'), tr('사진은 이미 올라갔어요. 사진 정보만 다시 저장하고 있어요.', 'The photo is already uploaded. Saving the photo details again.'));
         } else {
           uploadResult = await window.ReaderUploadFlow.uploadPhoto({
             file,
@@ -968,7 +973,7 @@
             setSubmitText: (text) => { submitBtn.textContent = text; },
             markProgress,
           }).catch(err => {
-            showEmergencyHelp(String(err?.message || '').includes('사진 업로드가 완료되지 않았어요'));
+            showEmergencyHelp(String(err?.message || '').includes(tr('사진 업로드가 완료되지 않았어요', 'The photo upload did not finish')));
             throw err;
           });
           pendingUploadedPhoto = {
@@ -986,23 +991,23 @@
           id: pendingUploadedPhoto.submissionId,
         };
         pendingUploadedPhoto.record = insertData;
-        submitBtn.textContent = '제출 기록 저장 중…';
-        markProgress('database', '제출 기록 저장 중', '사진 정보와 필름 정보를 함께 저장하고 있어요.');
+        submitBtn.textContent = tr('제출 기록 저장 중…', 'Saving submission…');
+        markProgress('database', tr('제출 기록 저장 중', 'Saving your submission'), tr('사진 정보와 필름 정보를 함께 저장하고 있어요.', 'Saving the photo and film details.'));
         let { error: dbErr } = await withNetworkTimeout(
           signal => db().submissions.create(insertData, { signal }),
           25000,
-          '제출 기록 저장'
+          tr('제출 기록 저장', 'Saving the submission')
         ).catch(err => ({ error: { message: err.message } }));
         if (dbErr && db().submissions.findOwn) {
           const saved = await withNetworkTimeout(
-            signal => db().submissions.findOwn(insertData, { signal }), 6000, '제출 결과 확인'
+            signal => db().submissions.findOwn(insertData, { signal }), 6000, tr('제출 결과 확인', 'Submission check')
           ).catch(() => null);
           if (saved?.data && !saved.error) dbErr = null;
         }
         if (dbErr) {
           uploadMeta.lastSuccessfulPath = path;
           uploadMeta.lastSuccessfulKind = uploadMeta.lastSuccessfulKind || pendingUploadedPhoto?.lastSuccessfulKind || 'storage';
-          throw new Error('사진은 올라갔지만 제출 기록 저장에 실패했어요. 입력 내용은 그대로 두고 아래 버튼을 다시 누르면 사진 재업로드 없이 기록 저장만 다시 시도합니다. (' + dbErr.message + ')');
+          throw new Error(tr('사진은 올라갔지만 제출 기록 저장에 실패했어요. 입력 내용은 그대로 두고 아래 버튼을 다시 누르면 사진 재업로드 없이 기록 저장만 다시 시도합니다. (', 'The photo was uploaded, but saving the submission failed. Leave your entries as they are and press the button below to retry saving without uploading the photo again. (') + dbErr.message + ')');
         }
         // 폴백 단계에서 부분 업로드가 남았을 수 있는 이전 path 들 정리
         for (const earlierPath of triedPaths) {
@@ -1021,7 +1026,7 @@
         pendingUploadedPhoto = null;
 
         // 5) 확인 화면
-        setUploadStatus('done', '제출 완료', 'Reader’s Roll 검토 큐에 들어갔어요.');
+        setUploadStatus('done', tr('제출 완료', 'Submitted'), tr('Reader’s Roll 검토 큐에 들어갔어요.', 'It is now in the Reader’s Roll review queue.'));
         openModal(renderSubmittedConfirm({ author: displaySubmissionAuthor(fields), film: fields.film }));
       } catch (err) {
         if (uploadStage !== 'validate') reportUploadFailure(uploadStage, err, uploadMeta);
@@ -1031,7 +1036,7 @@
           hasUploadedPhoto: !!pendingUploadedPhoto,
         });
         setUploadStatus('error', errState.title, errState.detail);
-        showError(err.message || '제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.');
+        showError(err.message || tr('제출을 마치지 못했어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.', 'Could not finish the submission. Check your entries and try again.'));
         submitBtn.disabled = false;
         submitBtn.textContent = errState.button;
       } finally {

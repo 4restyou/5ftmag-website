@@ -1,25 +1,29 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+
   function rollIntroText({ roll, rollTotal, rollLimit = 36, isFeatured = false }) {
     const count = roll?.rows?.length || 0;
     if (roll?.current && count === rollLimit) {
-      return `${roll.number}번째 롤이 ${rollLimit}컷으로 채워졌습니다. 다음 첫 컷이 올라오면 새 롤이 시작됩니다.`;
+      return tr(`${roll.number}번째 롤이 ${rollLimit}컷으로 채워졌습니다. 다음 첫 컷이 올라오면 새 롤이 시작됩니다.`, `Roll ${roll.number} is full at ${rollLimit} frames. A new roll starts with the next frame.`);
     }
     if (roll?.current && rollTotal > rollLimit) {
-      return `${roll.number}번째 롤이 진행 중입니다. 지난 롤은 따로 다시 볼 수 있어요.`;
+      return tr(`${roll.number}번째 롤이 진행 중입니다. 지난 롤은 따로 다시 볼 수 있어요.`, `Roll ${roll.number} is in progress. You can look back at past rolls separately.`);
     }
     if (!roll?.current) {
-      return `${roll.number}번째 지난 롤입니다. ${rollLimit}컷으로 채워진 한 롤을 다시 보고 있어요.`;
+      return tr(`${roll.number}번째 지난 롤입니다. ${rollLimit}컷으로 채워진 한 롤을 다시 보고 있어요.`, `This is past roll ${roll.number}, a full roll of ${rollLimit} frames.`);
     }
     if (isFeatured) {
       return count > 0
-        ? '독자들이 같은 필름으로 채워가는 또 하나의 한 롤입니다. 남은 빈 자리에 당신의 한 컷도 더해보세요.'
-        : '독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.';
+        ? tr('독자들이 같은 필름으로 채워가는 또 하나의 한 롤입니다. 남은 빈 자리에 당신의 한 컷도 더해보세요.', 'Another roll that readers fill together on the same film. Add your frame to one of the empty slots.')
+        : tr('독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.', 'Another roll that readers fill together on the same film. Put your frame in an empty slot.');
     }
     return count > 0
-      ? `${count}컷이 먼저 채워졌습니다. 남은 빈 자리를 독자들의 사진으로 함께 채워가요.`
-      : `아직 시작된 롤. 빈 ${rollLimit} 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.`;
+      ? tr(`${count}컷이 먼저 채워졌습니다. 남은 빈 자리를 독자들의 사진으로 함께 채워가요.`, `${count} ${count === 1 ? 'frame is' : 'frames are'} in so far. Readers fill the empty slots together.`)
+      : tr(`아직 시작된 롤. 빈 ${rollLimit} 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.`, `A roll just getting started. Readers fill all ${rollLimit} slots together. Take the first one.`);
   }
 
   function exportKeyOf(sub, { personKeyOf }) {
@@ -63,7 +67,7 @@
     if (selectedSave) {
       selectedSave.hidden = !selectionMode;
       selectedSave.disabled = selectedCount < 1;
-      selectedSave.textContent = `선택한 ${selectedCount}장 저장`;
+      selectedSave.textContent = tr(`선택한 ${selectedCount}장 저장`, `Save ${selectedCount} selected`);
     }
     if (cancel) cancel.hidden = !selectionMode;
     grid.classList.toggle('is-selecting', selectionMode);
@@ -87,13 +91,13 @@
     const expanded = archiveOpen || !isViewingCurrent;
     rollSwitcher.hidden = false;
     rollSwitcher.innerHTML = `
-      <span class="reader-control-label">롤 보기</span>
+      <span class="reader-control-label">${tr('롤 보기', 'Rolls')}</span>
       <button type="button" class="reader-roll-toggle${expanded ? ' is-active' : ''}" data-roll-action="${isViewingCurrent ? 'toggle' : 'current'}" aria-expanded="${expanded ? 'true' : 'false'}">
-        ${isViewingCurrent ? `지난 롤 보기 <span>${pastNumbers.length}</span>` : `현재 롤로 돌아가기 <span>${currentNumber}</span>`}
+        ${isViewingCurrent ? `${tr('지난 롤 보기', 'Past rolls')} <span>${pastNumbers.length}</span>` : `${tr('현재 롤로 돌아가기', 'Back to current roll')} <span>${currentNumber}</span>`}
       </button>
-      <div class="reader-roll-numbers" ${expanded ? '' : 'hidden'} aria-label="지난 롤 번호">
+      <div class="reader-roll-numbers" ${expanded ? '' : 'hidden'} aria-label="${tr('지난 롤 번호', 'Past roll numbers')}">
         ${pastNumbers.map((number) => `
-          <button type="button" class="reader-roll-number${number === activeRoll ? ' is-active' : ''}" data-roll-number="${number}" aria-label="${number}번째 지난 롤 보기">
+          <button type="button" class="reader-roll-number${number === activeRoll ? ' is-active' : ''}" data-roll-number="${number}" aria-label="${tr(`${number}번째 지난 롤 보기`, `View past roll ${number}`)}">
             ${number}
           </button>
         `).join('')}
@@ -112,14 +116,14 @@
     personFilter.hidden = false;
     personFilter.classList.toggle('is-single', authors.length === 1);
     personFilter.innerHTML = `
-      <span class="reader-control-label">${authors.length > 1 ? '작가 필터' : '작가'}</span>
+      <span class="reader-control-label">${authors.length > 1 ? tr('작가 필터', 'Filter by photographer') : tr('작가', 'Photographer')}</span>
       ${authors.length > 1 ? `<button type="button" class="reader-person-chip${activePerson === 'all' ? ' is-active' : ''}" data-person-key="all">
         ALL <span>${rollRows.length}</span>
       </button>` : ''}
       ${authors.map(([key, info]) => `
         <button type="button" class="reader-person-chip${activePerson === key || authors.length === 1 ? ' is-active' : ''}" data-person-key="${escapeAttr(key)}">
-          ${escapeAttr(info.label)} <span>${authors.length === 1 ? `${info.count}컷` : info.count}</span>
-          ${authors.length > 1 ? '<em class="reader-person-all">전체</em>' : ''}
+          ${escapeAttr(info.label)} <span>${authors.length === 1 ? tr(`${info.count}컷`, `${info.count} ${info.count === 1 ? 'frame' : 'frames'}`) : info.count}</span>
+          ${authors.length > 1 ? `<em class="reader-person-all">${tr('전체', 'All')}</em>` : ''}
         </button>
       `).join('')}`;
   }
@@ -149,7 +153,7 @@
       if (!sub) {
         slot.className = 'reader-slot is-empty';
         delete slot.dataset.exportKey;
-        slot.setAttribute('aria-label', `프레임 ${i + 1} — 비어 있음`);
+        slot.setAttribute('aria-label', tr(`프레임 ${i + 1} — 비어 있음`, `Frame ${i + 1}, empty`));
         slot.innerHTML = `<span class="reader-slot-frame">${String(i + 1).padStart(2, '0')}</span>`;
         continue;
       }
@@ -160,10 +164,10 @@
       const instaHandle = (sub.instagram || '').replace(/^@/, '');
       slot.className = `reader-slot is-filled${selectionMode ? ' is-selecting' : ''}${isSelected ? ' is-selected' : ''}`;
       slot.dataset.exportKey = key;
-      slot.setAttribute('aria-label', `${personLabelOf(sub)}의 사진`);
+      slot.setAttribute('aria-label', tr(`${personLabelOf(sub)}의 사진`, `Photo by ${personLabelOf(sub)}`));
       if (instaHandle) slot.setAttribute('data-instagram', instaHandle);
       slot.innerHTML = `
-        <button type="button" class="reader-slot-link" aria-label="${escapeAttr(selectionMode ? `${personLabelOf(sub)}의 사진 선택` : `${personLabelOf(sub)}의 사진 크게 보기`)}" aria-pressed="${selectionMode ? String(isSelected) : 'false'}">
+        <button type="button" class="reader-slot-link" aria-label="${escapeAttr(selectionMode ? tr(`${personLabelOf(sub)}의 사진 선택`, `Select photo by ${personLabelOf(sub)}`) : tr(`${personLabelOf(sub)}의 사진 크게 보기`, `View photo by ${personLabelOf(sub)}`))}" aria-pressed="${selectionMode ? String(isSelected) : 'false'}">
           <span class="reader-slot-window">
             <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
           </span>
@@ -175,8 +179,8 @@
     }
     if (counter) {
       counter.textContent = activePerson === 'all'
-        ? `${rollRows.length} / ${rollLimit} · ${activeRoll}롤`
-        : `${visible.length} / ${rollRows.length} · ${activeRoll}롤`;
+        ? `${rollRows.length} / ${rollLimit} · ${tr(`${activeRoll}롤`, `Roll ${activeRoll}`)}`
+        : `${visible.length} / ${rollRows.length} · ${tr(`${activeRoll}롤`, `Roll ${activeRoll}`)}`;
     }
     const saveBtn = modalContent.querySelector(`[data-save-roll="reader"][data-film-key="${filmKey}"]`);
     if (saveBtn) saveBtn.hidden = visible.length === 0;

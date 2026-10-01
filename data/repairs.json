@@ -10,7 +10,11 @@
       "specialty": "라이카·수동 RF",
       "description": "반도 김진철 실장이 독립해 충무로 사진집 건물에 오픈. 독립 후 더 저렴하고 빨라졌다.",
       "contact": null,
-      "url": null
+      "url": null,
+      "name_en": "Camera Doctor",
+      "address_en": "3F, Cheongnim Bldg., 25 Toegye-ro 27-gil, Jung-gu, Seoul",
+      "specialty_en": "Leica, manual rangefinders",
+      "description_en": "Opened by chief technician Kim Jin-cheol after leaving Bando, in the Sajinjip building in Chungmuro. Cheaper and faster since going independent."
     },
     {
       "name": "홍성중앙카메라",
@@ -19,7 +23,11 @@
       "specialty": "라이카·수동 RF",
       "description": "대기와 비용이 있는 편이지만 퀄리티는 최상급이다.",
       "contact": null,
-      "url": null
+      "url": null,
+      "name_en": "Hongseong Jungang Camera",
+      "address_en": "7 Joyang-ro, Hongseong-eup, Hongseong-gun, Chungcheongnam-do",
+      "specialty_en": "Leica, manual rangefinders",
+      "description_en": "Expect some wait and cost, but the quality is top-notch."
     },
     {
       "name": "거인광학",
@@ -28,7 +36,11 @@
       "specialty": "라이카·수동 RF",
       "description": "대기 길고 비용 높은 편. 퀄리티는 월드클래스로 통한다. 경기도 동탄 개인 작업실 기반이라 방문 접수는 받지 않고 택배 접수를 원칙으로 한다.",
       "contact": null,
-      "url": "https://gigantoptik.com"
+      "url": "https://gigantoptik.com",
+      "name_en": "Gigant Optik",
+      "address_en": null,
+      "specialty_en": "Leica, manual rangefinders",
+      "description_en": "Long waits and relatively high cost. Its quality is regarded as world-class. Based in a private workshop in Dongtan, Gyeonggi-do, so walk-ins are not accepted; repairs are taken by courier as a rule."
     },
     {
       "name": "빛그림 수리실",
@@ -37,7 +49,11 @@
       "specialty": "올드카메라",
       "description": "충무로. 1940년대 이전 올드카메라라면 첫손에 꼽힌다.",
       "contact": null,
-      "url": null
+      "url": null,
+      "name_en": "Bitgeurim Repair Shop",
+      "address_en": "2F, 17 Samil-daero 4-gil, Jung-gu, Seoul",
+      "specialty_en": "Vintage cameras",
+      "description_en": "Chungmuro. The first choice for vintage cameras from before the 1940s."
     },
     {
       "name": "삼성사",
@@ -46,7 +62,11 @@
       "specialty": "펜탁스·콘탁스",
       "description": "부품 보유량이 압도적이라 콘탁스 문제 시 1순위. 다만 일부 기종(S2·S2B·TVS)은 부품 재고가 줄고 있다.",
       "contact": "02-2266-8162",
-      "url": null
+      "url": null,
+      "name_en": "Samseongsa",
+      "address_en": "Unit 302, Pilsamsa Bldg., 13 Toegye-ro 31-gil, Jung-gu, Seoul",
+      "specialty_en": "Pentax, Contax",
+      "description_en": "Its huge parts inventory makes it the first stop for Contax problems. Parts stock for some models (S2, S2B, TVS) is running low, though."
     },
     {
       "name": "한국펜탁스",
@@ -55,7 +75,11 @@
       "specialty": "펜탁스",
       "description": "을지로. 과잉진료 없이 담백하고 깔끔한 수리가 장점.",
       "contact": "02-2268-7767",
-      "url": null
+      "url": null,
+      "name_en": "Korea Pentax",
+      "address_en": "Unit 203, Eulji Biz Center, 45 Supyo-ro, Jung-gu, Seoul",
+      "specialty_en": "Pentax",
+      "description_en": "Eulji-ro. Clean, no-nonsense repairs with no unnecessary work."
     },
     {
       "name": "충일카메라",
@@ -64,7 +88,11 @@
       "specialty": "캐논·니콘 SLR·RF·핫셀블라드",
       "description": "컴팩트는 받지 않음. SLR·RF 수동기 전천후에 계측기기도 잘 갖췄고, 핫셀블라드 수리도 가능하다.",
       "contact": "02-2263-7583",
-      "url": null
+      "url": null,
+      "name_en": "Chungil Camera",
+      "address_en": "Unit 201, Yujin Bldg., 10 Supyo-ro 6-gil, Jung-gu, Seoul",
+      "specialty_en": "Canon and Nikon SLRs and rangefinders, Hasselblad",
+      "description_en": "Does not accept compacts. Handles all kinds of manual SLRs and rangefinders, is well equipped with test instruments, and also repairs Hasselblad."
     },
     {
       "name": "한국카메라AS",
@@ -73,7 +101,11 @@
       "specialty": "핫셀블라드",
       "description": "폐업 후 일산에서 소규모로 다시 시작. 핫셀블라드 전문.",
       "contact": null,
-      "url": null
+      "url": null,
+      "name_en": "Korea Camera AS",
+      "address_en": null,
+      "specialty_en": "Hasselblad",
+      "description_en": "Closed, then restarted on a small scale in Ilsan. Hasselblad specialist."
     },
     {
       "name": "충무로카메라AS",
@@ -82,7 +114,11 @@
       "specialty": "컴팩트 자동카메라",
       "description": "까다로운 컴팩트 자동 수리에 강하고 친절하다. 비용은 조금 높은 편.",
       "contact": "02-778-1908",
-      "url": "http://fixclub.co.kr"
+      "url": "http://fixclub.co.kr",
+      "name_en": "Chungmuro Camera AS",
+      "address_en": "13 Supyo-ro, Jung-gu, Seoul",
+      "specialty_en": "Automatic compact cameras",
+      "description_en": "Strong at tricky automatic compact repairs, and friendly. Prices are a little high."
     },
     {
       "name": "남대문 스피드",
@@ -91,7 +127,11 @@
       "specialty": "컴팩트 자동카메라",
       "description": "친절하고 가격 좋고 꼼꼼하다. 다만 최근 작업 적체가 있는 편.",
       "contact": "0507-1427-2284 · 010-3515-7664",
-      "url": null
+      "url": null,
+      "name_en": "Namdaemun Speed",
+      "address_en": "Unit 301, 3F, 2-1 Namdaemun-ro, Jung-gu, Seoul",
+      "specialty_en": "Automatic compact cameras",
+      "description_en": "Friendly, well priced, and thorough. There has been a backlog of work lately."
     },
     {
       "name": "남대문 디포커스",
@@ -100,7 +140,11 @@
       "specialty": "렌즈 클리닝·복잡 수리",
       "description": "렌즈 헤이즈·발삼·핀교정, 대구경 렌즈 클리닝, 플래시·전자회로 등 까다로운 수리. 선반·밀링으로 부품을 직접 깎기도 한다.",
       "contact": "02-779-4305 · 010-5246-4305",
-      "url": null
+      "url": null,
+      "name_en": "Namdaemun Defocus",
+      "address_en": "Unit 302, 3F, 10-1 Namdaemun-ro, Jung-gu, Seoul",
+      "specialty_en": "Lens cleaning, complex repairs",
+      "description_en": "Tricky repairs such as lens haze, balsam separation, and focus calibration, large-aperture lens cleaning, and flash and electronic circuit work. Also machines parts in-house on a lathe and milling machine."
     },
     {
       "name": "작은풍경",
@@ -109,7 +153,11 @@
       "specialty": "간단 정비·클리닝",
       "description": "세운상가 1층. 클리닝·부품교체 같은 가벼운 정비에 단골 삼기 좋다. 친절하고 빠르다.",
       "contact": "02-2267-0607",
-      "url": null
+      "url": null,
+      "name_en": "Jageun Punggyeong",
+      "address_en": "Unit 148, Techno-gwan, Sewoon Square, 109 Changgyeonggung-ro, Jongno-gu, Seoul",
+      "specialty_en": "Basic maintenance, cleaning",
+      "description_en": "On the first floor of Sewoon Sangga. A good regular shop for light maintenance like cleaning and parts replacement. Friendly and fast."
     },
     {
       "name": "소니 신용산 서비스센터",
@@ -118,7 +166,11 @@
       "specialty": "소니 카메라 서비스",
       "description": "신용산역 앞 공식 소니 서비스센터. 렌즈교환식 카메라(A/E Mount), 디지털 카메라, 캠코더와 시네마라인 일부(FX2·FX3·FX30)를 맡길 수 있다. 미놀타 계보 카메라는 방문 전 접수 가능 여부를 확인하는 편이 낫다.",
       "contact": "02-318-5640",
-      "url": "https://www.sony.co.kr/scs/handler/Map-ViewMap?dealerascId=309"
+      "url": "https://www.sony.co.kr/scs/handler/Map-ViewMap?dealerascId=309",
+      "name_en": "Sony Sinyongsan Service Center",
+      "address_en": "Unit 409, Building B, Raemian Yongsan The Central, 95 Hangang-daero, Yongsan-gu, Seoul",
+      "specialty_en": "Sony camera service",
+      "description_en": "Official Sony service center in front of Sinyongsan Station. Accepts interchangeable-lens cameras (A/E Mount), digital cameras, camcorders, and some Cinema Line models (FX2, FX3, FX30). For Minolta-lineage cameras, check whether they can be accepted before visiting."
     },
     {
       "name": "부산 신카메라",
@@ -127,7 +179,11 @@
       "specialty": "니콘·올림푸스·콘탁스",
       "description": "남포동의 오래된 카메라 수리점. 올림푸스 PEN F·FT, 콘탁스 케이블 등을 고친 이력이 알려져 있다. 2년 AS 보장, 문자 상담, 택배 접수, 카드결제를 받는다. 조건은 바뀔 수 있으니 맡기기 전에 전화로 물어보는 것이 좋다.",
       "contact": "051-246-0360",
-      "url": null
+      "url": null,
+      "name_en": "Busan Sin Camera",
+      "address_en": "47 Nampo-gil, Jung-gu, Busan",
+      "specialty_en": "Nikon, Olympus, Contax",
+      "description_en": "A long-established camera repair shop in Nampo-dong. Known for repairs on the Olympus PEN F and FT, Contax cables, and more. Offers a 2-year repair warranty, consultation by text message, courier drop-off, and card payment. Terms may change, so call before dropping off a camera."
     },
     {
       "name": "폴라존",
@@ -136,7 +192,11 @@
       "specialty": "폴라로이드",
       "description": "홍대. 폴라로이드 카메라 전문. 클래식 폴라로이드 사용 가능 테스트와 수리를 함께 안내한다.",
       "contact": "02-2285-5639",
-      "url": "https://polazone.com"
+      "url": "https://polazone.com",
+      "name_en": "Polazone",
+      "address_en": "3F, 39 Eoulmadang-ro, Mapo-gu, Seoul",
+      "specialty_en": "Polaroid",
+      "description_en": "Hongdae. Polaroid camera specialist. Offers working-condition tests and repairs for classic Polaroid cameras."
     },
     {
       "name": "권카메라",
@@ -145,7 +205,11 @@
       "specialty": "중고 매입·판매",
       "description": "포항의 중고 카메라 상점. 매입과 판매를 함께 한다. 지역에서 급할 때 들르기 좋다.",
       "contact": "054-242-1882 · 010-9750-5171 · 0504-4642-6931",
-      "url": "https://naver.me/GYGgan9L"
+      "url": "https://naver.me/GYGgan9L",
+      "name_en": "Gwon Camera",
+      "address_en": "127-1 Yongdang-ro, Buk-gu, Pohang-si, Gyeongsangbuk-do",
+      "specialty_en": "Used camera buying and selling",
+      "description_en": "A used camera shop in Pohang that both buys and sells. A handy stop when you need something fast in the area."
     },
     {
       "name": "명문카메라",
@@ -154,7 +218,11 @@
       "specialty": null,
       "description": "대구 전자관 안에 있다. 지역에서 알음알음 찾는 카메라 상점이다.",
       "contact": "0507-1313-4049",
-      "url": "https://naver.me/GALXqfko"
+      "url": "https://naver.me/GALXqfko",
+      "name_en": "Myeongmun Camera",
+      "address_en": "Unit 299, 1F, Jeonja-gwan, 45 Yutongdanji-ro, Buk-gu, Daegu",
+      "specialty_en": null,
+      "description_en": "Inside the Jeonja-gwan electronics hall in Daegu. A camera shop locals find by word of mouth."
     },
     {
       "name": "유성카메라",
@@ -163,7 +231,11 @@
       "specialty": "간단 정비",
       "description": "대구 중앙로 지하상가에 있다. 간단한 정비는 꼼꼼히 봐주고, 대구권에서 이름이 알려진 곳이다.",
       "contact": "053-428-2848 · 0507-1475-2848",
-      "url": "https://naver.me/FUh2jXG0"
+      "url": "https://naver.me/FUh2jXG0",
+      "name_en": "Yuseong Camera",
+      "address_en": "E-31, Daehyeon Free Mall, 580 Gukchaebosang-ro, Jung-gu, Daegu",
+      "specialty_en": "Basic maintenance",
+      "description_en": "In the Jungang-ro underground shopping mall in Daegu. Careful with basic maintenance and well known in the Daegu area."
     },
     {
       "name": "중앙카메라",
@@ -172,7 +244,11 @@
       "specialty": "필름·디지털 카메라 수리",
       "description": "부평깡통시장 미진아케이드 안쪽에 있다. 국제시장 2·3공구 입구 맞은편이다. 필름카메라와 디지털카메라를 함께 고치고 카메라 소매도 한다. 공간이 좁고 수리에 집중할 때는 응대가 늦어질 수 있으니 시간을 넉넉히 두고 가는 편이 낫다. 가기 전에 수리 가능 여부와 부품 재고를 미리 물어보길 권한다.",
       "contact": "051-248-2624",
-      "url": null
+      "url": null,
+      "name_en": "Jungang Camera",
+      "address_en": "Inside Mijin Arcade, 8 Junggu-ro 43beon-gil, Jung-gu, Busan",
+      "specialty_en": "Film and digital camera repair",
+      "description_en": "Inside Mijin Arcade in Bupyeong Kkangtong Market, across from the entrance to Gukje Market sections 2 and 3. Repairs both film and digital cameras and also sells cameras. The space is small, and service can be slow while they are focused on repairs, so allow plenty of time. Ask ahead whether the repair is possible and whether parts are in stock."
     },
     {
       "name": "찰칵이상자",
@@ -181,7 +257,11 @@
       "specialty": "수동 필름카메라·RF·렌즈",
       "description": "해운대 재송동에 있다. 수동 필름카메라를 주로 본다. 니콘 F·FM·FE, 캐논 A시리즈와 캐노넷, 펜탁스 SP·K·M, 미놀타 X300과 SRT, 올림푸스 PEN과 트립35, 야시카 일렉트로를 비롯해 리코·마미야·코니카·후지카·프락티카·콘탁스·탑콘까지 다루는 기종 목록을 공개해 두었다. 점검과 분해청소부터 오버홀까지 한다. 렌즈 청소와 조리개·초점 교정도 맡는다. 코시나 CT-1, 코비카 35, 야시카 FX-3, 리코 XR-5 같은 마이너 브랜드와 수동 기종은 수리비를 깎아 준다. 공개된 기종 목록과 요금표는 2021년 4월 기준이라 지금과 다를 수 있다. 가기 전에 수리 가능 여부와 비용을 물어보는 편이 낫다.",
       "contact": "010-4582-8958",
-      "url": null
+      "url": null,
+      "name_en": "Chalkak Isangja",
+      "address_en": "2F, 23 Jaesong 1-ro, Haeundae-gu, Busan",
+      "specialty_en": "Manual film cameras, rangefinders, lenses",
+      "description_en": "In Jaesong-dong, Haeundae. Works mainly on manual film cameras. It publishes a list of the models it handles, including the Nikon F, FM, and FE, Canon A series and Canonet, Pentax SP, K, and M, Minolta X300 and SRT, Olympus PEN and Trip 35, and Yashica Electro, along with Ricoh, Mamiya, Konica, Fujica, Praktica, Contax, and Topcon. Services range from inspection and cleaning to full overhauls. Also does lens cleaning and aperture and focus calibration. Repair discounts for minor brands and manual models such as the Cosina CT-1, Cobica 35, Yashica FX-3, and Ricoh XR-5. The published model list and price list date from April 2021 and may have changed. Ask whether the repair is possible and what it costs before you go."
     }
   ]
 }

@@ -8,7 +8,7 @@ export function leftoverKorean(html) {
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, (m) => m.replace(/\/\*[\s\S]*?\*\//g, ''))
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, (m) => (/application\/ld\+json/.test(m) ? m : ''))
-    .replace(/\sdata-author="[^"]*"/g, '')
+    .replace(/\sdata-(?:author|film-names)="[^"]*"/g, '')
     .replace(/[(（][^()（）]*[가-힣][^()（）]*[)）]/g, '')
     .replace(/[《〈「『][^》〉」』]*[》〉」』]/g, '');
   return text.split('\n').map((line, i) => ({ line: i + 1, text: line.trim() })).filter((l) => /[가-힣]/.test(l.text));

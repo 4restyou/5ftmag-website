@@ -1,5 +1,7 @@
 (function () {
   'use strict';
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const tr = (window.i18n || { t: (ko) => ko }).t;
 
   function bindFilmPicker({
     films,
@@ -106,7 +108,7 @@
       setMode('request');
       closeDropdown();
       optionList?.querySelectorAll('.rs-film-option.is-selected').forEach(el => el.classList.remove('is-selected'));
-      if (selectedLabel) selectedLabel.textContent = '필름을 선택해 주세요';
+      if (selectedLabel) selectedLabel.textContent = tr('필름을 선택해 주세요', 'Choose a film');
       if (filmInput) filmInput.value = reqInput?.value?.trim() || '';
       setTimeout(() => reqInput?.focus(), 50);
       syncThemeCheckbox(filmInput?.value || '');

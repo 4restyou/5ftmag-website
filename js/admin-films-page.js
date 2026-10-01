@@ -248,6 +248,7 @@ function openForm(slug) {
     $('f-issue').value = f.issue || '';
     $('f-aliases').value = aliasesToText(f.aliases);
     $('f-desc').value = f.description || '';
+    $('f-descEn').value = f.description_en || '';
     $('f-canThumbnail').value = f.can_thumbnail || '';
     setCanThumbPreview(f.can_thumbnail || '');
   } else {
@@ -369,6 +370,7 @@ $('filmForm').addEventListener('submit', async (e) => {
       displayName: form.displayName.value.trim() || `${form.brand.value.trim()} ${form.name.value.trim()}`.trim(),
       aliases: textToAliases(form.aliases.value),
       description: form.description.value.trim(),
+      descriptionEn: form.descriptionEn.value.trim() || null,
       iso: form.iso.value.trim() || null,
       type: form.type.value.trim() || null,
       format: form.format.value.trim() || null,

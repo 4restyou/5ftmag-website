@@ -11,6 +11,10 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+
   const root = document.getElementById('filmReaderPhotos');
   if (!root) return;
 
@@ -34,8 +38,8 @@
 
   function cellHtml(photo, index) {
     const who = photo.submitterName || photo.instagram || '';
-    const alt = `${filmLabel} 로 찍은 사진${who ? `. 촬영 ${who}` : ''}`;
-    return `<button type="button" class="film-shot" data-shot="${index}" aria-label="${escapeAttr(alt)} 크게 보기">
+    const alt = tr(`${filmLabel} 로 찍은 사진${who ? `. 촬영 ${who}` : ''}`, `Shot on ${filmLabel}${who ? ` by ${who}` : ''}`);
+    return `<button type="button" class="film-shot" data-shot="${index}" aria-label="${escapeAttr(tr(`${alt} 크게 보기`, `View larger: ${alt}`))}">
       <img src="${escapeAttr(photo.image)}" alt="${escapeAttr(alt)}" loading="lazy" decoding="async" />
       ${who ? `<span class="film-shot-who">${escapeHtml(who)}</span>` : ''}
     </button>`;
@@ -49,11 +53,11 @@
     box.hidden = true;
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
-    box.setAttribute('aria-label', '사진 크게 보기');
+    box.setAttribute('aria-label', tr('사진 크게 보기', 'Photo viewer'));
     box.innerHTML = `
-      <button type="button" class="film-lightbox-close" aria-label="닫기">✕</button>
-      <button type="button" class="film-lightbox-prev" aria-label="이전 사진">‹</button>
-      <button type="button" class="film-lightbox-next" aria-label="다음 사진">›</button>
+      <button type="button" class="film-lightbox-close" aria-label="${tr('닫기', 'Close')}">✕</button>
+      <button type="button" class="film-lightbox-prev" aria-label="${tr('이전 사진', 'Previous photo')}">‹</button>
+      <button type="button" class="film-lightbox-next" aria-label="${tr('다음 사진', 'Next photo')}">›</button>
       <figure>
         <img alt="" />
         <figcaption></figcaption>
@@ -89,7 +93,7 @@
       if (!photo) return;
       img.src = photo.image;
       const who = photo.submitterName || photo.instagram || '';
-      img.alt = `${filmLabel} 로 찍은 사진${who ? `. 촬영 ${who}` : ''}`;
+      img.alt = tr(`${filmLabel} 로 찍은 사진${who ? `. 촬영 ${who}` : ''}`, `Shot on ${filmLabel}${who ? ` by ${who}` : ''}`);
       const bits = [who, photo.camera, photo.caption].filter(Boolean).map(escapeHtml);
       caption.innerHTML = bits.join(' · ');
 
@@ -102,7 +106,7 @@
         b.type = 'button';
         b.className = 'film-lightbox-potw';
         b.dataset.featureSub = subId;
-        b.textContent = '이주의 사진으로 걸기';
+        b.textContent = tr('이주의 사진으로 걸기', 'Set as Photo of the Week');
         caption.appendChild(b);
       });
     }
@@ -153,9 +157,9 @@
     if (!photos.length) { root.remove(); return; }
 
     root.innerHTML = `
-      <h2>${escapeHtml(filmLabel)} 로 찍은 독자 사진</h2>
+      <h2>${tr(`${escapeHtml(filmLabel)} 로 찍은 독자 사진`, `Reader photos shot on ${escapeHtml(filmLabel)}`)}</h2>
       <div class="film-shots">${photos.map(cellHtml).join('')}</div>
-      <p class="film-shots-more"><a href="/films.html?film=${encodeURIComponent(root.dataset.filmSlug || '')}">카탈로그에서 더 보기</a></p>`;
+      <p class="film-shots-more"><a href="${escapeAttr(i18n.url(`/films.html?film=${encodeURIComponent(root.dataset.filmSlug || '')}`))}">${tr('카탈로그에서 더 보기', 'See more in the catalog')}</a></p>`;
     root.hidden = false;
 
     const open = buildLightbox(photos);

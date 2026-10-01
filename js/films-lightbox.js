@@ -1,6 +1,10 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+
   function escapeText(value = '') {
     return String(value)
       .replaceAll('&', '&amp;')
@@ -59,8 +63,8 @@
     function resetView() {
       lightbox.classList.remove('is-zoomed');
       if (lightboxZoom) {
-        lightboxZoom.textContent = '확대';
-        lightboxZoom.setAttribute('aria-label', '사진 확대');
+        lightboxZoom.textContent = tr('확대', 'Zoom');
+        lightboxZoom.setAttribute('aria-label', tr('사진 확대', 'Zoom in'));
       }
     }
 
@@ -85,7 +89,7 @@
       if (thumbsCacheKey === cacheKey) return;
       lightboxThumbs.innerHTML = photos.map((photo, idx) => {
         const source = getPhotoSource(photo, false);
-        const label = `${idx + 1}번째 사진 보기${photo.author ? `, ${photo.author}` : ''}`;
+        const label = tr(`${idx + 1}번째 사진 보기`, `View photo ${idx + 1}`) + (photo.author ? `, ${photo.author}` : '');
         return `
           <button class="lightbox-thumb" type="button" data-photo-index="${idx}" aria-label="${escapeText(label)}">
             <img src="${source.webp}" alt="" loading="lazy" />
@@ -155,10 +159,10 @@
       // 편집부로 로그인했을 때만, 잘못 올라간 필름 표기를 여기서 바로 고칠 수 있게 한다.
       // 관리자 화면에서 그 사진을 다시 찾아내는 수고를 없애려는 것이다.
       if (photo.submissionId && options.canEditFilm?.()) {
-        parts.push(`<button type="button" class="lightbox-caption-link lightbox-caption-edit" data-edit-film="${escapeText(photo.submissionId)}" data-edit-current="${escapeText(photo.film || '')}">필름 수정</button>`);
+        parts.push(`<button type="button" class="lightbox-caption-link lightbox-caption-edit" data-edit-film="${escapeText(photo.submissionId)}" data-edit-current="${escapeText(photo.film || '')}">${tr('필름 수정', 'Edit film')}</button>`);
         // 좋은 사진을 발견한 자리에서 바로 걸 수 있게 한다. 관리 화면에서 그 사진을
         // 다시 찾아내는 수고를 없애려는 것이다. 대상은 독자 투고(submissionId)뿐이다.
-        parts.push(`<button type="button" class="lightbox-caption-link lightbox-caption-potw" data-feature-sub="${escapeText(photo.submissionId)}">이주의 사진</button>`);
+        parts.push(`<button type="button" class="lightbox-caption-link lightbox-caption-potw" data-feature-sub="${escapeText(photo.submissionId)}">${tr('이주의 사진', 'Photo of the week')}</button>`);
       }
       const metaHtml = parts.join(' · ');
       const noteHtml = photo.caption ? `<span class="lightbox-note">${escapeText(photo.caption)}</span>` : '';
@@ -218,7 +222,7 @@
         const isFav = options.hasPhotoFavorite?.(subId) || false;
         lightboxFav.classList.toggle('is-fav', isFav);
         lightboxFav.setAttribute('aria-pressed', String(isFav));
-        lightboxFav.setAttribute('aria-label', isFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
+        lightboxFav.setAttribute('aria-label', isFav ? tr('즐겨찾기 해제', 'Remove from favorites') : tr('즐겨찾기 추가', 'Add to favorites'));
       } else {
         lightboxFav.hidden = true;
         lightboxFav.removeAttribute('data-submission-id');
@@ -254,7 +258,7 @@
       };
       lightboxImg.dataset.fallback = '0';
       lightboxImg.src = source.webp;
-      lightboxImg.alt = [photo.author, photo.film].filter(Boolean).join(' · ') || '필름 사진';
+      lightboxImg.alt = [photo.author, photo.film].filter(Boolean).join(' · ') || tr('필름 사진', 'Film photo');
       lightboxCap.innerHTML = renderCaption(photo);
       bindCaptionActions();
       lightboxCounter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
@@ -318,7 +322,7 @@
       options.setPhotoFavorite?.(subId, !wasFav);
       lightboxFav.classList.toggle('is-fav', !wasFav);
       lightboxFav.setAttribute('aria-pressed', String(!wasFav));
-      lightboxFav.setAttribute('aria-label', !wasFav ? '즐겨찾기 해제' : '즐겨찾기 추가');
+      lightboxFav.setAttribute('aria-label', !wasFav ? tr('즐겨찾기 해제', 'Remove from favorites') : tr('즐겨찾기 추가', 'Add to favorites'));
       lightboxFav.classList.add('is-busy');
       const { error } = await (options.togglePhotoFavorite?.(subId, wasFav) || Promise.resolve({ error: null }));
       lightboxFav.classList.remove('is-busy');
@@ -326,15 +330,15 @@
         options.setPhotoFavorite?.(subId, wasFav);
         lightboxFav.classList.toggle('is-fav', wasFav);
         lightboxFav.setAttribute('aria-pressed', String(wasFav));
-        options.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
+        options.notify?.(tr('처리 실패: ', 'Failed: ') + (error.message || tr('잠시 후 다시 시도', 'Please try again in a moment.')), 'danger');
       }
     }
 
     function toggleZoom() {
       const zoomed = lightbox.classList.toggle('is-zoomed');
       if (lightboxZoom) {
-        lightboxZoom.textContent = zoomed ? '맞춤' : '확대';
-        lightboxZoom.setAttribute('aria-label', zoomed ? '화면에 맞추기' : '사진 확대');
+        lightboxZoom.textContent = zoomed ? tr('맞춤', 'Fit') : tr('확대', 'Zoom');
+        lightboxZoom.setAttribute('aria-label', zoomed ? tr('화면에 맞추기', 'Fit to screen') : tr('사진 확대', 'Zoom in'));
       }
     }
 

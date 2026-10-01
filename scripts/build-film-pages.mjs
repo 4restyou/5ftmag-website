@@ -11,10 +11,12 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ROOT, navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
+import { ROOT, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, alternatesHtml } from './lib/site-shell.mjs';
 
 const FILMS_JSON = path.join(ROOT, 'data/films.json');
 const OUT_DIR = path.join(ROOT, 'film');
+const EN_OUT_DIR = path.join(ROOT, 'en/film');
+const EN_INDEX_PAGE = path.join(ROOT, 'en/films.html');
 const REFERENCE_PAGE = path.join(ROOT, 'films.html');
 const STORIES_JSON = path.join(ROOT, 'data/stories.json');
 
@@ -22,6 +24,40 @@ const ORIGIN = 'https://www.5ftmag.com';
 const SITE_NAME = '5ft magazine';
 const FALLBACK_OG = `${ORIGIN}/img/og/5ft-link1.webp`;
 const SAME_BRAND_LIMIT = 8;
+
+// 영문판(en/film/<slug>.html)도 같은 함수로 찍는다. 문구만 갈라 둔다.
+const TEXT = {
+  ko: {
+    lang: 'ko', locale: 'ko_KR', inLanguage: 'ko-KR', prefix: '',
+    spec: ['브랜드', '감도', '종류', '포맷', '수록 호'],
+    fallbackDesc: (parts) => `${parts} 필름. 5ft.mag 필름 카탈로그에서 규격과 독자들이 찍은 사진을 확인하세요.`,
+    category: '사진 필름', catalog: '필름 카탈로그', crumb: '현재 위치',
+    aliases: '다르게 부르는 이름',
+    shotOn: (n) => `${n} 로 찍은 사진`, photoAlt: (n, a) => `${n} 로 찍은 사진${a ? `. 촬영 ${a}` : ''}`,
+    articles: (n) => `${n} 를 다룬 글`, sameBrand: (b) => `${b} 의 다른 필름`, thumbAlt: (n) => `${n} 필름`,
+    cta: '카탈로그에서는 이 필름으로 찍은 사진을 촬영자·카메라별로 골라 보고, 직접 올릴 수도 있습니다.',
+    ctaView: '카탈로그에서 보기', ctaAll: '필름 전체 목록',
+    search: '전체 검색', dark: '다크 모드로 전환', menu: '메뉴 열기',
+    indexSummary: (n) => `필름 전체 목록 ${n}종`, indexSub: '브랜드별로 정리한 필름 카탈로그입니다. 이름을 누르면 규격과 설명을 볼 수 있어요.', other: '기타',
+  },
+  en: {
+    lang: 'en', locale: 'en_US', inLanguage: 'en', prefix: '/en',
+    spec: ['Brand', 'Speed', 'Type', 'Format', 'Featured in'],
+    fallbackDesc: (parts) => `${parts} film. See its specs and reader photos in the 5ft.mag film catalog.`,
+    category: 'Photographic film', catalog: 'Film catalog', crumb: 'Breadcrumb',
+    aliases: 'Also known as',
+    shotOn: (n) => `Shot on ${n}`, photoAlt: (n, a) => `Photo shot on ${n}${a ? `. By ${a}` : ''}`,
+    articles: (n) => `Articles on ${n}`, sameBrand: (b) => `More from ${b}`, thumbAlt: (n) => `${n} film`,
+    cta: 'In the catalog you can browse photos shot on this film by photographer and camera, and upload your own.',
+    ctaView: 'View in catalog', ctaAll: 'All films',
+    search: 'Search', dark: 'Switch to dark mode', menu: 'Open menu',
+    indexSummary: (n) => `All ${n} films`, indexSub: 'The film catalog, sorted by brand. Tap a name to see its specs and description.', other: 'Other',
+  },
+};
+const HANGUL = /[가-힣]/;
+// 대표 필름 사진의 촬영자(고정 작가). 영문판은 로마자 표기로(en/about.html 과 같은 표기)
+const PERSON_EN = { '박순렬': 'Park Sun-ryeol', '노애경': 'Noh Ae-gyeong', '장형수': 'Jang Hyeong-su' };
+const personOf = (name, T) => (T.lang === 'en' && PERSON_EN[name]) || name;
 
 function esc(s) {
   return String(s ?? '')
@@ -58,35 +94,40 @@ function displayNameOf(film) {
 }
 
 // 검색·공유에 쓰이는 한 줄 설명. desc 가 비면 규격으로 대체한다.
-function descriptionOf(film) {
-  const desc = (film.desc || '').trim();
+function descOf(film, T) {
+  return ((T.lang === 'en' && film.descEn) || film.desc || '').trim();
+}
+
+function descriptionOf(film, T = TEXT.ko) {
+  const desc = descOf(film, T);
   if (desc) return desc.length > 180 ? `${desc.slice(0, 177)}…` : desc;
   const parts = [film.brand, film.iso && `ISO ${film.iso}`, film.type, film.format].filter(Boolean);
-  return `${parts.join(' · ')} 필름. 5ft.mag 필름 카탈로그에서 규격과 독자들이 찍은 사진을 확인하세요.`;
+  return T.fallbackDesc(parts.join(' · '));
 }
 
 // 별칭에는 한글 표기가 섞여 있다("코닥 울트라맥스 400"). 검색어와 직접 맞물리는
 // 부분이라 페이지에 그대로 노출한다. 표시 이름과 겹치는 항목은 뺀다.
-function aliasesOf(film) {
+function aliasesOf(film, T = TEXT.ko) {
   const name = displayNameOf(film).toLowerCase();
   const seen = new Set([name]);
   const out = [];
   for (const alias of film.aliases || []) {
     const key = String(alias).trim().toLowerCase();
     if (!key || seen.has(key)) continue;
+    if (T.lang === 'en' && HANGUL.test(key)) continue;   // 영문판엔 한글 별칭을 싣지 않는다
     seen.add(key);
     out.push(String(alias).trim());
   }
   return out;
 }
 
-function specRows(film) {
+function specRows(film, T = TEXT.ko) {
   return [
-    ['브랜드', film.brand],
-    ['감도', film.iso ? `ISO ${film.iso}` : ''],
-    ['종류', film.type],
-    ['포맷', film.format],
-    ['수록 호', film.issue],
+    [T.spec[0], film.brand],
+    [T.spec[1], film.iso ? `ISO ${film.iso}` : ''],
+    [T.spec[2], film.type],
+    [T.spec[3], film.format],
+    [T.spec[4], film.issue],
   ].filter(([, value]) => value);
 }
 
@@ -104,30 +145,30 @@ function filmNameCandidates(film) {
   return [...new Set(names)];
 }
 
-function jsonLd(film, sameBrand) {
+function jsonLd(film, sameBrand, T) {
   const name = displayNameOf(film);
-  const url = `${ORIGIN}/film/${film.slug}.html`;
-  const properties = specRows(film).map(([label, value]) => ({
+  const url = `${ORIGIN}${T.prefix}/film/${film.slug}.html`;
+  const properties = specRows(film, T).map(([label, value]) => ({
     '@type': 'PropertyValue', name: label, value: String(value),
   }));
   const product = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name,
-    description: descriptionOf(film),
+    description: descriptionOf(film, T),
     url,
-    category: '사진 필름',
-    inLanguage: 'ko-KR',
+    category: T.category,
+    inLanguage: T.inLanguage,
   };
   if (film.brand) product.brand = { '@type': 'Brand', name: film.brand };
   const image = thumbnailOf(film);
   if (image) product.image = [absoluteImage(image)];
-  const alternateName = aliasesOf(film);
+  const alternateName = aliasesOf(film, T);
   if (alternateName.length) product.alternateName = alternateName;
   if (properties.length) product.additionalProperty = properties;
   if (sameBrand.length) {
     product.isRelatedTo = sameBrand.map((other) => ({
-      '@type': 'Product', name: displayNameOf(other), url: `${ORIGIN}/film/${other.slug}.html`,
+      '@type': 'Product', name: displayNameOf(other), url: `${ORIGIN}${T.prefix}/film/${other.slug}.html`,
     }));
   }
 
@@ -135,8 +176,8 @@ function jsonLd(film, sameBrand) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: '5ft magazine', item: `${ORIGIN}/` },
-      { '@type': 'ListItem', position: 2, name: '필름 카탈로그', item: `${ORIGIN}/films.html` },
+      { '@type': 'ListItem', position: 1, name: '5ft magazine', item: `${ORIGIN}${T.prefix}/` },
+      { '@type': 'ListItem', position: 2, name: T.catalog, item: `${ORIGIN}${T.prefix}/films.html` },
       { '@type': 'ListItem', position: 3, name, item: url },
     ],
   };
@@ -150,10 +191,10 @@ function jsonLd(film, sameBrand) {
 // 링크는 카탈로그로 보낸다. 상세 페이지(/film/<slug>.html)는 검색 전용이라
 // 독자가 그쪽으로 들어가지 않게 하고, 색인은 sitemap 과 상세 페이지끼리의
 // 상호 링크로 이뤄진다.
-async function writeFilmIndex(films) {
+async function writeFilmIndex(films, T = TEXT.ko, page = path.join(ROOT, 'films.html')) {
   const byBrand = new Map();
   for (const film of films) {
-    const brand = film.brand || '기타';
+    const brand = film.brand || T.other;
     if (!byBrand.has(brand)) byBrand.set(brand, []);
     byBrand.get(brand).push(film);
   }
@@ -161,7 +202,7 @@ async function writeFilmIndex(films) {
   const html = brands.map((brand) => {
     const items = byBrand.get(brand)
       .sort((a, b) => displayNameOf(a).localeCompare(displayNameOf(b), 'ko'))
-      .map((film) => `        <li><a href="./films.html?film=${encodeURIComponent(film.slug)}">${esc(displayNameOf(film))}</a></li>`)
+      .map((film) => `        <li><a href="${T.prefix ? `${T.prefix}/` : './'}films.html?film=${encodeURIComponent(film.slug)}">${esc(displayNameOf(film))}</a></li>`)
       .join('\n');
     return `    <div class="film-index-brand">
       <h3>${esc(brand)}</h3>
@@ -171,16 +212,16 @@ ${items}
     </div>`;
   }).join('\n');
 
-  const page = path.join(ROOT, 'films.html');
-  const source = await fs.readFile(page, 'utf-8');
+  const source = await fs.readFile(page, 'utf-8').catch(() => null);
+  if (source == null) return false;
   // details 로 접어 둔다. 접혀 있어도 마크업은 HTML 에 그대로 남아 크롤러가
   // 읽고 링크를 따라간다. 화면에서만 기본으로 감춘다.
   const next = source.replace(
     /<!-- FILM-INDEX:START -->[\s\S]*?<!-- FILM-INDEX:END -->/,
     `<!-- FILM-INDEX:START -->
   <details class="film-index-fold">
-    <summary>필름 전체 목록 ${films.length}종</summary>
-    <p class="film-index-sub">브랜드별로 정리한 필름 카탈로그입니다. 이름을 누르면 규격과 설명을 볼 수 있어요.</p>
+    <summary>${T.indexSummary(films.length)}</summary>
+    <p class="film-index-sub">${T.indexSub}</p>
     <div class="film-index-grid">
 ${html}
     </div>
@@ -194,15 +235,17 @@ ${html}
   return false;
 }
 
-function render(film, sameBrand, versioned, outFile, articles) {
+function render(film, sameBrand, versioned, outFile, articles, T = TEXT.ko) {
+  const P = T.prefix;
   const name = displayNameOf(film);
   const title = `${name} | 5ft magazine`;
-  const description = descriptionOf(film);
-  const url = `${ORIGIN}/film/${film.slug}.html`;
+  const description = descriptionOf(film, T);
+  const desc = descOf(film, T);
+  const url = `${ORIGIN}${P}/film/${film.slug}.html`;
   const ogImage = absoluteImage(thumbnailOf(film));
   const thumb = thumbnailOf(film);
-  const aliases = aliasesOf(film);
-  const rows = specRows(film);
+  const aliases = aliasesOf(film, T);
+  const rows = specRows(film, T);
 
   const specHtml = rows.map(([label, value]) => `
         <div class="film-detail-spec-row">
@@ -212,7 +255,7 @@ function render(film, sameBrand, versioned, outFile, articles) {
 
   const aliasHtml = aliases.length ? `
       <section class="film-detail-block">
-        <h2>다르게 부르는 이름</h2>
+        <h2>${esc(T.aliases)}</h2>
         <ul class="film-detail-aliases">
 ${aliases.map((alias) => `          <li>${esc(alias)}</li>`).join('\n')}
         </ul>
@@ -221,11 +264,11 @@ ${aliases.map((alias) => `          <li>${esc(alias)}</li>`).join('\n')}
   const photos = Array.isArray(film.photos) ? film.photos.filter((p) => p?.src).slice(0, 12) : [];
   const photosHtml = photos.length ? `
       <section class="film-detail-block">
-        <h2>${esc(name)} 로 찍은 사진</h2>
+        <h2>${esc(T.shotOn(name))}</h2>
         <div class="film-detail-photos">
 ${photos.map((photo) => `          <figure>
-            <img src="/${esc(String(photo.src).replace(/^\.?\//, ''))}" alt="${esc(name)} 로 찍은 사진${photo.author ? `. 촬영 ${esc(photo.author)}` : ''}" loading="lazy" decoding="async" />
-${photo.author ? `            <figcaption>${esc(photo.author)}</figcaption>` : ''}
+            <img src="/${esc(String(photo.src).replace(/^\.?\//, ''))}" alt="${esc(T.photoAlt(name, photo.author && personOf(photo.author, T)))}" loading="lazy" decoding="async" />
+${photo.author ? `            <figcaption>${esc(personOf(photo.author, T))}</figcaption>` : ''}
           </figure>`).join('\n')}
         </div>
       </section>` : '';
@@ -234,22 +277,26 @@ ${photo.author ? `            <figcaption>${esc(photo.author)}</figcaption>` : '
   // 카탈로그 모달의 "이 필름으로 쓴 글" 링크도 같은 데이터를 쓴다.
   const articleHtml = (articles && articles.length) ? `
       <section class="film-detail-block">
-        <h2>${esc(name)} 를 다룬 글</h2>
+        <h2>${esc(T.articles(name))}</h2>
         <ul class="film-detail-articles">
-${articles.map((st) => `          <li><a href="/${esc(st.page)}">${esc(st.title)}</a><span>${esc(st.categoryLabel || '')}</span></li>`).join('\n')}
+${articles.map((st) => {
+    // 영문판은 번역된 글이면 영문 제목·영문 페이지로
+    const en = T.lang === 'en' && st.titleEn;
+    return `          <li><a href="/${en ? 'en/' : ''}${esc(st.page)}">${esc(en ? st.titleEn : st.title)}</a><span>${esc(st.categoryLabel || '')}</span></li>`;
+  }).join('\n')}
         </ul>
       </section>` : '';
 
   const brandHtml = sameBrand.length ? `
       <section class="film-detail-block">
-        <h2>${esc(film.brand)} 의 다른 필름</h2>
+        <h2>${esc(T.sameBrand(film.brand))}</h2>
         <ul class="film-detail-siblings">
-${sameBrand.map((other) => `          <li><a href="/film/${esc(other.slug)}.html">${esc(displayNameOf(other))}</a><span>${esc([other.iso && `ISO ${other.iso}`, other.format].filter(Boolean).join(' · '))}</span></li>`).join('\n')}
+${sameBrand.map((other) => `          <li><a href="${P}/film/${esc(other.slug)}.html">${esc(displayNameOf(other))}</a><span>${esc([other.iso && `ISO ${other.iso}`, other.format].filter(Boolean).join(' · '))}</span></li>`).join('\n')}
         </ul>
       </section>` : '';
 
   return `<!DOCTYPE html>
-<html lang="ko" data-theme="light">
+<html lang="${T.lang}" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <base href="/">
@@ -266,7 +313,7 @@ ${sameBrand.map((other) => `          <li><a href="/film/${esc(other.slug)}.html
   <meta property="og:image" content="${esc(ogImage)}">
   <meta property="og:url" content="${esc(url)}">
   <meta property="og:site_name" content="${esc(SITE_NAME)}">
-  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale" content="${T.locale}">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${esc(title)}">
@@ -278,12 +325,12 @@ ${sameBrand.map((other) => `          <li><a href="/film/${esc(other.slug)}.html
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js"></script>
+  <script src="/js/theme-init.js"></script>${T.lang === 'en' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">
   <link rel="stylesheet" href="${versioned('css/film-detail.css')}">
-${jsonLd(film, sameBrand)}
+${jsonLd(film, sameBrand, T)}
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -291,30 +338,30 @@ ${jsonLd(film, sameBrand)}
 
 <header>
   <div class="header-inner">
-    <a href="/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <a href="${P}/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     ${navHtml(outFile)}
     <div class="nav-right">
-      <a href="/search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
-      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
-      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+      <a href="/search.html" class="icon-btn" id="headerSearchBtn" aria-label="${T.search}" title="${T.search}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="${T.dark}" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="${T.menu}" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
   ${mobileNavHtml(outFile)}
 </header>
 
 <main class="film-detail">
-  <nav class="film-detail-crumb" aria-label="현재 위치">
-    <a href="/">5ft magazine</a>
+  <nav class="film-detail-crumb" aria-label="${T.crumb}">
+    <a href="${P}/">5ft magazine</a>
     <span aria-hidden="true">›</span>
-    <a href="/films.html">필름 카탈로그</a>
+    <a href="${P}/films.html">${T.catalog}</a>
   </nav>
 
   <div class="film-detail-head">
-    ${thumb ? `<div class="film-detail-thumb"><img src="/${esc(String(thumb).replace(/^\.?\//, ''))}" alt="${esc(name)} 필름" width="240" height="320" decoding="async" /></div>` : ''}
+    ${thumb ? `<div class="film-detail-thumb"><img src="/${esc(String(thumb).replace(/^\.?\//, ''))}" alt="${esc(T.thumbAlt(name))}" width="240" height="320" decoding="async" /></div>` : ''}
     <div class="film-detail-headline">
       ${film.brand ? `<p class="film-detail-brand">${esc(film.brand)}</p>` : ''}
       <h1>${esc(name)}</h1>
-      ${film.desc ? `<p class="film-detail-desc">${esc(film.desc)}</p>` : ''}
+      ${desc ? `<p class="film-detail-desc">${esc(desc)}</p>` : ''}
       <dl class="film-detail-spec">${specHtml}
       </dl>
     </div>
@@ -330,10 +377,10 @@ ${articleHtml}
            data-film-names="${esc(JSON.stringify(filmNameCandidates(film)))}"></section>
 
   <section class="film-detail-cta">
-    <p>카탈로그에서는 이 필름으로 찍은 사진을 촬영자·카메라별로 골라 보고, 직접 올릴 수도 있습니다.</p>
+    <p>${T.cta}</p>
     <div class="film-detail-cta-actions">
-      <a class="film-detail-btn film-detail-btn-primary" href="/films.html?film=${encodeURIComponent(film.slug)}">카탈로그에서 보기</a>
-      <a class="film-detail-btn" href="/films.html">필름 전체 목록</a>
+      <a class="film-detail-btn film-detail-btn-primary" href="${P}/films.html?film=${encodeURIComponent(film.slug)}">${T.ctaView}</a>
+      <a class="film-detail-btn" href="${P}/films.html">${T.ctaAll}</a>
     </div>
   </section>
 </main>
@@ -341,7 +388,7 @@ ${articleHtml}
 <footer>
   <div class="footer-inner-left">
     <span class="footer-logo">5ft magazine</span>
-    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 전남광주통합특별시 동구 충장로46번길 8, 2층</span>
+    ${footerPublisherHtml(outFile)}
   </div>
   ${footerHtml(outFile)}
   <span class="footer-copy">© 2026 5ft magazine</span>
@@ -369,6 +416,8 @@ ${articleHtml}
   const versioned = assetVersionReader(referenceHtml, {
     'css/film-detail.css': await contentHash('css/film-detail.css'),
     'js/film-detail.js': await contentHash('js/film-detail.js'),
+    // i18n.js 는 영문 페이지만 싣는다. 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
+    'js/i18n.js': ((await fs.readFile(path.join(ROOT, 'en/about.html'), 'utf-8').catch(() => '')).match(/js\/i18n\.js\?v=([0-9A-Za-z-]+)/) || [])[1],
     // potw-picker.js 는 여기 넣지 않는다. films.html 에도 실려 bump-version 이
     // 관리하므로, 자체 해시를 붙이면 버전이 갈라져 단일 버전 가드에 걸린다.
   });
@@ -402,15 +451,28 @@ ${articleHtml}
   }
 
   await fs.mkdir(OUT_DIR, { recursive: true });
+  await fs.mkdir(EN_OUT_DIR, { recursive: true });
 
+  const written = [];
   for (const film of films) {
     const sameBrand = (byBrand.get(film.brand) || [])
       .filter((other) => other.slug !== film.slug)
       .slice(0, SAME_BRAND_LIMIT);
-    const outFile = path.join(OUT_DIR, `${film.slug}.html`);
-    await fs.writeFile(outFile, render(film, sameBrand, versioned, outFile, byFilm.get(film.slug)), 'utf-8');
+    for (const [dir, T] of [[OUT_DIR, TEXT.ko], [EN_OUT_DIR, TEXT.en]]) {
+      const outFile = path.join(dir, `${film.slug}.html`);
+      await fs.writeFile(outFile, render(film, sameBrand, versioned, outFile, byFilm.get(film.slug), T), 'utf-8');
+      written.push(outFile);
+    }
+  }
+  // 언어 대응 링크는 두 판이 다 써진 뒤에 붙인다(공통 셸과 같은 규칙, scripts/lib/site-shell.mjs)
+  for (const file of written) {
+    const alternates = alternatesHtml(file);
+    if (!alternates) continue;
+    const html = await fs.readFile(file, 'utf-8');
+    await fs.writeFile(file, html.replace(/(<link rel="canonical" href="[^"]*">)/, `$1\n${alternates}`), 'utf-8');
   }
   const indexUpdated = await writeFilmIndex(films);
+  await writeFilmIndex(films, TEXT.en, EN_INDEX_PAGE);
   console.log(`[build-film-pages] ${films.length}개 필름 상세 페이지 생성: ${path.relative(ROOT, OUT_DIR)}/`);
   console.log(`[build-film-pages] films.html 전체 목록 ${indexUpdated ? '갱신' : '변경 없음'}`);
   console.log(`[build-film-pages] 기사가 연결된 필름 ${byFilm.size}종`);

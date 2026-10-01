@@ -18,11 +18,12 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ROOT, navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
+import { ROOT, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, alternatesHtml } from './lib/site-shell.mjs';
 
 const LABS_JSON = path.join(ROOT, 'data/labs.json');
 const REPAIRS_JSON = path.join(ROOT, 'data/repairs.json');
 const OUT_DIR = path.join(ROOT, 'labs');
+const EN_OUT_DIR = path.join(ROOT, 'en/labs');
 const REFERENCE_PAGE = path.join(ROOT, 'labs.html');
 
 const ORIGIN = 'https://www.5ftmag.com';
@@ -43,6 +44,54 @@ const SLUG_BY_REGION = new Map(REGIONS);
 
 // 가격표에 싣는 종류와 포맷. data/labs.json 의 prices 키를 그대로 따른다.
 const FILM_KINDS = [['color', '컬러'], ['bw', '흑백'], ['slide', '슬라이드'], ['cinema', '시네마']];
+
+// 영문판(en/labs/<region>.html). 지역 키·슬러그·지도 검색은 한국어 원문을 그대로 쓰고 표시만 바꾼다
+const REGION_EN = {
+  '서울': 'Seoul', '경기': 'Gyeonggi', '인천': 'Incheon', '강원': 'Gangwon', '대전': 'Daejeon', '충남': 'Chungnam',
+  '충북': 'Chungbuk', '세종': 'Sejong', '대구': 'Daegu', '경북': 'Gyeongbuk', '부산': 'Busan', '울산': 'Ulsan',
+  '경남': 'Gyeongnam', '전남광주': 'Gwangju · Jeonnam', '전북': 'Jeonbuk', '제주': 'Jeju',
+};
+const KIND_EN = { color: 'Color', bw: 'B&W', slide: 'Slide', cinema: 'Cinema' };
+const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
+const TEXT = {
+  ko: {
+    lang: 'ko', locale: 'ko_KR', inLanguage: 'ko-KR', prefix: '', dir: OUT_DIR,
+    region: (r) => r, kind: (key, label) => label, field: (item, key) => item[key],
+    won: (v) => `${v.toLocaleString('ko-KR')}원`, high: '고해상', priceCaption: (n) => `${n} 현상 가격`, kindHead: '종류',
+    scan: (v) => `기본 스캔 ${v}`, site: '홈페이지 ↗', specialty: (v) => `전문 ${v}`, contact: (v) => `연락처 ${v}`,
+    labsN: (n) => `필름 현상소 ${n}곳`, repairsN: (n) => `카메라 수리점 ${n}곳`, labsTitle: (r) => `${r} 필름 현상소`, repairsTitle: (r) => `${r} 카메라 수리점`,
+    labsAndRepairs: (r) => `${r} 필름 현상소와 카메라 수리점`, labsCount: (n) => `현상소 ${n}곳`, repairsCount: (n) => `수리점 ${n}곳`,
+    descLabs: (r, n) => `${r}의 필름 현상소 ${n}곳을 주소, 스캔 화질, 컬러·흑백·슬라이드 현상 가격과 함께 정리했습니다.`,
+    descCheap: (v) => `135 컬러 기본 현상은 ${v.toLocaleString('ko-KR')}원부터입니다.`,
+    descRepairs: (r, n) => `${r}에서 카메라를 맡길 수 있는 수리점 ${n}곳의 전문 분야와 연락처도 함께 실었습니다.`,
+    crumb: '현재 위치', labsCrumb: '필름 현상소', repairsHeading: (r, n) => `${r} 카메라 수리점 ${n}곳`,
+    repairsSub: '필름카메라를 맡길 수 있는 곳입니다. 취급 기종과 비용은 바뀔 수 있으니 가기 전에 물어보시는 편이 좋습니다.',
+    others: '다른 지역', place: (n) => `${n}곳`,
+    cta: '가격과 정보는 바뀔 수 있습니다. 지도에서 위치를 보거나 정정할 내용이 있으면 전체 목록에서 알려주세요.', ctaBtn: '전국 현상소 목록·지도',
+    search: '전체 검색', dark: '다크 모드로 전환', menu: '메뉴 열기',
+    labIndex: (n) => `지역별 현상소 ${n}곳`, labIndexSub: '지역 이름을 누르면 그 지역 현상소의 주소와 현상 가격을 한 번에 볼 수 있어요.',
+    repairIndex: (n) => `지역별 카메라 수리점 ${n}곳`, repairIndexSub: '필름카메라를 맡길 수 있는 곳이에요. 이름을 누르면 전문 분야와 연락처가 열려요.', noRegion: '지역 등록 전',
+  },
+  en: {
+    lang: 'en', locale: 'en_US', inLanguage: 'en', prefix: '/en', dir: EN_OUT_DIR,
+    region: (r) => REGION_EN[r] || r, kind: (key, label) => KIND_EN[key] || label,
+    field: (item, key) => item[`${key}En`] || item[`${key}_en`] || item[key],
+    won: (v) => `${v.toLocaleString('en-US')} won`, high: 'High-res', priceCaption: (n) => `${n} development prices`, kindHead: 'Type',
+    scan: (v) => `Standard scan ${v}`, site: 'Website ↗', specialty: (v) => `Specialty: ${v}`, contact: (v) => `Contact: ${v}`,
+    labsN: (n) => plural(n, 'film lab'), repairsN: (n) => plural(n, 'camera repair shop'), labsTitle: (r) => `Film labs in ${r}`, repairsTitle: (r) => `Camera repair shops in ${r}`,
+    labsAndRepairs: (r) => `Film labs and camera repair shops in ${r}`, labsCount: (n) => plural(n, 'lab'), repairsCount: (n) => plural(n, 'repair shop'),
+    descLabs: (r, n) => `${plural(n, 'film lab')} in ${r}, with addresses, scan resolution and color, black-and-white and slide development prices.`,
+    descCheap: (v) => `Standard 135 color development starts at ${v.toLocaleString('en-US')} won.`,
+    descRepairs: (r, n) => `Also listed: ${plural(n, 'camera repair shop')} in ${r}, with their specialties and contacts.`,
+    crumb: 'Breadcrumb', labsCrumb: 'Film labs', repairsHeading: (r, n) => `${plural(n, 'camera repair shop')} in ${r}`,
+    repairsSub: 'Places that take film cameras for repair. Models handled and costs can change, so it is worth asking before you go.',
+    others: 'Other regions', place: (n) => `${n}`,
+    cta: 'Prices and details can change. To see locations on the map or send a correction, use the full list.', ctaBtn: 'All labs and map',
+    search: 'Search', dark: 'Switch to dark mode', menu: 'Open menu',
+    labIndex: (n) => `Film labs by region (${n})`, labIndexSub: 'Tap a region to see the addresses and development prices of its labs.',
+    repairIndex: (n) => `Camera repair shops by region (${n})`, repairIndexSub: 'Places that take film cameras for repair. Tap a name to see the specialty and contact.', noRegion: 'Region not set',
+  },
+};
 const FORMATS = [['135', '135'], ['120', '120']];
 
 function esc(s) {
@@ -65,22 +114,23 @@ async function contentHash(relPath) {
   return crypto.createHash('sha1').update(buf).digest('hex').slice(0, 8);
 }
 
-function won(value) {
-  return typeof value === 'number' && value > 0 ? `${value.toLocaleString('ko-KR')}원` : '';
+function won(value, T = TEXT.ko) {
+  return typeof value === 'number' && value > 0 ? T.won(value) : '';
 }
 
 // 한 현상소의 가격을 종류 × 포맷 표로 만든다. 값이 하나도 없으면 표를 생략한다.
-function priceTable(lab) {
+function priceTable(lab, T = TEXT.ko) {
   const prices = lab.prices || {};
-  const rows = FILM_KINDS.map(([key, label]) => {
+  const rows = FILM_KINDS.map(([key, koLabel]) => {
+    const label = T.kind(key, koLabel);
     const cells = FORMATS.map(([format]) => {
       const entry = prices[key]?.[format];
       if (!entry) return '';
-      const basic = won(entry.basic);
-      const high = won(entry.high);
+      const basic = won(entry.basic, T);
+      const high = won(entry.high, T);
       if (!basic && !high) return '';
-      if (basic && high) return `${basic} <span class="lab-price-high">고해상 ${high}</span>`;
-      return basic || `고해상 ${high}`;
+      if (basic && high) return `${basic} <span class="lab-price-high">${T.high} ${high}</span>`;
+      return basic || `${T.high} ${high}`;
     });
     return cells.some(Boolean) ? [label, cells] : null;
   }).filter(Boolean);
@@ -88,9 +138,9 @@ function priceTable(lab) {
   if (!rows.length) return '';
   return `
         <table class="lab-price-table">
-          <caption class="sr-only">${esc(lab.name)} 현상 가격</caption>
+          <caption class="sr-only">${esc(T.priceCaption(T.field(lab, 'name')))}</caption>
           <thead>
-            <tr><th scope="col">종류</th>${FORMATS.map(([, label]) => `<th scope="col">${esc(label)}</th>`).join('')}</tr>
+            <tr><th scope="col">${T.kindHead}</th>${FORMATS.map(([, label]) => `<th scope="col">${esc(label)}</th>`).join('')}</tr>
           </thead>
           <tbody>
 ${rows.map(([label, cells]) => `            <tr><th scope="row">${esc(label)}</th>${cells.map((cell) => `<td>${cell || '<span class="lab-price-none">-</span>'}</td>`).join('')}</tr>`).join('\n')}
@@ -98,39 +148,41 @@ ${rows.map(([label, cells]) => `            <tr><th scope="row">${esc(label)}</t
         </table>`;
 }
 
-function labCard(lab) {
-  const features = (lab.features || '').trim();
+function labCard(lab, T = TEXT.ko) {
+  const features = (T.field(lab, 'features') || '').trim();
   return `
       <article class="lab-entry">
-        <h3 class="lab-entry-name">${esc(lab.name)}</h3>
-        <p class="lab-entry-address">${esc(lab.address || '')}</p>
-        ${lab.scanRes ? `<p class="lab-entry-meta">기본 스캔 ${esc(lab.scanRes)}</p>` : ''}
+        <h3 class="lab-entry-name">${esc(T.field(lab, 'name'))}</h3>
+        <p class="lab-entry-address">${esc(T.field(lab, 'address') || '')}</p>
+        ${lab.scanRes ? `<p class="lab-entry-meta">${esc(T.scan(lab.scanRes))}</p>` : ''}
         ${features ? `<p class="lab-entry-features">${esc(features).replace(/\n/g, '<br />')}</p>` : ''}
-        ${priceTable(lab)}
-        ${lab.url ? `<p class="lab-entry-link"><a href="${esc(lab.url)}" target="_blank" rel="noopener nofollow">홈페이지 ↗</a></p>` : ''}
+        ${priceTable(lab, T)}
+        ${lab.url ? `<p class="lab-entry-link"><a href="${esc(lab.url)}" target="_blank" rel="noopener nofollow">${T.site}</a></p>` : ''}
       </article>`;
 }
 
 // 수리점 한 곳. 현상소와 같은 .lab-entry 마크업을 쓰고 담는 값만 다르다.
 // 가격표 대신 전문 분야와 연락처가 들어간다.
-function repairEntry(shop) {
-  const description = (shop.description || '').trim();
+function repairEntry(shop, T = TEXT.ko) {
+  const description = (T.field(shop, 'description') || '').trim();
+  const address = T.field(shop, 'address');
+  const specialty = T.field(shop, 'specialty');
   return `
       <article class="lab-entry">
-        <h3 class="lab-entry-name">${esc(shop.name)}</h3>
-        ${shop.address ? `<p class="lab-entry-address">${esc(shop.address)}</p>` : ''}
-        ${shop.specialty ? `<p class="lab-entry-meta">전문 ${esc(shop.specialty)}</p>` : ''}
-        ${shop.contact ? `<p class="lab-entry-meta">연락처 ${esc(shop.contact)}</p>` : ''}
+        <h3 class="lab-entry-name">${esc(T.field(shop, 'name'))}</h3>
+        ${address ? `<p class="lab-entry-address">${esc(address)}</p>` : ''}
+        ${specialty ? `<p class="lab-entry-meta">${esc(T.specialty(specialty))}</p>` : ''}
+        ${shop.contact ? `<p class="lab-entry-meta">${esc(T.contact(shop.contact))}</p>` : ''}
         ${description ? `<p class="lab-entry-features">${esc(description).replace(/\n/g, '<br />')}</p>` : ''}
-        ${shop.url ? `<p class="lab-entry-link"><a href="${esc(shop.url)}" target="_blank" rel="noopener nofollow">홈페이지 ↗</a></p>` : ''}
+        ${shop.url ? `<p class="lab-entry-link"><a href="${esc(shop.url)}" target="_blank" rel="noopener nofollow">${T.site}</a></p>` : ''}
       </article>`;
 }
 
-function localBusiness(lab) {
+function localBusiness(lab, T = TEXT.ko) {
   const node = {
     '@type': 'LocalBusiness',
-    name: lab.name,
-    address: { '@type': 'PostalAddress', addressCountry: 'KR', addressLocality: lab.region, streetAddress: lab.address },
+    name: T.field(lab, 'name'),
+    address: { '@type': 'PostalAddress', addressCountry: 'KR', addressLocality: T.region(lab.region), streetAddress: T.field(lab, 'address') },
     additionalType: 'https://www.wikidata.org/wiki/Q1155589',
   };
   if (lab.url) node.url = lab.url;
@@ -152,19 +204,19 @@ function telephoneOf(contact) {
 // 달지 않는다. 카메라 수리업에 맞는 항목을 확인하지 못했고, 구조화 데이터에
 // 엉뚱한 항목을 적으면 검색엔진이 업종을 잘못 읽는다. 업종은 knowsAbout 과
 // description 으로 전한다.
-function repairBusiness(shop) {
+function repairBusiness(shop, T = TEXT.ko) {
   const node = {
     '@type': 'LocalBusiness',
-    name: shop.name,
+    name: T.field(shop, 'name'),
   };
   if (shop.address) {
     node.address = {
       '@type': 'PostalAddress', addressCountry: 'KR',
-      addressLocality: shop.region, streetAddress: shop.address,
+      addressLocality: T.region(shop.region), streetAddress: T.field(shop, 'address'),
     };
   }
-  if (shop.specialty) node.knowsAbout = shop.specialty;
-  if (shop.description) node.description = shop.description;
+  if (shop.specialty) node.knowsAbout = T.field(shop, 'specialty');
+  if (shop.description) node.description = T.field(shop, 'description');
   const tel = telephoneOf(shop.contact);
   if (tel) node.telephone = tel;
   if (shop.url) node.url = shop.url;
@@ -183,33 +235,34 @@ function itemList(name, items, toNode) {
 }
 
 // 제목과 설명에 쓰는 한 줄. 수리점이 없는 지역은 예전과 같은 문구를 유지한다.
-function headline(region, labs, repairs) {
+function headline(region, labs, repairs, T = TEXT.ko) {
   const parts = [];
-  if (labs.length) parts.push(`필름 현상소 ${labs.length}곳`);
-  if (repairs.length) parts.push(`카메라 수리점 ${repairs.length}곳`);
-  return `${region} ${parts.join(' · ')}`;
+  if (labs.length) parts.push(T.labsN(labs.length));
+  if (repairs.length) parts.push(T.repairsN(repairs.length));
+  return T.lang === 'en' ? `${T.region(region)}: ${parts.join(' · ')}` : `${region} ${parts.join(' · ')}`;
 }
 
-function jsonLd(region, labs, repairs, url) {
+function jsonLd(region, labs, repairs, url, T = TEXT.ko) {
+  const shownRegion = T.region(region);
   const collection = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${region} 필름 현상소`,
+    name: T.labsTitle(shownRegion),
     url,
-    inLanguage: 'ko-KR',
+    inLanguage: T.inLanguage,
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${ORIGIN}/` },
     mainEntity: [
-      labs.length ? itemList(`${region} 필름 현상소`, labs, localBusiness) : null,
-      repairs.length ? itemList(`${region} 카메라 수리점`, repairs, repairBusiness) : null,
+      labs.length ? itemList(T.labsTitle(shownRegion), labs, (lab) => localBusiness(lab, T)) : null,
+      repairs.length ? itemList(T.repairsTitle(shownRegion), repairs, (shop) => repairBusiness(shop, T)) : null,
     ].filter(Boolean),
   };
   const breadcrumb = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${ORIGIN}/` },
-      { '@type': 'ListItem', position: 2, name: '필름 현상소', item: `${ORIGIN}/labs.html` },
-      { '@type': 'ListItem', position: 3, name: headline(region, labs, repairs), item: url },
+      { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${ORIGIN}${T.prefix}/` },
+      { '@type': 'ListItem', position: 2, name: T.labsCrumb, item: `${ORIGIN}${T.prefix}/labs.html` },
+      { '@type': 'ListItem', position: 3, name: headline(region, labs, repairs, T), item: url },
     ],
   };
   return [collection, breadcrumb]
@@ -217,33 +270,35 @@ function jsonLd(region, labs, repairs, url) {
     .join('\n');
 }
 
-function render(region, labs, repairs, others, versioned, outFile) {
+function render(region, labs, repairs, others, versioned, outFile, T = TEXT.ko) {
+  const P = T.prefix;
+  const shownRegion = T.region(region);
   const slug = SLUG_BY_REGION.get(region);
-  const url = `${ORIGIN}/labs/${slug}.html`;
-  const title = `${headline(region, labs, repairs)} | 5ft magazine`;
+  const url = `${ORIGIN}${P}/labs/${slug}.html`;
+  const title = `${headline(region, labs, repairs, T)} | 5ft magazine`;
   const cheapest = labs
     .map((lab) => lab.prices?.color?.['135']?.basic)
     .filter((value) => typeof value === 'number' && value > 0)
     .sort((a, b) => a - b)[0];
   const sentences = [];
   if (labs.length) {
-    sentences.push(`${region}의 필름 현상소 ${labs.length}곳을 주소, 스캔 화질, 컬러·흑백·슬라이드 현상 가격과 함께 정리했습니다.`);
-    if (cheapest) sentences.push(`135 컬러 기본 현상은 ${cheapest.toLocaleString('ko-KR')}원부터입니다.`);
+    sentences.push(T.descLabs(shownRegion, labs.length));
+    if (cheapest) sentences.push(T.descCheap(cheapest));
   }
   if (repairs.length) {
-    sentences.push(`${region}에서 카메라를 맡길 수 있는 수리점 ${repairs.length}곳의 전문 분야와 연락처도 함께 실었습니다.`);
+    sentences.push(T.descRepairs(shownRegion, repairs.length));
   }
   const description = sentences.join(' ');
   const heading = repairs.length
-    ? (labs.length ? `${region} 필름 현상소와 카메라 수리점` : `${region} 카메라 수리점`)
-    : `${region} 필름 현상소`;
+    ? (labs.length ? T.labsAndRepairs(shownRegion) : T.repairsTitle(shownRegion))
+    : T.labsTitle(shownRegion);
   const countLine = [
-    labs.length ? `현상소 ${labs.length}곳` : '',
-    repairs.length ? `수리점 ${repairs.length}곳` : '',
+    labs.length ? T.labsCount(labs.length) : '',
+    repairs.length ? T.repairsCount(repairs.length) : '',
   ].filter(Boolean).join(' · ');
 
   return `<!DOCTYPE html>
-<html lang="ko" data-theme="light">
+<html lang="${T.lang}" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <base href="/">
@@ -260,7 +315,7 @@ function render(region, labs, repairs, others, versioned, outFile) {
   <meta property="og:image" content="${esc(FALLBACK_OG)}">
   <meta property="og:url" content="${esc(url)}">
   <meta property="og:site_name" content="${esc(SITE_NAME)}">
-  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale" content="${T.locale}">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${esc(title)}">
@@ -272,12 +327,12 @@ function render(region, labs, repairs, others, versioned, outFile) {
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js"></script>
+  <script src="/js/theme-init.js"></script>${T.lang === 'en' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">
   <link rel="stylesheet" href="${versioned('css/lab-region.css')}">
-${jsonLd(region, labs, repairs, url)}
+${jsonLd(region, labs, repairs, url, T)}
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
 </head>
@@ -285,22 +340,22 @@ ${jsonLd(region, labs, repairs, url)}
 
 <header>
   <div class="header-inner">
-    <a href="/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <a href="${P}/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     ${navHtml(outFile)}
     <div class="nav-right">
-      <a href="/search.html" class="icon-btn" id="headerSearchBtn" aria-label="전체 검색" title="전체 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
-      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☽</button>
-      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="메뉴 열기" aria-controls="mobileNav" aria-expanded="false">☰</button>
+      <a href="/search.html" class="icon-btn" id="headerSearchBtn" aria-label="${T.search}" title="${T.search}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="${T.dark}" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="${T.menu}" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
   ${mobileNavHtml(outFile)}
 </header>
 
 <main class="lab-region">
-  <nav class="lab-region-crumb" aria-label="현재 위치">
-    <a href="/">5ft magazine</a>
+  <nav class="lab-region-crumb" aria-label="${T.crumb}">
+    <a href="${P}/">5ft magazine</a>
     <span aria-hidden="true">›</span>
-    <a href="/labs.html">필름 현상소</a>
+    <a href="${P}/labs.html">${T.labsCrumb}</a>
   </nav>
 
   <header class="lab-region-head">
@@ -310,34 +365,34 @@ ${jsonLd(region, labs, repairs, url)}
   </header>
 
   <div class="lab-region-list">
-${labs.map(labCard).join('\n')}
+${labs.map((lab) => labCard(lab, T)).join('\n')}
   </div>
 ${repairs.length ? `
   <section class="lab-region-repairs" aria-labelledby="repairTitle">
-    <h2 id="repairTitle">${esc(region)} 카메라 수리점 ${repairs.length}곳</h2>
-    <p class="lab-region-sub">필름카메라를 맡길 수 있는 곳입니다. 취급 기종과 비용은 바뀔 수 있으니 가기 전에 물어보시는 편이 좋습니다.</p>
+    <h2 id="repairTitle">${esc(T.repairsHeading(shownRegion, repairs.length))}</h2>
+    <p class="lab-region-sub">${T.repairsSub}</p>
     <div class="lab-region-list">
-${repairs.map(repairEntry).join('\n')}
+${repairs.map((shop) => repairEntry(shop, T)).join('\n')}
     </div>
   </section>` : ''}
 
   <section class="lab-region-nav">
-    <h2>다른 지역</h2>
+    <h2>${T.others}</h2>
     <ul>
-${others.map(([name, otherSlug, count]) => `      <li><a href="/labs/${esc(otherSlug)}.html">${esc(name)}</a><span>${count}곳</span></li>`).join('\n')}
+${others.map(([name, otherSlug, count]) => `      <li><a href="${P}/labs/${esc(otherSlug)}.html">${esc(T.region(name))}</a><span>${T.place(count)}</span></li>`).join('\n')}
     </ul>
   </section>
 
   <section class="lab-region-cta">
-    <p>가격과 정보는 바뀔 수 있습니다. 지도에서 위치를 보거나 정정할 내용이 있으면 전체 목록에서 알려주세요.</p>
-    <a class="lab-region-btn" href="/labs.html">전국 현상소 목록·지도</a>
+    <p>${T.cta}</p>
+    <a class="lab-region-btn" href="${P}/labs.html">${T.ctaBtn}</a>
   </section>
 </main>
 
 <footer>
   <div class="footer-inner-left">
     <span class="footer-logo">5ft magazine</span>
-    <span class="footer-publisher">발행처 4rest · 편집 박순렬 · 전남광주통합특별시 동구 충장로46번길 8, 2층</span>
+    ${footerPublisherHtml(outFile)}
   </div>
   ${footerHtml(outFile)}
   <span class="footer-copy">© 2026 5ft magazine</span>
@@ -356,19 +411,19 @@ ${others.map(([name, otherSlug, count]) => `      <li><a href="/labs/${esc(other
 // 않게 하고, 색인은 sitemap 과 지역 페이지끼리의 상호 링크로 이뤄진다.
 // labs.html 의 마커 한 쌍 사이를 채운다. 현상소와 수리점이 같은 모양이라
 // 마커 이름과 문구만 달리 받는다.
-async function writeIndex(marker, summary, sub, groups, itemHref) {
+async function writeIndex(marker, summary, sub, groups, itemHref, T = TEXT.ko, page = path.join(ROOT, 'labs.html')) {
   const line = (item) => (itemHref
-    ? `        <li><a href="${esc(itemHref(item))}">${esc(item.name)}</a></li>`
-    : `        <li>${esc(item.name)}</li>`);
+    ? `        <li><a href="${esc(itemHref(item))}">${esc(T.field(item, 'name'))}</a></li>`
+    : `        <li>${esc(T.field(item, 'name'))}</li>`);
   const html = groups.map(([label, href, items]) => `    <div class="lab-index-region">
-      <h3><a href="${esc(href)}">${esc(label)}</a> <span>${items.length}곳</span></h3>
+      <h3><a href="${esc(href)}">${esc(label)}</a> <span>${T.place(items.length)}</span></h3>
       <ul>
 ${items.map(line).join('\n')}
       </ul>
     </div>`).join('\n');
 
-  const page = path.join(ROOT, 'labs.html');
-  const source = await fs.readFile(page, 'utf-8');
+  const source = await fs.readFile(page, 'utf-8').catch(() => null);
+  if (source == null) return false;
   // details 로 접어 둔다. 접혀 있어도 마크업은 HTML 에 그대로 남아 크롤러가
   // 읽고 링크를 따라간다. 화면에서만 기본으로 감춘다.
   const pattern = new RegExp(`<!-- ${marker}:START -->[\\s\\S]*?<!-- ${marker}:END -->`);
@@ -420,6 +475,8 @@ function itemSlug(item) {
   const referenceHtml = await fs.readFile(REFERENCE_PAGE, 'utf-8');
   const versioned = assetVersionReader(referenceHtml, {
     'css/lab-region.css': await contentHash('css/lab-region.css'),
+    // i18n.js 는 영문 페이지만 싣는다. 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
+    'js/i18n.js': ((await fs.readFile(path.join(ROOT, 'en/about.html'), 'utf-8').catch(() => '')).match(/js\/i18n\.js\?v=([0-9A-Za-z-]+)/) || [])[1],
   });
 
   const parsed = JSON.parse(raw);
@@ -441,19 +498,31 @@ function itemSlug(item) {
   const noRegion = allRepairs.filter((shop) => !SLUG_BY_REGION.has(shop.region)).sort(byName);
 
   await fs.mkdir(OUT_DIR, { recursive: true });
+  await fs.mkdir(EN_OUT_DIR, { recursive: true });
 
   // 수리점만 있고 현상소가 없는 지역도 페이지를 만든다.
   const pageRegions = REGIONS.map(([region]) => region)
     .filter((region) => byRegion.has(region) || repairsByRegion.has(region));
 
+  const written = [];
   for (const region of pageRegions) {
     const others = [...byRegion.entries()]
       .filter(([name]) => name !== region)
       .map(([name, list]) => [name, SLUG_BY_REGION.get(name), list.length]);
-    const outFile = path.join(OUT_DIR, `${SLUG_BY_REGION.get(region)}.html`);
-    const page = render(region, byRegion.get(region) || [], repairsByRegion.get(region) || [],
-      others, versioned, outFile);
-    await fs.writeFile(outFile, page, 'utf-8');
+    for (const T of [TEXT.ko, TEXT.en]) {
+      const outFile = path.join(T.dir, `${SLUG_BY_REGION.get(region)}.html`);
+      const page = render(region, byRegion.get(region) || [], repairsByRegion.get(region) || [],
+        others, versioned, outFile, T);
+      await fs.writeFile(outFile, page, 'utf-8');
+      written.push(outFile);
+    }
+  }
+  // 언어 대응 링크는 두 판이 다 써진 뒤에 붙인다(공통 셸과 같은 규칙, scripts/lib/site-shell.mjs)
+  for (const file of written) {
+    const alternates = alternatesHtml(file);
+    if (!alternates) continue;
+    const html = await fs.readFile(file, 'utf-8');
+    await fs.writeFile(file, html.replace(/(<link rel="canonical" href="[^"]*">)/, `$1\n${alternates}`), 'utf-8');
   }
 
   const labTotal = [...byRegion.values()].reduce((sum, list) => sum + list.length, 0);
@@ -479,6 +548,20 @@ function itemSlug(item) {
       groups,
       (shop) => `./labs.html?lab=${encodeURIComponent(itemSlug(shop))}`,
     );
+  }
+
+  // 영문 목록(en/labs.html). 링크·지역 키는 한국어판과 같은 값을 쓴다(labs-page.js 가 그 값으로 거른다)
+  const EN_INDEX = path.join(ROOT, 'en/labs.html');
+  const E = TEXT.en;
+  await writeIndex('LAB-INDEX', E.labIndex(labTotal), E.labIndexSub,
+    [...byRegion.entries()].map(([region, list]) => [E.region(region), `/en/labs.html?region=${encodeURIComponent(region)}`, list]),
+    null, E, EN_INDEX);
+  if (allRepairs.length) {
+    const groups = [...repairsByRegion.entries()].map(([region, list]) =>
+      [E.region(region), `/en/labs.html?region=${encodeURIComponent(region)}`, list]);
+    if (noRegion.length) groups.push([E.noRegion, '/en/labs.html', noRegion]);
+    await writeIndex('REPAIR-INDEX', E.repairIndex(allRepairs.length), E.repairIndexSub, groups,
+      (shop) => `/en/labs.html?lab=${encodeURIComponent(itemSlug(shop))}`, E, EN_INDEX);
   }
 
   const skipped = labs.length - labTotal;
