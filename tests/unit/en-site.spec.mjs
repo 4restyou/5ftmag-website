@@ -49,8 +49,8 @@ describe('공통 셸: 영문 페이지', () => {
       expect(html).toContain('hreflang="en" href="https://www.5ftmag.com/en/about.html"');
       expect(html).toContain('hreflang="x-default" href="https://www.5ftmag.com/about.html"');
     }
-    // 짝이 없는 페이지(장터 등)엔 넣지 않는다
-    expect(alternatesHtml(join(ROOT, 'market.html'))).toBe('');
+    // 짝이 없는 페이지(구매 등)엔 넣지 않는다
+    expect(alternatesHtml(join(ROOT, 'shop.html'))).toBe('');
   });
 });
 
@@ -80,9 +80,10 @@ describe('js/i18n.js', () => {
     expect(i18n.url('/')).toBe('/en/');
   });
 
-  it('영문판이 없는 곳(장터·구매 등)은 한국어판으로 둔다', () => {
+  it('영문판이 없는 곳(구매·이북 등)은 한국어판으로 둔다', () => {
     const i18n = load('en');
-    expect(i18n.url('/market.html')).toBe('/market.html');
+    expect(i18n.url('/market.html')).toBe('/en/market.html');
+    expect(i18n.url('/books.html')).toBe('/en/books.html');
     expect(i18n.url('/shop.html')).toBe('/shop.html');
     expect(i18n.url('/en/films.html')).toBe('/en/films.html');
   });

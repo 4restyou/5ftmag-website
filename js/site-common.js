@@ -128,6 +128,10 @@
       if (film) return `${PUBLIC_SHARE_ORIGIN}/films?film=${encodeURIComponent(film)}`;
       return `${PUBLIC_SHARE_ORIGIN}/films`;
     }
+    // 영문 장터도 /market/<id> 짧은 주소가 한국어판으로 가므로 /en/market.html?id=… 로 둔다
+    if (/^\/en\/market\.html$/i.test(cleanPath)) {
+      return `${PUBLIC_SHARE_ORIGIN}/en/market.html${marketId ? `?id=${encodeURIComponent(marketId)}` : ''}`;
+    }
     if (/\/market\.html$/i.test(cleanPath)) {
       if (marketId) return `${PUBLIC_SHARE_ORIGIN}/market/${encodeURIComponent(marketId)}`;
       return `${PUBLIC_SHARE_ORIGIN}/market`;
@@ -386,7 +390,10 @@
     const target = i18n.isEn ? 'ko' : 'en';
     const alt = document.querySelector(`link[rel="alternate"][hreflang="${target}"]`);
     if (!alt) return;
-    const href = new URL(alt.href).pathname + location.search + location.hash;
+    // 장터 매물 짧은 주소(/market/<id>)는 id 를 쿼리로 옮겨 영문판에서도 같은 매물이 열리게 한다
+    const marketId = (location.pathname.match(/^\/market\/([^/]+)/) || [])[1];
+    const search = marketId ? `?id=${marketId}` : location.search;
+    const href = new URL(alt.href).pathname + search + location.hash;
     const make = () => {
       const a = document.createElement('a');
       a.href = href;

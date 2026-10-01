@@ -6,6 +6,8 @@
 // 멀어진 페이지는 비운다(220 쪽도 메모리·선명도 문제 없이). 확대(핀치·버튼·드래그 팬) 지원.
 // 실패 시 새 탭 링크를 보여준다.
 (function () {
+  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const T = i18n.t;
   const PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/';
   const PDFJS = PDFJS_BASE + 'legacy/build/pdf.min.mjs';
   const PDFJS_WORKER = PDFJS_BASE + 'legacy/build/pdf.worker.min.mjs';
@@ -103,17 +105,17 @@
       <div class="wz-reader-bar">
         <span class="wz-reader-title">${esc(title)}</span>
         <div class="wz-reader-tools">
-          <button type="button" class="wz-reader-btn" data-zout aria-label="축소">−</button>
-          <button type="button" class="wz-reader-btn" data-zin aria-label="확대">+</button>
-          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-prev aria-label="이전 페이지">‹</button>
+          <button type="button" class="wz-reader-btn" data-zout aria-label="${T('축소', 'Zoom out')}">−</button>
+          <button type="button" class="wz-reader-btn" data-zin aria-label="${T('확대', 'Zoom in')}">+</button>
+          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-prev aria-label="${T('이전 페이지', 'Previous page')}">‹</button>
           <span class="wz-reader-pageno" data-pageno>· / ·</span>
-          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-next aria-label="다음 페이지">›</button>
-          <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="닫기">✕</button>
+          <button type="button" class="wz-reader-btn wz-reader-flipbtn" data-next aria-label="${T('다음 페이지', 'Next page')}">›</button>
+          <button type="button" class="wz-reader-btn wz-reader-close" data-close aria-label="${T('닫기', 'Close')}">✕</button>
         </div>
       </div>
-      ${readerOpts && readerOpts.cta ? `<div class="wz-reader-cta-wrap">${readerOpts.cta.note ? `<p class="wz-reader-cta-note" hidden>${esc(readerOpts.cta.note)}</p>` : ''}<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || '전체 보기')}</button></div>` : ''}
+      ${readerOpts && readerOpts.cta ? `<div class="wz-reader-cta-wrap">${readerOpts.cta.note ? `<p class="wz-reader-cta-note" hidden>${esc(readerOpts.cta.note)}</p>` : ''}<button type="button" class="wz-reader-cta" data-cta>${esc(readerOpts.cta.label || T('전체 보기', 'View all'))}</button></div>` : ''}
       <div class="wz-reader-stage">
-        <div class="wz-reader-loading">불러오는 중…</div>
+        <div class="wz-reader-loading">${T('불러오는 중…', 'Loading…')}</div>
         <div class="wz-reader-zoom"><div class="wz-reader-book"></div></div>
       </div>`;
     document.body.appendChild(overlay);
@@ -243,7 +245,7 @@
       console.warn('[webzine-reader]', err && err.message);
       if (overlay === mine) {
         const el = overlay.querySelector('.wz-reader-loading');
-        if (el) { el.className = 'wz-reader-error'; el.innerHTML = `불러오지 못했어요. <a href="${esc(url)}" target="_blank" rel="noopener">새 탭에서 열기 →</a>`; }
+        if (el) { el.className = 'wz-reader-error'; el.innerHTML = `${T('불러오지 못했어요.', 'Could not load.')} <a href="${esc(url)}" target="_blank" rel="noopener">${T('새 탭에서 열기 →', 'Open in a new tab →')}</a>`; }
       }
     } finally {
       busy = false;
