@@ -15,6 +15,7 @@
 // (검증은 서버에서 비밀키로 다시 한다.)
 
 (function () {
+  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
   const CFG = {
     storeId: 'store-4c794b21-bbaa-466c-8fa9-17f42db08940',
     // 카카오페이 채널 — 재심사 통과 후 라이브 키를 넣으면 버튼이 다시 나타남.
@@ -94,12 +95,12 @@
 
   // ── 구매 방법 선택 모달 ──
   function openModal(product) {
-    const won = product.price ? product.price.toLocaleString('ko-KR') + '원' : '';
+    const won = product.price ? i18n.t(product.price.toLocaleString('ko-KR') + '원', product.price.toLocaleString('en-US') + ' won') : '';
     const hasKakao = !!CFG.kakaoChannelKey;
     const hasStore = !!(product.store_url && /\/products\/\d+/.test(product.store_url));
 
     if (!hasKakao && !hasStore) {
-      alert('구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 인스타그램 @film_socialclub DM 으로 문의해 주세요.');
+      alert(i18n.t('구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 인스타그램 @film_socialclub DM 으로 문의해 주세요.', 'How to buy\n\nOnline payment is not ready yet. To buy, send a DM to @film_socialclub on Instagram.'));
       return;
     }
 
@@ -110,31 +111,31 @@
     back.setAttribute('aria-labelledby', 'ebkPayTitle');
 
     const methodButtons = [
-      hasKakao ? '<button type="button" class="ebk-pay-method" data-method="kakao">카카오페이로 결제</button>' : '',
-      hasStore ? `<a href="${esc(product.store_url)}" target="_blank" rel="noopener" class="ebk-pay-method ebk-pay-method-link" data-store>스마트스토어에서 구매 ↗</a>` : '',
-      hasStore ? '<button type="button" class="ebk-pay-method ebk-pay-method-sub" data-redeem>이미 구매했어요 · 주문번호 인증</button>' : '',
+      hasKakao ? `<button type="button" class="ebk-pay-method" data-method="kakao">${i18n.t('카카오페이로 결제', 'Pay with KakaoPay')}</button>` : '',
+      hasStore ? `<a href="${esc(product.store_url)}" target="_blank" rel="noopener" class="ebk-pay-method ebk-pay-method-link" data-store>${i18n.t('스마트스토어에서 구매', 'Buy on Smart Store')} ↗</a>` : '',
+      hasStore ? `<button type="button" class="ebk-pay-method ebk-pay-method-sub" data-redeem>${i18n.t('이미 구매했어요 · 주문번호 인증', 'Already bought it? Verify your order number')}</button>` : '',
     ].join('');
 
     back.innerHTML = `
       <div class="ebk-pay-modal">
         <div data-pane="pick">
-          <h2 id="ebkPayTitle" class="ebk-pay-modal-title">구매 방법 선택</h2>
+          <h2 id="ebkPayTitle" class="ebk-pay-modal-title">${i18n.t('구매 방법 선택', 'Choose how to buy')}</h2>
           <p class="ebk-pay-modal-sub">${esc(product.title)}${won ? ` · ${won}` : ''}</p>
           <div class="ebk-pay-methods">${methodButtons}</div>
-          <p class="ebk-pay-legal">열람을 시작하면 청약철회가 제한됩니다. <a href="/legal/refund.html" target="_blank" rel="noopener">취소·환불 규정</a></p>
-          <button type="button" class="ebk-pay-cancel" data-cancel>취소</button>
+          <p class="ebk-pay-legal">${i18n.t('열람을 시작하면 청약철회가 제한됩니다.', 'Once you start reading, you can no longer cancel the purchase.')} <a href="/legal/refund.html" target="_blank" rel="noopener">${i18n.t('취소·환불 규정', 'Cancellation and refund policy (Korean)')}</a></p>
+          <button type="button" class="ebk-pay-cancel" data-cancel>${i18n.t('취소', 'Cancel')}</button>
         </div>
         <div data-pane="redeem" hidden>
-          <h2 class="ebk-pay-modal-title">주문번호 인증</h2>
-          <p class="ebk-pay-modal-sub">스마트스토어 결제 후 받은 <b>주문번호</b>와 <b>주문자 정보</b>를 입력하면 이 계정에 열람권이 발급돼요. (네이버페이 주문내역 &gt; 주문번호)</p>
-          <input type="text" class="ebk-pay-input" data-redeem-order inputmode="numeric" placeholder="주문번호 (예: 2026070812345671)" maxlength="32" aria-label="스마트스토어 주문번호" />
-          <input type="text" class="ebk-pay-input" data-redeem-name placeholder="주문자 이름" maxlength="40" autocomplete="name" aria-label="주문자 이름" />
-          <input type="text" class="ebk-pay-input" data-redeem-phone inputmode="numeric" placeholder="주문자 연락처 끝 4자리" maxlength="16" autocomplete="tel" aria-label="주문자 연락처 끝 4자리" />
+          <h2 class="ebk-pay-modal-title">${i18n.t('주문번호 인증', 'Verify your order')}</h2>
+          <p class="ebk-pay-modal-sub">${i18n.t('스마트스토어 결제 후 받은 <b>주문번호</b>와 <b>주문자 정보</b>를 입력하면 이 계정에 열람권이 발급돼요. (네이버페이 주문내역 &gt; 주문번호)', 'Enter the <b>order number</b> and <b>buyer details</b> from your Smart Store purchase, and this account gets full access. (Naver Pay order history &gt; order number)')}</p>
+          <input type="text" class="ebk-pay-input" data-redeem-order inputmode="numeric" placeholder="${i18n.t('주문번호 (예: 2026070812345671)', 'Order number (e.g. 2026070812345671)')}" maxlength="32" aria-label="${i18n.t('스마트스토어 주문번호', 'Smart Store order number')}" />
+          <input type="text" class="ebk-pay-input" data-redeem-name placeholder="${i18n.t('주문자 이름', 'Buyer name')}" maxlength="40" autocomplete="name" aria-label="${i18n.t('주문자 이름', 'Buyer name')}" />
+          <input type="text" class="ebk-pay-input" data-redeem-phone inputmode="numeric" placeholder="${i18n.t('주문자 연락처 끝 4자리', 'Last 4 digits of buyer phone')}" maxlength="16" autocomplete="tel" aria-label="${i18n.t('주문자 연락처 끝 4자리', 'Last 4 digits of buyer phone')}" />
           <p class="ebk-pay-redeem-msg" aria-live="polite"></p>
           <div class="ebk-pay-methods">
-            <button type="button" class="ebk-pay-method" data-redeem-go>인증하고 열람권 받기</button>
+            <button type="button" class="ebk-pay-method" data-redeem-go>${i18n.t('인증하고 열람권 받기', 'Verify and unlock')}</button>
           </div>
-          <button type="button" class="ebk-pay-cancel" data-back>← 뒤로</button>
+          <button type="button" class="ebk-pay-cancel" data-back>← ${i18n.t('뒤로', 'Back')}</button>
         </div>
       </div>`;
 
@@ -152,30 +153,30 @@
       const buyerName = (back.querySelector('[data-redeem-name]')?.value || '').trim();
       const buyerPhone = (back.querySelector('[data-redeem-phone]')?.value || '').trim();
       if (orderNo.replace(/[^0-9A-Za-z]/g, '').length < 8) {
-        msgEl.textContent = '주문번호를 다시 확인해 주세요.';
+        msgEl.textContent = i18n.t('주문번호를 다시 확인해 주세요.', 'Please check the order number.');
         return;
       }
       if (!buyerName) {
-        msgEl.textContent = '주문자 이름을 입력해 주세요.';
+        msgEl.textContent = i18n.t('주문자 이름을 입력해 주세요.', 'Please enter the buyer name.');
         return;
       }
       if (buyerPhone.replace(/\D/g, '').length < 4) {
-        msgEl.textContent = '주문자 연락처 끝 4자리를 입력해 주세요.';
+        msgEl.textContent = i18n.t('주문자 연락처 끝 4자리를 입력해 주세요.', 'Please enter the last 4 digits of the buyer phone.');
         return;
       }
       if (busy) return;
       busy = true;
-      msgEl.textContent = '주문 확인 중…';
+      msgEl.textContent = i18n.t('주문 확인 중…', 'Checking your order…');
       let r = null;
       try { r = await db().ebooks.redeemOrder(product.slug, orderNo, buyerName, buyerPhone); } catch (_) {}
       busy = false;
       if (r && r.ok) {
         close();
-        overlay('인증 완료! 전체 페이지를 불러올게요…');
+        overlay(i18n.t('인증 완료! 전체 페이지를 불러올게요…', 'Verified! Loading the full e-book…'));
         location.replace(cleanUrl());
         return;
       }
-      msgEl.textContent = (r && r.detail) || '인증에 실패했어요. 잠시 후 다시 시도하거나 @film_socialclub 으로 문의해 주세요.';
+      msgEl.textContent = (r && r.detail) || i18n.t('인증에 실패했어요. 잠시 후 다시 시도하거나 @film_socialclub 으로 문의해 주세요.', 'Verification failed. Please try again in a moment or contact @film_socialclub.');
     }
 
     back.addEventListener('click', (e) => {
@@ -198,14 +199,14 @@
 
   // ── 카카오페이 결제 (PortOne V2) ──
   async function pay(product) {
-    if (!CFG.kakaoChannelKey) { alert('아직 준비되지 않은 결제수단이에요.'); return; }
+    if (!CFG.kakaoChannelKey) { alert(i18n.t('아직 준비되지 않은 결제수단이에요.', 'This payment method is not available yet.')); return; }
     if (busy) return;
     busy = true;
     try {
       await loadSdk();
     } catch (_) {
       busy = false;
-      alert('결제 모듈을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+      alert(i18n.t('결제 모듈을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.', 'Couldn\'t load the payment module. Please try again in a moment.'));
       return;
     }
     const paymentId = shortId();
@@ -227,7 +228,7 @@
       busy = false;
       forgetPayment(paymentId);
       console.error('[ebook] requestPayment 실패', e);
-      alert('결제를 시작하지 못했어요.\n' + (e && (e.message || e.code) ? (e.message || e.code) : '잠시 후 다시 시도해 주세요.'));
+      alert(i18n.t('결제를 시작하지 못했어요.\n', 'Couldn\'t start the payment.\n') + (e && (e.message || e.code) ? (e.message || e.code) : i18n.t('잠시 후 다시 시도해 주세요.', 'Please try again in a moment.')));
       return;
     }
     // 모바일은 redirect 되어 여기로 안 옴(복귀 시 checkReturn 처리).
@@ -236,7 +237,7 @@
       busy = false;
       forgetPayment(paymentId);
       if (!/cancel/i.test(resp.code || '') && !/취소/.test(resp.message || '')) {
-        alert('결제가 완료되지 않았어요.\n' + (resp.message || ''));
+        alert(i18n.t('결제가 완료되지 않았어요.\n', 'The payment was not completed.\n') + (resp.message || ''));
       }
       return;
     }
@@ -246,19 +247,19 @@
 
   // ── 결제 검증 + 열람권 부여 ──
   async function finishVerify(slug, paymentId) {
-    overlay('결제 확인 중이에요…');
+    overlay(i18n.t('결제 확인 중이에요…', 'Confirming your payment…'));
     let r = null;
     try { r = await db().ebooks.purchaseVerify(slug, paymentId); } catch (_) {}
     busy = false;
     if (r && r.ok) {
       forgetPayment(paymentId);
-      overlay('완료! 전체 페이지를 불러올게요…');
+      overlay(i18n.t('완료! 전체 페이지를 불러올게요…', 'Done! Loading the full e-book…'));
       location.replace(cleanUrl());
       return;
     }
     hideOverlay();
     if (r?.error === 'login required') {
-      if (confirm('결제 확인을 계속하려면 다시 로그인이 필요해요. Google로 로그인할까요?')) {
+      if (confirm(i18n.t('결제 확인을 계속하려면 다시 로그인이 필요해요. Google로 로그인할까요?', 'Please sign in again to finish confirming your payment. Sign in with Google?'))) {
         db().auth.signInWithGoogle(new URL(cleanUrl(), location.origin).href);
       }
       return;
@@ -269,10 +270,10 @@
     ]);
     if (terminalErrors.has(r?.error)) {
       forgetPayment(paymentId);
-      alert('결제가 완료되지 않았거나 결제 정보가 일치하지 않아요. 결제 내역을 확인해 주세요.');
+      alert(i18n.t('결제가 완료되지 않았거나 결제 정보가 일치하지 않아요. 결제 내역을 확인해 주세요.', 'The payment was not completed or its details don\'t match. Please check your payment history.'));
       return;
     }
-    alert('결제는 처리됐지만 열람권 확인이 지연되고 있어요.\n결제번호를 보관했으니 새로고침하면 자동으로 다시 확인합니다.');
+    alert(i18n.t('결제는 처리됐지만 열람권 확인이 지연되고 있어요.\n결제번호를 보관했으니 새로고침하면 자동으로 다시 확인합니다.', 'Your payment went through, but unlocking the e-book is taking longer than usual.\nWe saved your payment ID. Refresh the page and we\'ll check again automatically.'));
   }
 
   // ── 모바일 redirect 복귀 처리 ──
@@ -300,11 +301,11 @@
   async function start(product) {
     if (!product || !product.slug) return;
     const m = db();
-    if (!m || !m.isReady()) { alert('잠시 후 다시 시도해 주세요.'); return; }
+    if (!m || !m.isReady()) { alert(i18n.t('잠시 후 다시 시도해 주세요.', 'Please try again in a moment.')); return; }
     let sess = null;
     try { sess = await m.auth.getSession(); } catch (_) {}
     if (!sess) {
-      if (confirm('구매하려면 로그인이 필요해요. Google로 로그인할까요?')) {
+      if (confirm(i18n.t('구매하려면 로그인이 필요해요. Google로 로그인할까요?', 'You need to sign in to buy. Sign in with Google?'))) {
         m.auth.signInWithGoogle(location.href.split('#')[0]);
       }
       return;

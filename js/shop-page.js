@@ -4,6 +4,7 @@
 // 구매 CTA 는 Smart Store 의 상품 페이지로 새 탭 점프.
 
 (function () {
+  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
   const grid = document.getElementById('shopGrid');
   const empty = document.getElementById('shopEmpty');
   const chipsBar = document.getElementById('shopChips');
@@ -22,14 +23,17 @@
     filter: 'all',
   };
 
-  function fmtPrice(n) { return window.MagUtil.formatPrice(n); }
+  function fmtPrice(n) {
+    const s = window.MagUtil.formatPrice(n);
+    return i18n.isEn ? s.replace(/원$/, ' won') : s;
+  }
 
   function categoryLabel(cat) {
     switch (cat) {
-      case 'film':   return '필름';
-      case 'camera': return '카메라';
-      case 'goods':  return '굿즈';
-      case 'book':   return '책';
+      case 'film':   return i18n.t('필름', 'Film');
+      case 'camera': return i18n.t('카메라', 'Camera');
+      case 'goods':  return i18n.t('굿즈', 'Goods');
+      case 'book':   return i18n.t('책', 'Book');
       default:       return cat || '';
     }
   }
@@ -56,7 +60,7 @@
       : `<span class="shop-card-price">${escapeHtml(fmtPrice(p.price))}</span>`;
     const isSoldOut = p.available === false;
     const soldOut = isSoldOut
-      ? '<span class="shop-card-soldout">품절</span>'
+      ? `<span class="shop-card-soldout">${i18n.t('품절', 'Sold out')}</span>`
       : '';
     const excerpt = p.excerpt
       ? `<p class="shop-card-excerpt">${escapeHtml(p.excerpt)}</p>`
@@ -88,8 +92,8 @@
       grid.innerHTML = '';
       empty.hidden = false;
       empty.textContent = cat === 'all'
-        ? '아직 등록된 상품이 없어요. 편집부가 곧 채워 넣습니다.'
-        : '이 카테고리엔 아직 상품이 없어요.';
+        ? i18n.t('아직 등록된 상품이 없어요. 편집부가 곧 채워 넣습니다.', 'No products yet. The editors will add some soon.')
+        : i18n.t('이 카테고리엔 아직 상품이 없어요.', 'Nothing in this category yet.');
       return;
     }
     empty.hidden = true;
@@ -140,7 +144,7 @@
     } catch (_) { /* 사용자 취소·실패 → 클립보드 fallback */ }
     try {
       await navigator.clipboard.writeText(url);
-      flashToast('링크 복사됨');
+      flashToast(i18n.t('링크 복사됨', 'Link copied'));
     } catch (_) {
       flashToast(url);
     }
@@ -158,17 +162,17 @@
     let buyButton;
     if (p.available === false && p.ebookSlug) {
       // 품절 실물 → 동일 이북으로 보기 (같은 사이트라 새 탭 아님)
-      buyButton = `<a href="ebook-read.html?slug=${escapeAttr(p.ebookSlug)}" class="shop-buy-btn">품절 · 이북으로 보기 <span class="shop-buy-arrow">↗</span></a>`;
+      buyButton = `<a href="${i18n.isEn ? i18n.url('/ebook-read.html') : 'ebook-read.html'}?slug=${escapeAttr(p.ebookSlug)}" class="shop-buy-btn">${i18n.t('품절 · 이북으로 보기', 'Sold out · Read the e-book')} <span class="shop-buy-arrow">↗</span></a>`;
     } else if (!p.smartStoreUrl || p.available === false) {
-      buyButton = `<button type="button" class="shop-buy-btn is-disabled" disabled>${p.available === false ? '품절' : '준비 중'}</button>`;
+      buyButton = `<button type="button" class="shop-buy-btn is-disabled" disabled>${p.available === false ? i18n.t('품절', 'Sold out') : i18n.t('준비 중', 'Coming soon')}</button>`;
     } else {
-      buyButton = `<a href="${escapeAttr(p.smartStoreUrl)}" target="_blank" rel="noopener" class="shop-buy-btn">Smart Store 에서 구매하기 <span class="shop-buy-arrow">↗</span></a>`;
+      buyButton = `<a href="${escapeAttr(p.smartStoreUrl)}" target="_blank" rel="noopener" class="shop-buy-btn">${i18n.t('Smart Store 에서 구매하기', 'Buy on Smart Store')} <span class="shop-buy-arrow">↗</span></a>`;
     }
     const description = p.description
       ? `<div class="shop-modal-desc">${escapeHtml(p.description).replace(/\n/g, '<br>')}</div>`
       : '';
     const magazineLink = (p.category === 'book' || p.ebookSlug)
-      ? `<a href="books.html${p.ebookSlug ? `?issue=${encodeURIComponent(p.ebookSlug)}` : ''}" class="shop-share-btn" data-action="view-magazine">이 호의 내용 보기 →</a>`
+      ? `<a href="${i18n.isEn ? i18n.url('/books.html') : 'books.html'}${p.ebookSlug ? `?issue=${encodeURIComponent(p.ebookSlug)}` : ''}" class="shop-share-btn" data-action="view-magazine">${i18n.t('이 호의 내용 보기', 'See what\'s in this issue')} →</a>`
       : '';
 
     modalPanel.classList.toggle('has-images', !!imgs);
@@ -183,19 +187,19 @@
         <div class="shop-modal-actions">
           ${buyButton}
           ${magazineLink}
-          <button type="button" class="shop-share-btn" data-action="share-product" data-slug="${escapeAttr(p.slug)}" aria-label="이 상품 공유">
+          <button type="button" class="shop-share-btn" data-action="share-product" data-slug="${escapeAttr(p.slug)}" aria-label="${escapeAttr(i18n.t('이 상품 공유', 'Share this product'))}">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
             </svg>
-            공유
+            ${i18n.t('공유', 'Share')}
           </button>
         </div>
         <p class="shop-modal-note">
-          <strong>재고·가격은 Smart Store 에서 최종 확인해 주세요.</strong> 사이트 정보와 다를 수 있습니다.
-          ${p.updatedAt ? `<br><span class="shop-modal-checked">(마지막 확인: ${escapeHtml(lastCheckedHtml(p.updatedAt))})</span>` : ''}
+          ${i18n.t('<strong>재고·가격은 Smart Store 에서 최종 확인해 주세요.</strong> 사이트 정보와 다를 수 있습니다.', '<strong>Please confirm stock and price on Smart Store.</strong> They may differ from this site.')}
+          ${p.updatedAt ? `<br><span class="shop-modal-checked">(${i18n.t('마지막 확인', 'Last checked')}: ${escapeHtml(lastCheckedHtml(p.updatedAt))})</span>` : ''}
         </p>
-        <p class="shop-modal-note">결제·배송·환불은 Naver Smart Store 에서 진행됩니다.</p>
+        <p class="shop-modal-note">${i18n.t('결제·배송·환불은 Naver Smart Store 에서 진행됩니다.', 'Payment, shipping and refunds go through Naver Smart Store (Korea only).')}</p>
       </div>
     `;
     modal.hidden = false;
@@ -339,6 +343,6 @@
     .catch(err => {
       console.error('[shop] load 실패:', err);
       empty.hidden = false;
-      empty.textContent = '상품을 불러오지 못했어요. 잠시 후 새로고침 해주세요.';
+      empty.textContent = i18n.t('상품을 불러오지 못했어요. 잠시 후 새로고침 해주세요.', 'Couldn\'t load products. Please refresh in a moment.');
     });
 })();
