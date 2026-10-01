@@ -8,7 +8,7 @@
   var isEn = document.documentElement.lang === 'en';
 
   // 영문판이 있는 페이지. 여기 없는 페이지(장터·구매·이북 등)는 한국어판으로 보낸다.
-  var EN_PAGES = /^\/(?:index\.html)?$|^\/(?:stories|films|labs|about)\.html$|^\/(?:stories|film|labs)\/[^/]+\.html$/;
+  var EN_PAGES = /^\/(?:index\.html)?$|^\/(?:stories|films|labs|about|books)\.html$|^\/(?:stories|film|labs)\/[^/]+\.html$/;
 
   function url(href) {
     if (!isEn || typeof href !== 'string') return href;
