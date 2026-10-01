@@ -645,8 +645,8 @@
     if (links.querySelector('[data-legal]')) return; // 이미 inject 됨
     const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
     const entries = [
-      [tr('이용약관', 'Terms'), base + 'legal/terms.html'],
-      [tr('개인정보', 'Privacy'), base + 'legal/privacy.html'],
+      [tr('이용약관', 'Terms'), i18n.isEn ? i18n.url('/legal/terms.html') : base + 'legal/terms.html'],
+      [tr('개인정보', 'Privacy'), i18n.isEn ? i18n.url('/legal/privacy.html') : base + 'legal/privacy.html'],
       [tr('저작권', 'Copyright'),  base + 'legal/copyright.html'],
       [tr('취소·환불', 'Refunds'), base + 'legal/refund.html'],
     ];
@@ -946,7 +946,7 @@
           <p class="notif-panel-guest-title">${tr('로그인하면 알림을 받을 수 있어요', 'Sign in to get notifications')}</p>
           <p class="notif-panel-guest-body">${tr('댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.', 'Comment replies, photo approvals and new articles.<br/>You can also get them as push notifications.')}</p>
           <button type="button" class="notif-panel-guest-btn" data-action="auth-login">${tr('Google로 로그인', 'Sign in with Google')}</button>
-          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">${tr('로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.', 'By signing in, you confirm you are 14 or older and agree to the <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">Terms</a> and <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a> (in Korean).')}</p>
+          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">${tr('로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.', 'By signing in, you confirm you are 14 or older and agree to the <a href="/en/legal/terms.html" style="color:inherit; text-decoration:underline;">Terms</a> and <a href="/en/legal/privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a>.')}</p>
         </div>`;
       document.body.appendChild(guestPanel);
       bell.addEventListener('click', (e) => {

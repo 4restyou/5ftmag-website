@@ -86,6 +86,8 @@ describe('js/i18n.js', () => {
     expect(i18n.url('/shop.html')).toBe('/en/shop.html');
     expect(i18n.url('/authors/kim-hyuna.html')).toBe('/en/authors/kim-hyuna.html');
     expect(i18n.url('/admin/films.html')).toBe('/admin/films.html');
+    expect(i18n.url('/legal/terms.html')).toBe('/en/legal/terms.html');
+    expect(i18n.url('/legal/refund.html')).toBe('/legal/refund.html');
     expect(i18n.url('/en/films.html')).toBe('/en/films.html');
   });
 });
