@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unsubscribe | 5ft magazine</title>
+  <meta name="description" content="Unsubscribe from the 5ft magazine newsletter.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://www.5ftmag.com/en/unsubscribe.html">
+  <link rel="alternate" hreflang="ko" href="https://www.5ftmag.com/unsubscribe.html">
+  <link rel="alternate" hreflang="en" href="https://www.5ftmag.com/en/unsubscribe.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.5ftmag.com/unsubscribe.html">
+
+  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/icon-32.png">
+  <link rel="shortcut icon" href="/img/favicon/favicon.ico">
+
+  <script src="/js/theme-init.js"></script>
+  <script src="/js/i18n.js?v=20261001-en6"></script>
+  <link rel="stylesheet" href="/pretendard.css" />
+  <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
+  <link rel="stylesheet" href="/css/common.css?v=20260810-toast">
+  <link rel="stylesheet" href="/css/article.css?v=20261001-en2">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/en/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="/en/stories.html">Articles</a></li>
+      <li><a href="/en/films.html">Films</a></li>
+      <li><a href="/en/books.html">Magazine</a></li>
+      <li><a href="/en/market.html">Market</a></li>
+      <li><a href="/en/labs.html">Labs</a></li>
+      <li><a href="/en/about.html">About</a></li>
+      <li><a href="/en/shop.html">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/en/search.html" class="icon-btn" id="headerSearchBtn" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark mode" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="/en/stories.html">Articles</a>
+    <a href="/en/films.html">Films</a>
+    <a href="/en/books.html">Magazine</a>
+    <a href="/en/market.html">Market</a>
+    <a href="/en/labs.html">Labs</a>
+    <a href="/en/about.html">About</a>
+    <a href="/en/shop.html">Shop</a>
+  </nav>
+</header>
+
+<main class="article">
+  <h1>Unsubscribe from the newsletter</h1>
+  <div id="unsubResult" aria-live="polite">
+    <p>One moment…</p>
+  </div>
+  <p style="margin-top:32px;">
+    <a href="/en/">← Back to 5ft magazine</a>
+  </p>
+</main>
+
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft magazine</span>
+    <span class="footer-publisher">Published by 4rest · Editor Park Soon Yeol · 2F, 8 Chungjang-ro 46beon-gil, Dong-gu, Gwangju, Korea</span>
+  </div>
+  <div class="footer-links">
+    <a href="/en/shop.html">Shop</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+<span class="footer-copy">© 2026 5ft magazine</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
+  <script src="/js/db-client.js?v=20261001-en3" defer></script>
+<script src="/js/util.js?v=20261001-en2" defer></script>
+  <script src="/js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
+  <script src="/js/site-common.js?v=20261001-en6" defer></script>
+<script>
+(async function () {
+  const out = document.getElementById('unsubResult');
+  const setHtml = (html) => { out.innerHTML = html; };
+
+  const token = (new URLSearchParams(location.search).get('token') || '').trim();
+  if (!token) {
+    setHtml('<p>Open this page from the unsubscribe link in a 5ft magazine new-issue email. If you can\'t find the link, write to <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a>.</p>');
+    return;
+  }
+
+  // db-client 초기화 대기 (최대 5초)
+  let waited = 0;
+  while ((!window.MagDB || !window.MagDB.isReady()) && waited < 5000) {
+    await new Promise((r) => setTimeout(r, 100));
+    waited += 100;
+  }
+  if (!window.MagDB || !window.MagDB.isReady()) {
+    setHtml('<p>The connection is unstable. Please try again in a moment.</p>');
+    return;
+  }
+
+  setHtml('<p>Unsubscribing…</p>');
+  const res = await window.MagDB.newsletter.unsubscribe(token);
+  if (res && res.ok) {
+    setHtml('<p><strong>You\'ve been unsubscribed.</strong> We hope to see you again someday.</p>');
+    return;
+  }
+  if (res && res.error && res.error.message === 'invalid token') {
+    setHtml('<p>This link isn\'t valid. Please check the unsubscribe link in our most recent email.</p>');
+    return;
+  }
+  setHtml('<p>This link was already used, or something went wrong. If you keep seeing this page, write to <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a>.</p>');
+})();
+</script>
+
+</body>
+</html>

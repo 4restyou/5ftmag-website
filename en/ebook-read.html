@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>E-book reader | 5ft magazine</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon.svg">
+  <script src="/js/theme-init.js"></script>
+  <script src="/js/i18n.js?v=20261001-en6"></script>
+  <link rel="stylesheet" href="/pretendard.css" />
+  <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
+  <link rel="stylesheet" href="/css/common.css?v=20260810-toast">
+  <link rel="stylesheet" href="/css/webzine.css?v=20260629-ebkprev">
+  <style>
+    body { background: var(--bg); color: var(--text); }
+    .ebook-gate { max-width: 520px; margin: 0 auto; padding: 80px 24px; text-align: center; color: var(--text-muted); }
+    .ebook-gate h2 { color: var(--text); font-size: 20px; margin: 0 0 10px; }
+    .ebook-gate p { font-size: 14px; line-height: 1.7; margin: 0 0 8px; }
+    /* 막혔을 때 원인 코드. 신고 캡처 한 장으로 어디를 볼지 가려내려고 둔다. */
+    .ebook-gate-code { font-size: 12px; opacity: 0.65; margin-top: 14px; }
+    /* 본문을 가리지 않는 고정 높이의 구매 영역. */
+    .wz-reader-cta-wrap {
+      order: 2; flex: 0 0 auto; height: calc(104px + env(safe-area-inset-bottom, 0px));
+      box-sizing: border-box; padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px;
+    }
+    .wz-reader:has(.wz-reader-cta-wrap) .wz-reader-stage { min-height: 0; }
+    .wz-reader-cta-note {
+      margin: 0; font-size: 13px; line-height: 20px; font-weight: 600; color: #fff;
+    }
+    .wz-reader-cta {
+      font: inherit; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: 0;
+      width: min(100%, 340px); min-height: 44px; padding: 11px 16px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.5); background: transparent; color: #fff; cursor: pointer;
+    }
+    .wz-reader.is-preview-end .wz-reader-cta { background: var(--accent); color: #111; border-color: var(--accent); }
+    .wz-reader-cta:hover { border-color: var(--accent); }
+    .wz-reader-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+    /* 결제수단 선택 모달 */
+    .ebk-pay-modal-back {
+      position: fixed; inset: 0; z-index: 2300; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      padding: 20px; animation: ebk-fade .2s ease both;
+    }
+    .ebk-pay-modal {
+      width: 100%; max-width: 340px; background: var(--bg); color: var(--text);
+      border-radius: 18px; padding: 26px 22px 18px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .ebk-pay-modal-title { margin: 0 0 4px; font-size: 18px; }
+    .ebk-pay-modal-sub { margin: 0 0 18px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .ebk-pay-methods { display: flex; flex-direction: column; gap: 10px; }
+    .ebk-pay-method {
+      font: inherit; font-size: 15px; font-weight: 700; padding: 14px; border-radius: 12px;
+      border: 1px solid var(--line, rgba(0,0,0,0.12)); background: var(--surface, #f5f5f7); color: var(--text);
+      cursor: pointer; transition: transform .12s ease, border-color .12s ease;
+    }
+    .ebk-pay-method:hover:not([disabled]) { transform: translateY(-1px); border-color: var(--accent); }
+    .ebk-pay-method[disabled] { opacity: .5; cursor: not-allowed; }
+    .ebk-pay-method-link { display: block; text-decoration: none; text-align: center; box-sizing: border-box; }
+    .ebk-pay-method-sub { font-weight: 600; font-size: 13.5px; background: none; }
+    .ebk-pay-soon { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .ebk-pay-legal { margin: 14px 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+    .ebk-pay-legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+    .ebk-pay-input {
+      width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; padding: 12px 14px;
+      border-radius: 10px; border: 1px solid var(--line, rgba(0,0,0,0.15)); background: var(--bg);
+      color: var(--text); margin-bottom: 8px; letter-spacing: 0.02em;
+    }
+    .ebk-pay-redeem-msg { min-height: 18px; margin: 0 0 10px; font-size: 12.5px; color: var(--text-muted); }
+    .ebk-pay-cancel {
+      margin-top: 14px; font: inherit; font-size: 13px; color: var(--text-muted);
+      background: none; border: none; cursor: pointer; padding: 6px;
+    }
+    /* 처리 중 오버레이 */
+    .ebk-pay-overlay {
+      position: fixed; inset: 0; z-index: 2400; display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    }
+    .ebk-pay-overlay-box { text-align: center; color: #fff; }
+    .ebk-pay-overlay-box p { margin: 14px 0 0; font-size: 14px; font-weight: 600; }
+    .ebk-pay-spinner {
+      display: inline-block; width: 34px; height: 34px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; animation: ebk-spin .8s linear infinite;
+    }
+    @keyframes ebk-spin { to { transform: rotate(360deg); } }
+    @keyframes ebk-fade { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+</head>
+<body>
+
+<main id="ebookRoot">
+  <div class="ebook-gate"><p>Loading…</p></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
+  <script src="/js/db-client.js?v=20261001-en3" defer></script>
+<script src="/js/util.js?v=20261001-en2" defer></script>
+<script src="/js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
+  <script src="/js/site-common.js?v=20261001-en6" defer></script>
+<script src="/js/webzine-reader.js?v=20261001-en4" defer></script>
+<script src="/js/ebook-checkout.js?v=20261001-en6" defer></script>
+<script src="/js/ebook-reader-page.js?v=20261001-en6" defer></script>
+</body>
+</html>

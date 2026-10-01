@@ -7,8 +7,8 @@
 (function () {
   var isEn = document.documentElement.lang === 'en';
 
-  // 영문판이 있는 페이지. 여기 없는 페이지(장터·구매·이북 등)는 한국어판으로 보낸다.
-  var EN_PAGES = /^\/(?:index\.html)?$|^\/(?:stories|films|labs|about|books|market)\.html$|^\/(?:stories|film|labs)\/[^/]+\.html$/;
+  // 영문판이 있는 페이지. 여기 없는 페이지(관리 화면 등)는 한국어판으로 보낸다.
+  var EN_PAGES = /^\/(?:index\.html)?$|^\/(?:stories|films|labs|about|books|market|shop|search|me|authors|ebook-read|unsubscribe)\.html$|^\/(?:stories|film|labs|authors)\/[^/]+\.html$/;
 
   function url(href) {
     if (!isEn || typeof href !== 'string') return href;

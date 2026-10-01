@@ -1,5 +1,9 @@
 'use strict';
 
+const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+// 이 파일의 상대 링크(films.html 등). 영문판에선 /en/ 쪽으로 보낸다. 한국어 출력은 그대로.
+const pageHref = (p) => i18n.isEn ? i18n.url('/' + p) : p;
+
 const STATE = {
   user: null,
   section: 'photos',     // 'photos' | 'market' | 'notifs' | 'my-comments' | 'fav-*'
@@ -27,7 +31,7 @@ const STATE = {
   pendingAvatar: null,   // 저장 전 임시 업로드된 아바타 {url, path}
 };
 
-const CAT_LABELS = { film:'필름', camera:'카메라', lens:'렌즈', accessory:'액세서리', etc:'기타' };
+const CAT_LABELS = { film:i18n.t('필름', 'Film'), camera:i18n.t('카메라', 'Cameras'), lens:i18n.t('렌즈', 'Lenses'), accessory:i18n.t('액세서리', 'Accessories'), etc:i18n.t('기타', 'Other') };
 
 function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
@@ -42,10 +46,18 @@ function fmtDateShort(iso) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 // "30000000" → "30,000,000원". 숫자가 아니면 (예: "가격 협의") 원문 그대로.
-function fmtPrice(v) { return window.MagUtil.formatPrice(v, { keepText: true }); }
+function fmtPrice(v) {
+  if (!i18n.isEn) return window.MagUtil.formatPrice(v, { keepText: true });
+  // 영문판: "30,000,000 won". 판정 규칙은 MagUtil.formatPrice 와 같다.
+  const raw = String(v ?? '').trim();
+  if (!raw) return '';
+  const n = Number(raw.replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
+  return n.toLocaleString('en-US') + ' won';
+}
 function statusLabel(s) {
-  return ({ pending:'대기', approved:'공개 중', rejected:'반려',
-           available:'판매중', reserved:'예약중', sold:'판매완료', hidden:'숨김' })[s] || s;
+  return ({ pending:i18n.t('대기', 'Pending'), approved:i18n.t('공개 중', 'Published'), rejected:i18n.t('반려', 'Declined'),
+           available:i18n.t('판매중', 'For sale'), reserved:i18n.t('예약중', 'Reserved'), sold:i18n.t('판매완료', 'Sold'), hidden:i18n.t('숨김', 'Hidden') })[s] || s;
 }
 function nextStatusOf(s) {
   return s === 'available' ? 'reserved' : s === 'reserved' ? 'sold' : 'available';
@@ -53,7 +65,7 @@ function nextStatusOf(s) {
 
 async function checkAuth() {
   if (!db() || !db().isReady()) {
-    document.body.innerHTML = '<div class="gate"><h2>인증 모듈을 불러오지 못했습니다</h2><p>새로고침 후에도 반복되면 편집부에 알려주세요.</p></div>';
+    document.body.innerHTML = i18n.t('<div class="gate"><h2>인증 모듈을 불러오지 못했습니다</h2><p>새로고침 후에도 반복되면 편집부에 알려주세요.</p></div>', '<div class="gate"><h2>Couldn\'t load the sign-in module</h2><p>If this keeps happening after a refresh, please let the editors know.</p></div>');
     return false;
   }
   const session = await db().auth.getSession();
@@ -61,8 +73,8 @@ async function checkAuth() {
   STATE.user = session.user;
   const profile = await db().profiles.getMine();
   STATE.profile = profile;
-  const name = profile?.display_name || STATE.user.email?.split('@')[0] || '사용자';
-  $('meUser').innerHTML = `${escapeHtml(name)} · <button id="logout">로그아웃</button>`;
+  const name = profile?.display_name || STATE.user.email?.split('@')[0] || i18n.t('사용자', 'User');
+  $('meUser').innerHTML = `${escapeHtml(name)} · <button id="logout">${i18n.t('로그아웃', 'Sign out')}</button>`;
   $('logout').addEventListener('click', async () => {
     await db().auth.signOut();
     location.reload();
@@ -82,7 +94,7 @@ function showGate() {
 // 사진 섹션 (기존)
 // ═════════════════════════════════════════
 async function loadPhotos() {
-  $('list').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('list').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   STATE.rows = await db().submissions.listMine();
   renderPhotoCounts();
   renderPhotoList();
@@ -101,12 +113,12 @@ function renderPhotoList() {
   const rows = STATE.filter === 'all' ? STATE.rows : STATE.rows.filter(r => r.status === STATE.filter);
   if (rows.length === 0) {
     const photoEmpty = STATE.filter === 'all'
-      ? '아직 올린 사진이 없습니다. 독자 사진 영역에 보낼 사진을 메인에서 제출해 보세요.'
-      : `${statusLabel(STATE.filter)} 상태의 사진이 없습니다. 다른 분류를 선택해 보세요.`;
+      ? i18n.t('아직 올린 사진이 없습니다. 독자 사진 영역에 보낼 사진을 메인에서 제출해 보세요.', 'You haven\'t sent any photos yet. Submit one for the reader photo section from the home page.')
+      : i18n.t(`${statusLabel(STATE.filter)} 상태의 사진이 없습니다. 다른 분류를 선택해 보세요.`, `No photos marked ${statusLabel(STATE.filter)}. Try another filter.`);
     $('list').innerHTML = `
       <div class="me-empty">
         ${photoEmpty}
-        <br /><a class="me-empty-cta" href="index.html">메인에서 사진 올리러 가기 →</a>
+        <br /><a class="me-empty-cta" href="${i18n.isEn ? '/en/' : 'index.html'}">${i18n.t('메인에서 사진 올리러 가기 →', 'Submit a photo from the home page →')}</a>
       </div>`;
     return;
   }
@@ -118,7 +130,7 @@ function renderPhotoList() {
 function renderPhotoCard(r) {
   const url = db().submissions.publicUrl(r.storage_path);
   const igNorm = (r.instagram || '').replace(/^@/, '');
-  const deleteLabel = r.status === 'pending' ? '제출 취소' : '삭제';
+  const deleteLabel = r.status === 'pending' ? i18n.t('제출 취소', 'Withdraw') : i18n.t('삭제', 'Delete');
   return `
     <div class="me-card" data-id="${r.id}">
       <div class="me-card-img" data-zoom="${escapeAttr(url)}">
@@ -127,17 +139,17 @@ function renderPhotoCard(r) {
       <div class="me-card-meta">
         <div>
           <span class="me-card-status ${escapeAttr(r.status)}">${escapeHtml(statusLabel(r.status))}</span>
-          ${r.theme_month ? `<span class="me-card-theme">🎬 ${escapeHtml(r.theme_month)} 응모</span>` : ''}
+          ${r.theme_month ? `<span class="me-card-theme">🎬 ${i18n.t(`${escapeHtml(r.theme_month)} 응모`, `${escapeHtml(r.theme_month)} entry`)}</span>` : ''}
         </div>
-        <div class="me-card-row"><span class="k">제출</span><span class="v">${fmtDate(r.created_at)}</span></div>
-        <div class="me-card-row"><span class="k">이름</span><span class="v" data-field="submitter_name">${escapeHtml(r.submitter_name || '-')}</span></div>
-        <div class="me-card-row"><span class="k">인스타</span><span class="v" data-field="instagram">${escapeHtml(r.instagram || '-')}</span></div>
-        <div class="me-card-row"><span class="k">필름</span><span class="v" data-field="film">${escapeHtml(r.film || '-')}</span></div>
-        <div class="me-card-row"><span class="k">카메라</span><span class="v" data-field="camera">${escapeHtml(r.camera || '-')}</span></div>
-        <div class="me-card-row"><span class="k">메모</span><span class="v" data-field="caption">${escapeHtml(r.caption || '-')}</span></div>
-        ${r.rejection_reason ? `<div class="me-card-row"><span class="k">반려 사유</span><span class="v">${escapeHtml(r.rejection_reason)}</span></div>` : ''}
+        <div class="me-card-row"><span class="k">${i18n.t('제출', 'Submitted')}</span><span class="v">${fmtDate(r.created_at)}</span></div>
+        <div class="me-card-row"><span class="k">${i18n.t('이름', 'Name')}</span><span class="v" data-field="submitter_name">${escapeHtml(r.submitter_name || '-')}</span></div>
+        <div class="me-card-row"><span class="k">${i18n.t('인스타', 'Instagram')}</span><span class="v" data-field="instagram">${escapeHtml(r.instagram || '-')}</span></div>
+        <div class="me-card-row"><span class="k">${i18n.t('필름', 'Film')}</span><span class="v" data-field="film">${escapeHtml(r.film || '-')}</span></div>
+        <div class="me-card-row"><span class="k">${i18n.t('카메라', 'Camera')}</span><span class="v" data-field="camera">${escapeHtml(r.camera || '-')}</span></div>
+        <div class="me-card-row"><span class="k">${i18n.t('메모', 'Note')}</span><span class="v" data-field="caption">${escapeHtml(r.caption || '-')}</span></div>
+        ${r.rejection_reason ? `<div class="me-card-row"><span class="k">${i18n.t('반려 사유', 'Reason declined')}</span><span class="v">${escapeHtml(r.rejection_reason)}</span></div>` : ''}
         <div class="me-card-actions">
-          <button type="button" class="me-btn me-btn-secondary" data-action="edit">수정</button>
+          <button type="button" class="me-btn me-btn-secondary" data-action="edit">${i18n.t('수정', 'Edit')}</button>
           <button type="button" class="me-btn me-btn-danger" data-action="delete">${escapeHtml(deleteLabel)}</button>
         </div>
       </div>
@@ -160,8 +172,8 @@ function enterEditMode(card) {
   }
   const actions = card.querySelector('.me-card-actions');
   actions.innerHTML = `
-    <button type="button" class="me-btn me-btn-primary" data-action="save">저장</button>
-    <button type="button" class="me-btn me-btn-secondary" data-action="cancel-edit">취소</button>`;
+    <button type="button" class="me-btn me-btn-primary" data-action="save">${i18n.t('저장', 'Save')}</button>
+    <button type="button" class="me-btn me-btn-secondary" data-action="cancel-edit">${i18n.t('취소', 'Cancel')}</button>`;
 }
 
 async function savePhotoEdits(card) {
@@ -174,30 +186,30 @@ async function savePhotoEdits(card) {
   });
   if (patch.instagram) patch.instagram = '@' + patch.instagram.replace(/^@/, '');
   const saveBtn = card.querySelector('[data-action="save"]');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중…'; }
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = i18n.t('저장 중…', 'Saving…'); }
   const { error } = await db().submissions.updateMine(id, patch);
   if (error) {
-    window.notify?.('수정 내용을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')', 'danger');
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장'; }
+    window.notify?.(i18n.t('수정 내용을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (', 'Couldn\'t save your changes. Refresh and try again. (') + error.message + ')', 'danger');
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = i18n.t('저장', 'Save'); }
     return;
   }
   await loadPhotos();
 }
 
 async function deletePhoto(card) {
-  if (!confirm('이 사진 제출을 삭제할까요? 저장된 사진 파일도 함께 삭제되어 복구할 수 없습니다.')) return;
+  if (!confirm(i18n.t('이 사진 제출을 삭제할까요? 저장된 사진 파일도 함께 삭제되어 복구할 수 없습니다.', 'Delete this photo submission? The uploaded file will be deleted too and can\'t be recovered.'))) return;
   const id   = card.dataset.id;
   const row  = STATE.rows.find(r => r.id === id);
   const path = row?.storage_path;
   const btn  = card.querySelector('[data-action="delete"]');
   const origLabel = btn?.textContent;
-  if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
+  if (btn) { btn.disabled = true; btn.textContent = i18n.t('삭제 중…', 'Deleting…'); }
   const { data, error } = await db().submissions.deleteMine(id);
   // RLS 가 silently 차단하면 error 없이 data: [] 로 돌아옴 — 반드시 명시 검사.
   // 검사 없이 storage 만 지우면 DB row 남아서 깨진 썸네일이 생김.
   if (error || !data?.length) {
-    window.notify?.('사진 제출을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다. 관리자에게 문의해 주세요.') + ')', 'danger');
-    if (btn) { btn.disabled = false; btn.textContent = origLabel || '삭제'; }
+    window.notify?.(i18n.t('사진 제출을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (', 'Couldn\'t delete the photo submission. Check your permissions or connection. (') + (error?.message || i18n.t('서버에서 거부했습니다. 관리자에게 문의해 주세요.', 'The server refused the request. Please contact the editors.')) + ')', 'danger');
+    if (btn) { btn.disabled = false; btn.textContent = origLabel || i18n.t('삭제', 'Delete'); }
     return;
   }
   if (path) await db().submissions.removePhoto(path);
@@ -252,7 +264,7 @@ function bindCardImageFallbacks(scope = document) {
 // 매물 섹션
 // ═════════════════════════════════════════
 async function loadMarket() {
-  $('marketList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('marketList').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   STATE.marketRows = await db().market.listMine();
   renderMarketList();
 }
@@ -262,8 +274,8 @@ function renderMarketList() {
   if (rows.length === 0) {
     $('marketList').innerHTML = `
       <div class="me-empty">
-        아직 올린 매물이 없습니다. 사용하지 않는 카메라, 렌즈, 필름을 마켓에 등록해 보세요.
-        <br /><a class="me-empty-cta" href="market.html#new">매물 올리러 가기 →</a>
+        ${i18n.t('아직 올린 매물이 없습니다. 사용하지 않는 카메라, 렌즈, 필름을 마켓에 등록해 보세요.', 'You haven\'t posted any listings yet. List a camera, lens, or film you no longer use on the market.')}
+        <br /><a class="me-empty-cta" href="${pageHref('market.html')}#new">${i18n.t('매물 올리러 가기 →', 'Post a listing →')}</a>
       </div>`;
     return;
   }
@@ -292,12 +304,12 @@ function renderMarketCard(r) {
           <span>${escapeHtml(CAT_LABELS[r.category] || r.category)}</span>
           ${r.location ? `<span>· ${escapeHtml(r.location)}</span>` : ''}
           <span>· ${fmtDateShort(r.created_at)}</span>
-          <span>· 사진 ${r.storage_paths?.length || 0}장</span>
+          <span>· ${i18n.t(`사진 ${r.storage_paths?.length || 0}장`, `${r.storage_paths?.length || 0} photo${(r.storage_paths?.length || 0) === 1 ? '' : 's'}`)}</span>
         </div>
         <div class="me-card-actions">
           ${canEdit ? `<button type="button" class="me-btn me-btn-secondary" data-action="cycle">${escapeHtml(statusLabel(r.status))} → ${escapeHtml(statusLabel(next))}</button>` : ''}
-          ${canEdit ? `<a href="market.html?edit=${escapeAttr(r.id)}" class="me-btn me-btn-secondary">수정</a>` : ''}
-          <button type="button" class="me-btn me-btn-danger" data-action="delete">삭제</button>
+          ${canEdit ? `<a href="${pageHref('market.html')}?edit=${escapeAttr(r.id)}" class="me-btn me-btn-secondary">${i18n.t('수정', 'Edit')}</a>` : ''}
+          <button type="button" class="me-btn me-btn-danger" data-action="delete">${i18n.t('삭제', 'Delete')}</button>
         </div>
       </div>
     </div>`;
@@ -319,17 +331,17 @@ function bindMarketCardActions() {
         if (a === 'cycle') {
           btn.disabled = true;
           const { error } = await db().market.cycleStatusMine(id, status);
-          if (error) { window.notify?.('매물 상태를 변경하지 못했어요. 새로고침 후 다시 시도해 주세요. (' + error.message + ')', 'danger'); btn.disabled = false; return; }
+          if (error) { window.notify?.(i18n.t('매물 상태를 변경하지 못했어요. 새로고침 후 다시 시도해 주세요. (', 'Couldn\'t change the listing status. Refresh and try again. (') + error.message + ')', 'danger'); btn.disabled = false; return; }
           await loadMarket();
         } else if (a === 'delete') {
-          if (!confirm('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.')) return;
-          btn.disabled = true; btn.textContent = '삭제 중…';
+          if (!confirm(i18n.t('이 매물을 삭제할까요? 등록한 사진 파일도 함께 삭제됩니다.', 'Delete this listing? Its photos will be deleted too.'))) return;
+          btn.disabled = true; btn.textContent = i18n.t('삭제 중…', 'Deleting…');
           const row = STATE.marketRows.find(r => r.id === id);
           const { data, error } = await db().market.deleteMine(id);
           // RLS silent block 가드 — data 비면 storage 건드리지 않고 종료
           if (error || !data?.length) {
-            window.notify?.('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (' + (error?.message || '서버에서 거부했습니다.') + ')', 'danger');
-            btn.disabled = false; btn.textContent = '삭제';
+            window.notify?.(i18n.t('매물을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (', 'Couldn\'t delete the listing. Check your permissions or connection. (') + (error?.message || i18n.t('서버에서 거부했습니다.', 'The server refused the request.')) + ')', 'danger');
+            btn.disabled = false; btn.textContent = i18n.t('삭제', 'Delete');
             return;
           }
           if (row?.storage_paths?.length) await db().market.removePhotos(row.storage_paths);
@@ -432,16 +444,16 @@ function loadProfile() {
     e.target.value = '';
     if (!file) return;
     const status = $('profileStatus');
-    status.textContent = '사진 올리는 중…';
+    status.textContent = i18n.t('사진 올리는 중…', 'Uploading photo…');
     try {
       const blob = await resizeAvatar(file);
       const res = await db().profiles.uploadAvatar(blob);
       if (res.error || !res.url) throw new Error(res.error?.message || 'upload-failed');
       STATE.pendingAvatar = res;
       setAvatarPreview(res.url);
-      status.textContent = '사진 준비됨. 저장을 눌러 반영하세요.';
+      status.textContent = i18n.t('사진 준비됨. 저장을 눌러 반영하세요.', 'Photo ready. Press Save to apply it.');
     } catch (err) {
-      status.textContent = '사진 업로드 실패: ' + (err.message || err);
+      status.textContent = i18n.t('사진 업로드 실패: ', 'Photo upload failed: ') + (err.message || err);
     }
   });
 
@@ -454,13 +466,13 @@ function loadProfile() {
       bio: $('profileBio').value.trim(),
     };
     if (STATE.pendingAvatar) patch.avatar_url = STATE.pendingAvatar.url;
-    if (!patch.display_name) { status.textContent = '표시 이름을 입력해 주세요.'; return; }
+    if (!patch.display_name) { status.textContent = i18n.t('표시 이름을 입력해 주세요.', 'Please enter a display name.'); return; }
 
     btn.disabled = true;
-    status.textContent = '저장 중…';
+    status.textContent = i18n.t('저장 중…', 'Saving…');
     const res = await db().profiles.updateMine(patch);
     btn.disabled = false;
-    if (res.error) { status.textContent = '저장 실패: ' + res.error.message; return; }
+    if (res.error) { status.textContent = i18n.t('저장 실패: ', 'Save failed: ') + res.error.message; return; }
 
     // 이전 아바타 정리(우리 버킷 파일일 때만)
     if (STATE.pendingAvatar && STATE.profile?.avatar_url) {
@@ -470,9 +482,9 @@ function loadProfile() {
     STATE.pendingAvatar = null;
     // 헤더 이름도 갱신
     $('meUser').innerHTML =
-      `${escapeHtml(patch.display_name)} · <button id="logout">로그아웃</button>`;
+      `${escapeHtml(patch.display_name)} · <button id="logout">${i18n.t('로그아웃', 'Sign out')}</button>`;
     $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
-    status.textContent = '저장했어요.';
+    status.textContent = i18n.t('저장했어요.', 'Saved.');
   });
 }
 
@@ -480,11 +492,11 @@ function loadProfile() {
 // 좋아한 사진 (reader_submissions 중 본인이 ♡ 한 것)
 // ═════════════════════════════════════════
 async function loadFavPhotos() {
-  $('favPhotosGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('favPhotosGrid').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   const favs = await db().favorites.list('submission');
   if (favs.length === 0) {
     STATE.favPhotos = [];
-    $('favPhotosGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 사진이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 페이지에서 사진 보러 가기 →</a></div>`;
+    $('favPhotosGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 사진이 없어요.', 'You haven\'t liked any photos yet.')}<br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름 페이지에서 사진 보러 가기 →', 'Browse photos on the Films page →')}</a></div>`;
     return;
   }
   const ids = favs.map(f => f.target_id);
@@ -499,7 +511,7 @@ async function loadFavPhotos() {
 function renderFavPhotos() {
   const rows = STATE.favPhotos || [];
   if (rows.length === 0) {
-    $('favPhotosGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 사진이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 페이지에서 사진 보러 가기 →</a></div>`;
+    $('favPhotosGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 사진이 없어요.', 'You haven\'t liked any photos yet.')}<br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름 페이지에서 사진 보러 가기 →', 'Browse photos on the Films page →')}</a></div>`;
     return;
   }
   $('favPhotosGrid').innerHTML = rows.map(r => {
@@ -509,7 +521,7 @@ function renderFavPhotos() {
     return `
       <div class="me-fav-photo" data-id="${escapeAttr(r.id)}" data-zoom="${escapeAttr(url)}">
         <img src="${escapeAttr(url)}" alt="" loading="lazy" />
-        <button type="button" class="me-fav-unbtn" data-action="unfav-photo" data-id="${escapeAttr(r.id)}" aria-label="즐겨찾기 해제" title="즐겨찾기 해제">♥</button>
+        <button type="button" class="me-fav-unbtn" data-action="unfav-photo" data-id="${escapeAttr(r.id)}" aria-label="${i18n.t('즐겨찾기 해제', 'Remove from favorites')}" title="${i18n.t('즐겨찾기 해제', 'Remove from favorites')}">♥</button>
         <span class="me-fav-meta">
           ${author ? `<span class="author">${escapeHtml(author)}</span>` : ''}
           ${film ? `<span class="film">${escapeHtml(film)}</span>` : ''}
@@ -524,7 +536,7 @@ function renderFavPhotos() {
         e.stopPropagation();
         const id = unbtn.dataset.id;
         const { error } = await db().favorites.remove('submission', id);
-        if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
+        if (error) { window.notify?.(i18n.t('해제 실패: ', 'Couldn\'t remove: ') + error.message, 'danger'); return; }
         STATE.favPhotos = STATE.favPhotos.filter(r => r.id !== id);
         renderFavPhotos();
         return;
@@ -542,11 +554,11 @@ function renderFavPhotos() {
 // 좋아한 필름 (films.json 중 본인이 ♡ 한 것)
 // ═════════════════════════════════════════
 async function loadFavFilms() {
-  $('favFilmsGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('favFilmsGrid').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   const favs = await db().favorites.list('film');
   if (favs.length === 0) {
     STATE.favFilms = [];
-    $('favFilmsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 필름이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 라이브러리 둘러보기 →</a></div>`;
+    $('favFilmsGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 필름이 없어요.', 'You haven\'t liked any films yet.')}<br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름 라이브러리 둘러보기 →', 'Browse the film library →')}</a></div>`;
     return;
   }
   if (!STATE.filmsData) {
@@ -572,7 +584,7 @@ async function loadFavFilms() {
 function renderFavFilms() {
   const items = STATE.favFilms || [];
   if (items.length === 0) {
-    $('favFilmsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 필름이 없어요.<br /><a class="me-empty-cta" href="films.html">필름 라이브러리 둘러보기 →</a></div>`;
+    $('favFilmsGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 필름이 없어요.', 'You haven\'t liked any films yet.')}<br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름 라이브러리 둘러보기 →', 'Browse the film library →')}</a></div>`;
     return;
   }
   $('favFilmsGrid').innerHTML = items.map(({ slug, film }) => {
@@ -582,8 +594,8 @@ function renderFavFilms() {
       : `<span style="color:var(--text-muted); font-size:12px;">${escapeHtml(film.name || '')}</span>`;
     return `
       <div class="me-fav-film-card" data-slug="${escapeAttr(slug)}">
-        <button type="button" class="me-fav-unbtn" data-action="unfav-film" data-slug="${escapeAttr(slug)}" aria-label="즐겨찾기 해제" title="즐겨찾기 해제">♥</button>
-        <a href="films.html#${encodeURIComponent(slug)}">
+        <button type="button" class="me-fav-unbtn" data-action="unfav-film" data-slug="${escapeAttr(slug)}" aria-label="${i18n.t('즐겨찾기 해제', 'Remove from favorites')}" title="${i18n.t('즐겨찾기 해제', 'Remove from favorites')}">♥</button>
+        <a href="${pageHref('films.html')}#${encodeURIComponent(slug)}">
           <div class="me-fav-film-img">${thumbHtml}</div>
           <span class="me-fav-film-brand">${escapeHtml(film.brand || '')}</span>
           <h3 class="me-fav-film-name">${escapeHtml(film.name || '')}</h3>
@@ -597,7 +609,7 @@ function renderFavFilms() {
       e.stopPropagation();
       const slug = btn.dataset.slug;
       const { error } = await db().favorites.remove('film', slug);
-      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
+      if (error) { window.notify?.(i18n.t('해제 실패: ', 'Couldn\'t remove: ') + error.message, 'danger'); return; }
       STATE.favFilms = STATE.favFilms.filter(x => x.slug !== slug);
       renderFavFilms();
     });
@@ -608,11 +620,11 @@ function renderFavFilms() {
 // 좋아한 웹진 (webzine_issues 중 본인이 ♡ 한 것)
 // ═════════════════════════════════════════
 async function loadFavWebzine() {
-  $('favWebzineGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('favWebzineGrid').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   const favs = await db().favorites.list('webzine');
   if (favs.length === 0) {
     STATE.favWebzine = [];
-    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 책이 없어요.<br /><a class="me-empty-cta" href="books.html">책 보러 가기 →</a></div>`;
+    $('favWebzineGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 책이 없어요.', 'You haven\'t liked any books yet.')}<br /><a class="me-empty-cta" href="${pageHref('books.html')}">${i18n.t('책 보러 가기 →', 'Browse books →')}</a></div>`;
     return;
   }
   let list = [];
@@ -625,7 +637,7 @@ async function loadFavWebzine() {
 function renderFavWebzine() {
   const items = STATE.favWebzine || [];
   if (items.length === 0) {
-    $('favWebzineGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 책이 없어요.<br /><a class="me-empty-cta" href="books.html">책 보러 가기 →</a></div>`;
+    $('favWebzineGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 책이 없어요.', 'You haven\'t liked any books yet.')}<br /><a class="me-empty-cta" href="${pageHref('books.html')}">${i18n.t('책 보러 가기 →', 'Browse books →')}</a></div>`;
     return;
   }
   $('favWebzineGrid').innerHTML = items.map(it => {
@@ -635,7 +647,7 @@ function renderFavWebzine() {
       : `<span style="color:var(--text-muted); font-size:12px;">${escapeHtml(it.title || '')}</span>`;
     return `
       <div class="me-fav-film-card" data-id="${escapeAttr(it.id)}">
-        <button type="button" class="me-fav-unbtn" data-action="unfav-webzine" data-id="${escapeAttr(it.id)}" aria-label="좋아요 해제" title="좋아요 해제">♥</button>
+        <button type="button" class="me-fav-unbtn" data-action="unfav-webzine" data-id="${escapeAttr(it.id)}" aria-label="${i18n.t('좋아요 해제', 'Unlike')}" title="${i18n.t('좋아요 해제', 'Unlike')}">♥</button>
         <a href="webzine.html?issue=${encodeURIComponent(it.slug)}">
           <div class="me-fav-film-img">${thumb}</div>
           <span class="me-fav-film-brand">${escapeHtml(it.issue_label || it.category || '')}</span>
@@ -649,7 +661,7 @@ function renderFavWebzine() {
       e.stopPropagation();
       const id = btn.dataset.id;
       const { error } = await db().favorites.remove('webzine', id);
-      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
+      if (error) { window.notify?.(i18n.t('해제 실패: ', 'Couldn\'t remove: ') + error.message, 'danger'); return; }
       STATE.favWebzine = STATE.favWebzine.filter(x => x.id !== id);
       renderFavWebzine();
     });
@@ -664,11 +676,11 @@ function normalizeContributorKey(s) {
 }
 
 async function loadFavContributors() {
-  $('favContributorsGrid').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('favContributorsGrid').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   const favs = await db().favorites.list('contributor');
   if (favs.length === 0) {
     STATE.favContributors = [];
-    $('favContributorsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 작가가 없어요.<br /><a class="me-empty-cta" href="films.html">필름별 작가 보러 가기 →</a></div>`;
+    $('favContributorsGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 작가가 없어요.', 'You haven\'t liked any contributors yet.')}<br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름별 작가 보러 가기 →', 'Find contributors by film →')}</a></div>`;
     return;
   }
   // 모든 승인된 사진을 한 번 fetch 해서 키별 그룹
@@ -698,7 +710,7 @@ async function loadFavContributors() {
 function renderFavContributors() {
   const items = STATE.favContributors || [];
   if (items.length === 0) {
-    $('favContributorsGrid').innerHTML = `<div class="me-empty">아직 ♡ 누른 작가가 없어요.<br /><a class="me-empty-cta" href="films.html">필름별 작가 보러 가기 →</a></div>`;
+    $('favContributorsGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 작가가 없어요.', 'You haven\'t liked any contributors yet.')}<br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름별 작가 보러 가기 →', 'Find contributors by film →')}</a></div>`;
     return;
   }
   $('favContributorsGrid').innerHTML = items.map(({ key, label, instagram, instagramUrl, photos }) => {
@@ -707,20 +719,21 @@ function renderFavContributors() {
       return src ? `<div class="me-fav-contrib-thumb"><img src="${escapeAttr(src)}" alt="" loading="lazy" /></div>` : '';
     }).join('');
     const filmsCount = new Set(photos.map(p => p.film || '').filter(Boolean)).size;
-    const meta = `${photos.length}컷${filmsCount ? ` · ${filmsCount}개 필름` : ''}`;
+    const meta = i18n.t(`${photos.length}컷${filmsCount ? ` · ${filmsCount}개 필름` : ''}`,
+      `${photos.length} shot${photos.length === 1 ? '' : 's'}${filmsCount ? ` · ${filmsCount} film${filmsCount === 1 ? '' : 's'}` : ''}`);
     const collectionHref = `contributor/${encodeURIComponent(key)}`;
     const igLine = instagram
       ? `<a class="me-fav-contrib-ig" href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener">Instagram ↗</a>`
       : '';
     return `
       <div class="me-fav-contrib-card" data-key="${escapeAttr(key)}">
-        <button type="button" class="me-fav-unbtn" data-action="unfav-contributor" data-key="${escapeAttr(key)}" aria-label="작가 즐겨찾기 해제" title="작가 즐겨찾기 해제">♥</button>
-        <a class="me-fav-contrib-main" href="${escapeAttr(collectionHref)}" aria-label="${escapeAttr(label)} 사진 모아 보기">
+        <button type="button" class="me-fav-unbtn" data-action="unfav-contributor" data-key="${escapeAttr(key)}" aria-label="${i18n.t('작가 즐겨찾기 해제', 'Remove contributor from favorites')}" title="${i18n.t('작가 즐겨찾기 해제', 'Remove contributor from favorites')}">♥</button>
+        <a class="me-fav-contrib-main" href="${escapeAttr(collectionHref)}" aria-label="${escapeAttr(i18n.t(`${label} 사진 모아 보기`, `See all photos by ${label}`))}">
           <div class="me-fav-contrib-thumbs">${thumbs || '<div class="me-fav-contrib-thumb empty"></div>'}</div>
           <div class="me-fav-contrib-info">
             <h3 class="me-fav-contrib-name">${escapeHtml(label)}</h3>
             <p class="me-fav-contrib-meta">${escapeHtml(meta)}</p>
-            <span class="me-fav-contrib-cta">사진 모아 보기 →</span>
+            <span class="me-fav-contrib-cta">${i18n.t('사진 모아 보기 →', 'See all photos →')}</span>
           </div>
         </a>
         ${igLine ? `<div class="me-fav-contrib-footer">${igLine}</div>` : ''}
@@ -732,7 +745,7 @@ function renderFavContributors() {
       e.stopPropagation();
       const key = btn.dataset.key;
       const { error } = await db().favorites.remove('contributor', key);
-      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
+      if (error) { window.notify?.(i18n.t('해제 실패: ', 'Couldn\'t remove: ') + error.message, 'danger'); return; }
       STATE.favContributors = STATE.favContributors.filter(x => x.key !== key);
       renderFavContributors();
     });
@@ -743,11 +756,11 @@ function renderFavContributors() {
 // 스크랩한 글 (stories.json 중 본인이 🔖 한 것)
 // ═════════════════════════════════════════
 async function loadFavArticles() {
-  $('favArticlesList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('favArticlesList').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   const favs = await db().favorites.list('article');
   if (favs.length === 0) {
     STATE.favArticles = [];
-    $('favArticlesList').innerHTML = `<div class="me-empty">아직 스크랩한 글이 없어요.<br /><a class="me-empty-cta" href="stories.html">Articles 둘러보기 →</a></div>`;
+    $('favArticlesList').innerHTML = `<div class="me-empty">${i18n.t('아직 스크랩한 글이 없어요.', 'You haven\'t saved any articles yet.')}<br /><a class="me-empty-cta" href="${pageHref('stories.html')}">${i18n.t('Articles 둘러보기 →', 'Browse Articles →')}</a></div>`;
     return;
   }
   if (!STATE.storiesData) {
@@ -767,7 +780,7 @@ async function loadFavArticles() {
 function renderFavArticles() {
   const items = STATE.favArticles || [];
   if (items.length === 0) {
-    $('favArticlesList').innerHTML = `<div class="me-empty">아직 스크랩한 글이 없어요.<br /><a class="me-empty-cta" href="stories.html">Articles 둘러보기 →</a></div>`;
+    $('favArticlesList').innerHTML = `<div class="me-empty">${i18n.t('아직 스크랩한 글이 없어요.', 'You haven\'t saved any articles yet.')}<br /><a class="me-empty-cta" href="${pageHref('stories.html')}">${i18n.t('Articles 둘러보기 →', 'Browse Articles →')}</a></div>`;
     return;
   }
   $('favArticlesList').innerHTML = items.map(({ id, story }) => {
@@ -788,7 +801,7 @@ function renderFavArticles() {
             <p class="me-fav-article-excerpt">${escapeHtml(story.excerpt || '')}</p>
           </div>
         </a>
-        <button type="button" class="me-fav-unbtn" data-action="unfav-article" data-id="${escapeAttr(id)}" aria-label="스크랩 해제" title="스크랩 해제">♥</button>
+        <button type="button" class="me-fav-unbtn" data-action="unfav-article" data-id="${escapeAttr(id)}" aria-label="${i18n.t('스크랩 해제', 'Remove from saved')}" title="${i18n.t('스크랩 해제', 'Remove from saved')}">♥</button>
       </div>`;
   }).join('');
   $('favArticlesList').querySelectorAll('[data-action="unfav-article"]').forEach(btn => {
@@ -797,7 +810,7 @@ function renderFavArticles() {
       e.stopPropagation();
       const id = btn.dataset.id;
       const { error } = await db().favorites.remove('article', id);
-      if (error) { window.notify?.('해제 실패: ' + error.message, 'danger'); return; }
+      if (error) { window.notify?.(i18n.t('해제 실패: ', 'Couldn\'t remove: ') + error.message, 'danger'); return; }
       STATE.favArticles = STATE.favArticles.filter(x => x.id !== id);
       renderFavArticles();
     });
@@ -822,7 +835,7 @@ $('imgZoom').addEventListener('click', () => {
 // 알림 (user_notifications)
 // ═════════════════════════════════════════
 async function loadNotifs() {
-  $('notifsList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('notifsList').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   STATE.notifs = await db().notifications.list({ limit: 50 });
   renderNotifs();
 }
@@ -833,7 +846,7 @@ function renderNotifs() {
   const anyUnread = rows.some(r => !r.read_at);
   if (markBtn) markBtn.hidden = !anyUnread;
   if (rows.length === 0) {
-    $('notifsList').innerHTML = '<div class="me-empty">아직 알림이 없어요.</div>';
+    $('notifsList').innerHTML = `<div class="me-empty">${i18n.t('아직 알림이 없어요.', 'No notifications yet.')}</div>`;
     return;
   }
   $('notifsList').innerHTML = rows.map(r => `
@@ -842,7 +855,7 @@ function renderNotifs() {
       <div class="me-notif-body">
         <div class="me-notif-title">${escapeHtml(r.title || '')}</div>
         ${r.body ? `<div class="me-notif-text">${escapeHtml(r.body)}</div>` : ''}
-        <div class="me-notif-meta">${fmtDate(r.created_at)}${r.link ? ` · <a href="${escapeAttr(r.link)}">바로가기 →</a>` : ''}</div>
+        <div class="me-notif-meta">${fmtDate(r.created_at)}${r.link ? ` · <a href="${escapeAttr(i18n.url(r.link))}">${i18n.t('바로가기 →', 'Open →')}</a>` : ''}</div>
       </div>
     </div>`).join('');
 }
@@ -883,7 +896,7 @@ $('notifsMarkAll')?.addEventListener('click', async () => {
 // 메시지 (회원 ↔ 편집부)
 // ═════════════════════════════════════════
 async function loadMessages() {
-  $('messagesList').innerHTML = '<div class="me-msg-empty">불러오는 중…</div>';
+  $('messagesList').innerHTML = `<div class="me-msg-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   STATE.messages = await db().messages.list();
   renderMessages();
   startMessagesPolling();
@@ -901,7 +914,7 @@ function fmtTimeShort(iso) {
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
   if (sameDay) return `${hh}:${mm}`;
-  if (isYest)  return `어제 ${hh}:${mm}`;
+  if (isYest)  return i18n.t(`어제 ${hh}:${mm}`, `Yesterday ${hh}:${mm}`);
   return `${d.getMonth() + 1}/${d.getDate()} ${hh}:${mm}`;
 }
 function bucketKey(iso, fromEditor) {
@@ -912,7 +925,7 @@ function bucketKey(iso, fromEditor) {
 function renderMessages() {
   const list = STATE.messages || [];
   if (!list.length) {
-    $('messagesList').innerHTML = '<div class="me-msg-empty">아직 주고받은 메시지가 없습니다. 편집부에 처음 인사를 보내보세요.</div>';
+    $('messagesList').innerHTML = `<div class="me-msg-empty">${i18n.t('아직 주고받은 메시지가 없습니다. 편집부에 처음 인사를 보내보세요.', 'No messages yet. Say hello to the editors.')}</div>`;
     return;
   }
   let lastKey = null;
@@ -925,13 +938,13 @@ function renderMessages() {
     if (m.deleted_at) {
       return `
         <div class="me-msg-row ${mine ? 'is-mine' : 'is-theirs'}">
-          <div class="me-msg-bubble me-msg-bubble-deleted">삭제된 메시지입니다.</div>
+          <div class="me-msg-bubble me-msg-bubble-deleted">${i18n.t('삭제된 메시지입니다.', 'This message was deleted.')}</div>
         </div>
       `;
     }
-    const editedMark = m.edited_at ? `<span class="me-msg-edited">수정됨</span>` : '';
-    const readMark = mine && m.read_at ? `<span class="me-msg-read">읽음</span>` : '';
-    const senderLabel = mine ? '' : `<span class="me-msg-sender">편집부</span>`;
+    const editedMark = m.edited_at ? `<span class="me-msg-edited">${i18n.t('수정됨', 'Edited')}</span>` : '';
+    const readMark = mine && m.read_at ? `<span class="me-msg-read">${i18n.t('읽음', 'Read')}</span>` : '';
+    const senderLabel = mine ? '' : `<span class="me-msg-sender">${i18n.t('편집부', 'Editors')}</span>`;
     const timeStamp = showTime
       ? `<span class="me-msg-time">${escapeHtml(fmtTimeShort(m.created_at))}</span>`
       : '';
@@ -943,7 +956,7 @@ function renderMessages() {
           ${timeStamp}
           ${editedMark}
           ${readMark}
-          ${mine ? `<button type="button" class="me-msg-action" data-action="edit-msg">수정</button>` : ''}
+          ${mine ? `<button type="button" class="me-msg-action" data-action="edit-msg">${i18n.t('수정', 'Edit')}</button>` : ''}
         </div>
       </div>
     `;
@@ -983,8 +996,8 @@ function startEditMessage(messageId) {
   bubble.innerHTML = `
     <textarea id="${inputId}" class="me-msg-edit-input" maxlength="2000">${escapeHtml(current)}</textarea>
     <div class="me-msg-edit-actions">
-      <button type="button" class="me-msg-action" data-action="cancel-edit">취소</button>
-      <button type="button" class="me-msg-action me-msg-action-primary" data-action="save-edit">저장</button>
+      <button type="button" class="me-msg-action" data-action="cancel-edit">${i18n.t('취소', 'Cancel')}</button>
+      <button type="button" class="me-msg-action me-msg-action-primary" data-action="save-edit">${i18n.t('저장', 'Save')}</button>
     </div>
   `;
   const input = document.getElementById(inputId);
@@ -994,7 +1007,7 @@ function startEditMessage(messageId) {
     const next = input.value.trim();
     if (!next) return;
     const res = await db().messages.edit(messageId, next);
-    if (res?.error) { alert('수정 실패: ' + res.error.message); return; }
+    if (res?.error) { alert(i18n.t('수정 실패: ', 'Edit failed: ') + res.error.message); return; }
     await loadMessages();
   });
 }
@@ -1041,7 +1054,7 @@ async function sendMessage() {
     renderMessages();
   } catch (err) {
     console.error(err);
-    alert('전송 실패: ' + (err.message || '알 수 없는 오류'));
+    alert(i18n.t('전송 실패: ', 'Send failed: ') + (err.message || i18n.t('알 수 없는 오류', 'Unknown error')));
   } finally {
     STATE.sendingMessage = false;
     $('messageSend').disabled = false;
@@ -1064,7 +1077,7 @@ $('messageSend')?.addEventListener('click', sendMessage);
 // 내 댓글
 // ═════════════════════════════════════════
 async function loadMyComments() {
-  $('myCommentsList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('myCommentsList').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   STATE.myComments = await db().comments.listByUser({ limit: 50 });
   renderMyComments();
 }
@@ -1090,13 +1103,13 @@ function renderMyComments() {
   const rows = STATE.myComments || [];
   if (rows.length === 0) {
     $('myCommentsList').innerHTML = `
-      <div class="me-empty">아직 남긴 댓글이 없어요.
-        <br /><a class="me-empty-cta" href="stories.html">글 읽으러 가기 →</a>
+      <div class="me-empty">${i18n.t('아직 남긴 댓글이 없어요.', 'You haven\'t left any comments yet.')}
+        <br /><a class="me-empty-cta" href="${pageHref('stories.html')}">${i18n.t('글 읽으러 가기 →', 'Read some articles →')}</a>
       </div>`;
     return;
   }
   $('myCommentsList').innerHTML = rows.map(r => {
-    const link = buildCommentLink(r.page_id);
+    const link = i18n.url(buildCommentLink(r.page_id));
     return `
       <div class="me-mycomment">
         <div class="me-mycomment-meta">
@@ -1112,28 +1125,28 @@ function renderMyComments() {
 // 내 제안 (film_proposals)
 // ═════════════════════════════════════════
 async function loadMyProposals() {
-  $('myProposalsList').innerHTML = '<div class="me-empty">불러오는 중…</div>';
+  $('myProposalsList').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…')}</div>`;
   STATE.myProposals = await db().filmProposals.listMine();
   renderMyProposals();
 }
 
 function statusLabelKor(s) {
-  return ({ pending: '검토 중', approved: '승인됨', rejected: '반려됨' })[s] || s;
+  return ({ pending: i18n.t('검토 중', 'In review'), approved: i18n.t('승인됨', 'Approved'), rejected: i18n.t('반려됨', 'Declined') })[s] || s;
 }
 
 function renderMyProposals() {
   const rows = STATE.myProposals || [];
   if (rows.length === 0) {
     $('myProposalsList').innerHTML = `
-      <div class="me-empty">아직 제안한 필름이 없어요.
-        <br /><a class="me-empty-cta" href="films.html">필름 라이브러리로 →</a>
+      <div class="me-empty">${i18n.t('아직 제안한 필름이 없어요.', 'You haven\'t suggested any films yet.')}
+        <br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름 라이브러리로 →', 'Go to the film library →')}</a>
       </div>`;
     return;
   }
   $('myProposalsList').innerHTML = rows.map(r => {
     const status = String(r.status || 'pending');
     const meta = [r.iso, r.type, r.format].filter(Boolean).join(' · ');
-    const notes = r.reviewer_notes ? `<div class="me-prop-notes">편집부 메모: ${escapeHtml(r.reviewer_notes)}</div>` : '';
+    const notes = r.reviewer_notes ? `<div class="me-prop-notes">${i18n.t('편집부 메모: ', 'Editors\' note: ')}${escapeHtml(r.reviewer_notes)}</div>` : '';
     return `
       <div class="me-prop me-prop--${escapeAttr(status)}">
         <div class="me-prop-head">

@@ -4,9 +4,9 @@
  * 빌드와 별도로 `npm run build:authors` 로도 실행할 수 있다.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { assetVersions } from './lib/asset-version.mjs';
-import { navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
+import { navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, footerCopyHtml, alternatesHtml } from './lib/site-shell.mjs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isPublishedContent } from './story-visibility.mjs';
@@ -39,6 +39,30 @@ const AUTHOR_NOTES = new Map([
   ['강혜원 (앨리카메라 대표)', '앨리카메라를 운영하며 빈티지 카메라와 렌즈를 소개합니다.'],
   ['윤동규', '유튜브 〈수집의 수집〉을 운영하며 다큐멘터리와 사진을 기록합니다.'],
   ['심규동', '사진집 〈고시텔〉·〈1인가구〉를 펴낸 사진가. 사람과 공간의 관계를 카메라로 기록합니다.'],
+]);
+
+// 영문판(en/authors*.html) 소개문. 위 한국어 소개문을 그대로 옮긴 것이다(사실을 덧붙이지 않는다).
+// 작품·채널 이름은 영문 기사에서 쓰는 표기를 따른다.
+const AUTHOR_NOTES_EN = new Map([
+  ['5ft.mag 편집부', 'Plans and edits 5ft magazine, a film photography magazine.'],
+  ['Film Social Club', 'A space on Chungjang-ro in Gwangju that keeps film and photo culture going.'],
+  ['Street Photography Club', 'A group of people who love street photography. They publish their own photobook series and distribute 5ft magazine.'],
+  ['Shin Noguchi', 'A Japanese street photographer who catches the strange moments of everyday life on the street.'],
+  ['Brisnap TV', 'A video channel that tries out film cameras and photo gear firsthand and reviews them.'],
+  ['김현아', 'Writes short essays about the textures of everyday life and relationships.'],
+  ['명수경', 'Turns small scenes from life with film into comics.'],
+  ['강혜원 (앨리카메라 대표)', 'Runs Ally Cameras and introduces vintage cameras and lenses.'],
+  ['윤동규', 'Runs the YouTube channel 〈The Collection of Collecting〉 and records documentaries and photographs.'],
+  ['심규동', 'Photographer behind the photobooks 〈Gositel〉 and 〈Single-Person Households〉. He records the relationship between people and spaces with his camera.'],
+]);
+// 영문 표기. stories.json 의 authorEn 이 있으면 그것을 먼저 쓴다.
+const AUTHOR_NAMES_EN = new Map([
+  ['5ft.mag 편집부', '5ft.mag Editors'],
+  ['김현아', 'Kim Hyun-a'],
+  ['명수경', 'Myeong Su-gyeong'],
+  ['강혜원 (앨리카메라 대표)', 'Kang Hye-won (CEO, Ally Cameras)'],
+  ['윤동규', 'Yoon Dong-gyu'],
+  ['심규동', 'Shim Kyu-dong'],
 ]);
 
 const AUTHOR_EXTERNAL_LINKS = new Map([
@@ -337,6 +361,212 @@ ${footer(authorFile, '../')}
   writeFileSync(join(ROOT, 'authors', `${author.slug}.html`), html);
 }
 
+// ── 영문판: en/authors.html, en/authors/<slug>.html ─────────────────────
+// 같은 입력(data/stories.json)으로 찍는다. 링크·자산은 절대경로(<base href="/"> 때문),
+// 영문판이 있는 페이지는 /en/ 으로 잇는다(sync-site-shell 과 같은 규칙).
+const EN_SITE_DESC = 'An archive of writing by the authors and contributors of 5ft magazine, all in one place.';
+const enHref = (page) => (existsSync(join(ROOT, 'en', page)) ? `/en/${page}` : `/${page}`);
+// i18n.js 는 영문 페이지만 싣는다. 다른 영문 페이지와 같은 버전을 쓴다(단일 버전 가드)
+const i18nVersion = (readFileSync(join(ROOT, 'en/about.html'), 'utf8').match(/js\/i18n\.js(\?v=[0-9A-Za-z-]+)/) || [])[1] || '';
+
+function enAuthor(author) {
+  const authorEn = author.stories.find((story) => story.authorEn)?.authorEn;
+  return {
+    ...author,
+    name: authorEn || AUTHOR_NAMES_EN.get(author.name) || author.name,
+    entityType: authorEntityType(author.name),
+    note: AUTHOR_NOTES_EN.get(author.name) || 'A contributor of writing and photographs to 5ft magazine.',
+  };
+}
+
+function enStructuredData(author) {
+  const url = `${SITE_URL}/en/authors/${author.slug}.html`;
+  const entity = { '@type': author.entityType, name: author.name, url, description: author.note };
+  const links = (author.externalLinks || []).map((link) => link.url).filter(Boolean);
+  if (links.length) entity.sameAs = links;
+  return ldScript({
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    url,
+    inLanguage: 'en',
+    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/en/` },
+    mainEntity: entity,
+  }) + ldScript({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '5ft magazine', item: `${SITE_URL}/en/` },
+      { '@type': 'ListItem', position: 2, name: 'Authors', item: `${SITE_URL}/en/authors.html` },
+      { '@type': 'ListItem', position: 3, name: author.name, item: url },
+    ],
+  });
+}
+
+function enIndexStructuredData(list) {
+  return ldScript({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Authors | 5ft magazine',
+    url: `${SITE_URL}/en/authors.html`,
+    inLanguage: 'en',
+    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/en/` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: list.length,
+      itemListElement: list.map((author, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: { '@type': author.entityType, name: author.name, url: `${SITE_URL}/en/authors/${author.slug}.html` },
+      })),
+    },
+  });
+}
+
+function enHead(title, description, canonicalPath, structuredData) {
+  return `<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}">
+  <link rel="canonical" href="${SITE_URL}${canonicalPath}">
+  <link rel="alternate" type="application/rss+xml" title="5ft magazine RSS" href="/rss.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${escapeHtml(title)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:image" content="${SITE_URL}/img/og/5ft-link1.webp">
+  <meta property="og:url" content="${SITE_URL}${canonicalPath}">
+  <meta property="og:site_name" content="5ft magazine">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="${SITE_URL}/img/og/5ft-link1.webp">
+${structuredData}  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
+  <link rel="shortcut icon" href="/img/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
+  <script src="/js/theme-init.js"></script>
+  <script src="/js/i18n.js${i18nVersion}"></script>
+  <link rel="stylesheet" href="/pretendard.css" />
+  <link rel="stylesheet" href="/css/tokens.css${v('css/tokens.css')}">
+  <link rel="stylesheet" href="/css/common.css${v('css/common.css')}">
+  <link rel="stylesheet" href="/css/authors.css${v('css/authors.css')}">
+</head>`;
+}
+
+function enHeader(outFile) {
+  return `<header>
+  <div class="header-inner">
+    <a href="/en/" class="site-logo"><img src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    ${navHtml(outFile)}
+    <div class="nav-right">
+      <a href="${enHref('search.html')}" class="icon-btn" id="headerSearchBtn" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark mode" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  ${mobileNavHtml(outFile)}
+</header>`;
+}
+
+function enFooter(outFile) {
+  return `<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft magazine</span>
+    ${footerPublisherHtml(outFile)}
+  </div>
+  ${footerHtml(outFile)}
+  ${footerCopyHtml(outFile)}
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/db-client.js${v('js/db-client.js')}"></script>
+<script src="/js/site-common.js${v('js/site-common.js')}"></script>`;
+}
+
+function enStoryCard(story) {
+  // 영문 페이지가 있는 글만 영문 제목·요약과 /en/ 주소로 잇는다. 없으면 한국어판으로.
+  const en = Boolean(story.titleEn) && existsSync(join(ROOT, 'en', story.page));
+  const title = en ? story.titleEn : story.title;
+  const excerpt = en ? (story.excerptEn || '') : (story.excerpt || '');
+  const image = story.thumbnail
+    ? `<img src="/${escapeHtml(story.thumbnail.replace(/^\.?\//, ''))}" alt="${escapeHtml(title)}" loading="lazy">`
+    : `<span class="author-story-placeholder">${escapeHtml(title)}</span>`;
+  return `<a class="author-story-card" href="/${en ? 'en/' : ''}${escapeHtml(story.page)}">
+    <div class="author-story-img ${story.thumbnail ? '' : 'is-text'}">${image}</div>
+    <div class="author-story-body">
+      <span class="author-story-meta">${escapeHtml(story.categoryLabel || story.category || '')} · ${escapeHtml(formatDate(story.date))}</span>
+      <h2>${escapeHtml(title)}</h2>
+      <p>${escapeHtml(excerpt)}</p>
+    </div>
+  </a>`;
+}
+
+const enAuthorList = authorList.map(enAuthor);
+const articlesLabel = (n) => `${n} ${n === 1 ? 'Article' : 'Articles'}`;
+mkdirSync(join(ROOT, 'en/authors'), { recursive: true });
+
+const enIndexFile = join(ROOT, 'en/authors.html');
+writeFileSync(enIndexFile, `${enHead('Authors | 5ft magazine', EN_SITE_DESC, '/en/authors.html', enIndexStructuredData(enAuthorList))}
+<body>
+${enHeader(enIndexFile)}
+<main class="authors-page">
+  <section class="authors-hero">
+    <span class="authors-kicker">CONTRIBUTORS</span>
+    <h1>Authors</h1>
+    <p>An archive of the people behind the writing, photos, interviews and reviews.</p>
+  </section>
+  <section class="authors-grid" aria-label="Authors">
+    ${enAuthorList.map((author) => `<a class="author-card" href="/en/authors/${author.slug}.html">
+      <span class="author-count">${articlesLabel(author.stories.length)}</span>
+      <h2>${escapeHtml(author.name)}</h2>
+      <p>${escapeHtml(author.note)}</p>
+    </a>`).join('\n    ')}
+  </section>
+</main>
+${enFooter(enIndexFile)}
+</body>
+</html>
+`);
+
+const written = [join(ROOT, 'authors.html'), enIndexFile];
+for (const author of enAuthorList) {
+  const authorFile = join(ROOT, 'en/authors', `${author.slug}.html`);
+  const title = `${author.name} | 5ft magazine Authors`;
+  const description = `The 5ft magazine archive of ${author.name}. ${articlesLabel(author.stories.length)}.`;
+  writeFileSync(authorFile, `${enHead(title, description, `/en/authors/${author.slug}.html`, enStructuredData(author))}
+<body>
+${enHeader(authorFile)}
+<main class="authors-page author-detail-page">
+  <section class="authors-hero">
+    <a class="authors-back" href="/en/authors.html">← Authors</a>
+    <span class="authors-kicker">${articlesLabel(author.stories.length).toUpperCase()}</span>
+    <h1>${escapeHtml(author.name)}</h1>
+    <p>${escapeHtml(author.note)}</p>
+  </section>
+  <section class="author-story-list" aria-label="${escapeHtml(`Articles by ${author.name}`)}">
+    ${author.stories.map(enStoryCard).join('\n    ')}
+  </section>
+</main>
+${enFooter(authorFile)}
+</body>
+</html>
+`);
+  written.push(join(ROOT, 'authors', `${author.slug}.html`), authorFile);
+}
+
+// 언어 대응 링크(hreflang)는 두 판이 다 써진 뒤에 붙인다. shell:sync 가 넣는 것과 같은 마크업이라
+// 다음 빌드가 shell:sync 결과를 되돌리지 않는다.
+for (const file of written) {
+  const alternates = alternatesHtml(file);
+  if (!alternates) continue;
+  const html = readFileSync(file, 'utf8');
+  writeFileSync(file, html.replace(/(<link rel="canonical" href="[^"]*">)/, `$1\n${alternates}`));
+}
+
 writeFileSync(
   join(ROOT, 'data/authors.json'),
   `${JSON.stringify(authorList.map((author) => ({
@@ -349,4 +579,4 @@ writeFileSync(
   })), null, 2)}\n`,
 );
 
-console.log(`Authors generated: ${authorList.length}`);
+console.log(`Authors generated: ${authorList.length} (ko + en)`);

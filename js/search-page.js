@@ -7,6 +7,7 @@
 // density 그리드/리스트 토글 (localStorage 기억).
 (function () {
   'use strict';
+  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
 
   const $ = (id) => document.getElementById(id);
   const input   = $('searchQ');
@@ -88,19 +89,24 @@
   function setHtml(html) { results.innerHTML = html; }
 
   function renderHint() {
-    setHtml('<p class="search-hint">키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요.</p>');
+    setHtml(`<p class="search-hint">${i18n.t('키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요.', 'One search covers articles, films, books, labs and market listings.')}</p>`);
   }
 
   function renderEmpty(q) {
-    setHtml(`<p class="search-empty">"<strong>${esc(q)}</strong>" 검색 결과가 없어요.<br />다른 단어로 다시 시도해 보세요.</p>`);
+    setHtml(i18n.t(
+      `<p class="search-empty">"<strong>${esc(q)}</strong>" 검색 결과가 없어요.<br />다른 단어로 다시 시도해 보세요.</p>`,
+      `<p class="search-empty">No results for "<strong>${esc(q)}</strong>".<br />Try a different word.</p>`));
   }
 
   function cardArticle(s, q) {
     const thumb = s.thumbnail
       ? `<div class="sc-thumb"><img src="${esc(s.thumbnail)}" alt="" loading="lazy" /></div>`
       : '';
-    const meta = [s.author, s.date].filter(Boolean).map(esc).join(' · ');
-    return `<a class="search-card" href="${esc(s.page || '#')}">
+    const author = i18n.isEn ? (s.authorEn || s.author) : s.author;
+    const meta = [author, s.date].filter(Boolean).map(esc).join(' · ');
+    // 영문판: localizeStories 가 번역된 글의 page 를 en/ 로 바꿔 둔다. <base href="/"> 라 절대경로로 쓴다.
+    const href = i18n.isEn && s.page ? '/' + s.page.replace(/^\//, '') : (s.page || '#');
+    return `<a class="search-card" href="${esc(href)}">
       ${thumb}
       <div class="sc-body">
         <div class="sc-kicker">${esc(s.categoryLabel || s.category || 'ARTICLE')}</div>
@@ -112,11 +118,13 @@
 
   function cardFilm(f, q) {
     const name = f.displayName || (f.brand ? `${f.brand} ${f.name || ''}`.trim() : f.name || '');
-    return `<a class="search-card" href="films.html?film=${encodeURIComponent(f.slug || '')}">
+    const desc = i18n.isEn ? (f.descEn || f.desc) : f.desc;
+    const href = i18n.isEn ? i18n.url('/films.html?film=' + encodeURIComponent(f.slug || '')) : `films.html?film=${encodeURIComponent(f.slug || '')}`;
+    return `<a class="search-card" href="${href}">
       <div class="sc-body">
         <div class="sc-kicker">${esc(f.brand || 'FILM')}</div>
         <div class="sc-title">${highlight(name, q)}</div>
-        ${f.desc ? `<div class="sc-meta">${esc(String(f.desc).slice(0, 80))}${String(f.desc).length > 80 ? '…' : ''}</div>` : ''}
+        ${desc ? `<div class="sc-meta">${esc(String(desc).slice(0, 80))}${String(desc).length > 80 ? '…' : ''}</div>` : ''}
       </div>
     </a>`;
   }
@@ -125,7 +133,7 @@
     const cover = w.cover_path && db() && db().webzine
       ? `<div class="sc-thumb sc-thumb--cover"><img src="${esc(db().webzine.publicUrl(w.cover_path))}" alt="" loading="lazy" /></div>`
       : '';
-    return `<a class="search-card" href="books.html">
+    return `<a class="search-card" href="${i18n.isEn ? i18n.url('/books.html') : 'books.html'}">
       ${cover}
       <div class="sc-body">
         <div class="sc-kicker">${esc(w.category || 'BOOKS')}${w.issue_label ? ' · ' + esc(w.issue_label) : ''}</div>
@@ -146,7 +154,8 @@
   }
 
   function cardLab(l, q) {
-    return `<a class="search-card" href="labs.html?lab=${encodeURIComponent(labSlug(l))}">
+    const href = i18n.isEn ? i18n.url('/labs.html?lab=' + encodeURIComponent(labSlug(l))) : `labs.html?lab=${encodeURIComponent(labSlug(l))}`;
+    return `<a class="search-card" href="${href}">
       <div class="sc-body">
         <div class="sc-kicker">LAB${l.region ? ' · ' + esc(l.region) : ''}</div>
         <div class="sc-title">${highlight(l.name || '', q)}</div>
@@ -162,16 +171,17 @@
       <div class="sc-body">
         <div class="sc-kicker">CONTRIBUTOR</div>
         <div class="sc-title">${highlight(c.label || c.key || '', q)}</div>
-        <div class="sc-meta">사진 ${Number(c.count) || 0}장</div>
+        <div class="sc-meta">${i18n.t(`사진 ${Number(c.count) || 0}장`, `${Number(c.count) || 0} photos`)}</div>
       </div>
     </a>`;
   }
 
   function cardMarket(m, q) {
     const priceTxt = (m.price && Number(m.price) > 0)
-      ? Number(m.price).toLocaleString('ko-KR') + '원'
-      : '가격 협의';
-    return `<a class="search-card" href="market.html?id=${encodeURIComponent(m.id || '')}">
+      ? (i18n.isEn ? Number(m.price).toLocaleString('en-US') + ' won' : Number(m.price).toLocaleString('ko-KR') + '원')
+      : i18n.t('가격 협의', 'Price negotiable');
+    const href = i18n.isEn ? i18n.url('/market.html?id=' + encodeURIComponent(m.id || '')) : `market.html?id=${encodeURIComponent(m.id || '')}`;
+    return `<a class="search-card" href="${href}">
       <div class="sc-body">
         <div class="sc-kicker">MARKET${m.category ? ' · ' + esc(m.category) : ''}</div>
         <div class="sc-title">${highlight(m.title || '', q)}</div>
@@ -182,7 +192,7 @@
 
   async function searchAll(q) {
     if (!q) { renderHint(); return; }
-    setHtml('<p class="search-hint">검색 중…</p>');
+    setHtml(`<p class="search-hint">${i18n.t('검색 중…', 'Searching…')}</p>`);
     const tokens = tokenize(q);
 
     const dbReady = db() && db().isReady && db().isReady();
@@ -205,10 +215,15 @@
         item: a,
         score: scoreMatch(tokens, [
           { text: a.title, weight: 10 },
+          // 영문판에선 a.title 이 영문 제목이다. 한국어로 쳐도 찾히게 원제(titleKo)도 본다.
+          { text: a.titleKo, weight: 10 },
+          { text: a.titleEn, weight: 10 },
           { text: a.author, weight: 5 },
+          { text: a.authorEn, weight: 5 },
           { text: a.categoryLabel, weight: 3 },
           { text: a.category, weight: 3 },
           { text: a.excerpt, weight: 2 },
+          { text: a.excerptEn, weight: 2 },
         ]),
       }))
       .filter((x) => x.score > 0)
@@ -223,6 +238,7 @@
           { text: f.brand, weight: 7 },
           { text: (f.aliases || []).join(' '), weight: 8 },
           { text: f.desc, weight: 2 },
+          { text: f.descEn, weight: 2 },
         ]),
       }))
       .filter((x) => x.score > 0)
@@ -285,12 +301,12 @@
       .sort((a, b) => b.score - a.score || (b.item.count || 0) - (a.item.count || 0));
 
     const sections = [
-      { label: 'Articles', items: stories, all: 'stories.html?q=' + encodeURIComponent(q), card: (x) => cardArticle(x.item, q) },
-      { label: 'Films',    items: films,   all: 'films.html',                              card: (x) => cardFilm(x.item, q) },
-      { label: 'Contributors', items: contributors, all: 'films.html', card: (x) => cardContributor(x.item, q) },
-      { label: 'Books',    items: webzine, all: 'books.html',                              card: (x) => cardWebzine(x.item, q) },
-      { label: 'Labs',     items: labs,    all: 'labs.html',                               card: (x) => cardLab(x.item, q) },
-      { label: 'Market',   items: market,  all: 'market.html',                             card: (x) => cardMarket(x.item, q) },
+      { label: 'Articles', items: stories, all: i18n.isEn ? i18n.url('/stories.html?q=' + encodeURIComponent(q)) : 'stories.html?q=' + encodeURIComponent(q), card: (x) => cardArticle(x.item, q) },
+      { label: 'Films',    items: films,   all: i18n.isEn ? i18n.url('/films.html') : 'films.html',                              card: (x) => cardFilm(x.item, q) },
+      { label: 'Contributors', items: contributors, all: i18n.isEn ? i18n.url('/films.html') : 'films.html', card: (x) => cardContributor(x.item, q) },
+      { label: 'Books',    items: webzine, all: i18n.isEn ? i18n.url('/books.html') : 'books.html',                              card: (x) => cardWebzine(x.item, q) },
+      { label: 'Labs',     items: labs,    all: i18n.isEn ? i18n.url('/labs.html') : 'labs.html',                               card: (x) => cardLab(x.item, q) },
+      { label: 'Market',   items: market,  all: i18n.isEn ? i18n.url('/market.html') : 'market.html',                             card: (x) => cardMarket(x.item, q) },
     ];
 
     const total = sections.reduce((a, s) => a + s.items.length, 0);
@@ -302,7 +318,7 @@
       .filter((s) => s.items.length > 0)
       .map((s) => {
         const more = s.items.length > PER
-          ? `<a class="search-more" href="${s.all}">전체 ${s.items.length}건 보기 →</a>`
+          ? `<a class="search-more" href="${s.all}">${i18n.t(`전체 ${s.items.length}건 보기 →`, `See all ${s.items.length} →`)}</a>`
           : '';
         return `<section class="search-section">
           <h2 class="search-section-head">${s.label} <span class="search-count">${s.items.length}</span></h2>
@@ -311,7 +327,9 @@
         </section>`;
       }).join('');
 
-    setHtml(`<p class="search-summary">"${esc(q)}" 검색 결과 총 <strong>${total}건</strong></p>` + html);
+    setHtml(i18n.t(
+      `<p class="search-summary">"${esc(q)}" 검색 결과 총 <strong>${total}건</strong></p>`,
+      `<p class="search-summary"><strong>${total} ${total === 1 ? 'result' : 'results'}</strong> for "${esc(q)}"</p>`) + html);
     resetFocus();
   }
 
