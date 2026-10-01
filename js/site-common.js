@@ -384,35 +384,64 @@
     }
   }
 
-  // 한·영 두 판이 다 있는 페이지(head 에 hreflang 링크가 있는 곳)에만 언어 전환을 붙인다.
-  // 링크는 공통 셸(scripts/lib/site-shell.mjs)이 영문판 공개 뒤에만 넣는다.
+  // 다른 언어판이 있는 페이지(head 에 hreflang 링크가 있는 곳)에만 헤더에 언어 메뉴(지구본 버튼)를 붙인다.
+  // 링크는 공통 셸(scripts/lib/site-shell.mjs)이 공개한 언어만 넣는다. 누르면 언어 목록이 펼쳐진다.
+  const LANG_NAMES = { ko: '한국어', en: 'English', ja: '日本語' };
+  function globeIconSvg() {
+    return '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>';
+  }
   function injectLangSwitch() {
-    const target = i18n.isEn ? 'ko' : 'en';
-    const alt = document.querySelector(`link[rel="alternate"][hreflang="${target}"]`);
-    if (!alt) return;
-    // 장터 매물 짧은 주소(/market/<id>)는 id 를 쿼리로 옮겨 영문판에서도 같은 매물이 열리게 한다
+    const navRight = document.querySelector('.nav-right');
+    if (!navRight || document.getElementById('langBtn')) return;
+    const alts = [...document.querySelectorAll('link[rel="alternate"][hreflang]')]
+      .filter((l) => LANG_NAMES[l.hreflang]);
+    if (alts.length < 2) return;
+    // 장터 매물 짧은 주소(/market/<id>)는 id 를 쿼리로 옮겨 다른 언어판에서도 같은 매물이 열리게 한다
     const marketId = (location.pathname.match(/^\/market\/([^/]+)/) || [])[1];
     const search = marketId ? `?id=${marketId}` : location.search;
-    const href = new URL(alt.href).pathname + search + location.hash;
-    const make = () => {
+    const current = i18n.lang || 'ko';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'lang-wrap';
+    const btn = document.createElement('button');
+    btn.id = 'langBtn';
+    btn.type = 'button';
+    btn.className = 'icon-btn lang-btn';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'langMenu');
+    btn.setAttribute('aria-label', { ko: '언어 선택', en: 'Language', ja: '言語' }[current]);
+    btn.title = btn.getAttribute('aria-label');
+    btn.innerHTML = globeIconSvg();
+    const menu = document.createElement('div');
+    menu.id = 'langMenu';
+    menu.className = 'lang-menu';
+    menu.hidden = true;
+    for (const l of alts) {
       const a = document.createElement('a');
-      a.href = href;
-      a.hreflang = target;
-      a.lang = target;
-      a.textContent = i18n.isEn ? 'KO' : 'EN';
-      a.setAttribute('aria-label', i18n.isEn ? '한국어로 보기' : 'View in English');
-      a.dataset.langSwitch = target;
-      return a;
-    };
-    const mainNav = document.querySelector('.main-nav');
-    if (mainNav && !mainNav.querySelector('[data-lang-switch]')) {
-      const li = document.createElement('li');
-      li.className = 'nav-lang';
-      li.appendChild(make());
-      mainNav.appendChild(li);
+      a.href = new URL(l.href).pathname + search + location.hash;
+      a.hreflang = l.hreflang;
+      a.lang = l.hreflang;
+      a.textContent = LANG_NAMES[l.hreflang];
+      a.dataset.langSwitch = l.hreflang;
+      if (l.hreflang === current) a.setAttribute('aria-current', 'true');
+      menu.appendChild(a);
     }
-    const mobileNav = document.getElementById('mobileNav');
-    if (mobileNav && !mobileNav.querySelector('[data-lang-switch]')) mobileNav.appendChild(make());
+    wrap.append(btn, menu);
+    const menuBtn = document.getElementById('menuBtn');
+    if (menuBtn && menuBtn.parentNode === navRight) navRight.insertBefore(wrap, menuBtn);
+    else navRight.appendChild(wrap);
+
+    const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = menu.hidden;
+      menu.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      if (open) (menu.querySelector('[aria-current]') || menu.firstChild)?.focus();
+    });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+    wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { close(); btn.focus(); } });
   }
 
   // ════════════════════════════════════════════════

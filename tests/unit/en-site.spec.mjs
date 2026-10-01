@@ -87,8 +87,55 @@ describe('js/i18n.js', () => {
     expect(i18n.url('/authors/kim-hyuna.html')).toBe('/en/authors/kim-hyuna.html');
     expect(i18n.url('/admin/films.html')).toBe('/admin/films.html');
     expect(i18n.url('/legal/terms.html')).toBe('/en/legal/terms.html');
-    expect(i18n.url('/legal/refund.html')).toBe('/legal/refund.html');
+    expect(i18n.url('/legal/refund.html')).toBe('/en/legal/refund.html');
     expect(i18n.url('/en/films.html')).toBe('/en/films.html');
+  });
+});
+
+describe('js/i18n.js: 일본어', () => {
+  const src = readFileSync(join(ROOT, 'js/i18n.js'), 'utf8');
+  const load = (lang) => {
+    document.documentElement.lang = lang;
+    delete window.i18n;
+    new Function(src)();
+    return window.i18n;
+  };
+  beforeEach(() => { document.documentElement.lang = 'ko'; });
+
+  it('일본어 문구가 있으면 일본어, 없으면 영어로 대신한다', () => {
+    const i18n = load('ja');
+    expect(i18n.t('최근 글', 'Latest', '最新記事')).toBe('最新記事');
+    expect(i18n.t('최근 글', 'Latest')).toBe('Latest');
+    expect(i18n.lang).toBe('ja');
+    expect(i18n.isEn).toBe(true); // "한국어판이 아님"
+  });
+
+  it('경로는 /ja/ 로 잇는다', () => {
+    const i18n = load('ja');
+    expect(i18n.url('/stories.html')).toBe('/ja/stories.html');
+    expect(i18n.url('/en/stories.html')).toBe('/en/stories.html');
+    expect(i18n.url('/admin/films.html')).toBe('/admin/films.html');
+  });
+
+  it('영문 페이지에선 일본어 인자를 무시한다', () => {
+    expect(load('en').t('최근 글', 'Latest', '最新記事')).toBe('Latest');
+    expect(load('ko').t('최근 글', 'Latest', '最新記事')).toBe('최근 글');
+  });
+});
+
+describe('공통 셸: 언어', () => {
+  it('파일 위치로 언어를 가른다', async () => {
+    const { langOf } = await import('../../scripts/lib/site-shell.mjs');
+    expect(langOf(join(ROOT, 'ja/about.html'))).toBe('ja');
+    expect(langOf(enAbout)).toBe('en');
+    expect(langOf(koAbout)).toBe('ko');
+  });
+
+  it('공개 전 언어(ja.publish=false)는 한국어·영문 페이지의 hreflang 에 넣지 않는다', () => {
+    const shell = JSON.parse(readFileSync(join(ROOT, 'data/site-shell.json'), 'utf8'));
+    if (shell.ja?.publish) return;
+    expect(alternatesHtml(koAbout)).not.toContain('hreflang="ja"');
+    expect(alternatesHtml(enAbout)).not.toContain('hreflang="ja"');
   });
 });
 

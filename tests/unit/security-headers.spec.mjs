@@ -21,7 +21,8 @@ describe('security headers', () => {
   });
 
   it('uses the existing refund page and redirects old links', () => {
-    expect(read('js/ebook-checkout.js')).toContain('href="/legal/refund.html"');
+    // 외국어판에선 i18n.url 이 /en/·/ja/ 의 같은 규정으로 잇는다
+    expect(read('js/ebook-checkout.js')).toContain("i18n.url('/legal/refund.html')");
     expect(fs.existsSync('legal/refund.html')).toBe(true);
     expect(read('netlify.toml')).toMatch(/from = "\/refund\.html"\s+to = "\/legal\/refund\.html"\s+status = 301/);
   });

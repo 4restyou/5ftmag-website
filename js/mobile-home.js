@@ -508,7 +508,7 @@
         ${theme.submissionNote ? `<p class="mh-theme-reward">${esc(loc('submissionNote'))}</p>` : ''}
         <div class="mh-theme-actions">
           <button type="button" class="rs-trigger" data-action="open-submission">${mt(`${esc(issue)} 응모하기`, `Submit to ${esc(issue)}`)}</button>
-          <a href="/books.html">${mt('지난 호 보기·구매', 'Back issues (Korean)')}</a>
+          <a href="${mhI18n.url ? mhI18n.url('/books.html') : '/books.html'}">${mt('지난 호 보기·구매', 'Back issues')}</a>
         </div>
       </section>`;
   }

@@ -58,5 +58,11 @@
     "footer": {
       "publisher": "Published by 4rest · Editor Park Soon Yeol · 2F, 8 Chungjang-ro 46beon-gil, Dong-gu, Gwangju, Korea"
     }
+  },
+  "ja": {
+    "publish": false,
+    "footer": {
+      "publisher": "発行 4rest · 編集 Park Soon Yeol · 韓国 光州 東区 忠壮路46番キル 8, 2階"
+    }
   }
 }

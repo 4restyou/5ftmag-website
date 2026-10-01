@@ -577,7 +577,7 @@
           <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
             ${isFeatured ? fpT('컷 채우기', 'Add a frame') : fpT('첫 컷 채우기', 'Add the first frame')}
           </button>
-          <a href="${fpI18n.isEn ? '/me.html' : 'me.html'}" class="reader-mine-link">${fpT('내 사진 관리 →', 'Manage my photos (Korean) →')}</a>
+          <a href="${fpI18n.isEn ? fpI18n.url('/me.html') : 'me.html'}" class="reader-mine-link">${fpT('내 사진 관리 →', 'Manage my photos →')}</a>
         </div>
       </div>`;
 

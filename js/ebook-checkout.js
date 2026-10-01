@@ -122,7 +122,7 @@
           <h2 id="ebkPayTitle" class="ebk-pay-modal-title">${i18n.t('구매 방법 선택', 'Choose how to buy')}</h2>
           <p class="ebk-pay-modal-sub">${esc(product.title)}${won ? ` · ${won}` : ''}</p>
           <div class="ebk-pay-methods">${methodButtons}</div>
-          <p class="ebk-pay-legal">${i18n.t('열람을 시작하면 청약철회가 제한됩니다.', 'Once you start reading, you can no longer cancel the purchase.')} <a href="/legal/refund.html" target="_blank" rel="noopener">${i18n.t('취소·환불 규정', 'Cancellation and refund policy (Korean)')}</a></p>
+          <p class="ebk-pay-legal">${i18n.t('열람을 시작하면 청약철회가 제한됩니다.', 'Once you start reading, you can no longer cancel the purchase.')} <a href="${i18n.url('/legal/refund.html')}" target="_blank" rel="noopener">${i18n.t('취소·환불 규정', 'Cancellation and refund policy')}</a></p>
           <button type="button" class="ebk-pay-cancel" data-cancel>${i18n.t('취소', 'Cancel')}</button>
         </div>
         <div data-pane="redeem" hidden>

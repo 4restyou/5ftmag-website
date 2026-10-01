@@ -1436,3 +1436,32 @@ kbd, .kbd {
 :where(.count, time, .date, [data-numeric]) {
   font-variant-numeric: tabular-nums;
 }
+
+/* 언어 메뉴 — 헤더 지구본 버튼을 누르면 펼쳐진다(js/site-common.js injectLangSwitch) */
+.lang-wrap { position: relative; display: flex; }
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 400;
+  min-width: 132px;
+  padding: 6px 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+}
+.lang-menu[hidden] { display: none; }
+.lang-menu a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  color: var(--text);
+  font-size: 14px;
+  text-decoration: none;
+}
+.lang-menu a::before { content: ''; width: 12px; }
+.lang-menu a[aria-current="true"] { font-weight: 700; }
+.lang-menu a[aria-current="true"]::before { content: '✓'; }
+.lang-menu a:hover, .lang-menu a:focus-visible { background: var(--border); outline: none; }

@@ -14,21 +14,31 @@ export const shellConfig = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'data/site-shell.json'), 'utf8'),
 );
 
-// 영문판(en/ 아래) 페이지인가. 영문 페이지의 셸은 영문판이 있는 곳은 en/ 쪽으로, 없는 곳(장터·구매 등)은
-// 한국어판으로 잇고, 발행처 줄도 영문으로 쓴다.
-export function isEnFile(file) {
-  return path.relative(ROOT, path.resolve(file)).split(path.sep)[0] === 'en';
+// 외국어판 디렉터리. 각 언어 페이지는 en/·ja/ 아래에 한국어판과 같은 경로로 둔다.
+export const LANGS = ['en', 'ja'];
+
+// 파일이 어느 언어판인가('ko' | 'en' | 'ja').
+export function langOf(file) {
+  const top = path.relative(ROOT, path.resolve(file)).split(path.sep)[0];
+  return LANGS.includes(top) ? top : 'ko';
 }
 
+// 영문판(en/ 아래) 페이지인가.
+export function isEnFile(file) {
+  return langOf(file) === 'en';
+}
+
+// 외국어 페이지의 셸은 그 언어판이 있는 곳은 그쪽으로, 없는 곳은 한국어판으로 잇고, 발행처 줄도 그 언어로 쓴다.
 function resolveTarget(file, target) {
-  if (isEnFile(file) && fs.existsSync(path.join(ROOT, 'en', target))) return path.join('en', target);
+  const lang = langOf(file);
+  if (lang !== 'ko' && fs.existsSync(path.join(ROOT, lang, target))) return path.join(lang, target);
   return target;
 }
 
 function hrefFrom(file, target) {
   const resolved = resolveTarget(file, target);
-  // 모든 페이지에 <base href="/"> 가 있어 상대경로는 루트(한국어판) 기준으로 풀린다. 영문 페이지는 절대경로로 쓴다
-  if (isEnFile(file)) return '/' + resolved.split(path.sep).join('/');
+  // 모든 페이지에 <base href="/"> 가 있어 상대경로는 루트(한국어판) 기준으로 풀린다. 외국어 페이지는 절대경로로 쓴다
+  if (langOf(file) !== 'ko') return '/' + resolved.split(path.sep).join('/');
   const rel = path.relative(path.dirname(file), path.join(ROOT, resolved)).split(path.sep).join('/');
   return rel || path.basename(resolved);
 }
@@ -63,7 +73,8 @@ export function footerHtml(file) {
 }
 
 function footerText(file) {
-  return file && isEnFile(file) ? { ...shellConfig.footer, ...shellConfig.en.footer } : shellConfig.footer;
+  const lang = file ? langOf(file) : 'ko';
+  return lang === 'ko' ? shellConfig.footer : { ...shellConfig.footer, ...shellConfig[lang]?.footer };
 }
 
 export function footerPublisherHtml(file) {
@@ -74,24 +85,31 @@ export function footerCopyHtml(file) {
   return `<span class="footer-copy">${footerText(file).copyright}</span>`;
 }
 
-// 한·영 두 판이 다 있는 페이지의 언어 대응 링크(hreflang). 영문판 공개 전(en.publish=false)에는 비운다.
-// js/site-common.js 는 이 링크가 있는 페이지에만 KO/EN 전환을 띄운다.
+// 같은 페이지의 다른 언어판 링크(hreflang). 공개한 언어(<lang>.publish=true)만 넣고, 짝이 하나도 없으면 비운다.
+// js/site-common.js 는 이 링크가 있는 페이지에만 언어 메뉴를 띄운다.
 function canonicalOf(file) {
   const m = fs.readFileSync(file, 'utf8').match(/<link rel="canonical" href="([^"]+)"/);
   return m && m[1];
 }
 
 export function alternatesHtml(file) {
-  if (!shellConfig.en?.publish) return '';
   const rel = path.relative(ROOT, path.resolve(file)).split(path.sep).join('/');
-  const koRel = isEnFile(file) ? rel.slice(3) : rel;
-  const koFile = path.join(ROOT, koRel), enFile = path.join(ROOT, 'en', koRel);
-  if (!fs.existsSync(koFile) || !fs.existsSync(enFile)) return '';
-  const ko = canonicalOf(koFile), en = canonicalOf(enFile);
-  if (!ko || !en) return '';
+  const lang = langOf(file);
+  const koRel = lang === 'ko' ? rel : rel.slice(lang.length + 1);
+  const koFile = path.join(ROOT, koRel);
+  // 공개 전인 언어의 페이지도 자기 자신과 공개된 언어판으로는 잇는다(미리 보며 확인할 수 있게)
+  const langs = LANGS.filter((l) => shellConfig[l]?.publish || l === lang);
+  const found = langs
+    .map((l) => ({ l, f: path.join(ROOT, l, koRel) }))
+    .filter(({ f }) => fs.existsSync(f))
+    .map(({ l, f }) => ({ l, href: canonicalOf(f) }))
+    .filter((x) => x.href);
+  if (!fs.existsSync(koFile) || !found.length) return '';
+  const ko = canonicalOf(koFile);
+  if (!ko) return '';
   return [
     `<link rel="alternate" hreflang="ko" href="${ko}">`,
-    `<link rel="alternate" hreflang="en" href="${en}">`,
+    ...found.map(({ l, href }) => `<link rel="alternate" hreflang="${l}" href="${href}">`),
     `<link rel="alternate" hreflang="x-default" href="${ko}">`,
   ].map((l) => `  ${l}`).join('\n');
 }
