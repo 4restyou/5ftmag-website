@@ -7,6 +7,10 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+
   const THEME_KEY = '5ftTheme';
 
   const telemetry = window.SiteTelemetry || {};
@@ -20,7 +24,7 @@
   function updateThemeButton(btn) {
     if (!btn) return;
     const isDark = document.documentElement.dataset.theme === 'dark';
-    btn.setAttribute('aria-label', isDark ? '라이트 모드로 전환' : '다크 모드로 전환');
+    btn.setAttribute('aria-label', isDark ? tr('라이트 모드로 전환', 'Switch to light mode') : tr('다크 모드로 전환', 'Switch to dark mode'));
     btn.setAttribute('aria-pressed', String(isDark));
     btn.setAttribute('type', 'button');
     btn.innerHTML = isDark
@@ -34,7 +38,7 @@
   function updateMenuButton(btn, nav) {
     if (!btn || !nav) return;
     const isOpen = nav.classList.contains('open');
-    btn.setAttribute('aria-label', isOpen ? '메뉴 닫기' : '메뉴 열기');
+    btn.setAttribute('aria-label', isOpen ? tr('메뉴 닫기', 'Close menu') : tr('메뉴 열기', 'Open menu'));
     btn.setAttribute('aria-expanded', String(isOpen));
     btn.setAttribute('aria-controls', nav.id || 'mobileNav');
     btn.setAttribute('type', 'button');
@@ -132,7 +136,7 @@
 
   function copyCurrentLink(btn) {
     copyTextToClipboard(prettyShareUrl(window.location.href)).then(function (ok) {
-      setCopyButtonState(btn, ok ? '복사 완료' : '복사 실패');
+      setCopyButtonState(btn, ok ? tr('복사 완료', 'Copied') : tr('복사 실패', 'Copy failed'));
     });
   }
   // 글로벌로도 노출 (기존 onclick="copyLink()" 호환)
@@ -235,6 +239,7 @@
     }
 
     normalizePrimaryNavigation();
+    injectLangSwitch();
 
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');
@@ -370,6 +375,34 @@
     }
   }
 
+  // 한·영 두 판이 다 있는 페이지(head 에 hreflang 링크가 있는 곳)에만 언어 전환을 붙인다.
+  // 링크는 공통 셸(scripts/lib/site-shell.mjs)이 영문판 공개 뒤에만 넣는다.
+  function injectLangSwitch() {
+    const target = i18n.isEn ? 'ko' : 'en';
+    const alt = document.querySelector(`link[rel="alternate"][hreflang="${target}"]`);
+    if (!alt) return;
+    const href = new URL(alt.href).pathname + location.search + location.hash;
+    const make = () => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.hreflang = target;
+      a.lang = target;
+      a.textContent = i18n.isEn ? 'KO' : 'EN';
+      a.setAttribute('aria-label', i18n.isEn ? '한국어로 보기' : 'View in English');
+      a.dataset.langSwitch = target;
+      return a;
+    };
+    const mainNav = document.querySelector('.main-nav');
+    if (mainNav && !mainNav.querySelector('[data-lang-switch]')) {
+      const li = document.createElement('li');
+      li.className = 'nav-lang';
+      li.appendChild(make());
+      mainNav.appendChild(li);
+    }
+    const mobileNav = document.getElementById('mobileNav');
+    if (mobileNav && !mobileNav.querySelector('[data-lang-switch]')) mobileNav.appendChild(make());
+  }
+
   // ════════════════════════════════════════════════
   // 접근성 — Skip to main content 링크
   //   Tab 처음 누르면 화면 최상단에 "본문으로 건너뛰기" 노출.
@@ -384,7 +417,7 @@
     const a = document.createElement('a');
     a.className = 'skip-link';
     a.href = '#' + main.id;
-    a.textContent = '본문으로 건너뛰기';
+    a.textContent = tr('본문으로 건너뛰기', 'Skip to content');
     document.body.insertBefore(a, document.body.firstChild);
   }
 
@@ -449,7 +482,7 @@
     const existing = _liveToasts.find((t) => t.key === key);
     if (existing) {
       existing.count += 1;
-      existing.countEl.textContent = `${existing.count}건`;
+      existing.countEl.textContent = tr(`${existing.count}건`, `×${existing.count}`);
       existing.countEl.hidden = false;
       // 타이머 연장 — 마지막 건 기준으로 다시 센다
       if (existing.timer) clearTimeout(existing.timer);
@@ -562,8 +595,8 @@
 
   function inferToastType(text, fallback = 'default') {
     const s = String(text ?? '');
-    if (/실패|오류|거부|에러|못했어요|중단|시간 초과|불가|잘못|만료|삭제하지 못|저장하지 못|처리 실패|복사 실패/.test(s)) return 'danger';
-    if (/접수|완료|저장|등록|로그인|승인|성공|복사 완료|새 알림|들어왔어요/.test(s)) return 'info';
+    if (/실패|오류|거부|에러|못했어요|중단|시간 초과|불가|잘못|만료|삭제하지 못|저장하지 못|처리 실패|복사 실패|failed|error|denied|expired|could not|couldn't/i.test(s)) return 'danger';
+    if (/접수|완료|저장|등록|로그인|승인|성공|복사 완료|새 알림|들어왔어요|saved|copied|signed|success|done|received/i.test(s)) return 'info';
     return fallback;
   }
 
@@ -600,10 +633,10 @@
     if (links.querySelector('[data-legal]')) return; // 이미 inject 됨
     const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
     const entries = [
-      ['이용약관', base + 'legal/terms.html'],
-      ['개인정보', base + 'legal/privacy.html'],
-      ['저작권',  base + 'legal/copyright.html'],
-      ['취소·환불', base + 'legal/refund.html'],
+      [tr('이용약관', 'Terms'), base + 'legal/terms.html'],
+      [tr('개인정보', 'Privacy'), base + 'legal/privacy.html'],
+      [tr('저작권', 'Copyright'),  base + 'legal/copyright.html'],
+      [tr('취소·환불', 'Refunds'), base + 'legal/refund.html'],
     ];
     entries.forEach(([label, href]) => {
       const a = document.createElement('a');
@@ -711,11 +744,11 @@
     const adminHref = authPathTo('admin/submissions.html');
     const items = [];
     if (!loggedIn) {
-      items.push({ label: '로그인', action: 'auth-login' });
+      items.push({ label: tr('로그인', 'Sign in'), action: 'auth-login' });
     } else {
-      if (isEditor) items.push({ label: '관리', href: adminHref });
-      items.push({ label: '내 정보', href: meHref });
-      items.push({ label: '로그아웃', action: 'auth-logout' });
+      if (isEditor) items.push({ label: tr('관리', 'Admin'), href: adminHref });
+      items.push({ label: tr('내 정보', 'My page'), href: meHref });
+      items.push({ label: tr('로그아웃', 'Sign out'), action: 'auth-logout' });
     }
     function accountIconSvg() {
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
@@ -729,7 +762,7 @@
         const a = document.createElement('a');
         a.href = '#';
         a.dataset.action = 'auth-login';
-        a.textContent = '로그인';
+        a.textContent = tr('로그인', 'Sign in');
         li.appendChild(a);
         if (shopLi && shopLi.parentNode === mainNav) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
         else mainNav.appendChild(li);
@@ -738,12 +771,12 @@
         li.setAttribute('data-nav-auth', '1');
         li.className = 'nav-account';
         const menuItems = [
-          { label: '내 정보', href: meHref },
-          ...(isEditor ? [{ label: '관리', href: adminHref }] : []),
-          { label: '로그아웃', action: 'auth-logout' },
+          { label: tr('내 정보', 'My page'), href: meHref },
+          ...(isEditor ? [{ label: tr('관리', 'Admin'), href: adminHref }] : []),
+          { label: tr('로그아웃', 'Sign out'), action: 'auth-logout' },
         ];
         li.innerHTML = `
-          <button type="button" class="icon-btn nav-account-btn" data-action="nav-account-toggle" aria-label="계정 메뉴 열기" aria-expanded="false">
+          <button type="button" class="icon-btn nav-account-btn" data-action="nav-account-toggle" aria-label="${tr('계정 메뉴 열기', 'Open account menu')}" aria-expanded="false">
             ${accountIconSvg()}
           </button>
           <div class="nav-account-menu" role="menu" hidden>
@@ -804,7 +837,7 @@
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
+      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
       return;
     }
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
@@ -816,15 +849,15 @@
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.('잠시 후 다시 시도해주세요.', 'info');
+      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
       return;
     }
     try {
       await window.MagDB.auth.signOut();
       writeEditorCache(false);
-      window.notify?.('로그아웃 되었습니다.', 'info');
+      window.notify?.(tr('로그아웃 되었습니다.', 'Signed out.'), 'info');
     } catch (err) {
-      window.notify?.('로그아웃 실패: ' + (err?.message || '잠시 후 다시 시도'), 'danger');
+      window.notify?.(tr('로그아웃 실패: ', 'Sign-out failed: ') + (err?.message || tr('잠시 후 다시 시도', 'please try again')), 'danger');
     }
   });
 
@@ -847,7 +880,7 @@
     bell.id = 'notifBell';
     bell.type = 'button';
     bell.className = 'icon-btn notif-bell';
-    bell.setAttribute('aria-label', '알림 열기');
+    bell.setAttribute('aria-label', tr('알림 열기', 'Open notifications'));
     bell.setAttribute('aria-expanded', 'false');
     bell.innerHTML = bellIconSvg() + '<span class="notif-badge" id="notifBadge" hidden></span>';
     if (themeBtn) navRight.insertBefore(bell, themeBtn);
@@ -891,17 +924,17 @@
       guestPanel.id = 'notifPanel';
       guestPanel.className = 'notif-panel';
       guestPanel.setAttribute('role', 'dialog');
-      guestPanel.setAttribute('aria-label', '알림');
+      guestPanel.setAttribute('aria-label', tr('알림', 'Notifications'));
       guestPanel.hidden = true;
       guestPanel.innerHTML = `
         <div class="notif-panel-head">
-          <span class="notif-panel-title">알림</span>
+          <span class="notif-panel-title">${tr('알림', 'Notifications')}</span>
         </div>
         <div class="notif-panel-guest">
-          <p class="notif-panel-guest-title">로그인하면 알림을 받을 수 있어요</p>
-          <p class="notif-panel-guest-body">댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.</p>
-          <button type="button" class="notif-panel-guest-btn" data-action="auth-login">Google로 로그인</button>
-          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.</p>
+          <p class="notif-panel-guest-title">${tr('로그인하면 알림을 받을 수 있어요', 'Sign in to get notifications')}</p>
+          <p class="notif-panel-guest-body">${tr('댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.', 'Comment replies, photo approvals and new articles.<br/>You can also get them as push notifications.')}</p>
+          <button type="button" class="notif-panel-guest-btn" data-action="auth-login">${tr('Google로 로그인', 'Sign in with Google')}</button>
+          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">${tr('로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.', 'By signing in, you confirm you are 14 or older and agree to the <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">Terms</a> and <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a> (in Korean).')}</p>
         </div>`;
       document.body.appendChild(guestPanel);
       bell.addEventListener('click', (e) => {
@@ -927,28 +960,28 @@
     panel.id = 'notifPanel';
     panel.className = 'notif-panel';
     panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-label', '알림');
+    panel.setAttribute('aria-label', tr('알림', 'Notifications'));
     panel.hidden = true;
     panel.innerHTML = `
       <div class="notif-panel-head">
-        <span class="notif-panel-title">알림</span>
-        <button type="button" class="notif-panel-allread" id="notifAllRead">전체 읽음</button>
+        <span class="notif-panel-title">${tr('알림', 'Notifications')}</span>
+        <button type="button" class="notif-panel-allread" id="notifAllRead">${tr('전체 읽음', 'Mark all read')}</button>
       </div>
       <div class="notif-panel-push" id="notifPushRow" hidden>
         <div class="notif-panel-push-summary">
-          <span class="notif-panel-push-label">기기에 푸시 알림 받기</span>
-          <button type="button" class="notif-panel-push-toggle" id="notifPushToggle" aria-pressed="false">켜기</button>
+          <span class="notif-panel-push-label">${tr('기기에 푸시 알림 받기', 'Push notifications on this device')}</span>
+          <button type="button" class="notif-panel-push-toggle" id="notifPushToggle" aria-pressed="false">${tr('켜기', 'Turn on')}</button>
         </div>
         <div class="notif-panel-push-detail" id="notifPushDetail" hidden>
-          <p class="notif-panel-push-help">댓글 답글 · 사진 승인 · 새 글이 OS 알림으로 와요. 언제든 끌 수 있어요.</p>
+          <p class="notif-panel-push-help">${tr('댓글 답글 · 사진 승인 · 새 글이 OS 알림으로 와요. 언제든 끌 수 있어요.', 'Replies, photo approvals and new articles arrive as system notifications. You can turn them off anytime.')}</p>
           <div class="notif-panel-push-actions">
-            <button type="button" class="notif-panel-push-confirm" id="notifPushConfirm">지금 켜기</button>
-            <button type="button" class="notif-panel-push-cancel" id="notifPushCancel">나중에</button>
+            <button type="button" class="notif-panel-push-confirm" id="notifPushConfirm">${tr('지금 켜기', 'Turn on now')}</button>
+            <button type="button" class="notif-panel-push-cancel" id="notifPushCancel">${tr('나중에', 'Later')}</button>
           </div>
         </div>
       </div>
       <div class="notif-panel-list" id="notifList">
-        <div class="notif-panel-empty">불러오는 중…</div>
+        <div class="notif-panel-empty">${tr('불러오는 중…', 'Loading…')}</div>
       </div>`;
     document.body.appendChild(panel);
 
@@ -989,10 +1022,10 @@
     function fmtAgo(iso) {
       const d = new Date(iso);
       const diff = Math.floor((Date.now() - d.getTime()) / 1000);
-      if (diff < 60) return '방금 전';
-      if (diff < 3600)   return Math.floor(diff / 60) + '분 전';
-      if (diff < 86400)  return Math.floor(diff / 3600) + '시간 전';
-      if (diff < 604800) return Math.floor(diff / 86400) + '일 전';
+      if (diff < 60) return tr('방금 전', 'just now');
+      if (diff < 3600)   return Math.floor(diff / 60) + tr('분 전', 'm ago');
+      if (diff < 86400)  return Math.floor(diff / 3600) + tr('시간 전', 'h ago');
+      if (diff < 604800) return Math.floor(diff / 86400) + tr('일 전', 'd ago');
       return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
     }
     function escapeHtml(s) {
@@ -1013,10 +1046,10 @@
       panel.hidden = false;
       bell.setAttribute('aria-expanded', 'true');
       const list = document.getElementById('notifList');
-      list.innerHTML = '<div class="notif-panel-empty">불러오는 중…</div>';
+      list.innerHTML = `<div class="notif-panel-empty">${tr('불러오는 중…', 'Loading…')}</div>`;
       const rows = await window.MagDB.notifications.list({ limit: 30 });
       if (!rows.length) {
-        list.innerHTML = '<div class="notif-panel-empty">새 알림이 없어요.</div>';
+        list.innerHTML = `<div class="notif-panel-empty">${tr('새 알림이 없어요.', 'No new notifications.')}</div>`;
         return;
       }
       list.innerHTML = rows.map(n => `
@@ -1085,7 +1118,7 @@
       const batch = _burst;
       _burst = [];
       if (!batch.length || typeof window.showToast !== 'function') return;
-      const msg = batch.length === 1 ? (batch[0] || '새 알림') : `새 알림 ${batch.length}건`;
+      const msg = batch.length === 1 ? (batch[0] || tr('새 알림', 'New notification')) : tr(`새 알림 ${batch.length}건`, `${batch.length} new notifications`);
       window.showToast(msg, { type: 'info', duration: 4200 });
     };
     try {
@@ -1114,7 +1147,7 @@
     if (isIos && !standalone) {
       row.hidden = false;
       btn.disabled = true;
-      btn.textContent = 'iOS는 홈 화면 추가 후';
+      btn.textContent = tr('iOS는 홈 화면 추가 후', 'iOS: add to Home Screen first');
       btn.setAttribute('aria-disabled', 'true');
       return;
     }
@@ -1122,7 +1155,7 @@
 
     async function reflect() {
       const active = await window.MagDB.push.isActive();
-      btn.textContent = active ? '끄기' : '켜기';
+      btn.textContent = active ? tr('끄기', 'Turn off') : tr('켜기', 'Turn on');
       btn.setAttribute('aria-pressed', String(active));
       btn.classList.toggle('is-on', active);
     }
@@ -1136,8 +1169,8 @@
       btn.classList.add('is-busy');
       try {
         const result = await window.MagDB.push.subscribe();
-        if (result?.error) showToast(result.error.message || '푸시 알림 구독 실패', { type: 'danger', duration: 6000 });
-        else showToast('푸시 알림을 켰어요.', { type: 'info', duration: 2400 });
+        if (result?.error) showToast(result.error.message || tr('푸시 알림 구독 실패', 'Push subscription failed'), { type: 'danger', duration: 6000 });
+        else showToast(tr('푸시 알림을 켰어요.', 'Push notifications on.'), { type: 'info', duration: 2400 });
       } catch (e) {
         showToast(`[핸들러 예외] ${e?.message || e}`, { type: 'danger', duration: 6000 });
       } finally {
@@ -1155,7 +1188,7 @@
         btn.classList.add('is-busy');
         try {
           await window.MagDB.push.unsubscribe();
-          showToast('푸시 알림을 껐어요.', { type: 'info', duration: 2400 });
+          showToast(tr('푸시 알림을 껐어요.', 'Push notifications off.'), { type: 'info', duration: 2400 });
         } finally {
           btn.classList.remove('is-busy');
           reflect();
@@ -1219,8 +1252,8 @@
     btn.className = 'article-fav';
     btn.dataset.articleId = articleId;
     btn.setAttribute('aria-pressed', 'false');
-    btn.setAttribute('aria-label', '스크랩 추가');
-    btn.innerHTML = bookmarkIconSvg() + '<span class="article-fav-label">스크랩</span>';
+    btn.setAttribute('aria-label', tr('스크랩 추가', 'Save article'));
+    btn.innerHTML = bookmarkIconSvg() + `<span class="article-fav-label">${tr('스크랩', 'Save')}</span>`;
     const shareLabel = shareBar.querySelector('.share-label');
     if (shareLabel && shareLabel.nextSibling) {
       shareBar.insertBefore(btn, shareLabel.nextSibling);
@@ -1248,12 +1281,12 @@
     btn.addEventListener('click', async () => {
       if (btn.classList.contains('is-busy')) return;
       if (!window.MagDB || !window.MagDB.isReady()) {
-        window.notify?.('잠시 후 다시 시도해주세요.', 'info');
+        window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
         return;
       }
       const sess = await window.MagDB.auth.getSession();
       if (!sess) {
-        if (!confirm('스크랩은 로그인이 필요해요. Google로 로그인할까요?')) return;
+        if (!confirm(tr('스크랩은 로그인이 필요해요. Google로 로그인할까요?', 'Saving needs an account. Sign in with Google?'))) return;
         window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
         return;
       }
@@ -1264,16 +1297,16 @@
       btn.classList.remove('is-busy');
       if (error) {
         setArticleFavState(btn, wasFav);
-        window.notify?.('처리 실패: ' + (error.message || '잠시 후 다시 시도'), 'danger');
+        window.notify?.(tr('처리 실패: ', 'Failed: ') + (error.message || tr('잠시 후 다시 시도', 'please try again')), 'danger');
       }
     });
   }
   function setArticleFavState(btn, on) {
     btn.classList.toggle('is-fav', on);
     btn.setAttribute('aria-pressed', String(on));
-    btn.setAttribute('aria-label', on ? '스크랩 해제' : '스크랩 추가');
+    btn.setAttribute('aria-label', on ? tr('스크랩 해제', 'Remove from saved') : tr('스크랩 추가', 'Save article'));
     const label = btn.querySelector('.article-fav-label');
-    if (label) label.textContent = on ? '스크랩됨' : '스크랩';
+    if (label) label.textContent = on ? tr('스크랩됨', 'Saved') : tr('스크랩', 'Save');
   }
 
   // ════════════════════════════════════════════════
@@ -1294,7 +1327,7 @@
       const nativeBtn = document.createElement('button');
       nativeBtn.type = 'button';
       nativeBtn.className = 'share-channel share-channel--native';
-      nativeBtn.textContent = '공유하기';
+      nativeBtn.textContent = tr('공유하기', 'Share');
       nativeBtn.addEventListener('click', () => {
         navigator.share({ title, url: shareUrl }).catch(() => {});
       });
@@ -1415,7 +1448,7 @@
         <div class="announcement-bar-track" aria-live="polite">
           <span class="announcement-bar-text"></span>
         </div>
-        <button type="button" class="announcement-bar-close" aria-label="공지 닫기">×</button>
+        <button type="button" class="announcement-bar-close" aria-label="${tr('공지 닫기', 'Close notice')}">×</button>
       </div>
     `;
     bar.querySelector('.announcement-bar-text').innerHTML = renderAnnouncementBody(data.body);
@@ -1460,8 +1493,8 @@
     bar.setAttribute('role', 'status');
     bar.innerHTML = `
       <div class="inapp-notice-inner">
-        <span class="inapp-notice-text"><strong>Google 로그인이 차단되었나요?</strong> 인앱 브라우저에선 Google 정책상 차단돼요. 우측 메뉴(⋮ 또는 ⋯) → <strong>Chrome · Safari 등 외부 브라우저로 열기</strong>를 눌러주세요.</span>
-        <button type="button" class="inapp-notice-close" aria-label="안내 닫기">×</button>
+        <span class="inapp-notice-text">${tr('<strong>Google 로그인이 차단되었나요?</strong> 인앱 브라우저에선 Google 정책상 차단돼요. 우측 메뉴(⋮ 또는 ⋯) → <strong>Chrome · Safari 등 외부 브라우저로 열기</strong>를 눌러주세요.', '<strong>Google sign-in blocked?</strong> Google does not allow sign-in inside in-app browsers. Use the menu (⋮ or ⋯) and choose <strong>Open in Chrome or Safari</strong>.')}</span>
+        <button type="button" class="inapp-notice-close" aria-label="${tr('안내 닫기', 'Close')}">×</button>
       </div>
     `;
     header.insertAdjacentElement('afterend', bar);

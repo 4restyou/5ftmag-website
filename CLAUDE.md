@@ -7,7 +7,7 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 - **무엇** — `5ft.mag` (오피트). 필름 사진 매거진 웹사이트. 발행처 4rest, 광주 기반. 기사·필름 카탈로그·현상소(labs)·이북·중고장터(market)·독자 사진 투고를 다룬다.
 - **스택** — 정적 HTML + **vanilla JS (ES 모듈, 프레임워크 없음)** + CSS(`css/tokens.css` 디자인 토큰 기반). 데이터/인증은 **Supabase** (Postgres + RLS + Deno 엣지 함수). 호스팅 **Netlify**. 빌드·검증은 Node 스크립트(`scripts/*.mjs`). 네이버 커머스 연동용 고정 IP **중계 서버**(`relay/`) 별도 운영.
 - **규모(현재)** — 기사 42, 저자 12, 마이그레이션 84, 엣지 함수 4(`ebook-page` · `ebook-purchase` · `ebook-redeem` · `send-push`).
-- **언어** — 사이트·커밋 메시지·운영자 소통 전부 **한국어**.
+- **언어** — 사이트 기본·커밋 메시지·운영자 소통은 **한국어**. 영문판은 `en/` 아래(아래 "영문판" 참고).
 - **의존성** — 런타임 프레임워크·번들러 없음. devDependencies 는 검증/테스트용(`@playwright/test`, `vitest`, `jsdom`)뿐. Node ≥ 18.
 
 ## 저장소 지도
@@ -29,6 +29,14 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 | `relay/` | 네이버 커머스 API 고정 IP 중계 서버 (`docs/relay-setup.md`) |
 | `docs/` | `maintenance.md` · `db-contract-audit.md` · `database-recovery.md` · `editorial-operations.md` · `relay-setup.md` · `secrets-rotation.md` |
 | `.claude/skills/` | 프로젝트 전용 실행 절차서 (자동 로드) |
+
+## 영문판 (/en/)
+
+영문판은 `en/` 아래에 한국어판과 같은 경로로 둔다(`en/about.html` ↔ `about.html`). 범위는 공통 틀·기사·필름 카탈로그·현상소·수리실이고, 장터·구매·이북은 한국어판으로 보낸다.
+
+- **영문 페이지의 링크·자산은 절대경로로 쓴다**(`/css/x.css`, `/en/stories.html`). 모든 페이지에 `<base href="/">` 가 있어 상대경로는 한국어판으로 풀린다.
+- **JS 문구는 한 자리에 두 언어를 적는다**: `i18n.t('최근 글', 'Latest')`, 경로는 `i18n.url('/stories.html')`. 영문 페이지만 `js/i18n.js` 를 불러오고, 한국어 페이지에선 각 파일 첫머리의 대체값(`window.i18n || { t: (ko) => ko, ... }`)이 한국어를 돌려준다.
+- **공통 셸**은 `data/site-shell.json` 의 `en` 칸(영문 발행처, `publish`)을 따른다. `publish: true` 일 때만 한·영 쌍이 있는 페이지에 hreflang 링크가 들어가고, 그 링크가 있어야 내비에 KO/EN 전환이 뜬다.
 
 ## 작업 원칙
 

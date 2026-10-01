@@ -52,5 +52,11 @@
   "footer": {
     "publisher": "발행처 4rest · 편집 박순렬 · 전남광주통합특별시 동구 충장로46번길 8, 2층",
     "copyright": "© 2026 5ft magazine"
+  },
+  "en": {
+    "publish": false,
+    "footer": {
+      "publisher": "Published by 4rest · Editor Park Sun-ryeol · 2F, 8 Chungjang-ro 46beon-gil, Dong-gu, Gwangju, Korea"
+    }
   }
 }
