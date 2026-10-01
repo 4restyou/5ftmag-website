@@ -30,7 +30,9 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 | `docs/` | `maintenance.md` · `db-contract-audit.md` · `database-recovery.md` · `editorial-operations.md` · `relay-setup.md` · `secrets-rotation.md` |
 | `.claude/skills/` | 프로젝트 전용 실행 절차서 (자동 로드) |
 
-## 영문판 (/en/)
+## 영문판 (/en/) · 일본어판 (/ja/)
+
+일본어판은 `ja/` 아래에 영문판과 같은 규칙으로 둔다(페이지 집합도 같다). 문구는 `i18n.t(ko, en, ja)` 세 인자, 일본어가 비면 영어가 나간다. `i18n.isEn` 은 "한국어판 아님"(영·일 모두 true), 언어를 가를 땐 `i18n.lang`. 한국 인명은 일본어판에서도 영문 로마자(운영자 결정). DB 표시 칸은 `*_en` 옆에 `*_ja`. 새 기사는 `node scripts/en-story-skeleton.mjs --lang ja <id>` 로 골격을 만들고 `node scripts/en-check.mjs --lang ja` 로 확인한다. 언어 전환은 헤더 지구본 버튼(공개한 언어만, `<lang>.publish`).
 
 영문판은 `en/` 아래에 한국어판과 같은 경로로 둔다(`en/about.html` ↔ `about.html`). 범위는 공개 페이지 전부(공통 틀·기사·필름 카탈로그·현상소·수리실·매거진·장터·쇼핑·이북 구매/열람·검색·내 정보·필자)이고, 관리 화면(`admin/`)·옛 책장(`books-classic.html`)·환불·저작권 규정(`legal/refund·copyright`)만 한국어판이다. 약관·개인정보처리방침 영문판은 편의 번역이며 한국어 원문이 우선한다고 적어 둔다(원문을 고치면 영문판도 함께 고친다). 매물·책 소개처럼 사람이 올린 내용은 원문 그대로 둔다.
 
