@@ -249,6 +249,54 @@
   to = "/en/about.html"
   status = 200
 
+# 영문판(/ja/). 한국어판과 같은 짧은 주소를 쓴다. 지역 별칭(gwangju·jeonnam)은 한국어판과 같이 301.
+[[redirects]]
+  from = "/ja/stories"
+  to = "/ja/stories.html"
+  status = 200
+
+[[redirects]]
+  from = "/ja/stories/:slug"
+  to = "/ja/stories/:slug.html"
+  status = 200
+
+[[redirects]]
+  from = "/ja/films"
+  to = "/ja/films.html"
+  status = 200
+
+[[redirects]]
+  from = "/ja/film/:slug"
+  to = "/ja/film/:slug.html"
+  status = 200
+
+[[redirects]]
+  from = "/ja/labs"
+  to = "/ja/labs.html"
+  status = 200
+
+[[redirects]]
+  from = "/ja/labs/gwangju"
+  to = "/ja/labs/jeonnamgwangju"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ja/labs/jeonnam"
+  to = "/ja/labs/jeonnamgwangju"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ja/labs/:region"
+  to = "/ja/labs/:region.html"
+  status = 200
+
+[[redirects]]
+  from = "/ja/about"
+  to = "/ja/about.html"
+  status = 200
+
 [[redirects]]
   from = "/stories"
   to = "/stories.html"

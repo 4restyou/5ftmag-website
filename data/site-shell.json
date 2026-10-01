@@ -60,7 +60,7 @@
     }
   },
   "ja": {
-    "publish": false,
+    "publish": true,
     "footer": {
       "publisher": "発行 4rest · 編集 Park Soon Yeol · 韓国 光州 東区 忠壮路46番キル 8, 2階"
     }

@@ -104,14 +104,16 @@ if (existsSync(labsPath)) {
   }
 }
 
-// 영문판(/en/). 공개(data/site-shell.json en.publish) 뒤에만 싣는다. 영문 파일이 있는 주소만 짝지어 넣는다.
+// 외국어판(/en/·/ja/). 공개(data/site-shell.json <lang>.publish) 뒤에만 싣는다. 그 언어 파일이 있는 주소만 짝지어 넣는다.
 const shell = JSON.parse(readFileSync(join(ROOT, 'data/site-shell.json'), 'utf8'));
-if (shell.en?.publish) {
-  for (const url of [...urls]) {
+const koUrls = [...urls];
+for (const lang of ['en', 'ja']) {
+  if (!shell[lang]?.publish) continue;
+  for (const url of koUrls) {
     const path = url.loc.slice(SITE_URL.length);
-    const file = path === '/' ? 'en/index.html' : `en${path}`;
+    const file = path === '/' ? `${lang}/index.html` : `${lang}${path}`;
     if (!existsSync(join(ROOT, file))) continue;
-    urls.push({ ...url, loc: `${SITE_URL}/en${path}` });
+    urls.push({ ...url, loc: `${SITE_URL}/${lang}${path}` });
   }
 }
 
