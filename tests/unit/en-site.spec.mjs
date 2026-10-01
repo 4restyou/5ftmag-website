@@ -36,11 +36,21 @@ describe('공통 셸: 영문 페이지', () => {
     expect(footerPublisherHtml(koAbout)).toMatch(/발행처/);
   });
 
-  it('공개 전에는 언어 대응 링크를 넣지 않는다', () => {
+  it('언어 대응 링크는 공개 여부(en.publish)를 따른다', () => {
     const shell = JSON.parse(readFileSync(join(ROOT, 'data/site-shell.json'), 'utf8'));
-    if (shell.en.publish) return;
-    expect(alternatesHtml(enAbout)).toBe('');
-    expect(alternatesHtml(koAbout)).toBe('');
+    if (!shell.en.publish) {
+      expect(alternatesHtml(enAbout)).toBe('');
+      expect(alternatesHtml(koAbout)).toBe('');
+      return;
+    }
+    for (const file of [koAbout, enAbout]) {
+      const html = alternatesHtml(file);
+      expect(html).toContain('hreflang="ko" href="https://www.5ftmag.com/about.html"');
+      expect(html).toContain('hreflang="en" href="https://www.5ftmag.com/en/about.html"');
+      expect(html).toContain('hreflang="x-default" href="https://www.5ftmag.com/about.html"');
+    }
+    // 짝이 없는 페이지(장터 등)엔 넣지 않는다
+    expect(alternatesHtml(join(ROOT, 'market.html'))).toBe('');
   });
 });
 
