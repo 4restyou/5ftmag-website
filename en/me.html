@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>My Account | 5ft magazine</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon.svg">
+  <script src="/js/theme-init.js"></script>
+  <script src="/js/i18n.js?v=20261001-en5"></script>
+  <link rel="stylesheet" href="/pretendard.css" />
+  <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
+  <link rel="stylesheet" href="/css/common.css?v=20260810-toast">
+  <link rel="stylesheet" href="/css/me.css?v=20260725-profilefix">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/en/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="/stories.html">Articles</a></li>
+      <li><a href="/films.html">Films</a></li>
+      <li><a href="/books.html">Magazine</a></li>
+      <li><a href="/market.html">Market</a></li>
+      <li><a href="/labs.html">Labs</a></li>
+      <li><a href="/about.html">About</a></li>
+      <li><a href="/shop.html">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/search.html" class="icon-btn" id="headerSearchBtn" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark mode" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="/stories.html">Articles</a>
+    <a href="/films.html">Films</a>
+    <a href="/books.html">Magazine</a>
+    <a href="/market.html">Market</a>
+    <a href="/labs.html">Labs</a>
+    <a href="/about.html">About</a>
+    <a href="/shop.html">Shop</a>
+  </nav>
+</header>
+
+<div class="me-header">
+  <a href="/en/" class="me-back">← 5ft magazine</a>
+  <div class="me-title-row">
+    <h1 class="me-title">My Account</h1>
+    <div class="me-user" id="meUser"></div>
+  </div>
+</div>
+
+<div id="gate" class="gate" hidden>
+  <h2>Please sign in</h2>
+  <p>Sign in to manage your photos and listings in one place.</p>
+  <button class="gate-btn" id="gateLogin">Sign in with Google</button>
+  <p class="gate-consent" style="font-size:12px; line-height:1.6; color:var(--text-muted); margin-top:14px; max-width:320px;">By signing in, you confirm you are 14 or older and agree to the <a href="/legal/terms.html" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">Terms of Use</a> and <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">Privacy Policy</a> (in Korean). Users under 14 cannot sign up.</p>
+</div>
+
+<div id="app" hidden>
+  <!-- 상위 페이지 탭 -->
+  <div class="me-pagetabs">
+    <button type="button" class="me-pagetab" data-section="profile">Profile</button>
+    <button type="button" class="me-pagetab active" data-section="photos">Photos</button>
+    <button type="button" class="me-pagetab" data-section="market">Listings</button>
+    <button type="button" class="me-pagetab" data-section="notifs">Notifications <span class="me-pagetab-badge" id="notifsBadge" hidden></span></button>
+    <button type="button" class="me-pagetab" data-section="messages">Messages <span class="me-pagetab-badge" id="messagesBadge" hidden></span></button>
+    <button type="button" class="me-pagetab" data-section="my-comments">My comments</button>
+    <button type="button" class="me-pagetab" data-section="my-proposals">My suggestions</button>
+    <button type="button" class="me-pagetab" data-section="fav-photos">Liked photos</button>
+    <button type="button" class="me-pagetab" data-section="fav-films">Liked films</button>
+    <button type="button" class="me-pagetab" data-section="fav-webzine">Liked books</button>
+    <button type="button" class="me-pagetab" data-section="fav-contributors">Liked contributors</button>
+    <button type="button" class="me-pagetab" data-section="fav-articles">Saved articles</button>
+  </div>
+
+  <!-- ─── 프로필 섹션 ─── -->
+  <section id="section-profile" hidden>
+    <form class="me-profile" id="profileForm" novalidate>
+      <div class="me-profile-avatar">
+        <img id="profileAvatarPreview" class="me-profile-avatar-img" alt="Profile photo" decoding="async" />
+        <div class="me-profile-avatar-side">
+          <label class="me-btn me-profile-avatar-btn">
+            Change photo
+            <input type="file" id="profileAvatarInput" accept="image/jpeg,image/png,image/webp" hidden />
+          </label>
+          <p class="me-profile-hint">A square image works best. Up to 2MB.</p>
+        </div>
+      </div>
+
+      <label class="me-profile-field">
+        <span class="me-profile-label">Display name</span>
+        <input type="text" id="profileName" maxlength="40" autocomplete="off"
+               placeholder="Shown on comments and the market" />
+      </label>
+
+      <label class="me-profile-field">
+        <span class="me-profile-label">Bio</span>
+        <textarea id="profileBio" maxlength="500" rows="4"
+                  placeholder="A short intro (up to 500 characters)"></textarea>
+        <span class="me-profile-count"><span id="profileBioCount">0</span>/500</span>
+      </label>
+
+      <p class="me-profile-locked">Your sign-in email is managed by your Google account and can't be changed here.</p>
+
+      <div class="me-profile-foot">
+        <button type="submit" class="me-btn me-btn-primary" id="profileSave">Save</button>
+        <span class="me-profile-status" id="profileStatus" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- ─── 사진 섹션 ─── -->
+  <section id="section-photos">
+    <div class="me-tabs">
+      <button type="button" class="me-tab active" data-status="all">All <span class="count" id="cnt-all">·</span></button>
+      <button type="button" class="me-tab" data-status="pending">Pending <span class="count" id="cnt-pending">·</span></button>
+      <button type="button" class="me-tab" data-status="approved">Published <span class="count" id="cnt-approved">·</span></button>
+      <button type="button" class="me-tab" data-status="rejected">Declined <span class="count" id="cnt-rejected">·</span></button>
+    </div>
+    <div class="me-list" id="list">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 매물 섹션 ─── -->
+  <section id="section-market" hidden>
+    <div class="me-market-toolbar">
+      <a href="/en/market.html#new" class="me-btn me-btn-primary">+ New listing</a>
+    </div>
+    <div class="me-list" id="marketList">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 알림 섹션 ─── -->
+  <section id="section-notifs" hidden>
+    <div class="me-notifs-toolbar">
+      <button type="button" class="me-btn" id="notifsMarkAll" hidden>Mark all as read</button>
+    </div>
+    <div class="me-list" id="notifsList">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 메시지 섹션 ─── -->
+  <section id="section-messages" hidden>
+    <div class="me-msg-intro">Messages here go to the editors. Replies may be slower outside business hours.</div>
+    <div class="me-msg-list" id="messagesList">
+      <div class="me-empty">Loading…</div>
+    </div>
+    <div class="me-msg-compose">
+      <textarea id="messageBody" placeholder="Type a message (up to 2000 characters, Ctrl/Cmd + Enter to send)" maxlength="2000"></textarea>
+      <div class="me-msg-compose-foot">
+        <span class="me-msg-compose-count" id="messageCount">0</span>
+        <button type="button" id="messageSend" class="me-btn">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 내 댓글 섹션 ─── -->
+  <section id="section-my-comments" hidden>
+    <div class="me-list" id="myCommentsList">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 내 제안 섹션 ─── -->
+  <section id="section-my-proposals" hidden>
+    <div class="me-list" id="myProposalsList">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 사진 섹션 ─── -->
+  <section id="section-fav-photos" hidden>
+    <div class="me-fav-grid" id="favPhotosGrid">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 필름 섹션 ─── -->
+  <section id="section-fav-films" hidden>
+    <div class="me-fav-films-grid" id="favFilmsGrid">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 웹진 섹션 ─── -->
+  <section id="section-fav-webzine" hidden>
+    <div class="me-fav-films-grid" id="favWebzineGrid">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 좋아한 작가 섹션 ─── -->
+  <section id="section-fav-contributors" hidden>
+    <div class="me-fav-contributors-grid" id="favContributorsGrid">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
+  <!-- ─── 스크랩한 글 섹션 ─── -->
+  <section id="section-fav-articles" hidden>
+    <div class="me-fav-articles-list" id="favArticlesList">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+</div>
+
+<div class="img-zoom" id="imgZoom"><img decoding="async" id="imgZoomTarget" alt="" /></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
+  <script src="/js/db-client.js?v=20261001-en3" defer></script>
+<script src="/js/util.js?v=20261001-en2" defer></script>
+  <script src="/js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
+  <script src="/js/site-common.js?v=20261001-en6" defer></script>
+<script src="/js/me-page.js?v=20260914-visibility" defer></script>
+
+</body>
+</html>
