@@ -249,6 +249,7 @@ function openForm(slug) {
     $('f-aliases').value = aliasesToText(f.aliases);
     $('f-desc').value = f.description || '';
     $('f-descEn').value = f.description_en || '';
+    $('f-descJa').value = f.description_ja || '';
     $('f-canThumbnail').value = f.can_thumbnail || '';
     setCanThumbPreview(f.can_thumbnail || '');
   } else {
@@ -371,6 +372,7 @@ $('filmForm').addEventListener('submit', async (e) => {
       aliases: textToAliases(form.aliases.value),
       description: form.description.value.trim(),
       descriptionEn: form.descriptionEn.value.trim() || null,
+      descriptionJa: form.descriptionJa.value.trim() || null,
       iso: form.iso.value.trim() || null,
       type: form.type.value.trim() || null,
       format: form.format.value.trim() || null,

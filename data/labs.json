@@ -56,7 +56,10 @@
       },
       "nameEn": "Gallery Photo Studio",
       "addressEn": "1F, Samsung Bldg., 642 Samseong-ro, Gangnam-gu, Seoul",
-      "featuresEn": "High-resolution option (up to 3600×5400).\nScan only: 3,000 won per roll. Development adds 4,000 won per roll."
+      "featuresEn": "High-resolution option (up to 3600×5400).\nScan only: 3,000 won per roll. Development adds 4,000 won per roll.",
+      "nameJa": "ギャラリー写真館",
+      "addressJa": "ソウル特別市 江南区 三成路 642 サムスンビル 1階",
+      "featuresJa": "高解像度オプション(最大3600×5400)。\nスキャンのみ1本3,000ウォン、現像を加えると1本につき4,000ウォン追加。"
     },
     {
       "name": "고래사진관",
@@ -111,7 +114,10 @@
       },
       "nameEn": "Gorae Photo Studio",
       "addressEn": "3F, 31 Mareunnae-ro 2-gil, Jung-gu, Seoul",
-      "featuresEn": "Sells development and scan vouchers. Self-scanning available."
+      "featuresEn": "Sells development and scan vouchers. Self-scanning available.",
+      "nameJa": "コレ写真館",
+      "addressJa": "ソウル特別市 中区 マルンネ路2ギル 31 3階",
+      "featuresJa": "現像・スキャン券を販売。セルフスキャンもできる。"
     },
     {
       "name": "낙성대사진관",
@@ -166,7 +172,10 @@
       },
       "nameEn": "Nakseongdae Photo Studio",
       "addressEn": "2F, 582 Bongcheon-ro, Gwanak-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "落星垈写真館",
+      "addressJa": "ソウル特別市 冠岳区 奉天路 582 2階",
+      "featuresJa": null
     },
     {
       "name": "다크룸서울",
@@ -221,7 +230,10 @@
       },
       "nameEn": "Darkroom Seoul",
       "addressEn": "2F, 26 Eoulmadang-ro 5-gil, Mapo-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ダークルーム・ソウル",
+      "addressJa": "ソウル特別市 麻浦区 オウルマダン路5ギル 26 2階",
+      "featuresJa": null
     },
     {
       "name": "달의바다",
@@ -276,7 +288,10 @@
       },
       "nameEn": "Dalui Bada",
       "addressEn": "Basement, 173 Jangmal-ro, Wonmi-gu, Bucheon-si, Gyeonggi-do",
-      "featuresEn": "Photo studio and film lab.\nRuns one-day classes in black-and-white darkroom printing."
+      "featuresEn": "Photo studio and film lab.\nRuns one-day classes in black-and-white darkroom printing.",
+      "nameJa": "タレバダ",
+      "addressJa": "京畿道 富川市 遠美区 チャンマル路 173 地階",
+      "featuresJa": "写真スタジオ兼現像所。\nモノクロ暗室プリントのワンデークラスを開いている。"
     },
     {
       "name": "동부칼라",
@@ -331,7 +346,10 @@
       },
       "nameEn": "Dongbu Color",
       "addressEn": "81 Bonghwasan-ro, Jungnang-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "東部カラー",
+      "addressJa": "ソウル特別市 中浪区 烽火山路 81",
+      "featuresJa": null
     },
     {
       "name": "망우삼림",
@@ -386,7 +404,10 @@
       },
       "nameEn": "Mangwoosamlim",
       "addressEn": "3F and 4F, 108 Eulji-ro, Jung-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "マンウサムリム",
+      "addressJa": "ソウル特別市 中区 乙支路 108 3階・4階",
+      "featuresJa": null
     },
     {
       "name": "명광스튜디오",
@@ -441,7 +462,10 @@
       },
       "nameEn": "Myeonggwang Studio",
       "addressEn": "2F, Baekma Bldg., 4 Nonhyeon-ro 17-gil, Seocho-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ミョングァンスタジオ",
+      "addressJa": "ソウル特別市 瑞草区 論峴路17ギル 4 ペクマビル 2階",
+      "featuresJa": null
     },
     {
       "name": "미림사진관",
@@ -496,7 +520,10 @@
       },
       "nameEn": "Mirim Photo Studio",
       "addressEn": "1F, 21 Gwangnaru-ro 24-gil, Gwangjin-gu, Seoul (in front of Konkuk University's old main gate)",
-      "featuresEn": "High-resolution scans when paying by cash or bank transfer."
+      "featuresEn": "High-resolution scans when paying by cash or bank transfer.",
+      "nameJa": "ミリム写真館",
+      "addressJa": "ソウル特別市 広津区 クァンナル路24ギル 21 1階(建国大学校 旧正門前)",
+      "featuresJa": "現金払いと口座振込なら高画質でスキャン。"
     },
     {
       "name": "보다봄",
@@ -551,7 +578,10 @@
       },
       "nameEn": "Bodabom",
       "addressEn": "4F, Sophia House Bldg., 1 Supyo-ro, Jung-gu, Seoul",
-      "featuresEn": "Imacon X5 drum scanning, development in dedicated B&W chemistry, premium development, and contact printing available."
+      "featuresEn": "Imacon X5 drum scanning, development in dedicated B&W chemistry, premium development, and contact printing available.",
+      "nameJa": "ボダボム",
+      "addressJa": "ソウル特別市 中区 水標路 1 ソフィアハウスビル 4階",
+      "featuresJa": "Imacon X5のドラムスキャン、モノクロ専用液での現像、プレミアム現像、ベタ焼きに対応。"
     },
     {
       "name": "부광사진관",
@@ -606,7 +636,10 @@
       },
       "nameEn": "Bugwang Photo Studio",
       "addressEn": "1F, 30 Wangsaeng-ro 66beon-gil, Nam-gu, Ulsan",
-      "featuresEn": "Film development and scanning (development only or scan only also available). Also operates as an ID photo studio."
+      "featuresEn": "Film development and scanning (development only or scan only also available). Also operates as an ID photo studio.",
+      "nameJa": "プグァン写真館",
+      "addressJa": "蔚山広域市 南区 ワンセン路66番ギル 30 1階",
+      "featuresJa": "フィルム現像・スキャン(現像のみ、スキャンのみも個別に可)。証明写真スタジオを兼業。"
     },
     {
       "name": "세하포토랩",
@@ -661,7 +694,10 @@
       },
       "nameEn": "Seha Photo Lab",
       "addressEn": "3F, 4 Paldal-ro 35-gil, Buk-gu, Daegu",
-      "featuresEn": "C-41, ECN-2, and B&W film development and scanning. High-resolution scan: 5,000 won extra. TIFF scans for 120 B&W."
+      "featuresEn": "C-41, ECN-2, and B&W film development and scanning. High-resolution scan: 5,000 won extra. TIFF scans for 120 B&W.",
+      "nameJa": "セハフォトラボ",
+      "addressJa": "大邱広域市 北区 八達路35ギル 4 3階",
+      "featuresJa": "C-41・ECN-2・モノクロフィルムの現像とスキャン。高解像度スキャンは5,000ウォン追加。120のモノクロはTIFFでスキャン。"
     },
     {
       "name": "스코피 홍대",
@@ -716,7 +752,10 @@
       },
       "nameEn": "Scopy Hongdae",
       "addressEn": "2F, Hongik Bldg., 17 Yanghwa-ro 18an-gil, Mapo-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "Scopy 弘大",
+      "addressJa": "ソウル特別市 麻浦区 楊花路18アンギル 17 弘益ビル 2階",
+      "featuresJa": null
     },
     {
       "name": "스코피 노량진",
@@ -771,7 +810,10 @@
       },
       "nameEn": "Scopy Noryangjin",
       "addressEn": "164 Jangseungbaegi-ro, Dongjak-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "Scopy 鷺梁津",
+      "addressJa": "ソウル特別市 銅雀区 チャンスンベギ路 164",
+      "featuresJa": null
     },
     {
       "name": "신신칼라",
@@ -826,7 +868,10 @@
       },
       "nameEn": "Sinsin Color",
       "addressEn": "10 Nonhyeon-ro 151-gil, Gangnam-gu, Seoul",
-      "featuresEn": "Choice of Noritsu or Fuji scanner."
+      "featuresEn": "Choice of Noritsu or Fuji scanner.",
+      "nameJa": "シンシンカラー",
+      "addressJa": "ソウル特別市 江南区 論峴路151ギル 10",
+      "featuresJa": "ノーリツとフジのスキャナーを選べる。"
     },
     {
       "name": "에이티사진관",
@@ -881,7 +926,10 @@
       },
       "nameEn": "AT Photo Studio",
       "addressEn": "40 Saejeumeunhae-geori, Jung-gu, Ulsan",
-      "featuresEn": "B&W film development and wet plate photography (by reservation). Also operates as an ID photo studio."
+      "featuresEn": "B&W film development and wet plate photography (by reservation). Also operates as an ID photo studio.",
+      "nameJa": "AT写真館",
+      "addressJa": "蔚山広域市 中区 セジュムネコリ 40",
+      "featuresJa": "モノクロフィルム現像、湿板写真(予約制)。証明写真スタジオを兼業。"
     },
     {
       "name": "엘리카메라",
@@ -936,7 +984,10 @@
       },
       "nameEn": "Ally Camera",
       "addressEn": "Unit 105, 28 Seongam-ro, Mapo-gu, Seoul",
-      "featuresEn": "Film camera specialty store; the shop also works as a film lab."
+      "featuresEn": "Film camera specialty store; the shop also works as a film lab.",
+      "nameJa": "エリーカメラ",
+      "addressJa": "ソウル特別市 麻浦区 ソンアム路 28 105号",
+      "featuresJa": "フィルムカメラの専門店で、店舗兼現像所。"
     },
     {
       "name": "연남 필름",
@@ -991,7 +1042,10 @@
       },
       "nameEn": "Yeonnam Film",
       "addressEn": "Unit 202 (right side), 11 Seongmisan-ro 29an-gil, Mapo-gu, Seoul (Yeonnam-dong)",
-      "featuresEn": "Prices changed on July 10, 2026. Check the website before visiting."
+      "featuresEn": "Prices changed on July 10, 2026. Check the website before visiting.",
+      "nameJa": "延南フィルム",
+      "addressJa": "ソウル特別市 麻浦区 ソンミサン路29アンギル 11 右側202号(延南洞)",
+      "featuresJa": "2026年7月10日に価格が変わった。訪れる前にホームページで確かめておくのが無難。"
     },
     {
       "name": "옥상필름",
@@ -1046,7 +1100,10 @@
       },
       "nameEn": "Oksang Film",
       "addressEn": "4F, 349 Dongho-ro, Jung-gu, Seoul",
-      "featuresEn": "Development and scanning for color, B&W, slide, and motion picture (ECN-2) film, with a choice of standard or high-resolution scans. Medium format film not accepted."
+      "featuresEn": "Development and scanning for color, B&W, slide, and motion picture (ECN-2) film, with a choice of standard or high-resolution scans. Medium format film not accepted.",
+      "nameJa": "オクサンフィルム",
+      "addressJa": "ソウル特別市 中区 東湖路 349 4階",
+      "featuresJa": "カラー・モノクロ・リバーサル・映画用(ECN-2)の現像とスキャン。画質は標準と高解像度から選べる。中判フィルムは扱わない。"
     },
     {
       "name": "우성상사",
@@ -1101,7 +1158,10 @@
       },
       "nameEn": "Useong Trading",
       "addressEn": "31 Donhwamun-ro, Jongno-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ウソン商事",
+      "addressJa": "ソウル特別市 鍾路区 敦化門路 31",
+      "featuresJa": null
     },
     {
       "name": "위켄드 필름",
@@ -1156,7 +1216,10 @@
       },
       "nameEn": "Weekend Film",
       "addressEn": "1F, 36 Changgyeonggung-ro 43-gil, Seongbuk-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ウィークエンドフィルム",
+      "addressJa": "ソウル特別市 城北区 昌慶宮路43ギル 36 1階",
+      "featuresJa": null
     },
     {
       "name": "이룸포토",
@@ -1211,7 +1274,10 @@
       },
       "nameEn": "Eroom Photo",
       "addressEn": "9-10 Jong-ro 11-gil, Jongno-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "イルムフォト",
+      "addressJa": "ソウル特別市 鍾路区 鍾路11ギル 9-10",
+      "featuresJa": null
     },
     {
       "name": "인스튜디오",
@@ -1266,7 +1332,10 @@
       },
       "nameEn": "In Studio",
       "addressEn": "Unit 201, Samnyeong Bldg., 111 Seosomun-ro, Jung-gu, Seoul",
-      "featuresEn": "135 film, 2 rolls or more: 4,000 won."
+      "featuresEn": "135 film, 2 rolls or more: 4,000 won.",
+      "nameJa": "インスタジオ",
+      "addressJa": "ソウル特別市 中区 西小門路 111 サムリョンビル 201号",
+      "featuresJa": "135は2本以上で1本4,000ウォン。"
     },
     {
       "name": "일삼오삼육",
@@ -1321,7 +1390,10 @@
       },
       "nameEn": "135 36",
       "addressEn": "135 36, Unit 302, 41 Supyo-ro 6-gil, Jung-gu, Seoul",
-      "featuresEn": "Color negative: prepaid 4 rolls for 16,000 won (valid 1 year) or 5,500 won per roll. Three scan quality levels; development only and strip scans priced separately."
+      "featuresEn": "Color negative: prepaid 4 rolls for 16,000 won (valid 1 year) or 5,500 won per roll. Three scan quality levels; development only and strip scans priced separately.",
+      "nameJa": "135 36",
+      "addressJa": "ソウル特別市 中区 水標路6ギル 41 302号",
+      "featuresJa": "カラーネガは前払い4本16,000ウォン(1年有効)、または1本5,500ウォン。画質は3段階から選べる。現像のみ・ストリップスキャンは別料金。"
     },
     {
       "name": "일양칼라",
@@ -1376,7 +1448,10 @@
       },
       "nameEn": "Ilyang Color",
       "addressEn": "Basement, Hanoe Bldg., 43 Dadong-gil, Jung-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "イリャンカラー",
+      "addressJa": "ソウル特別市 中区 茶洞ギル 43 ハンウェビル 地下",
+      "featuresJa": null
     },
     {
       "name": "중앙칼라",
@@ -1431,7 +1506,10 @@
       },
       "nameEn": "Joongang Color",
       "addressEn": "Unit 2, B1, New Geumho Tower, 12 Eulji-ro 44-gil, Jung-gu, Seoul",
-      "featuresEn": "Listed prices are for the Noritsu scanner. Fuji scanner: 4,000, 6,000, or 9,000 won. Scans can include APS perforations."
+      "featuresEn": "Listed prices are for the Noritsu scanner. Fuji scanner: 4,000, 6,000, or 9,000 won. Scans can include APS perforations.",
+      "nameJa": "中央カラー",
+      "addressJa": "ソウル特別市 中区 乙支路44ギル 12 ニュークムホタワー 地下1階 2号",
+      "featuresJa": "表示価格はノーリツ基準。フジのスキャナーは4,000・6,000・9,000ウォン。APSはパーフォレーションまでスキャンできる。"
     },
     {
       "name": "청계사진관",
@@ -1486,7 +1564,10 @@
       },
       "nameEn": "Cheonggye Photo Studio",
       "addressEn": "2F, 184 Cheonggyecheon-ro, Jung-gu, Seoul",
-      "featuresEn": "The lowest resolution tier (1512×1002) is not included."
+      "featuresEn": "The lowest resolution tier (1512×1002) is not included.",
+      "nameJa": "清渓写真館",
+      "addressJa": "ソウル特別市 中区 清渓川路 184 2階",
+      "featuresJa": "最低画質(1512×1002)の等級は除く。"
     },
     {
       "name": "취미사",
@@ -1541,7 +1622,10 @@
       },
       "nameEn": "Chwimisa",
       "addressEn": "Chwimisa, 9 Sungmun 16-gil, Mapo-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "趣味社",
+      "addressJa": "ソウル特別市 麻浦区 崇文16ギル 9",
+      "featuresJa": null
     },
     {
       "name": "Color Lab",
@@ -1596,7 +1680,10 @@
       },
       "nameEn": "Color Lab",
       "addressEn": "4F, Yungwang Bldg., 6 Gaepo-ro 34-gil, Gangnam-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "Color Lab",
+      "addressJa": "ソウル特別市 江南区 開浦路34ギル 6 ユングァンビル 4階",
+      "featuresJa": null
     },
     {
       "name": "코닥 안국점",
@@ -1651,7 +1738,10 @@
       },
       "nameEn": "Kodak Anguk",
       "addressEn": "55 Yulgok-ro, Jongno-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "Kodak 安国店",
+      "addressJa": "ソウル特別市 鍾路区 栗谷路 55",
+      "featuresJa": null
     },
     {
       "name": "타임포토",
@@ -1706,7 +1796,10 @@
       },
       "nameEn": "Time Photo",
       "addressEn": "3F, 179-1 Toegye-ro, Jung-gu, Seoul",
-      "featuresEn": "Medium format priced by frame size: 6×4.5 12,000 won, 6×6 10,000 won, 6×7 9,000 won (color). B&W +2,000 won, slide +3,000 won."
+      "featuresEn": "Medium format priced by frame size: 6×4.5 12,000 won, 6×6 10,000 won, 6×7 9,000 won (color). B&W +2,000 won, slide +3,000 won.",
+      "nameJa": "タイムフォト",
+      "addressJa": "ソウル特別市 中区 退渓路 179-1 3階",
+      "featuresJa": "中判フィルムはフォーマットごとに料金が異なる。6×4.5は12,000ウォン、6×6は10,000ウォン、6×7は9,000ウォン(カラー基準)。モノクロは2,000ウォン、リバーサルは3,000ウォン追加。"
     },
     {
       "name": "태그원스튜디오",
@@ -1761,7 +1854,10 @@
       },
       "nameEn": "Tag1 Studio",
       "addressEn": "B1, 264 Baekjegobun-ro, Songpa-gu, Seoul",
-      "featuresEn": "ID, profile, and family photo studio that also develops film. 35mm color and B&W development and scanning."
+      "featuresEn": "ID, profile, and family photo studio that also develops film. 35mm color and B&W development and scanning.",
+      "nameJa": "タグワンスタジオ",
+      "addressJa": "ソウル特別市 松坡区 百済古墳路 264 地下1階",
+      "featuresJa": "証明・プロフィール・家族写真のスタジオ兼現像所。35mmのカラー・モノクロの現像とスキャン。"
     },
     {
       "name": "팔레트 사진관",
@@ -1816,7 +1912,10 @@
       },
       "nameEn": "Palette Photo Studio",
       "addressEn": "2F, 3 Jayangbeonyeong-ro 13-gil, Gwangjin-gu, Seoul",
-      "featuresEn": "Motion picture film is developed in C-41 (not ECN-2)."
+      "featuresEn": "Motion picture film is developed in C-41 (not ECN-2).",
+      "nameJa": "パレット写真館",
+      "addressJa": "ソウル特別市 広津区 紫陽繁栄路13ギル 3 2階",
+      "featuresJa": "映画用フィルムの現像にはC-41を使う(ECN-2ではない)。"
     },
     {
       "name": "포토마루",
@@ -1871,7 +1970,10 @@
       },
       "nameEn": "Fotomaru",
       "addressEn": "2-1 Supyo-ro 6-gil, Jung-gu, Seoul",
-      "featuresEn": "Develops APS, 110, 127, 126, 220, 620, 820, and Minox."
+      "featuresEn": "Develops APS, 110, 127, 126, 220, 620, 820, and Minox.",
+      "nameJa": "フォトマル",
+      "addressJa": "ソウル特別市 中区 水標路6ギル 2-1",
+      "featuresJa": "APS・110・127・126・220・620・820・Minoxの現像に対応。"
     },
     {
       "name": "포토위드",
@@ -1926,7 +2028,10 @@
       },
       "nameEn": "Photowith",
       "addressEn": "Unit 408-1, 4F, Le Meilleur Jongno Town, 19 Jong-ro, Jongno-gu, Seoul",
-      "featuresEn": "Medium format scanning temporarily suspended."
+      "featuresEn": "Medium format scanning temporarily suspended.",
+      "nameJa": "フォトウィズ",
+      "addressJa": "ソウル特別市 鍾路区 鍾路 19 ル・メイエール鍾路タウン 4階 408-1号",
+      "featuresJa": "中判フィルムのスキャンは一時中断中。"
     },
     {
       "name": "포토플러스",
@@ -1981,7 +2086,10 @@
       },
       "nameEn": "Photo Plus",
       "addressEn": "#3160, 3F, Starfield Goyang, 1955 Goyang-daero, Deogyang-gu, Goyang-si, Gyeonggi-do",
-      "featuresEn": "Has a Naver Smart Store shop."
+      "featuresEn": "Has a Naver Smart Store shop.",
+      "nameJa": "フォトプラス",
+      "addressJa": "京畿道 高陽市 徳陽区 高陽大路 1955 スターフィールド高陽 3階 #3160",
+      "featuresJa": "NAVERスマートストアに出店。"
     },
     {
       "name": "포토피아",
@@ -2036,7 +2144,10 @@
       },
       "nameEn": "Photopia",
       "addressEn": "9 Supyo-ro 6-gil, Jung-gu, Seoul",
-      "featuresEn": "Prices vary by the number of exposures."
+      "featuresEn": "Prices vary by the number of exposures.",
+      "nameJa": "フォトピア",
+      "addressJa": "ソウル特別市 中区 水標路6ギル 9",
+      "featuresJa": "フィルムの撮影枚数によって価格が変わる。"
     },
     {
       "name": "픽커서울",
@@ -2091,7 +2202,10 @@
       },
       "nameEn": "Picker Seoul",
       "addressEn": "B2, KJ Tower, 207 Bongeunsa-ro, Gangnam-gu, Seoul",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ピッカーソウル",
+      "addressJa": "ソウル特別市 江南区 奉恩寺路 207 KJタワー 地下2階",
+      "featuresJa": null
     },
     {
       "name": "필름로그 서울",
@@ -2146,7 +2260,10 @@
       },
       "nameEn": "Filmlog Seoul",
       "addressEn": "1F, 10 Toegye-ro 68-gil, Jung-gu, Seoul",
-      "featuresEn": "Color and B&W development + scan (choice of M or L resolution). Scan only available."
+      "featuresEn": "Color and B&W development + scan (choice of M or L resolution). Scan only available.",
+      "nameJa": "フィルムログ ソウル",
+      "addressJa": "ソウル特別市 中区 退渓路68ギル 10 1階",
+      "featuresJa": "カラー・モノクロの現像+スキャン(M・L画質から選択)。スキャンのみも可。"
     },
     {
       "name": "필름로그 제주",
@@ -2201,7 +2318,10 @@
       },
       "nameEn": "Filmlog Jeju",
       "addressEn": "37 Seogwang-ro 11-gil, Jeju-si, Jeju-do",
-      "featuresEn": "Color and B&W development + scan (choice of M or L resolution). Scan only available."
+      "featuresEn": "Color and B&W development + scan (choice of M or L resolution). Scan only available.",
+      "nameJa": "フィルムログ 済州",
+      "addressJa": "済州特別自治道 済州市 ソグァン路11ギル 37",
+      "featuresJa": "カラー・モノクロの現像+スキャン(M・L画質から選択)。スキャンのみも可。"
     },
     {
       "name": "한일포토",
@@ -2256,7 +2376,10 @@
       },
       "nameEn": "Hanil Photo",
       "addressEn": "Unit 202, 2F, 212 Deungchon-ro, Yangcheon-gu, Seoul",
-      "featuresEn": "1,000 won extra for card payment."
+      "featuresEn": "1,000 won extra for card payment.",
+      "nameJa": "ハニルフォト",
+      "addressJa": "ソウル特別市 陽川区 登村路 212 2階 202号",
+      "featuresJa": "カード払いは1,000ウォン追加。"
     },
     {
       "name": "홍대포토랜드",
@@ -2311,7 +2434,10 @@
       },
       "nameEn": "Hongdae Photoland",
       "addressEn": "8 Worldcupbuk-ro 4-gil, Mapo-gu, Seoul",
-      "featuresEn": "Except for color negative, listed prices are for development only (scan not included)."
+      "featuresEn": "Except for color negative, listed prices are for development only (scan not included).",
+      "nameJa": "弘大フォトランド",
+      "addressJa": "ソウル特別市 麻浦区 ワールドカップ北路4ギル 8",
+      "featuresJa": "カラーネガ以外の表示価格は現像のみ(スキャンは含まない)。"
     },
     {
       "name": "홍포토",
@@ -2366,7 +2492,10 @@
       },
       "nameEn": "Hong Photo",
       "addressEn": "19 Yulgok-ro 19-gil, Jongno-gu, Seoul",
-      "featuresEn": "APS film development available."
+      "featuresEn": "APS film development available.",
+      "nameJa": "ホンフォト",
+      "addressJa": "ソウル特別市 鍾路区 栗谷路19ギル 19",
+      "featuresJa": "APSフィルムの現像に対応。"
     },
     {
       "name": "B&W 흑백 현상소",
@@ -2421,7 +2550,10 @@
       },
       "nameEn": "B&W Film Lab",
       "addressEn": "B&W Film Lab, 3F, 35 Mareunnae-ro 2-gil, Jung-gu, Seoul",
-      "featuresEn": "Black-and-white only. Development 6,000 won, scan 4,000 won, development + scan 10,000 won. 4×5 development and contact printing available."
+      "featuresEn": "Black-and-white only. Development 6,000 won, scan 4,000 won, development + scan 10,000 won. 4×5 development and contact printing available.",
+      "nameJa": "B&W モノクロ現像所",
+      "addressJa": "ソウル特別市 中区 マルンネ路2ギル 35 3階",
+      "featuresJa": "モノクロ専門の現像所。現像6,000ウォン、スキャン4,000ウォン、現像+スキャン10,000ウォン。4×5の現像とベタ焼きに対応。"
     },
     {
       "name": "해당화 사진관",
@@ -2476,7 +2608,10 @@
       },
       "nameEn": "Haedanghwa Photo Studio",
       "addressEn": "1F, 288 Jemullyang-ro, Jung-gu, Incheon",
-      "featuresEn": "Color development 5,000 won (3 rolls 13,000 won), high-resolution scan option, B&W development + scan 12,000 won. Also operates as an ID photo studio."
+      "featuresEn": "Color development 5,000 won (3 rolls 13,000 won), high-resolution scan option, B&W development + scan 12,000 won. Also operates as an ID photo studio.",
+      "nameJa": "ヘダンファ写真館",
+      "addressJa": "仁川広域市 中区 済物梁路 288 1階",
+      "featuresJa": "カラー現像5,000ウォン(3本で13,000ウォン)、高画質スキャンのオプションあり。モノクロ現像+スキャン12,000ウォン。証明写真スタジオを兼業。"
     },
     {
       "name": "정우 현상소",
@@ -2531,7 +2666,10 @@
       },
       "nameEn": "Jeongwoo Film Lab",
       "addressEn": "167-1 Jemullyang-ro, Jung-gu, Incheon",
-      "featuresEn": "Fuji scanner by default; Noritsu scanner available for 2,000 won extra."
+      "featuresEn": "Fuji scanner by default; Noritsu scanner available for 2,000 won extra.",
+      "nameJa": "チョンウ現像所",
+      "addressJa": "仁川広域市 中区 済物梁路 167-1",
+      "featuresJa": "フジのスキャナーが基本で、2,000ウォン追加でノーリツのスキャナーも選べる。"
     },
     {
       "name": "카메라 사진관",
@@ -2586,7 +2724,10 @@
       },
       "nameEn": "Camera Photo Studio",
       "addressEn": "2F, Building B, Sangsang Bldg., 11-13 Seongmal-ro 44beon-gil, Namdong-gu, Incheon",
-      "featuresEn": "Darkroom experience available."
+      "featuresEn": "Darkroom experience available.",
+      "nameJa": "カメラ写真館",
+      "addressJa": "仁川広域市 南洞区 ソンマル路44番ギル 11-13 サンサンビル B棟 2階",
+      "featuresJa": "暗室体験ができる。"
     },
     {
       "name": "판교 코닥",
@@ -2641,7 +2782,10 @@
       },
       "nameEn": "Pangyo Kodak",
       "addressEn": "Hoban Metrocube, 31 Daewangpangyo-ro 606beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do",
-      "featuresEn": "Uses a Noritsu scanner. B&W development is outsourced."
+      "featuresEn": "Uses a Noritsu scanner. B&W development is outsourced.",
+      "nameJa": "板橋 Kodak",
+      "addressJa": "京畿道 城南市 盆唐区 大王板橋路606番ギル 31(ホバン・メトロキューブ)",
+      "featuresJa": "ノーリツのスキャナーを使用。モノクロは外注で現像。"
     },
     {
       "name": "이터너블",
@@ -2696,7 +2840,10 @@
       },
       "nameEn": "Eternable",
       "addressEn": "Eternable (Film Paradise), Unit 301-5, 3F, Seonmyeong Plaza, 23 Sanhyeon-ro 78beon-gil, Ilsanseo-gu, Goyang-si, Gyeonggi-do",
-      "featuresEn": "B&W development limited to XP2."
+      "featuresEn": "B&W development limited to XP2.",
+      "nameJa": "エターナブル",
+      "addressJa": "京畿道 高陽市 一山西区 サンヒョン路78番ギル 23 ソンミョンプラザ 3階 301-5号 エターナブル(フィルム天国)",
+      "featuresJa": "モノクロはXP2に限り現像できる。"
     },
     {
       "name": "리틀베어 스튜디오",
@@ -2751,7 +2898,10 @@
       },
       "nameEn": "Little Bear Studio",
       "addressEn": "Unit 214, Building C, 32-34 Mugunghwa-ro, Ilsandong-gu, Goyang-si, Gyeonggi-do",
-      "featuresEn": "Uses a Noritsu scanner. 6 to 10 rolls: 5,500 won per roll. 11 rolls or more: 5,000 won per roll."
+      "featuresEn": "Uses a Noritsu scanner. 6 to 10 rolls: 5,500 won per roll. 11 rolls or more: 5,000 won per roll.",
+      "nameJa": "リトルベア・スタジオ",
+      "addressJa": "京畿道 高陽市 一山東区 ムグンファ路 32-34 C棟 214号",
+      "featuresJa": "ノーリツのスキャナーを使用。6〜10本は1本5,500ウォン、11本以上は1本5,000ウォン。"
     },
     {
       "name": "수원 칼라 현상소",
@@ -2806,7 +2956,10 @@
       },
       "nameEn": "Suwon Color Film Lab",
       "addressEn": "4 Jeongjo-ro 777beon-gil, Paldal-gu, Suwon-si, Gyeonggi-do",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "水原カラー現像所",
+      "addressJa": "京畿道 水原市 八達区 正祖路777番ギル 4",
+      "featuresJa": null
     },
     {
       "name": "야탑포토",
@@ -2861,7 +3014,10 @@
       },
       "nameEn": "Yatap Photo",
       "addressEn": "Unit 107, Bundang Jonghap Sangga, 24-8 Yatap-ro 69beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do",
-      "featuresEn": "Accepts orders by mail. For color negative, the scan price includes development; B&W and slide development are charged separately. APS available."
+      "featuresEn": "Accepts orders by mail. For color negative, the scan price includes development; B&W and slide development are charged separately. APS available.",
+      "nameJa": "野塔フォト",
+      "addressJa": "京畿道 城南市 盆唐区 野塔路69番ギル 24-8 盆唐総合商街 107号",
+      "featuresJa": "郵送で受け付ける。カラーネガはスキャン料金に現像代を含み、モノクロ・リバーサルは現像が別料金。APSに対応。"
     },
     {
       "name": "모란 현상소",
@@ -2916,7 +3072,10 @@
       },
       "nameEn": "Moran Film Lab",
       "addressEn": "5 Seongnam-daero 1151beon-gil, Jungwon-gu, Seongnam-si, Gyeonggi-do",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "モラン現像所",
+      "addressJa": "京畿道 城南市 中原区 城南大路1151番ギル 5",
+      "featuresJa": null
     },
     {
       "name": "미금포토",
@@ -2971,7 +3130,10 @@
       },
       "nameEn": "Migeum Photo",
       "addressEn": "Unit 108, Sun Plaza, 79 Dolma-ro, Bundang-gu, Seongnam-si, Gyeonggi-do",
-      "featuresEn": "Color negative: one free roll after 10 rolls developed (stamp card)."
+      "featuresEn": "Color negative: one free roll after 10 rolls developed (stamp card).",
+      "nameJa": "ミグムフォト",
+      "addressJa": "京畿道 城南市 盆唐区 トルマ路 79 サンプラザ 108号",
+      "featuresJa": "カラーネガを10本現像すると1本無料(スタンプ制)。"
     },
     {
       "name": "포토닉스",
@@ -3026,7 +3188,10 @@
       },
       "nameEn": "Photonics",
       "addressEn": "Photonics, 2F, 31 Gungdong-ro 18beon-gil, Yuseong-gu, Daejeon",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "フォトニクス",
+      "addressJa": "大田広域市 儒城区 宮洞路18番ギル 31 2階",
+      "featuresJa": null
     },
     {
       "name": "슈퍼포토마켓",
@@ -3081,7 +3246,10 @@
       },
       "nameEn": "Super Photo Market",
       "addressEn": "Unit 107, Daeyeong Plaza, 36 Dunsanbuk-ro, Seo-gu, Daejeon",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "スーパーフォトマーケット",
+      "addressJa": "大田広域市 西区 屯山北路 36 テヨンプラザ 107号",
+      "featuresJa": null
     },
     {
       "name": "올리브 칼라",
@@ -3136,7 +3304,10 @@
       },
       "nameEn": "Olive Color",
       "addressEn": "67 Dongseong-ro 3-gil, Jung-gu, Daegu",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "オリーブカラー",
+      "addressJa": "大邱広域市 中区 東城路3ギル 67",
+      "featuresJa": null
     },
     {
       "name": "the 35mm",
@@ -3191,7 +3362,10 @@
       },
       "nameEn": "the 35mm",
       "addressEn": "Dangol Photo Studio, 2F, 85 Gongpyeong-ro, Jung-gu, Daegu",
-      "featuresEn": "Send your film with a USB drive and the scan files come back on that drive."
+      "featuresEn": "Send your film with a USB drive and the scan files come back on that drive.",
+      "nameJa": "the 35mm",
+      "addressJa": "大邱広域市 中区 公平路 85 2階 タンゴル写真館",
+      "featuresJa": "フィルムとUSBメモリを一緒に送ると、スキャンデータをそのUSBに入れて返送してくれる。"
     },
     {
       "name": "솔리스트",
@@ -3246,7 +3420,10 @@
       },
       "nameEn": "Solist",
       "addressEn": "207 Myeongdeok-ro, Jung-gu, Daegu",
-      "featuresEn": "Entire process done by hand. Listed prices are for contact prints, not scans. Scans: 2,500 won for 135, 3,000 won for 120."
+      "featuresEn": "Entire process done by hand. Listed prices are for contact prints, not scans. Scans: 2,500 won for 135, 3,000 won for 120.",
+      "nameJa": "ソリスト",
+      "addressJa": "大邱広域市 中区 明徳路 207",
+      "featuresJa": "全工程が手作業。表示価格はスキャンではなくベタ焼きの料金で、スキャンは135が2,500ウォン、120が3,000ウォン。"
     },
     {
       "name": "포토매직",
@@ -3301,7 +3478,10 @@
       },
       "nameEn": "Photomagic",
       "addressEn": "Baekhap Bookstore, 284 Jungang-daero, Jung-gu, Daegu",
-      "featuresEn": "Imacon 848 drum scanner and Noritsu scanner. B&W and slide scans offered at 5MB, 18MB, and 60MB (listed prices are for 5MB and 18MB)."
+      "featuresEn": "Imacon 848 drum scanner and Noritsu scanner. B&W and slide scans offered at 5MB, 18MB, and 60MB (listed prices are for 5MB and 18MB).",
+      "nameJa": "フォトマジック",
+      "addressJa": "大邱広域市 中区 中央大路 284 ペクハプ書店",
+      "featuresJa": "Imacon 848のドラムスキャン、ノーリツのスキャナー。モノクロ・リバーサルは5MB・18MB・60MBの画質を用意(表示価格は5MB・18MB基準)。"
     },
     {
       "name": "헤르츠삼오 대구점",
@@ -3356,7 +3536,10 @@
       },
       "nameEn": "Hertz35 Daegu",
       "addressEn": "1F, 58 Dongseong-ro 1-gil, Jung-gu, Daegu",
-      "featuresEn": "Film development and scanning. Sells film cameras and lends them for free."
+      "featuresEn": "Film development and scanning. Sells film cameras and lends them for free.",
+      "nameJa": "Hertz35 大邱店",
+      "addressJa": "大邱広域市 中区 東城路1ギル 58 1階",
+      "featuresJa": "フィルム現像・スキャン、フィルムカメラの販売と無料レンタル。"
     },
     {
       "name": "헤르츠삼오 부산점",
@@ -3411,7 +3594,10 @@
       },
       "nameEn": "Hertz35 Busan",
       "addressEn": "1F, 60 Seojeon-ro 46beon-gil, Busanjin-gu, Busan",
-      "featuresEn": "Film development and scanning. Sells film cameras and lends them for free."
+      "featuresEn": "Film development and scanning. Sells film cameras and lends them for free.",
+      "nameJa": "Hertz35 釜山店",
+      "addressJa": "釜山広域市 釜山鎮区 ソジョン路46番ギル 60 1階",
+      "featuresJa": "フィルム現像・スキャン、フィルムカメラの販売と無料レンタル。"
     },
     {
       "name": "석주 사진관",
@@ -3466,7 +3652,10 @@
       },
       "nameEn": "Seokju Photo Studio",
       "addressEn": "17 Bongsanmunhwa-gil, Jung-gu, Daegu",
-      "featuresEn": "Also operates as Jaejae Sanghoe and Jaejae Project. Currently closed for construction; film development expected to resume in the fall."
+      "featuresEn": "Also operates as Jaejae Sanghoe and Jaejae Project. Currently closed for construction; film development expected to resume in the fall.",
+      "nameJa": "ソクチュ写真館",
+      "addressJa": "大邱広域市 中区 鳳山文化ギル 17",
+      "featuresJa": "ジェジェ商会・ジェジェプロジェクトとしても営業。現在は工事のため休業中で、秋に現像を再開する予定。"
     },
     {
       "name": "대구 칼라",
@@ -3521,7 +3710,10 @@
       },
       "nameEn": "Daegu Color",
       "addressEn": "12 Dongseong-ro 6-gil, Jung-gu, Daegu",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "大邱カラー",
+      "addressJa": "大邱広域市 中区 東城路6ギル 12",
+      "featuresJa": null
     },
     {
       "name": "88필름",
@@ -3576,7 +3768,10 @@
       },
       "nameEn": "88 Film",
       "addressEn": "27 Apsansunhwan-ro 95-gil, Nam-gu, Daegu",
-      "featuresEn": "Run by Project88. Unstaffed drop-off point at 2F, 31-14 Seoseong-ro, Jung-gu, Daegu."
+      "featuresEn": "Run by Project88. Unstaffed drop-off point at 2F, 31-14 Seoseong-ro, Jung-gu, Daegu.",
+      "nameJa": "88フィルム",
+      "addressJa": "大邱広域市 南区 アプサン循環路95ギル 27",
+      "featuresJa": "プロジェクト88が運営。大邱 中区 西城路 31-14 2階に無人の受付所がある。"
     },
     {
       "name": "현풍미도디지털사진관",
@@ -3631,7 +3826,10 @@
       },
       "nameEn": "Hyeonpung Mido Digital Photo Studio",
       "addressEn": "63 Hyeonpungjungang-ro, Hyeonpung-eup, Dalseong-gun, Daegu",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "玄風ミドデジタル写真館",
+      "addressJa": "大邱広域市 達城郡 玄風邑 玄風中央路 63",
+      "featuresJa": null
     },
     {
       "name": "필름로그 경주점",
@@ -3686,7 +3884,10 @@
       },
       "nameEn": "Filmlog Gyeongju",
       "addressEn": "2F, 10 Jungang-ro, Gyeongju-si, Gyeongsangbuk-do",
-      "featuresEn": "Choice of scanner."
+      "featuresEn": "Choice of scanner.",
+      "nameJa": "フィルムログ 慶州店",
+      "addressJa": "慶尚北道 慶州市 中央路 10 2階",
+      "featuresJa": "スキャナーを選べる。"
     },
     {
       "name": "바라보다 사진관 (경주필름)",
@@ -3741,7 +3942,10 @@
       },
       "nameEn": "Baraboda Photo Studio (Gyeongju Film)",
       "addressEn": "Baraboda Photo Studio, 3F, 7 Wonhyo-ro 105beon-gil, Gyeongju-si, Gyeongsangbuk-do",
-      "featuresEn": "Run by Baraboda Photo Studio. Film orders are taken through its Naver store. Sells motion picture film."
+      "featuresEn": "Run by Baraboda Photo Studio. Film orders are taken through its Naver store. Sells motion picture film.",
+      "nameJa": "パラボダ写真館(慶州フィルム)",
+      "addressJa": "慶尚北道 慶州市 元暁路105番ギル 7 3階 パラボダ写真館",
+      "featuresJa": "パラボダ写真館が運営し、フィルムの受付はNAVERストアで。映画用フィルムも販売。"
     },
     {
       "name": "디지털 희망칼라",
@@ -3796,7 +4000,10 @@
       },
       "nameEn": "Digital Heemang Color",
       "addressEn": "257 Jungheung-ro, Buk-gu, Pohang-si, Gyeongsangbuk-do",
-      "featuresEn": "Develops on Mondays, Wednesdays, and Fridays."
+      "featuresEn": "Develops on Mondays, Wednesdays, and Fridays.",
+      "nameJa": "デジタル希望カラー",
+      "addressJa": "慶尚北道 浦項市 北区 中興路 257",
+      "featuresJa": "毎週月・水・金に現像。"
     },
     {
       "name": "실개천 사진관",
@@ -3851,7 +4058,10 @@
       },
       "nameEn": "Silgaecheon Photo Studio",
       "addressEn": "Silgaecheon Photo Studio, Unit 102, 1F, 10-1 Jungangsangga-gil, Buk-gu, Pohang-si, Gyeongsangbuk-do",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "シルゲチョン写真館",
+      "addressJa": "慶尚北道 浦項市 北区 中央商街ギル 10-1 1階 102号",
+      "featuresJa": null
     },
     {
       "name": "공단 칼라",
@@ -3906,7 +4116,10 @@
       },
       "nameEn": "Gongdan Color",
       "addressEn": "587 Wonidae-ro, Seongsan-gu, Changwon-si, Gyeongsangnam-do",
-      "featuresEn": "The only film lab in Changwon. Develops on Mondays, Wednesdays, and Fridays."
+      "featuresEn": "The only film lab in Changwon. Develops on Mondays, Wednesdays, and Fridays.",
+      "nameJa": "工団カラー",
+      "addressJa": "慶尚南道 昌原市 城山区 ウォニ大路 587",
+      "featuresJa": "昌原で唯一の現像所。月・水・金に現像。"
     },
     {
       "name": "동광칼라현상소",
@@ -3961,7 +4174,10 @@
       },
       "nameEn": "Donggwang Color Film Lab",
       "addressEn": "667 Namgang-ro, Jinju-si, Gyeongsangnam-do",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "東光カラー現像所",
+      "addressJa": "慶尚南道 晋州市 南江路 667",
+      "featuresJa": null
     },
     {
       "name": "홍명코닥칼라",
@@ -4016,7 +4232,10 @@
       },
       "nameEn": "Hongmyeong Kodak Color",
       "addressEn": "199 Jungang-ro, Dong-gu, Daejeon",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ホンミョン・コダックカラー",
+      "addressJa": "大田広域市 東区 中央路 199",
+      "featuresJa": null
     },
     {
       "name": "행복찾기현상소",
@@ -4071,7 +4290,10 @@
       },
       "nameEn": "Haengbokchatgi Film Lab",
       "addressEn": "91-18 Junggyo-ro, Jung-gu, Daejeon",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ヘンボクチャッキ現像所",
+      "addressJa": "大田広域市 中区 中橋路 91-18",
+      "featuresJa": null
     },
     {
       "name": "모던 이미지 (한암)",
@@ -4126,7 +4348,10 @@
       },
       "nameEn": "Modern Image (Hanam)",
       "addressEn": "19 Meokgeori 8-gil, Dongnam-gu, Cheonan-si, Chungcheongnam-do",
-      "featuresEn": "Formerly Hanam Studio."
+      "featuresEn": "Formerly Hanam Studio.",
+      "nameJa": "モダンイメージ(ハナム)",
+      "addressJa": "忠清南道 天安市 東南区 モッコリ8ギル 19",
+      "featuresJa": "旧ハナムスタジオ。"
     },
     {
       "name": "행복한날 스튜디오",
@@ -4181,7 +4406,10 @@
       },
       "nameEn": "Haengbokhannal Studio",
       "addressEn": "764 Seobu-daero, Seobuk-gu, Cheonan-si, Chungcheongnam-do",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "ヘンボッカンナル・スタジオ",
+      "addressJa": "忠清南道 天安市 西北区 西部大路 764",
+      "featuresJa": null
     },
     {
       "name": "수석동 사진관",
@@ -4236,7 +4464,10 @@
       },
       "nameEn": "Suseok-dong Photo Studio",
       "addressEn": "Photo Classic, 1F, 4 Jeongjugol 6-gil, Seosan-si, Chungcheongnam-do",
-      "featuresEn": "Also operates as Photo Classic."
+      "featuresEn": "Also operates as Photo Classic.",
+      "nameJa": "スソクトン写真館",
+      "addressJa": "忠清南道 瑞山市 チョンジュゴル6ギル 4 1階 フォトクラシック",
+      "featuresJa": "フォトクラシックとしても営業。"
     },
     {
       "name": "달팽이 사진관",
@@ -4291,7 +4522,10 @@
       },
       "nameEn": "Dalpaengi Photo Studio",
       "addressEn": "59 Myeongdong-gil, Dongnam-gu, Cheonan-si, Chungcheongnam-do",
-      "featuresEn": "Photo studio specializing in B&W film. Darkroom lessons available."
+      "featuresEn": "Photo studio specializing in B&W film. Darkroom lessons available.",
+      "nameJa": "タルペンイ写真館",
+      "addressJa": "忠清南道 天安市 東南区 明洞ギル 59",
+      "featuresJa": "モノクロフィルム専門の写真館。暗室の講習も受けられる。"
     },
     {
       "name": "코아칼라현상소",
@@ -4346,7 +4580,10 @@
       },
       "nameEn": "Koa Color Film Lab",
       "addressEn": "190 Paldal-ro, Wansan-gu, Jeonju-si, Jeonbuk State",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "コアカラー現像所",
+      "addressJa": "全北特別自治道 全州市 完山区 八達路 190",
+      "featuresJa": null
     },
     {
       "name": "중앙칼라현상소",
@@ -4401,7 +4638,10 @@
       },
       "nameEn": "Jungang Color Film Lab",
       "addressEn": "Park Land, 207 Seokjeong-ro, Buan-eup, Buan-gun, Jeonbuk State",
-      "featuresEn": "Development is outsourced to Jeonju. Development 8,000 won, email delivery 5,000 won."
+      "featuresEn": "Development is outsourced to Jeonju. Development 8,000 won, email delivery 5,000 won.",
+      "nameJa": "中央カラー現像所",
+      "addressJa": "全北特別自治道 扶安郡 扶安邑 ソクチョン路 207 パークランド",
+      "featuresJa": "全州に外注して現像。現像代8,000ウォン、メール送信料5,000ウォン。"
     },
     {
       "name": "베르베르스튜디오 (매직포토)",
@@ -4456,7 +4696,10 @@
       },
       "nameEn": "Berber Studio (Magic Photo)",
       "addressEn": "75 Yongso-ro, Deokjin-gu, Jeonju-si, Jeonbuk State",
-      "featuresEn": "Magic Photo has merged into Berber Studio."
+      "featuresEn": "Magic Photo has merged into Berber Studio.",
+      "nameJa": "ベルベル・スタジオ(マジックフォト)",
+      "addressJa": "全北特別自治道 全州市 徳津区 ヨンソ路 75",
+      "featuresJa": "マジックフォトがベルベル・スタジオに統合された。"
     },
     {
       "name": "필름로그",
@@ -4511,7 +4754,10 @@
       },
       "nameEn": "Filmlog",
       "addressEn": "Simda, 10 Yeokjeon 2-gil, Suncheon-si, Jeollanam-do",
-      "featuresEn": "Drop-off point run jointly by Filmlog and the Simda bookstore. Leave your film at Simda for development. A vending machine is next to it."
+      "featuresEn": "Drop-off point run jointly by Filmlog and the Simda bookstore. Leave your film at Simda for development. A vending machine is next to it.",
+      "nameJa": "フィルムログ",
+      "addressJa": "全羅南道 順天市 駅前2ギル 10 シムダ",
+      "featuresJa": "フィルムログとシムダ書店が共同で営むドロップポイント。シムダ書店にフィルムを預ければ現像でき、隣で自動販売機も運営している。"
     },
     {
       "name": "영상칼라",
@@ -4566,7 +4812,10 @@
       },
       "nameEn": "Yeongsang Color",
       "addressEn": "121-1 Gyeongyeol-ro, Seo-gu, Gwangju",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "映像カラー",
+      "addressJa": "光州広域市 西区 キョンヨル路 121-1",
+      "featuresJa": null
     },
     {
       "name": "문화사진관",
@@ -4621,7 +4870,10 @@
       },
       "nameEn": "Munhwa Photo Studio",
       "addressEn": "97 Gyeongyeol-ro, Seo-gu, Gwangju",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "文化写真館",
+      "addressJa": "光州広域市 西区 キョンヨル路 97",
+      "featuresJa": null
     },
     {
       "name": "필름로그",
@@ -4676,7 +4928,10 @@
       },
       "nameEn": "Filmlog",
       "addressEn": "Andromeda, 1F, 8 Haseulla-ro 20beon-gil, Gangneung-si, Gangwon State",
-      "featuresEn": "Drop-off point run jointly by Filmlog and Andromeda. Leave your film at Andromeda for development. A vending machine is next to it."
+      "featuresEn": "Drop-off point run jointly by Filmlog and Andromeda. Leave your film at Andromeda for development. A vending machine is next to it.",
+      "nameJa": "フィルムログ",
+      "addressJa": "江原特別自治道 江陵市 ハスルラ路20番ギル 8 1階 アンドロメダ",
+      "featuresJa": "フィルムログとアンドロメダが共同で営むドロップポイント。アンドロメダにフィルムを預ければ現像でき、隣で自動販売機も運営している。"
     },
     {
       "name": "화목포토",
@@ -4731,7 +4986,10 @@
       },
       "nameEn": "Hwamok Photo",
       "addressEn": "Hwamok Photo Studio, Unit 121, Hwamok Depart Sangga, 64 Sesil-ro, Haeundae-gu, Busan",
-      "featuresEn": "Uses a Noritsu scanner."
+      "featuresEn": "Uses a Noritsu scanner.",
+      "nameJa": "ファモクフォト",
+      "addressJa": "釜山広域市 海雲台区 セシル路 64 ファモクデパート商街 121号",
+      "featuresJa": "ノーリツのスキャナーを使用。"
     },
     {
       "name": "화양연화",
@@ -4786,7 +5044,10 @@
       },
       "nameEn": "Hwayangyeonhwa",
       "addressEn": "2F, 5-2 Jungang-ro, Sangdang-gu, Cheongju-si, Chungcheongbuk-do",
-      "featuresEn": "Color and B&W film development and scanning, with a choice of low, medium, or high resolution. Photo printing service."
+      "featuresEn": "Color and B&W film development and scanning, with a choice of low, medium, or high resolution. Photo printing service.",
+      "nameJa": "花様年華",
+      "addressJa": "忠清北道 清州市 上党区 中央路 5-2 2階",
+      "featuresJa": "カラー・モノクロフィルムの現像とスキャン。画質は低・中・高から選べる。写真プリントのサービスもある。"
     },
     {
       "name": "간지사진관",
@@ -4841,7 +5102,10 @@
       },
       "nameEn": "Ganzi Photo Studio",
       "addressEn": "Ganzi Photo Studio, 2F, 62 Sincheon-daero 50beon-gil, Busanjin-gu, Busan",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "カンジ写真館",
+      "addressJa": "釜山広域市 釜山鎮区 シンチョン大路50番ギル 62 2階",
+      "featuresJa": null
     },
     {
       "name": "토픽칼라",
@@ -4896,7 +5160,10 @@
       },
       "nameEn": "Topic Color",
       "addressEn": "Topic Color, 1F, Heungguk Bldg., 44 Jungang-daero, Jung-gu, Busan",
-      "featuresEn": "Motion picture film development and scanning available."
+      "featuresEn": "Motion picture film development and scanning available.",
+      "nameJa": "トピックカラー",
+      "addressJa": "釜山広域市 中区 中央大路 44 フングクビル 1階",
+      "featuresJa": "映画用フィルムの現像とスキャンに対応。"
     },
     {
       "name": "NEW 조광",
@@ -4951,7 +5218,10 @@
       },
       "nameEn": "NEW Jogwang",
       "addressEn": "51 Jobang-ro, Dong-gu, Busan",
-      "featuresEn": "Takes film development orders for the Beomil-dong area."
+      "featuresEn": "Takes film development orders for the Beomil-dong area.",
+      "nameJa": "NEW チョグァン",
+      "addressJa": "釜山広域市 東区 チョバン路 51",
+      "featuresJa": "凡一洞一帯のフィルム現像を取り次ぐ。"
     },
     {
       "name": "동방사진관",
@@ -5006,7 +5276,10 @@
       },
       "nameEn": "Dongbang Photo Studio",
       "addressEn": "27 Gukgi-ro, Jeju-si, Jeju-do",
-      "featuresEn": null
+      "featuresEn": null,
+      "nameJa": "東方写真館",
+      "addressJa": "済州特別自治道 済州市 クッキ路 27",
+      "featuresJa": null
     },
     {
       "name": "책방무사",
@@ -5061,7 +5334,10 @@
       },
       "nameEn": "Chaekbang Musa",
       "addressEn": "Unit 106, 1F, Mangrove Sinchon, 121 Seogang-ro, Mapo-gu, Seoul",
-      "featuresEn": "Moved from Jeju to Sinchon, Seoul. Choice of scanner."
+      "featuresEn": "Moved from Jeju to Sinchon, Seoul. Choice of scanner.",
+      "nameJa": "チェッパンムサ",
+      "addressJa": "ソウル特別市 麻浦区 西江路 121 マングローブ新村 1階 106号",
+      "featuresJa": "済州からソウルの新村に移転した。スキャナーを選べる。"
     },
     {
       "name": "STRIPE",
@@ -5114,7 +5390,10 @@
       },
       "nameEn": "STRIPE",
       "addressEn": "Unit 103, 20 Jangchungdan-ro 10-gil, Jung-gu, Seoul",
-      "featuresEn": "B&W only. Development 10,000 won (Rodinal), self-scanning 3,000 won per roll. 35mm, 120, and 4×5 delivered as TIFF. Darkroom rental: 60,000 won for a half day, 110,000 won for a full day. Prints by the operator: RC 8×10 5,000 won, FB from 9,000 won. Sells Ilford film, chemicals, and photo paper. Weekdays 11 a.m. to 6 p.m., by reservation. Prices as of July 2025."
+      "featuresEn": "B&W only. Development 10,000 won (Rodinal), self-scanning 3,000 won per roll. 35mm, 120, and 4×5 delivered as TIFF. Darkroom rental: 60,000 won for a half day, 110,000 won for a full day. Prints by the operator: RC 8×10 5,000 won, FB from 9,000 won. Sells Ilford film, chemicals, and photo paper. Weekdays 11 a.m. to 6 p.m., by reservation. Prices as of July 2025.",
+      "nameJa": "STRIPE",
+      "addressJa": "ソウル特別市 中区 奨忠壇路10ギル 20 103号",
+      "featuresJa": "モノクロ専門。現像10,000ウォン(ロジナール)、セルフスキャンは1本3,000ウォン。35mm・120・4×5をTIFFで受け取れる。暗室レンタルは半日60,000ウォン、終日110,000ウォン。店主によるプリントはRC 8×10が5,000ウォン、FBは9,000ウォンから。Ilfordのフィルムと薬品、印画紙を販売。平日11時から18時まで、予約制。料金は2025年7月時点。"
     },
     {
       "name": "라이트사",
@@ -5167,7 +5446,10 @@
       },
       "nameEn": "Lightsa",
       "addressEn": "25-2 Seobudaeseong-ro 44beon-gil, Chuncheon-si, Gangwon State",
-      "featuresEn": "Accepts film development. Color development 9,000 won, scan 4,000 won. At the mouth of an alley near Inseong Hospital in Myeong-dong. Prices as of September 2026."
+      "featuresEn": "Accepts film development. Color development 9,000 won, scan 4,000 won. At the mouth of an alley near Inseong Hospital in Myeong-dong. Prices as of September 2026.",
+      "nameJa": "ライトサ",
+      "addressJa": "江原特別自治道 春川市 ソブデソン路44番ギル 25-2",
+      "featuresJa": "フィルム現像を受け付ける。カラー現像9,000ウォン、スキャン4,000ウォン。明洞のインソン病院近くの路地の入口にある。料金は2026年9月時点。"
     },
     {
       "name": "준포토",
@@ -5220,7 +5502,10 @@
       },
       "nameEn": "Jun Photo",
       "addressEn": "86-1 Jungang-ro, Chuncheon-si, Gangwon State",
-      "featuresEn": "Film is developed only on Mondays and Thursdays. Development: color 9,000 won, B&W 12,000 won, 120 10,000 won. Scan 4,000 won, half-frame scan 5,000 won. Prices as of September 2026."
+      "featuresEn": "Film is developed only on Mondays and Thursdays. Development: color 9,000 won, B&W 12,000 won, 120 10,000 won. Scan 4,000 won, half-frame scan 5,000 won. Prices as of September 2026.",
+      "nameJa": "ジュンフォト",
+      "addressJa": "江原特別自治道 春川市 中央路 86-1",
+      "featuresJa": "フィルム現像は月曜と木曜にだけ作業する。現像はカラー9,000ウォン、モノクロ12,000ウォン、120は10,000ウォン。スキャン4,000ウォン、ハーフフレームのスキャン5,000ウォン。料金は2026年9月時点。"
     },
     {
       "name": "동인스튜디오",
@@ -5273,7 +5558,10 @@
       },
       "nameEn": "Dongin Studio",
       "addressEn": "Ilsong Apt., 37 Hapyeong 3-gil, Gangneung-si, Gangwon State",
-      "featuresEn": "Photo studio in business since 1995. Film development and printing, large prints, and framing. Color development 5,000 won, scan 5,000 won. Prices as of September 2026."
+      "featuresEn": "Photo studio in business since 1995. Film development and printing, large prints, and framing. Color development 5,000 won, scan 5,000 won. Prices as of September 2026.",
+      "nameJa": "トンインスタジオ",
+      "addressJa": "江原特別自治道 江陵市 ハピョン3ギル 37 イルソンアパート",
+      "featuresJa": "1995年から続く写真館。フィルムの現像とプリント、大判プリント、額装までまとめて手がける。カラー現像5,000ウォン、スキャン5,000ウォン。料金は2026年9月時点。"
     }
   ]
 }

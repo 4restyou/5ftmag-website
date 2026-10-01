@@ -182,6 +182,10 @@
       <div class="form-row"><label for="f-addressEn">영문 주소</label><input type="text" id="f-addressEn" placeholder="3F, 25 Toegye-ro 27-gil, Jung-gu, Seoul" /></div>
       <div class="form-row"><label for="f-specialtyEn">영문 전문분야</label><input type="text" id="f-specialtyEn" placeholder="Leica, manual rangefinders" /></div>
       <div class="form-row"><label for="f-descriptionEn">영문 설명</label><textarea id="f-descriptionEn"></textarea></div>
+      <div class="form-row"><label for="f-nameJa">일본어 이름</label><div><input type="text" id="f-nameJa" placeholder="Camera Doctor" /><div class="hint">일본어판(/ja/)에만 보여요. 비워 두면 영어, 영어도 비면 한국어가 나갑니다.</div></div></div>
+      <div class="form-row"><label for="f-addressJa">일본어 주소</label><input type="text" id="f-addressJa" placeholder="ソウル特別市 中区 退渓路27ギル 25 3階" /></div>
+      <div class="form-row"><label for="f-specialtyJa">일본어 전문분야</label><input type="text" id="f-specialtyJa" placeholder="ライカ、マニュアルのレンジファインダー" /></div>
+      <div class="form-row"><label for="f-descriptionJa">일본어 설명</label><textarea id="f-descriptionJa"></textarea></div>
       <div class="form-actions">
         <button type="button" class="delete" id="deleteBtn" hidden>삭제</button>
         <button type="button" class="cancel" id="cancelBtn">취소</button>
@@ -348,6 +352,10 @@ function openForm(id) {
     $('f-addressEn').value = s.address_en || '';
     $('f-specialtyEn').value = s.specialty_en || '';
     $('f-descriptionEn').value = s.description_en || '';
+    $('f-nameJa').value = s.name_ja || '';
+    $('f-addressJa').value = s.address_ja || '';
+    $('f-specialtyJa').value = s.specialty_ja || '';
+    $('f-descriptionJa').value = s.description_ja || '';
   } else {
     $('modalTitle').textContent = '새 수리실';
     $('shopForm').reset();
@@ -390,6 +398,10 @@ $('shopForm').addEventListener('submit', async (e) => {
       address_en: $('f-addressEn').value.trim() || null,
       specialty_en: $('f-specialtyEn').value.trim() || null,
       description_en: $('f-descriptionEn').value.trim() || null,
+      name_ja: $('f-nameJa').value.trim() || null,
+      address_ja: $('f-addressJa').value.trim() || null,
+      specialty_ja: $('f-specialtyJa').value.trim() || null,
+      description_ja: $('f-descriptionJa').value.trim() || null,
     };
     const id = $('f-id').value.trim();
     if (id) {

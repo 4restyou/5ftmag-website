@@ -43,11 +43,15 @@ export function rowToJson(r) {
     description: r.description ?? null,
     contact: r.contact ?? null,
     url: r.url ?? null,
-    // 영문판 표시값. 비어 있으면 영문 페이지도 한국어 원문을 쓴다
+    // 영문·일본어판 표시값. 비어 있으면 일본어판은 영어, 영어도 비면 한국어 원문을 쓴다
     name_en: r.name_en ?? null,
     address_en: r.address_en ?? null,
     specialty_en: r.specialty_en ?? null,
     description_en: r.description_en ?? null,
+    name_ja: r.name_ja ?? null,
+    address_ja: r.address_ja ?? null,
+    specialty_ja: r.specialty_ja ?? null,
+    description_ja: r.description_ja ?? null,
   };
 }
 
