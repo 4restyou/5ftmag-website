@@ -100,9 +100,22 @@
 
   // 영문 페이지(<html lang="en">)에선 번역된 글(titleEn 이 있는 글)의 제목·요약·주소를 영문판으로 바꾼다.
   // id·author 는 그대로 둔다(작가 매칭·관련 글 점수의 키). 표시용 작가명은 authorEn 이다.
+  // 일문 페이지(<html lang="ja">)에선 titleJa 가 있는 글을 일문판(ja/)으로, 없으면 영문판 규칙을 따른다.
+  // 일문판에선 authorEn 자리에 authorJa 를 넣어, authorEn 을 읽는 화면이 그대로 일문 작가명을 쓰게 한다.
+  // 두 번째 인자는 true(영문, 예전 호출) 또는 'en' · 'ja' 이다.
   function localizeStories(list, isEn) {
-    if (!isEn || !Array.isArray(list)) return list;
+    const lang = isEn === true ? 'en' : isEn;
+    if ((lang !== 'en' && lang !== 'ja') || !Array.isArray(list)) return list;
     return list.map(function (s) {
+      if (lang === 'ja' && s && s.titleJa) {
+        return Object.assign({}, s, {
+          title: s.titleJa,
+          excerpt: s.excerptJa || s.excerptEn || s.excerpt,
+          authorEn: s.authorJa || s.authorEn,
+          page: s.page ? 'ja/' + s.page : s.page,
+          titleKo: s.title,
+        });
+      }
       if (!s || !s.titleEn) return s;
       return Object.assign({}, s, {
         title: s.titleEn,
@@ -123,7 +136,7 @@
       fetch('/data/stories.json').then(function (r) { return r.ok ? r.json() : []; }),
       fetchVisibility(),
     ]).then(function (pair) {
-      return localizeStories(applyVisibility(pair[0], pair[1]), document.documentElement.lang === 'en');
+      return localizeStories(applyVisibility(pair[0], pair[1]), document.documentElement.lang);
     }).catch(function () {
       storiesPromise = null;   // 다음 호출에서 다시 시도한다
       return [];

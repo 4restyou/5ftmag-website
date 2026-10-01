@@ -31,7 +31,7 @@
       if (selectedSave) {
         selectedSave.hidden = !selecting;
         selectedSave.disabled = selectedCount < 1;
-        selectedSave.textContent = tr(`선택한 ${selectedCount}장 저장`, `Save ${selectedCount} selected`);
+        selectedSave.textContent = tr(`선택한 ${selectedCount}장 저장`, `Save ${selectedCount} selected`, `選択した${selectedCount}枚を保存`);
       }
       if (cancel) cancel.hidden = !selecting;
     }
@@ -88,7 +88,7 @@
       if (!target) return;
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = tr('저장 중…', 'Saving…');
+      btn.textContent = tr('저장 중…', 'Saving…', '保存中…');
       try {
         const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, 'contrib');
         const authors = window.FilmsRollExport.collectAuthorsForExport(target, 'contrib', { authorLabel });
@@ -99,7 +99,7 @@
         window.FilmsRollExport.downloadCanvas(canvas, `5ftmag-${personSlug || 'contributor'}-${filmSlug || 'film'}-${slugStamp()}.jpg`);
       } catch (err) {
         console.error('[save-contrib]', err);
-        notify(tr('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the image. Please try again in a moment."), 'danger');
+        notify(tr('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the image. Please try again in a moment.", '画像を保存できませんでした。しばらくしてからもう一度お試しください。'), 'danger');
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;
@@ -115,12 +115,12 @@
       if (!target) return;
       const selectedCount = target.querySelectorAll('.reader-contributor-photo.is-selected').length;
       if (selectedCount < 1) {
-        notify(tr('저장할 사진을 먼저 선택해 주세요.', 'Select the photos to save first.'), 'danger');
+        notify(tr('저장할 사진을 먼저 선택해 주세요.', 'Select the photos to save first.', '保存する写真を先に選んでください。'), 'danger');
         return;
       }
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = tr('저장 중…', 'Saving…');
+      btn.textContent = tr('저장 중…', 'Saving…', '保存中…');
       try {
         const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, 'contrib', { onlySelected: true });
         const authors = window.FilmsRollExport.collectAuthorsForExport(target, 'contrib', { authorLabel });
@@ -132,7 +132,7 @@
         setContributorSelectionMode(section, false);
       } catch (err) {
         console.error('[save-selected-contrib]', err);
-        notify(tr('선택 이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the selected image. Please try again in a moment."), 'danger');
+        notify(tr('선택 이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the selected image. Please try again in a moment.", '選択した画像を保存できませんでした。しばらくしてからもう一度お試しください。'), 'danger');
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;
@@ -148,7 +148,7 @@
       if (!target) return;
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = tr('저장 중…', 'Saving…');
+      btn.textContent = tr('저장 중…', 'Saving…', '保存中…');
       try {
         const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, kind);
         const f = options.getFilm?.(filmKey) || {};
@@ -161,7 +161,7 @@
         window.FilmsRollExport.downloadCanvas(canvas, `5ftmag-${kind === 'reader' ? 'readers-roll' : 'editorial'}-${slug}-${slugStamp()}.jpg`);
       } catch (err) {
         console.error('[save-roll]', err);
-        notify(tr('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the image. Please try again in a moment."), 'danger');
+        notify(tr('이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the image. Please try again in a moment.", '画像を保存できませんでした。しばらくしてからもう一度お試しください。'), 'danger');
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;
@@ -177,12 +177,12 @@
       if (!target) return;
       const selectedCount = target.querySelectorAll('.reader-slot.is-filled.is-selected').length;
       if (selectedCount < 1) {
-        notify(tr('저장할 사진을 먼저 선택해 주세요.', 'Select the photos to save first.'), 'danger');
+        notify(tr('저장할 사진을 먼저 선택해 주세요.', 'Select the photos to save first.', '保存する写真を先に選んでください。'), 'danger');
         return;
       }
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = tr('저장 중…', 'Saving…');
+      btn.textContent = tr('저장 중…', 'Saving…', '保存中…');
       try {
         const stripCanvas = await window.FilmsRollExport.renderRollStripCanvas(target, kind, { onlySelected: true });
         const f = options.getFilm?.(filmKey) || {};
@@ -195,7 +195,7 @@
         target.dispatchEvent(new CustomEvent('reader-select-cancel', { bubbles: false }));
       } catch (err) {
         console.error('[save-selected-roll]', err);
-        notify(tr('선택 이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the selected image. Please try again in a moment."), 'danger');
+        notify(tr('선택 이미지 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', "Couldn't save the selected image. Please try again in a moment.", '選択した画像を保存できませんでした。しばらくしてからもう一度お試しください。'), 'danger');
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;

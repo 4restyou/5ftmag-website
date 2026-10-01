@@ -7,7 +7,7 @@
 // density 그리드/리스트 토글 (localStorage 기억).
 (function () {
   'use strict';
-  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
 
   const $ = (id) => document.getElementById(id);
   const input   = $('searchQ');
@@ -89,20 +89,20 @@
   function setHtml(html) { results.innerHTML = html; }
 
   function renderHint() {
-    setHtml(`<p class="search-hint">${i18n.t('키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요.', 'One search covers articles, films, books, labs and market listings.')}</p>`);
+    setHtml(`<p class="search-hint">${i18n.t('키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요.', 'One search covers articles, films, books, labs and market listings.', 'キーワードひとつで、記事・フィルム・本・現像所・出品をまとめて検索できます。')}</p>`);
   }
 
   function renderEmpty(q) {
     setHtml(i18n.t(
       `<p class="search-empty">"<strong>${esc(q)}</strong>" 검색 결과가 없어요.<br />다른 단어로 다시 시도해 보세요.</p>`,
-      `<p class="search-empty">No results for "<strong>${esc(q)}</strong>".<br />Try a different word.</p>`));
+      `<p class="search-empty">No results for "<strong>${esc(q)}</strong>".<br />Try a different word.</p>`, `<p class="search-empty">「<strong>${esc(q)}</strong>」の検索結果はありません。<br />別の言葉でもう一度お試しください。</p>`));
   }
 
   function cardArticle(s, q) {
     const thumb = s.thumbnail
       ? `<div class="sc-thumb"><img src="${esc(s.thumbnail)}" alt="" loading="lazy" /></div>`
       : '';
-    const author = i18n.isEn ? (s.authorEn || s.author) : s.author;
+    const author = i18n.lang === 'ja' ? (s.authorJa || s.authorEn || s.author) : i18n.isEn ? (s.authorEn || s.author) : s.author;
     const meta = [author, s.date].filter(Boolean).map(esc).join(' · ');
     // 영문판: localizeStories 가 번역된 글의 page 를 en/ 로 바꿔 둔다. <base href="/"> 라 절대경로로 쓴다.
     const href = i18n.isEn && s.page ? '/' + s.page.replace(/^\//, '') : (s.page || '#');
@@ -118,7 +118,7 @@
 
   function cardFilm(f, q) {
     const name = f.displayName || (f.brand ? `${f.brand} ${f.name || ''}`.trim() : f.name || '');
-    const desc = i18n.isEn ? (f.descEn || f.desc) : f.desc;
+    const desc = i18n.lang === 'ja' ? (f.descJa || f.descEn || f.desc) : i18n.isEn ? (f.descEn || f.desc) : f.desc;
     const href = i18n.isEn ? i18n.url('/films.html?film=' + encodeURIComponent(f.slug || '')) : `films.html?film=${encodeURIComponent(f.slug || '')}`;
     return `<a class="search-card" href="${href}">
       <div class="sc-body">
@@ -171,15 +171,15 @@
       <div class="sc-body">
         <div class="sc-kicker">CONTRIBUTOR</div>
         <div class="sc-title">${highlight(c.label || c.key || '', q)}</div>
-        <div class="sc-meta">${i18n.t(`사진 ${Number(c.count) || 0}장`, `${Number(c.count) || 0} photos`)}</div>
+        <div class="sc-meta">${i18n.t(`사진 ${Number(c.count) || 0}장`, `${Number(c.count) || 0} photos`, `写真 ${Number(c.count) || 0}枚`)}</div>
       </div>
     </a>`;
   }
 
   function cardMarket(m, q) {
     const priceTxt = (m.price && Number(m.price) > 0)
-      ? (i18n.isEn ? Number(m.price).toLocaleString('en-US') + ' won' : Number(m.price).toLocaleString('ko-KR') + '원')
-      : i18n.t('가격 협의', 'Price negotiable');
+      ? (i18n.lang === 'ja' ? Number(m.price).toLocaleString('ja-JP') + 'ウォン' : i18n.isEn ? Number(m.price).toLocaleString('en-US') + ' won' : Number(m.price).toLocaleString('ko-KR') + '원')
+      : i18n.t('가격 협의', 'Price negotiable', '価格応相談');
     const href = i18n.isEn ? i18n.url('/market.html?id=' + encodeURIComponent(m.id || '')) : `market.html?id=${encodeURIComponent(m.id || '')}`;
     return `<a class="search-card" href="${href}">
       <div class="sc-body">
@@ -192,7 +192,7 @@
 
   async function searchAll(q) {
     if (!q) { renderHint(); return; }
-    setHtml(`<p class="search-hint">${i18n.t('검색 중…', 'Searching…')}</p>`);
+    setHtml(`<p class="search-hint">${i18n.t('검색 중…', 'Searching…', '検索中…')}</p>`);
     const tokens = tokenize(q);
 
     const dbReady = db() && db().isReady && db().isReady();
@@ -218,12 +218,15 @@
           // 영문판에선 a.title 이 영문 제목이다. 한국어로 쳐도 찾히게 원제(titleKo)도 본다.
           { text: a.titleKo, weight: 10 },
           { text: a.titleEn, weight: 10 },
+          { text: a.titleJa, weight: 10 },
           { text: a.author, weight: 5 },
           { text: a.authorEn, weight: 5 },
+          { text: a.authorJa, weight: 5 },
           { text: a.categoryLabel, weight: 3 },
           { text: a.category, weight: 3 },
           { text: a.excerpt, weight: 2 },
           { text: a.excerptEn, weight: 2 },
+          { text: a.excerptJa, weight: 2 },
         ]),
       }))
       .filter((x) => x.score > 0)
@@ -239,6 +242,7 @@
           { text: (f.aliases || []).join(' '), weight: 8 },
           { text: f.desc, weight: 2 },
           { text: f.descEn, weight: 2 },
+          { text: f.descJa, weight: 2 },
         ]),
       }))
       .filter((x) => x.score > 0)
@@ -318,7 +322,7 @@
       .filter((s) => s.items.length > 0)
       .map((s) => {
         const more = s.items.length > PER
-          ? `<a class="search-more" href="${s.all}">${i18n.t(`전체 ${s.items.length}건 보기 →`, `See all ${s.items.length} →`)}</a>`
+          ? `<a class="search-more" href="${s.all}">${i18n.t(`전체 ${s.items.length}건 보기 →`, `See all ${s.items.length} →`, `${s.items.length}件をすべて見る →`)}</a>`
           : '';
         return `<section class="search-section">
           <h2 class="search-section-head">${s.label} <span class="search-count">${s.items.length}</span></h2>
@@ -329,7 +333,7 @@
 
     setHtml(i18n.t(
       `<p class="search-summary">"${esc(q)}" 검색 결과 총 <strong>${total}건</strong></p>`,
-      `<p class="search-summary"><strong>${total} ${total === 1 ? 'result' : 'results'}</strong> for "${esc(q)}"</p>`) + html);
+      `<p class="search-summary"><strong>${total} ${total === 1 ? 'result' : 'results'}</strong> for "${esc(q)}"</p>`, `<p class="search-summary">「${esc(q)}」の検索結果 <strong>${total}件</strong></p>`) + html);
     resetFocus();
   }
 

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>検索 | 5ft magazine</title>
+  <meta name="description" content="5ft magazine の記事・フィルム・本・現像所・出品をまとめて探せる総合検索。">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://www.5ftmag.com/ja/search.html">
+  <link rel="alternate" hreflang="ko" href="https://www.5ftmag.com/search.html">
+  <link rel="alternate" hreflang="en" href="https://www.5ftmag.com/en/search.html">
+  <link rel="alternate" hreflang="ja" href="https://www.5ftmag.com/ja/search.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.5ftmag.com/search.html">
+
+  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/icon-32.png">
+  <link rel="shortcut icon" href="/img/favicon/favicon.ico">
+
+  <script src="/js/theme-init.js"></script>
+  <script src="/js/i18n.js?v=20261001-lang"></script>
+  <link rel="stylesheet" href="/pretendard.css" />
+  <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
+  <link rel="stylesheet" href="/css/common.css?v=20261001-lang">
+  <link rel="stylesheet" href="/css/search.css?v=20260621-cmdk">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://pucpqsfwqouqohwsvmnd.supabase.co">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/ja/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <ul class="main-nav">
+      <li><a href="/ja/stories.html">Articles</a></li>
+      <li><a href="/ja/films.html">Films</a></li>
+      <li><a href="/ja/books.html">Magazine</a></li>
+      <li><a href="/ja/market.html">Market</a></li>
+      <li><a href="/ja/labs.html">Labs</a></li>
+      <li><a href="/ja/about.html">About</a></li>
+      <li><a href="/ja/shop.html">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/ja/search.html" class="icon-btn" id="headerSearchBtn" aria-label="検索" title="検索"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="ダークモードに切り替え" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="メニューを開く" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="/ja/stories.html">Articles</a>
+    <a href="/ja/films.html">Films</a>
+    <a href="/ja/books.html">Magazine</a>
+    <a href="/ja/market.html">Market</a>
+    <a href="/ja/labs.html">Labs</a>
+    <a href="/ja/about.html">About</a>
+    <a href="/ja/shop.html">Shop</a>
+  </nav>
+</header>
+
+<main class="search-page" id="main">
+  <div class="search-head">
+    <h1 class="search-title">総合検索</h1>
+    <div class="search-density" role="tablist" aria-label="結果の表示方法">
+      <button type="button" class="search-density-btn is-active" data-density="grid" role="tab" aria-selected="true">グリッド</button>
+      <button type="button" class="search-density-btn" data-density="list" role="tab" aria-selected="false">リスト</button>
+    </div>
+  </div>
+  <form id="searchForm" class="search-form" role="search">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+    <input type="search" id="searchQ" name="q" placeholder="タイトル、写真家、キーワード、フィルム名…" aria-label="検索語" autocomplete="off" />
+    <kbd class="search-form-kbd" aria-hidden="true" id="searchKbdHint">⌘K</kbd>
+    <button type="submit" class="search-submit">検索</button>
+  </form>
+  <div id="searchResults" aria-live="polite">
+    <p class="search-hint">キーワードひとつで、記事・フィルム・本・現像所・出品をまとめて検索できます。<kbd>↑</kbd> <kbd>↓</kbd> で移動、<kbd>Enter</kbd> で開きます。</p>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner-left">
+    <span class="footer-logo">5ft magazine</span>
+    <span class="footer-publisher">発行 4rest · 編集 Park Soon Yeol · 韓国 光州 東区 忠壮路46番キル 8, 2階</span>
+  </div>
+  <div class="footer-links">
+    <a href="/ja/shop.html">Shop</a>
+    <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine ↗</a>
+    <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a>
+    <a href="https://www.4rest.net" target="_blank" rel="noopener">4rest.net ↗</a>
+  </div>
+<span class="footer-copy">© 2026 5ft magazine</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
+  <script src="/js/db-client.js?v=20261002-ja" defer></script>
+<script src="/js/util.js?v=20261002-ja" defer></script>
+  <script src="/js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
+  <script src="/js/site-common.js?v=20261002-ja" defer></script>
+<script src="/js/search-page.js?v=20261002-ja" defer></script>
+
+</body>
+</html>

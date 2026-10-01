@@ -185,4 +185,15 @@ describe('MagUtil.localizeStories', () => {
     expect(a).toMatchObject({ title: 'English', excerpt: 'Summary', page: 'en/stories/a.html', author: '김현아', titleKo: '한국어' });
     expect(b).toBe(list[1]);
   });
+
+  it('일문 페이지에선 titleJa 가 있는 글만 일문 제목·요약·작가명·/ja/ 주소로', () => {
+    const ja = [
+      { ...list[0], titleJa: '日本語', excerptJa: '要約', authorEn: 'Kim Hyun-a', authorJa: 'Kim Hyun-a（JA）' },
+      list[1],
+    ];
+    const [a, b] = localizeStories(ja, 'ja');
+    expect(a).toMatchObject({ title: '日本語', excerpt: '要約', authorEn: 'Kim Hyun-a（JA）', page: 'ja/stories/a.html', author: '김현아', titleKo: '한국어' });
+    expect(b).toBe(ja[1]);
+    expect(localizeStories(list, 'en')[0]).toMatchObject({ title: 'English', page: 'en/stories/a.html' });
+  });
 });

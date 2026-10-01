@@ -24,6 +24,7 @@ const LABS_JSON = path.join(ROOT, 'data/labs.json');
 const REPAIRS_JSON = path.join(ROOT, 'data/repairs.json');
 const OUT_DIR = path.join(ROOT, 'labs');
 const EN_OUT_DIR = path.join(ROOT, 'en/labs');
+const JA_OUT_DIR = path.join(ROOT, 'ja/labs');
 const REFERENCE_PAGE = path.join(ROOT, 'labs.html');
 
 const ORIGIN = 'https://www.5ftmag.com';
@@ -52,6 +53,13 @@ const REGION_EN = {
   '경남': 'Gyeongnam', '전남광주': 'Gwangju · Jeonnam', '전북': 'Jeonbuk', '제주': 'Jeju',
 };
 const KIND_EN = { color: 'Color', bw: 'B&W', slide: 'Slide', cinema: 'Cinema' };
+// 일본어판(ja/labs/<region>.html). 표시값은 일본어 칸, 없으면 영문, 그것도 없으면 한국어 원문
+const REGION_JA = {
+  '서울': 'ソウル', '경기': '京畿', '인천': '仁川', '강원': '江原', '대전': '大田', '충남': '忠南',
+  '충북': '忠北', '세종': '世宗', '대구': '大邱', '경북': '慶北', '부산': '釜山', '울산': '蔚山',
+  '경남': '慶南', '전남광주': '全南光州', '전북': '全北', '제주': '済州',
+};
+const KIND_JA = { color: 'カラー', bw: 'モノクロ', slide: 'スライド', cinema: 'シネマ' };
 const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
 const TEXT = {
   ko: {
@@ -90,6 +98,26 @@ const TEXT = {
     search: 'Search', dark: 'Switch to dark mode', menu: 'Open menu',
     labIndex: (n) => `Film labs by region (${n})`, labIndexSub: 'Tap a region to see the addresses and development prices of its labs.',
     repairIndex: (n) => `Camera repair shops by region (${n})`, repairIndexSub: 'Places that take film cameras for repair. Tap a name to see the specialty and contact.', noRegion: 'Region not set',
+  },
+  ja: {
+    lang: 'ja', locale: 'ja_JP', inLanguage: 'ja', prefix: '/ja', dir: JA_OUT_DIR,
+    region: (r) => REGION_JA[r] || r, kind: (key, label) => KIND_JA[key] || label,
+    field: (item, key) => item[`${key}Ja`] || item[`${key}_ja`] || item[`${key}En`] || item[`${key}_en`] || item[key],
+    won: (v) => `${v.toLocaleString('ja-JP')}ウォン`, high: '高解像度', priceCaption: (n) => `${n}の現像料金`, kindHead: '種類',
+    scan: (v) => `標準スキャン ${v}`, site: 'ウェブサイト ↗', specialty: (v) => `専門：${v}`, contact: (v) => `連絡先：${v}`,
+    labsN: (n) => `フィルム現像所${n}か所`, repairsN: (n) => `カメラ修理店${n}か所`, labsTitle: (r) => `${r}のフィルム現像所`, repairsTitle: (r) => `${r}のカメラ修理店`,
+    labsAndRepairs: (r) => `${r}のフィルム現像所とカメラ修理店`, labsCount: (n) => `現像所${n}か所`, repairsCount: (n) => `修理店${n}か所`,
+    descLabs: (r, n) => `${r}のフィルム現像所${n}か所を、住所、スキャン解像度、カラー・モノクロ・スライドの現像料金とあわせてまとめました。`,
+    descCheap: (v) => `135カラーの標準現像は${v.toLocaleString('ja-JP')}ウォンからです。`,
+    descRepairs: (r, n) => `${r}でカメラを預けられる修理店${n}か所の専門分野と連絡先も掲載しています。`,
+    crumb: 'パンくずリスト', labsCrumb: 'フィルム現像所', repairsHeading: (r, n) => `${r}のカメラ修理店${n}か所`,
+    repairsSub: 'フィルムカメラの修理を受け付けている店です。対応機種や費用は変わることがあるので、行く前に問い合わせておくと安心です。',
+    others: 'ほかの地域', place: (n) => `${n}か所`,
+    cta: '料金や情報は変わることがあります。地図で場所を確かめたいときや訂正のご連絡は、全体の一覧ページからどうぞ。', ctaBtn: '全国の現像所一覧・地図',
+    search: '検索', dark: 'ダークモードに切り替え', menu: 'メニューを開く',
+    labIndex: (n) => `地域別の現像所 ${n}か所`, labIndexSub: '地域名を押すと、その地域の現像所の住所と現像料金をまとめて見られます。',
+    repairIndex: (n) => `地域別のカメラ修理店 ${n}か所`, repairIndexSub: 'フィルムカメラの修理を受け付けている店です。名前を押すと専門分野と連絡先が開きます。', noRegion: '地域未登録',
+    headline: (r, parts) => `${r}の${parts.join('・')}`, sentenceSep: '',
   },
 };
 const FORMATS = [['135', '135'], ['120', '120']];
@@ -239,6 +267,7 @@ function headline(region, labs, repairs, T = TEXT.ko) {
   const parts = [];
   if (labs.length) parts.push(T.labsN(labs.length));
   if (repairs.length) parts.push(T.repairsN(repairs.length));
+  if (T.headline) return T.headline(T.region(region), parts);
   return T.lang === 'en' ? `${T.region(region)}: ${parts.join(' · ')}` : `${region} ${parts.join(' · ')}`;
 }
 
@@ -288,7 +317,7 @@ function render(region, labs, repairs, others, versioned, outFile, T = TEXT.ko) 
   if (repairs.length) {
     sentences.push(T.descRepairs(shownRegion, repairs.length));
   }
-  const description = sentences.join(' ');
+  const description = sentences.join(T.sentenceSep ?? ' ');
   const heading = repairs.length
     ? (labs.length ? T.labsAndRepairs(shownRegion) : T.repairsTitle(shownRegion))
     : T.labsTitle(shownRegion);
@@ -327,7 +356,7 @@ function render(region, labs, repairs, others, versioned, outFile, T = TEXT.ko) 
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js"></script>${T.lang === 'en' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
+  <script src="/js/theme-init.js"></script>${T.lang !== 'ko' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">
@@ -499,6 +528,7 @@ function itemSlug(item) {
 
   await fs.mkdir(OUT_DIR, { recursive: true });
   await fs.mkdir(EN_OUT_DIR, { recursive: true });
+  await fs.mkdir(JA_OUT_DIR, { recursive: true });
 
   // 수리점만 있고 현상소가 없는 지역도 페이지를 만든다.
   const pageRegions = REGIONS.map(([region]) => region)
@@ -509,7 +539,7 @@ function itemSlug(item) {
     const others = [...byRegion.entries()]
       .filter(([name]) => name !== region)
       .map(([name, list]) => [name, SLUG_BY_REGION.get(name), list.length]);
-    for (const T of [TEXT.ko, TEXT.en]) {
+    for (const T of [TEXT.ko, TEXT.en, TEXT.ja]) {
       const outFile = path.join(T.dir, `${SLUG_BY_REGION.get(region)}.html`);
       const page = render(region, byRegion.get(region) || [], repairsByRegion.get(region) || [],
         others, versioned, outFile, T);
@@ -550,18 +580,20 @@ function itemSlug(item) {
     );
   }
 
-  // 영문 목록(en/labs.html). 링크·지역 키는 한국어판과 같은 값을 쓴다(labs-page.js 가 그 값으로 거른다)
-  const EN_INDEX = path.join(ROOT, 'en/labs.html');
-  const E = TEXT.en;
-  await writeIndex('LAB-INDEX', E.labIndex(labTotal), E.labIndexSub,
-    [...byRegion.entries()].map(([region, list]) => [E.region(region), `/en/labs.html?region=${encodeURIComponent(region)}`, list]),
-    null, E, EN_INDEX);
-  if (allRepairs.length) {
-    const groups = [...repairsByRegion.entries()].map(([region, list]) =>
-      [E.region(region), `/en/labs.html?region=${encodeURIComponent(region)}`, list]);
-    if (noRegion.length) groups.push([E.noRegion, '/en/labs.html', noRegion]);
-    await writeIndex('REPAIR-INDEX', E.repairIndex(allRepairs.length), E.repairIndexSub, groups,
-      (shop) => `/en/labs.html?lab=${encodeURIComponent(itemSlug(shop))}`, E, EN_INDEX);
+  // 외국어 목록(en/labs.html · ja/labs.html). 링크·지역 키는 한국어판과 같은 값을 쓴다(labs-page.js 가 그 값으로 거른다)
+  for (const E of [TEXT.en, TEXT.ja]) {
+    const INDEX = path.join(ROOT, E.lang, 'labs.html');
+    const P = E.prefix;
+    await writeIndex('LAB-INDEX', E.labIndex(labTotal), E.labIndexSub,
+      [...byRegion.entries()].map(([region, list]) => [E.region(region), `${P}/labs.html?region=${encodeURIComponent(region)}`, list]),
+      null, E, INDEX);
+    if (allRepairs.length) {
+      const groups = [...repairsByRegion.entries()].map(([region, list]) =>
+        [E.region(region), `${P}/labs.html?region=${encodeURIComponent(region)}`, list]);
+      if (noRegion.length) groups.push([E.noRegion, `${P}/labs.html`, noRegion]);
+      await writeIndex('REPAIR-INDEX', E.repairIndex(allRepairs.length), E.repairIndexSub, groups,
+        (shop) => `${P}/labs.html?lab=${encodeURIComponent(itemSlug(shop))}`, E, INDEX);
+    }
   }
 
   const skipped = labs.length - labTotal;

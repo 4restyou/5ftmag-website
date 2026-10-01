@@ -55,6 +55,20 @@ const AUTHOR_NOTES_EN = new Map([
   ['윤동규', 'Runs the YouTube channel 〈The Collection of Collecting〉 and records documentaries and photographs.'],
   ['심규동', 'Photographer behind the photobooks 〈Gositel〉 and 〈Single-Person Households〉. He records the relationship between people and spaces with his camera.'],
 ]);
+// 일본어판(ja/authors*.html) 소개문. 위 한국어 소개문을 옮긴 것이다(사실을 덧붙이지 않는다).
+// 작품·채널 이름은 일본어 기사에서 쓰는 표기를 따른다.
+const AUTHOR_NOTES_JA = new Map([
+  ['5ft.mag 편집부', 'フィルム写真マガジン 5ft magazine の企画と編集を担当しています。'],
+  ['Film Social Club', '光州・忠壮路を拠点に、フィルムと写真の文化をつないでいくスペースです。'],
+  ['Street Photography Club', 'ストリートフォトが好きな人たちの集まり。独自の写真集シリーズを発行し、5ft magazine の流通も手がけています。'],
+  ['Shin Noguchi', '日常のふとした不思議な瞬間を街でとらえる、日本のストリートフォトグラファーです。'],
+  ['Brisnap TV', 'フィルムカメラや写真機材を実際に使って紹介する動画チャンネルです。'],
+  ['김현아', '日常と人との関係の手ざわりを、短いエッセイに記しています。'],
+  ['명수경', 'フィルムのある暮らしの小さな場面を漫画にしています。'],
+  ['강혜원 (앨리카메라 대표)', 'アリーカメラを営み、ヴィンテージカメラとレンズを紹介しています。'],
+  ['윤동규', 'YouTube〈収集の収集〉を運営し、ドキュメンタリーと写真を記録しています。'],
+  ['심규동', '写真集〈コシテル〉〈単身世帯〉を出した写真家。人と空間の関係をカメラで記録しています。'],
+]);
 // 영문 표기. stories.json 의 authorEn 이 있으면 그것을 먼저 쓴다.
 const AUTHOR_NAMES_EN = new Map([
   ['5ft.mag 편집부', '5ft.mag Editors'],
@@ -361,26 +375,63 @@ ${footer(authorFile, '../')}
   writeFileSync(join(ROOT, 'authors', `${author.slug}.html`), html);
 }
 
-// ── 영문판: en/authors.html, en/authors/<slug>.html ─────────────────────
+// ── 외국어판: en/authors.html, en/authors/<slug>.html, ja/authors.html, ja/authors/<slug>.html ──
 // 같은 입력(data/stories.json)으로 찍는다. 링크·자산은 절대경로(<base href="/"> 때문),
-// 영문판이 있는 페이지는 /en/ 으로 잇는다(sync-site-shell 과 같은 규칙).
-const EN_SITE_DESC = 'An archive of writing by the authors and contributors of 5ft magazine, all in one place.';
-const enHref = (page) => (existsSync(join(ROOT, 'en', page)) ? `/en/${page}` : `/${page}`);
-// i18n.js 는 영문 페이지만 싣는다. 다른 영문 페이지와 같은 버전을 쓴다(단일 버전 가드)
+// 그 언어판이 있는 페이지는 /en/ · /ja/ 로 잇는다(sync-site-shell 과 같은 규칙).
+// i18n.js 는 외국어 페이지만 싣는다. 다른 영문 페이지와 같은 버전을 쓴다(단일 버전 가드)
 const i18nVersion = (readFileSync(join(ROOT, 'en/about.html'), 'utf8').match(/js\/i18n\.js(\?v=[0-9A-Za-z-]+)/) || [])[1] || '';
+const articlesLabel = (n) => `${n} ${n === 1 ? 'Article' : 'Articles'}`;
 
-function enAuthor(author) {
-  const authorEn = author.stories.find((story) => story.authorEn)?.authorEn;
+const FOREIGN = {
+  en: {
+    lang: 'en', locale: 'en_US',
+    siteDesc: 'An archive of writing by the authors and contributors of 5ft magazine, all in one place.',
+    heroLead: 'An archive of the people behind the writing, photos, interviews and reviews.',
+    gridLabel: 'Authors', search: 'Search', dark: 'Switch to dark mode', menu: 'Open menu',
+    name: (author) => author.stories.find((story) => story.authorEn)?.authorEn || AUTHOR_NAMES_EN.get(author.name) || author.name,
+    note: (author) => AUTHOR_NOTES_EN.get(author.name) || 'A contributor of writing and photographs to 5ft magazine.',
+    description: (name, n) => `The 5ft magazine archive of ${name}. ${articlesLabel(n)}.`,
+    listLabel: (name) => `Articles by ${name}`,
+    // 영문 페이지가 있는 글만 영문 제목·요약과 /en/ 주소로 잇는다. 없으면 한국어판으로.
+    story: (story) => (Boolean(story.titleEn) && existsSync(join(ROOT, 'en', story.page))
+      ? { prefix: 'en/', title: story.titleEn, excerpt: story.excerptEn || '' }
+      : { prefix: '', title: story.title, excerpt: story.excerpt || '' }),
+  },
+  ja: {
+    lang: 'ja', locale: 'ja_JP',
+    siteDesc: '5ft magazine に参加した執筆者とコントリビューターの記事を一か所にまとめたアーカイブです。',
+    heroLead: '文章、写真、インタビュー、レビューをつくった人たちのアーカイブです。',
+    gridLabel: '執筆者一覧', search: '検索', dark: 'ダークモードに切り替え', menu: 'メニューを開く',
+    name: (author) => author.stories.find((story) => story.authorJa)?.authorJa
+      || author.stories.find((story) => story.authorEn)?.authorEn || AUTHOR_NAMES_EN.get(author.name) || author.name,
+    note: (author) => AUTHOR_NOTES_JA.get(author.name) || '5ft magazine に文章や写真で参加したコントリビューターです。',
+    description: (name, n) => `${name}の5ft magazineアーカイブ。記事${n}本を集めました。`,
+    listLabel: (name) => `${name}の記事一覧`,
+    // 일본어 페이지가 있는 글은 일본어로, 없으면 영문판, 그것도 없으면 한국어판으로 잇는다.
+    story: (story) => {
+      if (story.titleJa && existsSync(join(ROOT, 'ja', story.page))) {
+        return { prefix: 'ja/', title: story.titleJa, excerpt: story.excerptJa || '' };
+      }
+      return FOREIGN.en.story(story);
+    },
+  },
+};
+
+function foreignHref(L, page) {
+  return existsSync(join(ROOT, L.lang, page)) ? `/${L.lang}/${page}` : `/${page}`;
+}
+
+function foreignAuthor(L, author) {
   return {
     ...author,
-    name: authorEn || AUTHOR_NAMES_EN.get(author.name) || author.name,
+    name: L.name(author),
     entityType: authorEntityType(author.name),
-    note: AUTHOR_NOTES_EN.get(author.name) || 'A contributor of writing and photographs to 5ft magazine.',
+    note: L.note(author),
   };
 }
 
-function enStructuredData(author) {
-  const url = `${SITE_URL}/en/authors/${author.slug}.html`;
+function foreignStructuredData(L, author) {
+  const url = `${SITE_URL}/${L.lang}/authors/${author.slug}.html`;
   const entity = { '@type': author.entityType, name: author.name, url, description: author.note };
   const links = (author.externalLinks || []).map((link) => link.url).filter(Boolean);
   if (links.length) entity.sameAs = links;
@@ -388,43 +439,43 @@ function enStructuredData(author) {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
     url,
-    inLanguage: 'en',
-    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/en/` },
+    inLanguage: L.lang,
+    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/${L.lang}/` },
     mainEntity: entity,
   }) + ldScript({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: '5ft magazine', item: `${SITE_URL}/en/` },
-      { '@type': 'ListItem', position: 2, name: 'Authors', item: `${SITE_URL}/en/authors.html` },
+      { '@type': 'ListItem', position: 1, name: '5ft magazine', item: `${SITE_URL}/${L.lang}/` },
+      { '@type': 'ListItem', position: 2, name: 'Authors', item: `${SITE_URL}/${L.lang}/authors.html` },
       { '@type': 'ListItem', position: 3, name: author.name, item: url },
     ],
   });
 }
 
-function enIndexStructuredData(list) {
+function foreignIndexStructuredData(L, list) {
   return ldScript({
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Authors | 5ft magazine',
-    url: `${SITE_URL}/en/authors.html`,
-    inLanguage: 'en',
-    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/en/` },
+    url: `${SITE_URL}/${L.lang}/authors.html`,
+    inLanguage: L.lang,
+    isPartOf: { '@type': 'WebSite', name: '5ft magazine', url: `${SITE_URL}/${L.lang}/` },
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: list.length,
       itemListElement: list.map((author, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        item: { '@type': author.entityType, name: author.name, url: `${SITE_URL}/en/authors/${author.slug}.html` },
+        item: { '@type': author.entityType, name: author.name, url: `${SITE_URL}/${L.lang}/authors/${author.slug}.html` },
       })),
     },
   });
 }
 
-function enHead(title, description, canonicalPath, structuredData) {
+function foreignHead(L, title, description, canonicalPath, structuredData) {
   return `<!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="${L.lang}" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <base href="/">
@@ -439,7 +490,7 @@ function enHead(title, description, canonicalPath, structuredData) {
   <meta property="og:image" content="${SITE_URL}/img/og/5ft-link1.webp">
   <meta property="og:url" content="${SITE_URL}${canonicalPath}">
   <meta property="og:site_name" content="5ft magazine">
-  <meta property="og:locale" content="en_US">
+  <meta property="og:locale" content="${L.locale}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
@@ -458,22 +509,22 @@ ${structuredData}  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon
 </head>`;
 }
 
-function enHeader(outFile) {
+function foreignHeader(L, outFile) {
   return `<header>
   <div class="header-inner">
-    <a href="/en/" class="site-logo"><img src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <a href="/${L.lang}/" class="site-logo"><img src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
     ${navHtml(outFile)}
     <div class="nav-right">
-      <a href="${enHref('search.html')}" class="icon-btn" id="headerSearchBtn" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
-      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark mode" aria-pressed="false">☽</button>
-      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">☰</button>
+      <a href="${foreignHref(L, 'search.html')}" class="icon-btn" id="headerSearchBtn" aria-label="${L.search}" title="${L.search}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="${L.dark}" aria-pressed="false">☽</button>
+      <button class="icon-btn hamburger" id="menuBtn" type="button" aria-label="${L.menu}" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
   </div>
   ${mobileNavHtml(outFile)}
 </header>`;
 }
 
-function enFooter(outFile) {
+function foreignFooter(outFile) {
   return `<footer>
   <div class="footer-inner-left">
     <span class="footer-logo">5ft magazine</span>
@@ -487,15 +538,12 @@ function enFooter(outFile) {
 <script src="/js/site-common.js${v('js/site-common.js')}"></script>`;
 }
 
-function enStoryCard(story) {
-  // 영문 페이지가 있는 글만 영문 제목·요약과 /en/ 주소로 잇는다. 없으면 한국어판으로.
-  const en = Boolean(story.titleEn) && existsSync(join(ROOT, 'en', story.page));
-  const title = en ? story.titleEn : story.title;
-  const excerpt = en ? (story.excerptEn || '') : (story.excerpt || '');
+function foreignStoryCard(L, story) {
+  const { prefix, title, excerpt } = L.story(story);
   const image = story.thumbnail
     ? `<img src="/${escapeHtml(story.thumbnail.replace(/^\.?\//, ''))}" alt="${escapeHtml(title)}" loading="lazy">`
     : `<span class="author-story-placeholder">${escapeHtml(title)}</span>`;
-  return `<a class="author-story-card" href="/${en ? 'en/' : ''}${escapeHtml(story.page)}">
+  return `<a class="author-story-card" href="/${prefix}${escapeHtml(story.page)}">
     <div class="author-story-img ${story.thumbnail ? '' : 'is-text'}">${image}</div>
     <div class="author-story-body">
       <span class="author-story-meta">${escapeHtml(story.categoryLabel || story.category || '')} · ${escapeHtml(formatDate(story.date))}</span>
@@ -505,57 +553,60 @@ function enStoryCard(story) {
   </a>`;
 }
 
-const enAuthorList = authorList.map(enAuthor);
-const articlesLabel = (n) => `${n} ${n === 1 ? 'Article' : 'Articles'}`;
-mkdirSync(join(ROOT, 'en/authors'), { recursive: true });
+const written = [join(ROOT, 'authors.html')];
+for (const L of [FOREIGN.en, FOREIGN.ja]) {
+  const list = authorList.map((author) => foreignAuthor(L, author));
+  mkdirSync(join(ROOT, L.lang, 'authors'), { recursive: true });
 
-const enIndexFile = join(ROOT, 'en/authors.html');
-writeFileSync(enIndexFile, `${enHead('Authors | 5ft magazine', EN_SITE_DESC, '/en/authors.html', enIndexStructuredData(enAuthorList))}
+  const indexFile = join(ROOT, L.lang, 'authors.html');
+  writeFileSync(indexFile, `${foreignHead(L, 'Authors | 5ft magazine', L.siteDesc, `/${L.lang}/authors.html`, foreignIndexStructuredData(L, list))}
 <body>
-${enHeader(enIndexFile)}
+${foreignHeader(L, indexFile)}
 <main class="authors-page">
   <section class="authors-hero">
     <span class="authors-kicker">CONTRIBUTORS</span>
     <h1>Authors</h1>
-    <p>An archive of the people behind the writing, photos, interviews and reviews.</p>
+    <p>${L.heroLead}</p>
   </section>
-  <section class="authors-grid" aria-label="Authors">
-    ${enAuthorList.map((author) => `<a class="author-card" href="/en/authors/${author.slug}.html">
+  <section class="authors-grid" aria-label="${L.gridLabel}">
+    ${list.map((author) => `<a class="author-card" href="/${L.lang}/authors/${author.slug}.html">
       <span class="author-count">${articlesLabel(author.stories.length)}</span>
       <h2>${escapeHtml(author.name)}</h2>
       <p>${escapeHtml(author.note)}</p>
     </a>`).join('\n    ')}
   </section>
 </main>
-${enFooter(enIndexFile)}
+${foreignFooter(indexFile)}
 </body>
 </html>
 `);
+  written.push(indexFile);
 
-const written = [join(ROOT, 'authors.html'), enIndexFile];
-for (const author of enAuthorList) {
-  const authorFile = join(ROOT, 'en/authors', `${author.slug}.html`);
-  const title = `${author.name} | 5ft magazine Authors`;
-  const description = `The 5ft magazine archive of ${author.name}. ${articlesLabel(author.stories.length)}.`;
-  writeFileSync(authorFile, `${enHead(title, description, `/en/authors/${author.slug}.html`, enStructuredData(author))}
+  for (const author of list) {
+    const authorFile = join(ROOT, L.lang, 'authors', `${author.slug}.html`);
+    const title = `${author.name} | 5ft magazine Authors`;
+    const description = L.description(author.name, author.stories.length);
+    writeFileSync(authorFile, `${foreignHead(L, title, description, `/${L.lang}/authors/${author.slug}.html`, foreignStructuredData(L, author))}
 <body>
-${enHeader(authorFile)}
+${foreignHeader(L, authorFile)}
 <main class="authors-page author-detail-page">
   <section class="authors-hero">
-    <a class="authors-back" href="/en/authors.html">← Authors</a>
+    <a class="authors-back" href="/${L.lang}/authors.html">← Authors</a>
     <span class="authors-kicker">${articlesLabel(author.stories.length).toUpperCase()}</span>
     <h1>${escapeHtml(author.name)}</h1>
     <p>${escapeHtml(author.note)}</p>
   </section>
-  <section class="author-story-list" aria-label="${escapeHtml(`Articles by ${author.name}`)}">
-    ${author.stories.map(enStoryCard).join('\n    ')}
+  <section class="author-story-list" aria-label="${escapeHtml(L.listLabel(author.name))}">
+    ${author.stories.map((story) => foreignStoryCard(L, story)).join('\n    ')}
   </section>
 </main>
-${enFooter(authorFile)}
+${foreignFooter(authorFile)}
 </body>
 </html>
 `);
-  written.push(join(ROOT, 'authors', `${author.slug}.html`), authorFile);
+    if (L.lang === 'en') written.push(join(ROOT, 'authors', `${author.slug}.html`));
+    written.push(authorFile);
+  }
 }
 
 // 언어 대응 링크(hreflang)는 두 판이 다 써진 뒤에 붙인다. shell:sync 가 넣는 것과 같은 마크업이라
@@ -579,4 +630,4 @@ writeFileSync(
   })), null, 2)}\n`,
 );
 
-console.log(`Authors generated: ${authorList.length} (ko + en)`);
+console.log(`Authors generated: ${authorList.length} (ko + en + ja)`);

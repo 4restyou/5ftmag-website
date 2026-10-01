@@ -29,7 +29,7 @@
       + `<div class="skeleton skeleton-line" style="width:40%"></div>`
       + `</div>`;
     return `<div class="mag-state mag-state--loading" role="status" aria-live="polite">`
-      + `<span class="sr-only">${esc(o.label || tr('불러오는 중…', 'Loading…'))}</span>`
+      + `<span class="sr-only">${esc(o.label || tr('불러오는 중…', 'Loading…', '読み込み中…'))}</span>`
       + card.repeat(count)
       + `</div>`;
   }
@@ -37,7 +37,7 @@
   // 빈 상태: 안내 + (선택) 다음 행동 버튼. action 이 있으면 data-state-action 으로 표시.
   function empty(opts) {
     const o = opts || {};
-    const title = o.title || tr('아직 표시할 내용이 없어요.', 'Nothing to show yet.');
+    const title = o.title || tr('아직 표시할 내용이 없어요.', 'Nothing to show yet.', 'まだ表示する内容がありません。');
     const desc = o.desc ? `<p class="mag-state-desc">${esc(o.desc)}</p>` : '';
     const cta = o.actionLabel
       ? `<button type="button" class="mag-state-btn" data-state-action="${esc(o.action || 'reset')}">${esc(o.actionLabel)}</button>`
@@ -51,11 +51,11 @@
   // 에러 상태: 안내 + 다시 시도 버튼 (기본 라벨 '다시 시도').
   function error(opts) {
     const o = opts || {};
-    const title = o.title || tr('불러오지 못했어요.', 'Could not load.');
+    const title = o.title || tr('불러오지 못했어요.', 'Could not load.', '読み込めませんでした。');
     const desc = o.desc ? `<p class="mag-state-desc">${esc(o.desc)}</p>`
-      : `<p class="mag-state-desc">${tr('네트워크 상태를 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.')}</p>`;
+      : `<p class="mag-state-desc">${tr('네트워크 상태를 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.', 'ネットワーク接続を確認して、もう一度お試しください。')}</p>`;
     const retry = o.noRetry ? ''
-      : `<button type="button" class="mag-state-btn" data-state-action="${esc(o.action || 'retry')}">${esc(o.actionLabel || tr('다시 시도', 'Try again'))}</button>`;
+      : `<button type="button" class="mag-state-btn" data-state-action="${esc(o.action || 'retry')}">${esc(o.actionLabel || tr('다시 시도', 'Try again', '再試行'))}</button>`;
     return `<div class="mag-state mag-state--error" role="alert">`
       + `<p class="mag-state-title">${esc(title)}</p>`
       + desc + retry

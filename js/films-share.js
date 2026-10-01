@@ -44,7 +44,7 @@
 
     const ok = await window.copyTextToClipboard?.(url);
     window.notify?.(
-      ok ? tr('링크 복사 완료', 'Link copied') : tr('복사 실패 — 주소창에서 직접 복사해주세요', 'Copy failed. Please copy the link from the address bar.'),
+      ok ? tr('링크 복사 완료', 'Link copied', 'リンクをコピーしました') : tr('복사 실패 — 주소창에서 직접 복사해주세요', 'Copy failed. Please copy the link from the address bar.', 'コピーできませんでした。アドレスバーから直接コピーしてください。'),
       ok ? 'info' : 'danger'
     );
   }
@@ -61,7 +61,7 @@
     const filmName = film?.displayName || film?.name || filmKey;
     await shareOrCopy({
       title: `${filmName} · 5ft.mag Films`,
-      text: tr(`5ft.mag Films 에서 ${filmName} 보기`, `See ${filmName} on 5ft.mag Films`),
+      text: tr(`5ft.mag Films 에서 ${filmName} 보기`, `See ${filmName} on 5ft.mag Films`, `5ft.mag Films で ${filmName} を見る`),
       url,
     });
   }
@@ -74,7 +74,7 @@
       : window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     await shareOrCopy({
       title: `${info.display} · 5ft.mag Films`,
-      text: tr(`5ft.mag 에서 ${info.display} 으로 찍은 사진 보기`, `See photos shot on ${info.display} at 5ft.mag`),
+      text: tr(`5ft.mag 에서 ${info.display} 으로 찍은 사진 보기`, `See photos shot on ${info.display} at 5ft.mag`, `5ft.mag で ${info.display} で撮った写真を見る`),
       url,
     });
   }
@@ -89,8 +89,8 @@
       : window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     const who = label || '@' + key;
     await shareOrCopy({
-      title: tr(`${who} 의 필름 사진 · 5ft magazine`, `Film photos by ${who} · 5ft magazine`),
-      text: tr(`${who} 님이 5ft.mag 에 올린 필름 사진 보기`, `See film photos ${who} shared on 5ft.mag`),
+      title: tr(`${who} 의 필름 사진 · 5ft magazine`, `Film photos by ${who} · 5ft magazine`, `${who} のフィルム写真 · 5ft magazine`),
+      text: tr(`${who} 님이 5ft.mag 에 올린 필름 사진 보기`, `See film photos ${who} shared on 5ft.mag`, `${who} さんが 5ft.mag に投稿したフィルム写真を見る`),
       url,
     });
   }

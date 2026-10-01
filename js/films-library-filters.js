@@ -6,11 +6,11 @@
   const tr = i18n.t;
 
   const FILTER_LABELS = {
-    all: tr('전체', 'All'),
-    color: tr('컬러', 'Color'),
-    bw: tr('흑백', 'B&W'),
-    slide: tr('슬라이드', 'Slide'),
-    cinema: tr('영화용', 'Cinema'),
+    all: tr('전체', 'All', 'すべて'),
+    color: tr('컬러', 'Color', 'カラー'),
+    bw: tr('흑백', 'B&W', 'モノクロ'),
+    slide: tr('슬라이드', 'Slide', 'スライド'),
+    cinema: tr('영화용', 'Cinema', '映画用'),
   };
   const MOBILE_LIBRARY_INITIAL = 30;
   const MOBILE_LIBRARY_STEP = 30;
@@ -92,7 +92,7 @@
       const shouldPage = isMobileFilms() && !hasActiveFilter() && matchedCount > libraryMobileVisible;
       wrap.hidden = !shouldPage;
       if (!shouldPage) return;
-      btn.textContent = tr(`필름 더 보기 (${matchedCount - libraryMobileVisible})`, `More films (${matchedCount - libraryMobileVisible})`);
+      btn.textContent = tr(`필름 더 보기 (${matchedCount - libraryMobileVisible})`, `More films (${matchedCount - libraryMobileVisible})`, `フィルムをもっと見る（${matchedCount - libraryMobileVisible}）`);
     }
 
     function renderFilterChips(libraryFilms) {
@@ -161,7 +161,7 @@
       for (const [, film] of libraryFilms) if (film.brand) brands.add(film.brand);
       const sorted = Array.from(brands).sort((a, b) => a.localeCompare(b, 'en'));
       for (const brand of [...currentBrands]) if (!brands.has(brand)) currentBrands.delete(brand);
-      buildMultiselect(root, tr('브랜드', 'Brand'), sorted.map(brand => ({ value: brand, label: brand })),
+      buildMultiselect(root, tr('브랜드', 'Brand', 'ブランド'), sorted.map(brand => ({ value: brand, label: brand })),
         () => currentBrands,
         (set) => {
           currentBrands = set;
@@ -277,11 +277,11 @@
       }
       if (unknowns.length) {
         unknowns.sort((a, b) => a.display.localeCompare(b.display, 'en'));
-        options.push({ groupLabel: tr('기타 (브랜드 미확인)', 'Other (unknown brand)') });
+        options.push({ groupLabel: tr('기타 (브랜드 미확인)', 'Other (unknown brand)', 'その他（ブランド不明）') });
         for (const camera of unknowns) options.push({ value: camera.key, label: camera.display, meta: String(camera.count) });
       }
       for (const key of [...currentCameras]) if (!cameraIndex.has(key)) currentCameras.delete(key);
-      buildMultiselect(root, tr('카메라', 'Camera'), options,
+      buildMultiselect(root, tr('카메라', 'Camera', 'カメラ'), options,
         () => currentCameras,
         (set) => {
           currentCameras.clear();
@@ -303,7 +303,7 @@
         const ctx = root._ms;
         const sel = ctx.getSelected();
         if (sel.size === 0) {
-          label.textContent = tr(`${ctx.labelPrefix} 전체`, `All ${ctx.labelPrefix.toLowerCase()}s`);
+          label.textContent = tr(`${ctx.labelPrefix} 전체`, `All ${ctx.labelPrefix.toLowerCase()}s`, `すべての${ctx.labelPrefix}`);
         } else if (sel.size === 1) {
           const value = [...sel][0];
           const opt = (ctx.options || []).find(option => option.value === value);
@@ -318,8 +318,8 @@
         const opts = ctx.options || [];
         const sel = ctx.getSelected();
         const clearBtn = `<div class="ms-dropdown-panel-head">
-          <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${tr(`${sel.size}개 선택`, `${sel.size} selected`)}</span>
-          <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>${tr('전체 해제', 'Clear all')}</button>
+          <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${tr(`${sel.size}개 선택`, `${sel.size} selected`, `${sel.size}件選択`)}</span>
+          <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>${tr('전체 해제', 'Clear all', 'すべて解除')}</button>
         </div>`;
         const rows = opts.map(option => {
           if (option.groupLabel) {
@@ -332,7 +332,7 @@
             ${option.meta ? `<span class="ms-opt-meta">${escapeHtml(option.meta)}</span>` : ''}
           </label>`;
         }).join('');
-        panel.innerHTML = clearBtn + (rows || `<div class="ms-dropdown-empty">${tr('옵션 없음', 'No options')}</div>`);
+        panel.innerHTML = clearBtn + (rows || `<div class="ms-dropdown-empty">${tr('옵션 없음', 'No options', '選択肢なし')}</div>`);
         panel.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
           checkbox.addEventListener('change', () => {
             const ctx2 = root._ms;
@@ -343,7 +343,7 @@
             refreshLabel();
             const headLabel = panel.querySelector('.ms-dropdown-clear-label');
             const clearEl = panel.querySelector('[data-action="ms-clear"]');
-            if (headLabel) headLabel.textContent = tr(`${next.size}개 선택`, `${next.size} selected`);
+            if (headLabel) headLabel.textContent = tr(`${next.size}개 선택`, `${next.size} selected`, `${next.size}件選択`);
             if (clearEl) clearEl.disabled = next.size === 0;
           });
         });

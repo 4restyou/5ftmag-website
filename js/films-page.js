@@ -208,7 +208,7 @@
       const on   = filmFavSlugs.has(slug);
       el.classList.toggle('is-fav', on);
       el.setAttribute('aria-pressed', String(on));
-      el.setAttribute('aria-label', on ? fpT('즐겨찾기 해제', 'Remove from favorites') : fpT('즐겨찾기 추가', 'Add to favorites'));
+      el.setAttribute('aria-label', on ? fpT('즐겨찾기 해제', 'Remove from favorites', 'お気に入りから外す') : fpT('즐겨찾기 추가', 'Add to favorites', 'お気に入りに追加'));
     });
   }
   async function toggleFilmFav(el) {
@@ -216,12 +216,12 @@
     const slug = el.dataset.filmSlug;
     if (!slug) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(fpT('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
+      window.notify?.(fpT('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?'))) return;
+      if (!confirm(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?', 'お気に入りにはログインが必要です。Google でログインしますか？'))) return;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return;
     }
@@ -238,7 +238,7 @@
       if (wasFav) filmFavSlugs.add(slug); else filmFavSlugs.delete(slug);
       syncFilmFavMarks();
       resortLibraryFavFirst();
-      window.notify?.(fpT('처리 실패: ', 'Failed: ') + (error.message || fpT('잠시 후 다시 시도', 'Please try again in a moment.')), 'danger');
+      window.notify?.(fpT('처리 실패: ', 'Failed: ', '処理に失敗しました: ') + (error.message || fpT('잠시 후 다시 시도', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。')), 'danger');
     }
   }
 
@@ -293,7 +293,7 @@
     if (introCount) {
       introCount.innerHTML = fpT(
         `지금까지 독자들이 더한 사진 <strong>${submissions.length.toLocaleString('ko-KR')}</strong>컷이 모여 있어요.`,
-        `Readers have added <strong>${submissions.length.toLocaleString(fpI18n.locale)}</strong> frame${submissions.length === 1 ? '' : 's'} so far.`);
+        `Readers have added <strong>${submissions.length.toLocaleString(fpI18n.locale)}</strong> frame${submissions.length === 1 ? '' : 's'} so far.`, `これまでに読者が加えた写真 <strong>${submissions.length.toLocaleString(fpI18n.locale)}</strong>コマが集まっています。`);
       introCount.hidden = false;
     }
 
@@ -346,10 +346,10 @@
         countEl.textContent = progress.label;
         countEl.classList.toggle('has-rolls', progress.currentNumber > 1);
         countEl.setAttribute('aria-label', progress.currentNumber > 1
-          ? fpT(`현재 ${progress.currentNumber}번째 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`, `Roll ${progress.currentNumber}: ${progress.currentCount}/${ROLL_LIMIT} frames`)
-          : fpT(`현재 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`, `Current roll: ${progress.currentCount}/${ROLL_LIMIT} frames`));
+          ? fpT(`현재 ${progress.currentNumber}번째 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`, `Roll ${progress.currentNumber}: ${progress.currentCount}/${ROLL_LIMIT} frames`, `現在 ${progress.currentNumber}本目のロール ${progress.currentCount}/${ROLL_LIMIT}コマ`)
+          : fpT(`현재 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`, `Current roll: ${progress.currentCount}/${ROLL_LIMIT} frames`, `現在のロール ${progress.currentCount}/${ROLL_LIMIT}コマ`));
       }
-      if (ctaEl) ctaEl.textContent = fpT('컷 채우기 →', 'Add a frame →');
+      if (ctaEl) ctaEl.textContent = fpT('컷 채우기 →', 'Add a frame →', '1コマ投稿する →');
     }
 
     applyLibraryFilter();
@@ -462,7 +462,7 @@
         // 아무 일도 안 일어난 것으로 보여 고장으로 읽는다. 이유를 밝힌다.
         const contributorCard = document.getElementById('filmsGridLibrary');
         if (contributorCard) contributorCard.scrollIntoView({ block: 'start' });
-        window.notify?.(fpT('이 작가의 사진을 찾지 못했어요. 사진이 내려갔거나 표기가 바뀐 것 같습니다.', "We couldn't find this photographer's photos. They may have been removed or relabeled."), 'info');
+        window.notify?.(fpT('이 작가의 사진을 찾지 못했어요. 사진이 내려갔거나 표기가 바뀐 것 같습니다.', "We couldn't find this photographer's photos. They may have been removed or relabeled.", 'この撮影者の写真が見つかりませんでした。写真が削除されたか、表記が変わった可能性があります。'), 'info');
       }
     }
 
@@ -514,10 +514,10 @@
         <div class="modal-section">
           <div class="modal-section-head">
             <span class="modal-section-tag">${escapeAttr(data.issue || 'ISSUE')} · EDITORIAL</span>
-            <span class="modal-section-meta">${fpT('사진가', 'Photographers')} ${escapeAttr(photographers.join(', '))}</span>
+            <span class="modal-section-meta">${fpT('사진가', 'Photographers', '写真家')} ${escapeAttr(photographers.join(', '))}</span>
             <div class="modal-section-actions">
-              <button type="button" class="modal-view-toggle" data-view-toggle aria-label="${fpT('컨택트 시트로 전환', 'Switch to contact sheet')}">${fpT('컨택트 시트', 'Contact sheet')}</button>
-              <button type="button" class="modal-view-save" data-save-roll="editorial" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="${fpT('필름스트립 이미지로 저장', 'Save as filmstrip image')}">${fpT('이미지로 저장', 'Save as image')}</button>
+              <button type="button" class="modal-view-toggle" data-view-toggle aria-label="${fpT('컨택트 시트로 전환', 'Switch to contact sheet', 'コンタクトシートに切り替え')}">${fpT('컨택트 시트', 'Contact sheet', 'コンタクトシート')}</button>
+              <button type="button" class="modal-view-save" data-save-roll="editorial" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="${fpT('필름스트립 이미지로 저장', 'Save as filmstrip image', 'フィルムストリップ画像として保存')}">${fpT('이미지로 저장', 'Save as image', '画像で保存')}</button>
             </div>
           </div>
           <div class="modal-gallery" data-view="grid" id="editorialGallery-${escapeAttr(filmKey)}">
@@ -531,7 +531,7 @@
     let slotsHTML = '';
     for (let i = 0; i < ROLL_LIMIT; i++) {
       slotsHTML += `
-        <div class="reader-slot is-empty" data-slot-index="${i}" aria-label="${fpT(`프레임 ${i + 1} — 비어 있음`, `Frame ${i + 1}, empty`)}">
+        <div class="reader-slot is-empty" data-slot-index="${i}" aria-label="${fpT(`프레임 ${i + 1} — 비어 있음`, `Frame ${i + 1}, empty`, `フレーム ${i + 1}（空き）`)}">
           <span class="reader-slot-frame">${String(i + 1).padStart(2, '0')}</span>
         </div>`;
     }
@@ -543,8 +543,8 @@
         </div>
         <p class="reader-roll-intro">
           ${isFeatured
-            ? fpT('독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.', 'Another roll, filled by readers shooting the same film. Add your frame to an empty slot.')
-            : fpT('아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.', 'A roll just getting started. Readers fill its 36 frames together. Take the first one.')}
+            ? fpT('독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.', 'Another roll, filled by readers shooting the same film. Add your frame to an empty slot.', '読者が同じフィルムで埋めていく、もう一本のロール。空いたコマにあなたの1コマを入れてみてください。')
+            : fpT('아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.', 'A roll just getting started. Readers fill its 36 frames together. Take the first one.', '始まったばかりのロール。36コマの空きを読者が一緒に埋めていきます。最初の1コマをどうぞ。')}
         </p>
         <div class="reader-roll-controls">
           <div class="reader-roll-control-main">
@@ -556,17 +556,17 @@
             </div>
           </div>
           <div class="modal-section-actions reader-roll-view-actions">
-            <span class="reader-control-label">${fpT('보기·저장', 'View · Save')}</span>
-            <button type="button" class="modal-view-toggle" data-view-toggle aria-label="${fpT('기본 그리드로 전환', 'Switch to grid')}">${fpT('기본 그리드', 'Grid')}</button>
+            <span class="reader-control-label">${fpT('보기·저장', 'View · Save', '表示・保存')}</span>
+            <button type="button" class="modal-view-toggle" data-view-toggle aria-label="${fpT('기본 그리드로 전환', 'Switch to grid', '標準グリッドに切り替え')}">${fpT('기본 그리드', 'Grid', '標準グリッド')}</button>
             <div class="reader-save-menu" data-reader-save-menu hidden>
-              <button type="button" class="modal-view-save" data-save-menu-toggle="reader" data-film-key="${escapeAttr(filmKey)}" aria-expanded="false" aria-label="${fpT('이미지 저장 방식 선택', 'Choose how to save the image')}">${fpT('이미지로 저장', 'Save as image')}</button>
+              <button type="button" class="modal-view-save" data-save-menu-toggle="reader" data-film-key="${escapeAttr(filmKey)}" aria-expanded="false" aria-label="${fpT('이미지 저장 방식 선택', 'Choose how to save the image', '画像の保存方法を選ぶ')}">${fpT('이미지로 저장', 'Save as image', '画像で保存')}</button>
               <div class="reader-save-menu-popover" data-save-menu-popover hidden>
-                <button type="button" class="reader-save-menu-item" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}">${fpT('전체 롤 저장', 'Save whole roll')}</button>
-                <button type="button" class="reader-save-menu-item" data-select-roll="reader" data-film-key="${escapeAttr(filmKey)}">${fpT('사진 골라 저장', 'Pick photos to save')}</button>
+                <button type="button" class="reader-save-menu-item" data-save-roll="reader" data-film-key="${escapeAttr(filmKey)}">${fpT('전체 롤 저장', 'Save whole roll', 'ロール全体を保存')}</button>
+                <button type="button" class="reader-save-menu-item" data-select-roll="reader" data-film-key="${escapeAttr(filmKey)}">${fpT('사진 골라 저장', 'Pick photos to save', '写真を選んで保存')}</button>
               </div>
             </div>
-            <button type="button" class="modal-view-save reader-selected-save" data-save-selected-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden disabled aria-label="${fpT('선택한 사진만 이미지로 저장', 'Save selected photos as an image')}">${fpT('선택한 0장 저장', 'Save 0 selected')}</button>
-            <button type="button" class="modal-view-cancel" data-select-cancel="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="${fpT('사진 선택 취소', 'Cancel photo selection')}">${fpT('취소', 'Cancel')}</button>
+            <button type="button" class="modal-view-save reader-selected-save" data-save-selected-roll="reader" data-film-key="${escapeAttr(filmKey)}" hidden disabled aria-label="${fpT('선택한 사진만 이미지로 저장', 'Save selected photos as an image', '選択した写真だけを画像で保存')}">${fpT('선택한 0장 저장', 'Save 0 selected', '選択した0枚を保存')}</button>
+            <button type="button" class="modal-view-cancel" data-select-cancel="reader" data-film-key="${escapeAttr(filmKey)}" hidden aria-label="${fpT('사진 선택 취소', 'Cancel photo selection', '写真の選択をキャンセル')}">${fpT('취소', 'Cancel', 'キャンセル')}</button>
           </div>
         </div>
         <div class="reader-grid" data-view="contact" id="readerGrid-${filmKey}">
@@ -575,9 +575,9 @@
         <div class="reader-contributor-view" id="readerContributorView-${filmKey}" hidden></div>
         <div class="reader-roll-actions">
           <button type="button" class="reader-submit-btn" data-action="open-submission" data-prefill-film="${escapeAttr(data.displayName || data.name)}">
-            ${isFeatured ? fpT('컷 채우기', 'Add a frame') : fpT('첫 컷 채우기', 'Add the first frame')}
+            ${isFeatured ? fpT('컷 채우기', 'Add a frame', '1コマ投稿する') : fpT('첫 컷 채우기', 'Add the first frame', '最初の1コマを投稿する')}
           </button>
-          <a href="${fpI18n.isEn ? fpI18n.url('/me.html') : 'me.html'}" class="reader-mine-link">${fpT('내 사진 관리 →', 'Manage my photos →')}</a>
+          <a href="${fpI18n.isEn ? fpI18n.url('/me.html') : 'me.html'}" class="reader-mine-link">${fpT('내 사진 관리 →', 'Manage my photos →', '自分の写真を管理 →')}</a>
         </div>
       </div>`;
 
@@ -590,7 +590,7 @@
     // "이 필름으로 쓴 글 N" 줄 — desc 아래, 메타 위. 글이 1개 이상일 때만.
     const articleCount = articleCountsByFilm[filmKey] || 0;
     const articleLine = articleCount > 0
-      ? `<a class="modal-articles-link" href="${escapeAttr(fpI18n.isEn ? fpI18n.url(`/stories.html?film=${encodeURIComponent(filmKey)}`) : `stories.html?film=${encodeURIComponent(filmKey)}`)}">${fpT(`이 필름으로 쓴 글 ${articleCount}편 →`, `${articleCount} ${articleCount === 1 ? 'story' : 'stories'} on this film →`)}</a>`
+      ? `<a class="modal-articles-link" href="${escapeAttr(fpI18n.isEn ? fpI18n.url(`/stories.html?film=${encodeURIComponent(filmKey)}`) : `stories.html?film=${encodeURIComponent(filmKey)}`)}">${fpT(`이 필름으로 쓴 글 ${articleCount}편 →`, `${articleCount} ${articleCount === 1 ? 'story' : 'stories'} on this film →`, `このフィルムで書いた記事 ${articleCount}本 →`)}</a>`
       : '';
 
     modalContent.innerHTML = `
@@ -692,7 +692,7 @@
     let rollLoadToken = 0;
     const selectedExportKeys = new Set();
     const rollIntro = modalContent.querySelector('.reader-roll-intro');
-    if (submitBtn) submitBtn.textContent = rollTotal > 0 ? fpT('컷 채우기', 'Add a frame') : (isFeatured ? fpT('컷 채우기', 'Add a frame') : fpT('첫 컷 채우기', 'Add the first frame'));
+    if (submitBtn) submitBtn.textContent = rollTotal > 0 ? fpT('컷 채우기', 'Add a frame', '1コマ投稿する') : (isFeatured ? fpT('컷 채우기', 'Add a frame', '1コマ投稿する') : fpT('첫 컷 채우기', 'Add the first frame', '最初の1コマを投稿する'));
 
     const filmLabelOf = (filmName) => {
       const match = typeof window.findFilmMatch === 'function'
@@ -860,7 +860,7 @@
       currentContributorKey = personKey;
       currentContributorLabel = label;
       if (rollIntro) {
-        rollIntro.textContent = fpT(`${label}님이 5ft.mag에 올린 전체 Reader's Roll 사진입니다.`, `All Reader's Roll photos ${label} has shared on 5ft.mag.`);
+        rollIntro.textContent = fpT(`${label}님이 5ft.mag에 올린 전체 Reader's Roll 사진입니다.`, `All Reader's Roll photos ${label} has shared on 5ft.mag.`, `${label} さんが 5ft.mag に投稿した Reader's Roll の写真すべてです。`);
       }
       if (counter) {
         counter.textContent = `${personEntries.length} photos · ${groups.length} films`;
@@ -878,42 +878,42 @@
                 class="reader-contributor-fav${isContribFav ? ' is-fav' : ''}"
                 data-contributor-key="${escapeAttr(personKey)}"
                 aria-pressed="${isContribFav ? 'true' : 'false'}"
-                aria-label="${isContribFav ? fpT('작가 즐겨찾기 해제', 'Remove photographer from favorites') : fpT('작가 즐겨찾기 추가', 'Add photographer to favorites')}"
-                title="${fpT('작가 즐겨찾기', 'Favorite photographer')}">
+                aria-label="${isContribFav ? fpT('작가 즐겨찾기 해제', 'Remove photographer from favorites', '撮影者をお気に入りから外す') : fpT('작가 즐겨찾기 추가', 'Add photographer to favorites', '撮影者をお気に入りに追加')}"
+                title="${fpT('작가 즐겨찾기', 'Favorite photographer', 'お気に入りの撮影者')}">
                 <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
                   <path stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"
                         d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
                 </svg>
               </button>
             </div>
-            <p>${fpT(`${personEntries.length}컷 · ${groups.length}개 필름`, `${fpFrames(personEntries.length)} · ${fpFilms(groups.length)}`)}</p>
+            <p>${fpT(`${personEntries.length}컷 · ${groups.length}개 필름`, `${fpFrames(personEntries.length)} · ${fpFilms(groups.length)}`, `${personEntries.length}コマ · ${groups.length}種のフィルム`)}</p>
           </div>
           <div class="reader-contributor-actions">
             ${instagramUrl ? `<a href="${escapeAttr(instagramUrl)}" target="_blank" rel="noopener" class="reader-contributor-link">Instagram ↗</a>` : ''}
-            <button type="button" class="reader-contributor-link" data-contrib-view-toggle aria-label="${fpT('컨택트 시트로 전환', 'Switch to contact sheet')}">${fpT('컨택트 시트', 'Contact sheet')}</button>
-            <button type="button" class="reader-contributor-back">← ${fpT(`${escapeAttr(film.displayName || film.name)}로 돌아가기`, `Back to ${escapeAttr(film.displayName || film.name)}`)}</button>
+            <button type="button" class="reader-contributor-link" data-contrib-view-toggle aria-label="${fpT('컨택트 시트로 전환', 'Switch to contact sheet', 'コンタクトシートに切り替え')}">${fpT('컨택트 시트', 'Contact sheet', 'コンタクトシート')}</button>
+            <button type="button" class="reader-contributor-back">← ${fpT(`${escapeAttr(film.displayName || film.name)}로 돌아가기`, `Back to ${escapeAttr(film.displayName || film.name)}`, `${escapeAttr(film.displayName || film.name)} に戻る`)}</button>
           </div>
         </div>
         <div class="reader-contributor-sections" data-view="grid">
         ${groups.map(([filmName, rows], gIdx) => `
           <section class="reader-contributor-group" data-film-name="${escapeAttr(filmName)}">
             <div class="reader-contributor-group-head">
-              <h4>${escapeAttr(filmName)} <span>${fpT(`${rows.length}컷`, fpFrames(rows.length))}</span></h4>
+              <h4>${escapeAttr(filmName)} <span>${fpT(`${rows.length}컷`, fpFrames(rows.length), `${rows.length}コマ`)}</span></h4>
               <div class="reader-contributor-save-actions">
                 <div class="reader-save-menu" data-contrib-save-menu>
-                  <button type="button" class="reader-save-btn" data-save-menu-toggle="contrib" data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}" aria-expanded="false" aria-label="${fpT('작가별 이미지 저장 방식 선택', "Choose how to save this photographer's images")}">${fpT('이미지로 저장', 'Save as image')}</button>
+                  <button type="button" class="reader-save-btn" data-save-menu-toggle="contrib" data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}" aria-expanded="false" aria-label="${fpT('작가별 이미지 저장 방식 선택', "Choose how to save this photographer's images", 'この撮影者の画像の保存方法を選ぶ')}">${fpT('이미지로 저장', 'Save as image', '画像で保存')}</button>
                   <div class="reader-save-menu-popover" data-save-menu-popover hidden>
-                    <button type="button" class="reader-save-menu-item" data-save-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">${fpT('전체 저장', 'Save all')}</button>
-                    <button type="button" class="reader-save-menu-item" data-select-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">${fpT('사진 골라 저장', 'Pick photos to save')}</button>
+                    <button type="button" class="reader-save-menu-item" data-save-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">${fpT('전체 저장', 'Save all', 'すべて保存')}</button>
+                    <button type="button" class="reader-save-menu-item" data-select-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}">${fpT('사진 골라 저장', 'Pick photos to save', '写真を選んで保存')}</button>
                   </div>
                 </div>
-                <button type="button" class="reader-save-btn reader-contrib-selected-save" data-save-selected-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}" hidden disabled>${fpT('선택한 0장 저장', 'Save 0 selected')}</button>
-                <button type="button" class="modal-view-cancel" data-cancel-contrib-select hidden>${fpT('취소', 'Cancel')}</button>
+                <button type="button" class="reader-save-btn reader-contrib-selected-save" data-save-selected-contrib data-person-key="${escapeAttr(personKey)}" data-author-label="${escapeAttr(authorLabel)}" data-film-name="${escapeAttr(filmName)}" hidden disabled>${fpT('선택한 0장 저장', 'Save 0 selected', '選択した0枚を保存')}</button>
+                <button type="button" class="modal-view-cancel" data-cancel-contrib-select hidden>${fpT('취소', 'Cancel', 'キャンセル')}</button>
               </div>
             </div>
             <div class="reader-contributor-grid" id="contribGrid-${escapeAttr(personKey)}-${gIdx}">
               ${rows.map((sub, idx) => `
-                <button type="button" class="reader-contributor-photo" data-person-key="${escapeAttr(personKey)}" data-photo-index="${idx}" data-film-name="${escapeAttr(filmName)}" aria-label="${fpT(`${escapeAttr(filmName)} ${idx + 1}번째 사진 크게 보기`, `View larger: ${escapeAttr(filmName)} photo ${idx + 1}`)}" aria-pressed="false">
+                <button type="button" class="reader-contributor-photo" data-person-key="${escapeAttr(personKey)}" data-photo-index="${idx}" data-film-name="${escapeAttr(filmName)}" aria-label="${fpT(`${escapeAttr(filmName)} ${idx + 1}번째 사진 크게 보기`, `View larger: ${escapeAttr(filmName)} photo ${idx + 1}`, `${escapeAttr(filmName)} の${idx + 1}枚目の写真を拡大表示`)}" aria-pressed="false">
                   <span class="reader-contributor-photo-window">
                     <img src="${escapeAttr(sub.image)}" alt="" loading="lazy" />
                   </span>
@@ -1132,7 +1132,7 @@
     // 필름별 그룹화
     const byFilm = new Map();
     for (const s of matched) {
-      const filmName = (s.film || '').trim() || fpT('(필름 미상)', '(Unknown film)');
+      const filmName = (s.film || '').trim() || fpT('(필름 미상)', '(Unknown film)', '（フィルム不明）');
       if (!byFilm.has(filmName)) byFilm.set(filmName, []);
       byFilm.get(filmName).push(s);
     }
@@ -1157,14 +1157,14 @@
         return `
           <div class="modal-photo" data-camera-photo-idx="${idx}">
             <img src="${escapeAttr(s.image)}" alt="" loading="lazy" />
-            <div class="modal-photo-caption">${escapeHtml(s.submitterName || s.author || fpT('익명', 'Anonymous'))}</div>
+            <div class="modal-photo-caption">${escapeHtml(s.submitterName || s.author || fpT('익명', 'Anonymous', '匿名'))}</div>
           </div>`;
       }).join('');
       return `
         <section class="modal-camera-section">
           <h3 class="modal-camera-section-title">
             <button type="button" class="modal-camera-film-jump" data-film-name="${escapeAttr(filmName)}">${escapeHtml(filmName)}</button>
-            <span>${fpT(`${rows.length}컷`, fpFrames(rows.length))}</span>
+            <span>${fpT(`${rows.length}컷`, fpFrames(rows.length), `${rows.length}コマ`)}</span>
           </h3>
           <div class="modal-gallery">${cellsHtml}</div>
         </section>`;
@@ -1175,9 +1175,9 @@
       <div class="modal-header">
         <span class="modal-brand">${escapeHtml(brandLabel)}</span>
         <h2 class="modal-name">${escapeHtml(info.display)}</h2>
-        <p class="modal-desc">${fpT(`${matched.length}컷 · ${byFilm.size}개 필름`, `${fpFrames(matched.length)} · ${fpFilms(byFilm.size)}`)}</p>
+        <p class="modal-desc">${fpT(`${matched.length}컷 · ${byFilm.size}개 필름`, `${fpFrames(matched.length)} · ${fpFilms(byFilm.size)}`, `${matched.length}コマ · ${byFilm.size}種のフィルム`)}</p>
       </div>
-      ${sectionsHtml || `<p class="modal-empty">${fpT('아직 이 카메라로 찍힌 사진이 없어요.', 'No photos shot on this camera yet.')}</p>`}
+      ${sectionsHtml || `<p class="modal-empty">${fpT('아직 이 카메라로 찍힌 사진이 없어요.', 'No photos shot on this camera yet.', 'このカメラで撮った写真はまだありません。')}</p>`}
     `;
 
     // 사진 클릭 → reader 라이트박스
@@ -1249,12 +1249,12 @@
 
   async function ensurePhotoFavoriteSession() {
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(fpT('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
+      window.notify?.(fpT('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
       return false;
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?'))) return false;
+      if (!confirm(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?', 'お気に入りにはログインが必要です。Google でログインしますか？'))) return false;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return false;
     }
@@ -1312,10 +1312,10 @@
     if (next === null || next === current) return;
     const { error } = await window.MagDB.review.patch(submissionId, { film: next });
     if (error) {
-      window.notify?.(fpT('필름 표기를 저장하지 못했어요. (', "Couldn't save the film label. (") + (error.message || fpT('권한을 확인해 주세요', 'Check your permissions.')) + ')', 'danger');
+      window.notify?.(fpT('필름 표기를 저장하지 못했어요. (', "Couldn't save the film label. (", 'フィルム表記を保存できませんでした。(') + (error.message || fpT('권한을 확인해 주세요', 'Check your permissions.', '権限を確認してください')) + ')', 'danger');
       return;
     }
-    window.notify?.(fpT('필름 표기를 "' + next + '" 로 바꿨어요. 목록을 새로 불러옵니다.', 'Film label changed to "' + next + '". Reloading the list.'), 'info');
+    window.notify?.(fpT('필름 표기를 "' + next + '" 로 바꿨어요. 목록을 새로 불러옵니다.', 'Film label changed to "' + next + '". Reloading the list.', 'フィルム表記を「' + next + '」に変更しました。一覧を読み込み直します。'), 'info');
     // 캐시된 승인 목록과 카탈로그 매칭을 다시 만들어야 반영된다.
     setTimeout(() => window.location.reload(), 900);
   }
@@ -1376,12 +1376,12 @@
     const key = btn.dataset.contributorKey;
     if (!key) return;
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(fpT('잠시 후 다시 시도해주세요.', 'Please try again in a moment.'), 'info');
+      window.notify?.(fpT('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
       return;
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm(fpT('작가 즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to save photographers to Favorites. Sign in with Google?'))) return;
+      if (!confirm(fpT('작가 즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to save photographers to Favorites. Sign in with Google?', '撮影者をお気に入りに追加するにはログインが必要です。Google でログインしますか？'))) return;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return;
     }
@@ -1394,14 +1394,14 @@
     if (error) {
       if (wasFav) contributorFavKeys.add(key); else contributorFavKeys.delete(key);
       setContributorFavState(btn, wasFav);
-      window.notify?.(fpT('처리 실패: ', 'Failed: ') + (error.message || fpT('잠시 후 다시 시도', 'Please try again in a moment.')), 'danger');
+      window.notify?.(fpT('처리 실패: ', 'Failed: ', '処理に失敗しました: ') + (error.message || fpT('잠시 후 다시 시도', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。')), 'danger');
     }
   }
 
   function setContributorFavState(btn, on) {
     btn.classList.toggle('is-fav', on);
     btn.setAttribute('aria-pressed', String(on));
-    btn.setAttribute('aria-label', on ? fpT('작가 즐겨찾기 해제', 'Remove photographer from favorites') : fpT('작가 즐겨찾기 추가', 'Add photographer to favorites'));
+    btn.setAttribute('aria-label', on ? fpT('작가 즐겨찾기 해제', 'Remove photographer from favorites', '撮影者をお気に入りから外す') : fpT('작가 즐겨찾기 추가', 'Add photographer to favorites', '撮影者をお気に入りに追加'));
   }
 
   // 그리드의 사진 클릭 시 라이트박스 열기 (이벤트 위임)
@@ -1414,8 +1414,8 @@
       if (gallery) {
         const next = gallery.dataset.view === 'contact' ? 'grid' : 'contact';
         gallery.dataset.view = next;
-        toggleBtn.textContent = next === 'contact' ? fpT('기본 그리드', 'Grid') : fpT('컨택트 시트', 'Contact sheet');
-        toggleBtn.setAttribute('aria-label', next === 'contact' ? fpT('기본 그리드로 전환', 'Switch to grid') : fpT('컨택트 시트로 전환', 'Switch to contact sheet'));
+        toggleBtn.textContent = next === 'contact' ? fpT('기본 그리드', 'Grid', '標準グリッド') : fpT('컨택트 시트', 'Contact sheet', 'コンタクトシート');
+        toggleBtn.setAttribute('aria-label', next === 'contact' ? fpT('기본 그리드로 전환', 'Switch to grid', '標準グリッドに切り替え') : fpT('컨택트 시트로 전환', 'Switch to contact sheet', 'コンタクトシートに切り替え'));
         // 에디토리얼 저장 버튼은 컨택트 시트 모드일 때만 노출
         const saveBtn = section?.querySelector('[data-save-roll="editorial"]');
         if (saveBtn) saveBtn.hidden = next !== 'contact';
@@ -1430,8 +1430,8 @@
       if (sections) {
         const next = sections.dataset.view === 'contact' ? 'grid' : 'contact';
         sections.dataset.view = next;
-        contribToggleBtn.textContent = next === 'contact' ? fpT('기본 그리드', 'Grid') : fpT('컨택트 시트', 'Contact sheet');
-        contribToggleBtn.setAttribute('aria-label', next === 'contact' ? fpT('기본 그리드로 전환', 'Switch to grid') : fpT('컨택트 시트로 전환', 'Switch to contact sheet'));
+        contribToggleBtn.textContent = next === 'contact' ? fpT('기본 그리드', 'Grid', '標準グリッド') : fpT('컨택트 시트', 'Contact sheet', 'コンタクトシート');
+        contribToggleBtn.setAttribute('aria-label', next === 'contact' ? fpT('기본 그리드로 전환', 'Switch to grid', '標準グリッドに切り替え') : fpT('컨택트 시트로 전환', 'Switch to contact sheet', 'コンタクトシートに切り替え'));
       }
       return;
     }
@@ -1591,7 +1591,7 @@
     if (libraryPhotosCount) {
       libraryPhotosCount.textContent = fpT(
         `${photosShuffled.length.toLocaleString('ko-KR')}컷 · ${photosVisible.toLocaleString('ko-KR')}컷 표시 중`,
-        `${photosShuffled.length.toLocaleString(fpI18n.locale)} frame${photosShuffled.length === 1 ? '' : 's'} · showing ${photosVisible.toLocaleString(fpI18n.locale)}`);
+        `${photosShuffled.length.toLocaleString(fpI18n.locale)} frame${photosShuffled.length === 1 ? '' : 's'} · showing ${photosVisible.toLocaleString(fpI18n.locale)}`, `${photosShuffled.length.toLocaleString(fpI18n.locale)}コマ · ${photosVisible.toLocaleString(fpI18n.locale)}コマを表示中`);
     }
   }
 
@@ -1666,12 +1666,12 @@
       const isEmptyPool = photosPool.length === 0;
       libraryPhotosGrid.innerHTML = window.MagState
         ? window.MagState.empty({
-            title: isEmptyPool ? fpT('아직 등록된 사진이 없어요.', 'No photos yet.') : fpT('조건에 맞는 사진이 없어요.', 'No photos match.'),
-            desc: isEmptyPool ? '' : fpT('검색어나 필터를 바꿔보세요.', 'Try a different search or filter.'),
-            actionLabel: hasFilter ? fpT('전체 보기', 'Show all') : '',
+            title: isEmptyPool ? fpT('아직 등록된 사진이 없어요.', 'No photos yet.', 'まだ登録された写真はありません。') : fpT('조건에 맞는 사진이 없어요.', 'No photos match.', '条件に合う写真がありません。'),
+            desc: isEmptyPool ? '' : fpT('검색어나 필터를 바꿔보세요.', 'Try a different search or filter.', '検索語やフィルターを変えてみてください。'),
+            actionLabel: hasFilter ? fpT('전체 보기', 'Show all', 'すべて表示') : '',
             action: 'reset',
           })
-        : `<p class="library-photos-empty">${fpT('조건에 맞는 사진이 없어요.', 'No photos match.')}</p>`;
+        : `<p class="library-photos-empty">${fpT('조건에 맞는 사진이 없어요.', 'No photos match.', '条件に合う写真がありません。')}</p>`;
       if (hasFilter) {
         window.MagState?.bindAction(libraryPhotosGrid, 'reset', () => {
           photosCategory = 'all';
@@ -1687,7 +1687,7 @@
           applyPhotosFilter({ reshuffle: false });
         });
       }
-      if (libraryPhotosCount) libraryPhotosCount.textContent = fpT('0컷', '0 frames');
+      if (libraryPhotosCount) libraryPhotosCount.textContent = fpT('0컷', '0 frames', '0コマ');
       if (libraryPhotosMoreWrap) libraryPhotosMoreWrap.hidden = true;
       return;
     }
@@ -1709,8 +1709,8 @@
     } catch (err) {
       console.warn('[films] photos view 로드 실패:', err);
       libraryPhotosGrid.innerHTML = window.MagState
-        ? window.MagState.error({ title: fpT('사진을 불러오지 못했어요.', "Couldn't load photos.") })
-        : `<p class="library-photos-empty">${fpT('사진을 불러오지 못했어요.', "Couldn't load photos.")}</p>`;
+        ? window.MagState.error({ title: fpT('사진을 불러오지 못했어요.', "Couldn't load photos.", '写真を読み込めませんでした。') })
+        : `<p class="library-photos-empty">${fpT('사진을 불러오지 못했어요.', "Couldn't load photos.", '写真を読み込めませんでした。')}</p>`;
       window.MagState?.bindAction(libraryPhotosGrid, 'retry', () => ensurePhotosShuffled({ force: true }));
       if (libraryPhotosCount) libraryPhotosCount.textContent = '';
     }
@@ -1746,7 +1746,7 @@
     updateLibraryViewUrl();
     if (next === 'photos') {
       if (libraryPhotosCount && photosShuffled.length === 0) {
-        libraryPhotosCount.textContent = fpT('불러오는 중…', 'Loading…');
+        libraryPhotosCount.textContent = fpT('불러오는 중…', 'Loading…', '読み込み中…');
       }
       await ensurePhotosShuffled();
     }

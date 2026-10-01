@@ -5,9 +5,9 @@
 // 책을 누르면 목록이 물러나고 책이 일어서는 소개 화면(.wz-detail)으로 간다. 소개 화면은 책마다 한 장이라
 // 아래로 넘기면 다음 책, ← 나 Esc 로 목록에 돌아온다. 이전 코버플로우 책장은 webzine-page.js (books-classic.html).
 (function () {
-  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
   const T = i18n.t;
-  const won = (n) => i18n.isEn ? n.toLocaleString('en-US') + ' won' : n.toLocaleString('ko-KR') + '원';
+  const won = (n) => i18n.lang === 'ja' ? n.toLocaleString('ja-JP') + 'ウォン' : i18n.isEn ? n.toLocaleString('en-US') + ' won' : n.toLocaleString('ko-KR') + '원';
   const stack = document.getElementById('wzStack');
   if (!stack) return;
   const marks = document.getElementById('wzMarks');
@@ -167,7 +167,7 @@
   let inDetail = false, closing = false, savedScroll = 0, current = 0;
 
   function pubOf(it) {
-    if (it._ebook) return it.kind === 'backissue' ? '5ft.mag' : T('S.P.C 사진첩', 'S.P.C Photobook');
+    if (it._ebook) return it.kind === 'backissue' ? '5ft.mag' : T('S.P.C 사진첩', 'S.P.C Photobook', 'S.P.C 写真集');
     return (it.category && it.category.trim()) || '5ft.mag';
   }
 
@@ -177,7 +177,7 @@
       ? `<img src="${esc(cu)}" alt="" loading="lazy" />`
       : `<span class="wz-plain"><b class="wz-foil">${esc(it.title)}</b><span class="wz-foil">${esc(pubOf(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</span></span>`;
     return `<div class="wz-book">
-      <button class="wz-hit" type="button" aria-label="${esc(pubOf(it))} ${esc(it.title)}, ${it._ebook ? T('유료', 'paid') : T('무료', 'free')}${T(' 소개 보기', ', view details')}"></button>
+      <button class="wz-hit" type="button" aria-label="${esc(pubOf(it))} ${esc(it.title)}, ${it._ebook ? T('유료', 'paid', '有料') : T('무료', 'free', '無料')}${T(' 소개 보기', ', view details', '、詳細を見る')}"></button>
       <span class="wz-b wz-back-cover wz-mat"></span>
       <span class="wz-b wz-side-l"></span><span class="wz-b wz-side-r"></span><span class="wz-b wz-fore"></span>
       <span class="wz-b wz-cover wz-mat${cu ? ' has-img' : ''}">${cover}</span>
@@ -187,20 +187,20 @@
   function actsMarkup(it) {
     if (it._ebook) {
       const href = `ebook-read.html?slug=${encodeURIComponent(it.slug)}`;
-      return `<a class="wz-act" href="${href}"><span>${T('미리보기', 'Preview')}</span><i>↗</i></a>` +
-        (it.price ? `<a class="wz-act wz-buy" href="${href}&amp;buy=1"><span>${T('구매하고 전체 보기', 'Buy the full edition')}<b>${won(it.price)}</b></span><i>↗</i></a>` : '');
+      return `<a class="wz-act" href="${href}"><span>${T('미리보기', 'Preview', 'プレビュー')}</span><i>↗</i></a>` +
+        (it.price ? `<a class="wz-act wz-buy" href="${href}&amp;buy=1"><span>${T('구매하고 전체 보기', 'Buy the full edition', '購入して全ページを読む')}<b>${won(it.price)}</b></span><i>↗</i></a>` : '');
     }
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
-    return read ? `<a class="wz-act wz-read" href="${read}" target="_blank" rel="noopener"><span>${T('읽기', 'Read')}</span><i>→</i></a>` : '';
+    return read ? `<a class="wz-act wz-read" href="${read}" target="_blank" rel="noopener"><span>${T('읽기', 'Read', '読む')}</span><i>→</i></a>` : '';
   }
   function pageMarkup(it, i) {
     const cu = coverUrl(it);
     const front = cu
-      ? `<img src="${esc(cu)}" alt="${esc(it.title)}${T(' 표지', ' cover')}" loading="lazy" />`
+      ? `<img src="${esc(cu)}" alt="${esc(it.title)}${T(' 표지', ' cover', ' 表紙')}" loading="lazy" />`
       : `<span class="wz-plain2"><b class="wz-foil">${esc(it.title)}</b><span class="wz-foil">${esc(pubOf(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</span></span>`;
     const side = it._ebook ? '' : `<div class="wz-side-acts">
-        <button type="button" class="wz-side-act wz-like" aria-pressed="false">♡ <span>${T('좋아요', 'Like')}</span></button>
-        <button type="button" class="wz-side-act wz-share">↗ <span>${T('공유', 'Share')}</span></button>
+        <button type="button" class="wz-side-act wz-like" aria-pressed="false">♡ <span>${T('좋아요', 'Like', 'いいね')}</span></button>
+        <button type="button" class="wz-side-act wz-share">↗ <span>${T('공유', 'Share', '共有')}</span></button>
       </div>`;
     return `<div class="wz-page-in">
       <div class="wz-stage3d"><div class="wz-sbook"><div class="wz-tilt">
@@ -211,11 +211,11 @@
         <span class="wz-leaf"><span class="wz-f wz-f-inside wz-mat"></span><span class="wz-f wz-f-front wz-mat${cu ? ' has-img' : ''}">${front}</span></span>
       </div></div><div class="wz-sshadow" aria-hidden="true"></div></div>
       <div class="wz-meta">
-        <span class="wz-kind">${it._ebook ? T('유료 · 양장', 'Paid · Hardcover') : T('무료 · 종이', 'Free · Paper')}</span>
+        <span class="wz-kind">${it._ebook ? T('유료 · 양장', 'Paid · Hardcover', '有料 · ハードカバー') : T('무료 · 종이', 'Free · Paper', '無料 · 紙版')}</span>
         <h2>${esc(it.title)}</h2>
         <p class="wz-by">${esc(pubOf(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</p>
         <div class="wz-rule"></div>
-        ${it.description ? `<p class="wz-desc">${esc(it.description)}</p><button type="button" class="wz-more" aria-expanded="false">${T('더 보기', 'More')}</button>` : ''}
+        ${it.description ? `<p class="wz-desc">${esc(it.description)}</p><button type="button" class="wz-more" aria-expanded="false">${T('더 보기', 'More', 'もっと見る')}</button>` : ''}
         <div class="wz-acts">${actsMarkup(it)}</div>
         ${side}
       </div>
@@ -337,14 +337,14 @@
     if (!btn) return;
     btn.classList.toggle('is-on', on);
     btn.setAttribute('aria-pressed', String(on));
-    btn.innerHTML = `${on ? '♥' : '♡'} <span>${T('좋아요', 'Like')}</span>`;
+    btn.innerHTML = `${on ? '♥' : '♡'} <span>${T('좋아요', 'Like', 'いいね')}</span>`;
   }
   async function toggleLike(it, btn) {
     const session = await db().auth.getSession();
     if (!session) { db().auth.signInWithGoogle(location.href); return; }
     const on = favSet.has(it.id);
     const { error } = await db().favorites.toggle('webzine', it.id, on);
-    if (error) { window.notify?.(T('좋아요 처리 실패: ', 'Could not save like: ') + error.message, 'danger'); return; }
+    if (error) { window.notify?.(T('좋아요 처리 실패: ', 'Could not save like: ', 'いいねを保存できませんでした：') + error.message, 'danger'); return; }
     if (on) favSet.delete(it.id); else favSet.add(it.id);
     setLikeBtn(btn, !on);
   }
@@ -353,12 +353,12 @@
     const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     const data = { title: `5ft.mag — ${it.title}`, text: it.title, url };
     if (navigator.share) { try { await navigator.share(data); } catch (_) {} return; }
-    try { await navigator.clipboard.writeText(url); window.notify?.(T('링크를 복사했어요.', 'Link copied.'), 'success'); }
+    try { await navigator.clipboard.writeText(url); window.notify?.(T('링크를 복사했어요.', 'Link copied.', 'リンクをコピーしました。'), 'success'); }
     catch (_) { window.notify?.(url, 'info'); }
   }
 
   function render() {
-    if (!issues.length) { stack.innerHTML = `<p class="wz-empty">${T('아직 발행된 책이 없어요.', 'No books yet.')}</p>`; return; }
+    if (!issues.length) { stack.innerHTML = `<p class="wz-empty">${T('아직 발행된 책이 없어요.', 'No books yet.', 'まだ発行された本はありません。')}</p>`; return; }
     stack.innerHTML = '';
     pagesEl.innerHTML = '';
     marks.innerHTML = '';
@@ -386,7 +386,7 @@
       }
 
       const m = document.createElement('button');
-      m.className = 'wz-mark'; m.type = 'button'; m.setAttribute('aria-label', T(it.title + '로 이동', 'Go to ' + it.title));
+      m.className = 'wz-mark'; m.type = 'button'; m.setAttribute('aria-label', T(it.title + '로 이동', 'Go to ' + it.title, it.title + 'へ移動'));
       m.dataset.pub = pubOf(it); m.dataset.title = it.title + (it.issue_label ? ' ' + it.issue_label : '');
       m.addEventListener('mouseenter', () => hoverMark(i));
       m.addEventListener('click', () => {
@@ -434,10 +434,10 @@
               const acc = await accessP;
               if (!acc || !acc.url) { leaveTo(a.href); return; }
               const buyHref = 'ebook-read.html?slug=' + encodeURIComponent(it.slug) + '&buy=1';
-              const label = it.price ? won(it.price) + T(' · 구매하고 전체 보기', ' · Buy the full edition') : T('구매하고 전체 보기', 'Buy the full edition');
+              const label = it.price ? won(it.price) + T(' · 구매하고 전체 보기', ' · Buy the full edition', ' · 購入して全ページを読む') : T('구매하고 전체 보기', 'Buy the full edition', '購入して全ページを読む');
               window.WebzineReader.open(acc.url, it.title, {
                 onClose: closed,
-                cta: acc.entitled ? null : { label, note: T('미리보기는 여기까지예요', 'End of the preview'), onClick: () => leaveTo(buyHref) },
+                cta: acc.entitled ? null : { label, note: T('미리보기는 여기까지예요', 'End of the preview', 'プレビューはここまでです'), onClick: () => leaveTo(buyHref) },
               });
             };
           } else {
@@ -452,7 +452,7 @@
       if (first && stage3d) {
         stage3d.classList.add('is-link');
         stage3d.setAttribute('role', 'link'); stage3d.tabIndex = 0;
-        stage3d.setAttribute('aria-label', `${it.title} ${it._ebook ? T('미리보기', 'Preview') : T('읽기', 'Read')}`);
+        stage3d.setAttribute('aria-label', `${it.title} ${it._ebook ? T('미리보기', 'Preview', 'プレビュー') : T('읽기', 'Read', '読む')}`);
         stage3d.addEventListener('click', () => first.click());
         stage3d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); first.click(); } });
       }
