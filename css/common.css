@@ -1439,6 +1439,8 @@ kbd, .kbd {
 
 /* 언어 메뉴 — 헤더 지구본 버튼을 누르면 펼쳐진다(js/site-common.js injectLangSwitch) */
 .lang-wrap { position: relative; display: flex; }
+.lang-btn { width: auto; min-width: 44px; padding: 0 6px; gap: 4px; }
+.lang-btn .lang-code { font-size: 12px; font-weight: 700; letter-spacing: .04em; line-height: 1; }
 .lang-menu {
   position: absolute;
   top: calc(100% + 6px);
@@ -1465,3 +1467,7 @@ kbd, .kbd {
 .lang-menu a[aria-current="true"] { font-weight: 700; }
 .lang-menu a[aria-current="true"]::before { content: '✓'; }
 .lang-menu a:hover, .lang-menu a:focus-visible { background: var(--border); outline: none; }
+
+/* 일본어판 줄바꿈 — 사이트 전체에 건 한국어 규칙(word-break: keep-all, 띄어쓰기에서만 줄바꿈)이 일본어엔 맞지 않는다.
+   일본어는 띄어쓰기가 거의 없어 문장 하나가 끊기지 않는 덩어리가 되고, 그 폭이 그리드 칸(1fr)을 밀어 레이아웃 비율이 깨졌다. */
+:lang(ja), :lang(ja) * { word-break: normal !important; line-break: strict; }

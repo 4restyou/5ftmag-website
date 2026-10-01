@@ -389,6 +389,8 @@
   // 다른 언어판이 있는 페이지(head 에 hreflang 링크가 있는 곳)에만 헤더에 언어 메뉴(지구본 버튼)를 붙인다.
   // 링크는 공통 셸(scripts/lib/site-shell.mjs)이 공개한 언어만 넣는다. 누르면 언어 목록이 펼쳐진다.
   const LANG_NAMES = { ko: '한국어', en: 'English', ja: '日本語' };
+  // 지구본 옆에 붙는 지금 언어 표시(운영자 결정: 일본어는 JP)
+  const LANG_CODES = { ko: 'KO', en: 'EN', ja: 'JP' };
   function globeIconSvg() {
     return '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>';
   }
@@ -414,7 +416,7 @@
     btn.setAttribute('aria-controls', 'langMenu');
     btn.setAttribute('aria-label', { ko: '언어 선택', en: 'Language', ja: '言語' }[current]);
     btn.title = btn.getAttribute('aria-label');
-    btn.innerHTML = globeIconSvg();
+    btn.innerHTML = globeIconSvg() + `<span class="lang-code">${LANG_CODES[current]}</span>`;
     const menu = document.createElement('div');
     menu.id = 'langMenu';
     menu.className = 'lang-menu';
