@@ -1,6 +1,6 @@
 # 5ft magazine (오피트)
 
-> 필름 사진 전문 매거진입니다. 발행처는 4rest, 광주에 있습니다. 필름 사진에 관한 기사, 필름 159종의 카탈로그, 전국 필름 현상소 92곳의 주소와 현상 가격, 이북과 종이 매거진, 중고 장터, 독자 사진 투고를 다룹니다. 모든 내용은 한국어입니다.
+> 필름 사진 전문 매거진입니다. 발행처는 4rest, 광주에 있습니다. 필름 사진에 관한 기사, 필름 165종의 카탈로그, 전국 필름 현상소 96곳의 주소와 현상 가격, 이북과 종이 매거진, 중고 장터, 독자 사진 투고를 다룹니다. 모든 내용은 한국어입니다.
 
 사이트 주소: https://www.5ftmag.com/
 전체 주소 목록: https://www.5ftmag.com/sitemap.xml
@@ -9,8 +9,8 @@ RSS: https://www.5ftmag.com/rss.xml
 ## 주요 페이지
 
 - [기사 목록](https://www.5ftmag.com/stories.html): 필름 사진, 사진가, 필름 제품, 전시를 다룬 기사 모음
-- [필름 카탈로그](https://www.5ftmag.com/films.html): 필름 159종의 감도·종류·포맷과 독자들이 찍은 사진
-- [현상소 목록](https://www.5ftmag.com/labs.html): 전국 필름 현상소 92곳의 주소·스캔 화질·현상 가격
+- [필름 카탈로그](https://www.5ftmag.com/films.html): 필름 165종의 감도·종류·포맷과 독자들이 찍은 사진
+- [현상소 목록](https://www.5ftmag.com/labs.html): 전국 필름 현상소 96곳의 주소·스캔 화질·현상 가격
 - [필자 목록](https://www.5ftmag.com/authors.html): 이 매거진에 글을 쓴 10명(팀)의 아카이브
 - [매거진](https://www.5ftmag.com/books.html): 종이 매거진과 이북
 - [중고 장터](https://www.5ftmag.com/market.html): 독자들이 올리는 필름 카메라·장비 중고 거래
@@ -18,6 +18,10 @@ RSS: https://www.5ftmag.com/rss.xml
 
 ## 최근 기사
 
+- [2026 / 10, 이달의 사진 전시](https://www.5ftmag.com/stories/oct-2026-exhibitions.html): 10월의 사진 전시는 우포늪, 도시, 지역 사진제와 큰 회고전을 따라 움직인다. 정봉채, 마틴 파, 유승호 〈BLUE HOUR〉, 유화정, 데보라 터브빌, 로저 발렌, 사진진주 2026까지. (5ft.mag 편집부, 2026-10-01)
+- [이갑철, 초점이 빗나간 곳에서 기가 보였다](https://www.5ftmag.com/stories/lee-gapchul.html): 기울어진 프레임, 흔들린 초점, 거친 흑백 입자. 이갑철은 거리의 불안에서 출발해 《충돌과 반동》의 의례와 《기》의 땅까지, 설명되지 않는 한국의 기운을 찍어 왔다. (5ft.mag 편집부, 2026-09-30)
+- [낸시 렉스로스, 흐림을 다룰 줄 알았던 사람](https://www.5ftmag.com/stories/nancy-rexroth-iowa.html): 다이애나 카메라로 찍은 사진집 《IOWA》의 작가 낸시 렉스로스가 10월 2일 신시내티 미술관에서 첫 회고전을 연다. 흐린 사진은 우연이 아니었다. 촬영과 선별과 암실에서 그가 세운 기준이었다. (5ft.mag 편집부, 2026-09-29)
+- [롤라이플렉스가 손목 위로 올라왔다](https://www.5ftmag.com/stories/artra-rolleiflex.html): Artra 가 롤라이플렉스 이안 반사식 카메라를 본뜬 손목시계 CAMERA DUAL ROLLEIFLEX 를 100개 한정으로 공개했다. 두 개의 다이얼이 위아래로 놓인 트윈 렌즈 배치를 그대로 옮겼다. 조리개 날이 여닫히는 앞선 모델 Camera One 과 함께 본다. (5ft.mag 편집부, 2026-09-23)
 - [이세현 사진전 《잔광》, 꺼진 자리에 남은 빛](https://www.5ftmag.com/stories/lee-sehyun-afterglow.html): 9월 20일까지 스페이스 이신. 노근리 탄흔, 경산 코발트 광산, 옛 광주 적십자병원에 붉고 푸른 빛을 쏘아 찍은 「푸른 낯, 붉은 밤」 연작. (5ft.mag 편집부, 2026-09-12)
 - [제7회 그랑핸드 필름사진상 — 향으로 기억되는 순간들](https://www.5ftmag.com/stories/granhand-fpag-7.html): 접수는 9월 16일부터 22일까지 이레뿐이다. 필름으로 찍은 사진 한 장이면 된다. 지난해에는 1,000명이 냈다. (5ft.mag 편집부, 2026-09-11)
 - [2026 / 9, 이달의 사진 전시](https://www.5ftmag.com/stories/sep-2026-exhibitions.html): 9월엔 사진가의 확대기 여섯 대가 미술관이 된다. 김포 제리 율스만 기념관 개관, 대구사진비엔날레 특별전, 대전포토페스티벌 〈노동〉, 인천국제현대사진전까지. 이번 달은 서울 바깥이 바쁘다. (5ft.mag 편집부, 2026-08-30)
@@ -44,19 +48,15 @@ RSS: https://www.5ftmag.com/rss.xml
 - [브리스냅 필름헛소리 02 — 보물찾기 같은 필름 중고카메라 구매](https://www.5ftmag.com/stories/brisnap-02.html): 호주 시골 할아버지의 슬라이드, 70년 묵은 코닥 브라우니 안의 필름, 게라지 세일에서 건진 한 뭉치. 필름카메라 중고거래에서 만난 세 번의 시간여행. (Brisnap TV, 2026-06-22)
 - [같은 에멀젼, 다른 네 이름. Optik OptiColour 200 의 정체](https://www.5ftmag.com/stories/optik-opticolour-200.html): 미국 인디 브랜드 Optik Oldschool 이 새 컬러 필름 OptiColour 200 을 공개했다. 그런데 안에 든 에멀젼은 ORWO Wolfen NC200 그대로다. 같은 InovisCoat 에멀젼이 네 가지 브랜드로 풀리는 이유와, Optik 이 손본 단 한 가지 차이를 정리… (5ft.mag 편집부, 2026-06-19)
 - [렌즈를 복각하던 회사가, 이번엔 필름을 만든다](https://www.5ftmag.com/stories/lll-film-project.html): 라이카 빈티지 렌즈를 1:1 복각해온 중국 라이트렌즈랩이 2025년 초에 필름 제조 계획을 발표했다. 1년 반이 지난 지금, 배합·코팅 장비·QC 라인까지 모두 사내에서 만드는 흐름이 어디까지 왔는지 정리. (5ft.mag 편집부, 2026-06-18)
-- [브리스냅 필름헛소리 01 — 필름사진 찍는 이유](https://www.5ftmag.com/stories/brisnap-01.html): 첫 글로 뭘 쓸까 고민하다 결국, 저는 왜 필름을 쓰는지 이야기를 풀어봅니다. 니콘 FM2 동경부터 D80을 손에 쥐게 된 용산 일화, 그리고 다시 F3 로 돌아오기까지. (Brisnap TV, 2026-06-16)
-- [비오톱 서울 — SPC 사진첩 ISSUE.02](https://www.5ftmag.com/stories/spc-issue02.html): 상경 후 코로나의 한가운데에서, 외부인의 시선으로 바라본 서울이라는 비오톱. 김도균의 SPC 사진첩 ISSUE.02. (Street Photography Club, 2026-06-12)
-- [빛, 먼지, 사람 — SPC 사진첩 ISSUE.03](https://www.5ftmag.com/stories/spc-issue03.html): 사건이 아니라 상태. 반복해서 마주친 빛·먼지·사람이 겹치는 순간들을 모은 한 권. 홍민우의 SPC 사진첩 ISSUE.03. (Street Photography Club, 2026-06-12)
-- [골문 앞의 ISO 400, 일포드 풋볼 에디션](https://www.5ftmag.com/stories/ilford-football.html): 월드컵 개막에 맞춰 일포드가 HP5 Plus 와 XP2 Super 풋볼 컬렉터스 에디션을 내놨다. 유제는 그대로, 상자에 Expired Film Club 의 흑백 축구 사진이 입혀졌다. (5ft.mag 편집부, 2026-06-11)
 
 ## 지역별 현상소
 
 각 페이지에 그 지역 현상소의 주소, 기본 스캔 화질, 컬러·흑백·슬라이드·시네마 현상 가격이 135·120 포맷별로 정리돼 있습니다.
 
-- [서울 필름 현상소](https://www.5ftmag.com/labs/seoul.html): 38곳
+- [서울 필름 현상소](https://www.5ftmag.com/labs/seoul.html): 40곳
 - [경기 필름 현상소](https://www.5ftmag.com/labs/gyeonggi.html): 9곳
 - [인천 필름 현상소](https://www.5ftmag.com/labs/incheon.html): 3곳
-- [강원 필름 현상소](https://www.5ftmag.com/labs/gangwon.html): 1곳
+- [강원 필름 현상소](https://www.5ftmag.com/labs/gangwon.html): 4곳
 - [대전 필름 현상소](https://www.5ftmag.com/labs/daejeon.html): 4곳
 - [충남 필름 현상소](https://www.5ftmag.com/labs/chungnam.html): 4곳
 - [충북 필름 현상소](https://www.5ftmag.com/labs/chungbuk.html): 1곳
@@ -67,7 +67,7 @@ RSS: https://www.5ftmag.com/rss.xml
 - [경남 필름 현상소](https://www.5ftmag.com/labs/gyeongnam.html): 2곳
 - [전남광주 필름 현상소](https://www.5ftmag.com/labs/jeonnamgwangju.html): 3곳
 - [전북 필름 현상소](https://www.5ftmag.com/labs/jeonbuk.html): 3곳
-- [제주 필름 현상소](https://www.5ftmag.com/labs/jeju.html): 3곳
+- [제주 필름 현상소](https://www.5ftmag.com/labs/jeju.html): 2곳
 
 ## 필름 카탈로그
 
@@ -146,6 +146,7 @@ RSS: https://www.5ftmag.com/rss.xml
 - [Ilford Delta 400](https://www.5ftmag.com/film/delta400.html): ISO 400, Black & White, 35mm, 120
 - [Ilford FP4 Plus 125](https://www.5ftmag.com/film/fp4plus.html): ISO 125, Black & White, 35mm, 120
 - [Ilford HP5 Plus 400](https://www.5ftmag.com/film/hp5plus.html): ISO 400, Black & White, 35mm, 120
+- [Ilford Ilfocolor 400 Plus](https://www.5ftmag.com/film/ilfocolor400plus.html): ISO 400, Color Negative, 35mm
 - [Ilford Ortho Plus 80](https://www.5ftmag.com/film/orthoplus80.html): ISO 80, Black & White, 35mm, 120
 - [Ilford Pan 100](https://www.5ftmag.com/film/ilfordpan100.html): ISO 100, Black & White, 35mm, 120
 - [Ilford Pan F Plus 50](https://www.5ftmag.com/film/panfplus50.html): ISO 50, Black & White, 35mm, 120
@@ -191,13 +192,16 @@ RSS: https://www.5ftmag.com/rss.xml
 - [Konica Centuria Super 200](https://www.5ftmag.com/film/konicacenturia200.html): ISO 200, Color Negative, 35mm
 - [Konica Industrial 100](https://www.5ftmag.com/film/konicaindustrial100.html): ISO 100, Color Negative, 35mm
 - [Leica MONOPAN 50](https://www.5ftmag.com/film/monopan50.html): ISO 50, BW Negative, 35mm
+- [Lomography B&W Orca 110](https://www.5ftmag.com/film/lomoorca110.html): ISO 100, Black & White, 110
 - [Lomography Babylon Kino 13](https://www.5ftmag.com/film/babylonkino13.html): ISO 13, Black & White, 35mm, 120
 - [Lomography Berlin Kino 400](https://www.5ftmag.com/film/berlinkino400.html): ISO 400, Black & White, 35mm, 120
 - [Lomography Color Negative 100](https://www.5ftmag.com/film/lomocolor100.html): ISO 100, Color Negative, 35mm, 120
 - [Lomography Color Negative 400](https://www.5ftmag.com/film/lomocolor400.html): ISO 400, Color Negative, 35mm, 120
 - [Lomography Color Negative 800](https://www.5ftmag.com/film/lomocolor800.html): ISO 800, Color Negative, 35mm, 120
+- [Lomography Color Tiger 110](https://www.5ftmag.com/film/lomotiger110.html): ISO 200, Color Negative, 110
 - [Lomography Earl Grey 100](https://www.5ftmag.com/film/earlgrey100.html): ISO 100, Black & White, 35mm, 120
 - [Lomography Lady Grey 400](https://www.5ftmag.com/film/ladygrey400.html): ISO 400, Black & White, 35mm, 120
+- [Lomography Lobster Redscale 110](https://www.5ftmag.com/film/lomolobster110.html): ISO 200, Color Negative, 110
 - [Lomography LomoChrome Classicolor 200](https://www.5ftmag.com/film/lomoclassicolor200.html): ISO 200, Color Negative, 35mm, 110
 - [Lomography LomoChrome Color '92](https://www.5ftmag.com/film/lomocolor92.html): ISO 400, Color Negative, 35mm, 120, 110
 - [Lomography LomoChrome Metropolis](https://www.5ftmag.com/film/lomometropolis.html): ISO 100/400, Color Negative, 35mm, 120, 110
@@ -205,9 +209,11 @@ RSS: https://www.5ftmag.com/rss.xml
 - [Lomography LomoChrome Turquoise](https://www.5ftmag.com/film/lomoturquoise.html): ISO 100/400, Color Negative, 35mm, 120, 110
 - [Lomography Potsdam Kino 100](https://www.5ftmag.com/film/potsdamkino100.html): ISO 100, Black & White, 35mm, 120
 - [Lomography Redscale XR 50–200](https://www.5ftmag.com/film/lomoredscale.html): ISO 50/200, Color Negative, 35mm, 120
+- [Lomography X-Pro Peacock 110](https://www.5ftmag.com/film/lomopeacock110.html): ISO 200, Slide (E-6), 110
 - [Lucky Color 200](https://www.5ftmag.com/film/luckycolor200.html): ISO 200, Color Negative, 35mm
 - [Lucky SHD 100 New](https://www.5ftmag.com/film/luckyshd100.html): ISO 100, Black & White, 35mm, 120
 - [Lucky SHD 400](https://www.5ftmag.com/film/luckyshd400.html): ISO 400, Black & White, 35mm, 120
+- [Optik Oldschool OptiColour 200](https://www.5ftmag.com/film/opticolour200.html): ISO 200, Color Negative, 35mm
 - [Oriental Seagull 100](https://www.5ftmag.com/film/orientalseagull100.html): ISO 100, Black & White, 35mm
 - [Oriental Seagull 400](https://www.5ftmag.com/film/orientalseagull400.html): ISO 400, Black & White, 35mm
 - [ORWO N75 Plus](https://www.5ftmag.com/film/orwon75.html): ISO 400, Black & White, 35mm
