@@ -56,7 +56,7 @@ const TEXT = {
 };
 const HANGUL = /[가-힣]/;
 // 대표 필름 사진의 촬영자(고정 작가). 영문판은 로마자 표기로(en/about.html 과 같은 표기)
-const PERSON_EN = { '박순렬': 'Park Sun-ryeol', '노애경': 'Noh Ae-gyeong', '장형수': 'Jang Hyeong-su' };
+const PERSON_EN = { '박순렬': 'Park Soon Yeol', '노애경': 'Noh Ae-gyeong', '장형수': 'Jang Hyeong-su' };
 const personOf = (name, T) => (T.lang === 'en' && PERSON_EN[name]) || name;
 
 function esc(s) {
