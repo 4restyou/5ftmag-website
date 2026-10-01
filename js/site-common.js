@@ -114,6 +114,11 @@
     const contributor = url.searchParams.get('contributor');
     const marketId = url.searchParams.get('id');
 
+    // 영문 카탈로그는 /camera/·/contributor/ 짧은 주소가 한국어판으로 가므로 /en/films?… 로 둔다
+    if (/^\/en\/films\.html$/i.test(cleanPath)) {
+      const query = url.searchParams.toString();
+      return `${PUBLIC_SHARE_ORIGIN}/en/films${query ? `?${query}` : ''}`;
+    }
     if (/\/films\.html$/i.test(cleanPath)) {
       if (camera) return `${PUBLIC_SHARE_ORIGIN}/camera/${encodeURIComponent(camera)}`;
       if (contributor) return `${PUBLIC_SHARE_ORIGIN}/contributor/${encodeURIComponent(contributor)}`;

@@ -1,5 +1,7 @@
 (function () {
   'use strict';
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const tr = (window.i18n || { t: (ko) => ko }).t;
 
   function isAcceptedImage(file) {
     if (!file) return false;
@@ -36,10 +38,10 @@
       clearSlowUploadHints();
       slowUploadTimers = [
         setTimeout(() => {
-          setUploadStatus('progress', '아직 처리 중입니다', '모바일 네트워크나 큰 사진은 시간이 더 걸릴 수 있어요. 같은 버튼을 다시 누르지 않아도 됩니다.');
+          setUploadStatus('progress', tr('아직 처리 중입니다', 'Still working'), tr('모바일 네트워크나 큰 사진은 시간이 더 걸릴 수 있어요. 같은 버튼을 다시 누르지 않아도 됩니다.', 'Mobile networks and large photos can take longer. No need to press the button again.'));
         }, 18000),
         setTimeout(() => {
-          setUploadStatus('progress', '서버 응답을 기다리는 중', '전송이 지연되면 자동으로 재시도합니다. 사진 전송은 최대 3분 안에 중단되며 입력 내용은 유지됩니다.');
+          setUploadStatus('progress', tr('서버 응답을 기다리는 중', 'Waiting for the server'), tr('전송이 지연되면 자동으로 재시도합니다. 사진 전송은 최대 3분 안에 중단되며 입력 내용은 유지됩니다.', 'If the upload stalls it retries automatically. It stops after 3 minutes at most, and what you entered is kept.'));
         }, 38000),
       ];
     }
@@ -56,7 +58,7 @@
       if (fileName) {
         fileName.textContent = file
           ? `${file.name}${note ? ` · ${note}` : ''}`
-          : '선택된 사진 없음';
+          : tr('선택된 사진 없음', 'No photo selected');
       }
       if (file) {
         const url = URL.createObjectURL(file);
@@ -71,19 +73,19 @@
       const list = Array.from(files || []);
       const file = list.find(isAcceptedImage);
       if (!file) {
-        showError('JPG, PNG, WebP 이미지만 올릴 수 있어요.');
+        showError(tr('JPG, PNG, WebP 이미지만 올릴 수 있어요.', 'Only JPG, PNG and WebP images can be uploaded.'));
         return;
       }
       if (!fileInput || fileInput.disabled) return;
       if (typeof DataTransfer === 'undefined') {
-        showError('이 브라우저에서는 드래그앤드롭 파일 지정이 지원되지 않아요. 파일 선택 버튼을 사용해 주세요.');
+        showError(tr('이 브라우저에서는 드래그앤드롭 파일 지정이 지원되지 않아요. 파일 선택 버튼을 사용해 주세요.', 'Drag and drop is not supported in this browser. Please use the file button.'));
         return;
       }
       const dt = new DataTransfer();
       dt.items.add(file);
       fileInput.files = dt.files;
       fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-      renderPhotoPreview(file, list.length > 1 ? '첫 번째 사진만 선택됨' : '');
+      renderPhotoPreview(file, list.length > 1 ? tr('첫 번째 사진만 선택됨', 'Only the first photo was selected') : '');
       showError('');
     }
 

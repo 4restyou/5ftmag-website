@@ -3,6 +3,13 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+  // 짧은 주소(/films, /camera/x, /contributor/x)는 한국어 카탈로그로 열린다.
+  // 영문판은 /en/films.html?... 긴 주소를 그대로 쓴다.
+  const PUBLIC_ORIGIN = 'https://5ftmag.com';
+
   function routeParam(kind) {
     try {
       const parts = window.location.pathname.split('/').filter(Boolean);
@@ -12,14 +19,16 @@
   }
 
   function filmsBasePath() {
-    return '/films';
+    return i18n.isEn ? i18n.url('/films.html') : '/films';
   }
 
   function prettyCameraPath(key) {
+    if (i18n.isEn) return i18n.url(`/films.html?camera=${encodeURIComponent(key)}`);
     return `/camera/${encodeURIComponent(key)}`;
   }
 
   function prettyContributorPath(key) {
+    if (i18n.isEn) return i18n.url(`/films.html?contributor=${encodeURIComponent(key)}`);
     return `/contributor/${encodeURIComponent(key)}`;
   }
 
@@ -35,7 +44,7 @@
 
     const ok = await window.copyTextToClipboard?.(url);
     window.notify?.(
-      ok ? '링크 복사 완료' : '복사 실패 — 주소창에서 직접 복사해주세요',
+      ok ? tr('링크 복사 완료', 'Link copied') : tr('복사 실패 — 주소창에서 직접 복사해주세요', 'Copy failed. Please copy the link from the address bar.'),
       ok ? 'info' : 'danger'
     );
   }
@@ -44,13 +53,15 @@
     // 상세 페이지(/film/<slug>)는 검색용이다. 독자가 공유한 링크는 카탈로그를
     // 열어 사진을 바로 보게 한다. prettyShareUrl 이 /films?film= 로 다듬는다.
     const path = `/films.html?film=${encodeURIComponent(filmKey)}`;
-    const url = window.prettyShareUrl
+    const url = i18n.isEn
+      ? PUBLIC_ORIGIN + i18n.url(path)
+      : window.prettyShareUrl
       ? window.prettyShareUrl(path)
       : `https://5ftmag.com/films?film=${encodeURIComponent(filmKey)}`;
     const filmName = film?.displayName || film?.name || filmKey;
     await shareOrCopy({
       title: `${filmName} · 5ft.mag Films`,
-      text: `5ft.mag Films 에서 ${filmName} 보기`,
+      text: tr(`5ft.mag Films 에서 ${filmName} 보기`, `See ${filmName} on 5ft.mag Films`),
       url,
     });
   }
@@ -58,10 +69,12 @@
   async function shareCamera(key, info) {
     if (!info) return;
     const path = prettyCameraPath(key);
-    const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
+    const url = i18n.isEn
+      ? PUBLIC_ORIGIN + path
+      : window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     await shareOrCopy({
       title: `${info.display} · 5ft.mag Films`,
-      text: `5ft.mag 에서 ${info.display} 으로 찍은 사진 보기`,
+      text: tr(`5ft.mag 에서 ${info.display} 으로 찍은 사진 보기`, `See photos shot on ${info.display} at 5ft.mag`),
       url,
     });
   }
@@ -71,11 +84,13 @@
   async function shareContributor(key, label) {
     if (!key) return;
     const path = prettyContributorPath(key);
-    const url = window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
+    const url = i18n.isEn
+      ? PUBLIC_ORIGIN + path
+      : window.prettyShareUrl ? window.prettyShareUrl(path) : `https://5ftmag.com${path}`;
     const who = label || '@' + key;
     await shareOrCopy({
-      title: `${who} 의 필름 사진 · 5ft magazine`,
-      text: `${who} 님이 5ft.mag 에 올린 필름 사진 보기`,
+      title: tr(`${who} 의 필름 사진 · 5ft magazine`, `Film photos by ${who} · 5ft magazine`),
+      text: tr(`${who} 님이 5ft.mag 에 올린 필름 사진 보기`, `See film photos ${who} shared on 5ft.mag`),
       url,
     });
   }

@@ -39,6 +39,7 @@ function rowToJson(r) {
     photos: Array.isArray(r.photos) ? r.photos : [],
   };
   // optional 필드는 값 있을 때만 포함 (기존 JSON 구조와 일관)
+  if (r.description_en)           out.descEn = r.description_en;
   if (r.issue)                    out.issue = r.issue;
   if (r.box_thumbnail)            out.boxThumbnail = r.box_thumbnail;
   if (r.box_thumbnail_status)     out.boxThumbnailStatus = r.box_thumbnail_status;

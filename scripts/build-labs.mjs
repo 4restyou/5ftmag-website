@@ -33,6 +33,10 @@ export function rowToJson(r) {
     features: r.features ?? null,
     url: r.url ?? null,
     prices: r.prices || {},
+    // 영문판 표시값. 비어 있으면 영문 페이지도 한국어 원문을 쓴다
+    nameEn: r.name_en ?? null,
+    addressEn: r.address_en ?? null,
+    featuresEn: r.features_en ?? null,
   };
 }
 

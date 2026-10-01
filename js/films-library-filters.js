@@ -1,12 +1,16 @@
 (function () {
   'use strict';
 
+  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
+
   const FILTER_LABELS = {
-    all: '전체',
-    color: '컬러',
-    bw: '흑백',
-    slide: '슬라이드',
-    cinema: '영화용',
+    all: tr('전체', 'All'),
+    color: tr('컬러', 'Color'),
+    bw: tr('흑백', 'B&W'),
+    slide: tr('슬라이드', 'Slide'),
+    cinema: tr('영화용', 'Cinema'),
   };
   const MOBILE_LIBRARY_INITIAL = 30;
   const MOBILE_LIBRARY_STEP = 30;
@@ -88,7 +92,7 @@
       const shouldPage = isMobileFilms() && !hasActiveFilter() && matchedCount > libraryMobileVisible;
       wrap.hidden = !shouldPage;
       if (!shouldPage) return;
-      btn.textContent = `필름 더 보기 (${matchedCount - libraryMobileVisible})`;
+      btn.textContent = tr(`필름 더 보기 (${matchedCount - libraryMobileVisible})`, `More films (${matchedCount - libraryMobileVisible})`);
     }
 
     function renderFilterChips(libraryFilms) {
@@ -157,7 +161,7 @@
       for (const [, film] of libraryFilms) if (film.brand) brands.add(film.brand);
       const sorted = Array.from(brands).sort((a, b) => a.localeCompare(b, 'en'));
       for (const brand of [...currentBrands]) if (!brands.has(brand)) currentBrands.delete(brand);
-      buildMultiselect(root, '브랜드', sorted.map(brand => ({ value: brand, label: brand })),
+      buildMultiselect(root, tr('브랜드', 'Brand'), sorted.map(brand => ({ value: brand, label: brand })),
         () => currentBrands,
         (set) => {
           currentBrands = set;
@@ -273,11 +277,11 @@
       }
       if (unknowns.length) {
         unknowns.sort((a, b) => a.display.localeCompare(b.display, 'en'));
-        options.push({ groupLabel: '기타 (브랜드 미확인)' });
+        options.push({ groupLabel: tr('기타 (브랜드 미확인)', 'Other (unknown brand)') });
         for (const camera of unknowns) options.push({ value: camera.key, label: camera.display, meta: String(camera.count) });
       }
       for (const key of [...currentCameras]) if (!cameraIndex.has(key)) currentCameras.delete(key);
-      buildMultiselect(root, '카메라', options,
+      buildMultiselect(root, tr('카메라', 'Camera'), options,
         () => currentCameras,
         (set) => {
           currentCameras.clear();
@@ -299,7 +303,7 @@
         const ctx = root._ms;
         const sel = ctx.getSelected();
         if (sel.size === 0) {
-          label.textContent = `${ctx.labelPrefix} 전체`;
+          label.textContent = tr(`${ctx.labelPrefix} 전체`, `All ${ctx.labelPrefix.toLowerCase()}s`);
         } else if (sel.size === 1) {
           const value = [...sel][0];
           const opt = (ctx.options || []).find(option => option.value === value);
@@ -314,8 +318,8 @@
         const opts = ctx.options || [];
         const sel = ctx.getSelected();
         const clearBtn = `<div class="ms-dropdown-panel-head">
-          <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${sel.size}개 선택</span>
-          <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>전체 해제</button>
+          <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${tr(`${sel.size}개 선택`, `${sel.size} selected`)}</span>
+          <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>${tr('전체 해제', 'Clear all')}</button>
         </div>`;
         const rows = opts.map(option => {
           if (option.groupLabel) {
@@ -328,7 +332,7 @@
             ${option.meta ? `<span class="ms-opt-meta">${escapeHtml(option.meta)}</span>` : ''}
           </label>`;
         }).join('');
-        panel.innerHTML = clearBtn + (rows || `<div class="ms-dropdown-empty">옵션 없음</div>`);
+        panel.innerHTML = clearBtn + (rows || `<div class="ms-dropdown-empty">${tr('옵션 없음', 'No options')}</div>`);
         panel.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
           checkbox.addEventListener('change', () => {
             const ctx2 = root._ms;
@@ -339,7 +343,7 @@
             refreshLabel();
             const headLabel = panel.querySelector('.ms-dropdown-clear-label');
             const clearEl = panel.querySelector('[data-action="ms-clear"]');
-            if (headLabel) headLabel.textContent = `${next.size}개 선택`;
+            if (headLabel) headLabel.textContent = tr(`${next.size}개 선택`, `${next.size} selected`);
             if (clearEl) clearEl.disabled = next.size === 0;
           });
         });

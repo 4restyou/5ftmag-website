@@ -43,6 +43,11 @@ export function rowToJson(r) {
     description: r.description ?? null,
     contact: r.contact ?? null,
     url: r.url ?? null,
+    // 영문판 표시값. 비어 있으면 영문 페이지도 한국어 원문을 쓴다
+    name_en: r.name_en ?? null,
+    address_en: r.address_en ?? null,
+    specialty_en: r.specialty_en ?? null,
+    description_en: r.description_en ?? null,
   };
 }
 

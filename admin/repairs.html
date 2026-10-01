@@ -178,6 +178,10 @@
       <div class="form-row"><label for="f-url">홈페이지·SNS</label><input type="text" id="f-url" placeholder="https://" /></div>
       <div class="form-row"><label for="f-contact">연락처</label><div><input type="text" id="f-contact" placeholder="전화·문자·카톡·인스타 등" /><div class="hint">전화번호, 문자 상담, 카카오톡, 인스타 DM 등 자유롭게.</div></div></div>
       <div class="form-row"><label for="f-description">설명</label><textarea id="f-description" placeholder="특징, 대기·비용, 카드결제·AS 여부 등"></textarea></div>
+      <div class="form-row"><label for="f-nameEn">영문 이름</label><div><input type="text" id="f-nameEn" placeholder="Camera Doctor" /><div class="hint">영문판(/en/)에만 보여요. 비워 두면 한국어가 나갑니다.</div></div></div>
+      <div class="form-row"><label for="f-addressEn">영문 주소</label><input type="text" id="f-addressEn" placeholder="3F, 25 Toegye-ro 27-gil, Jung-gu, Seoul" /></div>
+      <div class="form-row"><label for="f-specialtyEn">영문 전문분야</label><input type="text" id="f-specialtyEn" placeholder="Leica, manual rangefinders" /></div>
+      <div class="form-row"><label for="f-descriptionEn">영문 설명</label><textarea id="f-descriptionEn"></textarea></div>
       <div class="form-actions">
         <button type="button" class="delete" id="deleteBtn" hidden>삭제</button>
         <button type="button" class="cancel" id="cancelBtn">취소</button>
@@ -189,11 +193,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20260927-ebookdiag" defer></script>
-  <script src="../js/db-client.js?v=20260914-potwreorder" defer></script>
+  <script src="../js/db-client.js?v=20261001-en3" defer></script>
 <script src="../js/util.js?v=20261001-en2" defer></script>
   <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20261001-en" defer></script>
+  <script src="../js/site-common.js?v=20261001-en3" defer></script>
 <script>
 'use strict';
 
@@ -340,6 +344,10 @@ function openForm(id) {
     $('f-url').value = s.url || '';
     $('f-contact').value = s.contact || '';
     $('f-description').value = s.description || '';
+    $('f-nameEn').value = s.name_en || '';
+    $('f-addressEn').value = s.address_en || '';
+    $('f-specialtyEn').value = s.specialty_en || '';
+    $('f-descriptionEn').value = s.description_en || '';
   } else {
     $('modalTitle').textContent = '새 수리실';
     $('shopForm').reset();
@@ -378,6 +386,10 @@ $('shopForm').addEventListener('submit', async (e) => {
       url: $('f-url').value.trim() || null,
       contact: $('f-contact').value.trim() || null,
       description: $('f-description').value.trim() || null,
+      name_en: $('f-nameEn').value.trim() || null,
+      address_en: $('f-addressEn').value.trim() || null,
+      specialty_en: $('f-specialtyEn').value.trim() || null,
+      description_en: $('f-descriptionEn').value.trim() || null,
     };
     const id = $('f-id').value.trim();
     if (id) {

@@ -152,6 +152,9 @@ function openForm(id) {
     $('f-scanRes').value = l.scan_res || '';
     $('f-url').value = l.url || '';
     $('f-features').value = l.features || '';
+    $('f-nameEn').value = l.name_en || '';
+    $('f-addressEn').value = l.address_en || '';
+    $('f-featuresEn').value = l.features_en || '';
     fillPrices(l.prices);
   } else {
     $('modalTitle').textContent = '새 현상소';
@@ -191,6 +194,9 @@ $('labForm').addEventListener('submit', async (e) => {
       scan_res: $('f-scanRes').value.trim() || null,
       url: $('f-url').value.trim() || null,
       features: $('f-features').value.trim() || null,
+      name_en: $('f-nameEn').value.trim() || null,
+      address_en: $('f-addressEn').value.trim() || null,
+      features_en: $('f-featuresEn').value.trim() || null,
       prices: readPrices(),
     };
     const id = $('f-id').value.trim();

@@ -104,6 +104,17 @@ if (existsSync(labsPath)) {
   }
 }
 
+// 영문판(/en/). 공개(data/site-shell.json en.publish) 뒤에만 싣는다. 영문 파일이 있는 주소만 짝지어 넣는다.
+const shell = JSON.parse(readFileSync(join(ROOT, 'data/site-shell.json'), 'utf8'));
+if (shell.en?.publish) {
+  for (const url of [...urls]) {
+    const path = url.loc.slice(SITE_URL.length);
+    const file = path === '/' ? 'en/index.html' : `en${path}`;
+    if (!existsSync(join(ROOT, file))) continue;
+    urls.push({ ...url, loc: `${SITE_URL}/en${path}` });
+  }
+}
+
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((url) => `  <url>
