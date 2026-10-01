@@ -32,6 +32,16 @@
     }
   }
 
+  // 영문 페이지(<html lang="en">)에선 소개글을 영문(descEn)으로 바꿔 둔다. 화면 코드는 desc 만 본다.
+  // 영문이 없는 필름은 한국어 소개글 그대로.
+  function localize(data) {
+    if (document.documentElement.lang !== 'en' || !data) return data;
+    for (const entry of Object.values(data)) {
+      if (entry && entry.descEn) { entry.descKo = entry.desc; entry.desc = entry.descEn; }
+    }
+    return data;
+  }
+
   async function load({
     staticPath = 'data/films.json',
     waitMs = 3000,
@@ -51,7 +61,7 @@
 
     if (!data) {
       return {
-        data: await fetchStaticCatalog(staticPath),
+        data: localize(await fetchStaticCatalog(staticPath)),
         source: 'static',
         supplemented: 0,
       };
@@ -59,7 +69,7 @@
 
     const supplemented = await supplementFromStatic(data, staticPath, logger);
     return {
-      data,
+      data: localize(data),
       source: supplemented ? 'db+static' : 'db',
       supplemented,
     };
@@ -67,6 +77,7 @@
 
   window.FilmsCatalogLoader = {
     load,
+    localize,
     waitForMagDB,
   };
 })();

@@ -86,6 +86,13 @@ body {
 }
 
 /* ── 본문 ── */
+/* 영문판 기사 머리의 「AI 번역」 안내. 본문 폭에 맞춰 조용하게 */
+.article-translation-note {
+  max-width: var(--read-width);
+  margin: 0 auto 28px; padding: 10px 24px 0;
+  font-size: 13px; line-height: 1.6; color: var(--text-muted);
+}
+.article-translation-note a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .article-body {
   max-width: var(--read-width);
   margin: 0 auto;
