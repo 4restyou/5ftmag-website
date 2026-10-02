@@ -1036,20 +1036,45 @@
     return (await fetchJson('/data/films.json')) || {};
   }
 
+  function toFilmList(films) {
+    const obj = films && typeof films === 'object' ? films : {};
+    return Array.isArray(obj) ? obj : Object.entries(obj).map(([slug, f]) => ({ slug, ...f }));
+  }
+
   (async function start() {
     bindControls();
     bindStickyShrink();
-    const [stories, films, theme] = await Promise.all([
+    // 본문은 정적 data/films.json 으로 먼저 그린다. DB 카탈로그(최대 3초 대기)는 뒤에서 받아
+    // 내용이 다를 때만 같은 render() 로 덮어쓴다. DB 가 실패하면 정적 결과가 그대로 남는다
+    const localize = window.FilmsCatalogLoader?.localize || ((d) => d);
+    const dbFilmsP = loadFilmsCatalog();
+    const [stories, staticFilms, theme] = await Promise.all([
       window.MagUtil.loadStories(),
-      loadFilmsCatalog(),
+      fetchJson('/data/films.json').then(d => (d ? localize(d) : null)),
       fetchJson('/data/current-theme.json'),
     ]);
     STATE.stories = Array.isArray(stories) ? stories : [];
-    const filmsObj = films && typeof films === 'object' ? films : {};
-    STATE.films = Array.isArray(filmsObj) ? filmsObj : Object.entries(filmsObj).map(([slug, f]) => ({ slug, ...f }));
     STATE.theme = theme;
-    chooseRecommendations();
-    render();
+    if (staticFilms) {
+      STATE.films = toFilmList(staticFilms);
+      chooseRecommendations();
+      render();
+    }
+    const dbFilms = toFilmList(await dbFilmsP);
+    if (dbFilms.length && JSON.stringify(dbFilms) !== JSON.stringify(STATE.films)) {
+      // 추천 필름은 이미 화면에 나온 것을 그대로 두고(같은 slug 의 새 데이터로만 바꾼다) 다시 그린다
+      const bySlug = new Map(dbFilms.map(x => [x.slug || x.id, x]));
+      const prevRecs = staticFilms ? STATE.recommendations : [];
+      STATE.films = dbFilms;
+      const recs = prevRecs.map(x => bySlug.get(x.slug || x.id)).filter(Boolean);
+      if (recs.length && recs.length === prevRecs.length) STATE.recommendations = recs;
+      else chooseRecommendations();
+      if (STATE.view !== 'photos') render();
+    } else if (!staticFilms) {
+      STATE.films = dbFilms;
+      chooseRecommendations();
+      render();
+    }
     // 로그인 사용자라면 DB 개인화를 백그라운드로 hydrate
     setTimeout(hydrateFromDb, 200);
     maybeShowOnboarding();

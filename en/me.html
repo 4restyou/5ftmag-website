@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="/css/common.css?v=20261002-hdr">
-  <link rel="stylesheet" href="/css/me.css?v=20260725-profilefix">
+  <link rel="stylesheet" href="/css/me.css?v=20261002-c1">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -75,6 +75,7 @@
     <button type="button" class="me-pagetab" data-section="messages">Messages <span class="me-pagetab-badge" id="messagesBadge" hidden></span></button>
     <button type="button" class="me-pagetab" data-section="my-comments">My comments</button>
     <button type="button" class="me-pagetab" data-section="my-proposals">My suggestions</button>
+    <button type="button" class="me-pagetab" data-section="my-books">My books</button>
     <button type="button" class="me-pagetab" data-section="fav-photos">Liked photos</button>
     <button type="button" class="me-pagetab" data-section="fav-films">Liked films</button>
     <button type="button" class="me-pagetab" data-section="fav-webzine">Liked books</button>
@@ -124,7 +125,7 @@
       <button type="button" class="me-tab active" data-status="all">All <span class="count" id="cnt-all">·</span></button>
       <button type="button" class="me-tab" data-status="pending">Pending <span class="count" id="cnt-pending">·</span></button>
       <button type="button" class="me-tab" data-status="approved">Published <span class="count" id="cnt-approved">·</span></button>
-      <button type="button" class="me-tab" data-status="rejected">Declined <span class="count" id="cnt-rejected">·</span></button>
+      <button type="button" class="me-tab" data-status="rejected">Rejected <span class="count" id="cnt-rejected">·</span></button>
     </div>
     <div class="me-list" id="list">
       <div class="me-empty">Loading…</div>
@@ -180,6 +181,13 @@
     </div>
   </section>
 
+  <!-- ─── 내 책 섹션 (열람권이 있는 이북) ─── -->
+  <section id="section-my-books" hidden>
+    <div class="me-fav-films-grid" id="myBooksGrid">
+      <div class="me-empty">Loading…</div>
+    </div>
+  </section>
+
   <!-- ─── 좋아한 사진 섹션 ─── -->
   <section id="section-fav-photos" hidden>
     <div class="me-fav-grid" id="favPhotosGrid">
@@ -219,13 +227,13 @@
 <div class="img-zoom" id="imgZoom"><img decoding="async" id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
-  <script src="/js/db-client.js?v=20261002-b1" defer></script>
+<script src="/js/db/commerce.js?v=20261002-c1" defer></script>
+  <script src="/js/db-client.js?v=20261002-c1" defer></script>
 <script src="/js/util.js?v=20261002-ja" defer></script>
   <script src="/js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="/js/site-common.js?v=20261002-b1" defer></script>
-<script src="/js/me-page.js?v=20261002-sec" defer></script>
+<script src="/js/me-page.js?v=20261002-c1" defer></script>
 
 </body>
 </html>

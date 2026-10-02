@@ -47,7 +47,7 @@
   <link rel="stylesheet" href="/css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="/css/common.css?v=20261002-hdr">
   <link rel="stylesheet" href="/css/reader-submissions.css?v=20260616-themeauto">
-  <link rel="stylesheet" href="/css/home.css?v=20260914-potwfit">
+  <link rel="stylesheet" href="/css/home.css?v=20261002-c1">
   <link rel="stylesheet" href="/css/mobile-home.css?v=20260930-pull-haptic2">
 
   <!-- Schema.org Organization + WebSite -->
@@ -222,9 +222,12 @@
         <h3>Photo</h3>
         <span class="label label--copy">フィルムが写したすべての瞬間 · 読者の一枚</span>
       </div>
-      <div class="photo-mode-toggle" id="photoModeToggle" role="tablist" aria-label="写真の並び順">
-        <button type="button" class="photo-mode-btn is-active" data-mode="random" role="tab" aria-selected="true">ランダム</button>
-        <button type="button" class="photo-mode-btn" data-mode="recent" role="tab" aria-selected="false">新着</button>
+      <div class="sub-section-head-actions">
+        <button type="button" class="label photo-upload-link" data-action="open-submission" aria-haspopup="dialog">+ 写真を投稿</button>
+        <div class="photo-mode-toggle" id="photoModeToggle" role="tablist" aria-label="写真の並び順">
+          <button type="button" class="photo-mode-btn is-active" data-mode="random" role="tab" aria-selected="true">ランダム</button>
+          <button type="button" class="photo-mode-btn" data-mode="recent" role="tab" aria-selected="false">新着</button>
+        </div>
       </div>
     </div>
     <div class="discover-grid" id="photoGrid">
@@ -397,10 +400,10 @@
 <script src="/js/mh-pure.js?v=20260620-recommend" defer></script>
 <script src="/js/mobile-home-model.js?v=20260712-modules" defer></script>
 <script src="/js/films-catalog-loader.js?v=20261002-ja" defer></script>
-<script src="/js/mobile-home.js?v=20261002-ja" defer></script>
+<script src="/js/mobile-home.js?v=20261002-c1" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
-  <script src="/js/db-client.js?v=20261002-b1" defer></script>
+<script src="/js/db/commerce.js?v=20261002-c1" defer></script>
+  <script src="/js/db-client.js?v=20261002-c1" defer></script>
 <!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->
 <script src="/js/reader-camera-input.js?v=20261002-ja" defer></script>
 <script src="/js/reader-film-picker.js?v=20261002-ja" defer></script>

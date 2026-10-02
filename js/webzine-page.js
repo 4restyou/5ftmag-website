@@ -500,16 +500,31 @@
     }
   });
 
-  (async function load() {
+  // 웹진·이북을 둘 다 불러오지 못해 보여 줄 책이 없으면 "발행된 웹진이 없어요" 대신 실패 안내 + 다시 시도.
+  // 옛 책장은 한국어판뿐이지만 문구는 다른 페이지와 같이 세 언어로 적어 둔다
+  function renderLoadError() {
+    const T = (window.i18n || { t: (ko) => ko }).t;
+    const title = T('책장을 불러오지 못했어요.', 'Couldn\'t load the bookshelf.', '本棚を読み込めませんでした。');
+    root.innerHTML = window.MagState
+      ? window.MagState.error({ title, action: 'retry-books' })
+      : `<p class="wz-empty">${esc(title)}<br /><button type="button" class="mag-state-btn" data-state-action="retry-books">${T('다시 시도', 'Try again', '再試行')}</button></p>`;
+    root.querySelector('[data-state-action="retry-books"]')?.addEventListener('click', () => {
+      root.innerHTML = `<p class="wz-empty">${T('불러오는 중…', 'Loading…', '読み込み中…')}</p>`;
+      load();
+    }, { once: true });
+  }
+
+  async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
+    let failed = false;
     let webzineIssues = [];
-    try { webzineIssues = await db().webzine.listPublished(); } catch (_) { webzineIssues = []; }
+    try { webzineIssues = await db().webzine.listPublished({ strict: true }); } catch (_) { webzineIssues = []; failed = true; }
     if (!Array.isArray(webzineIssues)) webzineIssues = [];
 
     // 유료 이북 — 상단에 별도 책장으로. 같은 책장 스타일, 클릭 시 보호 뷰어로.
     let ebookItems = [];
     try {
-      const eb = (db().ebooks && await db().ebooks.listPublished()) || [];
+      const eb = (await db().ebooks.listPublished({ strict: true })) || [];
       ebookItems = eb.map((e) => ({
         id: 'ebook-' + e.id,
         _ebook: true,
@@ -523,7 +538,8 @@
         sort_order: -1000 + (e.sort_order || 0),
         created_at: e.created_at,
       }));
-    } catch (_) { ebookItems = []; }
+    } catch (_) { ebookItems = []; failed = true; }
+    if (failed && !webzineIssues.length && !ebookItems.length) { renderLoadError(); return; }
 
     issues = ebookItems.concat(webzineIssues);
     issues.sort((a, b) => ((a.sort_order || 0) - (b.sort_order || 0)) || (new Date(a.created_at || 0) - new Date(b.created_at || 0)));
@@ -552,5 +568,6 @@
         if (openState && openState.i === i) follow(openState.rs);
       });
     });
-  })();
+  }
+  load();
 })();

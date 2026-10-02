@@ -29,14 +29,15 @@
   const shop = {
     // 발행된 상품만 (공개 화면용). 정적 data/shop.json 으로 빌드되므로
     // 일반적으로 직접 호출은 admin 미리보기 / 운영 진단 정도.
-    async listPublished() {
-      const c = client(); if (!c) return [];
+    // strict: 실패하면 [] 대신 던진다. 공개 화면이 "불러오지 못함" 과 "0건" 을 가르는 데 쓴다
+    async listPublished({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw new Error('unavailable'); return []; }
       const { data, error } = await c.from('shop_products')
         .select('*')
         .eq('published', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
-      if (error) { console.warn('[shop.listPublished]', error.message); return []; }
+      if (error) { console.warn('[shop.listPublished]', error.message); if (strict) throw error; return []; }
       return data || [];
     },
     // 편집부 — 전체 (미발행 포함)
@@ -86,14 +87,15 @@
   // 카탈로그 + 열람권(entitlement). 페이지 이미지는 Edge Function 이 보호.
   const ebooks = {
     // 공개 — 발행된 이북 목록 (Books 페이지용)
-    async listPublished() {
-      const c = client(); if (!c) return [];
+    // strict: 실패하면 [] 대신 던진다 (shop.listPublished 와 같다)
+    async listPublished({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw new Error('unavailable'); return []; }
       const { data, error } = await c.from('ebook_products')
         .select('*')
         .eq('published', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
-      if (error) { console.warn('[ebooks.listPublished]', error.message); return []; }
+      if (error) { console.warn('[ebooks.listPublished]', error.message); if (strict) throw error; return []; }
       return data || [];
     },
     // 편집부 — 전체 (미발행 포함)

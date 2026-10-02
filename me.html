@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="css/common.css?v=20261002-hdr">
-  <link rel="stylesheet" href="css/me.css?v=20260725-profilefix">
+  <link rel="stylesheet" href="css/me.css?v=20261002-c1">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -74,6 +74,7 @@
     <button type="button" class="me-pagetab" data-section="messages">메시지 <span class="me-pagetab-badge" id="messagesBadge" hidden></span></button>
     <button type="button" class="me-pagetab" data-section="my-comments">내 댓글</button>
     <button type="button" class="me-pagetab" data-section="my-proposals">내 제안</button>
+    <button type="button" class="me-pagetab" data-section="my-books">내 책</button>
     <button type="button" class="me-pagetab" data-section="fav-photos">좋아한 사진</button>
     <button type="button" class="me-pagetab" data-section="fav-films">좋아한 필름</button>
     <button type="button" class="me-pagetab" data-section="fav-webzine">좋아한 책</button>
@@ -179,6 +180,13 @@
     </div>
   </section>
 
+  <!-- ─── 내 책 섹션 (열람권이 있는 이북) ─── -->
+  <section id="section-my-books" hidden>
+    <div class="me-fav-films-grid" id="myBooksGrid">
+      <div class="me-empty">불러오는 중…</div>
+    </div>
+  </section>
+
   <!-- ─── 좋아한 사진 섹션 ─── -->
   <section id="section-fav-photos" hidden>
     <div class="me-fav-grid" id="favPhotosGrid">
@@ -218,13 +226,13 @@
 <div class="img-zoom" id="imgZoom"><img decoding="async" id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db/commerce.js?v=20260927-ebookdiag" defer></script>
-  <script src="./js/db-client.js?v=20261002-b1" defer></script>
+<script src="./js/db/commerce.js?v=20261002-c1" defer></script>
+  <script src="./js/db-client.js?v=20261002-c1" defer></script>
 <script src="./js/util.js?v=20261002-ja" defer></script>
   <script src="./js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="./js/site-common.js?v=20261002-b1" defer></script>
-<script src="./js/me-page.js?v=20261002-sec" defer></script>
+<script src="./js/me-page.js?v=20261002-c1" defer></script>
 
 </body>
 </html>
