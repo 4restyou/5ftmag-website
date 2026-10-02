@@ -1193,74 +1193,6 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ════════════════════════════
-   뉴스레터
-════════════════════════════ */
-.newsletter-bar {
-  border-top: 1px solid var(--border);
-  padding: 28px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-.newsletter-bar p {
-  font-size: var(--fs-body);
-  font-weight: var(--fw-all);
-  letter-spacing: var(--ls-default);
-  color: var(--text-muted);
-}
-.nl-form { display: flex; gap: 8px; }
-.nl-form input {
-  font-family: var(--font);
-  font-size: var(--fs-body);
-  font-weight: var(--fw-all);
-  letter-spacing: var(--ls-default);
-  padding: 10px 16px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  border-radius: 2px;
-  outline: none;
-  width: 240px;
-  transition: border-color .15s;
-}
-.nl-form input:focus { border-color: var(--text-muted); }
-.nl-form button {
-  font-family: var(--font);
-  font-size: var(--fs-body);
-  font-weight: var(--fw-all);
-  letter-spacing: var(--ls-default);
-  padding: 10px 20px;
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: opacity .15s;
-}
-.nl-form button:hover { opacity: .7; }
-.nl-message {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 8px;
-  padding: 0 4px;
-  min-height: 18px;
-  transition: opacity .2s;
-}
-.nl-message.success { color: var(--text); }
-.nl-message.error { color: #c33; }
-
-/* Home-only footer affordance */
-.footer-admin {
-  color: var(--text-dim);
-  text-decoration: none;
-  transition: color .15s;
-  opacity: 0.6;
-}
-.footer-admin:hover { color: var(--text); opacity: 1; }
-
-
-/* ════════════════════════════
    HERO ABOUT — A ROLL OF FILM
 ════════════════════════════ */
 .hero-about {
@@ -1676,10 +1608,6 @@ body.modal-open { overflow: hidden; }
   .ad-banner .ad-headline { text-align: center; line-height: 1.5; }
   .next-issue-block .ni-title { font-size: 20px; }
   .next-issue-block .ni-desc { font-size: 12px; }
-  .newsletter-bar { flex-direction: column; align-items: flex-start; }
-  .nl-form { width: 100%; flex-direction: column; gap: 10px; }
-  .nl-form input { flex: none; width: 100%; min-width: 0; }
-  .nl-form button { width: 100%; }
   .hero-about, .belief, .how-section, .contrib-section { padding: 48px 20px; }
   .hero-title { font-size: 32px; }
   .belief-quote { font-size: 22px; }

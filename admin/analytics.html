@@ -401,6 +401,20 @@
 
   <div class="panel">
     <div class="panel-head">
+      <h2 class="panel-title">사이트 언어판 <span class="panel-sub" style="margin-left:6px">접속한 경로 기준</span></h2>
+      <span class="panel-sub" id="siteLangRangeLabel"></span>
+    </div>
+    <table class="stat-table">
+      <thead>
+        <tr><th>언어판</th><th class="bar-cell"></th><th class="num">조회</th><th class="num">세션</th></tr>
+      </thead>
+      <tbody id="siteLangs"><tr><td colspan="4" class="empty-state">불러오는 중…</td></tr></tbody>
+    </table>
+    <p class="panel-sub" id="siteLangNote" style="margin:8px 0 0">세션은 페이지별 세션 수를 더한 값이라, 한 사람이 같은 언어판에서 여러 페이지를 보면 겹쳐 셉니다.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
       <h2 class="panel-title">이벤트별 횟수 <span class="panel-sub" style="margin-left:6px">최근 30일</span></h2>
       <span class="panel-sub">메뉴 클릭·검색 등 페이지뷰 밖의 동작</span>
     </div>
@@ -517,7 +531,7 @@
   <script src="../js/site-pwa.js?v=20261002-f2" defer></script>
   <script src="../js/site-common.js?v=20261002-f1" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/admin-analytics-page.js?v=20261002-d2" defer></script>
+<script src="../js/admin-analytics-page.js?v=20261002-g" defer></script>
 
 </body>
 </html>

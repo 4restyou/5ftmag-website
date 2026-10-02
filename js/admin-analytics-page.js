@@ -445,6 +445,45 @@ function renderLanguages(rows) {
   }).join('');
 }
 
+// 사이트 언어판(/, /en/, /ja/) 별 조회·세션. 경로별 집계(top_paths)를 접두어로 묶는다.
+// 세션은 경로별 distinct 를 더한 값이라 언어판 안에서 여러 페이지를 본 세션이 겹친다.
+const SITE_LANG_PATH_LIMIT = 1000;
+function siteLangOf(path) {
+  const m = String(path || '').match(/^\/?(en|ja)(?=\/|\?|$)/);
+  return m ? m[1] : 'ko';
+}
+function renderSiteLangs(rows) {
+  const tbody = $('siteLangs');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  const labels = { ko: '한국어판 (/)', en: '영문판 (/en/)', ja: '일문판 (/ja/)' };
+  const sums = { ko: { views: 0, sessions: 0 }, en: { views: 0, sessions: 0 }, ja: { views: 0, sessions: 0 } };
+  for (const r of rows) {
+    const s = sums[siteLangOf(r.path)];
+    s.views += Number(r.views) || 0;
+    s.sessions += Number(r.sessions) || 0;
+  }
+  const total = sums.ko.views + sums.en.views + sums.ja.views;
+  const max = Math.max(1, sums.ko.views, sums.en.views, sums.ja.views);
+  tbody.innerHTML = Object.keys(labels).map(k => {
+    const { views, sessions } = sums[k];
+    const pct = Math.max(2, Math.round((views / max) * 100));
+    const share = total ? Math.round((views / total) * 1000) / 10 : 0;
+    return `<tr>
+      <td>${escapeHtml(labels[k])} <span class="panel-sub">${share}%</span></td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(views)}</td>
+      <td class="num">${fmtNum(sessions)}</td>
+    </tr>`;
+  }).join('');
+  const note = $('siteLangNote');
+  note.dataset.base = note.dataset.base || note.textContent;
+  note.textContent = note.dataset.base + (rows.length >= SITE_LANG_PATH_LIMIT
+    ? ` 조회 상위 ${fmtNum(SITE_LANG_PATH_LIMIT)}개 경로만 묶었습니다.` : '');
+}
+
 // app_events 이벤트별 횟수 (최근 30일). 기간 선택과 무관하게 RPC 가 일 수로만 받는다.
 async function loadAppEvents() {
   const tbody = $('appEvents');
@@ -1034,6 +1073,7 @@ async function reload() {
   $('refRangeLabel').textContent    = label;
   $('regRangeLabel').textContent    = label;
   $('langRangeLabel').textContent   = label;
+  $('siteLangRangeLabel').textContent = label;
   $('sessRangeLabel').textContent   = label;
   $('dwellRangeLabel').textContent  = label;
   $('uploadChartRangeLabel').textContent = label;
@@ -1046,7 +1086,7 @@ async function reload() {
   const topCamerasFn = STATE.camerasMode === 'all' ? db().analytics.uploadsTopCamerasAll(200) : db().analytics.uploadsTopCameras(f, t, 200);
 
   const [
-    summary, daily, paths, refs, regs, langs, sess, dwellSum, dwellPaths,
+    summary, daily, paths, refs, regs, langs, sitePaths, sess, dwellSum, dwellPaths,
     upSummary, upDaily, upTopContrib, upTopFilms, upTopCameras, upThemeRatio, pendingReports,
     ebookProducts, ebookSales,
   ] = await Promise.all([
@@ -1056,6 +1096,7 @@ async function reload() {
     db().analytics.referrers(f, t, 15),
     db().analytics.regions(f, t, 20),
     db().analytics.languages(f, t, 15),
+    db().analytics.topPaths(f, t, SITE_LANG_PATH_LIMIT),
     db().analytics.sessionStats(f, t),
     db().analytics.dwellSummary(f, t),
     db().analytics.dwellByPath(f, t, 10),
@@ -1080,6 +1121,7 @@ async function reload() {
   renderReferrers(refs);
   renderRegions(regs);
   renderLanguages(langs);
+  renderSiteLangs(sitePaths);
 
   renderUploadsSummary(upSummary);
   renderUploadChart(upDaily);
