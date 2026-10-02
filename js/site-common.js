@@ -11,6 +11,90 @@
   const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
   const tr = i18n.t;
 
+  // ════════════════════════════════════════════════
+  // 알림 문구 (벨 패널 · 내 정보 알림 탭 공용)
+  // ════════════════════════════════════════════════
+  // DB 트리거가 넣는 title·body 는 한국어다(Web Push 가 그대로 보낸다). 영·일판은 type + meta 로 문구를 만들고,
+  // meta 가 없는 옛 행이나 모르는 type 은 저장된 문구를 그대로 쓴다. 편집부용 알림은 관리 화면이 한국어뿐이라 그대로 둔다.
+  const NOTIF_NO_REASON = {
+    ko: '이번 사진은 싣지 않기로 했어요. 다른 컷으로 다시 응모해 주세요.',
+    en: "We didn't run this one. Please try again with another frame.",
+    ja: '今回は掲載を見送りました。別の1コマでまたご応募ください。',
+  };
+  function notifText(n) {
+    const stored = { title: n?.title || '', body: n?.body || '' };
+    const lang = i18n.lang === 'ja' ? 'ja' : i18n.lang === 'en' ? 'en' : 'ko';
+    const meta = n?.meta && typeof n.meta === 'object' ? n.meta : null;
+    const pick = (en, ja) => (lang === 'ja' ? ja : en);
+    if (n?.type === 'submission_rejected' && meta && !meta.reason) {
+      stored.body = NOTIF_NO_REASON[lang];
+    }
+    if (lang === 'ko') return stored;
+    const film = meta?.film ? String(meta.film) : '';
+    switch (n?.type) {
+      case 'submission_approved':
+        if (!meta) return stored;
+        return {
+          title: pick('Your photo is live', '写真が公開されました'),
+          body: film
+            ? pick(`Your ${film} photo is now in the library.`, `${film} の写真がライブラリに公開されました。`)
+            : pick('Your photo is now in the library.', '写真がライブラリに公開されました。'),
+        };
+      case 'submission_rejected':
+        if (!meta) return stored;
+        return {
+          title: pick("Your photo wasn't selected", '写真は不採用になりました'),
+          body: meta.reason ? String(meta.reason) : NOTIF_NO_REASON[lang],
+        };
+      case 'submission_deleted':
+        return {
+          title: pick('Your photo was removed by the editors', '写真が編集部により削除されました'),
+          body: pick('Contact the editors if you have questions (Instagram DM @5ft.magazine).', 'ご不明な点は編集部へ（Instagram @5ft.magazine に DM）。'),
+        };
+      case 'submission_featured': {
+        if (!meta) return stored;
+        const filmPart = film ? pick(` (${film})`, `（${film}）`) : '';
+        if (meta.live) {
+          return {
+            title: pick('Your photo is on the home page', '写真がホームに掲載されました'),
+            body: pick(`Your photo is on the 5ft.mag home page.${filmPart}`, `あなたの写真が 5ft.mag のホームに掲載されています。${filmPart}`),
+          };
+        }
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(meta.date || ''));
+        if (!m) return stored;
+        const date = new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString(i18n.locale, { month: 'long', day: 'numeric' });
+        return {
+          title: pick('Your photo was picked as Photo of the Week', '今週の一枚に選ばれました'),
+          body: pick(`It goes up on ${date}.${filmPart}`, `${date}からホームに掲載されます。${filmPart}`),
+        };
+      }
+      case 'listing_hidden':
+        return {
+          title: pick('Your listing was hidden', '出品が非表示になりました'),
+          body: pick('The editors reviewed and hid this listing.', '編集部が確認のうえ非表示にしました。'),
+        };
+      case 'listing_restored':
+        return {
+          title: pick('Your listing is back online', '出品が再公開されました'),
+          body: pick('The editors restored this listing.', '編集部が出品を復元しました。'),
+        };
+      case 'comment_reply':
+        return { title: pick('Someone replied to your comment', 'コメントに返信がありました'), body: stored.body };
+      case 'proposal_approved':
+      case 'proposal_rejected': {
+        const approved = n.type === 'proposal_approved';
+        const title = approved
+          ? pick('Your film suggestion was added', '提案したフィルムが登録されました')
+          : pick("Your film suggestion wasn't added", '提案したフィルムは登録されませんでした');
+        const name = meta && (meta.brand || meta.name) ? [meta.brand, meta.name].filter(Boolean).join(' ') : '';
+        return { title, body: name ? name + (meta.notes ? ` · ${meta.notes}` : '') : stored.body };
+      }
+      default:
+        return stored;
+    }
+  }
+  window.MagNotifText = notifText;
+
   const THEME_KEY = '5ftTheme';
 
   const telemetry = window.SiteTelemetry || {};
@@ -1145,12 +1229,15 @@
         list.innerHTML = `<div class="notif-panel-empty">${tr('새 알림이 없어요.', 'No new notifications.', '新しい通知はありません。')}</div>`;
         return;
       }
-      list.innerHTML = rows.map(n => `
-        <a class="notif-item${n.read_at ? '' : ' is-unread'}" href="${escapeHtml(safeInternalHref(n.link))}" data-id="${escapeHtml(n.id)}">
-          <div class="notif-item-title">${escapeHtml(n.title)}</div>
-          ${n.body ? `<div class="notif-item-body">${escapeHtml(n.body)}</div>` : ''}
+      list.innerHTML = rows.map(n => {
+        const text = notifText(n);
+        return `
+        <a class="notif-item${n.read_at ? '' : ' is-unread'}" href="${escapeHtml(i18n.url(safeInternalHref(n.link)))}" data-id="${escapeHtml(n.id)}">
+          <div class="notif-item-title">${escapeHtml(text.title)}</div>
+          ${text.body ? `<div class="notif-item-body">${escapeHtml(text.body)}</div>` : ''}
           <div class="notif-item-time">${fmtAgo(n.created_at)}</div>
-        </a>`).join('');
+        </a>`;
+      }).join('');
       // 알림을 누르면 그 알림 하나만 읽음 처리 후 이동한다(전체 읽음은 내 정보의 '모두 읽음').
       // 링크 이동이 먼저 일어나면 비동기 markRead 요청이 취소될 수 있어 여기서 순서를 보장한다.
       list.querySelectorAll('.notif-item').forEach(el => {
