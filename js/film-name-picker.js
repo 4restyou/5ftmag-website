@@ -51,7 +51,7 @@
   border: 0; background: none; cursor: pointer; font: inherit; text-align: left; color: inherit; }
 .fnp-item:hover, .fnp-item.is-active { background: var(--bg-sub, #f4f4f4); }
 .fnp-item-name { font-weight: var(--fw-heading, 700); font-size: 14px; }
-.fnp-item-spec { font-size: 11px; color: var(--text-muted, #666); margin-left: auto; white-space: nowrap; }
+.fnp-item-spec { font-size: 12px; color: var(--text-muted, #666); margin-left: auto; white-space: nowrap; }
 .fnp-empty { padding: 18px; font-size: 13px; color: var(--text-muted, #666); line-height: 1.6; }
 .fnp-foot { padding: 12px 18px; border-top: 1px solid var(--border, #e0e0e0);
   display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }

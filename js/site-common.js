@@ -1,6 +1,6 @@
 // 5ft.mag 공통 헤더/테마/메뉴 핸들러
-// 모든 페이지 <head> 에서 FOUC 방지용 1줄로 테마 초기 적용:
-//   <script>document.documentElement.dataset.theme=localStorage.getItem('5ftTheme')||'light';</script>
+// 모든 페이지 <head> 에서 FOUC 방지용으로 js/theme-init.js 를 동기 로드해 테마를 먼저 적용한다
+//   (저장값이 있으면 그대로, 없으면 기기 설정 prefers-color-scheme 을 따른다).
 // 모든 페이지 <body> 끝에 이 파일을 로드:
 //   <script src="./js/site-common.js"></script>  (또는 ../js/site-common.js)
 
@@ -353,7 +353,8 @@
   function init() {
     // 테마: head에서 이미 적용됐지만, 안전하게 재확인
     if (!document.documentElement.dataset.theme) {
-      document.documentElement.dataset.theme = localStorage.getItem(THEME_KEY) || 'light';
+      document.documentElement.dataset.theme = localStorage.getItem(THEME_KEY)
+        || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     }
 
     // 페이지뷰 로깅 — 한 페이지당 한 번
@@ -403,6 +404,22 @@
 
     // 햄버거 메뉴 토글
     if (menuBtn && mobileNav) {
+      // 시트가 열린 동안 헤더 밖 형제(본문·푸터 등)를 inert 로 막아 Tab 초점이 뒤 페이지로 새지 않게 한다.
+      // 원래 inert/aria-hidden 이던 요소는 건드리지 않는다. inert 를 모르는 브라우저는 aria-hidden 만.
+      const setBackgroundInert = (on) => {
+        const header = mobileNav.closest('header');
+        Array.from(document.body.children).forEach((el) => {
+          if (el === header || el.contains(mobileNav) || el.tagName === 'SCRIPT') return;
+          if (on) {
+            if (el.inert || el.getAttribute('aria-hidden') === 'true') return;
+            el.dataset.sheetInert = '1';
+            if ('inert' in el) el.inert = true; else el.setAttribute('aria-hidden', 'true');
+          } else if (el.dataset.sheetInert) {
+            delete el.dataset.sheetInert;
+            if ('inert' in el) el.inert = false; else el.removeAttribute('aria-hidden');
+          }
+        });
+      };
       const setMenuOpen = (opened) => {
         // 전체 화면 시트는 헤더 바로 아래에서 시작한다 (헤더 높이는 페이지마다 다를 수 있다)
         if (opened) {
@@ -411,6 +428,7 @@
         }
         mobileNav.classList.toggle('open', opened);
         document.body.classList.toggle('modal-open', opened);
+        setBackgroundInert(opened);
         updateMenuButton(menuBtn, mobileNav);
       };
       menuBtn.addEventListener('click', function () {
@@ -608,16 +626,28 @@
   //   Tab 처음 누르면 화면 최상단에 "본문으로 건너뛰기" 노출.
   //   스크린리더/키보드 사용자가 매 페이지 매번 nav 반복 안 듣고 본문으로 이동.
   // ════════════════════════════════════════════════
+  // 본문 후보 — <article>·<main>·[role=main]·<section> 중 화면에 보이는 첫 것.
+  //   홈은 모바일 홈(main.mh-root)과 PC 본문(.split-layout)을 함께 두고 하나만 보이므로
+  //   숨은 쪽을 가리키지 않게 보이는 것만 고른다.
+  function findMainTarget() {
+    const cands = Array.from(document.querySelectorAll('article, main, [role="main"], section'));
+    const main = cands.find(el => el.getClientRects().length > 0) || cands[0];
+    if (main && !main.id) main.id = 'main';
+    return main;
+  }
+
   function injectSkipLink() {
     if (document.querySelector('.skip-link')) return;
-    // 본문 후보 — <article> 또는 <main> 또는 첫 <section>
-    const main = document.querySelector('article, main, [role="main"], section');
+    const main = findMainTarget();
     if (!main) return;
-    if (!main.id) main.id = 'main';
     const a = document.createElement('a');
     a.className = 'skip-link';
     a.href = '#' + main.id;
     a.textContent = tr('본문으로 건너뛰기', 'Skip to content', '本文へスキップ');
+    // 화면 폭이나 'PC 보기' 토글로 보이는 본문이 바뀔 수 있어 누르기 직전에 다시 고른다.
+    const retarget = () => { const t = findMainTarget(); if (t) a.href = '#' + t.id; };
+    a.addEventListener('focus', retarget);
+    a.addEventListener('click', retarget);
     document.body.insertBefore(a, document.body.firstChild);
   }
 

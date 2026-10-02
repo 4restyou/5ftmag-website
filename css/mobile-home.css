@@ -146,7 +146,7 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-new-card { flex: 0 0 78%; max-width: 280px; scroll-snap-align: start; text-decoration: none; color: var(--text); background: var(--bg); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .mh-new-card .mh-new-thumb { aspect-ratio: 16/10; background: var(--border); overflow: hidden; }
 .mh-new-card .mh-new-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mh-new-card .mh-new-meta { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin: 12px 12px 4px; }
+.mh-new-card .mh-new-meta { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin: 12px 12px 4px; }
 .mh-new-card .mh-new-headline { font-size: 14px; font-weight: var(--fw-heading); line-height: 1.4; letter-spacing: -0.01em; margin: 0 12px 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* 브랜드별 row — 간격 늘리고 구분 명확하게 */
@@ -180,18 +180,18 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-compact-section.mh-recent { background: var(--bg-sub); }
 .mh-compact-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
 .mh-compact-head h2 { margin: 0; font-size: 18px; font-weight: var(--fw-heading); }
-.mh-compact-head span { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+.mh-compact-head span { margin-left: auto; font-size: 12px; color: var(--text-muted); }
 .mh-compact-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mh-compact-grid .mh-card { width: 100%; min-width: 0; flex: none; text-align: left; }
 .mh-compact-grid .mh-card-thumb { width: 100%; height: auto; aspect-ratio: 1; }
-.mh-compact-grid .mh-card-name { font-size: 11px; line-height: 1.3; }
+.mh-compact-grid .mh-card-name { font-size: 12px; line-height: 1.3; }
 /* 추천 필름: 최근 글과 같은 개수로 가로 띠. 한 화면에 세 장 조금 넘게 보여 옆으로 넘길 수 있다는 게 보인다 */
 .mh-film-strip { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory;
   margin: 0 calc(-1 * var(--mh-pad)); padding: 0 var(--mh-pad) 2px; scroll-padding-inline: var(--mh-pad); }   /* 스냅해도 첫 카드가 제목 줄과 맞게 */
 .mh-film-strip::-webkit-scrollbar { display: none; }
 .mh-film-strip .mh-card { flex: 0 0 30%; min-width: 0; }
 .mh-film-strip .mh-card-thumb { width: 100%; height: auto; aspect-ratio: 1; }
-.mh-film-strip .mh-card-name { font-size: 11px; line-height: 1.3; }
+.mh-film-strip .mh-card-name { font-size: 12px; line-height: 1.3; }
 /* 띠 끝의 「전체 보기」 카드. 끝에서 더 당길수록(--pull 0→1) 화살표가 커지고 앞으로 나온다 */
 .mh-end-card { --pull: 0; flex: 0 0 auto; align-self: stretch; scroll-snap-align: end; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
   min-width: 108px; padding: 0 14px; border-radius: 8px; border: 1px dashed var(--border); color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: var(--fw-heading);
@@ -217,11 +217,11 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 
 /* 현재 호 주제와 응모 안내. 큰 검정 면 대신 종이 같은 중간 surface를 사용한다. */
 .mh-theme { padding: 28px var(--mh-pad) 30px; background: var(--surface-1); border-top: 1px solid var(--border); }
-.mh-theme-tag { display: inline-block; padding: 5px 8px; background: var(--accent); color: var(--accent-text); font-size: 11px; font-weight: var(--fw-heading); letter-spacing: .08em; }
+.mh-theme-tag { display: inline-block; padding: 5px 8px; background: var(--accent); color: var(--accent-text); font-size: 12px; font-weight: var(--fw-heading); letter-spacing: .08em; }
 .mh-theme h2 { margin: 14px 0 6px; font-size: 28px; line-height: 1.08; font-weight: var(--fw-heading); }
 .mh-theme-sub { margin: 0 0 16px; font-size: 17px; color: var(--text); }
 .mh-theme-desc { margin: 0 0 14px; font-size: 14px; line-height: 1.65; color: var(--text-muted); word-break: keep-all; }
-.mh-theme-film { display: inline-block; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--bg); font-size: 11px; }
+.mh-theme-film { display: inline-block; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--bg); font-size: 12px; }
 .mh-theme-reward { margin: 18px 0 16px; padding-top: 14px; border-top: 1px solid var(--border-strong); font-size: 12px; line-height: 1.5; color: var(--text-muted); }
 .mh-theme-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .mh-theme-actions button, .mh-theme-actions a { display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px; border-radius: var(--btn-radius); font: inherit; font-size: 13px; font-weight: var(--fw-heading); cursor: pointer; text-decoration: none; }
@@ -337,7 +337,7 @@ html.mh-sheet-open, html.mh-sheet-open body { overflow: hidden; }
 .mh-sheet-thumb { flex: 0 0 auto; width: 88px; height: 88px; background: var(--bg-sub); border-radius: 8px; overflow: hidden; padding: 8px; box-sizing: border-box; }
 .mh-sheet-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .mh-sheet-meta { flex: 1; min-width: 0; }
-.mh-sheet-brand { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
+.mh-sheet-brand { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
 .mh-sheet-name { font-size: 22px; font-weight: var(--fw-heading); letter-spacing: -0.01em; margin: 0 0 6px; line-height: 1.2; }
 .mh-sheet-specs { font-size: 13px; color: var(--text); opacity: .75; }
 .mh-sheet-desc { font-size: 14px; line-height: 1.65; color: var(--text); margin: 0 0 18px; word-break: keep-all; }
@@ -432,7 +432,7 @@ html.mh-sheet-open, html.mh-sheet-open body { overflow: hidden; }
 .mh-sheet-lb-jump:active { color: #ffd400; }
 .mh-sheet-lb-note { font-size: 12px; color: rgba(255,255,255,.75); margin: 4px 0 0; line-height: 1.5; flex: 1 1 100%; }
 .mh-sheet-lb-counter {
-  font-size: 11px; color: rgba(255,255,255,.55); font-variant-numeric: tabular-nums;
+  font-size: 12px; color: rgba(255,255,255,.55); font-variant-numeric: tabular-nums;
   margin-left: auto; align-self: center;
 }
 
@@ -488,7 +488,7 @@ html.is-mobile-home .mh-potw[hidden] { display: none; }
   gap: 8px;
 }
 .mh-potw-sub {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--text-muted);
   letter-spacing: 0.02em;

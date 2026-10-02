@@ -494,7 +494,7 @@ header {
   overflow-wrap: anywhere;
 }
 .notif-item-time {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 4px;
 }
@@ -607,7 +607,12 @@ body:has(#mobileNav.open) #mhUploadFab {
 .mobile-nav-group[data-group="account"] a {
   font-size: 14px;
   color: var(--text-muted);
-  padding: 8px 0;
+  /* 터치 영역 44px (글자 크기 유지) */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0;
 }
 
 /* 지금 보고 있는 페이지: 굵게 + 왼쪽 점 */
@@ -806,6 +811,16 @@ footer {
   color: var(--text);
 }
 
+/* 터치 화면: 푸터 링크 높이 44px. 줄 간격은 링크 높이가 대신하므로 세로 gap 은 없앤다 */
+@media (max-width: 900px) {
+  .footer-links { row-gap: 0; }
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
 .footer-copy {
   font-size: 12px;
   font-weight: var(--fw-all);
@@ -977,7 +992,7 @@ footer {
   padding: 1px 7px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.22);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 /* 모바일에서는 토스트가 화면을 덮지 않게 폭·개수 노출을 줄인다.
@@ -1577,6 +1592,14 @@ kbd, .kbd {
 .lang-menu a[aria-current="true"] { font-weight: 700; }
 .lang-menu a[aria-current="true"]::before { content: '✓'; }
 .lang-menu a:hover, .lang-menu a:focus-visible { background: var(--border); outline: none; }
+
+/* 한국어 본문 줄바꿈 — 기사 본문·About 본문은 어절(띄어쓰기) 단위로만 끊는다("소/리를" 방지).
+   띄어쓰기 없는 긴 낱말(URL·영문 장단어)은 칸을 밀지 않게 아무 데서나 끊는다. 일본어는 아래 :lang(ja) 규칙이 되돌린다. */
+.article-body,
+.hero-about, .belief, .how-section, .join-section, .contrib-section, .partners-section, .contact-section {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
 
 /* 일본어판 줄바꿈 — 사이트 전체에 건 한국어 규칙(word-break: keep-all, 띄어쓰기에서만 줄바꿈)이 일본어엔 맞지 않는다.
    일본어는 띄어쓰기가 거의 없어 문장 하나가 끊기지 않는 덩어리가 되고, 그 폭이 그리드 칸(1fr)을 밀어 레이아웃 비율이 깨졌다. */

@@ -66,7 +66,7 @@
 .ft-chip-count,
 .ft-chip .labs-chip-count,
 .ft-chip .library-filter-count {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   background: var(--bg-sub);
@@ -198,7 +198,7 @@
 .ft-filter-section { margin-bottom: 18px; }
 .ft-filter-section-label {
   display: block;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: 8px;
 }

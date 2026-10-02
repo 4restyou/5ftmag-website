@@ -163,7 +163,7 @@
 }
 .cm-badge-editor {
   display: inline-block;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.08em;
   padding: 2px 6px;
