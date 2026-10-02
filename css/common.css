@@ -495,22 +495,45 @@ header {
 
 .mobile-nav {
   display: none;
-  flex-direction: column;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
 }
 
+/* 모바일 전체 화면 시트 (≤900px 에서만 햄버거가 보이므로 데스크톱엔 영향 없음).
+   top 은 열 때 JS 가 헤더 아래쪽 위치로 맞춘다. */
 .mobile-nav.open {
+  position: fixed;
+  top: calc(var(--header-h) + 1px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 290;
   display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 0 calc(24px + env(safe-area-inset-bottom, 0px));
+  animation: mobile-nav-in var(--duration-base) var(--easing);
+}
+
+/* 시트가 열려 있는 동안 떠 있는 사진 올리기 버튼(site-pwa.js)이 메뉴 위로 보이지 않게 */
+body:has(#mobileNav.open) #mhUploadFab {
+  display: none !important;
+}
+
+@keyframes mobile-nav-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.mobile-nav-group {
+  display: flex;
+  flex-direction: column;
 }
 
 .mobile-nav a {
-  font-size: var(--fs-nav);
-  font-weight: var(--fw-all);
-  letter-spacing: var(--ls-default);
+  position: relative;
   color: var(--text);
-  padding: 14px 24px;
-  border-bottom: 1px solid var(--border);
+  letter-spacing: var(--ls-default);
   transition: opacity .15s;
 }
 
@@ -518,9 +541,58 @@ header {
   opacity: .5;
 }
 
-.mobile-nav a.mobile-nav-secondary-start {
-  margin-top: 8px;
-  border-top: 1px solid var(--text);
+.mobile-nav-group[data-group="primary"] a {
+  font-size: 22px;
+  font-weight: var(--fw-all);
+  padding: 14px 24px;
+}
+
+.mobile-nav-group[data-group="secondary"] {
+  margin-top: 20px;
+}
+
+.mobile-nav-group[data-group="secondary"] a {
+  font-size: 16px;
+  font-weight: var(--fw-all);
+  color: var(--text-muted);
+  padding: 10px 24px;
+}
+
+.mobile-nav-group[data-group="account"] {
+  margin: auto 24px 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.mobile-nav-group[data-group="account"]:empty {
+  display: none;
+}
+
+.mobile-nav-group[data-group="account"] a {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 8px 0;
+}
+
+/* 지금 보고 있는 페이지: 굵게 + 왼쪽 점 */
+.mobile-nav a.current {
+  font-weight: var(--fw-heading);
+  color: var(--text);
+}
+
+.mobile-nav a.current::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .page-title {
