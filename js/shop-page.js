@@ -21,6 +21,7 @@
   const STATE = {
     products: [],
     filter: 'all',
+    loadFailed: false,   // 불러오기 실패. 칩을 눌러도 "상품 없음" 대신 실패 안내를 둔다
   };
 
   function fmtPrice(n) {
@@ -83,6 +84,7 @@
   }
 
   function applyFilter() {
+    if (STATE.loadFailed) return;
     const cat = STATE.filter;
     const list = cat === 'all'
       ? STATE.products
@@ -306,43 +308,55 @@
 
   // DB 우선 — admin 에서 등록·수정한 게 즉시 반영. 실패 시 정적 JSON 폴백.
   // 정적 data/shop.json 은 Netlify 빌드시 함께 갱신되긴 하지만 어디까지나
-  // SEO / 오프라인 / DB 다운 시 대비용.
+  // SEO / 오프라인 / DB 다운 시 대비용. 둘 다 실패하면 던진다(빈 목록과 구분).
   async function loadProducts() {
     if (await waitForDB()) {
       try {
-        const rows = await window.MagDB.shop.listPublished();
+        const rows = await window.MagDB.shop.listPublished({ strict: true });
         if (Array.isArray(rows)) return rows.map(rowToJson);
       } catch (e) {
         console.warn('[shop] DB fetch 실패, 정적 JSON 으로 폴백:', e);
       }
     }
-    try {
-      const res = await fetch('data/shop.json');
-      const data = await res.json();
-      return Array.isArray(data) ? data : [];
-    } catch (e) {
-      console.warn('[shop] 정적 JSON 도 실패:', e);
-      return [];
-    }
+    const res = await fetch('data/shop.json');
+    if (!res.ok) throw new Error('data/shop.json ' + res.status);
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   }
 
-  loadProducts()
-    .then(data => {
-      STATE.products = data;
-      updateChipCounts();
-      applyFilter();
-      // ?p={slug} 로 진입 시 해당 상품 자동 모달
-      try {
-        const slug = new URL(window.location.href).searchParams.get('p');
-        if (slug) {
-          const p = STATE.products.find(x => x.slug === slug);
-          if (p) openModal(p);
-        }
-      } catch (_) {}
-    })
-    .catch(err => {
-      console.error('[shop] load 실패:', err);
-      empty.hidden = false;
-      empty.textContent = i18n.t('상품을 불러오지 못했어요. 잠시 후 새로고침 해주세요.', 'Couldn\'t load products. Please refresh in a moment.', '商品を読み込めませんでした。しばらくしてから再読み込みしてください。');
-    });
+  function renderLoadError() {
+    const title = i18n.t('상품을 불러오지 못했어요.', 'Couldn\'t load the products.', '商品を読み込めませんでした。');
+    empty.hidden = true;
+    grid.innerHTML = window.MagState
+      ? window.MagState.error({ title, action: 'retry-shop' })
+      : `<div class="shop-empty">${escapeHtml(title)}<br /><button type="button" class="mag-state-btn" data-state-action="retry-shop">${i18n.t('다시 시도', 'Try again', '再試行')}</button></div>`;
+    grid.querySelector('[data-state-action="retry-shop"]')?.addEventListener('click', () => {
+      grid.innerHTML = '';
+      load();
+    }, { once: true });
+  }
+
+  function load() {
+    return loadProducts()
+      .then(data => {
+        STATE.loadFailed = false;
+        STATE.products = data;
+        updateChipCounts();
+        applyFilter();
+        // ?p={slug} 로 진입 시 해당 상품 자동 모달
+        try {
+          const slug = new URL(window.location.href).searchParams.get('p');
+          if (slug) {
+            const p = STATE.products.find(x => x.slug === slug);
+            if (p) openModal(p);
+          }
+        } catch (_) {}
+      })
+      .catch(err => {
+        console.error('[shop] load 실패:', err);
+        STATE.loadFailed = true;
+        renderLoadError();
+      });
+  }
+  load();
 })();

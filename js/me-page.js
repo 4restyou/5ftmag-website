@@ -18,6 +18,8 @@ const STATE = {
   sendingMessage: false,
   myComments: null,
   myProposals: null,
+  myBooks: null,         // 열람권이 있는 이북
+
   // favorites
   favPhotos: null,       // null = 미로딩, [] = 비어있음
   favFilms:  null,
@@ -55,8 +57,12 @@ function fmtPrice(v) {
   if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
   return i18n.lang === 'ja' ? n.toLocaleString('ja-JP') + 'ウォン' : n.toLocaleString('en-US') + ' won';
 }
+// 검토 상태(사진 투고·필름 제안 등) 이름은 이 한 곳에서 정한다. 탭마다 이름이 달랐던 것을 한 벌로 묶었다
+function reviewStatusLabel(s) {
+  return ({ pending: i18n.t('대기', 'Pending', '審査中'), approved: i18n.t('공개 중', 'Published', '公開中'), rejected: i18n.t('반려', 'Rejected', '不採用') })[s] || '';
+}
 function statusLabel(s) {
-  return ({ pending:i18n.t('대기', 'Pending', '審査待ち'), approved:i18n.t('공개 중', 'Published', '公開中'), rejected:i18n.t('반려', 'Declined', '不採用'),
+  return reviewStatusLabel(s) || ({
            available:i18n.t('판매중', 'For sale', '販売中'), reserved:i18n.t('예약중', 'Reserved', '予約中'), sold:i18n.t('판매완료', 'Sold', '売約済み'), hidden:i18n.t('숨김', 'Hidden', '非表示') })[s] || s;
 }
 function nextStatusOf(s) {
@@ -65,7 +71,7 @@ function nextStatusOf(s) {
 
 async function checkAuth() {
   if (!db() || !db().isReady()) {
-    document.body.innerHTML = i18n.t('<div class="gate"><h2>인증 모듈을 불러오지 못했습니다</h2><p>새로고침 후에도 반복되면 편집부에 알려주세요 (인스타그램 @5ft.magazine DM).</p></div>', '<div class="gate"><h2>Couldn\'t load the sign-in module</h2><p>If this keeps happening after a refresh, please let the editors know (Instagram DM @5ft.magazine).</p></div>', '<div class="gate"><h2>認証モジュールを読み込めませんでした</h2><p>再読み込みしても続く場合は、編集部にお知らせください（Instagram @5ft.magazine に DM）。</p></div>');
+    showAuthError();
     return false;
   }
   const session = await db().auth.getSession();
@@ -80,6 +86,19 @@ async function checkAuth() {
     location.reload();
   });
   return true;
+}
+
+// 인증 모듈을 못 불렀을 때. 헤더·푸터는 두고 본문(#gate 자리)에만 안내를 그린다
+function showAuthError() {
+  const gate = $('gate');
+  $('app').hidden = true;
+  gate.innerHTML = `
+    <h2>${i18n.t('인증 모듈을 불러오지 못했습니다', 'Couldn\'t load the sign-in module', '認証モジュールを読み込めませんでした')}</h2>
+    <p>${i18n.t('새로고침 후에도 반복되면 편집부에 알려주세요 (인스타그램 @5ft.magazine DM).', 'If this keeps happening after a refresh, please let the editors know (Instagram DM @5ft.magazine).', '再読み込みしても続く場合は、編集部にお知らせください（Instagram @5ft.magazine に DM）。')}</p>
+    <button type="button" class="gate-btn" id="gateRetry">${i18n.t('다시 시도', 'Try again', 'もう一度試す')}</button>
+    <p class="gate-home"><a href="${i18n.url('/')}">${i18n.t('홈으로 가기 →', 'Back to home →', 'ホームへ戻る →')}</a></p>`;
+  gate.hidden = false;
+  $('gateRetry').addEventListener('click', () => location.reload());
 }
 
 function showGate() {
@@ -365,6 +384,7 @@ function switchSection(sec) {
   $('section-messages').hidden         = sec !== 'messages';
   $('section-my-comments').hidden      = sec !== 'my-comments';
   $('section-my-proposals').hidden     = sec !== 'my-proposals';
+  $('section-my-books').hidden         = sec !== 'my-books';
   $('section-fav-photos').hidden       = sec !== 'fav-photos';
   $('section-fav-films').hidden        = sec !== 'fav-films';
   $('section-fav-webzine').hidden      = sec !== 'fav-webzine';
@@ -376,6 +396,7 @@ function switchSection(sec) {
   if (sec === 'messages'          && STATE.messages         === null) loadMessages();
   if (sec === 'my-comments'       && STATE.myComments       === null) loadMyComments();
   if (sec === 'my-proposals'      && STATE.myProposals      === null) loadMyProposals();
+  if (sec === 'my-books'          && STATE.myBooks          === null) loadMyBooks();
   if (sec === 'fav-photos'        && STATE.favPhotos        === null) loadFavPhotos();
   if (sec === 'fav-films'         && STATE.favFilms         === null) loadFavFilms();
   if (sec === 'fav-webzine'       && STATE.favWebzine       === null) loadFavWebzine();
@@ -1143,10 +1164,6 @@ async function loadMyProposals() {
   renderMyProposals();
 }
 
-function statusLabelKor(s) {
-  return ({ pending: i18n.t('검토 중', 'In review', '審査中'), approved: i18n.t('승인됨', 'Approved', '承認済み'), rejected: i18n.t('반려됨', 'Declined', '不採用') })[s] || s;
-}
-
 function renderMyProposals() {
   const rows = STATE.myProposals || [];
   if (rows.length === 0) {
@@ -1163,13 +1180,53 @@ function renderMyProposals() {
     return `
       <div class="me-prop me-prop--${escapeAttr(status)}">
         <div class="me-prop-head">
-          <span class="me-prop-status">${escapeHtml(statusLabelKor(status))}</span>
+          <span class="me-prop-status">${escapeHtml(reviewStatusLabel(status) || status)}</span>
           <span class="me-prop-date">${fmtDate(r.created_at)}</span>
         </div>
         <div class="me-prop-title">${escapeHtml(r.display_name || (r.brand + ' ' + r.name))}</div>
         ${meta ? `<div class="me-prop-meta">${escapeHtml(meta)}</div>` : ''}
         ${r.description ? `<p class="me-prop-desc">${escapeHtml(r.description)}</p>` : ''}
         ${notes}
+      </div>`;
+  }).join('');
+}
+
+// ═════════════════════════════════════════
+// 내 책 (열람권이 있는 유료 이북)
+// ═════════════════════════════════════════
+async function loadMyBooks() {
+  $('myBooksGrid').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…', '読み込み中…')}</div>`;
+  let owned, list;
+  try {
+    [owned, list] = await Promise.all([db().ebooks.myEntitlementIds(), db().ebooks.listPublished({ strict: true })]);
+  } catch (e) {
+    console.warn('[me] 내 책 불러오기 실패', e);
+    $('myBooksGrid').innerHTML = `<div class="me-empty">${i18n.t('책 목록을 불러오지 못했어요.', 'Couldn\'t load your books.', '本の一覧を読み込めませんでした。')}<br /><button type="button" class="me-btn" id="myBooksRetry">${i18n.t('다시 시도', 'Try again', '再試行')}</button></div>`;
+    $('myBooksRetry').addEventListener('click', loadMyBooks, { once: true });
+    return;
+  }
+  STATE.myBooks = (list || []).filter(e => owned && owned.has(e.id));
+  renderMyBooks();
+}
+
+function renderMyBooks() {
+  const items = STATE.myBooks || [];
+  if (items.length === 0) {
+    $('myBooksGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 산 책이 없어요.', 'You haven\'t bought any books yet.', 'まだ購入した本はありません。')}<br /><a class="me-empty-cta" href="${pageHref('books.html')}">${i18n.t('책장 보러 가기 →', 'Browse the bookshelf →', '本棚を見る →')}</a></div>`;
+    return;
+  }
+  $('myBooksGrid').innerHTML = items.map(it => {
+    const href = i18n.url('/ebook-read.html') + '?slug=' + encodeURIComponent(it.slug);
+    const thumb = it.cover_image
+      ? `<img src="${escapeAttr(it.cover_image)}" alt="${escapeAttr(it.title || '')}" loading="lazy" />`
+      : `<span style="color:var(--text-muted); font-size:12px;">${escapeHtml(it.title || '')}</span>`;
+    return `
+      <div class="me-fav-film-card">
+        <a href="${escapeAttr(href)}">
+          <div class="me-fav-film-img">${thumb}</div>
+          <span class="me-fav-film-brand">${i18n.t('읽기 →', 'Read →', '読む →')}</span>
+          <p class="me-fav-film-spec">${escapeHtml(it.title || '')}</p>
+        </a>
       </div>`;
   }).join('');
 }
@@ -1188,7 +1245,7 @@ function renderMyProposals() {
   refreshNotifsBadge();
   refreshMessagesBadge();
   // URL hash 로 초기 탭 결정
-  const validSections = ['photos', 'market', 'notifs', 'messages', 'my-comments', 'my-proposals', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
+  const validSections = ['photos', 'market', 'notifs', 'messages', 'my-comments', 'my-proposals', 'my-books', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
   const hashSection = (location.hash || '').replace(/^#/, '');
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);

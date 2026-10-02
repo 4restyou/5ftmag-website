@@ -426,7 +426,7 @@
           let go;
           if (a.classList.contains('wz-read') && window.WebzineReader) {
             go = () => window.WebzineReader.open(a.href, it.title, { onClose: closed });
-          } else if (it._ebook && !a.classList.contains('wz-buy') && window.WebzineReader && db().ebooks?.getAccess) {
+          } else if (it._ebook && !a.classList.contains('wz-buy') && !a.classList.contains('wz-own') && window.WebzineReader && db().ebooks?.getAccess) {
             // 유료 미리보기도 무료와 같이 이 페이지에서 연다. 열람 주소는 표지가 열리는 동안 미리 받아 둔다.
             // 받지 못하면(서버·파일 문제) 원인을 보여 주는 ebook-read 로 넘긴다
             const accessP = db().ebooks.getAccess(it.slug).catch(() => null);
@@ -492,29 +492,62 @@
   let resizeT = null;
   window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { pages.forEach(measureDesc); placeBack(); }, 120); });
 
-  (async function load() {
+  // 열람권이 있는 책은 "구매하고 전체 보기" 를 "전체 읽기" 로 바꾼다. 로그인 전·조회 실패면 구매 버튼 그대로.
+  // 클릭 처리기는 a 의 class 를 누를 때 보므로, 같은 a 를 그 자리에서 고친다
+  async function markOwned() {
+    let owned;
+    try { owned = await db().ebooks.myEntitlementIds(); } catch (_) { return; }
+    if (!owned || !owned.size) return;
+    issues.forEach((it, i) => {
+      if (!it._ebook || !owned.has(it._pid)) return;
+      const buy = pages[i] && pages[i].querySelector('.wz-buy');
+      if (!buy) return;
+      buy.classList.remove('wz-buy');
+      buy.classList.add('wz-own');
+      buy.href = i18n.url('/ebook-read.html') + '?slug=' + encodeURIComponent(it.slug);
+      buy.innerHTML = `<span>${T('전체 읽기', 'Read the whole book', '全編を読む')}</span><i>→</i>`;
+    });
+  }
+
+  // 둘 다(웹진·이북) 불러오지 못해 보여 줄 책이 없으면 "발행된 책이 없어요" 대신 실패 안내 + 다시 시도
+  function renderLoadError() {
+    const title = T('책장을 불러오지 못했어요.', 'Couldn\'t load the bookshelf.', '本棚を読み込めませんでした。');
+    stack.innerHTML = window.MagState
+      ? window.MagState.error({ title, action: 'retry-books' })
+      : `<p class="wz-empty">${esc(title)}<br /><button type="button" class="mag-state-btn" data-state-action="retry-books">${T('다시 시도', 'Try again', '再試行')}</button></p>`;
+    stack.querySelector('[data-state-action="retry-books"]')?.addEventListener('click', () => {
+      stack.innerHTML = `<p class="wz-empty">${T('불러오는 중…', 'Loading…', '読み込み中…')}</p>`;
+      load();
+    }, { once: true });
+  }
+
+  async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
+    let failed = false;
     let webzineIssues = [];
-    try { webzineIssues = await db().webzine.listPublished(); } catch (_) { webzineIssues = []; }
+    try { webzineIssues = await db().webzine.listPublished({ strict: true }); } catch (_) { webzineIssues = []; failed = true; }
     if (!Array.isArray(webzineIssues)) webzineIssues = [];
 
     let ebookItems = [];
     try {
-      const eb = (db().ebooks && await db().ebooks.listPublished()) || [];
+      const eb = (await db().ebooks.listPublished({ strict: true })) || [];
       ebookItems = eb.map((e) => ({
-        id: 'ebook-' + e.id, _ebook: true, slug: e.slug, title: e.title, kind: e.kind,
+        id: 'ebook-' + e.id, _ebook: true, _pid: e.id, slug: e.slug, title: e.title, kind: e.kind,
         cover_url: e.cover_image || '',
         spine_color: e.spine_color || '', foil_color: e.foil_color || '',
         description: e.description || e.excerpt || '',
         issue_label: '', price: e.price, created_at: e.created_at,
       }));
-    } catch (_) { ebookItems = []; }
+    } catch (_) { ebookItems = []; failed = true; }
+    if (failed && !webzineIssues.length && !ebookItems.length) { renderLoadError(); return; }
 
     // 유무료·시즌 구분 없이 올린 순서. 최신이 위
     issues = ebookItems.concat(webzineIssues);
     issues.sort((a, b) => (new Date(b.created_at || 0) - new Date(a.created_at || 0)) || ((b.sort_order || 0) - (a.sort_order || 0)));
     issues.forEach((it, i) => { it._c = FALLBACK[i % FALLBACK.length]; });
     render();
+
+    markOwned();
 
     try { favSet = await db().favorites.idsForType('webzine'); } catch (_) { favSet = new Set(); }
     pages.forEach((p, i) => { const b = p.querySelector('.wz-like'); if (b) setLikeBtn(b, favSet.has(issues[i].id)); });
@@ -532,5 +565,6 @@
         if (!inDetail && markEls[i] && markEls[i].classList.contains('on')) root.style.setProperty('--wz-mood', issues[i]._c);
       });
     });
-  })();
+  }
+  load();
 })();

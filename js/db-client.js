@@ -1750,12 +1750,13 @@
 
   const WEBZINE_BUCKET = 'webzine';
   const webzine = {
-    async listPublished() {
-      const c = client(); if (!c) return [];
+    // strict: 실패하면 [] 대신 던진다. 책장이 "불러오지 못함" 과 "0건" 을 가르는 데 쓴다
+    async listPublished({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw new Error('unavailable'); return []; }
       const { data, error } = await c.from('webzine_issues')
         .select('*').eq('published', true)
         .order('sort_order', { ascending: false }).order('created_at', { ascending: false });
-      if (error) { console.warn('[webzine.listPublished]', error.message); return []; }
+      if (error) { console.warn('[webzine.listPublished]', error.message); if (strict) throw error; return []; }
       return data || [];
     },
     async listAll() {

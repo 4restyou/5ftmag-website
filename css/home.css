@@ -609,6 +609,32 @@ body.modal-open { overflow: hidden; }
   letter-spacing: 0.02em;
 }
 
+/* Photo 머리 오른쪽: [+ 내 사진 올리기] [랜덤|최근].
+   폰 FAB(#mhUploadFab)와 같은 data-action="open-submission" 을 쓴다.
+   640px 이하는 FAB 가 있으니 숨긴다. */
+.sub-section-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.sub-section-head .photo-upload-link {
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sub-section-head .photo-upload-link:hover { color: var(--text); }
+.sub-section-head .photo-upload-link:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .photo-upload-link { display: none; }
+}
+
 /* Photo 그리드 위 모드 토글 — 랜덤 / 최근 (segmented pill) */
 .photo-mode-toggle {
   display: inline-flex;

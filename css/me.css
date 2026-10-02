@@ -93,6 +93,8 @@ body { background: var(--bg); color: var(--text); }
 .gate h2 { font-size: 22px; font-weight: var(--fw-heading); margin: 0 0 12px; }
 .gate p { color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
 .gate .gate-btn { background: var(--text); color: var(--bg); border: 1px solid var(--text); padding: 12px 24px; border-radius: var(--btn-radius); font-size: 14px; font-weight: var(--fw-heading); cursor: pointer; }
+.gate .gate-home { margin: 18px 0 0; font-size: 14px; }
+.gate .gate-home a { color: inherit; text-underline-offset: 2px; }
 
 .img-zoom { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; padding: 24px; }
 .img-zoom.open { display: flex; }
