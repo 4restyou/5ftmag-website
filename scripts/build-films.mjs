@@ -13,6 +13,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { warnBuild } from './lib/build-warn.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -70,12 +71,12 @@ async function main() {
     rows = await res.json();
     if (!Array.isArray(rows)) throw new Error('expected array');
   } catch (err) {
-    console.warn('⚠ Supabase films fetch 실패. data/films.json 유지:', err.message);
+    warnBuild('build-films', `Supabase films fetch 실패. data/films.json 유지: ${err.message}`);
     process.exit(0);
   }
 
   if (rows.length === 0) {
-    console.warn('⚠ Supabase films 가 비어 있음. data/films.json 유지.');
+    warnBuild('build-films', 'Supabase films 가 비어 있음. data/films.json 유지.');
     process.exit(0);
   }
 
@@ -103,6 +104,6 @@ async function main() {
 }
 
 main().catch(err => {
-  console.warn('⚠ build-films 예외 발생, data/films.json 유지:', err?.message || err);
+  warnBuild('build-films', `build-films 예외 발생, data/films.json 유지: ${err?.message || err}`);
   process.exit(0);
 });

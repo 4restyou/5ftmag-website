@@ -664,18 +664,16 @@
     });
   }
 
-  // js/analytics.js (Plausible + Sentry bootstrapper) + js/icons.js 한 번만 로드
+  // js/analytics.js (Plausible + Sentry bootstrapper) 한 번만 로드
   let _aux = false;
   function loadAnalyticsOnce() {
     if (_aux) return;
     _aux = true;
     const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
-    [['analytics.js', '20260515-bootstrap'], ['icons.js', '20260515-icons']].forEach(([f, v]) => {
-      const s = document.createElement('script');
-      s.defer = true;
-      s.src = `${base}js/${f}?v=${v}`;
-      document.head.appendChild(s);
-    });
+    const s = document.createElement('script');
+    s.defer = true;
+    s.src = base + 'js/analytics.js?v=20260515-bootstrap';
+    document.head.appendChild(s);
   }
 
   // ════════════════════════════════════════════════

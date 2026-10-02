@@ -31,6 +31,8 @@ jobs:
         run: npm run validate
       - name: 공통 내비게이션·푸터 동기화
         run: npm run shell:check
+      - name: 외국어판(영·일) 남은 한국어 검사
+        run: npm run i18n:check
       - name: Vitest 단위 테스트
         run: npm run test:unit
       - name: DB baseline·계약 검증

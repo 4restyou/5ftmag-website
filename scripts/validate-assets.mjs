@@ -213,6 +213,24 @@ for (const html of [...htmlFiles, ...templateFiles]) {
     tags.get(tag).push(relative(ROOT, html));
   }
 }
+// JS 가 다른 자산을 ?v= 로 직접 부르는 곳(동적 로드·워커)도 같은 가드에 넣는다. /js/* 가
+// immutable 캐시라 버전을 떼면 새 내용이 안 내려가므로, 페이지와 같은 버전을 물게 한다.
+// admin-article-editor-page.js 는 미리보기용 HTML 문서를 통째로 품은 관리 화면 코드라 뺀다.
+const JS_VERSION_SKIP = new Set(['js/admin-article-editor-page.js']);
+const jsVerRe = /["'`/]((?:css|js)\/[a-z0-9._-]+\.(?:css|js))\?v=([0-9A-Za-z-]+)["'`]/gi;
+for (const js of walk(join(ROOT, 'js'), /\.js$/)) {
+  const rel = relative(ROOT, js);
+  if (JS_VERSION_SKIP.has(rel)) continue;
+  const text = readFileSync(js, 'utf8');
+  let m;
+  while ((m = jsVerRe.exec(text))) {
+    const [, asset, tag] = m;
+    if (!versionMap.has(asset)) versionMap.set(asset, new Map());
+    const tags = versionMap.get(asset);
+    if (!tags.has(tag)) tags.set(tag, []);
+    tags.get(tag).push(rel);
+  }
+}
 for (const [asset, tags] of versionMap) {
   if (tags.size <= 1) continue;
   const detail = [...tags.entries()]
