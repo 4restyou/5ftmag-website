@@ -15,7 +15,8 @@
 //     orderNo   = 주문번호 또는 상품주문번호
 //     buyerName = 스마트스토어 주문자 이름
 //     buyerPhone= 주문자 연락처(끝 4자리만 대조)
-// 응답: { ok: true } 또는 { error }
+// 응답: { ok: true } 또는 { error, detail? }
+//   주문 확인 실패(주문 없음·주문자 불일치·미결제·다른 상품)는 모두 403 { error: 'order not verified' } 하나로 준다.
 //
 // 필요 시크릿: NAVER_COMMERCE_CLIENT_ID / NAVER_COMMERCE_CLIENT_SECRET
 // (커머스API센터 apicenter.commerce.naver.com 에서 발급)
@@ -43,7 +44,10 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 function allowOrigin(origin: string | null): string {
   const o = origin || '';
   if (o === 'https://www.5ftmag.com' || o === 'https://5ftmag.com') return o;
-  if (/^https:\/\/[a-z0-9-]+\.netlify\.app$/.test(o)) return o;
+  // Netlify 는 우리 사이트(5ftmag)의 기본 주소와 미리보기·브랜치 주소(<무엇>--5ftmag.netlify.app)만 연다.
+  // 예전처럼 *.netlify.app 전체를 열면 남의 Netlify 사이트도 응답을 읽을 수 있었다.
+  // 앞부분에 '--' 가 다시 들어가지 않게 해 'evil--x--5ftmag' 같은 주소를 거른다(Netlify 사이트 이름엔 '--' 를 쓸 수 없다고 본다).
+  if (/^https:\/\/([a-z0-9]+(-[a-z0-9]+)*--)?5ftmag\.netlify\.app$/.test(o)) return o;
   return 'https://www.5ftmag.com';
 }
 function cors(origin: string | null): Record<string, string> {
@@ -92,7 +96,13 @@ Deno.serve(async (req) => {
 
   // 레이트리밋 — 주문번호 무차별 대입 완화. 원본 IP 대신 keyed hash 만 저장한다.
   // 제한 저장소가 고장 난 경우에는 우회를 허용하지 않고 잠시 후 재시도시킨다.
-  const clientIp = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim();
+  // 클라이언트 IP. x-forwarded-for 의 첫 값은 요청자가 직접 써 넣을 수 있어 IP 제한을 우회하는 데
+  // 쓰인다. 프록시는 받은 헤더 뒤에 자기가 본 주소를 덧붙이므로 마지막 값을 쓴다.
+  // 가정: Supabase 엣지 게이트웨이가 x-forwarded-for 끝에 실제 접속 IP 를 붙인다(실제 헤더는 확인하지 못했다).
+  // x-real-ip 는 게이트웨이가 덮어쓰는지 알 수 없어 x-forwarded-for 가 비었을 때만 쓴다.
+  // 둘 다 없으면 IP 제한은 건너뛰고 계정당 제한만 걸린다.
+  const xff = (req.headers.get('x-forwarded-for') || '').split(',').map(v => v.trim()).filter(Boolean);
+  const clientIp = xff[xff.length - 1] || (req.headers.get('x-real-ip') || '').trim();
   try {
     const sinceIso = new Date(Date.now() - 3600_000).toISOString();
     const ipHash = await hashIp(clientIp);
@@ -117,6 +127,17 @@ Deno.serve(async (req) => {
   } catch (_) {
     return json({ error: 'rate limit unavailable', detail: '주문 확인을 잠시 사용할 수 없어요. 잠시 후 다시 시도해 주세요.' }, 503, origin);
   }
+
+  // 주문 확인 실패는 이유(주문 없음·주문자 불일치·미결제·다른 상품)를 가리지 않고 같은 응답을 준다.
+  // 이유를 나눠 돌려주면 남의 주문번호가 실제로 있는지, 주문자 이름이 맞았는지를 하나씩 알아낼 수 있다.
+  // 자세한 이유는 함수 로그에만 남긴다(주문번호·이름·연락처는 남기지 않는다).
+  const notVerified = (reason: string) => {
+    console.warn('[ebook-redeem] not verified', reason);
+    return json({
+      error: 'order not verified',
+      detail: '주문을 확인하지 못했어요. 주문번호와 주문자 이름·연락처 끝 4자리를 스마트스토어 주문 정보와 똑같이 입력했는지 확인해 주세요. 결제 직후라면 잠시 후 다시 시도해 주세요.',
+    }, 403, origin);
+  };
 
   let body: any = null;
   try { body = await req.json(); } catch (_) { /* noop */ }
@@ -161,10 +182,7 @@ Deno.serve(async (req) => {
     if (resolved.status === 0) {
       return json({ error: 'store verify unavailable', detail: '스마트스토어 주문 확인이 지연되고 있어요. 잠시 후 다시 시도해 주세요.' }, 502, origin);
     }
-    return json({
-      error: 'order not found',
-      detail: '주문을 찾을 수 없어요. 주문번호를 다시 확인해 주세요. (결제 직후라면 잠시 후 다시 시도해 주세요.)',
-    }, 404, origin);
+    return notVerified('order not found');
   }
 
   // 이 이북 상품에 해당하고 결제가 유지 중인 상품주문 찾기.
@@ -186,18 +204,7 @@ Deno.serve(async (req) => {
   }
   if (!matched) {
     // 우선순위: 주문자 불일치 > (상품은 있으나 미결제/기타) > 상품 없음
-    if (buyerMismatch) {
-      return json({
-        error: 'buyer mismatch',
-        detail: '주문자 이름 또는 연락처가 주문 정보와 달라요. 스마트스토어 주문자 정보와 똑같이 입력해 주세요.',
-      }, 403, origin);
-    }
-    return json({
-      error: sawProduct ? 'order not payable' : 'product mismatch',
-      detail: sawProduct
-        ? '이 주문은 결제 완료 상태가 아니에요 (취소·반품 포함).'
-        : '이 주문에는 해당 이북 상품이 없어요.',
-    }, 402, origin);
+    return notVerified(buyerMismatch ? 'buyer mismatch' : sawProduct ? 'order not payable' : 'product mismatch');
   }
 
   // 부여 — order_ref 유니크 인덱스가 같은 주문 재사용을 차단

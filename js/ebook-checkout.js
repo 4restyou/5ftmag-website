@@ -100,7 +100,7 @@
     const hasStore = !!(product.store_url && /\/products\/\d+/.test(product.store_url));
 
     if (!hasKakao && !hasStore) {
-      alert(i18n.t('구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 인스타그램 @film_socialclub DM 으로 문의해 주세요.', 'How to buy\n\nOnline payment is not ready yet. To buy, send a DM to @film_socialclub on Instagram.', '購入について\n\nオンライン決済は準備中です。ご購入希望の方は、Instagram @film_socialclub に DM でお問い合わせください。'));
+      alert(i18n.t('구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 인스타그램 @5ft.magazine DM 으로 문의해 주세요.', 'How to buy\n\nOnline payment is not ready yet. To buy, send a DM to @5ft.magazine on Instagram.', '購入について\n\nオンライン決済は準備中です。ご購入希望の方は、Instagram @5ft.magazine に DM でお問い合わせください。'));
       return;
     }
 
@@ -176,7 +176,12 @@
         location.replace(cleanUrl());
         return;
       }
-      msgEl.textContent = (r && r.detail) || i18n.t('인증에 실패했어요. 잠시 후 다시 시도하거나 @film_socialclub 으로 문의해 주세요.', 'Verification failed. Please try again in a moment or contact @film_socialclub.', '認証に失敗しました。しばらくしてから再度お試しいただくか、@film_socialclub までお問い合わせください。');
+      // 주문 확인 실패는 서버가 이유를 가리지 않고 하나로 준다(남의 주문 정보를 하나씩 맞혀 보지 못하게).
+      if (r?.error === 'order not verified') {
+        msgEl.textContent = i18n.t('주문을 확인하지 못했어요. 주문번호와 주문자 이름·연락처 끝 4자리를 스마트스토어 주문 정보와 똑같이 입력했는지 확인해 주세요. 결제 직후라면 잠시 후 다시 시도해 주세요.', 'We couldn\'t verify this order. Check that the order number, buyer name and last 4 digits of the phone match your Smart Store order exactly. If you just paid, try again in a moment.', '注文を確認できませんでした。注文番号、注文者の名前、電話番号の下4桁が Smart Store の注文情報と同じか確認してください。決済直後の場合は、しばらくしてから再度お試しください。');
+        return;
+      }
+      msgEl.textContent = (r && r.detail) || i18n.t('인증에 실패했어요. 잠시 후 다시 시도하거나 @5ft.magazine DM 으로 문의해 주세요.', 'Verification failed. Please try again in a moment or contact @5ft.magazine.', '認証に失敗しました。しばらくしてから再度お試しいただくか、@5ft.magazine までお問い合わせください。');
     }
 
     back.addEventListener('click', (e) => {

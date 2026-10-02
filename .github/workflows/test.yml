@@ -7,6 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# 최소 권한. 검사만 하므로 읽기 권한이면 된다(feeds-sync 가 workflow_dispatch 로 깨울 때도 같다).
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest

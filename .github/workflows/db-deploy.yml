@@ -15,6 +15,10 @@ on:
       - '.github/workflows/db-deploy.yml'
   workflow_dispatch:
 
+# 최소 권한. 이 워크플로우는 저장소를 읽기만 한다(배포 인증은 SUPABASE_ACCESS_TOKEN 시크릿).
+permissions:
+  contents: read
+
 env:
   SUPABASE_PROJECT_REF: pucpqsfwqouqohwsvmnd
 
@@ -24,9 +28,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 버전을 고정한다. latest 는 CLI 새 릴리스가 동작을 바꾸면 배포가 예고 없이 깨진다.
+      # 올릴 때는 이 값을 바꾸는 PR 로 올린다(db-deploy·functions-deploy 를 같은 값으로).
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.119.0
 
       - name: Link project
         env:

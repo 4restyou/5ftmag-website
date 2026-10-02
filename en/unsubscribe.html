@@ -62,6 +62,7 @@
 
 <main class="article">
   <h1>Unsubscribe from the newsletter</h1>
+  <p>We are not sending the newsletter right now. Unsubscribe requests are still processed.</p>
   <div id="unsubResult" aria-live="polite">
     <p>One moment…</p>
   </div>
@@ -86,7 +87,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
-  <script src="/js/db-client.js?v=20261002-ja" defer></script>
+  <script src="/js/db-client.js?v=20261002-sec" defer></script>
 <script src="/js/util.js?v=20261002-ja" defer></script>
   <script src="/js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
@@ -98,7 +99,7 @@
 
   const token = (new URLSearchParams(location.search).get('token') || '').trim();
   if (!token) {
-    setHtml('<p>Open this page from the unsubscribe link in a 5ft magazine new-issue email. If you can\'t find the link, write to <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a>.</p>');
+    setHtml('<p>Open this page from the unsubscribe link in an earlier 5ft magazine email. If you can\'t find the link, send a DM to <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine</a> on Instagram.</p>');
     return;
   }
 
@@ -123,7 +124,7 @@
     setHtml('<p>This link isn\'t valid. Please check the unsubscribe link in our most recent email.</p>');
     return;
   }
-  setHtml('<p>This link was already used, or something went wrong. If you keep seeing this page, write to <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a>.</p>');
+  setHtml('<p>This link was already used, or something went wrong. If you keep seeing this page, send a DM to <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine</a> on Instagram.</p>');
 })();
 </script>
 

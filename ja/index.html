@@ -266,8 +266,8 @@
     <!-- ── 소식 ──
          Film Finder 뒤, Partners 앞에 둔다. News 와 Partners 는 둘 다 "우리가
          누구인지" 를 말하는 자리라 붙여 놓았다. 오른쪽 칼럼은 콘텐츠(이주의
-         사진·Photo) → 도구(Film Finder) → 소개(News·Partners) → 행동
-         (Newsletter) 순으로 읽힌다. -->
+         사진·Photo) → 도구(Film Finder) → 소개(News·Partners) 순으로 읽힌다.
+         (뉴스레터 구독 칸은 발송을 쉬는 동안 걷어 냈다. 2026-10 운영자 결정.) -->
     <div class="sub-section-head">
       <h3>News</h3>
       <span class="label">マガジンのお知らせ</span>
@@ -318,17 +318,6 @@
 </div>
 
 
-<!-- ════════ 뉴스레터: 운영 재개 가능성을 위해 기능은 보존하고 화면에서만 중단 ════════ -->
-<div class="newsletter-bar" hidden>
-  <p>新しい号のお知らせをメールで受け取る（韓国語）</p>
-  <div>
-    <form class="nl-form" id="newsletterForm">
-      <input type="email" id="newsletterEmail" placeholder="メールアドレス" aria-label="ニュースレター用メールアドレス" required />
-      <button type="submit">購読する</button>
-    </form>
-    <p class="nl-message" id="newsletterMessage" aria-live="polite"></p>
-  </div>
-</div>
 
 <!-- ════════ Photo 라이트박스 (통합) ════════ -->
 <div class="photo-lightbox" id="photoLightbox" role="dialog" aria-modal="true" aria-label="写真を拡大表示">
@@ -404,14 +393,14 @@
   <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
   <script src="/js/site-common.js?v=20261002-notif" defer></script>
 <script src="/js/potw-picker.js?v=20260914-potwreorder" defer></script>
-<script src="/js/home-page.js?v=20261002-ja" defer></script>
+<script src="/js/home-page.js?v=20261002-sec" defer></script>
 <script src="/js/mh-pure.js?v=20260620-recommend" defer></script>
 <script src="/js/mobile-home-model.js?v=20260712-modules" defer></script>
 <script src="/js/films-catalog-loader.js?v=20261002-ja" defer></script>
 <script src="/js/mobile-home.js?v=20261002-ja" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
-  <script src="/js/db-client.js?v=20261002-ja" defer></script>
+  <script src="/js/db-client.js?v=20261002-sec" defer></script>
 <!-- tus / image-processor / camera-brands 는 '내 사진 올리기' 폼을 열 때 reader-submissions 가 동적 로드한다 -->
 <script src="/js/reader-camera-input.js?v=20261002-ja" defer></script>
 <script src="/js/reader-film-picker.js?v=20261002-ja" defer></script>

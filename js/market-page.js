@@ -975,7 +975,7 @@ document.addEventListener('click', (e) => {
     await new Promise(r => setTimeout(r, 50));
   }
   if (!db() || !db().isReady()) {
-    renderMarketLoadError(i18n.t('마켓 연결을 준비하지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.', 'Could not connect to the market. If this keeps happening after a refresh, let our editors know.', 'マーケットへの接続を準備できませんでした。再読み込みしても続く場合は、編集部にお知らせください。'));
+    renderMarketLoadError(i18n.t('마켓 연결을 준비하지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요 (인스타그램 @5ft.magazine DM).', 'Could not connect to the market. If this keeps happening after a refresh, let our editors know (Instagram DM @5ft.magazine).', 'マーケットへの接続を準備できませんでした。再読み込みしても続く場合は、編集部にお知らせください（Instagram @5ft.magazine に DM）。'));
     return;
   }
   const session = await db().auth.getSession();
