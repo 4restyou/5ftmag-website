@@ -464,12 +464,25 @@
       }
     }
 
-    function sortLibrary(entries, filmFavSlugs) {
+    // mode: 'photos'(Reader's Roll 사진 많은 순, 기본) · 'name'(브랜드→이름) · 'iso'(낮은 순).
+    // 'photos'·'iso' 가 같으면 이름순으로 잇는다. photoCounts 는 slug → 사진 수 Map.
+    function sortLibrary(entries, filmFavSlugs, { mode = 'name', photoCounts = new Map() } = {}) {
+      const isoOf = (film) => {
+        const n = parseInt(String(film.iso || '').replace(/[^0-9].*$/, ''), 10);
+        return Number.isFinite(n) ? n : Infinity;
+      };
       return entries.slice().sort((a, b) => {
         const fa = a[1], fb = b[1];
         const favA = filmFavSlugs.has(a[0]) ? 0 : 1;
         const favB = filmFavSlugs.has(b[0]) ? 0 : 1;
         if (favA !== favB) return favA - favB;
+        if (mode === 'photos') {
+          const diff = (photoCounts.get(b[0]) || 0) - (photoCounts.get(a[0]) || 0);
+          if (diff !== 0) return diff;
+        } else if (mode === 'iso') {
+          const diff = isoOf(fa) - isoOf(fb);
+          if (diff !== 0) return diff;
+        }
         const brandCompare = (fa.brand || '').localeCompare(fb.brand || '', 'ko');
         if (brandCompare !== 0) return brandCompare;
         const nameA = fa.displayName || fa.name || '';

@@ -58,7 +58,7 @@
   <link rel="stylesheet" href="./css/comments.css?v=20261002-e1">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20261002-e1">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20261002-e1">
-  <link rel="stylesheet" href="./css/films.css?v=20261002-e1">
+  <link rel="stylesheet" href="./css/films.css?v=20261002-e2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -108,6 +108,7 @@
 
 <!-- ════════ 필름 그리드 (데이터 기반) ════════ -->
 <div class="films-section" role="main" id="main" data-library-view="films">
+  <section class="theme-film-band" id="themeFilmBand" aria-label="이달의 테마 필름" hidden></section>
   <div class="films-section-head films-section-head-library">
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
@@ -177,6 +178,14 @@
       <p class="library-photos-count library-toolbar-photos-only" id="libraryPhotosCount">불러오는 중…</p>
     </div>
     <div class="library-toolbar-right">
+      <label class="library-sort library-toolbar-films-only">
+        <span class="sr-only">정렬</span>
+        <select id="librarySort">
+          <option value="photos" selected>사진 많은 순</option>
+          <option value="name">이름순</option>
+          <option value="iso">ISO 낮은 순</option>
+        </select>
+      </label>
       <div class="library-toolbar-films-only library-toolbar-ms" id="libraryAdvancedFilters">
         <div class="ms-dropdown" id="libraryBrandMS" data-key="brand">
           <button type="button" class="ms-dropdown-btn" aria-haspopup="true" aria-expanded="false">
@@ -697,17 +706,17 @@
   <script src="./js/site-common.js?v=20261002-e1" defer></script>
 <script src="./js/films-export.js?v=20260626-thumbcors" defer></script>
 <script src="./js/films-utils.js?v=20260610-purehelpers" defer></script>
-<script src="./js/films-cards.js?v=20261002-ja" defer></script>
+<script src="./js/films-cards.js?v=20261002-e2" defer></script>
 <script src="./js/film-name-picker.js?v=20261002-e1" defer></script>
 <script src="./js/potw-picker.js?v=20260914-potwreorder" defer></script>
 <script src="./js/films-share.js?v=20261002-ja" defer></script>
-<script src="./js/films-library-filters.js?v=20261002-e1" defer></script>
+<script src="./js/films-library-filters.js?v=20261002-e2" defer></script>
 <script src="./js/films-catalog-loader.js?v=20261002-ja" defer></script>
 <script src="./js/films-lightbox.js?v=20261002-ja" defer></script>
 <script src="./js/films-reader-export.js?v=20261002-ja" defer></script>
 <script src="./js/films-reader-roll-ui.js?v=20261002-b1" defer></script>
 <script src="./js/films-reader-roll-data.js?v=20260908-nocap" defer></script>
-<script src="./js/films-page.js?v=20261002-c3" defer></script>
+<script src="./js/films-page.js?v=20261002-e2" defer></script>
 <script src="./js/films-propose.js?v=20261002-c3" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>

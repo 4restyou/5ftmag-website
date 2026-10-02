@@ -80,7 +80,20 @@
   const renderLibraryCameraSelect = () => libraryFilters.renderCameraSelect();
   const renderLibraryFilterChips = (libraryFilms) => libraryFilters.renderFilterChips(libraryFilms);
   const resolveCanonicalCameraKey = (key) => libraryFilters.resolveCanonicalCameraKey(key);
-  const sortLibrary = (entries) => libraryFilters.sortLibrary(entries, filmFavSlugs);
+  // 라이브러리 정렬. 기본은 Reader's Roll 사진 많은 순. 고른 값은 ?sort= 와 localStorage 에 남긴다
+  // (모달을 닫으면 주소가 /films 로 돌아가므로 다시 올 때는 저장값을 쓴다).
+  const LIBRARY_SORTS = ['photos', 'name', 'iso'];
+  const LIBRARY_SORT_KEY = '5ft_films_sort';
+  let librarySort = (() => {
+    let v = '';
+    try { v = new URLSearchParams(location.search).get('sort') || ''; } catch (_) {}
+    if (!LIBRARY_SORTS.includes(v)) { try { v = localStorage.getItem(LIBRARY_SORT_KEY) || ''; } catch (_) {} }
+    return LIBRARY_SORTS.includes(v) ? v : 'photos';
+  })();
+  // slug → 승인된 Reader's Roll 사진 수 (updateReaderCounts 가 채운다)
+  let photoCountBySlug = new Map();
+  const sortLibrary = (entries, favs = filmFavSlugs) =>
+    libraryFilters.sortLibrary(entries, favs, { mode: librarySort, photoCounts: photoCountBySlug });
 
   const readerExport = window.FilmsReaderExport.create({
     getFilm: (filmKey) => filmsData[filmKey] || {},
@@ -112,8 +125,8 @@
     //  단, Library 컨텍스트로 렌더되므로 같은 필름이라도 "0 / 36 · 자리 채우기" 표현
     // 데스크탑·모바일 모두 브랜드(가나다·ABC) → 이름(가나다·ABC) 알파벳 순 통일.
     const libraryAll = sortLibrary(entries);
-    // 좋아요 해제 시 카드를 이 자리로 돌려보내기 위해 원본 순서 저장
-    libraryOriginalOrder = libraryAll.map(([slug]) => slug);
+    // 좋아요 해제 시 카드를 이 자리로 돌려보내기 위해 원본 순서 저장 (즐겨찾기 빼고 정렬)
+    libraryOriginalOrder = sortLibrary(entries, new Set()).map(([slug]) => slug);
 
     const cardOptions = { filmFavSlugs, rollLimit: ROLL_LIMIT, articleCounts: articleCountsByFilm };
     filmsGridFeatured.innerHTML = featured.map(([slug, f]) => renderFilmCard(slug, f, 'featured-grid', cardOptions)).join('');
@@ -126,6 +139,8 @@
     // 새로 렌더된 카드들에 클릭 핸들러 연결
     // CTA(.film-cta-action) 클릭은 reader-submissions.js 글로벌 위임이 처리하므로 모달 안 띄움
     // ♡ 즐겨찾기 토글 클릭은 toggleFilmFav 가 별도 처리 — 카드 모달 안 열림
+    // 카드는 <a class="film-card-link"> + 형제 하트 버튼. 링크는 새 탭 열기(⌘/Ctrl·가운데 클릭)만
+    // 브라우저에 맡기고, 보통 클릭은 모달로 연다.
     document.querySelectorAll('.film-card').forEach(card => {
       card.addEventListener('click', (e) => {
         const fav = e.target.closest('.film-fav');
@@ -135,16 +150,45 @@
           toggleFilmFav(fav);
           return;
         }
-        if (e.target.closest('.film-cta-action')) return;
+        if (e.target.closest('.film-cta-action')) { e.preventDefault(); return; }
+        if (!e.target.closest('.film-card-link')) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
         openModal(card.dataset.film, { source: card.closest('#filmsGridLibrary') ? 'library' : 'issue' });
       });
     });
   }
 
+  // 정렬을 다시 계산해 라이브러리 카드 순서를 바꾼다 (즐겨찾기 우선은 resortLibraryFavFirst 가 유지).
+  function applyLibrarySort({ animate = true } = {}) {
+    if (!filmsGridLibrary) return;
+    libraryOriginalOrder = sortLibrary(Object.entries(filmsData), new Set()).map(([slug]) => slug);
+    resortLibraryFavFirst({ animate });
+    applyLibraryFilter();
+  }
+
+  function bindLibrarySort() {
+    const select = document.getElementById('librarySort');
+    if (!select) return;
+    select.value = librarySort;
+    select.addEventListener('change', () => {
+      librarySort = LIBRARY_SORTS.includes(select.value) ? select.value : 'photos';
+      try { localStorage.setItem(LIBRARY_SORT_KEY, librarySort); } catch (_) {}
+      try {
+        const u = new URL(location.href);
+        if (librarySort === 'photos') u.searchParams.delete('sort');
+        else u.searchParams.set('sort', librarySort);
+        history.replaceState(null, '', u.toString());
+      } catch (_) {}
+      applyLibrarySort();
+    });
+  }
+  bindLibrarySort();
+
   // 좋아요 토글 시 라이브러리 카드를 fav-우선으로 재배치 + FLIP 애니메이션.
   // libraryOriginalOrder(데스크탑 알파벳 / 모바일 첫 렌더 셔플) 를 기준으로 fav 만 앞으로
   // 끌어올리고, fav 해제 시에는 원래 자리로 복귀.
-  function resortLibraryFavFirst() {
+  function resortLibraryFavFirst({ animate = true } = {}) {
     if (!filmsGridLibrary || libraryOriginalOrder.length === 0) return;
     const cards = Array.from(filmsGridLibrary.children);
     if (cards.length === 0) return;
@@ -167,6 +211,7 @@
     });
     filmsGridLibrary.appendChild(frag);
 
+    if (!animate) return;
     // LAST + INVERT + PLAY: 이동한 카드만 transform 으로 보정 → transition 해제
     cards.forEach(c => {
       const first = firstRects.get(c);
@@ -259,6 +304,45 @@
     } catch (_) { /* 조용히 무시 */ }
   }
 
+  // 이달의 테마 필름 띠 — 홈의 테마 블록과 같은 data/current-theme.json, 같은 응모 버튼
+  // (data-action="open-submission", reader-submissions.js 가 처리). active 가 아니거나 필름이 없으면 숨긴 채 둔다.
+  async function renderThemeFilmBand() {
+    const band = document.getElementById('themeFilmBand');
+    if (!band) return;
+    let theme = null;
+    try {
+      const r = await fetch('/data/current-theme.json');
+      theme = r.ok ? await r.json() : null;
+    } catch (_) { theme = null; }
+    if (!theme || !theme.active || !theme.film) return;
+    const slug = resolveFilmKey(theme.film);
+    const film = slug ? filmsData[slug] : null;
+    const filmName = film ? (film.displayName || film.name) : theme.film;
+    const can = film && film.canThumbnailStatus === 'set' && film.canThumbnail ? film.canThumbnail : '';
+    const canHtml = can
+      ? `<picture><source srcset="${escapeAttr(can.replace(/\.(png|jpe?g)$/i, '.webp'))}" type="image/webp"><img src="${escapeAttr(can)}" alt="" width="56" height="56" loading="lazy"></picture>`
+      : `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="14" y="8" width="36" height="44" rx="3"/><rect x="20" y="4" width="24" height="6" rx="1.2"/></svg>`;
+    const issue = theme.issue || theme.month || '';
+    const kicker = fpT('이달의 테마 필름', 'Theme film of the month', '今月のテーマフィルム');
+    const nameHtml = slug
+      ? `<a class="theme-film-name" href="${escapeAttr(fpI18n.url(`/films.html?film=${encodeURIComponent(slug)}`))}" data-theme-film="${escapeAttr(slug)}">${escapeHtml(filmName)}</a>`
+      : `<span class="theme-film-name">${escapeHtml(filmName)}</span>`;
+    band.setAttribute('aria-label', kicker);
+    band.innerHTML = `
+      <span class="theme-film-can">${canHtml}</span>
+      <span class="theme-film-text">
+        <span class="theme-film-kicker">${escapeHtml(kicker)}${issue || theme.title ? `<span class="theme-film-issue"> · ${escapeHtml([issue, theme.title].filter(Boolean).join(' '))}</span>` : ''}</span>
+        ${nameHtml}
+      </span>
+      <button type="button" class="theme-film-cta" data-action="open-submission" data-prefill-film="${escapeAttr(filmName)}">${fpT("Reader's Roll 참여하기 →", "Join the Reader's Roll →", "Reader's Roll に参加する →")}</button>`;
+    band.hidden = false;
+    band.querySelector('[data-theme-film]')?.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      openModal(slug, { source: 'library' });
+    });
+  }
+
   // 필름 카탈로그 — DB 우선, 정적 data/films.json fallback 및 보강.
   (async () => {
     try {
@@ -268,6 +352,7 @@
       ]);
       filmsData = catalog.data;
       renderFilmsGrid();
+      renderThemeFilmBand();
       updateReaderCounts();
       handleInitialDeepLink();
       await Promise.all([loadFilmFavorites(), loadPhotoFavorites(), loadContributorFavorites()]);
@@ -310,11 +395,13 @@
     // 필름별 카운트 + 독자 작가/SNS 검색 토큰 집계
     const countPerSlug = new Map();
     const readerSearchPerSlug = new Map();
+    const photoCounts = new Map();
     for (const slug of Object.keys(filmsData)) {
       const film = filmsData[slug];
       const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
       const aliasSet = new Set(aliases.map(normalize));
       const matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
+      photoCounts.set(slug, matched.length);
       if (matched.length > 0) {
         const rollState = buildReaderRollState(matched);
         const label = typeof window.ReaderRoll?.formatCardLabel === 'function'
@@ -352,7 +439,10 @@
       if (ctaEl) ctaEl.textContent = fpT('컷 채우기 →', 'Add a frame →', '1コマ投稿する →');
     }
 
-    applyLibraryFilter();
+    // 사진 수가 들어왔으니 '사진 많은 순' 이면 순서를 다시 잡는다 (첫 로드라 애니메이션 없이).
+    photoCountBySlug = photoCounts;
+    if (librarySort === 'photos') applyLibrarySort({ animate: false });
+    else applyLibraryFilter();
   }
 
   // ════════════════════════════
