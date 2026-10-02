@@ -6,7 +6,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isPublishedContent } from './story-visibility.mjs';
+import { isPublishedContent, withDbVisibility } from './story-visibility.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = resolve(dirname(__filename), '..');
@@ -46,7 +46,9 @@ addUrl(urls, '/legal/privacy.html', { changefreq: 'yearly', priority: '0.3' });
 addUrl(urls, '/legal/copyright.html', { changefreq: 'yearly', priority: '0.3' });
 addUrl(urls, '/legal/refund.html', { changefreq: 'yearly', priority: '0.3' });
 
-const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
+// 관리 화면에서 비공개로 돌린 글(story_visibility)은 뺀다. 외국어판 주소도 이 목록에서
+// 짝지어 만들므로 세 언어 모두에서 빠진다.
+const stories = await withDbVisibility(JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8')), { label: 'sitemap' });
 for (const story of stories) {
   if (!isPublishedContent(story) || !story.page) continue;
   addUrl(urls, `/${story.page}`, {

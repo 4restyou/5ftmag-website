@@ -1389,6 +1389,14 @@
       if (error) { console.warn('[analytics.regions]', error.message); return []; }
       return data || [];
     },
+    // 페이지뷰 밖의 사용자 동작(app_events: nav_clicked·search 등) 이벤트별 횟수.
+    // 날짜 범위가 아니라 최근 N일. 편집부만 통과한다(정의자 권한 RPC + 편집부 확인).
+    async eventsSummary(days = 30, limit = 50) {
+      const c = client(); if (!c) return [];
+      const { data, error } = await c.rpc('admin_events_summary', { p_days: days, p_limit: limit });
+      if (error) { console.warn('[analytics.eventsSummary]', error.message); return []; }
+      return data || [];
+    },
     async languages(from = null, to = null, limit = 20) {
       const c = client(); if (!c) return [];
       const { data, error } = await c.rpc('admin_analytics_languages', { p_from: from, p_to: to, p_limit: limit });
@@ -1886,7 +1894,7 @@
       const nowIso = new Date().toISOString();
       const { data, error } = await c
         .from('announcements')
-        .select('id, body, starts_at, ends_at')
+        .select('id, body, body_en, body_ja, starts_at, ends_at')
         .eq('is_active', true)
         .lte('starts_at', nowIso)
         .or(`ends_at.is.null,ends_at.gte.${nowIso}`)
@@ -1900,16 +1908,22 @@
       const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
       const { data, error } = await c
         .from('announcements')
-        .select('id, body, starts_at, ends_at, is_active, created_at')
+        .select('id, body, body_en, body_ja, starts_at, ends_at, is_active, created_at')
         .order('created_at', { ascending: false });
       return { data: data || [], error };
     },
-    async create({ body, starts_at, ends_at }) {
+    async create({ body, body_en, body_ja, starts_at, ends_at }) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const clean = String(body || '').trim();
       if (!clean || clean.length > 500) return { error: { message: 'body 1~500자' } };
       const uid = await userId();
-      const row = { body: clean, created_by: uid };
+      // 영·일 칸은 선택. 비우면 null 로 두어 화면이 한국어(일문은 영문 먼저)로 대신 쓴다.
+      const row = {
+        body: clean,
+        body_en: String(body_en || '').trim() || null,
+        body_ja: String(body_ja || '').trim() || null,
+        created_by: uid,
+      };
       if (starts_at) row.starts_at = starts_at;
       if (ends_at) row.ends_at = ends_at;
       const { error } = await c.from('announcements').insert(row);
@@ -1919,6 +1933,8 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const patch = {};
       if (typeof fields.body === 'string') patch.body = fields.body.trim();
+      if ('body_en' in fields) patch.body_en = String(fields.body_en || '').trim() || null;
+      if ('body_ja' in fields) patch.body_ja = String(fields.body_ja || '').trim() || null;
       if ('starts_at' in fields) patch.starts_at = fields.starts_at || null;
       if ('ends_at' in fields) patch.ends_at = fields.ends_at || null;
       if (typeof fields.is_active === 'boolean') patch.is_active = fields.is_active;

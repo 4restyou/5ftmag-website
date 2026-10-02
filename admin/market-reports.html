@@ -86,7 +86,7 @@
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20261002-d2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -186,11 +186,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20261002-c3" defer></script>
-  <script src="../js/db-client.js?v=20261002-c2" defer></script>
+  <script src="../js/db-client.js?v=20261002-d2" defer></script>
 <script src="../js/util.js?v=20261002-ja" defer></script>
   <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20261002-c3" defer></script>
+  <script src="../js/site-common.js?v=20261002-d2" defer></script>
+<script src="../js/admin-guard.js?v=20260803-guard"></script>
 <script>
 'use strict';
 
@@ -216,34 +217,9 @@ function fmtDate(iso) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-async function checkAccess() {
-  if (!db() || !db().isReady()) {
-    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
-    return false;
-  }
-  const session = await db().auth.getSession();
-  if (!session) { showGate(); return false; }
-  STATE.user = session.user;
-
-  const profile = await db().profiles.getMine();
-  if (!profile?.is_editor) { showGate('접근 권한이 없어요.'); return false; }
-  STATE.isEditor = true;
-  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
-  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
-  return true;
-}
-
-function showGate(msg) {
-  $('gate').hidden = false;
-  $('app').hidden = true;
-  if (msg) {
-    $('gate').querySelector('p').textContent = msg;
-    $('gateLogin').style.display = 'none';
-  }
-  $('gateLogin').addEventListener('click', async () => {
-    await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
-  });
-}
+// 접근 권한 — 공통 게이트(js/admin-guard.js) 위임. 모듈을 못 불러와도
+// 화면 전체를 지우지 않고 게이트에 안내만 그린다.
+async function checkAccess() { return window.AdminGuard.requireEditor(STATE); }
 
 async function loadCounts() {
   for (const status of ['pending', 'resolved', 'dismissed']) {

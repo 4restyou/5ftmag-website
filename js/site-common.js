@@ -1669,7 +1669,11 @@
         <button type="button" class="announcement-bar-close" aria-label="${tr('공지 닫기', 'Close notice', 'お知らせを閉じる')}">×</button>
       </div>
     `;
-    bar.querySelector('.announcement-bar-text').innerHTML = renderAnnouncementBody(data.body);
+    // 언어판에 맞는 칸이 비면 영어 → 한국어 순으로 대신 쓴다.
+    const body = i18n.lang === 'en' ? (data.body_en || data.body)
+      : i18n.lang === 'ja' ? (data.body_ja || data.body_en || data.body)
+      : data.body;
+    bar.querySelector('.announcement-bar-text').innerHTML = renderAnnouncementBody(body);
     header.insertAdjacentElement('afterend', bar);
 
     // 텍스트가 트랙보다 짧으면 마퀴 비활성 (가운데 정렬로 보임)

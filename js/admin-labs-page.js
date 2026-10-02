@@ -65,9 +65,20 @@ function updateSortIndicators() {
   });
 }
 
+// 한국어 원문이 있는데 영·일 칸이 빈 언어. 원문이 비면 번역할 것도 없다.
+const TR_FIELDS = ['name', 'address', 'features'];
+function missingLangs(row) {
+  return ['en', 'ja'].filter((l) => TR_FIELDS.some((f) =>
+    String(row[f] || '').trim() && !String(row[`${f}_${l}`] || '').trim()));
+}
+function missBadges(row) {
+  return missingLangs(row).map((l) => `<span class="tr-miss">${l.toUpperCase()} 없음</span>`).join('');
+}
+
 function render() {
   updateSortIndicators();
-  const filtered = sortLabs(applyFilter(STATE.labs, STATE.filter));
+  let filtered = sortLabs(applyFilter(STATE.labs, STATE.filter));
+  if (STATE.onlyMissing) filtered = filtered.filter((l) => missingLangs(l).length);
   $('count').textContent = `${filtered.length} / ${STATE.labs.length}`;
   if (filtered.length === 0) {
     $('tbody').innerHTML = '<tr><td colspan="5" class="empty">현상소가 없어요.</td></tr>';
@@ -79,7 +90,7 @@ function render() {
     return `
       <tr${hidden ? ' style="opacity:.55"' : ''}>
         <td data-label="이름">
-          <div class="col-name">${escapeHtml(l.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
+          <div class="col-name">${escapeHtml(l.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}${missBadges(l)}</div>
         </td>
         <td class="col-meta" data-label="지역">${escapeHtml(l.region || '')}</td>
         <td class="col-meta" data-label="주소">${escapeHtml(l.address || '')}</td>
@@ -98,6 +109,7 @@ function render() {
 }
 
 $('filter').addEventListener('input', (e) => { STATE.filter = e.target.value; render(); });
+$('onlyMissing').addEventListener('change', (e) => { STATE.onlyMissing = e.target.checked; render(); });
 
 document.querySelectorAll('.labs-table thead th.th-sort').forEach(th => {
   th.addEventListener('click', () => {

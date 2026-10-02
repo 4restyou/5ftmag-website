@@ -95,18 +95,18 @@ function renderTable() {
           <img class="thumb" loading="lazy" decoding="async" src="${escapeHtml(url)}" alt="" />
         </a>
       </td>
-      <td class="col-when">
+      <td class="col-when" data-label="게재일">
         <div class="when-date">${escapeHtml(r.featured_at)}</div>
         <div class="when-rel">${escapeHtml(relDays(r.featured_at, today))}</div>
       </td>
-      <td>${badge(r, today, live)}</td>
-      <td>
+      <td data-label="상태">${badge(r, today, live)}</td>
+      <td data-label="제출자">
         <div class="who">${escapeHtml(r.submitter_name || '이름 없음')}
           ${ig ? ` <a href="https://instagram.com/${encodeURIComponent(ig)}" target="_blank" rel="noopener">@${escapeHtml(ig)}</a>` : ''}
         </div>
         ${r.film ? `<div class="meta">${escapeHtml(r.film)}</div>` : ''}
       </td>
-      <td class="note${r.featured_note ? '' : ' none'}">${r.featured_note ? escapeHtml(r.featured_note) : '없음'}</td>
+      <td class="note${r.featured_note ? '' : ' none'}" data-label="편집부 한 줄">${r.featured_note ? escapeHtml(r.featured_note) : '없음'}</td>
       <td class="col-actions">
         <button type="button" class="row-btn icon" data-act="up" title="위 줄과 게재일을 맞바꿉니다" aria-label="위 줄과 자리 바꾸기">↑</button>
         <button type="button" class="row-btn icon" data-act="down" title="아래 줄과 게재일을 맞바꿉니다" aria-label="아래 줄과 자리 바꾸기">↓</button>

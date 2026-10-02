@@ -6,6 +6,7 @@ const STATE = {
   films: [],
   readerCounts: new Map(),
   filter: '',
+  onlyMissing: false,
   editingSlug: null,
   proposals: [],
   pendingProposalForForm: null,
@@ -166,8 +167,19 @@ function applyFilter(films, q) {
   ));
 }
 
+// 한국어 원문이 있는데 영·일 칸이 빈 언어. 원문이 비면 번역할 것도 없다.
+const TR_FIELDS = ['description'];
+function missingLangs(row) {
+  return ['en', 'ja'].filter((l) => TR_FIELDS.some((f) =>
+    String(row[f] || '').trim() && !String(row[`${f}_${l}`] || '').trim()));
+}
+function missBadges(row) {
+  return missingLangs(row).map((l) => `<span class="tr-miss">${l.toUpperCase()} 없음</span>`).join('');
+}
+
 function render() {
-  const filtered = applyFilter(STATE.films, STATE.filter);
+  let filtered = applyFilter(STATE.films, STATE.filter);
+  if (STATE.onlyMissing) filtered = filtered.filter((f) => missingLangs(f).length);
   $('count').textContent = `${filtered.length} / ${STATE.films.length}`;
   if (filtered.length === 0) {
     $('tbody').innerHTML = '<tr><td colspan="5" class="empty">필름이 없어요.</td></tr>';
@@ -182,7 +194,7 @@ function render() {
     return `
       <tr${hidden ? ' style="opacity:.55"' : ''}>
         <td data-label="필름">
-          <div class="col-display">${escapeHtml(display)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
+          <div class="col-display">${escapeHtml(display)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}${missBadges(f)}</div>
           <div class="col-slug">${escapeHtml(f.slug)}</div>
         </td>
         <td class="col-meta" data-label="스펙">${escapeHtml(spec)}</td>
@@ -213,6 +225,7 @@ $('filter').addEventListener('input', (e) => {
   STATE.filter = e.target.value;
   render();
 });
+$('onlyMissing').addEventListener('change', (e) => { STATE.onlyMissing = e.target.checked; render(); });
 
 // ═════════════════════════════════════════
 // 폼

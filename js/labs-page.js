@@ -169,7 +169,20 @@
       nameJa: r.name_ja ?? r.nameJa ?? null,
       addressJa: r.address_ja ?? r.addressJa ?? null,
       featuresJa: r.features_ja ?? r.featuresJa ?? null,
+      updatedAt: r.updated_at ?? r.updatedAt ?? null,
     };
+  }
+
+  // "최종 반영 YYYY.MM.DD" — 손으로 적던 날짜를, 불러온 목록 중 가장 최근에
+  // 고친 현상소의 updated_at 으로 채운다. 값이 없으면(옛 정적 파일) 박힌 문구를 둔다.
+  function showLabsUpdated(labs) {
+    const el = document.querySelector('.labs-updated');
+    if (!el || !Array.isArray(labs)) return;
+    const latest = labs.reduce((m, l) => Math.max(m, Date.parse(l.updatedAt || '') || 0), 0);
+    if (!latest) return;
+    const d = new Date(latest);
+    const ymd = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+    el.textContent = tr(`최종 반영 ${ymd}`, `Last updated ${ymd}`, `最終更新 ${ymd}`);
   }
 
   let staticLabsPromise = null;
@@ -251,6 +264,7 @@
       listEl.innerHTML = MagState.loading({ count: 8, variant: 'wide' });
       try {
         datasets[tab] = tab === 'labs' ? await loadLabs() : await loadRepairs();
+        if (tab === 'labs') showLabsUpdated(datasets.labs);
       } catch (_) {
         const loadingTab = tab;
         listEl.innerHTML = MagState.error({ title: TAB[tab].loadFail });
@@ -893,6 +907,7 @@
       try {
         if (!datasets[other]) {
           datasets[other] = other === 'labs' ? await loadLabs() : await loadRepairs();
+          if (other === 'labs') showLabsUpdated(datasets.labs);
         }
         const found = (datasets[other] || []).some((item) => itemSlug(item) === slug);
         if (found) await setTab(other);

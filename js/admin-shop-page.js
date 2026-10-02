@@ -234,7 +234,7 @@ async function applyReorder(srcSlug, targetSlug, before) {
   render();  // 낙관적 렌더
   const { error } = await db().shop.updateSortOrder(updates);
   if (error) {
-    alert('순서 저장 실패: ' + (error.message || '알 수 없음') + '\n새로고침해서 실제 상태 확인하세요.');
+    window.notify('순서 저장 실패: ' + (error.message || '알 수 없음') + ' 새로고침해서 실제 상태를 확인하세요.', 'danger');
     await reload();
   }
 }

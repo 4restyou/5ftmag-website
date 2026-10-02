@@ -87,15 +87,16 @@
     @media (max-width: 720px) {
       .sum { grid-template-columns: 1fr; }
       .adm-table thead { display: none; }
-      .adm-table tr { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
-      .adm-table td { border: none; padding: 0; }
+      /* tbody 까지 적어 admin-shell.css 의 공통 카드 규칙(.adm-table tbody tr)보다 앞선다. */
+      table.adm-table tbody tr { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 14px; border-bottom: 1px solid var(--border); }
+      table.adm-table tbody td { border: none; padding: 0; }
       .adm-table .col-thumb { grid-row: span 4; }
       /* 버튼 줄은 두 열을 다 쓴다. 썸네일 열(86px)에 끼면 글자가 세로로 쌓인다. */
       .adm-table .col-actions { grid-column: 1 / -1; text-align: left; white-space: normal; margin-top: 8px; }
       .row-btn { margin: 0 6px 0 0; }
     }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20261002-d2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -206,14 +207,14 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20261002-c3" defer></script>
-  <script src="../js/db-client.js?v=20261002-c2" defer></script>
+  <script src="../js/db-client.js?v=20261002-d2" defer></script>
 <script src="../js/util.js?v=20261002-ja" defer></script>
 <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20261002-c3" defer></script>
+  <script src="../js/site-common.js?v=20261002-d2" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
 <script src="../js/potw-picker.js?v=20260914-potwreorder" defer></script>
-<script src="../js/admin-potw-page.js?v=20260914-potwreorder" defer></script>
+<script src="../js/admin-potw-page.js?v=20261002-d2" defer></script>
 
 </body>
 </html>

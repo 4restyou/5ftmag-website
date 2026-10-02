@@ -11,7 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isPublishedContent } from './story-visibility.mjs';
+import { isPublishedContent, withDbVisibility } from './story-visibility.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = resolve(dirname(__filename), '..');
@@ -85,7 +85,9 @@ for (const file of [
 }
 
 // 4) Published stories contract
-const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
+// rss·sitemap 빌더와 같은 규칙으로 관리 화면의 비공개(story_visibility)를 덮어쓴다. 숨긴 글은
+// 피드에서 빠지는 것이 맞으므로 검사하지 않는다. DB 를 못 읽으면 빌더도 전부 싣는다.
+const stories = await withDbVisibility(JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8')), { label: 'qa-smoke' });
 const rssXml = readFileSync(join(ROOT, 'rss.xml'), 'utf8');
 const sitemapXml = readFileSync(join(ROOT, 'sitemap.xml'), 'utf8');
 const seenIds = new Set();

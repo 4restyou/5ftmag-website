@@ -14,6 +14,11 @@
 | Service Role Key | Edge Function 자동 주입 (`SUPABASE_SERVICE_ROLE_KEY`) | Supabase 가 관리 | — |
 | `SUPABASE_ACCESS_TOKEN` | GitHub Secrets (CI 용) | 사용자 키 만료 시 | CI 만 영향 |
 | `SUPABASE_DB_PASSWORD` | GitHub Secrets | DB 비밀번호 변경 시 | 〃 |
+| `NETLIFY_BUILD_HOOK` | GitHub Secrets | 훅을 지우거나 새로 만들 때 | 매일 새벽 빌드(`daily-build.yml`)만 영향 |
+
+## NETLIFY_BUILD_HOOK (매일 새벽 빌드)
+
+`.github/workflows/daily-build.yml` 이 매일 한국 시간 새벽 4시쯤 이 주소로 POST 해 Netlify 빌드를 깨운다. 관리 화면에서 추가한 필름·현상소의 상세 페이지와 sitemap·RSS(기사 비공개 반영 포함)가 그때 다시 만들어진다. 훅은 Netlify → Site configuration → Build & deploy → Build hooks 에서 "Add build hook"(브랜치 `main`)으로 만들고, 나온 주소를 GitHub 저장소 Settings → Secrets and variables → Actions 에 `NETLIFY_BUILD_HOOK` 으로 넣는다. 주소만 알면 누구나 빌드를 돌릴 수 있으니 채팅·코드에 적지 않는다. 새어 나갔으면 Netlify 에서 그 훅을 지우고 새로 만들어 시크릿을 바꾼다. 시크릿이 없으면 워크플로우는 안내만 남기고 건너뛴다.
 
 ## VAPID 키 회전 (사고 시)
 

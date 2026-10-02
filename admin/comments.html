@@ -45,6 +45,8 @@
     .ccard-author { font-weight: var(--fw-heading); color: var(--text); }
     .ccard-editor { font-size: 10px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; background: var(--text); color: var(--bg); padding: 1px 6px; border-radius: 2px; }
     .ccard-page { font-family: ui-monospace, monospace; font-size: 12px; color: var(--text-muted); }
+    a.ccard-page { text-decoration: underline; text-underline-offset: 2px; }
+    a.ccard-page:hover { color: var(--text); }
     .ccard-date { color: var(--text-muted); font-size: 12px; }
     .ccard-body { font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: var(--text); }
     .ccard.deleted .ccard-body { text-decoration: line-through; color: var(--text-muted); }
@@ -83,7 +85,7 @@
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20261002-d2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -181,11 +183,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20261002-c3" defer></script>
-  <script src="../js/db-client.js?v=20261002-c2" defer></script>
+  <script src="../js/db-client.js?v=20261002-d2" defer></script>
 <script src="../js/util.js?v=20261002-ja" defer></script>
   <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20261002-c3" defer></script>
+  <script src="../js/site-common.js?v=20261002-d2" defer></script>
+<script src="../js/admin-guard.js?v=20260803-guard"></script>
 <script>
 'use strict';
 
@@ -229,33 +232,20 @@ function flagsFor(text) {
   return reasons;
 }
 
-async function checkAccess() {
-  if (!db() || !db().isReady()) {
-    document.body.innerHTML = '<div class="gate"><h2>인증 모듈 로드 실패</h2><p>새로고침해주세요.</p></div>';
-    return false;
-  }
-  const session = await db().auth.getSession();
-  if (!session) { showGate(); return false; }
-  STATE.user = session.user;
-  const profile = await db().profiles.getMine();
-  if (!profile?.is_editor) { showGate('접근 권한이 없어요.'); return false; }
-  STATE.isEditor = true;
-  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
-  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
-  return true;
+// 댓글이 달린 페이지로 가는 링크. page_id 는 "stories/<slug>" 또는 "films/<key>"(필름 모달).
+function pageLink(pageId) {
+  const id = String(pageId || '');
+  if (!id) return '';
+  let href = '';
+  if (id.startsWith('stories/')) href = `/${id}.html`;
+  else if (id.startsWith('films/')) href = `/films.html?film=${encodeURIComponent(id.slice(6))}`;
+  if (!href) return `<span class="ccard-page">${escapeHtml(id)}</span>`;
+  return `<a class="ccard-page" href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(id)} ↗</a>`;
 }
 
-function showGate(msg) {
-  $('gate').hidden = false;
-  $('app').hidden = true;
-  if (msg) {
-    $('gate').querySelector('p').textContent = msg;
-    $('gateLogin').style.display = 'none';
-  }
-  $('gateLogin').addEventListener('click', async () => {
-    await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
-  });
-}
+// 접근 권한 — 공통 게이트(js/admin-guard.js) 위임. 모듈을 못 불러와도
+// 화면 전체를 지우지 않고 게이트에 안내만 그린다.
+async function checkAccess() { return window.AdminGuard.requireEditor(STATE); }
 
 async function loadTerms() {
   STATE.termRows = await db().commentFilterTerms.list();
@@ -339,7 +329,7 @@ function renderCard(r) {
       <div class="ccard-top">
         <span class="ccard-author">${escapeHtml(author)}</span>
         ${r.is_editor ? '<span class="ccard-editor">편집부</span>' : ''}
-        <span class="ccard-page">${escapeHtml(r.page_id || '')}</span>
+        ${pageLink(r.page_id)}
         <span class="ccard-date">${fmtDate(r.created_at)}${edited ? ' (수정됨)' : ''}</span>
         ${delBadge}
       </div>
