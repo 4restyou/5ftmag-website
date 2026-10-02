@@ -27,7 +27,9 @@
 
 코드로 자동화 못 하거나, 잘못 건드리면 라이브가 깨지는 항목.
 
-### 0. feeds-sync 가 main 에 푸시하지 못한다 (2026-09-12 확인)
+### 0. feeds-sync 가 main 에 푸시하지 못한다 (2026-09-12 확인) — **해결(2026-10-01, #768)**
+
+> 임시 브랜치에 커밋 → test.yml 을 workflow_dispatch 로 돌려 통과 → main 에 fast-forward 하는 방식으로 바꿨다. 아래는 당시 기록이다.
 
 `.github/workflows/feeds-sync.yml` 은 관리 페이지의 공개/비공개 토글이 `data/stories.json`
 하나만 커밋했을 때 `rss.xml`·`sitemap.xml` 을 재생성해 뒤따라 커밋하려고 만든 것이다.
@@ -125,7 +127,9 @@ prod 스키마 확정(1번) 후 `public.is_editor()` SQL 함수 하나로 모으
 
 ## 🟢 천천히
 
-### 8. GitHub PAT 의존 제거
+### 8. GitHub PAT 의존 제거 — **일부 해결**
+
+> 공개/비공개 토글은 DB(`story_visibility`)로 옮겨 PAT 이 필요 없다. 「기사 작성」 화면의 PR 만들기만 PAT 을 쓰는데, 이 화면은 지금 쓰지 않는다(`docs/admin-guide.md`).
 admin 글쓰기/토글이 사용자 localStorage 의 PAT 으로 GitHub API 직접 호출.
 누설 시 main 임의 커밋 가능. 정공법: Supabase Edge Function 이 서버
 토큰으로 대행. 차선: GitHub App OAuth.

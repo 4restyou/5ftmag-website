@@ -82,6 +82,19 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
 3. `data/stories.json` 항목에 `titleEn`, `excerptEn`, `authorEn` 을 넣는다.
 4. `npm run shell:sync` (영문 페이지 셸·링크 연결) → `node scripts/en-check.mjs <id>` 가 `✓ 남은 한국어 없음` 인지 확인. CI 의 단위 테스트(en-site.spec)도 같은 검사를 한다.
 
+## 4.6. 일본어판 (ja/stories/)
+
+영문판과 같은 PR 에 넣는다. 영문판을 먼저 끝내고 그것을 대조 자료로 쓴다.
+
+1. `node scripts/en-story-skeleton.mjs --lang ja <id>` — 일본어 골격(언어 태그·경로·공통 문구·「AI 번역」 안내).
+2. 남은 한국어를 일본어로 옮긴다. 기준 예시는 `ja/stories/lee-gapchul.html`. 규칙:
+   - 편집부 글은 常体(である/だ), Film Social Club 등 사담조는 です・ます. em dash·「――」 금지.
+   - 한국 인명은 영문판과 같은 로마자(Park Soon Yeol, Lee Gap-chul). 5ft.mag 편집부 → 5ft.mag 編集部. 외국 작가는 정착된 가타카나, 필름 제품명은 라틴 표기.
+   - 전시·책 제목은 공식 일본어명이 있으면 그것, 없으면 옮기고 첫 등장에 원제를 괄호로 병기. 《》〈〉는 원문대로.
+   - 가격은 `9,000ウォン`, 한국 한정 안내는 `（韓国国内のみ）`.
+3. `data/stories.json` 항목에 `titleJa`, `excerptJa`, `authorJa` 를 넣는다.
+4. `npm run shell:sync` → `node scripts/en-check.mjs --lang ja <id>` 가 `✓ 남은 한국어 없음` 인지 확인.
+
 ## 5. 배포
 
 /ship 절차로 PR → 머지. 보고 시 기사 URL 과 "Articles 목록 맨 위 노출"을 안내하고, 임시 처리(핸들 미확보 등)가 있으면 명시한다.
