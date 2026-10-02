@@ -73,7 +73,7 @@
       const list = Array.from(files || []);
       const file = list.find(isAcceptedImage);
       if (!file) {
-        showError(tr('JPG, PNG, WebP 이미지만 올릴 수 있어요.', 'Only JPG, PNG and WebP images can be uploaded.', 'JPG・PNG・WebP の画像のみアップロードできます。'));
+        showError(tr('JPG, PNG, WebP, HEIC 이미지만 올릴 수 있어요.', 'Only JPG, PNG, WebP and HEIC images can be uploaded.', 'JPG・PNG・WebP・HEIC の画像のみアップロードできます。'));
         return;
       }
       if (!fileInput || fileInput.disabled) return;

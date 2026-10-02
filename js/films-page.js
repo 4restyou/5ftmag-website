@@ -544,7 +544,7 @@
         <p class="reader-roll-intro">
           ${isFeatured
             ? fpT('독자들이 같은 필름으로 채워가는 또 하나의 한 롤. 빈 자리에 당신의 한 컷을 넣어보세요.', 'Another roll, filled by readers shooting the same film. Add your frame to an empty slot.', '読者が同じフィルムで埋めていく、もう一本のロール。空いたコマにあなたの1コマを入れてみてください。')
-            : fpT('아직 시작된 롤. 빈 36 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.', 'A roll just getting started. Readers fill its 36 frames together. Take the first one.', '始まったばかりのロール。36コマの空きを読者が一緒に埋めていきます。最初の1コマをどうぞ。')}
+            : fpT('아직 아무도 채우지 않은 롤이에요. 첫 컷을 올려 보세요.', 'No one has added to this roll yet. Upload the first frame.', 'まだ誰も埋めていないロールです。最初の1コマを投稿してみてください。')}
         </p>
         <div class="reader-roll-controls">
           <div class="reader-roll-control-main">

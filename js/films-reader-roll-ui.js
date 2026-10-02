@@ -23,7 +23,7 @@
     }
     return count > 0
       ? tr(`${count}컷이 먼저 채워졌습니다. 남은 빈 자리를 독자들의 사진으로 함께 채워가요.`, `${count} ${count === 1 ? 'frame is' : 'frames are'} in so far. Readers fill the empty slots together.`, `${count}コマが先に埋まりました。残りの空きを読者の写真で一緒に埋めていきましょう。`)
-      : tr(`아직 시작된 롤. 빈 ${rollLimit} 자리를 독자들이 함께 채워갑니다. 첫 자리를 차지해 보세요.`, `A roll just getting started. Readers fill all ${rollLimit} slots together. Take the first one.`, `始まったばかりのロール。${rollLimit}コマの空きを読者が一緒に埋めていきます。最初の1コマをどうぞ。`);
+      : tr('아직 아무도 채우지 않은 롤이에요. 첫 컷을 올려 보세요.', 'No one has added to this roll yet. Upload the first frame.', 'まだ誰も埋めていないロールです。最初の1コマを投稿してみてください。');
   }
 
   function exportKeyOf(sub, { personKeyOf }) {

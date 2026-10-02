@@ -460,7 +460,7 @@
           <input class="rs-file-input" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" required />
           <span class="rs-dropzone" id="rs-dropzone" role="button" tabindex="0" aria-label="${tr('사진 파일 선택', 'Choose a photo file', '写真ファイルを選ぶ')}">
             <span class="rs-dropzone-title">${tr('사진을 끌어오거나 클릭해서 선택', 'Drag a photo here or click to choose', '写真をドラッグするか、クリックして選択')}</span>
-            <span class="rs-dropzone-meta">JPG / PNG / WebP · ${tr('1장', '1 photo', '1枚')}</span>
+            <span class="rs-dropzone-meta">JPG / PNG / WebP / HEIC · ${tr('1장', '1 photo', '1枚')}</span>
             <span class="rs-dropzone-file" id="rs-file-name">${tr('선택된 사진 없음', 'No photo selected', '写真が選択されていません')}</span>
           </span>
           <span class="rs-hint">${tr('자동으로 웹용 크기로 줄여 업로드합니다.', 'We resize it for the web automatically before uploading.', 'Web 用のサイズに自動で縮小してアップロードします。')}</span>

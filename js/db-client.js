@@ -271,7 +271,7 @@
       const i = url.indexOf(marker);
       if (i === -1) return;
       const path = url.slice(i + marker.length).split('?')[0];
-      try { await c.storage.from('user-avatars').remove([path]); } catch (_) {}
+      try { const { error } = await c.storage.from('user-avatars').remove([path]); if (error) console.warn('[storage.remove] user-avatars', error.message || error); } catch (e) { console.warn('[storage.remove] user-avatars', e); }
     },
     // 편집부가 메시지 보낼 회원을 찾을 때.
     // display_name (Google 계정 이름), 사진 등록 시 입력한 작가명 (submitter_name),
@@ -705,7 +705,7 @@
     },
     async removePhoto(path) {
       const c = client(); if (!c) return;
-      try { await c.storage.from(BUCKET).remove([path]); } catch (_) {}
+      try { const { error } = await c.storage.from(BUCKET).remove([path]); if (error) console.warn('[storage.remove]', BUCKET, error.message || error); } catch (e) { console.warn('[storage.remove]', BUCKET, e); }
     },
     publicUrl(path) {
       return `/i/reader/${path}`;
@@ -996,7 +996,7 @@
     },
     async removePhotos(paths) {
       const c = client(); if (!c || !paths?.length) return;
-      try { await c.storage.from(MARKET_BUCKET).remove(paths); } catch (_) {}
+      try { const { error } = await c.storage.from(MARKET_BUCKET).remove(paths); if (error) console.warn('[storage.remove]', MARKET_BUCKET, error.message || error); } catch (e) { console.warn('[storage.remove]', MARKET_BUCKET, e); }
     },
     async report(listingId, reason) {
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
@@ -1060,7 +1060,7 @@
       const { data, error } = await c.from('market_listings').delete().eq('id', listingId).select('id');
       if (error || !data?.length) return { error: error || { message: '삭제 거부됨 (편집부 권한 확인)' } };
       if (row?.storage_paths?.length) {
-        try { await c.storage.from(MARKET_BUCKET).remove(row.storage_paths); } catch (_) {}
+        try { const { error } = await c.storage.from(MARKET_BUCKET).remove(row.storage_paths); if (error) console.warn('[storage.remove]', MARKET_BUCKET, error.message || error); } catch (e) { console.warn('[storage.remove]', MARKET_BUCKET, e); }
       }
       return { data };
     },

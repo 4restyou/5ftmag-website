@@ -65,19 +65,19 @@
       markProgress('storage', tr('네트워크 연결 필요', 'No network connection', 'ネットワーク接続が必要です'), tr('연결을 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.', '接続を確認してから、もう一度お試しください。'));
       throw new Error(tr('네트워크 연결이 끊겼어요. 연결을 확인한 뒤 다시 시도해 주세요.', 'Your network connection dropped. Check your connection and try again.', 'ネットワーク接続が切れました。接続を確認してから、もう一度お試しください。'));
     }
-    setSubmitText(tr(`사진 디코딩 중… (${fmtBytes(file.size)})`, `Decoding photo… (${fmtBytes(file.size)})`, `写真をデコード中…（${fmtBytes(file.size)}）`));
+    setSubmitText(tr(`사진 읽는 중… (${fmtBytes(file.size)})`, `Reading photo… (${fmtBytes(file.size)})`, `写真を読み込み中…（${fmtBytes(file.size)}）`));
     markProgress('decode', tr('사진을 읽는 중', 'Reading the photo', '写真を読み込んでいます'), tr(`${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`, `Preparing the ${fmtBytes(file.size)} file for the web.`, `${fmtBytes(file.size)} のファイルを Web 用の画像に準備しています。`));
     const { blob } = await withNetworkTimeout(
       signal => resizeToJpeg(file, ({ stage, width: w, height: h }) => {
         if (signal.aborted) return;
         if (stage === 'decode') {
-          setSubmitText(tr(`사진 디코딩 중… (${fmtBytes(file.size)})`, `Decoding photo… (${fmtBytes(file.size)})`, `写真をデコード中…（${fmtBytes(file.size)}）`));
+          setSubmitText(tr(`사진 읽는 중… (${fmtBytes(file.size)})`, `Reading photo… (${fmtBytes(file.size)})`, `写真を読み込み中…（${fmtBytes(file.size)}）`));
           markProgress('decode', tr('사진을 읽는 중', 'Reading the photo', '写真を読み込んでいます'), tr('큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.', 'Large photos can take a few seconds at this step.', '大きな写真はこの段階で数秒かかることがあります。'));
         } else if (stage === 'resize') {
           setSubmitText(tr(`사진 크기 줄이는 중… (${w}×${h})`, `Resizing photo… (${w}×${h})`, `写真を縮小中…（${w}×${h}）`));
           markProgress('resize', tr('사진 크기 줄이는 중', 'Resizing the photo', '写真を縮小しています'), tr(`${w}×${h} 크기로 변환하고 있어요.`, `Converting to ${w}×${h}.`, `${w}×${h} のサイズに変換しています。`));
         } else if (stage === 'encode') {
-          setSubmitText(tr(`사진 인코딩 중… (${w}×${h})`, `Encoding photo… (${w}×${h})`, `写真をエンコード中…（${w}×${h}）`));
+          setSubmitText(tr(`사진 크기 줄이는 중… (${w}×${h})`, `Resizing photo… (${w}×${h})`, `写真を縮小中…（${w}×${h}）`));
           markProgress('encode', tr('사진을 압축하는 중', 'Compressing the photo', '写真を圧縮しています'), tr('업로드 전에 용량을 줄이고 있어요.', 'Reducing the file size before upload.', 'アップロード前に容量を小さくしています。'));
         }
       }),

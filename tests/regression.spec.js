@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('알림 항목 클릭 시 전체 읽음 처리', async ({ page }) => {
+test('알림 항목 클릭 시 그 알림만 읽음 처리', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
@@ -10,7 +10,7 @@ test('알림 항목 클릭 시 전체 읽음 처리', async ({ page }) => {
     body: '',
   }));
   await page.addInitScript(() => {
-    window.__notif = { markAllRead: 0, unread: 2 };
+    window.__notif = { markAllRead: 0, markRead: [], unread: 2 };
     window.MagDB = {
       isReady: () => true,
       auth: {
@@ -26,6 +26,11 @@ test('알림 항목 클릭 시 전체 읽음 처리', async ({ page }) => {
           { id: 'n1', title: '새 사진이 승인됐어요', body: "Reader's Roll에 반영됐습니다.", link: '#', created_at: new Date().toISOString(), read_at: null },
           { id: 'n2', title: '매물 신고 처리', body: '처리가 완료됐습니다.', link: '#', created_at: new Date().toISOString(), read_at: null },
         ],
+        markRead: async (ids) => {
+          window.__notif.markRead.push(...ids);
+          window.__notif.unread -= ids.length;
+          return { error: null };
+        },
         markAllRead: async () => {
           window.__notif.markAllRead += 1;
           window.__notif.unread = 0;
@@ -50,9 +55,10 @@ test('알림 항목 클릭 시 전체 읽음 처리', async ({ page }) => {
   await expect(page.locator('#notifList .notif-item.is-unread')).toHaveCount(2);
   await page.locator('#notifList .notif-item').first().click();
 
-  await page.waitForFunction(() => window.__notif.markAllRead === 1);
-  await expect(page.locator('#notifList .notif-item.is-unread')).toHaveCount(0);
-  await expect(page.locator('#notifBadge')).toBeHidden();
+  await page.waitForFunction(() => window.__notif.markRead.join(',') === 'n1');
+  expect(await page.evaluate(() => window.__notif.markAllRead)).toBe(0);
+  await expect(page.locator('#notifList .notif-item.is-unread')).toHaveCount(1);
+  await expect(page.locator('#notifBadge')).toHaveText('1');
 });
 
 test('알림 링크는 내부 경로만 href 로 렌더링한다', async ({ page }) => {
