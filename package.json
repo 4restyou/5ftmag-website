@@ -7,6 +7,8 @@
   "scripts": {
     "validate": "node scripts/validate-assets.mjs",
     "qa": "npm run validate && node scripts/qa-smoke.mjs",
+    "i18n:check": "node scripts/en-check.mjs && node scripts/en-check.mjs --lang ja",
+    "ci": "npm run validate && npm run shell:check && npm run i18n:check && npm run test:unit && npm run db:baseline:check && node scripts/db-audit.mjs --strict && node scripts/qa-smoke.mjs",
     "qa:release": "npm run build:rss && npm run build:sitemap && npm run qa",
     "qa:visual": "node scripts/qa-visual.mjs",
     "test": "playwright test",
@@ -22,6 +24,7 @@
     "content:health": "node scripts/content-health.mjs",
     "optimize-images": "python3 scripts/optimize-images.py",
     "prebuild": "node scripts/validate-assets.mjs",
+    "postbuild": "node scripts/validate-assets.mjs && node scripts/qa-smoke.mjs",
     "build": "node scripts/build-films.mjs && node scripts/build-labs.mjs && node scripts/build-repairs.mjs && node scripts/build-shop.mjs && node scripts/build-authors.mjs && node scripts/build-contributor-pages.mjs && node scripts/build-rss.mjs && node scripts/build-sitemap.mjs && node scripts/build-film-pages.mjs && node scripts/build-lab-pages.mjs && node scripts/build-llms.mjs",
     "build:rss": "node scripts/build-rss.mjs",
     "build:authors": "node scripts/build-authors.mjs",

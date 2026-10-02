@@ -92,18 +92,16 @@ Supabase + Netlify 환경에서 댓글, 답글, 좋아요, 편집부 답변 표�
 
 ## 5. 프론트엔드에 키 입력
 
-`js/supabase-config.js` 열어서 두 값을 본인 프로젝트 것으로 교체:
+`js/db-client.js` 첫머리의 두 상수를 본인 프로젝트 것으로 교체:
 
 ```js
-window.SUPABASE_CONFIG = {
-  url: 'https://YOUR-PROJECT-ID.supabase.co',     // ← 여기
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', // ← 여기
-};
+const URL_  = 'https://YOUR-PROJECT-ID.supabase.co';      // ← 여기
+const ANON_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';  // ← 여기
 ```
 
 값은 **Supabase → Settings → API** 에서 복사:
-- **Project URL** → `url`
-- **Project API keys → anon public** → `anonKey`
+- **Project URL** → `URL_`
+- **Project API keys → anon public** → `ANON_`
 
 > ⚠️ `service_role` 키는 절대 프론트엔드에 넣지 마세요. 그건 서버 전용입니다.
 > `anon public` 키는 브라우저에 노출되어도 안전 — RLS 정책이 데이터를 보호합니다.
@@ -178,7 +176,7 @@ Supabase 무료 티어:
 ## 트러블슈팅
 
 **Q. 댓글 영역에 "Supabase 미연결" 메시지**
-→ `js/supabase-config.js`의 url/anonKey가 아직 placeholder. 5단계 다시 확인.
+→ `js/db-client.js`의 URL_/ANON_ 이 아직 placeholder. 5단계 다시 확인.
 
 **Q. Google 로그인 시 redirect_uri_mismatch 에러**
 → Google Console의 Authorized redirect URIs에 Supabase callback URL이 등록되어 있는지 확인. 정확히 `https://YOUR-PROJECT-ID.supabase.co/auth/v1/callback` 형태.

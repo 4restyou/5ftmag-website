@@ -413,7 +413,7 @@ ${articleHtml}
   <span class="footer-copy">© 2026 5ft magazine</span>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="${versioned('js/db/commerce.js')}" defer></script>
 <script src="${versioned('js/db-client.js')}" defer></script>
 <script src="${versioned('js/util.js')}" defer></script>

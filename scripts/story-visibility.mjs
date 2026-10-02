@@ -1,3 +1,5 @@
+import { warnBuild } from './lib/build-warn.mjs';
+
 export function seoulTodayIso(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -56,7 +58,7 @@ export async function withDbVisibility(stories, { label = 'build', timeoutMs = 5
     if (hidden) console.log(`  [${label}] story_visibility: 비공개 ${hidden}편을 뺍니다`);
     return applyVisibility(stories, rows);
   } catch (err) {
-    console.warn(`⚠ [${label}] story_visibility 를 읽지 못해 data/stories.json 그대로 싣습니다: ${err?.message || err}`);
+    warnBuild(label, `story_visibility 를 읽지 못해 data/stories.json 그대로 싣습니다: ${err?.message || err}`);
     return stories;
   }
 }

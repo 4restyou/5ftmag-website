@@ -12,6 +12,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { warnBuild } from './lib/build-warn.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -58,7 +59,7 @@ async function main() {
     if (!res.ok) {
       // 테이블이 아직 prod 에 없거나 RLS 차단된 경우 — 조용히 패스 (빌드 통과)
       if (res.status === 404 || res.status === 400) {
-        console.warn(`⚠ shop_products 테이블 없음 (HTTP ${res.status}). data/shop.json 유지.`);
+        warnBuild('build-shop', `shop_products 테이블 없음 (HTTP ${res.status}). data/shop.json 유지.`);
         process.exit(0);
       }
       throw new Error(`HTTP ${res.status} ${res.statusText}`);
@@ -66,7 +67,7 @@ async function main() {
     rows = await res.json();
     if (!Array.isArray(rows)) throw new Error('expected array');
   } catch (err) {
-    console.warn('⚠ Supabase shop_products fetch 실패. data/shop.json 유지:', err.message);
+    warnBuild('build-shop', `Supabase shop_products fetch 실패. data/shop.json 유지: ${err.message}`);
     process.exit(0);
   }
 

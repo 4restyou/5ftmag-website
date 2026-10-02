@@ -149,3 +149,24 @@ test('legal 푸터 링크가 동적으로 inject 되는지', async ({ page }) =>
   await page.waitForFunction(() => document.querySelector('.footer-links a[data-legal]'));
   await expect(page.locator('.footer-links a[data-legal]')).toHaveCount(4);
 });
+
+// 영문·일문판: 페이지가 열리고 <html lang> 이 맞고 헤더 지구본에 언어 코드가 뜬다.
+// 외부 호출(Supabase·CDN·분석)은 모두 막고 로컬 자산만으로 확인한다.
+const LOCALE_PAGES = [
+  { lang: 'en', code: 'EN', paths: ['/en/', '/en/stories.html', '/en/stories/01.html'] },
+  { lang: 'ja', code: 'JP', paths: ['/ja/', '/ja/stories.html', '/ja/stories/01.html'] },
+];
+
+for (const { lang, code, paths } of LOCALE_PAGES) {
+  for (const path of paths) {
+    test(`locale ${path}`, async ({ page, baseURL }) => {
+      await page.route(url => !url.href.startsWith(baseURL), route => route.abort());
+      const res = await page.goto(path, { waitUntil: 'load' });
+      expect(res?.status(), `${path} HTTP status`).toBeLessThan(400);
+      await expect(page.locator('html')).toHaveAttribute('lang', lang);
+      const langCode = page.locator('#langBtn .lang-code');
+      await expect(langCode).toBeVisible();
+      await expect(langCode).toHaveText(code);
+    });
+  }
+}

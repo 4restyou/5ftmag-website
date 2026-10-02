@@ -28,6 +28,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ROOT, navHtml, mobileNavHtml, footerHtml } from './lib/site-shell.mjs';
+import { warnBuild } from './lib/build-warn.mjs';
 
 const OUT_DIR = path.join(ROOT, 'contributor');
 const FILMS_JSON = path.join(ROOT, 'data/films.json');
@@ -271,7 +272,7 @@ ${p.film || p.camera ? `      <figcaption>${esc([p.film, p.camera].filter(Boolea
   <span class="footer-copy">© 2026 5ft magazine</span>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="${versioned('js/db/commerce.js')}" defer></script>
 <script src="${versioned('js/db-client.js')}" defer></script>
 <script src="${versioned('js/util.js')}" defer></script>
@@ -286,7 +287,7 @@ ${p.film || p.camera ? `      <figcaption>${esc([p.film, p.camera].filter(Boolea
   try {
     rows = await fetchApproved();
   } catch (err) {
-    console.warn(`[build-contributor-pages] Supabase 조회 실패, skip: ${err.message}`);
+    warnBuild('build-contributor-pages', `Supabase 조회 실패, skip: ${err.message}`);
     return;
   }
 

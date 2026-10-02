@@ -39,9 +39,9 @@
     if (!window.tus || typeof window.tus.Upload !== 'function')
       jobs.push(loadScriptOnce('https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js'));
     if (typeof window.processImageForUpload !== 'function')
-      jobs.push(loadScriptOnce('./js/image-processor.js?v=20260520-mobileupload'));
+      jobs.push(loadScriptOnce('./js/image-processor.js?v=20261002-ja'));
     if (typeof window.normalizeCamera !== 'function')
-      jobs.push(loadScriptOnce('./js/camera-brands.js?v=20260522-camerasearch'));
+      jobs.push(loadScriptOnce('./js/camera-brands.js?v=20260611-keyunify'));
     return Promise.all(jobs);
   }
   let formOutsideClickHandler = null;

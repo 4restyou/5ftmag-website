@@ -53,7 +53,8 @@ async function main() {
     .filter(isPublishedContent)
     .sort(compareStories);
 
-  const buildDate = new Date().toUTCString();
+  // 빌드 시각이 아니라 가장 최신 글의 날짜. 같은 글 목록이면 rss.xml 이 바뀌지 않는다.
+  const buildDate = items.length ? rfc822(items[0].date) : new Date(0).toUTCString();
   const itemsXml = items.map(s => `    <item>
       <title>${escapeXml(s.title)}</title>
       <link>${SITE}/${s.page}</link>

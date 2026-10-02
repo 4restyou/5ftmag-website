@@ -19,6 +19,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { warnBuild } from './lib/build-warn.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -74,12 +75,12 @@ async function main() {
     rows = await res.json();
     if (!Array.isArray(rows)) throw new Error('expected array');
   } catch (err) {
-    console.warn('⚠ Supabase repair_shops fetch 실패. data/repairs.json 유지:', err.message);
+    warnBuild('build-repairs', `Supabase repair_shops fetch 실패. data/repairs.json 유지: ${err.message}`);
     process.exit(0);
   }
 
   if (rows.length === 0) {
-    console.warn('⚠ Supabase repair_shops 가 비어 있음. data/repairs.json 유지.');
+    warnBuild('build-repairs', 'Supabase repair_shops 가 비어 있음. data/repairs.json 유지.');
     process.exit(0);
   }
 
@@ -92,7 +93,7 @@ async function main() {
 // 직접 실행될 때만 동작 (import 시엔 rowToJson 만 노출 — 테스트용)
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(err => {
-    console.warn('⚠ build-repairs 예외, data/repairs.json 유지:', err?.message || err);
+    warnBuild('build-repairs', `build-repairs 예외, data/repairs.json 유지: ${err?.message || err}`);
     process.exit(0);
   });
 }

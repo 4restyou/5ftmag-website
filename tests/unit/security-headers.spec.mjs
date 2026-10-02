@@ -42,7 +42,7 @@ describe('security headers', () => {
 
   it('allows only the known external execution and telemetry origins', () => {
     const header = csp();
-    expect(header).toContain('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/');
+    expect(header).toContain('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/');
     expect(header).toContain('https://oapi.map.naver.com');
     expect(header).toContain('https://plausible.io');
     expect(header).toContain('https://js.sentry-cdn.com');
@@ -66,6 +66,7 @@ describe('security headers', () => {
       for (const src of jsd(d)) expect(src).toMatch(/^https:\/\/cdn\.jsdelivr\.net\/(npm|gh)\/.+\/$/);
     }
     expect(jsd('script-src').sort()).toEqual([
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/',
       'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/',
       'https://cdn.jsdelivr.net/npm/lenis@1.1.20/',
       'https://cdn.jsdelivr.net/npm/page-flip@2.0.7/',

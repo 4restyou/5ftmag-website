@@ -100,7 +100,7 @@ PR 생성 후 **CI 통과**하면 **사용자가 "배포하지 마" / "PR 만 �
 - **css/js 자산 수정** — `node scripts/bump-version.mjs <경로> <YYYYMMDD-feature>` 로 캐시버스트(아래 참고). 수동 sed 금지.
 - **공통 내비/푸터 변경** — `data/site-shell.json` 만 고치고 `npm run shell:sync` 로 전 페이지 주입 → `npm run shell:check` (exit 0). 페이지별 nav/footer 를 손으로 고치지 말 것.
 - **DB 작업** — `node scripts/db-audit.mjs` 로 클라이언트 참조 ↔ 스키마 계약 확인. 스키마를 바꿨으면 `npm run db:baseline` 로 베이스라인 재생성 후 `npm run db:baseline:check` (드리프트 0).
-- **전체 한 방** — `npm run qa` = validate + qa-smoke. (CI 는 여기에 shell:check·vitest·db:baseline:check·db-audit --strict·Playwright 를 더한다.)
+- **전체 한 방** — `npm run ci` = CI 순서 그대로(validate → shell:check → 영·일 en-check → vitest → db:baseline:check + db-audit --strict → qa-smoke). CI 는 여기에 Playwright 를 더한다. 가볍게는 `npm run qa`(validate + qa-smoke).
 - 배포까지 갔으면 **머지 커밋 SHA + 후속 워크플로우 성공 여부 + 사용자 확인 방법**을 보고한다.
 
 ## 인프라 / DB 환경 (주의)
