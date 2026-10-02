@@ -338,15 +338,14 @@
         ${tr('로그인하면 지금 보던 화면으로 돌아와 사진 올리기를 이어갈 수 있어요.', 'Sign in and you will come back to this page to finish uploading.', 'ログインすると、いま見ていた画面に戻って写真の投稿を続けられます。')}<br />
         ${tr("사진은 편집부 검토 후 보통 24~48시간 안에 Reader's Roll에 반영됩니다.", "The editors review each photo, and it usually appears in Reader's Roll within 24 to 48 hours.", "写真は編集部の確認後、通常24〜48時間以内に Reader's Roll に掲載されます。")}
       </p>
-      <button type="button" class="rs-btn rs-btn-google" data-action="rs-login-google">
+      ${window.MagAuthUI.loginButton({ className: 'rs-btn rs-btn-google', attrs: 'data-action="rs-login-google"', label: `
         <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">
           <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.78 2.72v2.26h2.88c1.69-1.55 2.66-3.84 2.66-6.62z"/>
           <path fill="#34A853" d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.88-2.26c-.8.54-1.83.86-3.07.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.34A8.99 8.99 0 0 0 9 18z"/>
           <path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.3-1.71V4.96H.96A8.99 8.99 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3-2.33z"/>
           <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.97 8.97 0 0 0 9 0C5.48 0 2.44 2.02.96 4.96l3 2.34C4.67 5.16 6.66 3.58 9 3.58z"/>
         </svg>
-        ${tr('Google로 계속하기', 'Continue with Google', 'Google で続ける')}
-      </button>`;
+        ${tr('Google로 계속하기', 'Continue with Google', 'Google で続ける')}` })}`;
   }
 
   function renderSubmissionForm(theme, prefillFilm, films) {
@@ -538,8 +537,7 @@
           <strong style="display:block;margin-bottom:4px;">${tr('사진이 계속 안 올라가요?', 'Photo still will not upload?', '写真がうまくアップロードできませんか？')}</strong>
           ${tr('와이파이가 더 안정적인 곳에서 다시 시도해 보시거나, 아래로 사진을 보내주시면 직접 등록해 드릴게요.', 'Try again somewhere with steadier Wi-Fi, or send the photo to us below and we will add it for you.', 'Wi-Fi がより安定した場所でもう一度お試しいただくか、下記から写真を送っていただければ、こちらで登録します。')}
           <div style="margin-top:6px;">
-            · <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener" style="color:#5a3e1f;text-decoration:underline;">${tr('@5ft.magazine 인스타 DM', '@5ft.magazine Instagram DM', '@5ft.magazine Instagram DM')}</a><br>
-            · <a href="mailto:4rest_design@naver.com?subject=Reader's Roll 사진 제출" style="color:#5a3e1f;text-decoration:underline;">4rest_design@naver.com</a>
+            · <a href="${window.MagContact.url}" target="_blank" rel="noopener" style="color:#5a3e1f;text-decoration:underline;">${window.MagContact.text()}</a>
           </div>
         </div>
       </form>`;

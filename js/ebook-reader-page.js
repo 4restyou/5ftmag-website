@@ -18,7 +18,7 @@
       window.EbookCheckout.start(product);
       return;
     }
-    alert(i18n.t('구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 인스타그램 @5ft.magazine DM 으로 문의해 주세요. 입금 확인 후 전체 열람권을 드립니다.', 'How to buy\n\nOnline payment is not ready yet. To buy, send a DM to @5ft.magazine on Instagram. We\'ll unlock the full e-book once your payment is confirmed.', '購入について\n\nオンライン決済は準備中です。ご購入希望の方は、Instagram @5ft.magazine に DM でお問い合わせください。入金を確認した後、全ページの閲覧権をお渡しします。'));
+    alert(i18n.t(`구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 편집부로 연락해 주세요 (${window.MagContact.text()}). 입금 확인 후 전체 열람권을 드립니다.`, `How to buy\n\nOnline payment is not ready yet. To buy, contact the editors (${window.MagContact.text()}). We'll unlock the full e-book once your payment is confirmed.`, `購入について\n\nオンライン決済は準備中です。ご購入希望の方は、編集部までご連絡ください（${window.MagContact.text()}）。入金を確認した後、全ページの閲覧権をお渡しします。`));
   }
 
   async function init() {
@@ -40,7 +40,7 @@
       console.error('[ebook] 열람 실패', { slug, access });
       if (!access) {
         gate(i18n.t('<h2>연결 실패</h2><p>이북 서버에 닿지 못했어요. 잠시 후 새로고침해 주세요.</p>', '<h2>Connection failed</h2><p>We couldn\'t reach the e-book server. Please refresh in a moment.</p>', '<h2>接続できませんでした</h2><p>電子書籍のサーバーにつながりませんでした。しばらくしてから再読み込みしてください。</p>')
-          + i18n.t('<p class="ebook-gate-code">문제가 이어지면 이 화면을 캡처해 알려주세요 (인스타그램 @5ft.magazine DM). (code: network)</p>', '<p class="ebook-gate-code">If this keeps happening, send us a screenshot of this screen (Instagram DM @5ft.magazine). (code: network)</p>', '<p class="ebook-gate-code">問題が続く場合は、この画面をキャプチャしてお知らせください（Instagram @5ft.magazine に DM）。（code: network）</p>'));
+          + i18n.t(`<p class="ebook-gate-code">문제가 이어지면 이 화면을 캡처해 알려주세요 (${window.MagContact.text()}). (code: network)</p>`, `<p class="ebook-gate-code">If this keeps happening, send us a screenshot of this screen (${window.MagContact.text()}). (code: network)</p>`, `<p class="ebook-gate-code">問題が続く場合は、この画面をキャプチャしてお知らせください（${window.MagContact.text()}）。（code: network）</p>`));
         return;
       }
       if (access.error === 'not found') {
@@ -53,7 +53,7 @@
       const full = access.missing === 'full.pdf' || access.entitled === true;
       gate(`<h2>${i18n.t('준비 중', 'Coming soon', '準備中')}</h2><p>${full
         ? i18n.t('전체 PDF 가 아직 올라오지 않았어요.', 'The full PDF hasn\'t been uploaded yet.', '全ページの PDF はまだアップロードされていません。')
-        : i18n.t('미리보기 PDF 가 아직 올라오지 않았어요.', 'The preview PDF hasn\'t been uploaded yet.', 'プレビューの PDF はまだアップロードされていません。')} ${i18n.t('편집부에 알려주시면 (인스타그램 @5ft.magazine DM) 바로 확인할게요.', 'Let the editors know (Instagram DM @5ft.magazine) and we\'ll look into it right away.', '編集部にお知らせいただければ（Instagram @5ft.magazine に DM）、すぐに確認します。')}</p>`
+        : i18n.t('미리보기 PDF 가 아직 올라오지 않았어요.', 'The preview PDF hasn\'t been uploaded yet.', 'プレビューの PDF はまだアップロードされていません。')} ${i18n.t(`편집부에 알려주시면 (${window.MagContact.text()}) 바로 확인할게요.`, `Let the editors know (${window.MagContact.text()}) and we'll look into it right away.`, `編集部にお知らせいただければ（${window.MagContact.text()}）、すぐに確認します。`)}</p>`
         + `<p class="ebook-gate-code">(code: ${esc(access.error || 'unknown')}${access.missing ? ' / ' + esc(access.missing) : ''})</p>`);
       return;
     }

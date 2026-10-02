@@ -12,6 +12,46 @@
   const tr = i18n.t;
 
   // ════════════════════════════════════════════════
+  // 문의 창구 (독자가 막혔을 때 안내하는 곳은 하나다)
+  // ════════════════════════════════════════════════
+  // 오류 문구 끝의 연락 안내는 이 값을 쓴다. 공식 메일은 약관·개인정보처리방침·푸터에만 둔다.
+  const CONTACT = {
+    url: 'https://instagram.com/5ft.magazine',
+    text: () => tr('인스타그램 @5ft.magazine DM', 'Instagram DM @5ft.magazine', 'Instagram @5ft.magazine に DM'),
+  };
+  window.MagContact = CONTACT;
+
+  // ════════════════════════════════════════════════
+  // 로그인 입구 (버튼 + 약관 동의 문구)
+  // ════════════════════════════════════════════════
+  // 로그인 버튼을 그리는 자리는 loginButton 으로 마크업을 만든다. 버튼 아래 동의 문구가 늘 함께 나간다.
+  // 실제 로그인 호출(돌아올 주소)은 각 입구의 클릭 처리기가 지금처럼 맡는다.
+  // 버튼 없이 확인창으로 묻는 입구는 confirmLogin 이 같은 동의 문구를 덧붙여 묻는다.
+  function loginConsent() {
+    const a = (href, text) => `<a href="${i18n.url(href)}" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">${text}</a>`;
+    const terms = '/legal/terms.html';
+    const privacy = '/legal/privacy.html';
+    return `<p class="login-consent" style="font-size:12px; line-height:1.6; color:var(--text-muted); margin:10px 0 0;">${tr(
+      `계속하면 만 14세 이상이며 ${a(terms, '이용약관')}과 ${a(privacy, '개인정보처리방침')}에 동의하는 것으로 봅니다.`,
+      `By continuing, you confirm you are 14 or older and agree to the ${a(terms, 'Terms of Use')} and ${a(privacy, 'Privacy Policy')}.`,
+      `続けると、14歳以上であり、${a(terms, '利用規約')}と${a(privacy, 'プライバシーポリシー')}に同意したものとみなします。`
+    )}</p>`;
+  }
+  window.MagAuthUI = {
+    loginButton({ label, className = '', attrs = '' } = {}) {
+      const text = label || tr('Google로 계속하기', 'Continue with Google', 'Google で続ける');
+      return `<button type="button" class="${className}" ${attrs}>${text}</button>${loginConsent()}`;
+    },
+    confirmLogin(message) {
+      return window.confirm(message + '\n\n' + tr(
+        '계속하면 만 14세 이상이며 이용약관과 개인정보처리방침에 동의하는 것으로 봅니다.',
+        'By continuing, you confirm you are 14 or older and agree to the Terms of Use and Privacy Policy.',
+        '続けると、14歳以上であり、利用規約とプライバシーポリシーに同意したものとみなします。'
+      ));
+    },
+  };
+
+  // ════════════════════════════════════════════════
   // 알림 문구 (벨 패널 · 내 정보 알림 탭 공용)
   // ════════════════════════════════════════════════
   // DB 트리거가 넣는 title·body 는 한국어다(Web Push 가 그대로 보낸다). 영·일판은 type + meta 로 문구를 만들고,
@@ -49,7 +89,7 @@
       case 'submission_deleted':
         return {
           title: pick('Your photo was removed by the editors', '写真が編集部により削除されました'),
-          body: pick('Contact the editors if you have questions (Instagram DM @5ft.magazine).', 'ご不明な点は編集部へ（Instagram @5ft.magazine に DM）。'),
+          body: pick(`Contact the editors if you have questions (${CONTACT.text()}).`, `ご不明な点は編集部へ（${CONTACT.text()}）。`),
         };
       case 'submission_featured': {
         if (!meta) return stored;
@@ -1107,8 +1147,7 @@
         <div class="notif-panel-guest">
           <p class="notif-panel-guest-title">${tr('로그인하면 알림을 받을 수 있어요', 'Sign in to get notifications', 'ログインすると通知を受け取れます')}</p>
           <p class="notif-panel-guest-body">${tr('댓글 답글 · 사진 승인 · 새 글 알림.<br/>기기에 푸시로도 받을 수 있어요.', 'Comment replies, photo approvals and new articles.<br/>You can also get them as push notifications.', 'コメントへの返信、写真の承認、新着記事をお知らせします。<br/>端末へのプッシュ通知でも受け取れます。')}</p>
-          <button type="button" class="notif-panel-guest-btn" data-action="auth-login">${tr('Google로 로그인', 'Sign in with Google', 'Googleでログイン')}</button>
-          <p class="notif-panel-guest-consent" style="font-size:11px; line-height:1.5; color:var(--text-muted); margin-top:10px;">${tr('로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 간주합니다.', 'By signing in, you confirm you are 14 or older and agree to the <a href="/en/legal/terms.html" style="color:inherit; text-decoration:underline;">Terms</a> and <a href="/en/legal/privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a>.', 'ログインすると、14歳以上であり、<a href="/ja/legal/terms.html" style="color:inherit; text-decoration:underline;">利用規約</a>と<a href="/ja/legal/privacy.html" style="color:inherit; text-decoration:underline;">プライバシーポリシー</a>に同意したものとみなされます。')}</p>
+          ${window.MagAuthUI.loginButton({ label: tr('Google로 로그인', 'Sign in with Google', 'Googleでログイン'), className: 'notif-panel-guest-btn', attrs: 'data-action="auth-login"' })}
         </div>`;
       document.body.appendChild(guestPanel);
       bell.addEventListener('click', (e) => {
@@ -1465,7 +1504,7 @@
       }
       const sess = await window.MagDB.auth.getSession();
       if (!sess) {
-        if (!confirm(tr('스크랩은 로그인이 필요해요. Google로 로그인할까요?', 'Saving needs an account. Sign in with Google?', '保存するにはログインが必要です。Googleでログインしますか？'))) return;
+        if (!window.MagAuthUI.confirmLogin(tr('스크랩은 로그인이 필요해요. Google로 로그인할까요?', 'Saving needs an account. Sign in with Google?', '保存するにはログインが必要です。Googleでログインしますか？'))) return;
         window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
         return;
       }

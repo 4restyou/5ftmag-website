@@ -158,7 +158,7 @@
       const label = dir === 'prev' ? tr('← 목록으로', '← Back to list', '← 一覧へ') : tr('목록으로 →', 'Back to list →', '一覧へ →');
       return `<a class="${cls}" href="${i18n.url('/stories.html')}">
         <span class="nav-label">${label}</span>
-        <span class="nav-title">${tr('Stories 전체 보기', 'All articles', 'すべての記事')}</span>
+        <span class="nav-title">${tr('Articles 전체 보기', 'All Articles', 'Articles をすべて見る')}</span>
       </a>`;
     }
 

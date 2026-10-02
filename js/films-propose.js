@@ -46,7 +46,7 @@
     const session = await d.auth.getSession();
     if (session && session.user) return session.user;
     // 비로그인 — 로그인 유도
-    const ok = window.confirm(tr('필름 제안은 로그인 후 가능해요. 로그인 페이지로 이동할까요?', 'Sign in to suggest a film. Go to sign in?', 'フィルムの提案にはログインが必要です。ログインページに移動しますか？'));
+    const ok = window.MagAuthUI.confirmLogin(tr('필름 제안은 로그인 후 가능해요. 로그인 페이지로 이동할까요?', 'Sign in to suggest a film. Go to sign in?', 'フィルムの提案にはログインが必要です。ログインページに移動しますか？'));
     if (ok) {
       try { await d.auth.signInWithGoogle(window.location.href); } catch (_) {}
     }

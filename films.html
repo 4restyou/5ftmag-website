@@ -55,10 +55,10 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20260702-unify">
   <link rel="stylesheet" href="./css/common.css?v=20261002-hdr">
-  <link rel="stylesheet" href="./css/comments.css?v=20260622-polish">
+  <link rel="stylesheet" href="./css/comments.css?v=20261002-c3">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20260616-themeauto">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20260616-ui">
-  <link rel="stylesheet" href="./css/films.css?v=20260907-potwpick">
+  <link rel="stylesheet" href="./css/films.css?v=20261002-c3">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -132,26 +132,29 @@
         <label>이름<span class="req">*</span>
           <input type="text" name="name" required maxlength="80" placeholder="Portra 400 · MONOPAN 50 …" />
         </label>
-        <label>표시 이름 <span class="opt">(선택)</span>
-          <input type="text" name="displayName" maxlength="140" placeholder="비우면 '브랜드 이름' 으로 자동" />
+        <label>필름 종류 (컬러 / 흑백 / 슬라이드)<span class="req">*</span>
+          <input type="text" name="type" required maxlength="40" placeholder="컬러 네거티브 · 흑백 · 슬라이드" />
         </label>
-        <div class="propose-row">
-          <label>ISO
-            <input type="text" name="iso" maxlength="20" placeholder="100 · 400 …" />
+        <details class="propose-more">
+          <summary>선택 항목 더 적기</summary>
+          <label>표시 이름 <span class="opt">(선택)</span>
+            <input type="text" name="displayName" maxlength="140" placeholder="비우면 '브랜드 이름' 으로 자동" />
           </label>
-          <label>type
-            <input type="text" name="type" maxlength="40" placeholder="Color Negative · BW · Slide · Tungsten" />
+          <div class="propose-row">
+            <label>ISO
+              <input type="text" name="iso" maxlength="20" placeholder="100 · 400 …" />
+            </label>
+            <label>포맷 (35mm / 120 / 110 …)
+              <input type="text" name="format" maxlength="40" placeholder="35mm · 120" />
+            </label>
+          </div>
+          <label>설명 <span class="opt">(선택)</span>
+            <textarea name="description" maxlength="1000" rows="3" placeholder="발색·입자 특징, 시기, 추천 광원 등"></textarea>
           </label>
-          <label>format
-            <input type="text" name="format" maxlength="40" placeholder="35mm · 120 · 35mm, 120" />
+          <label>다른 이름 (있다면)
+            <textarea name="aliases" maxlength="500" rows="2" placeholder="포트라 400, Kodak Portra 400 (쉼표나 줄바꿈으로 나눠 적어 주세요)"></textarea>
           </label>
-        </div>
-        <label>설명 <span class="opt">(선택)</span>
-          <textarea name="description" maxlength="1000" rows="3" placeholder="발색·입자 특징, 시기, 추천 광원 등"></textarea>
-        </label>
-        <label>별칭(쉼표 또는 줄바꿈) <span class="opt">(선택)</span>
-          <textarea name="aliases" maxlength="500" rows="2" placeholder="포트라 400, Kodak Portra 400, portra400"></textarea>
-        </label>
+        </details>
         <p class="propose-form-msg" id="proposeFormMsg" aria-live="polite"></p>
         <div class="propose-actions">
           <button type="button" class="propose-cancel" id="proposeCancel">취소</button>
@@ -691,7 +694,7 @@
 <script src="./js/ui-states.js?v=20261002-ja" defer></script>
   <script src="./js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="./js/site-common.js?v=20261002-c2" defer></script>
+  <script src="./js/site-common.js?v=20261002-c3" defer></script>
 <script src="./js/films-export.js?v=20260626-thumbcors" defer></script>
 <script src="./js/films-utils.js?v=20260610-purehelpers" defer></script>
 <script src="./js/films-cards.js?v=20261002-ja" defer></script>
@@ -704,19 +707,19 @@
 <script src="./js/films-reader-export.js?v=20261002-ja" defer></script>
 <script src="./js/films-reader-roll-ui.js?v=20261002-b1" defer></script>
 <script src="./js/films-reader-roll-data.js?v=20260908-nocap" defer></script>
-<script src="./js/films-page.js?v=20261002-b1" defer></script>
-<script src="./js/films-propose.js?v=20261002-ja" defer></script>
+<script src="./js/films-page.js?v=20261002-c3" defer></script>
+<script src="./js/films-propose.js?v=20261002-c3" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>
-<script src="./js/db/commerce.js?v=20261002-c1" defer></script>
+<script src="./js/db/commerce.js?v=20261002-c3" defer></script>
   <script src="./js/db-client.js?v=20261002-c2" defer></script>
-<script src="./js/comments.js?v=20261002-sec" defer></script>
+<script src="./js/comments.js?v=20261002-c3" defer></script>
 <script src="./js/image-processor.js?v=20261002-ja" defer></script>
 <script src="./js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="./js/reader-camera-input.js?v=20261002-ja" defer></script>
 <script src="./js/reader-film-picker.js?v=20261002-ja" defer></script>
 <script src="./js/reader-upload-form-ui.js?v=20261002-b1" defer></script>
 <script src="./js/reader-upload-flow.js?v=20261002-b1" defer></script>
-<script src="./js/reader-submissions.js?v=20261002-b1" defer></script>
+<script src="./js/reader-submissions.js?v=20261002-c3" defer></script>
 </body>
 </html>
