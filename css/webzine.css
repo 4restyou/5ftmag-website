@@ -31,7 +31,7 @@ footer { background: var(--wz-bg); border-top-color: transparent; color: rgba(25
 
 .wz-intro { padding: 68px 40px 8px; text-align: center; }
 .wz-intro-inner { max-width: 660px; margin: 0 auto; }
-.wz-kicker { display: block; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 255, 255, .42); margin-bottom: 16px; }
+.wz-kicker { display: block; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 255, 255, .5); margin-bottom: 16px; } /* .42(4.01:1) → .5 (#211c25 위 5.15:1) */
 .wz-page-title { font-size: clamp(40px, 6vw, 66px); font-weight: var(--fw-heading); letter-spacing: -0.03em; line-height: 1; margin: 0 0 20px; color: #fff; }
 .wz-lede { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: rgba(255, 255, 255, .82); margin: 0 0 12px; }
 .wz-howto { font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, .48); margin: 0; }

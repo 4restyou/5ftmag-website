@@ -5,14 +5,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 32px;
+  padding: 20px calc(32px + var(--wide-inset));
   border-bottom: 1px solid var(--border);
 }
 .pagination-bar .nav-arrow {
   font-family: inherit;
   background: none;
   border: 0;
-  padding: 0;
+  /* 터치 영역 44px — 글자 크기·바 높이는 그대로 두고 위아래 여백만 넓힌다(음수 margin 으로 상쇄) */
+  padding: 12px 0;
+  margin: -12px 0;
+  min-width: 44px;
   cursor: pointer;
   font-size: var(--fs-body);
   color: var(--text-muted);
@@ -34,6 +37,9 @@
   padding: 4px 10px;
   color: var(--text-muted);
   border-radius: 2px;
+  /* 터치 높이 44px (모양은 그대로, 바 높이는 음수 margin 으로 유지) */
+  min-height: 44px;
+  margin: -9px 0;
   transition: background .15s, color .15s;
 }
 .page-numbers a:hover, .page-numbers button:not(:disabled):hover { background: var(--bg-sub); color: var(--text); }
@@ -190,7 +196,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 20px 40px;
+  padding: 20px calc(40px + var(--wide-inset));
   border-bottom: 1px solid var(--border);
 }
 .articles-controls .search-input-wrap {
@@ -221,7 +227,7 @@
    화면이 넓어지면 컬럼 수가 자동으로 늘어남
    (모바일 1열 → 태블릿 2~3열 → 데스크탑 4열 → 큰 화면 5열+) */
 .articles-section {
-  padding: 72px 40px;
+  padding: 72px calc(40px + var(--wide-inset));
 }
 /* 해상도별 카드 개수 — 최대 4열, 좁아지면 3 → 2 → 1 */
 .articles-grid {
@@ -304,7 +310,7 @@
 .article-img.text-only .text-card-mark {
   position: absolute;
   bottom: 14px; left: 14px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.12em;
   color: var(--accent-text);
@@ -325,7 +331,7 @@
   position: absolute;
   top: 14px; left: 14px;
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.08em;
   background: var(--text);

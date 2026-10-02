@@ -149,7 +149,7 @@
   color: var(--text);
 }
 .rs-theme-line-sub {
-  font-size: 11px; color: var(--text-muted);
+  font-size: 12px; color: var(--text-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .rs-theme-chevron {
@@ -169,7 +169,7 @@
   opacity: .8; line-height: 1.55; margin: 0;
 }
 .rs-theme-hint {
-  font-size: 11px; line-height: 1.5;
+  font-size: 12px; line-height: 1.5;
   color: #78350f;
   background: #fef3c7;
   border-radius: 4px;
@@ -183,7 +183,7 @@
 .rs-consent-note {
   display: block;
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   line-height: 1.5;
 }
@@ -201,7 +201,7 @@
 }
 .theme-banner-text { color: #1f1f1f; }
 .theme-banner-tag {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -264,7 +264,7 @@
   font-weight: var(--fw-all);
   text-transform: none;
   letter-spacing: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-dim);
   margin-left: 4px;
 }
@@ -282,7 +282,7 @@
 }
 .rs-recent-cameras[hidden] { display: none; }
 .rs-recent-cameras-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -337,7 +337,7 @@
   font-weight: var(--fw-heading);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 12px;
   opacity: 0.75;
   margin-right: 2px;
 }
@@ -656,7 +656,7 @@
   padding: 4px 0;
 }
 .rs-film-group-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.12em;
   color: var(--text-muted);
@@ -686,7 +686,7 @@
 .rs-film-option-name { flex: 1; }
 .rs-film-option-iso {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.04em;
 }

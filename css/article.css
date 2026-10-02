@@ -46,7 +46,7 @@ body {
   margin-bottom: 24px;
   /* 한국어 단어 단위 줄바꿈 — '세 풍|경' 같이 어절이 끊기지 않음 */
   word-break: keep-all;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
 }
 .article-title .title-break {
   display: block;
@@ -61,7 +61,7 @@ body {
   line-height: 1.5;
   margin-bottom: 24px;
   word-break: keep-all;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
 }
 .article-author {
   display: flex; align-items: center; gap: 14px;
@@ -282,7 +282,7 @@ body {
   border-radius: 4px;
 }
 .contributor-mini-role {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.12em;
   color: var(--text-muted);
@@ -311,7 +311,7 @@ body {
 }
 .cta-box-tag {
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.16em;
   background: var(--accent);
@@ -531,7 +531,7 @@ body {
 }
 .article-ref-label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.12em;
   color: var(--text-muted);
@@ -605,7 +605,7 @@ body {
 }
 .related-card .related-cat {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.12em;
   color: var(--text-muted);
@@ -974,7 +974,7 @@ body {
 }
 .film-spec-row .label {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.12em;
   text-transform: uppercase;

@@ -44,7 +44,7 @@ body { background: var(--bg); color: var(--text); }
 .me-tab  { padding: 10px 16px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 14px; font-weight: var(--fw-heading); color: var(--text-muted); cursor: pointer; letter-spacing: 0.02em; transition: color .15s, border-color .15s; }
 .me-tab:hover { color: var(--text); }
 .me-tab.active { color: var(--text); border-bottom-color: var(--text); }
-.me-tab .count { display: inline-block; background: var(--bg-sub); color: var(--text-muted); font-size: 11px; padding: 1px 7px; border-radius: var(--badge-radius); margin-left: 6px; font-weight: var(--fw-heading); }
+.me-tab .count { display: inline-block; background: var(--bg-sub); color: var(--text-muted); font-size: 12px; padding: 1px 7px; border-radius: var(--badge-radius); margin-left: 6px; font-weight: var(--fw-heading); }
 .me-tab.active .count { background: var(--text); color: var(--bg); }
 
 .me-list { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 20px; }
@@ -56,18 +56,18 @@ body { background: var(--bg); color: var(--text); }
 .me-card-img.is-missing::after {
   content: '사진 파일을 찾지 못했습니다. 삭제 후 다시 올려주세요';
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  padding: 12px; text-align: center; font-size: 11px; line-height: 1.5; letter-spacing: 0.04em;
+  padding: 12px; text-align: center; font-size: 12px; line-height: 1.5; letter-spacing: 0.04em;
   color: var(--text-muted); font-weight: var(--fw-heading);
 }
 
 .me-card-meta { display: grid; gap: 10px; font-size: 14px; }
 .me-card-row  { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: baseline; line-height: 1.55; }
-.me-card-row .k { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.me-card-row .k { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
 .me-card-row .v { color: var(--text); word-break: break-word; }
 .me-card-row .v input, .me-card-row .v textarea { width: 100%; font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 3px; background: var(--bg); color: var(--text); }
 .me-card-row .v textarea { resize: vertical; min-height: 60px; }
 
-.me-card-status { display: inline-block; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.1em; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; }
+.me-card-status { display: inline-block; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.1em; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; }
 .me-card-status.pending  { background: #fef3c7; color: #78350f; }
 .me-card-status.approved { background: #d1fae5; color: #064e3b; }
 .me-card-status.rejected { background: #fee2e2; color: #7f1d1d; }
@@ -75,7 +75,7 @@ body { background: var(--bg); color: var(--text); }
 .me-card-status.reserved  { background: #fef3c7; color: #78350f; }
 .me-card-status.sold      { background: #e5e7eb; color: #4b5563; }
 .me-card-status.hidden    { background: #fee2e2; color: #7f1d1d; }
-.me-card-theme { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; padding: 2px 8px; border-radius: 2px; background: #e0e7ff; color: #3730a3; }
+.me-card-theme { display: inline-block; margin-left: 6px; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.08em; padding: 2px 8px; border-radius: 2px; background: #e0e7ff; color: #3730a3; }
 
 .me-card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .me-btn { font: inherit; font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.02em; padding: 8px 14px; border-radius: var(--btn-radius); cursor: pointer; border: 1px solid var(--border); transition: opacity .15s, border-color .15s, background .15s; text-decoration: none; display: inline-flex; align-items: center; }
@@ -110,7 +110,7 @@ body { background: var(--bg); color: var(--text); }
 .me-fav-photo { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 4px; background: var(--bg-sub); cursor: zoom-in; }
 .me-fav-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s; }
 .me-fav-photo:hover img { transform: scale(1.03); }
-.me-fav-photo .me-fav-meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px 9px; background: linear-gradient(to top, rgba(0,0,0,0.55), transparent); color: #fff; font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.02em; line-height: 1.35; }
+.me-fav-photo .me-fav-meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px 9px; background: linear-gradient(to top, rgba(0,0,0,0.55), transparent); color: #fff; font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.02em; line-height: 1.35; }
 .me-fav-photo .me-fav-meta .author { display: block; font-weight: var(--fw-heading); }
 .me-fav-photo .me-fav-meta .film   { display: block; opacity: 0.78; font-weight: var(--fw-all); margin-top: 1px; }
 .me-fav-photo .me-fav-unbtn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.55); color: #fff; border: none; border-radius: 999px; width: 26px; height: 26px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background .15s; }
@@ -119,7 +119,7 @@ body { background: var(--bg); color: var(--text); }
 .me-fav-film-card a { display: block; text-decoration: none; color: inherit; }
 .me-fav-film-card .me-fav-film-img { aspect-ratio: 1; background: var(--bg-sub); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .me-fav-film-card .me-fav-film-img img { width: 78%; height: 78%; object-fit: contain; }
-.me-fav-film-card .me-fav-film-brand { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); margin-top: 10px; display: block; }
+.me-fav-film-card .me-fav-film-brand { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); margin-top: 10px; display: block; }
 .me-fav-film-card .me-fav-film-name { font-size: 17px; font-weight: var(--fw-heading); letter-spacing: -0.015em; margin: 2px 0 4px; }
 .me-fav-film-card .me-fav-film-spec { font-size: 12px; color: var(--text-muted); margin: 0; }
 .me-fav-film-card .me-fav-unbtn { position: absolute; top: 10px; right: 10px; background: var(--bg); color: var(--text-muted); border: none; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: color .15s; }
@@ -152,7 +152,7 @@ body { background: var(--bg); color: var(--text); }
 .me-fav-article-thumb.is-empty { background: repeating-linear-gradient(135deg, var(--bg) 0 8px, var(--bg-sub) 8px 16px); }
 .me-fav-article-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .me-fav-article-meta { display: grid; gap: 6px; align-content: start; min-width: 0; }
-.me-fav-article-cat { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); }
+.me-fav-article-cat { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.08em; color: var(--text-muted); }
 .me-fav-article-title { font-size: 17px; font-weight: var(--fw-heading); letter-spacing: -0.015em; margin: 0; line-height: 1.35; word-break: keep-all; }
 .me-fav-article-excerpt { font-size: 13px; color: var(--text-muted); line-height: 1.55; margin: 2px 0 0; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .me-fav-article .me-fav-unbtn { position: absolute; top: 12px; right: 12px; background: var(--bg); color: var(--text-muted); border: none; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: color .15s; }
@@ -265,7 +265,7 @@ body { background: var(--bg); color: var(--text); }
 .me-prop-status {
   font-weight: 700; padding: 2px 8px; border-radius: 10px;
   background: rgba(127,127,127,.12); color: var(--text);
-  font-size: 11px;
+  font-size: 12px;
 }
 .me-prop--pending .me-prop-status   { background: rgba(255,180,30,.22); color: #b96e00; }
 .me-prop--approved .me-prop-status  { background: rgba(46,125,50,.18); color: #2e7d32; }
@@ -316,7 +316,7 @@ body { background: var(--bg); color: var(--text); }
 .me-msg-row.is-mine { align-self: flex-end; align-items: flex-end; }
 .me-msg-row.is-theirs { align-self: flex-start; align-items: flex-start; }
 .me-msg-sender {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--fw-heading, 600);
   letter-spacing: 0.08em;
   color: var(--text-muted, rgba(127,127,127,.85));
@@ -353,7 +353,7 @@ body { background: var(--bg); color: var(--text); }
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted, rgba(127,127,127,.85));
   font-variant-numeric: tabular-nums;
   padding: 0 2px;
@@ -365,7 +365,7 @@ body { background: var(--bg); color: var(--text); }
 .me-msg-read { color: #1e88e5; font-weight: var(--fw-heading, 600); }
 .me-msg-action {
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading, 600);
   padding: 2px 8px;
   background: transparent;
@@ -432,7 +432,7 @@ body { background: var(--bg); color: var(--text); }
   gap: 12px;
 }
 .me-msg-compose-count {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted, rgba(127,127,127,.85));
   margin-right: auto;
 }
@@ -452,7 +452,7 @@ body { background: var(--bg); color: var(--text); }
 .me-profile-field input:focus,
 .me-profile-field textarea:focus { outline: none; border-color: var(--text); }
 .me-profile-field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-.me-profile-count { align-self: flex-end; font-size: 11px; color: var(--text-muted); }
+.me-profile-count { align-self: flex-end; font-size: 12px; color: var(--text-muted); }
 .me-profile-locked { font-size: 12px; color: var(--text-muted); margin: 0; padding: 10px 12px; background: var(--bg-sub); border-radius: var(--btn-radius); }
 .me-profile-foot { display: flex; align-items: center; gap: 14px; }
 .me-profile-status { font-size: 13px; color: var(--text-muted); }

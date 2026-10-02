@@ -5,12 +5,12 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 20px 40px;
+  padding: 20px calc(40px + var(--wide-inset));
   border-bottom: 1px solid var(--border);
 }
 /* labs 검색 input 시각 정의는 css/ui-controls.css 의 .ft-search-bar 로 통일.
    labs.html 의 검색 바는 .labs-controls 한 줄 아래에 따로 배치된다. */
-.labs-search-bar { margin: 0 40px 14px; }
+.labs-search-bar { margin: 0 calc(40px + var(--wide-inset)) 14px; }
 @media (max-width: 640px) {
   .labs-search-bar { margin: 0 20px 12px; }
 }
@@ -39,7 +39,7 @@
   display: flex;
   align-items: flex-start;
   gap: 28px;
-  padding: 40px 40px 28px;
+  padding: 40px calc(40px + var(--wide-inset)) 28px;
   background: var(--bg);
 }
 .intro-inner {
@@ -70,7 +70,7 @@
 }
 .labs-safety .labs-updated {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.02em;
   color: var(--text-muted);
   opacity: 0.8;
@@ -212,7 +212,7 @@
 }
 
 .labs-section {
-  padding: 24px 40px 80px;
+  padding: 24px calc(40px + var(--wide-inset)) 80px;
 }
 /* "더 보기" — 데스크톱 숨김, 모바일에서만 노출 (films 라이브러리와 동일) */
 .labs-more-wrap {
@@ -453,7 +453,7 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
 }
 .lab-region {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--fw-heading);
   letter-spacing: 0.06em;
   color: var(--accent-text);
@@ -483,7 +483,7 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
   margin-right: 2px;
 }
 .lab-price-note {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   opacity: 0.8;
 }
@@ -518,7 +518,7 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
 
 .labs-chip-count {
   margin-left: 5px;
-  font-size: 11px;
+  font-size: 12px;
   opacity: 0.6;
 }
 
@@ -605,7 +605,7 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
 }
 .lab-index-region h3 a { color: inherit; text-decoration: none; }
 .lab-index-region h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.lab-index-region h3 span { font-size: 11px; font-weight: 400; color: var(--text-muted); }
+.lab-index-region h3 span { font-size: 12px; font-weight: 400; color: var(--text-muted); }
 .lab-index-region ul { list-style: none; margin: 0; padding: 0; }
 .lab-index-region li {
   font-size: 13px;

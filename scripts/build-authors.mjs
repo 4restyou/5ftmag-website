@@ -238,7 +238,7 @@ ${structuredData}  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/icon-16.png">
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
-  <script src="./js/theme-init.js"></script>
+  <script src="./js/theme-init.js?v=20261002-e1"></script>
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css${v('css/tokens.css')}">
   <link rel="stylesheet" href="css/common.css${v('css/common.css')}">
@@ -500,7 +500,7 @@ ${structuredData}  <link rel="icon" type="image/svg+xml" href="/img/favicon/icon
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js"></script>
+  <script src="/js/theme-init.js?v=20261002-e1"></script>
   <script src="/js/i18n.js${i18nVersion}"></script>
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="/css/tokens.css${v('css/tokens.css')}">

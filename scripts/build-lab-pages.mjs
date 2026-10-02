@@ -176,11 +176,12 @@ ${rows.map(([label, cells]) => `            <tr><th scope="row">${esc(label)}</t
         </table>`;
 }
 
+// 현상소 카드는 h1 바로 아래라 h2 다(수리점 카드는 '수리점' h2 아래라 h3). 모양은 .lab-entry-name 이 정한다.
 function labCard(lab, T = TEXT.ko) {
   const features = (T.field(lab, 'features') || '').trim();
   return `
       <article class="lab-entry">
-        <h3 class="lab-entry-name">${esc(T.field(lab, 'name'))}</h3>
+        <h2 class="lab-entry-name">${esc(T.field(lab, 'name'))}</h2>
         <p class="lab-entry-address">${esc(T.field(lab, 'address') || '')}</p>
         ${lab.scanRes ? `<p class="lab-entry-meta">${esc(T.scan(lab.scanRes))}</p>` : ''}
         ${features ? `<p class="lab-entry-features">${esc(features).replace(/\n/g, '<br />')}</p>` : ''}
@@ -356,7 +357,7 @@ function render(region, labs, repairs, others, versioned, outFile, T = TEXT.ko) 
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js"></script>${T.lang !== 'ko' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
+  <script src="/js/theme-init.js?v=20261002-e1"></script>${T.lang !== 'ko' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">

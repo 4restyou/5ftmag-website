@@ -318,12 +318,12 @@
         const opts = ctx.options || [];
         const sel = ctx.getSelected();
         const clearBtn = `<div class="ms-dropdown-panel-head">
-          <span class="ms-dropdown-clear-label" style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em">${tr(`${sel.size}개 선택`, `${sel.size} selected`, `${sel.size}件選択`)}</span>
+          <span class="ms-dropdown-clear-label" style="font-size:12px;color:var(--text-muted);letter-spacing:0.06em">${tr(`${sel.size}개 선택`, `${sel.size} selected`, `${sel.size}件選択`)}</span>
           <button type="button" class="ms-dropdown-clear" data-action="ms-clear" ${sel.size === 0 ? 'disabled' : ''}>${tr('전체 해제', 'Clear all', 'すべて解除')}</button>
         </div>`;
         const rows = opts.map(option => {
           if (option.groupLabel) {
-            return `<div class="ms-dropdown-empty" style="padding:8px 14px 4px;font-weight:var(--fw-heading);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">${escapeHtml(option.groupLabel)}</div>`;
+            return `<div class="ms-dropdown-empty" style="padding:8px 14px 4px;font-weight:var(--fw-heading);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">${escapeHtml(option.groupLabel)}</div>`;
           }
           const checked = sel.has(option.value);
           return `<label class="ms-dropdown-option">

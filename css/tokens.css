@@ -19,6 +19,10 @@
   /* 레이아웃 */
   --header-h:     60px;
   --read-width:   720px;    /* 본문 읽기 너비 (한 줄 38~42자) */
+  /* 큰 화면에서 본문을 헤더(.header-inner 1600px)와 같은 폭으로 묶는 좌우 여백.
+     전폭 띠(배경·구분선)는 그대로 두고 안쪽 내용만 가운데로 모은다.
+     padding 의 % 는 부모 폭 기준이라 body 바로 아래 래퍼에서 쓴다. */
+  --wide-inset:   max(0px, (100% - 1600px) / 2);
 
   /* 타이포그래피 */
   --font:         'Pretendard', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
