@@ -7,7 +7,7 @@
 
   const $ = (id) => document.getElementById(id);
   const db = () => window.MagDB;
-  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc = window.MagUtil.escapeHtml;
 
   const STATE = {
     threads: [],

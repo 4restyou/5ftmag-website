@@ -3,9 +3,9 @@
   // ════════════════════════════
   // 필름 데이터: data/films.json에서 로딩 + 그리드 렌더링
   // ════════════════════════════
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
   // 최상위 스크립트라 전역 이름이 겹치지 않게 fp 접두어를 쓴다.
-  const fpI18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  const fpI18n = window.i18n;
   const fpT = fpI18n.t;
   const fpFrames = (n) => `${n} frame${n === 1 ? '' : 's'}`;
   const fpFilms = (n) => `${n} film${n === 1 ? '' : 's'}`;
@@ -428,7 +428,7 @@
       const card = libraryGrid.querySelector(`.film-card[data-film="${slug}"]`);
       if (!card) continue;
       const countEl = card.querySelector('.film-count');
-      const ctaEl = card.querySelector('.film-cta');
+      const ctaEls = card.querySelectorAll('.film-cta');
       if (countEl) {
         countEl.textContent = progress.label;
         countEl.classList.toggle('has-rolls', progress.currentNumber > 1);
@@ -436,7 +436,8 @@
           ? fpT(`현재 ${progress.currentNumber}번째 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`, `Roll ${progress.currentNumber}: ${progress.currentCount}/${ROLL_LIMIT} frames`, `現在 ${progress.currentNumber}本目のロール ${progress.currentCount}/${ROLL_LIMIT}コマ`)
           : fpT(`현재 롤 ${progress.currentCount}/${ROLL_LIMIT}컷`, `Current roll: ${progress.currentCount}/${ROLL_LIMIT} frames`, `現在のロール ${progress.currentCount}/${ROLL_LIMIT}コマ`));
       }
-      if (ctaEl) ctaEl.textContent = fpT('컷 채우기 →', 'Add a frame →', '1コマ投稿する →');
+      // 링크 안의 빈 자리(.film-cta-slot)와 형제 버튼(.film-cta-action)을 함께 바꾼다.
+      ctaEls.forEach(el => { el.textContent = fpT('컷 채우기 →', 'Add a frame →', '1コマ投稿する →'); });
     }
 
     // 사진 수가 들어왔으니 '사진 많은 순' 이면 순서를 다시 잡는다 (첫 로드라 애니메이션 없이).

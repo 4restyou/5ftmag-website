@@ -3,8 +3,8 @@
 (function () {
   'use strict';
 
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const i18n = window.i18n;
   const tr = i18n.t;
   // 짧은 주소(/films, /camera/x, /contributor/x)는 한국어 카탈로그로 열린다.
   // 영문판은 /en/films.html?... 긴 주소를 그대로 쓴다.

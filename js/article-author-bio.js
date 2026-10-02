@@ -4,9 +4,11 @@
 // .article-author .author-name 텍스트와 location.pathname 을 authors.json·stories.json 과 매칭.
 
 (async function () {
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const i18n = window.i18n;
   const tr = i18n.t;
+  const escapeText = window.MagUtil.escapeHtml;
+  const escapeAttr = window.MagUtil.escapeAttr;
   const articleEl = document.querySelector('article');
   if (!articleEl) return;
 
@@ -166,12 +168,4 @@
     nav.innerHTML = cell(older, 'prev') + cell(newer, 'next');
   }
 
-  function escapeText(s) {
-    const div = document.createElement('div');
-    div.textContent = String(s ?? '');
-    return div.innerHTML;
-  }
-  function escapeAttr(s) {
-    return String(s ?? '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  }
 })();

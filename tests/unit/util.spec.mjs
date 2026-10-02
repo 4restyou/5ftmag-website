@@ -89,8 +89,48 @@ describe('window.MagUtil.normalizeFilmLabel', () => {
   });
 });
 
+describe('errorMessage', () => {
+  const f = (e) => window.MagUtil.errorMessage(e);
+  it('returns the raw message when there is no known code', () => {
+    expect(f({ message: 'boom' })).toBe('boom');
+    expect(f({ message: 'x', code: '23505' })).toBe('x');
+  });
+  it('keeps the Korean stock text as is on Korean pages', () => {
+    const prev = window.i18n;
+    try {
+      window.i18n = { lang: 'ko', t: (ko) => ko };
+      expect(f({ message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.', code: 'AUTH_EXPIRED' }))
+        .toBe('로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.');
+    } finally { window.i18n = prev; }
+  });
+  it('localizes by code and appends the original in parentheses', () => {
+    const prev = window.i18n;
+    try {
+      window.i18n = { lang: 'en', t: (ko, en) => en };
+      expect(f({ message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.', code: 'AUTH_EXPIRED' }))
+        .toBe('Your sign-in has expired. Please sign in again and try again.');
+      expect(f({ message: 'new row violates row-level security policy', code: 'RLS_DENIED' }))
+        .toBe('You do not have permission to save this. Please sign in again and try again. (new row violates row-level security policy)');
+    } finally { window.i18n = prev; }
+  });
+});
+
 describe('formatPrice', () => {
   const f = (...args) => window.MagUtil.formatPrice(...args);
+
+  it('uses the page language for the unit (i18n.lang)', () => {
+    const prev = window.i18n;
+    try {
+      window.i18n = { lang: 'en' };
+      expect(f(30000)).toBe('30,000 won');
+      window.i18n = { lang: 'ja' };
+      expect(f(30000)).toBe('30,000ウォン');
+      window.i18n = { lang: 'ko' };
+      expect(f(30000)).toBe('30,000원');
+    } finally {
+      window.i18n = prev;
+    }
+  });
 
   it('formats numbers with ko-KR thousands separator', () => {
     expect(f(30000)).toBe('30,000원');
@@ -192,7 +232,7 @@ describe('window.MagUtil.pickByAuthorRoundRobin', () => {
 describe('window.MagUtil shape', () => {
   it('exposes the shared browser utilities', () => {
     expect(Object.keys(window.MagUtil).sort()).toEqual(
-      ['applyVisibility', 'escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'loadStories', 'localizeStories', 'normalizeFilmLabel', 'pickByAuthorRoundRobin', 'seoulTodayIso', 'supabaseConfig']
+      ['applyVisibility', 'errorMessage', 'escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'loadStories', 'localizeStories', 'normalizeFilmLabel', 'pickByAuthorRoundRobin', 'seoulTodayIso', 'supabaseConfig']
     );
   });
 

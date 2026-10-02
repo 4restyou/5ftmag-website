@@ -5,8 +5,8 @@
 // 신규 글 + 사진이 있는 추천 필름 + 최근 본 필름 + 현재 호 참여 안내.
 
 (function () {
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const mhI18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const mhI18n = window.i18n;
   const mt = mhI18n.t;
   const murl = mhI18n.url;
   const MOBILE_MAX = 640;
@@ -54,7 +54,7 @@
     } catch (err) { console.warn('[mh] fetch', url, err); return null; }
   }
 
-  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  const esc = window.MagUtil.escapeHtml;
 
   // pure 함수들 — js/mh-pure.js 에서 추출 (window.MHPure)
   // index.html 에서 mh-pure.js 가 mobile-home.js 보다 먼저 로드됨.
@@ -157,7 +157,7 @@
   }
 
   // escAttr 도우미
-  function escAttr(s) { return esc(s); }
+  const escAttr = window.MagUtil.escapeAttr;
 
   // ── 본체 렌더 ──
   // view: 'films' (브랜드별) | 'photos' (전체 사진 그리드)

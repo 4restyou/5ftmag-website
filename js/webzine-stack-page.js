@@ -5,9 +5,9 @@
 // 책을 누르면 목록이 물러나고 책이 일어서는 소개 화면(.wz-detail)으로 간다. 소개 화면은 책마다 한 장이라
 // 아래로 넘기면 다음 책, ← 나 Esc 로 목록에 돌아온다. 이전 코버플로우 책장은 webzine-page.js (books-classic.html).
 (function () {
-  const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n;
   const T = i18n.t;
-  const won = (n) => i18n.lang === 'ja' ? n.toLocaleString('ja-JP') + 'ウォン' : i18n.isEn ? n.toLocaleString('en-US') + ' won' : n.toLocaleString('ko-KR') + '원';
+  const won = (n) => window.MagUtil.formatPrice(n);
   const stack = document.getElementById('wzStack');
   if (!stack) return;
   const marks = document.getElementById('wzMarks');
@@ -18,7 +18,7 @@
   const HOVERABLE = window.matchMedia?.('(hover: hover)')?.matches !== false;
 
   function db() { return window.MagDB; }
-  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  const esc = window.MagUtil.escapeHtml;
   const FALLBACK = ['#7a3b52', '#3f5a78', '#6b5036', '#4a6b4f', '#5a4a78', '#8a4a32'];
   const coverUrl = (it) => (it.cover_url ? it.cover_url : (it.cover_path ? db().webzine.publicUrl(it.cover_path) : ''));
 

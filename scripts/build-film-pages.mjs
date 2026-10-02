@@ -344,7 +344,8 @@ ${sameBrand.map((other) => `          <li><a href="${P}/film/${esc(other.slug)}.
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js?v=20261002-e1"></script>${T.lang !== 'ko' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
+  <script src="/js/theme-init.js?v=20261002-e1"></script>
+  <script src="${versioned('js/i18n.js')}"></script>
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">
@@ -435,7 +436,7 @@ ${articleHtml}
   const versioned = assetVersionReader(referenceHtml, {
     'css/film-detail.css': await contentHash('css/film-detail.css'),
     'js/film-detail.js': await contentHash('js/film-detail.js'),
-    // i18n.js 는 외국어 페이지만 싣는다. 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
+    // i18n.js 는 모든 언어판이 싣는다(한국어판에선 한국어를 돌려준다). 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
     'js/i18n.js': ((await fs.readFile(path.join(ROOT, 'en/about.html'), 'utf-8').catch(() => '')).match(/js\/i18n\.js\?v=([0-9A-Za-z-]+)/) || [])[1],
     // potw-picker.js 는 여기 넣지 않는다. films.html 에도 실려 bump-version 이
     // 관리하므로, 자체 해시를 붙이면 버전이 갈라져 단일 버전 가드에 걸린다.

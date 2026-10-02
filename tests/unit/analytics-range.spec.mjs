@@ -64,7 +64,8 @@ describe('통계 기간', () => {
 });
 
 describe('통계 RPC 계약', () => {
-  const CLIENT = fs.readFileSync(path.resolve(process.cwd(), 'js/db-client.js'), 'utf8');
+  // 통계(analytics) 함수는 편집부 전용이라 js/db/admin.js 에 있다.
+  const CLIENT = fs.readFileSync(path.resolve(process.cwd(), 'js/db/admin.js'), 'utf8');
   const SQL = fs.readFileSync(
     path.resolve(process.cwd(), 'supabase/migrations/20260830000001_analytics_date_range.sql'), 'utf8');
   const ERROR_SQL = fs.readFileSync(

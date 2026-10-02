@@ -7,7 +7,7 @@
 // density 그리드/리스트 토글 (localStorage 기억).
 (function () {
   'use strict';
-  const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n;
 
   const $ = (id) => document.getElementById(id);
   const input   = $('searchQ');
@@ -18,9 +18,7 @@
   let density = localStorage.getItem(DENSITY_KEY) || 'grid';
   if (density !== 'grid' && density !== 'list') density = 'grid';
 
-  function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-  }
+  const esc = window.MagUtil.escapeHtml;
   function db() { return window.MagDB; }
 
   function syncUrl(q) {
@@ -178,7 +176,7 @@
 
   function cardMarket(m, q) {
     const priceTxt = (m.price && Number(m.price) > 0)
-      ? (i18n.lang === 'ja' ? Number(m.price).toLocaleString('ja-JP') + 'ウォン' : i18n.isEn ? Number(m.price).toLocaleString('en-US') + ' won' : Number(m.price).toLocaleString('ko-KR') + '원')
+      ? window.MagUtil.formatPrice(m.price)
       : i18n.t('가격 협의', 'Price negotiable', '価格応相談');
     const href = i18n.isEn ? i18n.url('/market.html?id=' + encodeURIComponent(m.id || '')) : `market.html?id=${encodeURIComponent(m.id || '')}`;
     return `<a class="search-card" href="${href}">

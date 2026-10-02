@@ -7,8 +7,8 @@
 (function () {
   'use strict';
 
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, lang: 'ko', locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const i18n = window.i18n;
   const tr = i18n.t;
 
   const listEl = document.getElementById('labsList');
@@ -100,19 +100,11 @@
   let mobileVisible = MOBILE_INITIAL;
   const isMobileLabs = () => !!(window.matchMedia && window.matchMedia('(max-width: 640px)').matches);
 
-  function escapeHtml(s) {
-    const d = document.createElement('div');
-    d.textContent = String(s ?? '');
-    return d.innerHTML;
-  }
-  function escapeAttr(s) {
-    return String(s ?? '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  }
+  const escapeHtml = window.MagUtil.escapeHtml;
+  const escapeAttr = window.MagUtil.escapeAttr;
   function won(v) {
     if (v == null || v === '') return null;
-    return typeof v === 'number'
-      ? tr(`${v.toLocaleString('ko-KR')}원`, `${v.toLocaleString(i18n.locale)} won`, `${v.toLocaleString(i18n.locale)}ウォン`)
-      : String(v);
+    return typeof v === 'number' ? window.MagUtil.formatPrice(v) : String(v);
   }
   function slugify(s) {
     return String(s || '').toLowerCase()

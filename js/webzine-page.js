@@ -37,7 +37,7 @@
   }
 
   function db() { return window.MagDB; }
-  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  const esc = window.MagUtil.escapeHtml;
   const FALLBACK = ['#7a3b52', '#3f5a78', '#6b5036', '#4a6b4f', '#5a4a78', '#8a4a32'];
   const coverUrl = (it) => (it.cover_url ? it.cover_url : (it.cover_path ? db().webzine.publicUrl(it.cover_path) : ''));
 
@@ -506,7 +506,7 @@
   // 웹진·이북을 둘 다 불러오지 못해 보여 줄 책이 없으면 "발행된 웹진이 없어요" 대신 실패 안내 + 다시 시도.
   // 옛 책장은 한국어판뿐이지만 문구는 다른 페이지와 같이 세 언어로 적어 둔다
   function renderLoadError() {
-    const T = (window.i18n || { t: (ko) => ko }).t;
+    const T = window.i18n.t;
     const title = T('책장을 불러오지 못했어요.', 'Couldn\'t load the bookshelf.', '本棚を読み込めませんでした。');
     root.innerHTML = window.MagState
       ? window.MagState.error({ title, action: 'retry-books' })

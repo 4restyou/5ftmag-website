@@ -148,6 +148,9 @@
   //   opts.empty    — 값이 없거나 0 이하일 때 표시 (기본 '')
   //   opts.keepText — 숫자가 아닌 값("가격 협의" 등)을 원문 그대로 살릴지 (기본 false)
   // keepText 경로는 사용자 입력이므로 escapeHtml 로 감싼다.
+  // 단위는 페이지 언어(i18n.lang)를 따른다: 30,000원 / 30,000 won / 30,000ウォン.
+  // 표시용 문자열만 만든다. 결제로 보내는 금액은 숫자 그대로 따로 쓴다.
+  const PRICE_UNITS = { ko: ['ko-KR', '원'], en: ['en-US', ' won'], ja: ['ja-JP', 'ウォン'] };
   function formatPrice(value, opts) {
     const empty = opts && 'empty' in opts ? opts.empty : '';
     const keepText = !!(opts && opts.keepText);
@@ -155,7 +158,33 @@
     if (!raw) return empty;
     const n = Number(raw.replace(/[^0-9.-]/g, ''));
     if (!Number.isFinite(n) || n <= 0) return keepText ? escapeHtml(raw) : empty;
-    return n.toLocaleString('ko-KR') + '원';
+    const unit = PRICE_UNITS[window.i18n && window.i18n.lang] || PRICE_UNITS.ko;
+    return n.toLocaleString(unit[0]) + unit[1];
+  }
+
+  // DB 계층(js/db-client.js)이 오류에 붙이는 code → 화면 문구 [한, 영, 일].
+  // 한국어 칸은 db-client 가 message 로 넣는 문구와 같게 둔다(한국어판 화면은 그대로).
+  const ERROR_TEXT = {
+    AUTH_EXPIRED: ['로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.', 'Your sign-in has expired. Please sign in again and try again.', 'ログインの有効期限が切れました。もう一度ログインしてからお試しください。'],
+    AUTH_REQUIRED: ['로그인이 필요해요.', 'Please sign in first.', 'ログインが必要です。'],
+    NETWORK: ['네트워크 연결이 불안정해요. 연결을 확인한 뒤 다시 시도해 주세요.', 'The network connection is unstable. Check your connection and try again.', 'ネットワーク接続が不安定です。接続を確認してから、もう一度お試しください。'],
+    FILE_TOO_LARGE: ['파일 용량이 너무 커요.', 'The file is too large.', 'ファイルの容量が大きすぎます。'],
+    UNSUPPORTED_TYPE: ['지원하지 않는 파일 형식이에요.', 'This file type is not supported.', 'このファイル形式には対応していません。'],
+    RLS_DENIED: ['권한이 없어 저장하지 못했어요. 다시 로그인한 뒤 시도해 주세요.', 'You do not have permission to save this. Please sign in again and try again.', '権限がないため保存できませんでした。もう一度ログインしてからお試しください。'],
+    UNAVAILABLE: ['서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.', 'Could not reach the server. Please try again in a moment.', 'サーバーに接続できませんでした。しばらくしてからもう一度お試しください。'],
+    UPLOAD_TOOL: ['TUS 클라이언트가 로드되지 않았어요. 페이지를 새로고침해 주세요.', 'The upload tool did not load. Please refresh the page.', 'アップロードツールが読み込まれていません。ページを再読み込みしてください。'],
+    ABORTED: ['업로드가 중단되었어요.', 'The upload was stopped.', 'アップロードが中断されました。'],
+  };
+
+  // 오류 → 화면 문구. code 가 있으면 그 언어 문구를 쓰고, 서버가 준 원문은 괄호로 덧붙인다.
+  // code 가 없는 옛 경로는 message 를 그대로 돌려준다.
+  function errorMessage(error) {
+    const raw = String((error && error.message) || '');
+    const row = error && ERROR_TEXT[error.code];
+    if (!row) return raw;
+    const t = window.i18n ? window.i18n.t : function (ko) { return ko; };
+    const text = t(row[0], row[1], row[2]);
+    return raw && raw !== row[0] && raw !== text ? `${text} (${raw})` : text;
   }
 
   // 사진 풀에서 작가를 한 명씩 돌아가며 뽑는다 (라운드로빈).
@@ -212,6 +241,7 @@
     seoulTodayIso: seoulTodayIso,
     isPublishedContent: isPublishedContent,
     formatPrice: formatPrice,
+    errorMessage: errorMessage,
     pickByAuthorRoundRobin: pickByAuthorRoundRobin,
     applyVisibility: applyVisibility,
     localizeStories: localizeStories,

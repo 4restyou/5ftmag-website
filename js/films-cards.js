@@ -8,7 +8,7 @@
     escapeAttr,
     filterCategoryOf,
   } = window.FilmsUtils;
-  const i18n = window.i18n || { t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n;
   const tr = i18n.t;
 
   function renderFilmCard(slug, film, context = 'library-grid', options = {}) {
@@ -67,10 +67,15 @@
       ...(film.aliases || []), slug,
     ].filter(Boolean).join(' ').toLowerCase();
 
+    // 투고 CTA 는 하트처럼 카드 링크 밖의 형제 버튼이다. 링크 안에는 같은 글자의 빈 자리
+    // (.film-cta-slot, 보이지 않음)를 남겨 카드 높이를 그대로 두고, 버튼을 그 자리에 겹친다.
     const ctaIsUpload = context === 'library-grid';
     const ctaHtml = ctaIsUpload
-      ? `<span class="film-cta film-cta-action" role="button" tabindex="0" data-action="open-submission" data-prefill-film="${escapeAttr(film.displayName || film.name)}">${cta}</span>`
+      ? `<span class="film-cta film-cta-slot" aria-hidden="true">${cta}</span>`
       : `<span class="film-cta">${cta}</span>`;
+    const ctaButtonHtml = ctaIsUpload
+      ? `<button type="button" class="film-cta film-cta-action" data-action="open-submission" data-prefill-film="${escapeAttr(film.displayName || film.name)}">${cta}</button>`
+      : '';
 
     // 하트는 카드 링크(<a>) 안이 아니라 형제 버튼이다. 안에 두면 버튼 안의 버튼이 되어
     // 키보드·스크린리더가 둘을 구분하지 못한다. 위치는 CSS 에서 절대 위치로 겹친다.
@@ -102,6 +107,7 @@
           <p class="film-spec"><span class="film-spec-main">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)}</span><span class="film-spec-format">${escapeAttr(film.format)}</span></p>
           ${ctaHtml}
         </a>
+        ${ctaButtonHtml}
         ${favHtml}
       </div>`;
   }

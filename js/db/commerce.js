@@ -35,7 +35,7 @@
     // 일반적으로 직접 호출은 admin 미리보기 / 운영 진단 정도.
     // strict: 실패하면 [] 대신 던진다. 공개 화면이 "불러오지 못함" 과 "0건" 을 가르는 데 쓴다
     async listPublished({ strict = false } = {}) {
-      const c = client(); if (!c) { if (strict) throw new Error('unavailable'); return []; }
+      const c = client(); if (!c) { if (strict) throw Object.assign(new Error('unavailable'), { code: 'UNAVAILABLE' }); return []; }
       const { data, error } = await c.from('shop_products')
         .select('*')
         .eq('published', true)
@@ -62,7 +62,7 @@
       return data;
     },
     async upsert(row) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const onConflict = row.id ? undefined : 'slug';
       const { data, error } = await c.from('shop_products')
         .upsert(row, { onConflict })
@@ -72,13 +72,13 @@
       return { data };
     },
     async remove(slug) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const { error } = await c.from('shop_products').delete().eq('slug', slug);
       return { error };
     },
     // 순서 batch 변경 — updates: [{ slug, sort_order }, ...]
     async updateSortOrder(updates) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const results = await Promise.all(updates.map(u =>
         c.from('shop_products').update({ sort_order: u.sort_order }).eq('slug', u.slug)
       ));
@@ -93,7 +93,7 @@
     // 공개 — 발행된 이북 목록 (Books 페이지용)
     // strict: 실패하면 [] 대신 던진다 (shop.listPublished 와 같다)
     async listPublished({ strict = false } = {}) {
-      const c = client(); if (!c) { if (strict) throw new Error('unavailable'); return []; }
+      const c = client(); if (!c) { if (strict) throw Object.assign(new Error('unavailable'), { code: 'UNAVAILABLE' }); return []; }
       const { data, error } = await c.from('ebook_products')
         .select('*')
         .eq('published', true)
@@ -120,7 +120,7 @@
       return data;
     },
     async upsert(row) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const onConflict = row.id ? undefined : 'slug';
       const { data, error } = await c.from('ebook_products')
         .upsert(row, { onConflict })
@@ -130,7 +130,7 @@
       return { data };
     },
     async remove(slug) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const { error } = await c.from('ebook_products').delete().eq('slug', slug);
       return { error };
     },
@@ -183,7 +183,7 @@
     },
     // 편집부 — 수동 부여 (무통장입금 확인 후). 회수 이력이 있으면 재활성화.
     async grant(userId_, productId, { source = 'manual', orderRef = '' } = {}) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const grantedBy = await userId();
       const { error } = await c.from('ebook_entitlements')
         .upsert(
@@ -197,7 +197,7 @@
     },
     // 편집부 — 회수. 감사·환불 확인을 위해 행을 삭제하지 않는다.
     async revoke(userId_, productId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const { error } = await c.from('ebook_entitlements')
         .update({ status: 'revoked', revoked_at: new Date().toISOString(), revoke_reason: 'manual' })
         .eq('user_id', userId_).eq('product_id', productId).eq('status', 'active');
@@ -207,13 +207,13 @@
     // ── PDF (비공개 버킷, 편집부 업로드용) ──
     // full.pdf(전체) + preview.pdf(앞 1/3)를 {pagesPath}/ 에 둔다.
     async uploadPdf(pagesPath, fileName, blob) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const { error } = await c.storage.from('ebook-pages')
         .upload(`${pagesPath}/${fileName}`, blob, { upsert: true, contentType: 'application/pdf' });
       return { error };
     },
     async clearPdfs(pagesPath) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const { error } = await c.storage.from('ebook-pages')
         .remove([`${pagesPath}/full.pdf`, `${pagesPath}/preview.pdf`]);
       return { error };
@@ -236,7 +236,7 @@
     // 표지 — 웹진과 같은 공개 버킷에 ebooks/ 경로로 업로드. 공개 URL 반환.
     // 기존 webzine 네임스페이스(uploadFile/publicUrl)를 재사용한다.
     async uploadCover(slug, file) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const ext = ((file.name && file.name.split('.').pop()) || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
       const path = `ebooks/${slug}-cover.${ext}`;
       const { error } = await webzine.uploadFile(path, file);
@@ -245,7 +245,7 @@
     },
     // 페이지 수만 안전하게 갱신 (upsert 는 누락 컬럼을 날리므로 targeted update)
     async setPageCount(id, count) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const { error } = await c.from('ebook_products')
         .update({ page_count: count }).eq('id', id);
       return { error };
