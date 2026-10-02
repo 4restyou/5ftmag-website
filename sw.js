@@ -3,10 +3,13 @@
 //   - HTML: network-first (3초 타임아웃) + 실패 시 캐시 fallback
 //     배포 직후 즉시 새 HTML 받게. stale-while-revalidate 의 "2번 새로고침 후 갱신"
 //     UX 결함 해소. 오프라인 시는 캐시로 그대로 동작.
-//   - 정적 자산 (JS/CSS/이미지): 네트워크 우선 + 캐시 fallback (캐시 키로 버스트됨)
+//     3초가 지나도 캐시가 없으면 오류로 끝내지 않고 네트워크 응답을 끝까지 기다린다.
+//   - 정적 자산 (JS/CSS): 네트워크 우선 + 캐시 fallback (캐시 키로 버스트됨)
+//   - 이미지: 캐시에 담지 않는다 (/img/* 는 HTTP immutable 캐시가 맡는다, 무한 누적 방지)
+//   - 캐시 이름을 바꾸면 activate 에서 옛 캐시를 통째로 지운다.
 // 푸시 알림 핸들러 포함.
 
-const CACHE = '5ft-v2-network-first';
+const CACHE = '5ft-v3-20261002';
 const CORE = [
   '/',
   '/index.html',
@@ -31,13 +34,36 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// network-first 의 타임아웃 — 느린 네트워크라도 3초 안에 안 오면 캐시 fallback.
-function fetchWithTimeout(req, ms) {
+// network-first 의 타임아웃 — 3초 안에 안 오면 캐시가 있을 때만 캐시로 답한다.
+// 캐시가 없으면 같은 네트워크 요청을 끝까지 기다린다(느린 회선에서 처음 여는 페이지).
+function networkFirst(req, ms) {
+  const net = fetch(req);
   return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('sw timeout')), ms);
-    fetch(req).then(res => { clearTimeout(t); resolve(res); })
-              .catch(err => { clearTimeout(t); reject(err); });
+    let settled = false;
+    const t = setTimeout(async () => {
+      const cached = await caches.match(req).catch(() => null);
+      if (cached && !settled) { settled = true; resolve(cached); }
+    }, ms);
+    net.then((res) => {
+      clearTimeout(t);
+      if (res && res.ok) {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => null);
+      }
+      if (!settled) { settled = true; resolve(res); }
+    }).catch(async (err) => {
+      clearTimeout(t);
+      if (settled) return;
+      settled = true;
+      const cached = await caches.match(req).catch(() => null);
+      if (cached) resolve(cached); else reject(err);
+    });
   });
+}
+
+function isImage(url, req) {
+  return url.pathname.startsWith('/img/') || req.destination === 'image'
+    || /\.(?:png|jpe?g|webp|avif|gif|svg|ico|heic)$/i.test(url.pathname);
 }
 
 self.addEventListener('fetch', (e) => {
@@ -47,37 +73,34 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return;
   // POST/admin/Supabase 등 API 는 캐시 안 함
   if (url.pathname.startsWith('/i/') || url.pathname.includes('/admin/')) return;
+  // 이미지는 캐시에 담지 않는다 (브라우저 HTTP 캐시가 처리). 미리 담아 둔 로고만 오프라인용으로 꺼내 쓴다.
+  if (isImage(url, req)) {
+    if (CORE.includes(url.pathname)) e.respondWith(caches.match(req).then((c) => c || fetch(req)));
+    return;
+  }
 
   const isHtml = req.headers.get('accept')?.includes('text/html') || url.pathname.endsWith('.html') || url.pathname === '/';
 
   if (isHtml) {
-    // network-first — 새 배포는 즉시 반영, 네트워크 끊겼을 때만 캐시.
-    e.respondWith((async () => {
-      try {
-        const res = await fetchWithTimeout(req, 3000);
-        if (res && res.ok) {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => null);
-        }
-        return res;
-      } catch (_) {
-        const cached = await caches.match(req);
-        if (cached) return cached;
-        throw new Error('network failed and no cache');
-      }
-    })());
+    // network-first — 새 배포는 즉시 반영, 느리거나 끊겼을 때만 캐시.
+    e.respondWith(networkFirst(req, 3000));
     return;
   }
 
   // 기타 정적: 네트워크 우선 + 캐시 fallback
   e.respondWith(
     fetch(req).then((res) => {
-      if (res && res.ok) {
+      const type = res && res.headers.get('content-type') || '';
+      if (res && res.ok && !type.startsWith('image/')) {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => null);
       }
       return res;
-    }).catch(() => caches.match(req))
+    }).catch(async (err) => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+      throw err;
+    })
   );
 });
 

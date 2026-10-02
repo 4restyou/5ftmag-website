@@ -320,18 +320,28 @@
 
   // 지역순: 지역별로 묶어 구분 헤더와 함께 렌더. REGION_ORDER 우선, 그 외는 가나다,
   // 지역 없는 항목은 '기타'로 맨 끝. 각 지역 안은 이름순.
-  function renderGrouped(items) {
+  const regionKey = (it) => it.region || '기타';
+  const regionRank = (r) => (r === '기타' ? 9999 : (REGION_ORDER.indexOf(r) === -1 ? 998 : REGION_ORDER.indexOf(r)));
+  function sortByRegion(items) {
+    return [...items].sort((a, b) => {
+      const ka = regionKey(a), kb = regionKey(b);
+      return (regionRank(ka) - regionRank(kb)) || ka.localeCompare(kb, 'ko') || byName(a, b);
+    });
+  }
+  // items 는 sortByRegion 을 거친 목록(모바일에선 앞부분만). 머리 숫자는 all(잘리기 전 전체) 기준.
+  function renderGrouped(items, all = items) {
+    const totals = new Map();
+    for (const it of all) totals.set(regionKey(it), (totals.get(regionKey(it)) || 0) + 1);
     const groups = new Map();
     for (const it of items) {
-      const key = it.region || '기타';
+      const key = regionKey(it);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(it);
     }
-    const rank = (r) => (r === '기타' ? 9999 : (REGION_ORDER.indexOf(r) === -1 ? 998 : REGION_ORDER.indexOf(r)));
-    const keys = [...groups.keys()].sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b, 'ko'));
-    return keys.map((k) => {
-      const grp = groups.get(k).sort(byName);
-      return `<h2 class="labs-region-divider">${escapeHtml(regionLabel(k))}<span class="labs-region-divider-count">${tr(`${grp.length}곳`, `${grp.length}`, `${grp.length}か所`)}</span></h2>`
+    return [...groups.keys()].map((k) => {
+      const grp = groups.get(k);
+      const n = totals.get(k) || grp.length;
+      return `<h2 class="labs-region-divider">${escapeHtml(regionLabel(k))}<span class="labs-region-divider-count">${tr(`${n}곳`, `${n}`, `${n}か所`)}</span></h2>`
         + grp.map(card).join('');
     }).join('');
   }
@@ -440,20 +450,42 @@
     return tab === 'labs' ? labCard(item) : repairCard(item);
   }
 
+  // 지도 SDK 를 못 불렀을 때 독자에게 보이는 안내. 지도 버튼을 눌러도 아무 반응이 없던 문제.
+  const mapFailText = () => (tab === 'labs'
+    ? tr("지도를 불러오지 못했어요. 각 현상소의 '지도에서 보기'를 눌러 주세요", "The map couldn't load. Use “Naver Map (Korean) ↗” on each lab instead.", '地図を読み込めませんでした。各現像所の「NAVERマップ（韓国語）」からご覧ください。')
+    : tr("지도를 불러오지 못했어요. 각 수리실의 '지도에서 보기'를 눌러 주세요", "The map couldn't load. Use “Naver Map (Korean) ↗” on each shop instead.", '地図を読み込めませんでした。各修理店の「NAVERマップ（韓国語）」からご覧ください。'));
+  function showMapFailNotice() {
+    if (mapSectionEl) mapSectionEl.hidden = true;
+    let note = document.getElementById('labsMapFail');
+    if (!note) {
+      note = document.createElement('p');
+      note.id = 'labsMapFail';
+      note.className = 'labs-count labs-map-fail';
+      note.setAttribute('role', 'status');
+      const anchor = document.getElementById('labsCount');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(note, anchor);
+      else if (mapSectionEl && mapSectionEl.parentNode) mapSectionEl.parentNode.insertBefore(note, mapSectionEl);
+      else return;
+    }
+    note.textContent = mapFailText();
+    note.hidden = false;
+  }
+
   function initMap() {
     const el = document.getElementById('labsMap');
-    // SDK 로드 실패(오프라인·차단) 시 지도 영역을 숨기고 리스트만 유지한다.
+    // SDK 로드 실패(오프라인·차단) 시 지도 영역을 숨기고 리스트만 유지한 채 안내를 띄운다.
     if (!el || !window.naver || !naver.maps) {
-      if (mapSectionEl) mapSectionEl.hidden = true;
+      console.warn('[labs] naver maps SDK not loaded');
+      showMapFailNotice();
       return;
     }
     // 도메인·키 인증 실패 시에도 빈 회색 박스 대신 영역을 접는다.
     window.addEventListener('labs:naver-map-auth-failed', () => {
-      if (mapSectionEl) mapSectionEl.hidden = true;
+      showMapFailNotice();
       setView('list');
     });
     if (window.__labsNaverMapAuthFailed) {
-      if (mapSectionEl) mapSectionEl.hidden = true;
+      showMapFailNotice();
       return;
     }
     map = new naver.maps.Map(el, {
@@ -674,8 +706,8 @@
     }
     // 모바일 + 필터·검색 없을 때만 처음 일부만 렌더. 지도 마커는 전체(filtered) 유지.
     const capped = isMobileLabs() && region === 'all' && !query;
-    const shown = capped ? filtered.slice(0, mobileVisible) : filtered;
-    listEl.innerHTML = renderGrouped(shown);
+    const sorted = sortByRegion(filtered);
+    listEl.innerHTML = renderGrouped(capped ? sorted.slice(0, mobileVisible) : sorted, sorted);
     updateMoreButton(capped ? filtered.length : 0);
     // 첫 렌더 후 URL 의 ?lab=slug 가 있으면 해당 카드 자동 펼침.
     if (!deepLinkApplied) tryApplyDeepLink();
@@ -755,12 +787,15 @@
     mapEl.hidden = false;
     mapEl.innerHTML = '';
     mapEl.classList.remove('labs-modal-map-empty');
-    const showEmpty = (reason) => {
+    const showEmpty = (reason, msg) => {
       console.warn('[labs] modal map skip:', reason, item.name, item.address);
       mapEl.classList.add('labs-modal-map-empty');
-      mapEl.innerHTML = `<span class="labs-modal-map-msg">${tr('지도 표시 실패', 'Map unavailable', '地図を表示できません')} (${reason})</span>`;
+      mapEl.innerHTML = `<span class="labs-modal-map-msg">${escapeHtml(msg)}</span>`;
     };
-    if (!window.naver || !naver.maps) { showEmpty(tr('SDK 미로드', 'SDK not loaded', 'SDK未読み込み')); return; }
+    if (!window.naver || !naver.maps) {
+      showEmpty('sdk not loaded', tr("지도를 불러오지 못했어요. 아래 '지도에서 보기'를 눌러 주세요", "The map couldn't load. Use “Naver Map (Korean) ↗” below.", '地図を読み込めませんでした。下の「NAVERマップ（韓国語）」からご覧ください。'));
+      return;
+    }
     // 좌표 source 우선순위: 1) item.lat/lng (DB·정적 JSON), 2) 메인 지도 geocode 캐시(markerBySlug),
     // 3) item.address 직접 geocode (admin 등록 후 좌표 없는 lab 대응).
     let coord = await resolveItemCoord(item);
@@ -773,7 +808,7 @@
         lat = pos.lat(); lng = pos.lng();
       }
     }
-    if (!isValidCoord({ lat, lng })) { showEmpty(tr('좌표 없음', 'no coordinates', '座標なし')); return; }
+    if (!isValidCoord({ lat, lng })) { showEmpty('no coordinates', tr('위치 정보가 없어 지도를 그리지 못했어요', 'No location data for this place yet.', '位置情報がないため地図を表示できません')); return; }
     // 모달 transition 후 size 측정되도록 다음 frame 에서 생성.
     requestAnimationFrame(() => {
       try {
@@ -784,7 +819,7 @@
         });
         modalMapMarker = new naver.maps.Marker({ position: center, map: modalMap, title: shown(item, 'name') });
       } catch (e) {
-        showEmpty(tr('생성 오류 ', 'init error ', '初期化エラー ') + (e?.message || e));
+        showEmpty('init error ' + (e?.message || e), tr("지도를 불러오지 못했어요. 아래 '지도에서 보기'를 눌러 주세요", "The map couldn't load. Use “Naver Map (Korean) ↗” below.", '地図を読み込めませんでした。下の「NAVERマップ（韓国語）」からご覧ください。'));
       }
     });
   }
@@ -908,7 +943,7 @@
 
   function setView(next) {
     if (next !== 'map') next = 'list';
-    if (next === 'map' && window.__labsNaverMapAuthFailed) next = 'list';
+    if (next === 'map' && window.__labsNaverMapAuthFailed) { showMapFailNotice(); next = 'list'; }
     view = next;
     document.documentElement.classList.toggle('labs-view-map', view === 'map');
     document.documentElement.classList.toggle('labs-view-list', view === 'list');
