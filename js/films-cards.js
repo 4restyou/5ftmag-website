@@ -8,7 +8,8 @@
     escapeAttr,
     filterCategoryOf,
   } = window.FilmsUtils;
-  const tr = (window.i18n || { t: (ko) => ko }).t;
+  const i18n = window.i18n || { t: (ko) => ko, url: (u) => u };
+  const tr = i18n.t;
 
   function renderFilmCard(slug, film, context = 'library-grid', options = {}) {
     const rollLimit = options.rollLimit || 36;
@@ -71,33 +72,38 @@
       ? `<span class="film-cta film-cta-action" role="button" tabindex="0" data-action="open-submission" data-prefill-film="${escapeAttr(film.displayName || film.name)}">${cta}</span>`
       : `<span class="film-cta">${cta}</span>`;
 
+    // 하트는 카드 링크(<a>) 안이 아니라 형제 버튼이다. 안에 두면 버튼 안의 버튼이 되어
+    // 키보드·스크린리더가 둘을 구분하지 못한다. 위치는 CSS 에서 절대 위치로 겹친다.
     const isFav = filmFavSlugs.has(slug);
     const favHtml = `
-      <span class="film-fav${isFav ? ' is-fav' : ''}" role="button" tabindex="0"
+      <button type="button" class="film-fav${isFav ? ' is-fav' : ''}"
             data-action="toggle-film-fav" data-film-slug="${escapeAttr(slug)}"
             aria-pressed="${isFav}" aria-label="${isFav ? tr('즐겨찾기 해제', 'Remove from favorites', 'お気に入りから外す') : tr('즐겨찾기 추가', 'Add to favorites', 'お気に入りに追加')}">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round"
                 d="M12 21s-7.5-4.5-9.5-9.5C1 7.5 4 4.5 7.5 4.5c2 0 3.6 1 4.5 2.5.9-1.5 2.5-2.5 4.5-2.5 3.5 0 6.5 3 5 7-2 5-9.5 9.5-9.5 9.5z"/>
         </svg>
-      </span>`;
+      </button>`;
 
     // "이 필름으로 쓴 글 N" 표시는 카드가 아니라 모달 desc 아래로 이전 (films-page.js).
     // 카드는 사진·이름 위주의 깔끔한 그리드로 유지.
 
+    const href = i18n.url(`/films.html?film=${encodeURIComponent(slug)}`);
     return `
-      <button class="film-card${tierClass}" data-reveal data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-brand="${escapeAttr(film.brand || '')}" data-search="${escapeAttr(searchTokens)}">
-        <div class="film-img">
-          ${badgeHtml}
-          ${favHtml}
-          ${imgHtml}
-          <span class="film-count">${countLabel}</span>
-        </div>
-        <span class="film-brand">${escapeAttr(film.brand)}</span>
-        <h2 class="film-name">${escapeAttr(film.name)}</h2>
-        <p class="film-spec"><span class="film-spec-main">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)}</span><span class="film-spec-format">${escapeAttr(film.format)}</span></p>
-        ${ctaHtml}
-      </button>`;
+      <div class="film-card${tierClass}" data-reveal data-film="${escapeAttr(slug)}" data-tier="${escapeAttr(film.tier)}" data-filter-category="${escapeAttr(filterCategoryOf(film))}" data-brand="${escapeAttr(film.brand || '')}" data-search="${escapeAttr(searchTokens)}">
+        <a class="film-card-link" href="${escapeAttr(href)}">
+          <div class="film-img">
+            ${badgeHtml}
+            ${imgHtml}
+            <span class="film-count">${countLabel}</span>
+          </div>
+          <span class="film-brand">${escapeAttr(film.brand)}</span>
+          <h2 class="film-name">${escapeAttr(film.name)}</h2>
+          <p class="film-spec"><span class="film-spec-main">ISO ${escapeAttr(film.iso)} · ${escapeAttr(film.type)}</span><span class="film-spec-format">${escapeAttr(film.format)}</span></p>
+          ${ctaHtml}
+        </a>
+        ${favHtml}
+      </div>`;
   }
 
   window.FilmsCards = {
