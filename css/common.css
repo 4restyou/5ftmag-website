@@ -55,6 +55,8 @@ header {
   align-items: center;
   justify-content: space-between;
   height: var(--header-h);
+  max-width: 1600px;
+  margin: 0 auto;
   padding: 0 24px;
 }
 
@@ -147,7 +149,7 @@ header {
   white-space: nowrap;
 }
 .main-nav .nav-more summary::-webkit-details-marker { display: none; }
-.main-nav .nav-more summary::after { content: '▾'; margin-left: 6px; font-size: 9px; }
+.main-nav .nav-more summary::after { content: '▾'; margin-left: 5px; font-size: 11px; }
 .main-nav .nav-more summary:hover { opacity: .45; }
 .main-nav .nav-more summary.current { font-weight: var(--fw-heading); }
 .main-nav .nav-more summary.current::before {
@@ -175,15 +177,27 @@ header {
 .main-nav .nav-more-menu a:hover { background: var(--bg-sub); opacity: 1; }
 [data-theme="dark"] .nav-more-menu { box-shadow: 0 12px 34px rgba(0,0,0,.46); }
 
-.main-nav .nav-account {
+.nav-right .nav-account {
   position: relative;
   display: flex;
   align-items: center;
   height: var(--header-h);
-  margin-left: 4px;
 }
 
-.main-nav .nav-account-btn,
+.nav-right .nav-login {
+  display: block;
+  padding: 0 10px;
+  font-size: var(--fs-nav);
+  font-weight: var(--fw-all);
+  letter-spacing: var(--ls-default);
+  color: var(--text);
+  line-height: var(--header-h);
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+.nav-right .nav-login:hover { opacity: .45; }
+
+.nav-right .nav-account-btn,
 .main-nav a.nav-auth-icon {
   display: flex;
   align-items: center;
@@ -261,6 +275,25 @@ header {
   align-items: center;
   gap: 4px;
   margin-left: 4px;
+}
+
+/* 데스크톱: 글 메뉴와 아이콘 묶음 사이를 띄우고 짧은 세로선으로 나눈다 */
+@media (min-width: 901px) {
+  .main-nav + .nav-right {
+    position: relative;
+    margin-left: 28px;
+    padding-left: 12px;
+  }
+  .main-nav + .nav-right::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 1px;
+    height: 20px;
+    transform: translateY(-50%);
+    background: var(--border);
+  }
 }
 
 /* ────────── 알림 종 + 뱃지 + 드롭다운 ────────── */
@@ -844,9 +877,14 @@ footer {
 }
 
 @media (max-width: 900px) {
-  .main-nav {
+  .main-nav,
+  .nav-right [data-nav-auth] {
     display: none;
   }
+
+  /* 모바일 아이콘 순서는 그대로(검색 · 알림 · 테마 · 언어 · 메뉴). DOM 은 데스크톱 순서라 order 로 되돌린다 */
+  .nav-right .lang-wrap { order: 1; }
+  .nav-right #menuBtn { order: 2; }
 
   .hamburger {
     display: flex;

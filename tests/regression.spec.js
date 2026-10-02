@@ -134,7 +134,7 @@ test('데스크톱 헤더는 계정 메뉴 안에 내 정보와 로그아웃을 
   });
 
   await page.goto('/');
-  const accountButton = page.locator('.main-nav .nav-account-btn[aria-label="계정 메뉴 열기"]');
+  const accountButton = page.locator('.nav-right .nav-account-btn[aria-label="계정 메뉴 열기"]');
   await expect(accountButton).toBeVisible({ timeout: 5000 });
   await expect(accountButton.locator('svg')).toBeVisible();
   const topLevelLinks = page.locator('.main-nav > li > a');
