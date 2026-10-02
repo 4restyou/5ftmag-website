@@ -278,18 +278,30 @@
 
     // 햄버거 메뉴 토글
     if (menuBtn && mobileNav) {
-      menuBtn.addEventListener('click', function () {
-        const opened = mobileNav.classList.toggle('open');
+      const setMenuOpen = (opened) => {
+        // 전체 화면 시트는 헤더 바로 아래에서 시작한다 (헤더 높이는 페이지마다 다를 수 있다)
+        if (opened) {
+          const header = mobileNav.closest('header');
+          if (header) mobileNav.style.top = Math.max(0, header.getBoundingClientRect().bottom) + 'px';
+        }
+        mobileNav.classList.toggle('open', opened);
         document.body.classList.toggle('modal-open', opened);
         updateMenuButton(menuBtn, mobileNav);
+      };
+      menuBtn.addEventListener('click', function () {
+        setMenuOpen(!mobileNav.classList.contains('open'));
       });
 
       // 네비게이션 링크 클릭 시 메뉴 닫기
       mobileNav.addEventListener('click', function (event) {
-        if (event.target.closest('a')) {
-          mobileNav.classList.remove('open');
-          document.body.classList.remove('modal-open');
-          updateMenuButton(menuBtn, mobileNav);
+        if (event.target.closest('a')) setMenuOpen(false);
+      });
+
+      // ESC 로 닫고 포커스를 햄버거로 돌린다
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && mobileNav.classList.contains('open')) {
+          setMenuOpen(false);
+          menuBtn.focus();
         }
       });
     }
@@ -379,9 +391,18 @@
         shop: byPage(mobileNav, 'shop.html'),
       };
       if (links.magazine) links.magazine.textContent = 'Magazine';
-      [links.articles, links.films, links.magazine, links.market, links.labs, links.about, links.shop]
-        .filter(Boolean).forEach(a => mobileNav.appendChild(a));
-      links.labs?.classList.add('mobile-nav-secondary-start');
+      // 모바일 시트는 세 묶음: 주요 메뉴 / 보조 메뉴 / 계정(renderAuthNav 가 채운다)
+      const group = (name, items) => {
+        const div = document.createElement('div');
+        div.className = 'mobile-nav-group';
+        div.dataset.group = name;
+        items.filter(Boolean).forEach(a => div.appendChild(a));
+        mobileNav.appendChild(div);
+      };
+      group('primary', [links.articles, links.films, links.magazine, links.market, links.labs]);
+      group('secondary', [links.about, links.shop]);
+      group('account', []);
+      mobileNav.querySelectorAll('a.current').forEach(a => a.setAttribute('aria-current', 'page'));
       mobileNav.dataset.primaryNormalized = '1';
     }
   }
@@ -791,8 +812,8 @@
     if (!loggedIn) {
       items.push({ label: tr('로그인', 'Sign in', 'ログイン'), action: 'auth-login' });
     } else {
-      if (isEditor) items.push({ label: tr('관리', 'Admin', '管理'), href: adminHref });
       items.push({ label: tr('내 정보', 'My page', 'マイページ'), href: meHref });
+      if (isEditor) items.push({ label: tr('관리', 'Admin', '管理'), href: adminHref });
       items.push({ label: tr('로그아웃', 'Sign out', 'ログアウト'), action: 'auth-logout' });
     }
     function accountIconSvg() {
@@ -835,17 +856,22 @@
         else mainNav.appendChild(li);
       }
     }
-    // 모바일 nav (Shop 링크 뒤에 끼움)
+    // 모바일 nav (시트 아래쪽 계정 묶음에 넣는다)
     if (mobileNav) {
-      const shopA = mobileNav.querySelector('a[href*="smartstore"]') || null;
+      let account = mobileNav.querySelector('.mobile-nav-group[data-group="account"]');
+      if (!account) {
+        account = document.createElement('div');
+        account.className = 'mobile-nav-group';
+        account.dataset.group = 'account';
+        mobileNav.appendChild(account);
+      }
       items.forEach(it => {
         const a = document.createElement('a');
         a.setAttribute('data-nav-auth', '1');
         if (it.href) a.href = it.href;
         else { a.href = '#'; a.dataset.action = it.action; }
         a.textContent = it.label;
-        if (shopA && shopA.nextSibling) shopA.parentNode.insertBefore(a, shopA.nextSibling);
-        else mobileNav.appendChild(a);
+        account.appendChild(a);
       });
     }
   }
