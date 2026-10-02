@@ -945,6 +945,16 @@
   //   로그인 사용자에게만 .nav-right 에 종 버튼 inject.
   //   클릭 시 드롭다운 패널 표시. 실시간 INSERT 토스트.
   // ════════════════════════════════════════════════
+  // 패널(position: fixed)을 종 아이콘 바로 아래에 맞춘다. 헤더 안쪽 너비에 상한(1600px)이 생겨
+  // 넓은 화면에선 종이 화면 끝에서 떨어지므로, 화면 끝 기준 고정값 대신 종의 오른쪽 끝에 맞춘다.
+  // 480px 이하는 CSS 가 좌우 8px 로 펼치므로 손대지 않는다.
+  function alignNotifPanel(panel, bell) {
+    if (!panel || !bell) return;
+    if (window.innerWidth <= 480) { panel.style.right = ''; return; }
+    const r = bell.getBoundingClientRect();
+    panel.style.right = Math.max(8, Math.round(window.innerWidth - r.right)) + 'px';
+  }
+
   function bellIconSvg() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18a2 2 0 0 0 4 0"/></svg>';
   }
@@ -1020,9 +1030,11 @@
       bell.addEventListener('click', (e) => {
         e.stopPropagation();
         const open = guestPanel.hidden;
+        if (open) alignNotifPanel(guestPanel, bell);
         guestPanel.hidden = !open;
         bell.setAttribute('aria-expanded', String(open));
       });
+      window.addEventListener('resize', () => { if (!guestPanel.hidden) alignNotifPanel(guestPanel, bell); });
       document.addEventListener('click', (e) => {
         if (guestPanel.hidden) return;
         if (guestPanel.contains(e.target) || bell.contains(e.target)) return;
@@ -1123,6 +1135,7 @@
       }
     }
     async function openPanel() {
+      alignNotifPanel(panel, bell);
       panel.hidden = false;
       bell.setAttribute('aria-expanded', 'true');
       const list = document.getElementById('notifList');
@@ -1169,6 +1182,7 @@
       e.stopPropagation();
       if (panel.hidden) openPanel(); else closePanel();
     });
+    window.addEventListener('resize', () => { if (!panel.hidden) alignNotifPanel(panel, bell); });
     document.addEventListener('click', (e) => {
       if (panel.hidden) return;
       if (panel.contains(e.target) || bell.contains(e.target)) return;
