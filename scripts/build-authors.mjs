@@ -13,6 +13,8 @@ import { isPublishedContent } from './story-visibility.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = resolve(dirname(__filename), '..');
+// i18n.js 는 모든 언어판이 싣는다(한국어판에선 한국어를 돌려준다). 다른 영문 페이지와 같은 버전을 쓴다(단일 버전 가드)
+const i18nVersion = (readFileSync(join(ROOT, 'en/about.html'), 'utf8').match(/js\/i18n\.js(\?v=[0-9A-Za-z-]+)/) || [])[1] || '';
 const SITE_URL = 'https://www.5ftmag.com';
 
 const AUTHOR_SLUGS = new Map([
@@ -239,6 +241,7 @@ ${structuredData}  <link rel="icon" type="image/svg+xml" href="img/favicon/icon.
   <link rel="shortcut icon" href="img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
   <script src="./js/theme-init.js?v=20261002-e1"></script>
+  <script src="./js/i18n.js${i18nVersion}"></script>
   <link rel="stylesheet" href="pretendard.css" />
   <link rel="stylesheet" href="css/tokens.css${v('css/tokens.css')}">
   <link rel="stylesheet" href="css/common.css${v('css/common.css')}">
@@ -378,8 +381,6 @@ ${footer(authorFile, '../')}
 // ── 외국어판: en/authors.html, en/authors/<slug>.html, ja/authors.html, ja/authors/<slug>.html ──
 // 같은 입력(data/stories.json)으로 찍는다. 링크·자산은 절대경로(<base href="/"> 때문),
 // 그 언어판이 있는 페이지는 /en/ · /ja/ 로 잇는다(sync-site-shell 과 같은 규칙).
-// i18n.js 는 외국어 페이지만 싣는다. 다른 영문 페이지와 같은 버전을 쓴다(단일 버전 가드)
-const i18nVersion = (readFileSync(join(ROOT, 'en/about.html'), 'utf8').match(/js\/i18n\.js(\?v=[0-9A-Za-z-]+)/) || [])[1] || '';
 const articlesLabel = (n) => `${n} ${n === 1 ? 'Article' : 'Articles'}`;
 
 const FOREIGN = {

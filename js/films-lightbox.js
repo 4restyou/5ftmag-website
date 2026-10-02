@@ -1,18 +1,11 @@
 (function () {
   'use strict';
 
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const i18n = window.i18n;
   const tr = i18n.t;
 
-  function escapeText(value = '') {
-    return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
+  const escapeText = window.MagUtil.escapeHtml;
 
   function createNoopLightbox() {
     return {
@@ -92,7 +85,7 @@
         const label = tr(`${idx + 1}번째 사진 보기`, `View photo ${idx + 1}`, `${idx + 1}枚目の写真を見る`) + (photo.author ? `, ${photo.author}` : '');
         return `
           <button class="lightbox-thumb" type="button" data-photo-index="${idx}" aria-label="${escapeText(label)}">
-            <img src="${source.webp}" alt="" loading="lazy" />
+            <img src="${escapeText(source.webp)}" alt="" loading="lazy" />
           </button>
         `;
       }).join('');

@@ -3,6 +3,9 @@ import { readFileSync } from 'node:fs';
 
 beforeEach(() => {
   vi.useFakeTimers();
+  // 페이지처럼 i18n.js · util.js 를 먼저 싣는다
+  window.eval(readFileSync('js/i18n.js', 'utf8'));
+  window.eval(readFileSync('js/util.js', 'utf8'));
   window.eval(readFileSync('js/reader-upload-flow.js', 'utf8'));
 });
 afterEach(() => {

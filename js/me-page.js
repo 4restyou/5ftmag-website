@@ -1,6 +1,6 @@
 'use strict';
 
-const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
+const i18n = window.i18n;
 // 이 파일의 상대 링크(films.html 등). 영문판에선 /en/ 쪽으로 보낸다. 한국어 출력은 그대로.
 const pageHref = (p) => i18n.isEn ? i18n.url('/' + p) : p;
 
@@ -48,15 +48,7 @@ function fmtDateShort(iso) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 // "30000000" → "30,000,000원". 숫자가 아니면 (예: "가격 협의") 원문 그대로.
-function fmtPrice(v) {
-  if (!i18n.isEn) return window.MagUtil.formatPrice(v, { keepText: true });
-  // 영문판: "30,000,000 won". 판정 규칙은 MagUtil.formatPrice 와 같다.
-  const raw = String(v ?? '').trim();
-  if (!raw) return '';
-  const n = Number(raw.replace(/[^0-9.-]/g, ''));
-  if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
-  return i18n.lang === 'ja' ? n.toLocaleString('ja-JP') + 'ウォン' : n.toLocaleString('en-US') + ' won';
-}
+function fmtPrice(v) { return window.MagUtil.formatPrice(v, { keepText: true }); }
 // 검토 상태(사진 투고·필름 제안 등) 이름은 이 한 곳에서 정한다. 탭마다 이름이 달랐던 것을 한 벌로 묶었다
 function reviewStatusLabel(s) {
   return ({ pending: i18n.t('대기', 'Pending', '審査中'), approved: i18n.t('공개 중', 'Published', '公開中'), rejected: i18n.t('반려', 'Rejected', '不採用') })[s] || '';

@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const i18n = window.i18n;
   const tr = i18n.t;
 
   const FALLBACK_LONG_SIDE = 1200;
@@ -33,9 +33,18 @@
     return 45000;
   }
 
+  // code 가 붙은 오류를 만든다. 화면(reader-submissions.js)은 message 가 아니라 code 로 갈래를 고른다.
+  function codedError(message, code) {
+    const error = new Error(message);
+    if (code) error.code = code;
+    return error;
+  }
+
   function retryable(error) {
+    if (['AUTH_EXPIRED', 'AUTH_REQUIRED', 'RLS_DENIED', 'UPLOAD_TOOL'].includes(error?.code)) return false;
     const status = Number(error?.status || error?.statusCode);
     if (status >= 400 && status < 500 && ![408, 413, 429].includes(status)) return false;
+    // code 가 없는 옛 경로의 대체 판정
     return !/로그인|권한|세션|ログイン|権限|セッション|row.level security|unauthorized|forbidden|TUS 클라이언트/i.test(error?.message || '');
   }
 
@@ -56,14 +65,14 @@
     const totalBudget = Number(window.__readerUploadTotalTimeoutMs) || 180000;
     function remaining(ms) {
       const left = totalBudget - (Date.now() - started);
-      if (left <= 0) throw new Error(tr('사진 업로드 시간 초과. 입력 내용은 유지됩니다. 연결을 확인한 뒤 다시 시도해 주세요.', 'Photo upload timed out. Your entries are kept. Check your connection and try again.', '写真のアップロードがタイムアウトしました。入力内容は保持されています。接続を確認してから、もう一度お試しください。'));
+      if (left <= 0) throw codedError(tr('사진 업로드 시간 초과. 입력 내용은 유지됩니다. 연결을 확인한 뒤 다시 시도해 주세요.', 'Photo upload timed out. Your entries are kept. Check your connection and try again.', '写真のアップロードがタイムアウトしました。入力内容は保持されています。接続を確認してから、もう一度お試しください。'), 'UPLOAD_TIMEOUT');
       return Math.min(ms, left);
     }
     uploadMeta.attempts = Array.isArray(uploadMeta.attempts) ? uploadMeta.attempts : [];
     uploadMeta.finalError = '';
     if (navigator.onLine === false) {
       markProgress('storage', tr('네트워크 연결 필요', 'No network connection', 'ネットワーク接続が必要です'), tr('연결을 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.', '接続を確認してから、もう一度お試しください。'));
-      throw new Error(tr('네트워크 연결이 끊겼어요. 연결을 확인한 뒤 다시 시도해 주세요.', 'Your network connection dropped. Check your connection and try again.', 'ネットワーク接続が切れました。接続を確認してから、もう一度お試しください。'));
+      throw codedError(tr('네트워크 연결이 끊겼어요. 연결을 확인한 뒤 다시 시도해 주세요.', 'Your network connection dropped. Check your connection and try again.', 'ネットワーク接続が切れました。接続を確認してから、もう一度お試しください。'), 'NETWORK');
     }
     setSubmitText(tr(`사진 읽는 중… (${fmtBytes(file.size)})`, `Reading photo… (${fmtBytes(file.size)})`, `写真を読み込み中…（${fmtBytes(file.size)}）`));
     markProgress('decode', tr('사진을 읽는 중', 'Reading the photo', '写真を読み込んでいます'), tr(`${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`, `Preparing the ${fmtBytes(file.size)} file for the web.`, `${fmtBytes(file.size)} のファイルを Web 用の画像に準備しています。`));
@@ -84,7 +93,7 @@
       remaining(52000),
       tr('사진 변환', 'Photo conversion', '写真の変換')
     );
-    if (blob.size > MAX_UPLOAD_BYTES) throw new Error(tr('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.', 'The photo is too large. Please try an image under 5MB.', '写真の容量が大きすぎます。5MB 以下の画像でもう一度お試しください。'));
+    if (blob.size > MAX_UPLOAD_BYTES) throw codedError(tr('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.', 'The photo is too large. Please try an image under 5MB.', '写真の容量が大きすぎます。5MB 以下の画像でもう一度お試しください。'), 'FILE_TOO_LARGE');
 
     markProgress('auth', tr('로그인 상태 확인 중', 'Checking sign-in', 'ログイン状態を確認中'), tr('업로드 권한을 확인하고 있어요.', 'Checking your upload permission.', 'アップロードの権限を確認しています。'));
     let user = readLocalJwtUser();
@@ -92,7 +101,7 @@
       const session = await withNetworkTimeout(db.auth.getSession(), remaining(6000), tr('로그인 확인', 'Sign-in check', 'ログイン確認'));
       user = session?.user;
     }
-    if (!user) throw new Error(tr('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.', 'Your sign-in has expired. Please sign in again and submit.', 'ログインの有効期限が切れました。もう一度ログインしてから送信してください。'));
+    if (!user) throw codedError(tr('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.', 'Your sign-in has expired. Please sign in again and submit.', 'ログインの有効期限が切れました。もう一度ログインしてから送信してください。'), 'AUTH_EXPIRED');
 
     if (uploadState.userId !== user.id) {
       uploadState.userId = user.id;
@@ -215,8 +224,10 @@
 
     if (upErr) {
       uploadMeta.finalError = upErr.message || String(upErr);
-      if (!retryable(upErr)) throw new Error(upErr.message);
-      throw new Error(tr('사진 업로드가 완료되지 않았어요. 네트워크가 매우 불안정한 것 같습니다. 아래 안내된 경로로 보내주시면 직접 등록해 드릴게요. (', 'The photo upload did not finish. Your network seems very unstable. Send the photo through one of the options below and we will add it for you. (', '写真のアップロードが完了しませんでした。ネットワークがかなり不安定なようです。下記の方法で写真を送っていただければ、こちらで登録します。(') + upErr.message + ')');
+      // DB 계층의 원문(한국어 기본값)을 그 언어 문구로 바꾸고 원문은 괄호로 덧붙인다(MagUtil.errorMessage).
+      const detail = window.MagUtil.errorMessage(upErr);
+      if (!retryable(upErr)) throw codedError(detail, upErr.code);
+      throw codedError(tr('사진 업로드가 완료되지 않았어요. 네트워크가 매우 불안정한 것 같습니다. 아래 안내된 경로로 보내주시면 직접 등록해 드릴게요. (', 'The photo upload did not finish. Your network seems very unstable. Send the photo through one of the options below and we will add it for you. (', '写真のアップロードが完了しませんでした。ネットワークがかなり不安定なようです。下記の方法で写真を送っていただければ、こちらで登録します。(') + detail + ')', 'NETWORK');
     }
 
     return {

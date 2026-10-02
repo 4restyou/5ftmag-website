@@ -238,7 +238,7 @@
     // RLS profiles_update_own 이 본인 행만 통과시키고, is_editor/user_id 는
     // profiles_privilege_guard 트리거가 막으므로 안전한 컬럼만 넘긴다.
     async updateMine(patch = {}) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
       if (!uid) return { error: { message: 'not-signed-in' } };
       const fields = {};
@@ -251,7 +251,7 @@
     },
     // 아바타 이미지를 avatars 버킷의 본인 폴더에 올리고 public URL 을 돌려준다.
     async uploadAvatar(blob) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
       if (!uid) return { error: { message: 'not-signed-in' } };
       const ext = (blob.type && blob.type.includes('png')) ? 'png'
@@ -273,76 +273,6 @@
       const path = url.slice(i + marker.length).split('?')[0];
       try { const { error } = await c.storage.from('user-avatars').remove([path]); if (error) console.warn('[storage.remove] user-avatars', error.message || error); } catch (e) { console.warn('[storage.remove] user-avatars', e); }
     },
-    // 편집부가 메시지 보낼 회원을 찾을 때.
-    // display_name (Google 계정 이름), 사진 등록 시 입력한 작가명 (submitter_name),
-    // 사진 등록 시 입력한 IG 핸들 (instagram) 셋 다 검색. 매칭된 필드는 hints[] 로 같이 반환.
-    async search(query) {
-      const c = client(); if (!c) return [];
-      const q = String(query || '').trim();
-      if (q.length < 1) return [];
-      const like = `%${q}%`;
-
-      const profileQ = c.from('profiles_public')
-        .select('user_id, display_name, avatar_url')
-        .ilike('display_name', like)
-        .limit(20);
-
-      const submissionQ = c.from('reader_submissions')
-        .select('user_id, submitter_name, instagram')
-        .or(`submitter_name.ilike.${like},instagram.ilike.${like}`)
-        .limit(60);
-
-      const [profRes, subRes] = await Promise.all([profileQ, submissionQ]);
-      if (profRes.error) console.warn('[profiles.search]', profRes.error.message);
-      if (subRes.error)  console.warn('[profiles.search:submissions]', subRes.error.message);
-
-      const results = new Map();
-      for (const p of (profRes.data || [])) {
-        if (!p.user_id) continue;
-        results.set(p.user_id, {
-          user_id: p.user_id,
-          display_name: p.display_name,
-          avatar_url: p.avatar_url,
-          hints: ['이름'],
-        });
-      }
-
-      // submission 의 user_id 중 results 에 없는 것 → profile 조회 (display_name 채우려고)
-      const missingUids = [...new Set((subRes.data || [])
-        .map(s => s.user_id)
-        .filter(uid => uid && !results.has(uid)))];
-      if (missingUids.length > 0) {
-        const { data: extraProfiles } = await c.from('profiles_public')
-          .select('user_id, display_name, avatar_url')
-          .in('user_id', missingUids);
-        for (const p of (extraProfiles || [])) {
-          results.set(p.user_id, {
-            user_id: p.user_id,
-            display_name: p.display_name,
-            avatar_url: p.avatar_url,
-            hints: [],
-          });
-        }
-      }
-
-      const ql = q.toLowerCase();
-      for (const s of (subRes.data || [])) {
-        if (!s.user_id) continue;
-        const r = results.get(s.user_id);
-        if (!r) continue;
-        if (s.submitter_name && s.submitter_name.toLowerCase().includes(ql)) {
-          const hint = `사진 등록명 "${s.submitter_name}"`;
-          if (!r.hints.includes(hint)) r.hints.push(hint);
-        }
-        if (s.instagram && s.instagram.toLowerCase().includes(ql)) {
-          const ig = s.instagram.startsWith('@') ? s.instagram : '@' + s.instagram;
-          const hint = `IG ${ig}`;
-          if (!r.hints.includes(hint)) r.hints.push(hint);
-        }
-      }
-
-      return [...results.values()].slice(0, 20);
-    },
   };
 
   // ─── 댓글 (read via view, write via base table) ───
@@ -359,9 +289,9 @@
       return data || [];
     },
     async insert({ pageId, body, parentId }) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('comments').insert({
         page_id: pageId,
         user_id: uid,
@@ -383,45 +313,15 @@
       return data || [];
     },
     async update(id, body) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('comments').update({
         body: String(body || '').trim(),
         updated_at: new Date().toISOString(),
       }).eq('id', id);
     },
     async softDelete(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('comments').update({ deleted_at: new Date().toISOString() }).eq('id', id);
-    },
-    // ─ 모더레이션(편집부) ─ 페이지 구분 없이 전체 댓글을 최신순으로.
-    async adminListAll({ limit = 500 } = {}) {
-      const c = client(); if (!c) return { data: [], error: null };
-      const { data, error } = await c.from('comments_with_meta')
-        .select('*').order('created_at', { ascending: false }).limit(limit);
-      return { data: data || [], error };
-    },
-    async adminRestore(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('comments').update({ deleted_at: null }).eq('id', id);
-    },
-  };
-
-  // ─── 금칙어(편집부 관리) ───
-  const commentFilterTerms = {
-    async list() {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.from('comment_filter_terms').select('*').order('term', { ascending: true });
-      if (error) return [];
-      return data || [];
-    },
-    async add(term) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const uid = await userId();
-      return c.from('comment_filter_terms').insert({ term: String(term || '').trim(), created_by: uid });
-    },
-    async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('comment_filter_terms').delete().eq('id', id);
     },
   };
 
@@ -435,15 +335,15 @@
       return new Set((data || []).map(r => r.comment_id));
     },
     async add(commentId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('likes').insert({ comment_id: commentId, user_id: uid });
     },
     async remove(commentId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('likes').delete().eq('comment_id', commentId).eq('user_id', uid);
     },
   };
@@ -451,7 +351,7 @@
   // ─── 뉴스레터 구독 (이메일만 수집) ───
   const newsletter = {
     async subscribe(email) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const clean = String(email || '').trim().toLowerCase();
       if (!clean || clean.length > 200) return { error: { message: 'invalid email' } };
       // 직접 INSERT 는 막혀 있다(20261002000004). 정의자 권한 RPC 가 형식을 검사하고 중복이어도 같은 결과를 돌려준다.
@@ -461,7 +361,7 @@
     // 토큰으로 해지. 운영자가 새 이슈 메일에 unsubscribe.html?token=... 형태로 박는다.
     // SECURITY DEFINER 함수가 RLS 를 우회하며 정확히 일치하는 row 하나만 삭제.
     async unsubscribe(token) {
-      const c = client(); if (!c) return { ok: false, error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { ok: false, error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const t = String(token || '').trim();
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(t)) {
         return { ok: false, error: { message: 'invalid token' } };
@@ -502,16 +402,27 @@
       .slice(0, 40);
   }
 
+  // 오류 객체에는 화면이 문구를 고를 수 있게 짧은 code 를 붙인다(AUTH_EXPIRED·NETWORK·RLS_DENIED 등).
+  // 문구는 js/util.js 의 MagUtil.errorMessage 가 언어별로 고른다. message 는 원문(한국어 기본값·서버 응답).
+  function codeForStatus(status) {
+    if (status === 401) return 'AUTH_EXPIRED';
+    if (status === 403) return 'RLS_DENIED';
+    if (status === 413) return 'FILE_TOO_LARGE';
+    if (status === 415) return 'UNSUPPORTED_TYPE';
+    if (status >= 500) return 'UNAVAILABLE';
+    return undefined;
+  }
+
   // storage-js의 upload 옵션은 AbortSignal을 전달하지 않아 이 경로만 fetch를 사용한다.
   async function readerStorageRequest(method, path, blob, opts) {
-    const c = client(); if (!c) return { error: { message: 'unavailable' } };
+    const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
     try {
       if (opts.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
       const { data } = await withTimeout(c.auth.getSession(), 7000, 'getSession');
       if (opts.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
       const session = data?.session;
       if (!session?.access_token || !path.startsWith(session.user.id + '/')) {
-        return { error: { message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.', status: 401 } };
+        return { error: { message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.', status: 401, code: 'AUTH_EXPIRED' } };
       }
       const encoded = path.split('/').map(encodeURIComponent).join('/');
       let body;
@@ -529,12 +440,13 @@
       });
       if (!response.ok) {
         const detail = method === 'HEAD' ? {} : await response.json().catch(() => ({}));
-        return { error: { message: detail.message || detail.error || `업로드 오류 (${response.status})`, status: Number(detail.statusCode) || response.status } };
+        const status = Number(detail.statusCode) || response.status;
+        return { error: { message: detail.message || detail.error || `HTTP ${response.status}`, status, code: codeForStatus(status) } };
       }
       const length = response.headers.get('content-length');
       return { error: null, bytes: length == null ? null : Number(length) };
     } catch (error) {
-      return { error: { message: error.message, code: error.name === 'AbortError' ? 'ABORTED' : 'NETWORK_ERROR' } };
+      return { error: { message: error.message, code: error.name === 'AbortError' ? 'ABORTED' : 'NETWORK' } };
     }
   }
 
@@ -601,14 +513,14 @@
       return (data || []).map(mapApprovedSubmission);
     },
     async findOwn(record, opts = {}) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       let query = c.from('reader_submissions').select('id')
         .eq('id', record.id).eq('user_id', record.user_id).eq('storage_path', record.storage_path).maybeSingle();
       if (opts.signal) query = query.abortSignal(opts.signal);
       return query;
     },
     async create(record, opts = {}) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       if (record.id) {
         const existing = await submissions.findOwn(record, opts);
         if (existing.error || existing.data) return existing;
@@ -635,16 +547,16 @@
     // 이어 보낼 수 있어 단일 POST보다 복구가 쉽다. tus-js-client가 로드되어
     // window.tus.Upload 로 접근 가능해야 함.
     async uploadPhotoResumable(path, blob, opts = {}) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       if (!window.tus || typeof window.tus.Upload !== 'function') {
-        return { error: { message: 'TUS 클라이언트가 로드되지 않았어요. 페이지를 새로고침해 주세요.' } };
+        return { error: { message: 'TUS 클라이언트가 로드되지 않았어요. 페이지를 새로고침해 주세요.', code: 'UPLOAD_TOOL' } };
       }
       let accessToken = null;
       try {
         const { data } = await withTimeout(c.auth.getSession(), 7000, 'getSession');
         accessToken = data?.session?.access_token || null;
       } catch (_) {}
-      if (!accessToken) return { error: { message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.' } };
+      if (!accessToken) return { error: { message: '로그인이 만료되었어요. 다시 로그인한 뒤 시도해 주세요.', code: 'AUTH_EXPIRED' } };
       if (opts.signal?.aborted) return { error: { message: '업로드가 중단되었어요.', code: 'ABORTED' } };
 
       return new Promise((resolve) => {
@@ -680,7 +592,8 @@
           fingerprint: async () => `reader:${BUCKET}:${path}:${blob.size}`,
           onError(err) {
             const message = err?.message || String(err || '업로드 실패');
-            finish({ error: { message: String(message).slice(0, 300), status: err?.originalResponse?.getStatus?.() } });
+            const status = err?.originalResponse?.getStatus?.();
+            finish({ error: { message: String(message).slice(0, 300), status, code: status ? codeForStatus(status) : 'NETWORK' } });
           },
           onProgress(bytesSent, bytesTotal) {
             if (!settled && !opts.signal?.aborted) { try { opts.onProgress?.(bytesSent, bytesTotal); } catch (_) {} }
@@ -729,16 +642,16 @@
       return data || [];
     },
     async updateMine(id, patch) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       // 본인 row 만 매칭 — RLS 가 한 번 더 가드, trigger 가 핵심 컬럼 보호
       return c.from('reader_submissions').update(patch).eq('id', id).eq('user_id', uid);
     },
     async deleteMine(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       // .select() 를 체이닝해서 실제로 삭제된 row 가 반환되도록 함.
       // 안 그러면 RLS 가 silently 차단해도 data:null/error:null 로 통과되어
       // storage 파일만 지워지고 DB row 가 남는 orphan(=깨진 썸네일) 발생.
@@ -747,56 +660,17 @@
   };
 
   // ─── 편집부 검토 — RLS 가 권한 검증 ───
-  // 응모 검토 — 필터 (query 텍스트 + month YYYY-MM) 공통 적용 헬퍼
-  function applyReviewFilters(q, opts) {
-    if (opts.themeOnly) q = q.not('theme_month', 'is', null);
-    if (opts.query) {
-      // submitter_name / instagram / film 셋 중 하나라도 부분일치
-      const safe = String(opts.query).replace(/[%,\\]/g, ' ').trim();
-      if (safe) {
-        const pat = `%${safe}%`;
-        q = q.or(`submitter_name.ilike.${pat},instagram.ilike.${pat},film.ilike.${pat}`);
-      }
-    }
-    if (opts.month && /^\d{4}-\d{2}$/.test(opts.month)) {
-      const [Y, M] = opts.month.split('-').map(Number);
-      const start = `${opts.month}-01T00:00:00`;
-      const nextM = M === 12 ? `${Y + 1}-01` : `${Y}-${String(M + 1).padStart(2, '0')}`;
-      const end = `${nextM}-01T00:00:00`;
-      q = q.gte('created_at', start).lt('created_at', end);
-    }
-    return q;
-  }
-
   const review = {
-    async count(status, opts = {}) {
-      const c = client(); if (!c) return 0;
-      let q = c.from('reader_submissions')
-        .select('id', { count: 'exact', head: true }).eq('status', status);
-      q = applyReviewFilters(q, opts);
-      const { count } = await q;
-      return count || 0;
-    },
-    async list(status, from, to, opts = {}) {
-      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
-      let q = c.from('reader_submissions').select('*').eq('status', status);
-      q = applyReviewFilters(q, opts);
-      return q.order('created_at', { ascending: status === 'pending' }).range(from, to);
-    },
     async patch(id, patch) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('reader_submissions').update(patch).eq('id', id);
-    },
-    async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('reader_submissions').delete().eq('id', id);
     },
     // ── 이주의 사진 (편집부) ──
     // 선정은 승인된 사진이면 무엇이든 가능하다. 좋아요 수는 고를 때 참고하는
     // 값일 뿐 조건이 아니다. 좋아요를 안 누르는 독자가 많아서, 좋아요가 적다고
     // 좋은 사진이 아닌 것은 아니다.
     async setFeatured(id, dateStr, note) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))) {
         return { error: { message: '날짜 형식이 올바르지 않습니다 (YYYY-MM-DD)' } };
       }
@@ -811,7 +685,7 @@
     // 게재일이 아니라 선정한 순간에 보낸다. 예약분은 아직 홈에 없으므로
     // "걸렸어요" 라고 하면 거짓이 된다. 그래서 문구를 나눈다.
     async notifyFeatured(row, dateStr) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       if (!row?.user_id) return { error: { message: '제출자를 찾을 수 없습니다' } };
 
       const today = new Date().toISOString().slice(0, 10);
@@ -838,7 +712,7 @@
     // 편집부만 읽을 수 있다("editors read all"). 그래서 이 함수는 편집부
     // 세션에서만 끝까지 통과한다.
     async feature(id, dateStr, note) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))) {
         return { error: { message: '날짜 형식이 올바르지 않습니다 (YYYY-MM-DD)' } };
       }
@@ -857,39 +731,6 @@
       const { error: nErr } = await this.notifyFeatured(row, dateStr);
       return { notified: !nErr, notifyError: nErr || null };
     },
-    // 두 사진의 게재일을 맞바꾼다. 관리 화면의 위/아래 화살표가 쓴다.
-    //
-    // note 는 건드리지 않는다. setFeatured 는 note 를 덮어쓰므로 여기서는
-    // featured_at 만 바꾼다. 알림도 보내지 않는다. 이미 뽑힌 사람들끼리
-    // 자리를 바꾼 것이라 다시 알릴 일이 아니다.
-    //
-    // 두 번의 update 라 중간에 실패하면 두 사진이 같은 날짜를 갖게 된다.
-    // 그러면 홈이 나중에 등록한 쪽을 걸어서 화면이 헷갈리므로, 두 번째가
-    // 실패하면 첫 번째를 되돌린다.
-    async swapFeaturedDates(idA, dateA, idB, dateB) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const ok = (d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d || ''));
-      if (!idA || !idB || !ok(dateA) || !ok(dateB)) {
-        return { error: { message: '바꿀 두 날짜가 올바르지 않습니다' } };
-      }
-      const { error: e1 } = await c.from('reader_submissions')
-        .update({ featured_at: dateB }).eq('id', idA).select('id');
-      if (e1) return { error: e1 };
-
-      const { error: e2 } = await c.from('reader_submissions')
-        .update({ featured_at: dateA }).eq('id', idB).select('id');
-      if (e2) {
-        await c.from('reader_submissions').update({ featured_at: dateA }).eq('id', idA);
-        return { error: e2 };
-      }
-      return { error: null };
-    },
-    async clearFeatured(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('reader_submissions').update({
-        featured_at: null, featured_note: null,
-      }).eq('id', id).select('id');
-    },
     // 선정 목록 — 예약분까지 포함해 편집부가 일정을 본다 (미래 날짜 포함).
     async listFeatured() {
       const c = client(); if (!c) return [];
@@ -899,25 +740,6 @@
         .order('featured_at', { ascending: false });
       if (error) return [];
       return data || [];
-    },
-    // 편집부 전용 — 사진 좋아요 수 집계 (개인정보 노출 X)
-    // RPC SECURITY DEFINER 함수가 caller 의 is_editor 검사
-    async adminLikeCounts() {
-      const c = client(); if (!c) return new Map();
-      const { data, error } = await c.rpc('admin_submission_like_counts');
-      if (error) {
-        console.warn('[admin] like counts:', error.message);
-        return new Map();
-      }
-      return new Map((data || []).map(r => [String(r.target_id), Number(r.like_count) || 0]));
-    },
-    // 좋아요 순 정렬용 — 페이지네이션 무시하고 status 안의 모든 row 일괄 조회
-    //   (5ft.mag 규모에서 approved 가 10k 넘어가기 전엔 한 페이지로 충분)
-    async listAll(status, opts = {}) {
-      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
-      let q = c.from('reader_submissions').select('*').eq('status', status);
-      q = applyReviewFilters(q, opts);
-      return q.order('created_at', { ascending: false }).limit(2000);
     },
   };
 
@@ -963,15 +785,15 @@
       return data || [];
     },
     async create(record) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('market_listings').insert({ ...record, user_id: uid, status: 'available' });
     },
     async updateMine(id, patch) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('market_listings').update(patch).eq('id', id).eq('user_id', uid);
     },
     async cycleStatusMine(id, currentStatus) {
@@ -983,14 +805,14 @@
       return { next, error: r.error };
     },
     async deleteMine(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       // .select() — RLS silent block 가드 (submissions.deleteMine 와 동일)
       return c.from('market_listings').delete().eq('id', id).eq('user_id', uid).select('id');
     },
     async uploadPhoto(path, blob) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.storage.from(MARKET_BUCKET).upload(path, blob, {
         contentType: 'image/jpeg', upsert: false,
       });
@@ -1000,70 +822,12 @@
       try { const { error } = await c.storage.from(MARKET_BUCKET).remove(paths); if (error) console.warn('[storage.remove]', MARKET_BUCKET, error.message || error); } catch (e) { console.warn('[storage.remove]', MARKET_BUCKET, e); }
     },
     async report(listingId, reason) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('market_reports').insert({
         listing_id: listingId, reporter_id: uid, reason: String(reason || '').trim(),
       });
-    },
-
-    // ─── 편집부 전용 — RLS 가 권한 가드 ───
-    async adminGetListing(id) {
-      // base 테이블에서 직접 조회 — hidden 포함, RLS 가 편집부만 허용
-      const c = client(); if (!c) return null;
-      const { data } = await c.from('market_listings').select('*').eq('id', id).maybeSingle();
-      if (!data) return null;
-      // profiles 조인 (display_name 보강) — 간단히 별도 조회
-      const { data: prof } = await c.from('profiles_public').select('display_name')
-        .eq('user_id', data.user_id).maybeSingle();
-      return { ...data, display_name: prof?.display_name || null };
-    },
-    async adminReportCount(status = 'pending') {
-      const c = client(); if (!c) return 0;
-      const { count } = await c.from('market_reports')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', status);
-      return count || 0;
-    },
-    async adminListReports(status, from, to) {
-      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
-      let q = c.from('market_reports')
-        .select('id, listing_id, reporter_id, reason, status, resolved_at, resolved_by, resolver_note, created_at');
-      if (status) q = q.eq('status', status);
-      return q.order('created_at', { ascending: false }).range(from, to);
-    },
-    async adminPatchReport(id, patch) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const uid = await userId();
-      const merged = { ...patch };
-      if (patch.status && patch.status !== 'pending') {
-        merged.resolved_at = new Date().toISOString();
-        merged.resolved_by = uid;
-      } else if (patch.status === 'pending') {
-        merged.resolved_at = null;
-        merged.resolved_by = null;
-      }
-      return c.from('market_reports').update(merged).eq('id', id).select('id');
-    },
-    async adminHideListing(listingId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('market_listings').update({ status: 'hidden' }).eq('id', listingId).select('id');
-    },
-    async adminUnhideListing(listingId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('market_listings').update({ status: 'available' }).eq('id', listingId).select('id');
-    },
-    async adminDeleteListing(listingId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      // 매물 row 조회 → storage_paths 회수 → DB 삭제 → storage 삭제
-      const { data: row } = await c.from('market_listings').select('storage_paths').eq('id', listingId).maybeSingle();
-      const { data, error } = await c.from('market_listings').delete().eq('id', listingId).select('id');
-      if (error || !data?.length) return { error: error || { message: '삭제 거부됨 (편집부 권한 확인)' } };
-      if (row?.storage_paths?.length) {
-        try { const { error } = await c.storage.from(MARKET_BUCKET).remove(row.storage_paths); if (error) console.warn('[storage.remove]', MARKET_BUCKET, error.message || error); } catch (e) { console.warn('[storage.remove]', MARKET_BUCKET, e); }
-      }
-      return { data };
     },
   };
 
@@ -1089,18 +853,18 @@
       return new Set(rows.map(r => r.target_id));
     },
     async add(targetType, targetId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       // PK conflict 무시 — 이미 좋아요한 항목 재클릭도 멱등하게 통과
       return c.from('user_favorites')
         .upsert({ user_id: uid, target_type: targetType, target_id: targetId },
                 { onConflict: 'user_id,target_type,target_id', ignoreDuplicates: true });
     },
     async remove(targetType, targetId) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('user_favorites').delete()
         .eq('user_id', uid).eq('target_type', targetType).eq('target_id', targetId);
     },
@@ -1206,7 +970,7 @@
       }
     },
     async unsubscribe() {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const sub = await this.getSubscription();
       if (sub) {
         try { await c.from('push_subscriptions').delete().eq('endpoint', sub.endpoint); } catch (_) {}
@@ -1250,7 +1014,7 @@
     async markRead(ids) {
       const c = client(); if (!c || !ids?.length) return { error: null };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('user_notifications')
         .update({ read_at: new Date().toISOString() })
         .in('id', ids)
@@ -1260,16 +1024,16 @@
     async markAllRead() {
       const c = client(); if (!c) return { error: null };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('user_notifications')
         .update({ read_at: new Date().toISOString() })
         .eq('user_id', uid)
         .is('read_at', null);
     },
     async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       return c.from('user_notifications').delete().eq('id', id).eq('user_id', uid);
     },
   };
@@ -1290,205 +1054,6 @@
         });
       }
       return map;
-    },
-    async upsert({ model_key, brand, display, note, alias_of }) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
-      return c.from('camera_brand_overrides').upsert({
-        model_key: String(model_key || '').trim(),
-        brand: String(brand || '').trim(),
-        display: display ? String(display).trim() : null,
-        note: note ? String(note).trim() : null,
-        alias_of: alias_of ? String(alias_of).trim() : null,
-        created_by: uid,
-      });
-    },
-    async remove(modelKey) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('camera_brand_overrides').delete().eq('model_key', modelKey);
-    },
-  };
-
-  // ─── 통계 (편집부 전용 — 모든 RPC 내부에서 is_editor 검사) ───
-  async function fallbackUploadsTop(field, { from = null, to = null, days = null, limit = 10 } = {}) {
-    const c = client(); if (!c) return [];
-    const col = field === 'camera' ? 'camera' : 'film';
-    const since = days ? new Date(Date.now() - Number(days) * 86400000).toISOString() : null;
-    const fromIso = from && /^\d{4}-\d{2}-\d{2}$/.test(String(from)) ? `${from}T00:00:00` : since;
-    const toIso = to && /^\d{4}-\d{2}-\d{2}$/.test(String(to)) ? `${to}T23:59:59.999` : null;
-    let rows = [];
-
-    let q = c.from('reader_submissions')
-      .select(`${col}, status, created_at`)
-      .not(col, 'is', null)
-      .limit(5000);
-    if (fromIso) q = q.gte('created_at', fromIso);
-    if (toIso) q = q.lte('created_at', toIso);
-    const primary = await q;
-
-    if (primary.error) {
-      let publicQ = c.from('reader_submissions_approved')
-        .select(`${col}, created_at`)
-        .not(col, 'is', null)
-        .limit(5000);
-      if (fromIso) publicQ = publicQ.gte('created_at', fromIso);
-      if (toIso) publicQ = publicQ.lte('created_at', toIso);
-      const fallback = await publicQ;
-      if (fallback.error) {
-        console.warn(`[analytics.fallbackUploadsTop.${col}]`, fallback.error.message);
-        return [];
-      }
-      rows = (fallback.data || []).map(r => ({ ...r, status: 'approved' }));
-    } else {
-      rows = primary.data || [];
-    }
-
-    const grouped = new Map();
-    for (const row of rows) {
-      const key = String(row[col] || '').trim();
-      if (!key) continue;
-      const cur = grouped.get(key) || { [col]: key, uploads: 0, approved: 0 };
-      cur.uploads += 1;
-      if (row.status === 'approved') cur.approved += 1;
-      grouped.set(key, cur);
-    }
-    return [...grouped.values()]
-      .sort((a, b) => (b.uploads - a.uploads) || (b.approved - a.approved) || String(a[col]).localeCompare(String(b[col]), 'ko'))
-      .slice(0, limit);
-  }
-
-  const analytics = {
-    async summary() {
-      const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_analytics_summary');
-      if (error) { console.warn('[analytics.summary]', error.message); return null; }
-      return Array.isArray(data) ? (data[0] || null) : data;
-    },
-    async daily(from = null, to = null) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_daily', { p_from: from, p_to: to });
-      if (error) { console.warn('[analytics.daily]', error.message); return []; }
-      return data || [];
-    },
-    async topPaths(from = null, to = null, limit = 20) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_top_paths', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.topPaths]', error.message); return []; }
-      return data || [];
-    },
-    async referrers(from = null, to = null, limit = 20) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_referrers', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.referrers]', error.message); return []; }
-      return data || [];
-    },
-    async regions(from = null, to = null, limit = 20) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_regions', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.regions]', error.message); return []; }
-      return data || [];
-    },
-    // 페이지뷰 밖의 사용자 동작(app_events: nav_clicked·search 등) 이벤트별 횟수.
-    // 날짜 범위가 아니라 최근 N일. 편집부만 통과한다(정의자 권한 RPC + 편집부 확인).
-    async eventsSummary(days = 30, limit = 50) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_events_summary', { p_days: days, p_limit: limit });
-      if (error) { console.warn('[analytics.eventsSummary]', error.message); return []; }
-      return data || [];
-    },
-    async languages(from = null, to = null, limit = 20) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_languages', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.languages]', error.message); return []; }
-      return data || [];
-    },
-    async dwellSummary(from = null, to = null) {
-      const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_analytics_dwell_summary', { p_from: from, p_to: to });
-      if (error) { console.warn('[analytics.dwellSummary]', error.message); return null; }
-      return Array.isArray(data) ? (data[0] || null) : data;
-    },
-    async dwellByPath(from = null, to = null, limit = 10) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_analytics_dwell_by_path', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.dwellByPath]', error.message); return []; }
-      return data || [];
-    },
-    async sessionStats(from = null, to = null) {
-      const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_analytics_session_stats', { p_from: from, p_to: to });
-      if (error) { console.warn('[analytics.sessionStats]', error.message); return null; }
-      return Array.isArray(data) ? (data[0] || null) : data;
-    },
-    // 전체 기간 라벨에 실제 시작일을 적기 위해 쓴다
-    async firstDay() {
-      const c = await ready();
-      const { data, error } = await c.rpc('admin_analytics_first_day');
-      if (error) { console.warn('[analytics.firstDay]', error.message); return null; }
-      return (data && data[0]) || null;
-    },
-    async uploadsSummary() {
-      const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_uploads_summary');
-      if (error) { console.warn('[analytics.uploadsSummary]', error.message); return null; }
-      return Array.isArray(data) ? (data[0] || null) : data;
-    },
-    async uploadsDaily(from = null, to = null) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_daily', { p_from: from, p_to: to });
-      if (error) { console.warn('[analytics.uploadsDaily]', error.message); return []; }
-      return data || [];
-    },
-    async uploadsTopContributors(from = null, to = null, limit = 10) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_contributors', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopContributors]', error.message); return []; }
-      return data || [];
-    },
-    async uploadsTopFilms(from = null, to = null, limit = 10) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_films', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopFilms]', error.message); return fallbackUploadsTop('film', { from, to, limit }); }
-      return data?.length ? data : fallbackUploadsTop('film', { from, to, limit });
-    },
-    async uploadsTopFilmsAll(limit = 10) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_films_all', { p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopFilmsAll]', error.message); return fallbackUploadsTop('film', { limit }); }
-      return data?.length ? data : fallbackUploadsTop('film', { limit });
-    },
-    async uploadsTopCameras(from = null, to = null, limit = 10) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_cameras', { p_from: from, p_to: to, p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopCameras]', error.message); return fallbackUploadsTop('camera', { from, to, limit }); }
-      return data?.length ? data : fallbackUploadsTop('camera', { from, to, limit });
-    },
-    async uploadsTopCamerasAll(limit = 10) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.rpc('admin_uploads_top_cameras_all', { p_limit: limit });
-      if (error) { console.warn('[analytics.uploadsTopCamerasAll]', error.message); return fallbackUploadsTop('camera', { limit }); }
-      return data?.length ? data : fallbackUploadsTop('camera', { limit });
-    },
-    async uploadsThemeRatio(from = null, to = null) {
-      const c = client(); if (!c) return null;
-      const { data, error } = await c.rpc('admin_uploads_theme_ratio', { p_from: from, p_to: to });
-      if (error) { console.warn('[analytics.uploadsThemeRatio]', error.message); return null; }
-      return Array.isArray(data) ? (data[0] || null) : data;
-    },
-    async clientErrorsRecent(hours = 24, limit = 20) {
-      const c = client(); if (!c) return [];
-      const modern = await c.rpc('admin_client_errors_recent_v2', { p_hours: hours, p_limit: limit });
-      if (!modern.error) return modern.data || [];
-      const legacy = await c.rpc('admin_client_errors_recent', { p_hours: hours, p_limit: limit });
-      if (legacy.error) { console.warn('[analytics.clientErrorsRecent]', legacy.error.message || modern.error.message); return []; }
-      return legacy.data || [];
-    },
-    async clientErrorsPurge(keepDays = 30) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const { data, error } = await c.rpc('admin_client_errors_purge', { p_keep_days: keepDays });
-      if (error) { console.warn('[analytics.clientErrorsPurge]', error.message); return { error }; }
-      return { deleted: Number(data) || 0 };
     },
   };
 
@@ -1587,7 +1152,7 @@
       return data || null;
     },
     async upsert(record) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const payload = {
         slug:                  record.slug,
         tier:                  record.tier || 'library',
@@ -1617,17 +1182,17 @@
       return c.from('films').upsert(payload, { onConflict: 'slug' });
     },
     async setHidden(slug, hidden) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('films').update({ is_hidden: !!hidden }).eq('slug', slug);
     },
     async remove(slug) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('films').delete().eq('slug', slug);
     },
     // 캔(필름통) 썸네일 업로드 — 편집부만(Storage RLS).
     // 반환: { url, error }. url 은 public Storage URL (그대로 can_thumbnail 컬럼에 저장).
     async uploadCanThumbnail(slug, file) {
-      const c = client(); if (!c) return { url: null, error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { url: null, error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const cleanSlug = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
       if (!cleanSlug) return { url: null, error: { message: 'invalid slug' } };
       if (!file || !file.size) return { url: null, error: { message: 'no file' } };
@@ -1674,7 +1239,7 @@
       return data || null;
     },
     async upsert(record) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const payload = {
         name:      (record.name || '').trim(),
         region:    record.region ?? null,
@@ -1697,11 +1262,11 @@
       return c.from('labs').upsert(payload);
     },
     async setHidden(id, hidden) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('labs').update({ is_hidden: !!hidden }).eq('id', id);
     },
     async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('labs').delete().eq('id', id);
     },
   };
@@ -1728,7 +1293,7 @@
       return data || [];
     },
     async upsert(record) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const payload = {
         name:        (record.name || '').trim(),
         region:      record.region ?? null,
@@ -1748,11 +1313,11 @@
       return c.from('repair_shops').upsert(payload);
     },
     async setHidden(id, hidden) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('repair_shops').update({ is_hidden: !!hidden }).eq('id', id);
     },
     async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('repair_shops').delete().eq('id', id);
     },
   };
@@ -1761,7 +1326,7 @@
   const webzine = {
     // strict: 실패하면 [] 대신 던진다. 책장이 "불러오지 못함" 과 "0건" 을 가르는 데 쓴다
     async listPublished({ strict = false } = {}) {
-      const c = client(); if (!c) { if (strict) throw new Error('unavailable'); return []; }
+      const c = client(); if (!c) { if (strict) throw Object.assign(new Error('unavailable'), { code: 'UNAVAILABLE' }); return []; }
       const { data, error } = await c.from('webzine_issues')
         .select('*').eq('published', true)
         .order('sort_order', { ascending: false }).order('created_at', { ascending: false });
@@ -1783,15 +1348,15 @@
       return data || null;
     },
     async upsert(record) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('webzine_issues').upsert(record).select().maybeSingle();
     },
     async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('webzine_issues').delete().eq('id', id);
     },
     async uploadFile(path, file) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.storage.from(WEBZINE_BUCKET).upload(path, file, {
         contentType: file.type || 'application/octet-stream', upsert: true,
       });
@@ -1804,9 +1369,9 @@
   // films 테이블로 promote. 본인 신청만 SELECT, 편집부는 전체 권한(RLS).
   const filmProposals = {
     async create(rec) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       const payload = {
         user_id: uid,
         brand: String(rec.brand || '').trim(),
@@ -1834,53 +1399,6 @@
       if (error) return [];
       return data || [];
     },
-    // 편집부 전용 — pending(또는 전체) 목록
-    async listForReview({ status = 'pending', limit = 100 } = {}) {
-      const c = client(); if (!c) return [];
-      let q = c.from('film_proposals')
-        .select('*').order('created_at', { ascending: false }).limit(limit);
-      if (status && status !== 'all') q = q.eq('status', status);
-      const { data, error } = await q;
-      if (error) { console.warn('[filmProposals.listForReview]', error.message); return []; }
-      return data || [];
-    },
-    // 승인: status=approved + approved_slug 기록. 실제 films INSERT 는 admin/films 폼에서.
-    async approve(id, slug, notes) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('film_proposals').update({
-        status: 'approved',
-        approved_slug: slug || null,
-        reviewer_notes: notes || null,
-        reviewed_at: new Date().toISOString(),
-      }).eq('id', id);
-    },
-    async reject(id, notes) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      return c.from('film_proposals').update({
-        status: 'rejected',
-        reviewer_notes: notes || null,
-        reviewed_at: new Date().toISOString(),
-      }).eq('id', id);
-    },
-    // 신청자 알림 — 편집부가 승인/반려 후 호출 (RLS 가 본인+편집부만 인서트 허용
-    // 하지 않으므로 RPC 가 없다면 편집부 권한으로 user_notifications 직접 INSERT).
-    async notifyDecision(proposal, kind /* 'approved'|'rejected' */, link) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const titles = {
-        approved: '신청하신 필름이 등록됐어요',
-        rejected: '신청하신 필름이 반려됐어요',
-      };
-      const type = kind === 'approved' ? 'proposal_approved' : 'proposal_rejected';
-      return c.from('user_notifications').insert({
-        user_id: proposal.user_id,
-        type,
-        related_id: proposal.id,
-        title: titles[kind] || '신청 결과',
-        body: `${proposal.brand} ${proposal.name}` + (proposal.reviewer_notes ? ` · ${proposal.reviewer_notes}` : ''),
-        link: link || null,
-        meta: { brand: proposal.brand, name: proposal.name, notes: proposal.reviewer_notes || null },
-      });
-    },
   };
 
   const announcements = {
@@ -1903,49 +1421,6 @@
         .maybeSingle();
       return { data: data || null, error };
     },
-    // 관리: 전체 공지 (예약/지난/비활성 포함).
-    async listAll() {
-      const c = client(); if (!c) return { data: [], error: { message: 'unavailable' } };
-      const { data, error } = await c
-        .from('announcements')
-        .select('id, body, body_en, body_ja, starts_at, ends_at, is_active, created_at')
-        .order('created_at', { ascending: false });
-      return { data: data || [], error };
-    },
-    async create({ body, body_en, body_ja, starts_at, ends_at }) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const clean = String(body || '').trim();
-      if (!clean || clean.length > 500) return { error: { message: 'body 1~500자' } };
-      const uid = await userId();
-      // 영·일 칸은 선택. 비우면 null 로 두어 화면이 한국어(일문은 영문 먼저)로 대신 쓴다.
-      const row = {
-        body: clean,
-        body_en: String(body_en || '').trim() || null,
-        body_ja: String(body_ja || '').trim() || null,
-        created_by: uid,
-      };
-      if (starts_at) row.starts_at = starts_at;
-      if (ends_at) row.ends_at = ends_at;
-      const { error } = await c.from('announcements').insert(row);
-      return { error };
-    },
-    async update(id, fields) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const patch = {};
-      if (typeof fields.body === 'string') patch.body = fields.body.trim();
-      if ('body_en' in fields) patch.body_en = String(fields.body_en || '').trim() || null;
-      if ('body_ja' in fields) patch.body_ja = String(fields.body_ja || '').trim() || null;
-      if ('starts_at' in fields) patch.starts_at = fields.starts_at || null;
-      if ('ends_at' in fields) patch.ends_at = fields.ends_at || null;
-      if (typeof fields.is_active === 'boolean') patch.is_active = fields.is_active;
-      const { error } = await c.from('announcements').update(patch).eq('id', id);
-      return { error };
-    },
-    async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const { error } = await c.from('announcements').delete().eq('id', id);
-      return { error };
-    },
   };
 
   // ── Article drafts (편집부 에디터 저장소) ──
@@ -1963,7 +1438,7 @@
     // 기본값과 같아지면 행을 지운다. 그래야 원본이 둘로 갈라지지 않고
     // 이 테이블에는 "기본값에서 벗어난 글" 만 남는다.
     async setPublished(storyId, published, defaultPublished) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const id = String(storyId || '').trim();
       if (!id) return { error: { message: '글 id 가 없습니다' } };
 
@@ -1993,7 +1468,7 @@
       return data;
     },
     async upsertDraft(row) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const payload = { ...row };
       if (!payload.created_by) {
         try { payload.created_by = await userId(); } catch (_) {}
@@ -2007,12 +1482,12 @@
       return { data };
     },
     async removeDraft(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const { error } = await c.from('article_drafts').delete().eq('id', id);
       return { error };
     },
     async uploadMedia(path, blob) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.storage.from(ARTICLE_MEDIA_BUCKET).upload(path, blob, {
         cacheControl: '31536000', upsert: false, contentType: blob.type || 'application/octet-stream',
       });
@@ -2096,21 +1571,13 @@
     },
     // 회원이 보냄
     async send(body) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const uid = await userId();
-      if (!uid) return { error: { message: 'login required' } };
+      if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       const text = String(body || '').trim();
       if (!text) return { error: { message: 'empty' } };
       if (text.length > 2000) return { error: { message: 'too long' } };
       return c.from('messages').insert({ user_id: uid, from_editor: false, body: text });
-    },
-    // 편집부가 특정 회원에게 보냄
-    async sendAsEditor(targetUserId, body) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const text = String(body || '').trim();
-      if (!text) return { error: { message: 'empty' } };
-      if (text.length > 2000) return { error: { message: 'too long' } };
-      return c.from('messages').insert({ user_id: targetUserId, from_editor: true, body: text });
     },
     // 회원: 자기 받은 메시지 (편집부가 보낸 것) 읽음 처리.
     // 편집부: targetUserId 의 회원이 보낸 메시지 읽음 처리.
@@ -2134,15 +1601,6 @@
         .is('read_at', null);
       return count || 0;
     },
-    // 편집부 인박스: 회원별 스레드 목록 (마지막 메시지 / 안읽음 카운트 포함)
-    async listThreads({ limit = 200 } = {}) {
-      const c = client(); if (!c) return [];
-      const { data, error } = await c.from('message_threads').select('*')
-        .order('last_at', { ascending: false })
-        .limit(limit);
-      if (error) { console.warn('[messages.listThreads]', error.message); return []; }
-      return data || [];
-    },
     // 편집부 인박스: 회원이 보낸 메시지 중 전체 안읽음 카운트 (헤더 배지용)
     async unreadCountForAdmin() {
       const c = client(); if (!c) return 0;
@@ -2154,22 +1612,33 @@
     },
     // 본인 메시지 수정 (회원: 자기 발신, 편집부: 편집부 발신)
     async edit(id, body) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       const text = String(body || '').trim();
       if (!text) return { error: { message: 'empty' } };
       if (text.length > 2000) return { error: { message: 'too long' } };
       const { error } = await c.rpc('edit_message', { p_id: id, p_body: text });
       return { error };
     },
-    // 편집부 전용 soft delete
-    async remove(id) {
-      const c = client(); if (!c) return { error: { message: 'unavailable' } };
-      const { error } = await c.rpc('delete_message', { p_id: id });
-      return { error };
-    },
   };
 
-  const { shop, ebooks } = window.MagDBCommerce.create({ client, session, url: URL_, webzine });
+  // commerce.js 를 싣지 않는 페이지(필자 페이지 등)에서도 MagDB 가 만들어지게 한다.
+  const { shop, ebooks } = window.MagDBCommerce
+    ? window.MagDBCommerce.create({ client, session, url: URL_, webzine })
+    : { shop: {}, ebooks: {} };
+
+  // 편집부 전용 함수(응모 검토·장터 신고·통계·공지/메시지 관리 등)는 js/db/admin.js 에 있다.
+  // 관리 화면(admin/*.html)만 그 파일을 이 파일 앞에 싣고, 여기서 같은 이름으로 붙인다.
+  // 공개 화면이 편집부에게만 보여 주는 기능(이주의 사진 선정·필름명 수정·메시지 배지)은 여기 남긴다.
+  const admin = window.MagDBAdmin ? window.MagDBAdmin.create({ client, userId, MARKET_BUCKET }) : {};
+  Object.assign(profiles, admin.profiles);
+  Object.assign(comments, admin.comments);
+  Object.assign(review, admin.review);
+  Object.assign(market, admin.market);
+  Object.assign(cameraOverrides, admin.cameraOverrides);
+  Object.assign(filmProposals, admin.filmProposals);
+  Object.assign(announcements, admin.announcements);
+  Object.assign(messages, admin.messages);
+  const { commentFilterTerms, analytics } = admin;
 
   window.MagDB = {
     isReady() { return !!_client; },

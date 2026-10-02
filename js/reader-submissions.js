@@ -2,13 +2,15 @@
 // 사용법:
 //   <button data-action="open-submission">내 사진 올리기</button>
 //   <script src="js/db-client.js"></script>
-//   <script src="js/reader-submissions.js"></script>
+//   <script src="js/reader-upload-loader.js"></script>
+// 공개 페이지는 로더만 싣고, 로더가 첫 클릭 때 이 파일과 reader-* 모듈을 불러온다.
+// 관리 화면처럼 이 파일을 직접 싣는 곳도 로더를 먼저 둔다(필름명 매칭 함수가 로더에 있다).
 
 (function () {
   'use strict';
 
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const i18n = window.i18n;
   const tr = i18n.t;
 
   const MAX_LONG_SIDE = 1600;
@@ -124,96 +126,9 @@
     return _filmsPromise;
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 필름명 정규화 + 매칭 (films.html, admin과 공유)
-  //  - 정규화: 소문자 + 공백/하이픈/언더스코어/괄호 등 제거 (Hangul은 그대로)
-  //  - exact match: 정규화된 alias 집합에 hit
-  //  - fuzzy match: 부분 포함 + Levenshtein 거리 ≤ 임계값
-  // ════════════════════════════════════════════════════════════
-  const normalizeFilmName = window.MagUtil.normalizeFilmLabel;
-
-  // films 객체에서 정규화된 alias → 필름 entry 매핑 빌드
-  function buildAliasIndex(films) {
-    const buckets = new Map();
-    for (const slug of Object.keys(films || {})) {
-      const f = films[slug];
-      const all = (f.aliases || []).concat([f.displayName, f.name]).filter(Boolean);
-      for (const a of all) {
-        const k = normalizeFilmName(a);
-        if (!k) continue;
-        if (!buckets.has(k)) buckets.set(k, new Map());
-        buckets.get(k).set(slug, { slug, film: f });
-      }
-    }
-    const map = new Map();
-    for (const [alias, entriesBySlug] of buckets) {
-      const entries = [...entriesBySlug.values()];
-      map.set(alias, entries.length === 1
-        ? entries[0]
-        : { ambiguous: true, entries });
-    }
-    return map;
-  }
-
-  // Levenshtein 거리 (작은 입력에 최적, films 매칭 용도)
-  function levenshtein(a, b) {
-    const m = a.length, n = b.length;
-    if (!m) return n; if (!n) return m;
-    let prev = Array.from({ length: n + 1 }, (_, i) => i);
-    for (let i = 1; i <= m; i++) {
-      const curr = [i];
-      for (let j = 1; j <= n; j++) {
-        curr[j] = a[i - 1] === b[j - 1]
-          ? prev[j - 1]
-          : Math.min(prev[j - 1], prev[j], curr[j - 1]) + 1;
-      }
-      prev = curr;
-    }
-    return prev[n];
-  }
-
-  // 사용자 입력 → 가장 그럴듯한 필름 후보
-  //   - exact: alias 일치 → { type: 'exact', film, canonical }
-  //   - fuzzy: 부분 포함 또는 Levenshtein ≤ 임계값 → { type: 'fuzzy', film, canonical, score }
-  //   - none: null
-  function findFilmMatch(input, films) {
-    const q = normalizeFilmName(input);
-    if (!q) return null;
-    const aliasIndex = buildAliasIndex(films);
-
-    // 1) Exact match (alias 집합 내)
-    const exactEntry = aliasIndex.get(q);
-    if (exactEntry && !exactEntry.ambiguous) {
-      const entry = exactEntry;
-      return { type: 'exact', film: entry.film, slug: entry.slug, canonical: entry.film.displayName || entry.film.name };
-    }
-
-    // 2) Fuzzy: 부분 포함(양방향) 우선, 그다음 Levenshtein
-    const candidates = [];
-    for (const [normAlias, entry] of aliasIndex) {
-      if (entry.ambiguous) continue;
-      // 너무 짧은 입력은 잘못된 매칭 위험 — 최소 길이 3 이상에서만 부분 매칭 인정
-      if (q.length >= 3 && (normAlias.includes(q) || q.includes(normAlias))) {
-        const score = Math.max(q.length, normAlias.length) - Math.min(q.length, normAlias.length);
-        candidates.push({ entry, score });
-        continue;
-      }
-      // Levenshtein 임계값: 입력 길이의 30% 또는 3 중 작은 값
-      const threshold = Math.min(3, Math.max(1, Math.floor(q.length * 0.3)));
-      const d = levenshtein(q, normAlias);
-      if (d <= threshold) candidates.push({ entry, score: d });
-    }
-    if (!candidates.length) return null;
-    // 가장 가까운 후보
-    candidates.sort((a, b) => a.score - b.score);
-    const best = candidates[0].entry;
-    return { type: 'fuzzy', film: best.film, slug: best.slug, canonical: best.film.displayName || best.film.name };
-  }
-
-  // 외부에서 사용할 수 있게 노출 (films.html, admin과 공유)
-  window.normalizeFilmName = normalizeFilmName;
-  window.buildFilmAliasIndex = buildAliasIndex;
-  window.findFilmMatch = findFilmMatch;
+  // 필름명 정규화·매칭은 투고 창 없이도 films·admin 이 쓰므로 js/reader-upload-loader.js 에 둔다.
+  const normalizeFilmName = window.normalizeFilmName;
+  const findFilmMatch = window.findFilmMatch;
 
   // ════════════════════════════════════════════════════════════
   // 사진 변환 — js/image-processor.js 의 Worker 경로 우선,
@@ -812,7 +727,11 @@
     ].join('|');
   }
 
+  // 갈래는 오류 code 로 고른다(js/db-client.js · js/reader-upload-flow.js 가 붙인다).
+  // 메시지 문자열 판정은 code 가 없는 옛 경로의 대체로만 남긴다.
+  const KNOWN_ERROR_CODES = new Set(['AUTH_EXPIRED', 'AUTH_REQUIRED', 'NETWORK', 'UPLOAD_TIMEOUT', 'FILE_TOO_LARGE', 'UNSUPPORTED_TYPE', 'RLS_DENIED', 'UNAVAILABLE', 'UPLOAD_TOOL', 'ABORTED']);
   function uploadErrorState({ stage, error, hasUploadedPhoto }) {
+    const code = KNOWN_ERROR_CODES.has(error?.code) ? error.code : '';
     const msg = String(error?.message || '');
     const lower = msg.toLowerCase();
     if (hasUploadedPhoto || stage === 'database') {
@@ -822,7 +741,7 @@
         button: tr('제출 기록 다시 저장', 'Save submission again', '送信記録を保存し直す'),
       };
     }
-    if (stage === 'auth' || msg.includes('로그인') || msg.includes('세션') || (i18n.isEn && (lower.includes('sign in') || lower.includes('session'))) || (i18n.lang === 'ja' && (msg.includes('ログイン') || msg.includes('セッション')))) {
+    if (stage === 'auth' || code === 'AUTH_EXPIRED' || code === 'AUTH_REQUIRED' || (!code && (msg.includes('로그인') || msg.includes('세션') || (i18n.isEn && (lower.includes('sign in') || lower.includes('session'))) || (i18n.lang === 'ja' && (msg.includes('ログイン') || msg.includes('セッション')))))) {
       return {
         title: tr('로그인이 필요해요', 'Please sign in', 'ログインが必要です'),
         detail: tr('로그인이 풀렸거나 권한 확인이 오래 걸렸습니다. 다시 로그인한 뒤 이어서 제출해 주세요.', 'You were signed out, or the permission check took too long. Sign in again and continue your submission.', 'ログインが切れたか、権限の確認に時間がかかりました。もう一度ログインしてから送信を続けてください。'),
@@ -830,7 +749,7 @@
       };
     }
     if (stage === 'storage') {
-      const timedOut = msg.includes('시간 초과') || lower.includes('timeout') || msg.includes('네트워크') || (i18n.isEn && (lower.includes('timed out') || lower.includes('network'))) || (i18n.lang === 'ja' && (msg.includes('タイムアウト') || msg.includes('ネットワーク')));
+      const timedOut = code === 'UPLOAD_TIMEOUT' || code === 'NETWORK' || (!code && (msg.includes('시간 초과') || lower.includes('timeout') || msg.includes('네트워크') || (i18n.isEn && (lower.includes('timed out') || lower.includes('network'))) || (i18n.lang === 'ja' && (msg.includes('タイムアウト') || msg.includes('ネットワーク')))));
       return {
         title: timedOut ? tr('사진 전송 시간이 초과됐어요', 'Photo upload timed out', '写真の送信がタイムアウトしました') : tr('사진 전송에 실패했어요', 'Photo upload failed', '写真を送信できませんでした'),
         detail: timedOut
@@ -1070,16 +989,7 @@
     autoReopenIfPending();
   }
 
-  // 외부 노출: 승인된 제출 가져오기 (MagDB 위임 — 호환성 유지)
-  window.fetchApprovedSubmissions = async function (limit = null) {
-    if (!db() || !db().isReady()) return [];
-    return withNetworkTimeout(
-      db().submissions.listApproved(limit),
-      30000,
-      '승인된 사진 목록 불러오기'
-    ).catch(err => {
-      console.warn('[reader-submissions] approved list:', err?.message || err);
-      return [];
-    });
-  };
+  // 외부 노출: 지연 로더(js/reader-upload-loader.js)가 첫 클릭 뒤 이 함수로 창을 연다.
+  // 승인된 제출 목록(fetchApprovedSubmissions)은 투고 창 없이도 쓰므로 로더에 있다.
+  window.ReaderSubmissions = { open: handleOpen };
 })();

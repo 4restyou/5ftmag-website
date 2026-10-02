@@ -4,7 +4,7 @@
 // 구매 CTA 는 Smart Store 의 상품 페이지로 새 탭 점프.
 
 (function () {
-  const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n;
   const grid = document.getElementById('shopGrid');
   const empty = document.getElementById('shopEmpty');
   const chipsBar = document.getElementById('shopChips');
@@ -15,8 +15,8 @@
 
   if (!grid) return;
 
-  const escapeHtml = window.MagUtil ? window.MagUtil.escapeHtml : (s) => String(s ?? '');
-  const escapeAttr = window.MagUtil ? window.MagUtil.escapeAttr : (s) => String(s ?? '');
+  const escapeHtml = window.MagUtil.escapeHtml;
+  const escapeAttr = window.MagUtil.escapeAttr;
 
   const STATE = {
     products: [],
@@ -24,10 +24,7 @@
     loadFailed: false,   // 불러오기 실패. 칩을 눌러도 "상품 없음" 대신 실패 안내를 둔다
   };
 
-  function fmtPrice(n) {
-    const s = window.MagUtil.formatPrice(n);
-    return i18n.lang === 'ja' ? s.replace(/원$/, 'ウォン') : i18n.isEn ? s.replace(/원$/, ' won') : s;
-  }
+  const fmtPrice = (n) => window.MagUtil.formatPrice(n);
 
   function categoryLabel(cat) {
     switch (cat) {

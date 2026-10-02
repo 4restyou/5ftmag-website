@@ -6,8 +6,8 @@
   const escapeHtml = window.MagUtil.escapeHtml;
   const escapeAttr = window.MagUtil.escapeAttr;
 
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const homeI18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const homeI18n = window.i18n;
   const ht = homeI18n.t;
   const hurl = (u) => homeI18n.url(homeI18n.isEn && u && !/^(?:[a-z]+:|\/|#)/i.test(u) ? '/' + u : u);
 
@@ -424,21 +424,18 @@
         const tag = ht((theme.issue || theme.month || '다음 호') + ' 주제', (theme.issue || theme.month || 'Next issue') + ' theme', (theme.issue || theme.month || '次号') + ' テーマ');
         const loc = (k) => (homeI18n.lang === 'ja' && theme[k + 'Ja']) || (homeI18n.isEn && theme[k + 'En']) || theme[k];
         slot.innerHTML = `
-          <span class="ni-tag">${escapeStr(tag)}</span>
-          <h2 class="ni-title">${escapeStr(theme.title || '')}</h2>
-          ${theme.subtitle ? `<p class="ni-sub">${escapeStr(loc('subtitle'))}</p>` : ''}
-          <p class="ni-desc">${escapeStr(loc('description') || '')}</p>
-          ${theme.submissionNote ? `<p class="ni-desc">${escapeStr(loc('submissionNote'))}</p>` : ''}
-          ${theme.film ? `<p class="ni-film">${ht('메인 필름', 'Main film', 'メインフィルム')} · ${escapeStr(theme.film)}</p>` : ''}
+          <span class="ni-tag">${escapeHtml(tag)}</span>
+          <h2 class="ni-title">${escapeHtml(theme.title || '')}</h2>
+          ${theme.subtitle ? `<p class="ni-sub">${escapeHtml(loc('subtitle'))}</p>` : ''}
+          <p class="ni-desc">${escapeHtml(loc('description') || '')}</p>
+          ${theme.submissionNote ? `<p class="ni-desc">${escapeHtml(loc('submissionNote'))}</p>` : ''}
+          ${theme.film ? `<p class="ni-film">${ht('메인 필름', 'Main film', 'メインフィルム')} · ${escapeHtml(theme.film)}</p>` : ''}
           <button type="button" class="ni-cta" data-action="open-submission">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
             ${ht('지금 응모하기', 'Submit now', '今すぐ応募する')}
           </button>`;
       })
       .catch(() => {});
-    function escapeStr(s) {
-      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
   })();
 
   // ════════════════════════════
@@ -779,7 +776,7 @@
     // 모바일 — 빈 자리에 만들어 넣는다. #mhBody 는 보기 전환마다 갈아끼워지므로
     // 그 바깥에 두어야 사진이 사라지지 않는다.
     if (mSec) {
-      const esc = window.MagUtil.escapeHtml;
+      const esc = escapeHtml;
       mSec.innerHTML = `
         <div class="mh-potw-inner">
           <h3 class="mh-potw-head" id="mhPotwHead">

@@ -11,15 +11,15 @@
 (function () {
   'use strict';
 
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const i18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko, url: (u) => u };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const i18n = window.i18n;
   const tr = i18n.t;
 
   const root = document.getElementById('filmReaderPhotos');
   if (!root) return;
 
-  const escapeHtml = window.MagUtil?.escapeHtml || ((s) => String(s ?? ''));
-  const escapeAttr = window.MagUtil?.escapeAttr || escapeHtml;
+  const escapeHtml = window.MagUtil.escapeHtml;
+  const escapeAttr = window.MagUtil.escapeAttr;
 
   const filmNames = (() => {
     try { return JSON.parse(root.dataset.filmNames || '[]'); } catch (_) { return []; }

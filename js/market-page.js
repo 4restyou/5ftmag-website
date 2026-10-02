@@ -1,6 +1,6 @@
 'use strict';
 
-const i18n = window.i18n || { isEn: false, lang: 'ko', t: (ko) => ko, url: (u) => u };
+const i18n = window.i18n;
 
 const CATEGORIES = [
   { key: 'all',       label: i18n.t('전체', 'All', 'すべて') },
@@ -39,23 +39,15 @@ function db() { return window.MagDB; }
 function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
 function escapeAttr(s) { return window.MagUtil.escapeAttr(s); }
 function nl2br(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
-// 판매자 연락처는 핸드폰·기타 중 하나만 있어도 된다. 비운 칸은 DB 에 '미입력'으로 들어가므로 화면에선 빈 값으로 본다.
-const CONTACT_BLANK = '미입력';
-function contactValue(v) { return v && v !== CONTACT_BLANK ? v : ''; }
+// 판매자 연락처는 핸드폰·기타 중 하나만 있어도 된다. 비운 칸은 NULL 로 저장한다.
+// 옛 행에는 비운 칸이 '미입력'으로 남아 있을 수 있어 화면에선 빈 값으로 본다.
+function contactValue(v) { return v && v !== '미입력' ? v : ''; }
 function fmtDate(iso) {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 // "30000000" → "30,000,000원". 숫자가 아니면 (예: "가격 협의") 원문 그대로.
-function fmtPrice(v) {
-  if (!i18n.isEn) return window.MagUtil.formatPrice(v, { keepText: true });
-  // 영문판: "30,000,000 won". 판정 규칙은 MagUtil.formatPrice 와 같다.
-  const raw = String(v ?? '').trim();
-  if (!raw) return '';
-  const n = Number(raw.replace(/[^0-9.-]/g, ''));
-  if (!Number.isFinite(n) || n <= 0) return escapeHtml(raw);
-  return i18n.lang === 'ja' ? n.toLocaleString('ja-JP') + 'ウォン' : n.toLocaleString('en-US') + ' won';
-}
+function fmtPrice(v) { return window.MagUtil.formatPrice(v, { keepText: true }); }
 function categoryLabel(k) {
   return (CATEGORIES.find(c => c.key === k) || {}).label || k;
 }
@@ -944,8 +936,8 @@ async function onSubmit(e) {
       uploadedNew.push(path);
     }
 
-    // DB 는 두 칸 모두 비어 있지 않아야 한다(NOT NULL + 길이 1 이상). 비운 칸은 기존 backfill 값과 같은 '미입력'으로 저장한다.
-    const record = { title, price, category, description, location, delivery_method, seller_name, phone: phone || CONTACT_BLANK, contact: contact || CONTACT_BLANK, storage_paths: finalPaths };
+    // 비운 칸은 NULL. DB 제약(market_listings_contact_any)이 둘 중 하나는 있게 막는다.
+    const record = { title, price, category, description, location, delivery_method, seller_name, phone: phone || null, contact: contact || null, storage_paths: finalPaths };
 
     if (STATE.editId) {
       submit.textContent = i18n.t('수정 저장 중…', 'Saving changes…', '変更を保存中…');

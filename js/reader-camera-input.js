@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const tr = (window.i18n || { t: (ko) => ko }).t;
+  const tr = window.i18n.t;
 
   function normalizeCameraLabel(s) {
     return String(s ?? '').trim().replace(/\s+/g, ' ');
@@ -199,8 +199,8 @@
 
   function renderRecentCameraChips(container, input, options) {
     if (!container || !input) return;
-    const escapeHtml = options.escapeHtml || ((v) => String(v));
-    const escapeAttr = options.escapeAttr || escapeHtml;
+    const escapeHtml = options.escapeHtml || window.MagUtil.escapeHtml;
+    const escapeAttr = options.escapeAttr || window.MagUtil.escapeAttr;
     const recent = readRecentCameras(options);
     if (!recent.length) {
       container.hidden = true;
@@ -217,8 +217,8 @@
     const recent = document.getElementById('rs-recent-cameras');
     const hint = document.getElementById('rs-camera-hint');
     if (!input) return;
-    const escapeHtml = options.escapeHtml || ((v) => String(v));
-    const escapeAttr = options.escapeAttr || escapeHtml;
+    const escapeHtml = options.escapeHtml || window.MagUtil.escapeHtml;
+    const escapeAttr = options.escapeAttr || window.MagUtil.escapeAttr;
     const list = await buildCameraList();
 
     renderRecentCameraChips(recent, input, options);

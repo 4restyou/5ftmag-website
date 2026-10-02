@@ -4,10 +4,10 @@
 // ?slug=<ebook slug>. Edge Function 이 열람권에 따라 full/preview PDF 서명 URL 발급.
 
 (function () {
-  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n;
   function $(id) { return document.getElementById(id); }
   function db() { return window.MagDB; }
-  function esc(s) { return window.MagUtil ? window.MagUtil.escapeHtml(s) : String(s == null ? '' : s); }
+  const esc = window.MagUtil.escapeHtml;
 
   function gate(html) { const r = $('ebookRoot'); if (r) r.innerHTML = `<div class="ebook-gate">${html}</div>`; }
 
@@ -59,7 +59,7 @@
     }
 
     const priceLabel = product.price
-      ? i18n.t(product.price.toLocaleString('ko-KR') + '원 · 구매하고 전체 보기', product.price.toLocaleString('en-US') + ' won · Buy to read it all', product.price.toLocaleString('ja-JP') + 'ウォン · 購入して全ページを読む')
+      ? window.MagUtil.formatPrice(product.price) + i18n.t(' · 구매하고 전체 보기', ' · Buy to read it all', ' · 購入して全ページを読む')
       : i18n.t('구매하고 전체 보기', 'Buy to read it all', '購入して全ページを読む');
     const opts = {
       // 책장(소개 화면)에서 왔으면 뒤로 가서 그 책의 소개 화면으로 돌아간다(표지가 다시 덮인다). 아니면 그 책의 소개 화면을 연다

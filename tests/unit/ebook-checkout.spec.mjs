@@ -16,6 +16,9 @@ function setup(url, pending = null, response = { error: 'network' }) {
   dom.window.MagDB = { ebooks: { purchaseVerify: verify }, auth: { signInWithGoogle: vi.fn() } };
   dom.window.alert = vi.fn();
   if (pending) dom.window.sessionStorage.setItem('5ft_ebook_pending_payment', JSON.stringify(pending));
+  // 페이지처럼 i18n.js · util.js 를 먼저 싣는다
+  dom.window.eval(readFileSync('js/i18n.js', 'utf8'));
+  dom.window.eval(readFileSync('js/util.js', 'utf8'));
   dom.window.eval(source);
   dom.window.document.dispatchEvent(new dom.window.Event('DOMContentLoaded'));
   return { window: dom.window, verify };

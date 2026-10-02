@@ -3,8 +3,8 @@
   // ════════════════════════════
   // Stories: JSON 로딩 + 카드 자동 생성
   // ════════════════════════════
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const storiesI18n = window.i18n || { isEn: false, locale: 'ko-KR', t: (ko) => ko };
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const storiesI18n = window.i18n;
   const st = storiesI18n.t;
   const monthLabel = (y, mo) => st(`${y}년 ${Number(mo)}월`, new Date(Number(y), Number(mo) - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }), `${y}年${Number(mo)}月`);
 

@@ -112,7 +112,8 @@ function transform(html, rel) {
   // 속성의 상대경로. 인라인 스크립트 안의 '../' + s.page 는 base 기준으로 이미 맞게 풀리므로 손대지 않는다
   out = out.replace(/\b(src|href|srcset)="([^"]*)"/g, (all, attr, value) => `${attr}="${absolutize(value, dir)}"`);
 
-  out = out.replace(/(<script src="\/js\/theme-init\.js"><\/script>)/, `$1\n  <script src="/js/i18n.js?v=${I18N_VERSION}"></script>`);
+  // 한국어판도 i18n.js 를 싣는다. 원문에 이미 있으면(절대경로로 바뀐 채) 그대로 두고, 없을 때만 넣는다
+  if (!/js\/i18n\.js/.test(out)) out = out.replace(/(<script src="\/js\/theme-init\.js"><\/script>)/, `$1\n  <script src="/js/i18n.js?v=${I18N_VERSION}"></script>`);
 
   for (const [a, b] of UI_FOR) out = out.split(a).join(b);
   out = out.replace(/<span class="role">([^<]*)<\/span>/g, (all, role) => ROLE_FOR[role.trim()] ? `<span class="role">${ROLE_FOR[role.trim()]}</span>` : all);

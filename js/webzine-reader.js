@@ -6,7 +6,7 @@
 // 멀어진 페이지는 비운다(220 쪽도 메모리·선명도 문제 없이). 확대(핀치·버튼·드래그 팬) 지원.
 // 실패 시 새 탭 링크를 보여준다.
 (function () {
-  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n;
   const T = i18n.t;
   const PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/';
   const PDFJS = PDFJS_BASE + 'legacy/build/pdf.min.mjs';
@@ -15,7 +15,7 @@
   const NEAR = 1, KEEP = 3;          // 현재 기준 ±NEAR 렌더, ±KEEP 밖은 비움
   const ZMAX = 3.5;
 
-  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  const esc = window.MagUtil.escapeHtml;
   function loadScript(src) {
     return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('load ' + src)); document.head.appendChild(s); });
   }

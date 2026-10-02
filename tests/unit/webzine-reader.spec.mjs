@@ -24,6 +24,9 @@ async function openReader({ total = 3, orientation = 'portrait', cta = true } = 
     move(index) { this.index = index; this.events.flip(); }
     destroy() {}
   } };
+  // 페이지처럼 i18n.js · util.js 를 먼저 싣는다
+  window.eval(readFileSync('js/i18n.js', 'utf8'));
+  window.eval(readFileSync('js/util.js', 'utf8'));
   window.eval(readFileSync('js/webzine-reader.js', 'utf8'));
   await window.WebzineReader.open('/preview.pdf', 'Preview', cta ? { cta: { note: 'Preview ended', label: 'Buy' } } : {});
   return { window, flip, note: window.document.querySelector('.wz-reader-cta-note') };

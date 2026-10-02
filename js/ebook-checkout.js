@@ -15,7 +15,7 @@
 // (검증은 서버에서 비밀키로 다시 한다.)
 
 (function () {
-  const i18n = window.i18n || { isEn: false, t: (ko) => ko, url: (u) => u };
+  const i18n = window.i18n;
   const CFG = {
     storeId: 'store-4c794b21-bbaa-466c-8fa9-17f42db08940',
     // 카카오페이 채널 — 재심사 통과 후 라이브 키를 넣으면 버튼이 다시 나타남.
@@ -26,7 +26,7 @@
   const PENDING_KEY = '5ft_ebook_pending_payment';
 
   function db() { return window.MagDB; }
-  function esc(s) { return window.MagUtil ? window.MagUtil.escapeHtml(s) : String(s == null ? '' : s); }
+  const esc = window.MagUtil.escapeHtml;
   let busy = false;
 
   // ── PortOne SDK 지연 로드 ──
@@ -95,7 +95,7 @@
 
   // ── 구매 방법 선택 모달 ──
   function openModal(product) {
-    const won = product.price ? i18n.t(product.price.toLocaleString('ko-KR') + '원', product.price.toLocaleString('en-US') + ' won', product.price.toLocaleString('ja-JP') + 'ウォン') : '';
+    const won = product.price ? window.MagUtil.formatPrice(product.price) : '';
     const hasKakao = !!CFG.kakaoChannelKey;
     const hasStore = !!(product.store_url && /\/products\/\d+/.test(product.store_url));
 

@@ -7,14 +7,10 @@
 // 의도적으로 의존성 없이 순수 문자열을 돌려줘, 각 페이지의 grid.innerHTML 에 그대로 꽂을 수 있게 한다.
 (function () {
   'use strict';
-  // 영문판(/en/)은 js/i18n.js 를 먼저 불러온다. 한국어 페이지에선 한국어 그대로.
-  const tr = (window.i18n || { t: (ko) => ko }).t;
+  // 모든 페이지가 js/i18n.js 를 먼저 싣는다(한국어판에선 한국어를 돌려준다).
+  const tr = window.i18n.t;
 
-  function esc(s) {
-    const d = document.createElement('div');
-    d.textContent = String(s ?? '');
-    return d.innerHTML;
-  }
+  const esc = window.MagUtil.escapeHtml;
 
   // 로딩: 스켈레톤 카드 n개 (skeleton 클래스는 common.css). variant 로 썸네일 비율 선택.
   function loading(opts) {

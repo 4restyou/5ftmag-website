@@ -760,7 +760,8 @@ test('메인 Photo는 라이브 독자 사진 응답이 느려도 먼저 렌더�
       };
     `,
   }));
-  await page.route('**/js/reader-submissions.js*', route => route.fulfill({
+  // fetchApprovedSubmissions 는 투고 지연 로더(reader-upload-loader.js)에 있다.
+  await page.route('**/js/reader-upload-loader.js*', route => route.fulfill({
     contentType: 'text/javascript',
     body: `
       window.fetchApprovedSubmissions = async () => new Promise(resolve => setTimeout(() => resolve([]), 10000));
@@ -792,7 +793,8 @@ test('메인 Photo 최근 모드는 최근 200장 안에서 작가를 분산한�
       };
     `,
   }));
-  await page.route('**/js/reader-submissions.js*', route => route.fulfill({
+  // fetchApprovedSubmissions 는 투고 지연 로더(reader-upload-loader.js)에 있다.
+  await page.route('**/js/reader-upload-loader.js*', route => route.fulfill({
     contentType: 'text/javascript',
     body: `
       const pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';

@@ -1,8 +1,8 @@
-// 외국어판(/en/ 영문, /ja/ 일문) 문구·경로 도우미.
+// 언어판(한국어 · /en/ 영문 · /ja/ 일문) 문구·경로 도우미.
 //
-// 외국어 페이지(<html lang="en"> · <html lang="ja">)만 이 파일을 불러온다. 한국어 페이지는 불러오지 않으므로,
-// 문구를 쓰는 쪽은 아래 한 줄로 한국어 기본값을 갖고 시작한다.
-//   var i18n = window.i18n || { isEn: false, t: function (ko) { return ko; }, url: function (u) { return u; } };
+// 모든 페이지가 head 에서 다른 스크립트보다 먼저 이 파일을 싣는다. 한국어 페이지에선 lang='ko', isEn=false,
+// t(ko)=ko, url(u)=u 를 돌려주므로, 문구를 쓰는 쪽은 대체값 없이 `const i18n = window.i18n;` 로 시작한다.
+// (예외: 이 파일을 싣지 않는 기사 편집 화면에도 실리는 site-common.js · image-processor.js 는 대체값을 남긴다.)
 // 문구는 한 자리에 세 언어를 함께 적는다: i18n.t('최근 글', 'Latest', '最新記事')
 // 일본어가 비어 있으면 영어, 영어도 비어 있으면 한국어를 돌려준다.
 //

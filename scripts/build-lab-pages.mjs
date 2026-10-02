@@ -357,7 +357,8 @@ function render(region, labs, repairs, others, versioned, outFile, T = TEXT.ko) 
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/icon-16.png">
   <link rel="shortcut icon" href="/img/favicon/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/icon-180.png">
-  <script src="/js/theme-init.js?v=20261002-e1"></script>${T.lang !== 'ko' ? `\n  <script src="${versioned('js/i18n.js')}"></script>` : ''}
+  <script src="/js/theme-init.js?v=20261002-e1"></script>
+  <script src="${versioned('js/i18n.js')}"></script>
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="${versioned('css/tokens.css')}">
   <link rel="stylesheet" href="${versioned('css/common.css')}">
@@ -505,7 +506,7 @@ function itemSlug(item) {
   const referenceHtml = await fs.readFile(REFERENCE_PAGE, 'utf-8');
   const versioned = assetVersionReader(referenceHtml, {
     'css/lab-region.css': await contentHash('css/lab-region.css'),
-    // i18n.js 는 영문 페이지만 싣는다. 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
+    // i18n.js 는 모든 언어판이 싣는다(한국어판에선 한국어를 돌려준다). 영문 페이지들과 같은 버전을 쓴다(단일 버전 가드)
     'js/i18n.js': ((await fs.readFile(path.join(ROOT, 'en/about.html'), 'utf-8').catch(() => '')).match(/js\/i18n\.js\?v=([0-9A-Za-z-]+)/) || [])[1],
   });
 

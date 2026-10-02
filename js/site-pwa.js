@@ -52,7 +52,8 @@
   }
 
   // 모바일 사진 올리기 FAB — films·me·홈에서만 노출.
-  // data-action="open-submission" 클릭 위임은 reader-submissions.js 가 이미 처리.
+  // data-action="open-submission" 클릭은 reader-upload-loader.js(첫 클릭, 모듈 지연 로드)와
+  // 그 뒤 실린 reader-submissions.js 의 위임이 처리한다.
   // 로그인 안 한 사용자도 일단 모달 트리거 → 모달 내부에서 로그인 분기.
   function shouldShowUploadFab() {
     if (isForceDesktop()) return false;
