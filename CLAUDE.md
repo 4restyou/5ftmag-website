@@ -27,7 +27,7 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 | `scripts/templates/` | 페이지 생성 템플릿 (캐시버스트 갱신 대상에 포함) |
 | `.github/workflows/` | `test.yml`(CI) · `db-deploy.yml` · `functions-deploy.yml` |
 | `relay/` | 네이버 커머스 API 고정 IP 중계 서버 (`docs/relay-setup.md`) |
-| `docs/` | `maintenance.md` · `db-contract-audit.md` · `database-recovery.md` · `editorial-operations.md` · `relay-setup.md` · `secrets-rotation.md` |
+| `docs/` | `admin-guide.md`(운영자 한 쪽 안내) · `maintenance.md` · `db-contract-audit.md` · `database-recovery.md` · `editorial-operations.md` · `relay-setup.md` · `secrets-rotation.md` |
 | `.claude/skills/` | 프로젝트 전용 실행 절차서 (자동 로드) |
 
 ## 영문판 (/en/) · 일본어판 (/ja/)
