@@ -30,10 +30,10 @@ CLAUDE.md "배포 정책 + 배포 루프" 의 실행 절차서. 이 순서를 �
 
 ## 3. 머지 후 확인 (여기까지가 배포)
 
-- `supabase/migrations/**` 포함 → **db-deploy** 워크플로우 성공 확인. 실패 시:
+- `supabase/migrations/**` 또는 `supabase/functions/**` 포함 → **Supabase DB and Edge Functions** 워크플로우의 DB 적용 후 함수 배포 순서와 성공 확인. **db-deploy**는 수동 복구 전용이다. 실패 시:
   - `Unauthorized` → SUPABASE_ACCESS_TOKEN 만료. 사용자에게 갱신 안내 + Studio SQL Editor 직접 적용 안내.
   - SQL 에러(23505 등) → prod 기존 데이터 충돌. **같은 마이그레이션 파일을 수정**해 재적용 (실패한 마이그레이션은 기록되지 않음. 새 파일 만들지 말 것).
-- `supabase/functions/**` 포함 → **functions-deploy** 성공 확인 (전 함수 디렉토리 스캔 배포).
+- DB 단계가 성공한 뒤 **functions-deploy**의 함수 단계 성공 확인 (전 함수 디렉토리 스캔 배포).
 - Netlify 는 main 머지 시 자동 (1~2분).
 
 ## 4. 사용자 보고

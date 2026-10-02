@@ -581,7 +581,7 @@ async function loadFavFilms() {
       if (db() && db().isReady()) {
         STATE.filmsData = await db().films.listAsObject();
       }
-      if (!STATE.filmsData || Object.keys(STATE.filmsData).length === 0) {
+      if (!STATE.filmsData) {
         const res = await fetch('data/films.json');
         STATE.filmsData = await res.json();
       }

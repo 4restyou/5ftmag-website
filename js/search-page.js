@@ -197,7 +197,9 @@
 
     const [storiesArr, filmsObj, contributorsArr, webzineArr, labsArr, marketArr] = await Promise.all([
       window.MagUtil.loadStories(),
-      fetchJsonSafe('/data/films.json'),
+      window.FilmsCatalogLoader
+        ? window.FilmsCatalogLoader.load({ staticPath: '/data/films.json' }).then(result => result.data).catch(() => ({}))
+        : fetchJsonSafe('/data/films.json'),
       // 빌드 때 승인 사진에서 뽑은 작가 목록. 사진 전체를 받아오지 않고도
       // 아이디로 찾을 수 있다.
       fetchJsonSafe('/data/contributors.json'),

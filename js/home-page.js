@@ -15,7 +15,9 @@
   // 공유한다. no-cache 를 쓰지 않아 브라우저 캐시(netlify /data/* max-age)를 활용.
   let _filmsJsonPromise = null;
   function filmsJson() {
-    return (_filmsJsonPromise ||= fetch('data/films.json').then(r => r.json()).catch(() => ({})));
+    return (_filmsJsonPromise ||= (window.FilmsCatalogLoader?.load
+      ? window.FilmsCatalogLoader.load({ staticPath: '/data/films.json' }).then(result => result.data)
+      : fetch('data/films.json').then(r => r.json())).catch(() => ({})));
   }
 
   function thumbnailPicture(src, alt, loading = 'lazy') {
@@ -508,16 +510,6 @@
 
     // films 카탈로그: Supabase 우선, 실패 시 정적 fallback
     async function fetchFilms() {
-      try {
-        for (let i = 0; i < 60; i++) {
-          if (window.MagDB && window.MagDB.isReady()) break;
-          await new Promise(r => setTimeout(r, 50));
-        }
-        if (window.MagDB && window.MagDB.isReady()) {
-          const obj = await window.MagDB.films.listAsObject();
-          if (obj && Object.keys(obj).length) return obj;
-        }
-      } catch (_) {}
       return filmsJson();
     }
 

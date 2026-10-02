@@ -38,7 +38,9 @@ for (const { path, must } of PAGES) {
 test('films 카드 클릭으로 모달 오픈', async ({ page }) => {
   await page.goto('/films.html');
   await page.waitForSelector('.film-card', { timeout: 8000 });
-  const firstCard = page.locator('.film-card').first();
+  // Featured cards keep their order while live reader counts reorder Library.
+  // Library search, paging and reader modals have separate regression coverage.
+  const firstCard = page.locator('#filmsGridFeatured .film-card').first();
   await firstCard.click();
   await expect(page.locator('.modal-overlay.open, #modalOverlay.open')).toBeVisible({ timeout: 4000 });
 });

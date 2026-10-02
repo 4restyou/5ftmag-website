@@ -12,24 +12,8 @@
 
   async function fetchStaticCatalog(staticPath) {
     const res = await fetch(staticPath);
+    if (!res.ok) throw new Error(`Film catalog HTTP ${res.status}`);
     return res.json();
-  }
-
-  async function supplementFromStatic(data, staticPath, logger) {
-    try {
-      const staticObj = await fetchStaticCatalog(staticPath);
-      let supplemented = 0;
-      for (const [slug, entry] of Object.entries(staticObj || {})) {
-        if (!data[slug]) {
-          data[slug] = entry;
-          supplemented++;
-        }
-      }
-      if (supplemented) logger?.info?.('[films] supplemented from static JSON:', supplemented);
-      return supplemented;
-    } catch (_) {
-      return 0;
-    }
   }
 
   // 영문 페이지(<html lang="en">)에선 소개글을 영문(descEn)으로 바꿔 둔다. 화면 코드는 desc 만 본다.
@@ -55,7 +39,7 @@
     if (db?.films?.listAsObject) {
       try {
         const obj = await db.films.listAsObject();
-        if (obj && Object.keys(obj).length) data = obj;
+        if (obj && typeof obj === 'object' && !Array.isArray(obj)) data = obj;
       } catch (err) {
         logger?.warn?.('[films] DB catalog fallback:', err?.message || err);
       }
@@ -69,11 +53,10 @@
       };
     }
 
-    const supplemented = await supplementFromStatic(data, staticPath, logger);
     return {
       data: localize(data),
-      source: supplemented ? 'db+static' : 'db',
-      supplemented,
+      source: 'db',
+      supplemented: 0,
     };
   }
 

@@ -1092,14 +1092,15 @@
   // JSONB 필드(aliases / photographers / photos) 는 JS 객체 그대로.
   const films = {
     async list() {
-      const c = client(); if (!c) return [];
+      const c = client(); if (!c) throw new Error('Film catalog unavailable');
       // 공개 카탈로그용 — is_hidden = true 는 제외
       const { data, error } = await c.from('films')
         .select('*')
         .eq('is_hidden', false)
         .order('brand', { ascending: true })
         .order('name', { ascending: true });
-      if (error) { console.warn('[films.list]', error.message); return []; }
+      if (error) throw error;
+      if (!Array.isArray(data)) throw new Error('Invalid film catalog');
       return data || [];
     },
     // admin 용 — 숨김 포함 전체. listAsObject 와 같이 키 변환 안 함.
@@ -1213,13 +1214,14 @@
   // ─── 현상소 카탈로그 (labs 테이블) ───
   // public 은 SELECT, editor 만 INSERT/UPDATE/DELETE. prices 는 JSONB(객체 그대로).
   const labs = {
-    async list() {
-      const c = client(); if (!c) return [];
+    async list({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw new Error('Lab catalog unavailable'); return []; }
       const { data, error } = await c.from('labs')
         .select('*').eq('is_hidden', false)
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
-      if (error) { console.warn('[labs.list]', error.message); return []; }
+      if (error) { if (strict) throw error; console.warn('[labs.list]', error.message); return []; }
+      if (strict && !Array.isArray(data)) throw new Error('Invalid lab catalog');
       return data || [];
     },
     // admin 용 — 숨김 포함 전체
@@ -1274,13 +1276,14 @@
   // ─── 수리실 (repair_shops 테이블) ───
   // public 은 SELECT, editor 만 INSERT/UPDATE/DELETE. 좌표 미저장(주소 지오코딩).
   const repairs = {
-    async list() {
-      const c = client(); if (!c) return [];
+    async list({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw new Error('Repair catalog unavailable'); return []; }
       const { data, error } = await c.from('repair_shops')
         .select('*').eq('is_hidden', false)
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
-      if (error) { console.warn('[repairs.list]', error.message); return []; }
+      if (error) { if (strict) throw error; console.warn('[repairs.list]', error.message); return []; }
+      if (strict && !Array.isArray(data)) throw new Error('Invalid repair catalog');
       return data || [];
     },
     async listAll() {
@@ -1429,10 +1432,11 @@
     // ── 글 공개/비공개 ──
     // data/stories.json 의 published 가 기본값이고, story_visibility 에 행이 있으면
     // 그것이 이긴다. 목록 화면은 js/util.js 의 loadStories() 가 합쳐서 준다.
-    async visibility() {
-      const c = client(); if (!c) return [];
+    async visibility({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw new Error('Story visibility unavailable'); return []; }
       const { data, error } = await c.from('story_visibility').select('story_id, published');
-      if (error) { console.warn('[articles.visibility]', error.message); return []; }
+      if (error) { if (strict) throw error; console.warn('[articles.visibility]', error.message); return []; }
+      if (strict && (!Array.isArray(data) || data.some(row => !row || row.story_id == null || typeof row.published !== 'boolean'))) throw new Error('Invalid story visibility');
       return data || [];
     },
     // 기본값과 같아지면 행을 지운다. 그래야 원본이 둘로 갈라지지 않고
@@ -1602,12 +1606,14 @@
       return count || 0;
     },
     // 편집부 인박스: 회원이 보낸 메시지 중 전체 안읽음 카운트 (헤더 배지용)
-    async unreadCountForAdmin() {
-      const c = client(); if (!c) return 0;
-      const { count } = await c.from('messages')
+    async unreadCountForAdmin({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw new Error('Message count unavailable'); return 0; }
+      const { count, error } = await c.from('messages')
         .select('id', { count: 'exact', head: true })
         .eq('from_editor', false)
         .is('read_at', null);
+      if (error) { if (strict) throw error; console.warn('[messages.unreadCountForAdmin]', error.message); }
+      if (strict && (!Number.isSafeInteger(count) || count < 0)) throw new Error('Invalid message count');
       return count || 0;
     },
     // 본인 메시지 수정 (회원: 자기 발신, 편집부: 편집부 발신)

@@ -50,8 +50,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/icon-180.png">
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20261002-e1">
-  <link rel="stylesheet" href="./css/common.css?v=20261002-e1">
-  <link rel="stylesheet" href="./css/webzine-stack.css?v=20261002-e1">
+  <link rel="stylesheet" href="./css/common.css?v=20261002-product-audit">
+  <link rel="stylesheet" href="./css/webzine-stack.css?v=20261002-product-audit">
   <style>
     /* header { z-index: 300 } 가 stacking context 라 그 안의 메뉴가 .wz-veil(2000) 아래로 paint 되는 것을 막는다.
        (`> header` 로 직계만 — wz-intro 도 <header> 라서.) 소개 화면(.wz-detail 2120)은 헤더 위로 덮는다. 색 강제는 다크톤 유지. */
@@ -106,7 +106,12 @@
       <span class="wz-kicker">5ft magazine · 디지털 책장</span>
       <h1 class="wz-page-title">Magazine</h1>
       <p class="wz-lede">필름 한 롤에 여러 사람의 시선이 모여, 한 권의 이야기가 됩니다.</p>
-      <p class="wz-howto">책을 누르면 표지가 세워지고 소개가 나와요. 그 화면에서 아래로 넘기면 다음 책, 왼쪽 화살표나 Esc 로 돌아와요.</p>
+      <div class="wz-selection" id="wzSelection" hidden>
+        <label for="wzBookSelect">책 선택</label>
+        <select id="wzBookSelect"></select>
+        <p id="wzSelectedBook" aria-live="polite"></p>
+        <a href="/me.html#fav-webzine">좋아한 책 →</a>
+      </div>
     </div>
   </header>
   <div class="wz-stack" id="wzStack" aria-label="책 목록">
@@ -135,14 +140,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="./js/i18n.js?v=20261002-f2"></script>
 <script src="./js/db/commerce.js?v=20261002-f2" defer></script>
-  <script src="./js/db-client.js?v=20261002-f2" defer></script>
-<script src="./js/util.js?v=20261002-f2" defer></script>
+  <script src="./js/db-client.js?v=20261002-product-audit" defer></script>
+<script src="./js/util.js?v=20261002-product-audit" defer></script>
 <script src="./js/ui-states.js?v=20261002-f2" defer></script>
-  <script src="./js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="./js/site-telemetry.js?v=20261002-product-audit" defer></script>
   <script src="./js/site-pwa.js?v=20261002-f2" defer></script>
-  <script src="./js/site-common.js?v=20261002-f1" defer></script>
+  <script src="./js/site-common.js?v=20261002-product-audit" defer></script>
 <script src="./js/webzine-reader.js?v=20261002-f2" defer></script>
-<script src="./js/webzine-stack-page.js?v=20261002-f2" defer></script>
+<script src="./js/webzine-stack-page.js?v=20261002-product-audit" defer></script>
 
 </body>
 </html>

@@ -11,6 +11,13 @@
   const i18n = window.i18n;
   const tr = i18n.t;
 
+  function externalWebsite(value) {
+    try {
+      const url = new URL(value);
+      return /^(https?:)$/.test(url.protocol) && !url.username && !url.password ? url.href : '';
+    } catch { return ''; }
+  }
+
   const listEl = document.getElementById('labsList');
   const filterEl = document.getElementById('labsFilter');
   const searchEl = document.getElementById('labsSearch');
@@ -26,6 +33,12 @@
   let markers = [];
   let infoWindow = null;
   let mapReady = false;
+
+  function closeMapInfo() {
+    if (!infoWindow) return;
+    try { infoWindow.close(); }
+    catch { infoWindow = null; }
+  }
 
   // 지역 정렬 우선순위 (그 외는 뒤에 등장 순)
   // 2026-07-01 전남광주통합특별시 출범으로 광주와 전남이 하나가 됐다.
@@ -203,8 +216,8 @@
     // 원본 = Supabase labs 테이블. 실패 시 정적 data/labs.json 으로 폴백.
     const staticLabs = await loadStaticLabs();
     try {
-      const rows = await window.MagDB?.labs?.list?.();
-      if (Array.isArray(rows) && rows.length) {
+      const rows = await window.MagDB?.labs?.list?.({ strict: true });
+      if (Array.isArray(rows)) {
         return rows.map(rowToLab).map((lab) => enrichLabWithStaticCoord(lab, staticLabs));
       }
     } catch (_) { /* 폴백으로 진행 */ }
@@ -227,14 +240,16 @@
     // 수리실 탭이 통째로 비었다.
     const staticRepairs = await loadStaticRepairs();
     try {
-      const rows = await window.MagDB?.repairs?.list?.();
-      if (Array.isArray(rows) && rows.length) return rows;
+      const rows = await window.MagDB?.repairs?.list?.({ strict: true });
+      if (Array.isArray(rows)) return rows;
     } catch (_) { /* 폴백으로 진행 */ }
     return staticRepairs;
   }
 
+  let tabRequest = 0;
   async function setTab(next) {
     if (next === tab && datasets[tab]) return;
+    const request = ++tabRequest;
     const tabChanged = next !== tab;
     tab = next;
     if (tabsEl) {
@@ -246,18 +261,33 @@
     }
     if (introEl) introEl.innerHTML = TAB[tab].intro;
     if (searchEl) searchEl.placeholder = TAB[tab].placeholder;
+    document.getElementById('labsSearchBtn')?.setAttribute('aria-label', tab === 'labs'
+      ? tr('현상소 검색', 'Search labs', '現像所を検索')
+      : tr('수리실 검색', 'Search repair shops', '修理店を検索'));
+    document.getElementById('labsMap')?.setAttribute('aria-label', tab === 'labs'
+      ? tr('현상소 위치 지도', 'Film lab locations', '現像所の位置地図')
+      : tr('수리실 위치 지도', 'Camera repair shop locations', '修理店の位置地図'));
     region = 'all';
     if (tabChanged) {
+      renderToken++;
+      closeMapInfo();
+      activeMapSlug = null;
+      markers.forEach(marker => { try { marker.setMap(null); } catch {} });
+      markers = [];
+      markerBySlug.clear();
       query = '';
       if (searchEl) searchEl.value = '';
+      if (document.getElementById('labsMapFail')) showMapFailNotice();
     }
     mobileVisible = MOBILE_INITIAL;
     if (!datasets[tab]) {
       listEl.innerHTML = MagState.loading({ count: 8, variant: 'wide' });
       try {
-        datasets[tab] = tab === 'labs' ? await loadLabs() : await loadRepairs();
-        if (tab === 'labs') showLabsUpdated(datasets.labs);
+        datasets[next] = next === 'labs' ? await loadLabs() : await loadRepairs();
+        if (request !== tabRequest) return;
+        if (next === 'labs') showLabsUpdated(datasets.labs);
       } catch (_) {
+        if (request !== tabRequest) return;
         const loadingTab = tab;
         listEl.innerHTML = MagState.error({ title: TAB[tab].loadFail });
         MagState.bindAction(listEl, 'retry', () => { datasets[loadingTab] = null; setTab(loadingTab); });
@@ -423,7 +453,8 @@
       : null;
     const links = [];
     if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">${tr('지도에서 보기 ↗', 'Naver Map (Korean) ↗', 'NAVERマップ（韓国語） ↗')}</a>`);
-    if (lab.url) links.push(`<a href="${escapeAttr(lab.url)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗', 'ウェブサイト・SNS ↗')}</a>`);
+    const website = externalWebsite(lab.url);
+    if (website) links.push(`<a href="${escapeAttr(website)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗', 'ウェブサイト・SNS ↗')}</a>`);
     return `
       ${lab.address ? `<p class="lab-addr">${escapeHtml(shown(lab, 'address'))}</p>` : ''}
       ${priceChips(lab.prices)}
@@ -439,7 +470,8 @@
       : null;
     const links = [];
     if (mapHref) links.push(`<a href="${escapeAttr(mapHref)}" target="_blank" rel="noopener" class="lab-link lab-link-map">${tr('지도에서 보기 ↗', 'Naver Map (Korean) ↗', 'NAVERマップ（韓国語） ↗')}</a>`);
-    if (s.url) links.push(`<a href="${escapeAttr(s.url)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗', 'ウェブサイト・SNS ↗')}</a>`);
+    const website = externalWebsite(s.url);
+    if (website) links.push(`<a href="${escapeAttr(website)}" target="_blank" rel="noopener" class="lab-link">${tr('홈페이지·SNS ↗', 'Website / social ↗', 'ウェブサイト・SNS ↗')}</a>`);
     return `
       ${s.address ? `<p class="lab-addr">${escapeHtml(shown(s, 'address'))}</p>` : ''}
       ${s.specialty ? `<p class="lab-meta">${tr('전문', 'Specialty:', '専門：')} ${escapeHtml(shown(s, 'specialty'))}</p>` : ''}
@@ -565,7 +597,8 @@
     const links = [];
     links.push(`<button type="button" class="labs-map-info-button" data-labs-map-detail="${escapeAttr(slug)}">${tr('자세히', 'Details', '詳細')}</button>`);
     if (naverMap) links.push(`<a href="${escapeAttr(naverMap)}" target="_blank" rel="noopener">${tr('길찾기 ↗', 'Directions ↗', '経路案内 ↗')}</a>`);
-    if (item.url) links.push(`<a href="${escapeAttr(item.url)}" target="_blank" rel="noopener">${tr('홈페이지 ↗', 'Website ↗', 'ウェブサイト ↗')}</a>`);
+    const website = externalWebsite(item.url);
+    if (website) links.push(`<a href="${escapeAttr(website)}" target="_blank" rel="noopener">${tr('홈페이지 ↗', 'Website ↗', 'ウェブサイト ↗')}</a>`);
     return `<div class="labs-map-info">
       <strong>${escapeHtml(shown(item, 'name'))}</strong>
       ${item.address ? `<span class="labs-map-info-addr">${escapeHtml(shown(item, 'address'))}</span>` : ''}
@@ -614,18 +647,19 @@
   function currentFiltered() {
     return data.filter(matches);
   }
-  async function updateMarkers(shown) {
+  async function updateMarkers(items) {
     if (!mapReady || !map || view !== 'map') return;
     const token = ++renderToken;
     markers.forEach((m) => m.setMap(null));
     markers = [];
     markerBySlug.clear();
-    if (infoWindow) infoWindow.close();
+    activeMapSlug = null;
+    closeMapInfo();
     const bounds = new naver.maps.LatLngBounds();
     let count = 0;
-    for (const item of shown) {
+    for (const item of items) {
       const coord = await resolveItemCoord(item);
-      if (token !== renderToken) return; // 더 최신 렌더가 시작됨 → 중단
+      if (token !== renderToken || view !== 'map') return;
       if (!coord) continue;
       if (!isValidCoord(coord)) continue;
       const pos = new naver.maps.LatLng(coord.lat, coord.lng);
@@ -696,7 +730,7 @@
     const filtered = currentFiltered();
     renderLabsCount(filtered.length);
     if (view === 'map') updateMarkers(filtered);
-    else if (infoWindow) infoWindow.close();
+    else closeMapInfo();
     if (!filtered.length) {
       const hasFilter = region !== 'all' || !!query;
       listEl.innerHTML = MagState.empty({
@@ -829,6 +863,7 @@
       }
     });
   }
+  let modalReturnFocus = null;
   function openModal(slug, opts) {
     const item = findItemBySlug(slug);
     if (!item) return;
@@ -837,8 +872,9 @@
     modal.querySelector('.labs-modal-name').textContent = shown(item, 'name') || '';
     modal.querySelector('.labs-modal-region').textContent = regionLabel(item.region);
     modal.querySelector('.labs-modal-body').innerHTML = detailHtml(item);
-    if (infoWindow) infoWindow.close();
+    closeMapInfo();
     activeMapSlug = null;
+    if (modal.hidden) modalReturnFocus = document.activeElement;
     modal.hidden = false;
     document.documentElement.classList.add('labs-modal-open');
     if (opts?.focusMap) focusMarkerBySlug(slug);
@@ -855,6 +891,8 @@
     document.documentElement.classList.remove('labs-modal-open');
     destroyModalMap();
     updateUrlLab(null);
+    if (modalReturnFocus?.isConnected) modalReturnFocus.focus();
+    modalReturnFocus = null;
   }
   async function shareCard(slug) {
     if (!slug) return;
@@ -919,6 +957,17 @@
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
+    const modal = document.getElementById('labsModal');
+    if (e.key !== 'Tab' || !modal || modal.hidden) return;
+    const targets = [...modal.querySelectorAll('button:not([disabled]), a[href], [tabindex="0"]')]
+      .filter(el => !el.hidden && !el.closest('[hidden]'));
+    if (!targets.length) return;
+    const first = targets[0], last = targets[targets.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+      e.preventDefault(); first.focus();
+    }
   });
 
   if (searchEl) {
@@ -940,6 +989,7 @@
   searchClose?.addEventListener('click', () => {
     searchBar.hidden = true;
     searchBtn?.setAttribute('aria-expanded', 'false');
+    searchBtn?.focus();
     if (searchEl) {
       searchEl.value = '';
       query = '';
@@ -972,8 +1022,9 @@
           updateMarkers(currentFiltered());
         });
       }
-    } else if (infoWindow) {
-      infoWindow.close();
+    } else {
+      renderToken++;
+      closeMapInfo();
       activeMapSlug = null;
     }
   }

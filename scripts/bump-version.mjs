@@ -27,7 +27,7 @@ if (!asset || asset.includes('..') || !tag || !/^(css|js)\/[a-z0-9._/-]+\.(css|j
 
 function walk(dir, ext, out = []) {
   for (const f of readdirSync(dir)) {
-    if (f.startsWith('.') || f === 'node_modules') continue;
+    if (f.startsWith('.') || ['node_modules', 'playwright-report', 'test-results', 'research', 'docs', 'supabase', 'relay', 'tests'].includes(f)) continue;
     const p = join(dir, f);
     if (statSync(p).isDirectory()) walk(p, ext, out);
     else if (f.endsWith(ext)) out.push(p);

@@ -36,11 +36,12 @@
     "build:contributors": "node scripts/build-contributor-pages.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@playwright/test": "^1.60.0",
     "jsdom": "^25.0.1",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }

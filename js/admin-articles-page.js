@@ -1,5 +1,5 @@
 // admin/articles.html 백엔드
-// 글의 공개/비공개를 토글한다.
+// 정적 기사의 목록 표시/숨김을 토글한다. 직접 URL 접근 보호가 아니다.
 //
 // 예전에는 GitHub API 로 data/stories.json 을 main 에 직접 커밋했다. 반영에
 // Netlify 재빌드 1~2분이 걸렸고 운영자가 토큰을 발급해 넣어야 했다(탭을 닫으면
@@ -8,13 +8,14 @@
 //
 // stories.json 의 published 가 기본값이고 오버라이드가 이긴다. 기본값과 같아지면
 // db-client 가 행을 지워서 원본이 둘로 갈라지지 않는다.
-// 기사 작성(article-editor)은 여전히 GitHub 토큰을 쓴다. 그쪽은 자체 모달이 있다.
+// 본문 작성·수정은 저장소 발행 절차를 따른다. 구형 에디터는 중단했다.
 
 (function () {
   'use strict';
 
   const $ = (id) => document.getElementById(id);
   const db = () => window.MagDB;
+  const REQUEST_TIMEOUT_MS = 15000;
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const STATE = {
@@ -23,6 +24,13 @@
     category: '',         // category filter
     query: '',            // search
     overrides: new Map(),  // story_visibility — 기본값에서 벗어난 글만 들어 있다
+    storiesReady: false,
+    visibilityReady: false,
+    storiesError: '',
+    visibilityError: '',
+    lastVisibilitySuccess: null,
+    loading: false,
+    busy: new Set(),
   };
 
   // 화면에 보이는 현재 공개 상태. stories.json 이 기본값이고 오버라이드가 이긴다.
@@ -70,21 +78,61 @@
   // GitHub API 로 한 번 더 가져와 sha 를 챙겼는데, 토글이 커밋을 만들지 않게
   // 되면서 그 sha 가 필요 없어졌다.
   async function loadStories() {
-    try {
-      const r = await fetch('/data/stories.json', { cache: 'no-store' });
-      if (r.ok) STATE.stories = await r.json();
-    } catch {}
-    await loadOverrides();
+    if (STATE.loading || STATE.busy.size) return;
+    STATE.loading = true;
     render();
+    try {
+      await Promise.all([
+        (async () => {
+          try {
+            const stories = await readWithTimeout(async () => {
+              const r = await fetch('/data/stories.json', { cache: 'no-store' });
+              if (!r.ok) throw new Error(`HTTP ${r.status}`);
+              return r.json();
+            });
+            if (!Array.isArray(stories) || stories.some((s) => !s || typeof s !== 'object' || s.id == null)) {
+              throw new Error('기사 목록 응답이 없습니다.');
+            }
+            STATE.stories = stories;
+            STATE.storiesReady = true;
+            STATE.storiesError = '';
+          } catch (err) {
+            STATE.storiesError = String(err.message || err);
+          }
+        })(),
+        loadOverrides(),
+      ]);
+    } finally {
+      STATE.loading = false;
+      render();
+    }
   }
 
   async function loadOverrides() {
     try {
-      const rows = await db().articles.visibility();
-      STATE.overrides = new Map((rows || []).map((r) => [String(r.story_id), r.published !== false]));
-    } catch (_) {
-      STATE.overrides = new Map();
+      const rows = await readWithTimeout(() => db().articles.visibility({ strict: true }));
+      if (!Array.isArray(rows) || rows.some((r) => !r || r.story_id == null || typeof r.published !== 'boolean')) {
+        throw new Error('목록 표시 상태 응답이 없습니다.');
+      }
+      STATE.overrides = new Map(rows.map((r) => [String(r.story_id), r.published]));
+      STATE.visibilityReady = true;
+      STATE.visibilityError = '';
+      STATE.lastVisibilitySuccess = new Date();
+    } catch (err) {
+      STATE.visibilityError = String(err.message || err);
     }
+  }
+
+  async function readWithTimeout(read) {
+    let timer;
+    try {
+      return await Promise.race([
+        Promise.resolve().then(read),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error('조회 시간이 초과되었습니다.')), REQUEST_TIMEOUT_MS);
+        }),
+      ]);
+    } finally { clearTimeout(timer); }
   }
 
   // ── 카테고리 select 채우기 ──
@@ -113,6 +161,22 @@
 
   // ── 렌더 ──
   function render() {
+    const available = STATE.storiesReady && STATE.visibilityReady && !STATE.storiesError && !STATE.visibilityError && !STATE.loading;
+    $('articlesRetry').disabled = STATE.loading || STATE.busy.size > 0;
+    $('articlesRetry').textContent = STATE.storiesError || STATE.visibilityError ? '목록 상태 다시 조회' : '목록 상태 새로고침';
+    const status = $('articlesLoadStatus');
+    if (STATE.loading) status.textContent = '기사 목록과 목록 표시 상태를 확인 중입니다. 변경은 잠시 중단됩니다.';
+    else if (STATE.storiesError || STATE.visibilityError) {
+      const previous = STATE.lastVisibilitySuccess ? ` 이전 상태입니다. 마지막 성공 ${STATE.lastVisibilitySuccess.toLocaleString('ko-KR')}.` : '';
+      status.textContent = `확인 불가. 목록 표시 상태를 변경할 수 없습니다.${previous} ${[STATE.storiesError, STATE.visibilityError].filter(Boolean).join(' · ')}`;
+    } else status.textContent = STATE.lastVisibilitySuccess ? `목록 표시 상태 확인: ${STATE.lastVisibilitySuccess.toLocaleString('ko-KR')}` : '확인 중';
+    if (STATE.lastVisibilitySuccess) status.dataset.lastSuccess = STATE.lastVisibilitySuccess.toISOString();
+    document.querySelectorAll('.pill-btn').forEach((btn) => { btn.disabled = !available && btn.dataset.filter !== 'all'; });
+    if (!STATE.storiesReady) {
+      $('articlesCount').textContent = STATE.loading ? '확인 중' : '확인 불가';
+      $('articlesList').innerHTML = `<div class="empty-state">${STATE.loading ? '기사를 불러오는 중입니다.' : '기사 목록을 불러오지 못했습니다.'}</div>`;
+      return;
+    }
     populateCategories();
     const list = applyFilters();
     $('articlesCount').textContent = `${list.length} / ${STATE.stories.length}편`;
@@ -133,14 +197,16 @@
   }
 
   function rowHtml(s) {
-    const isPub = isPublishedNow(s);
+    const isPub = STATE.visibilityReady ? isPublishedNow(s) : null;
+    const available = STATE.visibilityReady && !STATE.visibilityError && !STATE.storiesError && !STATE.loading && !STATE.busy.has(String(s.id));
+    const label = isPub === null ? '표시 상태 확인 불가' : (isPub ? '목록에 표시' : '목록에서 숨김');
     const thumb = s.thumbnail
       ? `<div class="article-thumb" style="background-image:url('${esc(s.thumbnail.startsWith('http') ? s.thumbnail : '/' + s.thumbnail)}')"></div>`
       : `<div class="article-thumb is-empty">no img</div>`;
     const date = s.date || '';
     const pageHref = s.page ? `/${esc(s.page)}` : '#';
     return `
-      <div class="article-row ${isPub ? '' : 'is-hidden'}" data-id="${esc(s.id)}">
+      <div class="article-row ${isPub === false ? 'is-hidden' : ''}" data-id="${esc(s.id)}">
         ${thumb}
         <div class="article-meta">
           <h3 class="article-title-line"><a href="${pageHref}" target="_blank" rel="noopener">${esc(s.title)}</a></h3>
@@ -152,11 +218,10 @@
         <span class="article-author-chip">${esc(s.author || '')}</span>
         <span class="article-date-chip">${esc(date)}</span>
         <div class="article-actions">
-          <a class="article-link-btn" href="/admin/article-editor.html?slug=${encodeURIComponent(s.id)}" title="에디터로">편집</a>
-          <label class="pub-toggle" title="${isPub ? '비공개로 전환' : '공개로 전환'}">
-            <input type="checkbox" data-id="${esc(s.id)}" ${isPub ? 'checked' : ''} />
+          <label class="pub-toggle" title="${available ? '기사 목록에 표시할지 선택' : '표시 상태 확인 후 변경할 수 있습니다'}">
+            <input type="checkbox" data-id="${esc(s.id)}" aria-label="${esc(s.title)} 목록에 표시" ${isPub ? 'checked' : ''} ${available ? '' : 'disabled'} />
             <span class="pub-toggle-track" aria-hidden="true"></span>
-            <span class="pub-toggle-label">${isPub ? '공개' : '비공개'}</span>
+            <span class="pub-toggle-label">${label}${STATE.visibilityReady && (STATE.visibilityError || STATE.storiesError || STATE.loading) ? ' (이전 상태)' : ''}</span>
           </label>
         </div>
       </div>
@@ -171,6 +236,12 @@
   // 기본값(stories.json)과 같아지면 db-client 가 행을 지운다. 그래서 한 글을
   // 내렸다가 다시 올리면 오버라이드가 남지 않는다.
   async function doToggle(id, nextPublished) {
+    if (STATE.loading || !STATE.visibilityReady || STATE.visibilityError || STATE.storiesError || STATE.busy.has(String(id))) {
+      toast('목록 표시 상태를 확인한 뒤 변경해주세요.', 'error');
+      const previous = STATE.stories.find((s) => String(s.id) === String(id));
+      revertCheckbox(id, previous ? isPublishedNow(previous) : false);
+      return;
+    }
     const story = STATE.stories.find((x) => String(x.id) === String(id));
     if (!story) {
       toast('글을 찾을 수 없습니다: ' + id, 'error');
@@ -179,6 +250,8 @@
     }
 
     const row = document.querySelector(`.article-row[data-id="${cssEsc(id)}"]`);
+    STATE.busy.add(String(id));
+    $('articlesRetry').disabled = true;
     if (row) row.classList.add('is-busy');
 
     try {
@@ -189,7 +262,7 @@
       if (cleared) STATE.overrides.delete(String(id));
       else STATE.overrides.set(String(id), nextPublished);
 
-      toast(`"${story.title}" ${nextPublished ? '공개' : '비공개'} 처리했어요. 바로 반영됩니다.`);
+      toast(`"${story.title}" ${nextPublished ? '목록에 표시' : '목록에서 숨김'} 처리했어요. 직접 URL 접근은 그대로입니다.`);
       render();
     } catch (err) {
       console.error(err);
@@ -198,7 +271,9 @@
       toast('토글 실패: ' + String(err.message || err).slice(0, 120), 'error');
       revertCheckbox(id, !nextPublished);
     } finally {
+      STATE.busy.delete(String(id));
       if (row) row.classList.remove('is-busy');
+      render();
     }
   }
 
@@ -210,6 +285,7 @@
 
   // ── 입력 바인딩 ──
   $('searchInput').addEventListener('input', (e) => { STATE.query = e.target.value; render(); });
+  $('articlesRetry').addEventListener('click', loadStories);
   $('categorySelect').addEventListener('change', (e) => { STATE.category = e.target.value; render(); });
   document.querySelectorAll('.pill-btn').forEach((btn) => {
     btn.addEventListener('click', () => {

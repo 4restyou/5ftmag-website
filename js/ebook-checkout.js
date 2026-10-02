@@ -17,7 +17,6 @@
 (function () {
   const i18n = window.i18n;
   const CFG = {
-    storeId: 'store-4c794b21-bbaa-466c-8fa9-17f42db08940',
     // 카카오페이 채널 — 재심사 통과 후 라이브 키를 넣으면 버튼이 다시 나타남.
     // (테스트 키: channel-key-6eb4e2ce-a4f7-4a99-99cb-f4998d60e1b2)
     kakaoChannelKey: '',
@@ -44,12 +43,6 @@
     return sdkPromise;
   }
 
-  function shortId() {
-    if (window.crypto?.randomUUID) return `eb_${window.crypto.randomUUID()}`;
-    const t = Date.now().toString(36);
-    const r = Math.random().toString(36).slice(2, 8);
-    return `eb_${t}_${r}`;
-  }
   function cleanUrl() {
     const slug = new URLSearchParams(location.search).get('slug') || '';
     return location.pathname + (slug ? `?slug=${encodeURIComponent(slug)}` : '');
@@ -214,24 +207,37 @@
       alert(i18n.t('결제 모듈을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.', 'Couldn\'t load the payment module. Please try again in a moment.', '決済モジュールを読み込めませんでした。しばらくしてから、もう一度お試しください。'));
       return;
     }
-    const paymentId = shortId();
-    rememberPayment(product.slug, paymentId);
+    let order;
+    try {
+      // Omitted paymentId asks ebook-purchase to create a server-bound order via
+      // the existing authenticated MagDB transport. Never send a buyer UID.
+      const created = await db().ebooks.purchaseVerify(product.slug);
+      if (!created?.ok || !created.order?.paymentId) throw new Error(created?.error || 'order creation failed');
+      order = created.order;
+    } catch (e) {
+      busy = false;
+      alert(i18n.t('결제 주문을 만들지 못했어요.\n', 'Couldn\'t create the payment order.\n', '決済注文を作成できませんでした。\n') + (e?.message || 'order creation failed'));
+      return;
+    }
+    const paymentId = order.paymentId;
+    rememberPayment(order.slug, paymentId);
     let resp = null;
     try {
       resp = await window.PortOne.requestPayment({
-        storeId: CFG.storeId,
+        storeId: order.storeId,
         channelKey: CFG.kakaoChannelKey,
         paymentId,
-        orderName: String(product.title || '이북'),
-        totalAmount: Number(product.price),
+        orderName: String(order.title || '이북'),
+        totalAmount: order.price,
         currency: 'CURRENCY_KRW',
         payMethod: 'EASY_PAY',
-        customData: JSON.stringify({ slug: product.slug }),
+        customData: JSON.stringify({ slug: order.slug }),
         redirectUrl: new URL(cleanUrl(), location.origin).href, // 모바일 복귀용 (slug 포함)
       });
     } catch (e) {
       busy = false;
-      forgetPayment(paymentId);
+      // A thrown SDK call does not establish whether the provider charged. Keep
+      // the server order for a safe status lookup on the next visit.
       console.error('[ebook] requestPayment 실패', e);
       alert(i18n.t('결제를 시작하지 못했어요.\n', 'Couldn\'t start the payment.\n', '決済を開始できませんでした。\n') + (e && (e.message || e.code) ? (e.message || e.code) : i18n.t('잠시 후 다시 시도해 주세요.', 'Please try again in a moment.', 'しばらくしてから、もう一度お試しください。')));
       return;
@@ -246,8 +252,8 @@
       }
       return;
     }
-    rememberPayment(product.slug, resp.paymentId || paymentId);
-    await finishVerify(product.slug, resp.paymentId || paymentId);
+    // The server-issued ID remains authoritative even if SDK/URL data differs.
+    await finishVerify(order.slug, paymentId);
   }
 
   // ── 결제 검증 + 열람권 부여 ──
@@ -269,16 +275,26 @@
       }
       return;
     }
+    if (r?.error === 'payment buyer mismatch') {
+      alert(i18n.t('이 결제를 시작한 계정으로 로그인해 주세요.\n결제번호: ', 'Sign in with the account that started this payment.\nPayment ID: ', 'この決済を開始したアカウントでログインしてください。\n決済番号: ') + paymentId);
+      return;
+    }
+    if (r?.error === 'legacy payment unbound') {
+      forgetPayment(paymentId);
+      alert(i18n.t('이전 결제의 구매 계정을 자동으로 확인할 수 없어요. 편집부에 결제번호와 영수증을 알려주세요.\n결제번호: ', 'We cannot automatically confirm the buyer of this older payment. Contact the editors with your payment ID and receipt.\nPayment ID: ', '以前の決済の購入アカウントを自動確認できません。編集部に決済番号と領収書をお知らせください。\n決済番号: ') + paymentId);
+      return;
+    }
     const terminalErrors = new Set([
-      'payment not found', 'not paid', 'amount mismatch', 'currency mismatch',
+      'payment not found', 'amount mismatch', 'currency mismatch',
       'store mismatch', 'product mismatch', 'payment mismatch', 'payment already used',
     ]);
-    if (terminalErrors.has(r?.error)) {
+    const endedPayment = r?.error === 'not paid' && ['FAILED', 'CANCELLED', 'PARTIAL_CANCELLED'].includes(r.status);
+    if (terminalErrors.has(r?.error) || endedPayment) {
       forgetPayment(paymentId);
       alert(i18n.t('결제가 완료되지 않았거나 결제 정보가 일치하지 않아요. 결제 내역을 확인해 주세요.', 'The payment was not completed or its details don\'t match. Please check your payment history.', '決済が完了していないか、決済情報が一致しません。決済履歴を確認してください。'));
       return;
     }
-    alert(i18n.t('결제는 처리됐지만 열람권 확인이 지연되고 있어요.\n결제번호를 보관했으니 새로고침하면 자동으로 다시 확인합니다.', 'Your payment went through, but unlocking the e-book is taking longer than usual.\nWe saved your payment ID. Refresh the page and we\'ll check again automatically.', '決済は処理されましたが、閲覧権の確認に時間がかかっています。\n決済番号を保存してあるので、ページを再読み込みすると自動で再確認します。'));
+    alert(i18n.t('결제 상태나 열람권을 아직 확인하지 못했어요.\n결제번호를 보관했으니 새로고침하면 자동으로 다시 확인합니다.', 'We could not confirm the payment status or unlock the e-book yet.\nWe saved your payment ID. Refresh the page and we\'ll check again automatically.', '決済状態または閲覧権をまだ確認できませんでした。\n決済番号を保存してあるので、ページを再読み込みすると自動で再確認します。'));
   }
 
   // ── 모바일 redirect 복귀 처리 ──

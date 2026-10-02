@@ -1,19 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
 
-// 기사 작성만 GitHub 토큰을 쓴다. 글 목록의 공개/비공개 토글은
-// story_visibility 로 옮겨서 토큰이 필요 없어졌다.
+// Browser publishing is retired; old tokens must be erased without reading them.
 const files = ['js/admin-article-editor-page.js'];
 
 describe('admin GitHub token storage', () => {
   for (const file of files) {
-    it(`${file} keeps PAT in the tab session and removes legacy persistence`, () => {
+    it(`${file} clears both legacy token stores without reading credentials`, () => {
       const source = readFileSync(file, 'utf8');
-      expect(source).toContain('sessionStorage.getItem(PAT_KEY)');
-      expect(source).toContain('sessionStorage.setItem(PAT_KEY');
-      expect(source).toContain('localStorage.removeItem(PAT_KEY)');
-      expect(source).not.toContain('localStorage.getItem(PAT_KEY)');
-      expect(source).not.toContain('localStorage.setItem(PAT_KEY');
+      const removed = [];
+      const storage = name => ({
+        getItem() { throw new Error('must not read a token'); },
+        setItem() { throw new Error('must not persist a token'); },
+        removeItem(key) { removed.push([name, key]); },
+      });
+      vm.runInNewContext(source, { window: { localStorage: storage('local'), sessionStorage: storage('session') } });
+      expect(removed).toEqual([['local', '5ft-gh-pat'], ['session', '5ft-gh-pat']]);
+      expect(source).not.toContain('api.github.com');
     });
   }
 

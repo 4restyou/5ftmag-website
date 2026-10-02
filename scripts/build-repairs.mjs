@@ -13,8 +13,8 @@
 //   SUPABASE_URL        (선택, 기본값: 운영 프로젝트)
 //   SUPABASE_ANON_KEY   (선택, 기본값: 운영 anon — db-client.js 와 동일)
 //
-// fetch 실패/빈 테이블이면 기존 data/repairs.json 유지 + warn (빌드 통과).
-// labs 와 같은 규칙이다. 한 번의 네트워크 실패로 목록이 사라지면 안 된다.
+// 성공한 빈 배열도 반영한다. fetch 실패 시 유효한 마지막 snapshot만 유지한다.
+// labs 와 같은 규칙이다. 성공한 숨김 결과와 네트워크 실패를 구별한다.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -56,6 +56,10 @@ export function rowToJson(r) {
   };
 }
 
+function validRepairs(rows) {
+  return Array.isArray(rows) && rows.every(row => row && typeof row.name === 'string' && row.name.trim());
+}
+
 async function main() {
   const url = new URL('/rest/v1/repair_shops', SUPABASE_URL);
   url.searchParams.set('select', '*');
@@ -73,19 +77,19 @@ async function main() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
     rows = await res.json();
-    if (!Array.isArray(rows)) throw new Error('expected array');
+    if (!validRepairs(rows)) throw new Error('expected array of named repair shops');
   } catch (err) {
+    let snapshot;
+    try { snapshot = JSON.parse(await fs.readFile(TARGET, 'utf8')); } catch { /* Checked below. */ }
+    const saved = Array.isArray(snapshot) ? snapshot : snapshot?.repairs;
+    if (!validRepairs(saved)) throw new Error('Supabase repair_shops fetch failed; no valid data/repairs.json snapshot. Refusing stale/seed fallback.');
     warnBuild('build-repairs', `Supabase repair_shops fetch 실패. data/repairs.json 유지: ${err.message}`);
-    process.exit(0);
-  }
-
-  if (rows.length === 0) {
-    warnBuild('build-repairs', 'Supabase repair_shops 가 비어 있음. data/repairs.json 유지.');
-    process.exit(0);
+    return;
   }
 
   const repairs = rows.map(rowToJson);
   const out = { source: 'supabase:public.repair_shops', type: 'camera-repair', count: repairs.length, repairs };
+  await fs.mkdir(path.dirname(TARGET), { recursive: true });
   await fs.writeFile(TARGET, JSON.stringify(out, null, 2) + '\n', 'utf8');
   console.log(`🔧 Repairs: ${repairs.length} entry → data/repairs.json`);
 }
@@ -93,7 +97,7 @@ async function main() {
 // 직접 실행될 때만 동작 (import 시엔 rowToJson 만 노출 — 테스트용)
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(err => {
-    warnBuild('build-repairs', `build-repairs 예외, data/repairs.json 유지: ${err?.message || err}`);
-    process.exit(0);
+    warnBuild('build-repairs', `build-repairs 실패: ${err?.message || err}`);
+    process.exitCode = 1;
   });
 }

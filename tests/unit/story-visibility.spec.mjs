@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { isPublishedContent, seoulTodayIso } from '../../scripts/story-visibility.mjs';
 

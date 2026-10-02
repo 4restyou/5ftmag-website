@@ -55,11 +55,11 @@
   <script src="./js/i18n.js?v=20261002-f2"></script>
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20261002-e1">
-  <link rel="stylesheet" href="./css/common.css?v=20261002-e1">
+  <link rel="stylesheet" href="./css/common.css?v=20261002-product-audit">
   <link rel="stylesheet" href="./css/comments.css?v=20261002-e1">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20261002-e1">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20261002-e1">
-  <link rel="stylesheet" href="./css/films.css?v=20261002-f2">
+  <link rel="stylesheet" href="./css/films.css?v=20261002-product-audit">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -114,8 +114,8 @@
     <h2 class="films-section-title">Library</h2>
     <p class="films-section-sub">독자들의 시선이 채워가는 한 롤. 같은 필름을 누가 어떻게 담아냈는지 모입니다.</p>
     <div class="ft-toggle library-view-toggle" role="tablist" aria-label="라이브러리 보기 방식">
-      <button type="button" class="ft-toggle-btn library-view-btn is-active" data-view="films" role="tab" aria-selected="true">브랜드 필름별</button>
-      <button type="button" class="ft-toggle-btn library-view-btn" data-view="photos" role="tab" aria-selected="false">사진으로</button>
+      <button type="button" class="ft-toggle-btn library-view-btn is-active" data-view="films" role="tab" aria-selected="true">필름</button>
+      <button type="button" class="ft-toggle-btn library-view-btn" data-view="photos" role="tab" aria-selected="false">사진</button>
     </div>
   </div>
 
@@ -170,6 +170,7 @@
     <div class="library-toolbar-left">
       <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
       <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
+      <a href="me.html#fav-films" class="library-mine-link">좋아한 필름 →</a>
       <button type="button" class="library-photos-shuffle library-toolbar-photos-only" id="libraryPhotosShuffle" aria-label="다시 섞기">
         <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
           <path d="M3 5h3l2 3M3 15h3l2-3M14 5h3l-3-3M14 5l-2 3M14 15h3l-3 3M14 15l-2-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -326,7 +327,7 @@
   <h2 class="sr-only" id="filmIndexTitle">필름 전체 목록</h2>
   <!-- FILM-INDEX:START -->
   <details class="film-index-fold">
-    <summary>필름 전체 목록 165종</summary>
+    <summary>필름 전체 목록 195종</summary>
     <p class="film-index-sub">브랜드별로 정리한 필름 카탈로그입니다. 이름을 누르면 규격과 설명을 볼 수 있어요.</p>
     <div class="film-index-grid">
     <div class="film-index-brand">
@@ -339,8 +340,12 @@
       <h3>ADOX</h3>
       <ul>
         <li><a href="./films.html?film=adoxchs100">Adox CHS 100 II</a></li>
+        <li><a href="./films.html?film=adoxcms20">ADOX CMS 20 II</a></li>
         <li><a href="./films.html?film=adoxmission200">Adox Color Mission 200</a></li>
         <li><a href="./films.html?film=adoxhr50">Adox HR-50</a></li>
+        <li><a href="./films.html?film=adoxscala160">ADOX Scala 160</a></li>
+        <li><a href="./films.html?film=adoxscala50">ADOX Scala 50</a></li>
+        <li><a href="./films.html?film=adoxsilvermax100">ADOX Silvermax 100</a></li>
       </ul>
     </div>
     <div class="film-index-brand">
@@ -365,6 +370,13 @@
       </ul>
     </div>
     <div class="film-index-brand">
+      <h3>Auroer</h3>
+      <ul>
+        <li><a href="./films.html?film=auroer400d">Auroer 400D</a></li>
+        <li><a href="./films.html?film=auroer800t">Auroer 800T</a></li>
+      </ul>
+    </div>
+    <div class="film-index-brand">
       <h3>BERGGER</h3>
       <ul>
         <li><a href="./films.html?film=bergger400">Bergger Pancro 400</a></li>
@@ -373,7 +385,7 @@
     <div class="film-index-brand">
       <h3>CANDIDO</h3>
       <ul>
-        <li><a href="./films.html?film=candido400">Candido 400</a></li>
+        <li><a href="./films.html?film=candido400">CANDIDO 400</a></li>
       </ul>
     </div>
     <div class="film-index-brand">
@@ -418,6 +430,7 @@
         <li><a href="./films.html?film=fomapan100">Foma Fomapan 100 Classic</a></li>
         <li><a href="./films.html?film=fomapan200">Foma Fomapan 200 Creative</a></li>
         <li><a href="./films.html?film=fomapan400">Foma Fomapan 400 Action</a></li>
+        <li><a href="./films.html?film=fomapanr100">Foma Fomapan R 100</a></li>
       </ul>
     </div>
     <div class="film-index-brand">
@@ -430,6 +443,7 @@
     <div class="film-index-brand">
       <h3>FUJIFILM</h3>
       <ul>
+        <li><a href="./films.html?film=fujiototo200">Fujicolor 오토오토 200</a></li>
         <li><a href="./films.html?film=fujifilm200">Fujifilm 200</a></li>
         <li><a href="./films.html?film=fujifilm400">Fujifilm 400</a></li>
         <li><a href="./films.html?film=fujiastia100f">Fujifilm Astia 100F</a></li>
@@ -451,6 +465,9 @@
         <li><a href="./films.html?film=reala100">Fujifilm Reala 100</a></li>
         <li><a href="./films.html?film=reala500d">Fujifilm Reala 500D</a></li>
         <li><a href="./films.html?film=realaace100">Fujifilm Reala Ace 100</a></li>
+        <li><a href="./films.html?film=sensia100">Fujifilm Sensia 100</a></li>
+        <li><a href="./films.html?film=sensia200">Fujifilm Sensia 200</a></li>
+        <li><a href="./films.html?film=sensia400">Fujifilm Sensia 400</a></li>
         <li><a href="./films.html?film=superiapremium400">Fujifilm Superia Premium 400</a></li>
         <li><a href="./films.html?film=superiavenus800">Fujifilm Superia Venus 800</a></li>
         <li><a href="./films.html?film=superia400">Fujifilm Superia X-TRA 400</a></li>
@@ -503,6 +520,12 @@
       </ul>
     </div>
     <div class="film-index-brand">
+      <h3>Kodak</h3>
+      <ul>
+        <li><a href="./films.html?film=kodakvision350d">Kodak Vision3 50d</a></li>
+      </ul>
+    </div>
+    <div class="film-index-brand">
       <h3>KODAK</h3>
       <ul>
         <li><a href="./films.html?film=aerocolor">Kodak Aerocolor IV</a></li>
@@ -514,7 +537,9 @@
         <li><a href="./films.html?film=e100vs">Kodak Ektachrome E100VS</a></li>
         <li><a href="./films.html?film=ektachromeE200">Kodak Ektachrome E200</a></li>
         <li><a href="./films.html?film=ektar100">Kodak Ektar 100</a></li>
+        <li><a href="./films.html?film=kodakgold100">Kodak Gold 100</a></li>
         <li><a href="./films.html?film=gold200">Kodak Gold 200</a></li>
+        <li><a href="./films.html?film=kodakgt800">KODAK GT 800</a></li>
         <li><a href="./films.html?film=kodacolor100">Kodak Kodacolor 100</a></li>
         <li><a href="./films.html?film=kodacolor200">Kodak Kodacolor 200</a></li>
         <li><a href="./films.html?film=portra160">Kodak Portra 160</a></li>
@@ -531,6 +556,7 @@
         <li><a href="./films.html?film=tmaxp3200">Kodak T-Max P3200</a></li>
         <li><a href="./films.html?film=trix400">Kodak Tri-X 400</a></li>
         <li><a href="./films.html?film=ultramax">Kodak UltraMax 400</a></li>
+        <li><a href="./films.html?film=kodak2242">Kodak Vision 2242</a></li>
         <li><a href="./films.html?film=vision3200t">Kodak Vision3 200T</a></li>
         <li><a href="./films.html?film=vision250d">Kodak Vision3 250D</a></li>
         <li><a href="./films.html?film=vision250dahu">Kodak Vision3 250D AHU</a></li>
@@ -580,8 +606,17 @@
       <h3>LUCKY</h3>
       <ul>
         <li><a href="./films.html?film=luckycolor200">Lucky Color 200</a></li>
+        <li><a href="./films.html?film=luckyxolor400">Lucky Color 400</a></li>
         <li><a href="./films.html?film=luckyshd100">Lucky SHD 100 New</a></li>
         <li><a href="./films.html?film=luckyshd400">Lucky SHD 400</a></li>
+      </ul>
+    </div>
+    <div class="film-index-brand">
+      <h3>MARIX</h3>
+      <ul>
+        <li><a href="./films.html?film=marix100d">MARIX 100D</a></li>
+        <li><a href="./films.html?film=marix400d">MARIX 400D</a></li>
+        <li><a href="./films.html?film=marix800t">MARIX 800T</a></li>
       </ul>
     </div>
     <div class="film-index-brand">
@@ -637,6 +672,22 @@
       <ul>
         <li><a href="./films.html?film=gp3100">Shanghai GP3 100</a></li>
         <li><a href="./films.html?film=gp3400">Shanghai GP3 400</a></li>
+      </ul>
+    </div>
+    <div class="film-index-brand">
+      <h3>SILBERRA</h3>
+      <ul>
+        <li><a href="./films.html?film=silberracolor100">Silberra Color 100</a></li>
+        <li><a href="./films.html?film=silberracolor160">Silberra Color 160</a></li>
+        <li><a href="./films.html?film=silberracolor50">Silberra Color 50</a></li>
+        <li><a href="./films.html?film=silberraorta50">Silberra Orta 50</a></li>
+        <li><a href="./films.html?film=silberraorta80">Silberra Orta 80</a></li>
+        <li><a href="./films.html?film=silberrapan100">Silberra PAN 100</a></li>
+        <li><a href="./films.html?film=silberrapan160">Silberra PAN 160</a></li>
+        <li><a href="./films.html?film=silberrapan200">Silberra PAN 200</a></li>
+        <li><a href="./films.html?film=silberrapan50">Silberra PAN 50</a></li>
+        <li><a href="./films.html?film=silberrau200">Silberra U200</a></li>
+        <li><a href="./films.html?film=silberrau400">Silberra U400</a></li>
       </ul>
     </div>
     <div class="film-index-brand">
@@ -700,19 +751,19 @@
 </footer>
 
 <script src="./js/reader-roll.js?v=20260522-cardlabel" defer></script>
-<script src="./js/util.js?v=20261002-f2" defer></script>
+<script src="./js/util.js?v=20261002-product-audit" defer></script>
 <script src="./js/ui-states.js?v=20261002-f2" defer></script>
-  <script src="./js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="./js/site-telemetry.js?v=20261002-product-audit" defer></script>
   <script src="./js/site-pwa.js?v=20261002-f2" defer></script>
-  <script src="./js/site-common.js?v=20261002-f1" defer></script>
+  <script src="./js/site-common.js?v=20261002-product-audit" defer></script>
 <script src="./js/films-export.js?v=20260626-thumbcors" defer></script>
-<script src="./js/films-utils.js?v=20260610-purehelpers" defer></script>
+<script src="./js/films-utils.js?v=20261003-product-audit" defer></script>
 <script src="./js/films-cards.js?v=20261002-f2" defer></script>
 <script src="./js/film-name-picker.js?v=20261002-f2" defer></script>
 <script src="./js/potw-picker.js?v=20260914-potwreorder" defer></script>
 <script src="./js/films-share.js?v=20261002-f2" defer></script>
 <script src="./js/films-library-filters.js?v=20261002-f2" defer></script>
-<script src="./js/films-catalog-loader.js?v=20261002-ja" defer></script>
+<script src="./js/films-catalog-loader.js?v=20261002-product-audit" defer></script>
 <script src="./js/films-lightbox.js?v=20261002-f2" defer></script>
 <script src="./js/films-reader-export.js?v=20261002-f2" defer></script>
 <script src="./js/films-reader-roll-ui.js?v=20261002-f2" defer></script>
@@ -721,7 +772,7 @@
 <script src="./js/films-propose.js?v=20261002-f2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db/commerce.js?v=20261002-f2" defer></script>
-  <script src="./js/db-client.js?v=20261002-f2" defer></script>
+  <script src="./js/db-client.js?v=20261002-product-audit" defer></script>
 <script src="./js/comments.js?v=20261002-f2" defer></script>
 <script src="./js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="./js/reader-upload-loader.js?v=20261002-f2" defer></script>
