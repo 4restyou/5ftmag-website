@@ -449,7 +449,13 @@ function renderLanguages(rows) {
 async function loadAppEvents() {
   const tbody = $('appEvents');
   if (!tbody) return;
-  const rows = await db().analytics.eventsSummary(30, 50);
+  // 조회가 없거나 실패해도 화면 초기화를 막지 않는다 (표만 비운다).
+  let rows = [];
+  try {
+    rows = (await db().analytics.eventsSummary?.(30, 50)) || [];
+  } catch (err) {
+    console.warn('[analytics] app_events 조회 실패', err);
+  }
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
     return;
