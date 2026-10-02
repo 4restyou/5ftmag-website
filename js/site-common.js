@@ -251,6 +251,7 @@
 
     normalizePrimaryNavigation();
     injectLangSwitch();
+    orderNavRight();
 
     const themeBtn = document.getElementById('themeBtn');
     const menuBtn = document.getElementById('menuBtn');
@@ -356,9 +357,9 @@
         shop: byPage(mainNav, 'shop.html'),
       };
       if (links.magazine) links.magazine.textContent = 'Magazine';
-      [links.articles, links.films, links.magazine, links.market].filter(Boolean)
+      [links.articles, links.films, links.magazine, links.market, links.labs].filter(Boolean)
         .forEach(a => mainNav.appendChild(a.closest('li')));
-      const secondary = [links.labs, links.about, links.shop].filter(Boolean);
+      const secondary = [links.about, links.shop].filter(Boolean);
       secondary.forEach(a => a.closest('li')?.remove());
       if (secondary.length) {
         const li = document.createElement('li');
@@ -405,6 +406,15 @@
       mobileNav.querySelectorAll('a.current').forEach(a => a.setAttribute('aria-current', 'page'));
       mobileNav.dataset.primaryNormalized = '1';
     }
+  }
+
+  // 데스크톱 헤더 아이콘 순서를 한 곳에서 고정한다: 검색 · 알림 · 언어 · 테마 · 계정 (햄버거는 데스크톱에서 숨김).
+  // 각 요소가 따로 주입되므로(언어·알림·계정) 주입할 때마다 다시 부른다.
+  function orderNavRight() {
+    const navRight = document.querySelector('.nav-right');
+    if (!navRight) return;
+    ['#headerSearchBtn', '#notifBell', '.lang-wrap', '#themeBtn', '[data-nav-auth]', '#menuBtn']
+      .forEach(sel => navRight.querySelectorAll(':scope > ' + sel).forEach(el => navRight.appendChild(el)));
   }
 
   // 다른 언어판이 있는 페이지(head 에 hreflang 링크가 있는 곳)에만 헤더에 언어 메뉴(지구본 버튼)를 붙인다.
@@ -819,21 +829,19 @@
     function accountIconSvg() {
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     }
-    // 메인 nav (Shop 다음에 끼움 — Shop 은 .ext 클래스로 식별)
-    if (mainNav) {
-      const shopLi = mainNav.querySelector('.ext')?.parentElement || null;
+    // 데스크톱: 헤더 오른쪽 아이콘 묶음의 맨 끝(orderNavRight 가 순서를 맞춘다)
+    const navRight = document.querySelector('.nav-right');
+    if (mainNav && navRight) {
       if (!loggedIn) {
-        const li = document.createElement('li');
-        li.setAttribute('data-nav-auth', '1');
         const a = document.createElement('a');
+        a.setAttribute('data-nav-auth', '1');
+        a.className = 'nav-login';
         a.href = '#';
         a.dataset.action = 'auth-login';
         a.textContent = tr('로그인', 'Sign in', 'ログイン');
-        li.appendChild(a);
-        if (shopLi && shopLi.parentNode === mainNav) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
-        else mainNav.appendChild(li);
+        navRight.appendChild(a);
       } else {
-        const li = document.createElement('li');
+        const li = document.createElement('div');
         li.setAttribute('data-nav-auth', '1');
         li.className = 'nav-account';
         const menuItems = [
@@ -852,9 +860,9 @@
             ).join('')}
           </div>
         `;
-        if (shopLi && shopLi.parentNode === mainNav) shopLi.parentNode.insertBefore(li, shopLi.nextSibling);
-        else mainNav.appendChild(li);
+        navRight.appendChild(li);
       }
+      orderNavRight();
     }
     // 모바일 nav (시트 아래쪽 계정 묶음에 넣는다)
     if (mobileNav) {
@@ -956,6 +964,7 @@
     bell.innerHTML = bellIconSvg() + '<span class="notif-badge" id="notifBadge" hidden></span>';
     if (themeBtn) navRight.insertBefore(bell, themeBtn);
     else navRight.appendChild(bell);
+    orderNavRight();
     return bell;
   }
 
