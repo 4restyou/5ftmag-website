@@ -445,6 +445,34 @@ function renderLanguages(rows) {
   }).join('');
 }
 
+// app_events 이벤트별 횟수 (최근 30일). 기간 선택과 무관하게 RPC 가 일 수로만 받는다.
+async function loadAppEvents() {
+  const tbody = $('appEvents');
+  if (!tbody) return;
+  // 조회가 없거나 실패해도 화면 초기화를 막지 않는다 (표만 비운다).
+  let rows = [];
+  try {
+    rows = (await db().analytics.eventsSummary?.(30, 50)) || [];
+  } catch (err) {
+    console.warn('[analytics] app_events 조회 실패', err);
+  }
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => Number(r.total) || 0));
+  tbody.innerHTML = rows.map(r => {
+    const v = Number(r.total) || 0;
+    const pct = Math.max(2, Math.round((v / max) * 100));
+    return `<tr>
+      <td><code>${escapeHtml(r.event_name || '')}</code></td>
+      <td class="bar-cell"><div class="stat-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="num">${fmtNum(r.total)}</td>
+      <td class="num">${fmtNum(r.unique_sessions)}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderUploadsSummary(s) {
   if (!s) {
     ['up-today','up-7d','up-30d','up-total'].forEach(id => $(id).textContent = '0');
@@ -1085,7 +1113,7 @@ $('rangeApply').addEventListener('click', () => {
   const from = $('rangeFrom').value || null;
   const to   = $('rangeTo').value   || null;
   if (from && to && from > to) {
-    alert('시작일이 종료일보다 뒤입니다.\n두 날짜를 바꿔서 넣어 주세요.');
+    window.notify('시작일이 종료일보다 뒤입니다. 두 날짜를 바꿔서 넣어 주세요.', 'danger');
     return;
   }
   STATE.from = from;
@@ -1127,14 +1155,14 @@ async function purgeClientErrors() {
   try {
     const res = await db().analytics.clientErrorsPurge(30);
     if (res?.error) {
-      window.showToast?.('정리 실패: ' + (res.error.message || ''), { type: 'danger' });
+      window.notify('정리 실패: ' + (res.error.message || ''), 'danger');
     } else {
       const n = res?.deleted ?? 0;
-      window.showToast?.(n ? `오래된 로그 ${n}건을 정리했어요.` : '정리할 로그가 없었어요.');
+      window.notify(n ? `오래된 로그 ${n}건을 정리했어요.` : '정리할 로그가 없었어요.', 'info');
       await loadClientErrors();
     }
   } catch (err) {
-    window.showToast?.('정리 실패: ' + (err?.message || err), { type: 'danger' });
+    window.notify('정리 실패: ' + (err?.message || err), 'danger');
   } finally {
     btn.disabled = false;
     btn.textContent = prev;
@@ -1169,7 +1197,7 @@ async function purgeClientErrors() {
     if (STATE.preset === 'all') reload();
   }).catch(() => {});
 
-  await Promise.all([loadThumbnailDebt(), loadClientErrors()]);
+  await Promise.all([loadThumbnailDebt(), loadClientErrors(), loadAppEvents()]);
   await reload();
   startOpsWatch();
 })();

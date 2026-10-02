@@ -4,7 +4,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isPublishedContent } from './story-visibility.mjs';
+import { isPublishedContent, withDbVisibility } from './story-visibility.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -45,7 +45,8 @@ function compareStories(a, b) {
 async function main() {
   const storiesPath = path.join(ROOT, 'data/stories.json');
   const text = await fs.readFile(storiesPath, 'utf-8');
-  const stories = JSON.parse(text);
+  // 관리 화면에서 비공개로 돌린 글(story_visibility)은 뺀다.
+  const stories = await withDbVisibility(JSON.parse(text), { label: 'rss' });
 
   // 게시된 글만, 날짜 내림차순
   const items = stories

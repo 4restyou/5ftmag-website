@@ -9,6 +9,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT } from './lib/site-shell.mjs';
+import { withDbVisibility } from './story-visibility.mjs';
 
 const SITE = 'https://www.5ftmag.com';
 const RECENT_STORIES = 30;
@@ -33,7 +34,8 @@ function oneLine(text, limit = 160) {
   return flat.length > limit ? `${flat.slice(0, limit - 1)}…` : flat;
 }
 
-const stories = readJson('data/stories.json', []);
+// 관리 화면에서 비공개로 돌린 글(story_visibility)은 뺀다.
+const stories = await withDbVisibility(readJson('data/stories.json', []), { label: 'llms' });
 const filmsRaw = readJson('data/films.json', {});
 const labsRaw = readJson('data/labs.json', { labs: [] });
 const authors = readJson('data/authors.json', []);

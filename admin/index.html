@@ -56,7 +56,7 @@
     @media (max-width: 860px) { .home-cards { grid-template-columns: repeat(2, 1fr); } .home-links { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 520px) { .home-links { grid-template-columns: 1fr; } }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20261002-d2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -147,6 +147,16 @@
       <div class="v" id="vReports" aria-live="polite">·</div>
       <div class="sub">매물 신고로 이동</div>
     </a>
+    <a class="home-card" id="cardMessages" href="/admin/messages.html">
+      <div class="k">안 읽은 메시지</div>
+      <div class="v" id="vMessages" aria-live="polite">·</div>
+      <div class="sub">메시지로 이동</div>
+    </a>
+    <a class="home-card" id="cardProposals" href="/admin/films.html">
+      <div class="k">필름 제안 대기</div>
+      <div class="v" id="vProposals" aria-live="polite">·</div>
+      <div class="sub">필름 카탈로그에서 검토</div>
+    </a>
     <a class="home-card" id="cardErrors" href="/admin/analytics.html#clientErrorsPanel">
       <div class="k">JS 오류 (24시간)</div>
       <div class="v" id="vErrors" aria-live="polite">·</div>
@@ -184,13 +194,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/db/commerce.js?v=20261002-c3"></script>
-  <script src="../js/db-client.js?v=20261002-c2"></script>
+  <script src="../js/db-client.js?v=20261002-d2"></script>
 <script src="../js/util.js?v=20261002-ja"></script>
 <script src="../js/site-telemetry.js?v=20260907-security"></script>
   <script src="../js/site-pwa.js?v=20260712-modules"></script>
-  <script src="../js/site-common.js?v=20261002-c3"></script>
+  <script src="../js/site-common.js?v=20261002-d2"></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/admin-home-page.js?v=20260803-arch"></script>
+<script src="../js/admin-home-page.js?v=20261002-d2"></script>
 
 </body>
 </html>

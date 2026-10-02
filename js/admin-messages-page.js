@@ -16,25 +16,8 @@
     sending: false,
   };
 
-  function showGate(msg) {
-    $('gate').hidden = false;
-    $('app').hidden = true;
-    if (msg) $('gate').querySelector('p').textContent = msg;
-  }
-
-  async function checkAccess() {
-    for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise((r) => setTimeout(r, 50)); }
-    if (!db() || !db().isReady()) { showGate('서비스 준비 실패. 잠시 후 새로고침해주세요.'); return false; }
-    const session = await db().auth.getSession();
-    if (!session) { showGate(); return false; }
-    const profile = await db().profiles.getMine();
-    if (!profile?.is_editor) { showGate('편집부 권한이 있는 계정으로 로그인해야 이 페이지를 볼 수 있어요.'); return false; }
-    $('adminUser').innerHTML = `${esc(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
-    $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
-    return true;
-  }
-
-  $('gateLogin').addEventListener('click', async () => { await db().auth.signInWithGoogle(window.location.href); });
+  // 접근 권한 — 공통 게이트(js/admin-guard.js) 위임.
+  async function checkAccess() { return window.AdminGuard.requireEditor({}); }
 
   function fmtAgo(iso) {
     if (!iso) return '';
@@ -97,6 +80,11 @@
     $('viewTitle').textContent = thread?.display_name || '회원';
     $('composeRow').hidden = false;
     $('viewList').innerHTML = '<div class="msg-view-empty">불러오는 중…</div>';
+    // 폰에서는 목록 아래에 대화창이 있어, 고른 뒤 손으로 내려가야 했다.
+    // 두 칸이 나란한 PC 에서는 이미 보이므로 움직이지 않는다.
+    if (window.matchMedia('(max-width: 720px)').matches) {
+      document.querySelector('.msg-view')?.scrollIntoView({ block: 'start' });
+    }
     STATE.messages = await db().messages.list(userId);
     renderMessages();
     // 회원이 보낸 메시지 읽음 처리
@@ -154,7 +142,7 @@
         if (!row) return;
         if (!confirm('이 메시지를 삭제할까요? (회원에게도 "삭제된 메시지" 로 표시됩니다)')) return;
         const res = await db().messages.remove(row.dataset.msgId);
-        if (res?.error) { alert('삭제 실패: ' + res.error.message); return; }
+        if (res?.error) { window.notify('삭제 실패: ' + res.error.message, 'danger'); return; }
         STATE.messages = await db().messages.list(STATE.currentUserId);
         renderMessages();
         await loadThreads();
@@ -185,7 +173,7 @@
       const next = input.value.trim();
       if (!next) return;
       const res = await db().messages.edit(messageId, next);
-      if (res?.error) { alert('수정 실패: ' + res.error.message); return; }
+      if (res?.error) { window.notify('수정 실패: ' + res.error.message, 'danger'); return; }
       STATE.messages = await db().messages.list(STATE.currentUserId);
       renderMessages();
     });
@@ -208,7 +196,7 @@
       await loadThreads();
     } catch (err) {
       console.error(err);
-      alert('전송 실패: ' + (err.message || '알 수 없는 오류'));
+      window.notify('전송 실패: ' + (err.message || '알 수 없는 오류'), 'danger');
     } finally {
       STATE.sending = false;
       $('composeSend').disabled = false;
@@ -311,7 +299,7 @@
       await openThread(userId);
     } catch (err) {
       console.error(err);
-      alert('전송 실패: ' + (err.message || '알 수 없는 오류'));
+      window.notify('전송 실패: ' + (err.message || '알 수 없는 오류'), 'danger');
     } finally {
       NM_STATE.sending = false;
       updateNmSendEnabled();

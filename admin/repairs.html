@@ -77,7 +77,7 @@
     .admin-subnav::-webkit-scrollbar { display: none; }
     .admin-subnav-link { white-space: nowrap; flex: 0 0 auto; }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20261002-d2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -154,6 +154,7 @@
 <main id="app" hidden>
   <div class="toolbar">
     <input type="search" class="filter" id="filter" placeholder="이름·지역·전문분야 검색" />
+    <label class="tr-filter"><input type="checkbox" id="onlyMissing" /> 번역 빈 것만</label>
     <span class="count" id="count"></span>
     <button type="button" class="primary-btn" id="newBtn">+ 새 수리실</button>
   </div>
@@ -197,11 +198,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20261002-c3" defer></script>
-  <script src="../js/db-client.js?v=20261002-c2" defer></script>
+  <script src="../js/db-client.js?v=20261002-d2" defer></script>
 <script src="../js/util.js?v=20261002-ja" defer></script>
   <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20261002-c3" defer></script>
+  <script src="../js/site-common.js?v=20261002-d2" defer></script>
+<script src="../js/admin-guard.js?v=20260803-guard"></script>
 <script>
 'use strict';
 
@@ -231,28 +233,8 @@ function escapeHtml(s) {
 }
 const escapeAttr = escapeHtml;
 
-function showGate(msg) { $('gate').hidden = false; if (msg) $('gate').querySelector('p').textContent = msg; }
-
-async function checkAccess() {
-  for (let i = 0; i < 50; i++) {
-    if (db() && db().isReady()) break;
-    await new Promise(r => setTimeout(r, 50));
-  }
-  if (!db() || !db().isReady()) { showGate('서비스 준비 실패. 잠시 후 새로고침해주세요.'); return false; }
-  const session = await db().auth.getSession();
-  if (!session) { showGate(); return false; }
-  STATE.user = session.user;
-  const profile = await db().profiles.getMine();
-  if (!profile?.is_editor) { showGate('편집부 권한이 있는 계정으로 로그인해야 이 페이지를 볼 수 있어요.'); return false; }
-  STATE.isEditor = true;
-  $('adminUser').innerHTML = `${escapeHtml(profile.display_name || session.user.email || '')} · <button id="logout">로그아웃</button>`;
-  $('logout').addEventListener('click', async () => { await db().auth.signOut(); location.reload(); });
-  return true;
-}
-
-$('gateLogin').addEventListener('click', async () => {
-  await db().auth.signInWithGoogle(window.location.href);
-});
+// 접근 권한 — 공통 게이트(js/admin-guard.js) 위임.
+async function checkAccess() { return window.AdminGuard.requireEditor(STATE); }
 
 async function reload() {
   // 목록 조회도 인증 경로를 타므로 멈출 수 있다. 타임아웃을 둬서 화면이
@@ -293,9 +275,20 @@ function updateSortIndicators() {
   });
 }
 
+// 한국어 원문이 있는데 영·일 칸이 빈 언어. 원문이 비면 번역할 것도 없다.
+const TR_FIELDS = ['name', 'address', 'specialty', 'description'];
+function missingLangs(row) {
+  return ['en', 'ja'].filter((l) => TR_FIELDS.some((f) =>
+    String(row[f] || '').trim() && !String(row[`${f}_${l}`] || '').trim()));
+}
+function missBadges(row) {
+  return missingLangs(row).map((l) => `<span class="tr-miss">${l.toUpperCase()} 없음</span>`).join('');
+}
+
 function render() {
   updateSortIndicators();
-  const filtered = sortShops(applyFilter(STATE.shops, STATE.filter));
+  let filtered = sortShops(applyFilter(STATE.shops, STATE.filter));
+  if (STATE.onlyMissing) filtered = filtered.filter((s) => missingLangs(s).length);
   $('count').textContent = `${filtered.length} / ${STATE.shops.length}`;
   if (filtered.length === 0) {
     $('tbody').innerHTML = '<tr><td colspan="4" class="empty">수리실이 없어요.</td></tr>';
@@ -306,7 +299,7 @@ function render() {
     return `
       <tr${hidden ? ' style="opacity:.55"' : ''}>
         <td data-label="이름">
-          <div class="col-name">${escapeHtml(s.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}</div>
+          <div class="col-name">${escapeHtml(s.name)}${hidden ? ' <span class="badge" style="background:#fde68a;color:#78350f">숨김</span>' : ''}${missBadges(s)}</div>
         </td>
         <td class="col-meta" data-label="지역">${escapeHtml(s.region || '')}</td>
         <td class="col-meta" data-label="전문분야">${escapeHtml(s.specialty || '')}</td>
@@ -324,6 +317,7 @@ function render() {
 }
 
 $('filter').addEventListener('input', (e) => { STATE.filter = e.target.value; render(); });
+$('onlyMissing').addEventListener('change', (e) => { STATE.onlyMissing = e.target.checked; render(); });
 
 document.querySelectorAll('.labs-table thead th.th-sort').forEach(th => {
   th.addEventListener('click', () => {

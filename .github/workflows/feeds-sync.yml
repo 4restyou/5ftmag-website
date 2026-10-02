@@ -1,14 +1,16 @@
 # main 에 바로 올린 기사 커밋(코덱스·운영자)이 data/stories.json 만 바꾸면, qa-smoke 가
 # 발행 글이 rss.xml·sitemap.xml 에도 들어가 있는지 검사하므로 main 의 CI 가 드리프트로 실패했다.
-# 이 워크플로우가 두 파일을 재생성해 뒤따라 올린다. (관리 페이지의 공개/비공개 토글은 이제
-# DB 의 story_visibility 만 바꾸므로 여기와 무관하다.)
+# 이 워크플로우가 두 파일을 재생성해 뒤따라 올린다. (관리 페이지의 공개/비공개 토글은
+# DB 의 story_visibility 만 바꾸므로 이 워크플로우를 깨우지 않는다. 빌더가 그 표를 읽어
+# 숨긴 글을 빼고, Netlify 빌드(매일 새벽 daily-build 포함) 때 라이브 피드에 반영된다.)
 #
 # main 은 보호 브랜치라 「validate」 검사를 통과한 커밋만 받는다. 이 워크플로우가 만든 커밋은
 # 그대로 푸시하면 거절된다(2026-10-01 확인). 그래서 커밋을 임시 브랜치에 올리고, 그 브랜치에서
 # CI(test.yml)를 직접 돌려 통과시킨 뒤 같은 커밋을 main 에 fast-forward 로 올린다.
 # GITHUB_TOKEN 으로 만든 PR·푸시는 CI 를 깨우지 않지만 workflow_dispatch 는 깨운다.
 #
-# 두 빌더는 로컬 파일(data/*.json)만 읽으므로 DB 접근이나 시크릿이 필요 없다.
+# 두 빌더는 data/*.json 과 공개 읽기 표 story_visibility(공개 anon 키)만 읽으므로 시크릿이 필요 없다.
+# DB 를 못 읽으면 경고만 남기고 JSON 그대로 싣는다.
 name: feeds-sync
 
 on:

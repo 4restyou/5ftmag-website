@@ -40,6 +40,7 @@
     .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
     .form-actions button { font: inherit; font-size: 13px; font-weight: var(--fw-heading); padding: 8px 16px; border-radius: var(--btn-radius); cursor: pointer; }
     .form-actions .save { background: var(--text); color: var(--bg); border: none; }
+    .form-actions .cancel { background: none; color: var(--text-muted); border: 1px solid var(--border); }
     .form-actions .save:disabled { opacity: 0.55; cursor: progress; }
     .form-msg { font-size: 12px; color: var(--text-muted); margin-top: 10px; min-height: 1em; }
     .form-msg.error { color: #b91c1c; }
@@ -62,7 +63,7 @@
     .empty { padding: 32px; text-align: center; color: var(--text-muted); }
     @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
   </style>
-  <link rel="stylesheet" href="../css/admin-shell.css?v=20260618-bulkselectall">
+  <link rel="stylesheet" href="../css/admin-shell.css?v=20261002-d2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -138,13 +139,27 @@
 
 <main id="app" hidden>
   <div class="panel">
-    <h2>새 공지 등록</h2>
+    <h2 id="formTitle">새 공지 등록</h2>
     <form id="newForm">
       <div class="form-row">
         <label for="f-body">본문 *</label>
         <div>
           <textarea id="f-body" required maxlength="500" placeholder="예: **5ft magazine** — 한국 필름 사진 매거진. (최대 500자)"></textarea>
           <div class="hint">사이트 상단에 마퀴(좌→우 흐르기) 배너로 표시돼요. 굵게 강조: <code>**텍스트**</code> 로 감싸기.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="f-bodyEn">영문 공지(선택)</label>
+        <div>
+          <textarea id="f-bodyEn" maxlength="500" placeholder="예: **5ft magazine**, a Korean film photography magazine."></textarea>
+          <div class="hint">영문판(/en/) 상단에 나가요. 비우면 한국어 본문이 나가요.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="f-bodyJa">일문 공지(선택)</label>
+        <div>
+          <textarea id="f-bodyJa" maxlength="500" placeholder="例: **5ft magazine** は韓国のフィルム写真マガジンです。"></textarea>
+          <div class="hint">일본어판(/ja/) 상단에 나가요. 비우면 영문, 영문도 비면 한국어 본문이 나가요.</div>
         </div>
       </div>
       <div class="form-row">
@@ -162,6 +177,7 @@
         </div>
       </div>
       <div class="form-actions">
+        <button type="button" class="cancel" id="cancelEditBtn" hidden>취소</button>
         <button type="submit" class="save" id="saveBtn">등록</button>
       </div>
       <div class="form-msg" id="formMsg"></div>
@@ -182,13 +198,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20261002-c3" defer></script>
-  <script src="../js/db-client.js?v=20261002-c2" defer></script>
+  <script src="../js/db-client.js?v=20261002-d2" defer></script>
 <script src="../js/util.js?v=20261002-ja" defer></script>
 <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20261002-c3" defer></script>
+  <script src="../js/site-common.js?v=20261002-d2" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/admin-announcements-page.js?v=20260803-arch" defer></script>
+<script src="../js/admin-announcements-page.js?v=20261002-d2" defer></script>
 
 </body>
 </html>

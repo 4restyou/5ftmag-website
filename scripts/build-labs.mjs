@@ -40,6 +40,8 @@ export function rowToJson(r) {
     nameJa: r.name_ja ?? null,
     addressJa: r.address_ja ?? null,
     featuresJa: r.features_ja ?? null,
+    // 현상소 페이지의 "최종 반영" 날짜는 목록 중 가장 최근 updatedAt 으로 채운다.
+    updatedAt: r.updated_at ?? null,
   };
 }
 

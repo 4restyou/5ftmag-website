@@ -64,12 +64,12 @@ $('tbody').addEventListener('click', async (e) => {
   else if (btn.dataset.act === 'toggle') {
     btn.disabled = true;
     const { error } = await withWriteTimeout(db().webzine.upsert({ id: issue.id, slug: issue.slug, title: issue.title, published: !issue.published }));
-    if (error) alert('변경 실패: ' + error.message);
+    if (error) window.notify('변경 실패: ' + error.message, 'danger');
     await reload();
   } else if (btn.dataset.act === 'del') {
     if (!confirm(`"${issue.title}" 을(를) 삭제할까요? (목록에서만 제거되며 업로드 파일은 남습니다)`)) return;
     const { error } = await withWriteTimeout(db().webzine.remove(issue.id));
-    if (error) alert('삭제 실패: ' + error.message);
+    if (error) window.notify('삭제 실패: ' + error.message, 'danger');
     await reload();
   }
 });
@@ -129,7 +129,7 @@ $('deleteBtn')?.addEventListener('click', async () => {
   if (!issue) return;
   if (!confirm(`"${issue.title}" 을(를) 삭제할까요? (목록에서만 제거되며 업로드 파일은 남습니다)`)) return;
   const { error } = await withWriteTimeout(db().webzine.remove(issue.id));
-  if (error) { alert('삭제 실패: ' + error.message); return; }
+  if (error) { window.notify('삭제 실패: ' + error.message, 'danger'); return; }
   closeModal();
   await reload();
 });

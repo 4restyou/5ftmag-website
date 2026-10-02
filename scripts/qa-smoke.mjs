@@ -85,6 +85,9 @@ for (const file of [
 }
 
 // 4) Published stories contract
+// 이 검사는 저장소 안의 stories.json 과 커밋된 rss·sitemap 이 맞는지 본다(드리프트 가드).
+// 빌더는 배포 때 story_visibility(관리 화면 토글)도 읽지만, 여기서는 읽지 않는다. 읽으면
+// 저장소에선 초안인데 관리 화면에서 공개로 켠 글을 "공개" 로 보고 커밋된 피드와 어긋난다.
 const stories = JSON.parse(readFileSync(join(ROOT, 'data/stories.json'), 'utf8'));
 const rssXml = readFileSync(join(ROOT, 'rss.xml'), 'utf8');
 const sitemapXml = readFileSync(join(ROOT, 'sitemap.xml'), 'utf8');

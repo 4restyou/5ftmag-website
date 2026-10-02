@@ -481,6 +481,15 @@ a.home-card:hover, a.card:hover {
   background: var(--color-neutral-bg); color: var(--color-neutral-text);
   white-space: nowrap;
 }
+/* 번역 빈 칸 — 필름·현상소·수리실·공지 목록의 "EN 없음 / JA 없음" */
+.tr-miss {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  font-size: 10.5px; font-weight: var(--fw-heading); letter-spacing: .04em; line-height: 1.5;
+  border-radius: 3px; background: var(--color-warning-bg); color: var(--color-warning-text);
+  vertical-align: middle; white-space: nowrap;
+}
+.tr-filter { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); cursor: pointer; user-select: none; }
+.tr-filter input { width: 16px; height: 16px; margin: 0; accent-color: var(--text); }
 
 /* ════════════════════════════════════════════════════════════════════════
    10. 빈 상태
@@ -611,6 +620,29 @@ a.home-card:hover, a.card:hover {
   .films-table td[data-label="actions"]::before,
   .labs-table td[data-label="actions"]::before,
   .wz-table td[data-label="actions"]::before { content: none; }
+}
+
+/* 공지·이주의 사진 목록(.adm-table) — 폰에서는 행을 카드처럼 세로로 쌓고,
+   각 칸 앞에 data-label 머리글을 붙인다. thead 는 숨긴다. */
+@media (max-width: 640px) {
+  .adm-table thead { display: none; }
+  .adm-table tbody tr { display: block; padding: 12px 14px; border-bottom: 1px solid var(--adm-line); }
+  .adm-table tbody tr:last-child { border-bottom: none; }
+  .adm-table tbody td { display: block; border: none; padding: 3px 0; text-align: left; white-space: normal; }
+  .adm-table tbody td[data-label]::before {
+    content: attr(data-label);
+    display: block; margin-bottom: 2px;
+    font-size: 11px; font-weight: var(--fw-heading); letter-spacing: .04em;
+    color: var(--text-muted);
+  }
+  .adm-table tbody td.col-actions { margin-top: 8px; }
+  .adm-table tbody td.col-actions .row-btn { margin: 0 6px 6px 0; }
+  .adm-table tbody td.empty { padding: 24px 0; text-align: center; }
+}
+
+/* 폰에서 16px 미만 입력칸은 iPhone 이 포커스 때 화면을 확대한다. */
+@media (max-width: 640px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: 16px !important; }
 }
 
 @media (max-width: 720px) {

@@ -1,6 +1,6 @@
 'use strict';
 
-// 5ft.mag 편집부 홈 — 오늘 처리할 일 (검토·신고·오류·트래픽) 요약과 섹션 바로가기.
+// 5ft.mag 편집부 홈 — 오늘 처리할 일 (검토·신고·메시지·필름 제안·오류·트래픽) 요약과 섹션 바로가기.
 const STATE = { user: null, loading: false };
 
 function $(id) { return document.getElementById(id); }
@@ -17,7 +17,6 @@ function diffLabel(today, yesterday) {
 }
 
 // 접근 권한 — 공통 게이트(js/admin-guard.js) 위임.
-const showGate = (msg) => window.AdminGuard.showGate(msg);
 async function checkAccess() { return window.AdminGuard.requireEditor(STATE); }
 
 async function getPendingReportCount() {
@@ -36,12 +35,16 @@ async function reload() {
   const btn = $('homeRefresh');
   btn.disabled = true;
   try {
-    const [uploads, pendingReports, errors, summary] = await Promise.all([
+    const [uploads, pendingReports, errors, summary, unreadMessages, proposals] = await Promise.all([
       db().analytics.uploadsSummary(),
       getPendingReportCount(),
       db().analytics.clientErrorsRecent(24, 50),
       db().analytics.summary(),
+      db().messages.unreadCountForAdmin().catch(() => 0),
+      db().filmProposals.listForReview({ status: 'pending' }).catch(() => []),
     ]);
+    const messageCount = Number(unreadMessages) || 0;
+    const proposalCount = Array.isArray(proposals) ? proposals.length : 0;
 
     const pendingUploads = Number(uploads?.total_pending) || 0;
     const reportCount = Number(pendingReports) || 0;
@@ -49,6 +52,8 @@ async function reload() {
 
     $('vPending').textContent = fmtNum(pendingUploads);
     $('vReports').textContent = fmtNum(reportCount);
+    $('vMessages').textContent = fmtNum(messageCount);
+    $('vProposals').textContent = proposalCount >= 100 ? '100+' : fmtNum(proposalCount);
     $('vErrors').textContent = errorCount >= 50 ? '50+' : fmtNum(errorCount);
     $('vViews').textContent = fmtNum(summary?.views_today);
     $('vViewsSub').textContent = summary ? diffLabel(summary.views_today, summary.views_yesterday) : '데이터 없음';
@@ -56,6 +61,8 @@ async function reload() {
     $('cardPending').classList.toggle('is-alert', pendingUploads > 0);
     $('cardReports').classList.toggle('is-alert', reportCount > 0);
     $('cardErrors').classList.toggle('is-alert', errorCount > 0);
+    $('cardMessages').classList.toggle('is-alert', messageCount > 0);
+    $('cardProposals').classList.toggle('is-alert', proposalCount > 0);
   } finally {
     STATE.loading = false;
     btn.disabled = false;
