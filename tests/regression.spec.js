@@ -486,7 +486,7 @@ test('글 공유 영역은 X와 카카오스토리 없이 정돈된 버튼만 �
   const labels = await page.locator('.share-bar a, .share-bar button').evaluateAll((els) => els.map((el) => el.textContent.trim()));
   expect(labels).toContain('스크랩');
   expect(labels).toContain('링크 복사');
-  expect(labels).toContain('Instagram ↗');
+  expect(labels).toContain('@5ft.magazine 팔로우');
   expect(labels).not.toContain('X');
   expect(labels).not.toContain('카카오스토리');
 });

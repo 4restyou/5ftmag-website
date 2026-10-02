@@ -802,7 +802,7 @@
       if (!window.MagDB?.isReady?.()) { window.notify?.(mt('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info'); return; }
       const sess = await window.MagDB.auth.getSession();
       if (!sess) {
-        if (!confirm(mt('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Favorites need an account. Sign in with Google?', 'お気に入りにはログインが必要です。Googleでログインしますか？'))) return;
+        if (!window.MagAuthUI.confirmLogin(mt('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Favorites need an account. Sign in with Google?', 'お気に入りにはログインが必要です。Googleでログインしますか？'))) return;
         window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
         return;
       }

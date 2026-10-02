@@ -364,7 +364,10 @@
   }
   async function toggleLike(it, btn) {
     const session = await db().auth.getSession();
-    if (!session) { db().auth.signInWithGoogle(location.href); return; }
+    if (!session) {
+      if (window.MagAuthUI.confirmLogin('좋아요는 로그인이 필요해요. Google로 로그인할까요?')) db().auth.signInWithGoogle(location.href);
+      return;
+    }
     const on = favSet.has(it.id);
     const { error } = await db().favorites.toggle('webzine', it.id, on);
     if (error) { window.notify?.('좋아요 처리 실패: ' + error.message, 'danger'); return; }

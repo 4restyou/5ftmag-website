@@ -2,7 +2,7 @@
    유료 이북은 양장(천 짜임 + 금박), 무료 웹진은 종이(크라프트 + 톤온톤 박). 책을 누르면 목록이 물러나고
    책이 일어서는 소개 화면으로 간다. 소개 화면에서 아래로 넘기면 다음 책, ← 나 Esc 로 목록.
    이전 코버플로우 책장은 css/webzine.css + js/webzine-page.js (books-classic.html) 에 그대로 있다. */
-#themeBtn { visibility: hidden; pointer-events: none; }   /* 다크 고정. 아이콘 자리는 유지 */
+#themeBtn { display: none; }   /* 다크 고정이라 테마 버튼을 아예 뺀다 (빈 칸 없이) */
 html {
   --wz-mark: url("../img/symbol-w.svg");
   --wz-base: #16121a;

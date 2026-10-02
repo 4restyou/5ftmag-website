@@ -221,7 +221,7 @@
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?', 'お気に入りにはログインが必要です。Google でログインしますか？'))) return;
+      if (!window.MagAuthUI.confirmLogin(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?', 'お気に入りにはログインが必要です。Google でログインしますか？'))) return;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return;
     }
@@ -1254,7 +1254,7 @@
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?', 'お気に入りにはログインが必要です。Google でログインしますか？'))) return false;
+      if (!window.MagAuthUI.confirmLogin(fpT('즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to use Favorites. Sign in with Google?', 'お気に入りにはログインが必要です。Google でログインしますか？'))) return false;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return false;
     }
@@ -1381,7 +1381,7 @@
     }
     const sess = await window.MagDB.auth.getSession();
     if (!sess) {
-      if (!confirm(fpT('작가 즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to save photographers to Favorites. Sign in with Google?', '撮影者をお気に入りに追加するにはログインが必要です。Google でログインしますか？'))) return;
+      if (!window.MagAuthUI.confirmLogin(fpT('작가 즐겨찾기는 로그인이 필요해요. Google로 로그인할까요?', 'Sign in to save photographers to Favorites. Sign in with Google?', '撮影者をお気に入りに追加するにはログインが必要です。Google でログインしますか？'))) return;
       window.MagDB.auth.signInWithGoogle(window.location.href.split('#')[0]);
       return;
     }

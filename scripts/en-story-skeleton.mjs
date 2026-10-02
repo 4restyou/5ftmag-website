@@ -41,10 +41,10 @@ const ROLE_EN = {
 };
 
 const UI = [
-  ['class="article-back">← Stories</a>', 'class="article-back">← Articles</a>'],
   ['<button type="button" data-action="copy-link">링크 복사</button>', '<button type="button" data-action="copy-link">Copy link</button>'],
   ['<span class="nav-label">← 목록으로</span>', '<span class="nav-label">← Back to list</span>'],
-  ['<span class="nav-title">Stories 전체 보기</span>', '<span class="nav-title">All articles</span>'],
+  ['<span class="nav-title">Articles 전체 보기</span>', '<span class="nav-title">All Articles</span>'],
+  ['rel="noopener">@5ft.magazine 팔로우</a>', 'rel="noopener">Follow @5ft.magazine</a>'],
   ['<h3 class="related-title">함께 읽기 좋은 글</h3>', '<h3 class="related-title">Read next</h3>'],
   ['alt="김현아"', 'alt="Kim Hyun-a"'],
   ['aria-label="전체 검색" title="전체 검색"', 'aria-label="Search" title="Search"'],
@@ -65,10 +65,10 @@ const ROLE_JA = {
 
 // 영문 표의 오른쪽 값을 일본어로 바꾼 것. 왼쪽(한국어 원문 마크업)은 같다.
 const UI_JA_TEXT = {
-  'class="article-back">← Articles</a>': 'class="article-back">← 記事一覧</a>',
   '<button type="button" data-action="copy-link">Copy link</button>': '<button type="button" data-action="copy-link">リンクをコピー</button>',
   '<span class="nav-label">← Back to list</span>': '<span class="nav-label">← 一覧へ</span>',
-  '<span class="nav-title">All articles</span>': '<span class="nav-title">すべての記事</span>',
+  '<span class="nav-title">All Articles</span>': '<span class="nav-title">Articles をすべて見る</span>',
+  'rel="noopener">Follow @5ft.magazine</a>': 'rel="noopener">@5ft.magazine をフォロー</a>',
   '<h3 class="related-title">Read next</h3>': '<h3 class="related-title">あわせて読みたい</h3>',
   'aria-label="Search" title="Search"': 'aria-label="検索" title="検索"',
   'aria-label="Switch to dark mode"': 'aria-label="ダークモードに切り替え"',

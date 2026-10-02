@@ -341,7 +341,10 @@
   }
   async function toggleLike(it, btn) {
     const session = await db().auth.getSession();
-    if (!session) { db().auth.signInWithGoogle(location.href); return; }
+    if (!session) {
+      if (window.MagAuthUI.confirmLogin(T('좋아요는 로그인이 필요해요. Google로 로그인할까요?', 'Likes need an account. Sign in with Google?', 'いいねするにはログインが必要です。Googleでログインしますか？'))) db().auth.signInWithGoogle(location.href);
+      return;
+    }
     const on = favSet.has(it.id);
     const { error } = await db().favorites.toggle('webzine', it.id, on);
     if (error) { window.notify?.(T('좋아요 처리 실패: ', 'Could not save like: ', 'いいねを保存できませんでした：') + error.message, 'danger'); return; }

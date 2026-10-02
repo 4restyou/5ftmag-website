@@ -100,7 +100,7 @@
     const hasStore = !!(product.store_url && /\/products\/\d+/.test(product.store_url));
 
     if (!hasKakao && !hasStore) {
-      alert(i18n.t('구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 인스타그램 @5ft.magazine DM 으로 문의해 주세요.', 'How to buy\n\nOnline payment is not ready yet. To buy, send a DM to @5ft.magazine on Instagram.', '購入について\n\nオンライン決済は準備中です。ご購入希望の方は、Instagram @5ft.magazine に DM でお問い合わせください。'));
+      alert(i18n.t(`구매 안내\n\n결제 준비 중이에요. 구매를 원하시면 편집부로 연락해 주세요 (${window.MagContact.text()}).`, `How to buy\n\nOnline payment is not ready yet. To buy, contact the editors (${window.MagContact.text()}).`, `購入について\n\nオンライン決済は準備中です。ご購入希望の方は、編集部までご連絡ください（${window.MagContact.text()}）。`));
       return;
     }
 
@@ -181,7 +181,7 @@
         msgEl.textContent = i18n.t('주문을 확인하지 못했어요. 주문번호와 주문자 이름·연락처 끝 4자리를 스마트스토어 주문 정보와 똑같이 입력했는지 확인해 주세요. 결제 직후라면 잠시 후 다시 시도해 주세요.', 'We couldn\'t verify this order. Check that the order number, buyer name and last 4 digits of the phone match your Smart Store order exactly. If you just paid, try again in a moment.', '注文を確認できませんでした。注文番号、注文者の名前、電話番号の下4桁が Smart Store の注文情報と同じか確認してください。決済直後の場合は、しばらくしてから再度お試しください。');
         return;
       }
-      msgEl.textContent = (r && r.detail) || i18n.t('인증에 실패했어요. 잠시 후 다시 시도하거나 @5ft.magazine DM 으로 문의해 주세요.', 'Verification failed. Please try again in a moment or contact @5ft.magazine.', '認証に失敗しました。しばらくしてから再度お試しいただくか、@5ft.magazine までお問い合わせください。');
+      msgEl.textContent = (r && r.detail) || i18n.t(`인증에 실패했어요. 잠시 후 다시 시도하고, 그래도 안 되면 편집부에 알려주세요 (${window.MagContact.text()}).`, `Verification failed. Please try again in a moment. If it still fails, let the editors know (${window.MagContact.text()}).`, `認証に失敗しました。しばらくしてから再度お試しください。それでも続く場合は、編集部にお知らせください（${window.MagContact.text()}）。`);
     }
 
     back.addEventListener('click', (e) => {
@@ -264,7 +264,7 @@
     }
     hideOverlay();
     if (r?.error === 'login required') {
-      if (confirm(i18n.t('결제 확인을 계속하려면 다시 로그인이 필요해요. Google로 로그인할까요?', 'Please sign in again to finish confirming your payment. Sign in with Google?', '決済の確認を続けるには、もう一度ログインが必要です。Google でログインしますか？'))) {
+      if (window.MagAuthUI.confirmLogin(i18n.t('결제 확인을 계속하려면 다시 로그인이 필요해요. Google로 로그인할까요?', 'Please sign in again to finish confirming your payment. Sign in with Google?', '決済の確認を続けるには、もう一度ログインが必要です。Google でログインしますか？'))) {
         db().auth.signInWithGoogle(new URL(cleanUrl(), location.origin).href);
       }
       return;
@@ -310,7 +310,7 @@
     let sess = null;
     try { sess = await m.auth.getSession(); } catch (_) {}
     if (!sess) {
-      if (confirm(i18n.t('구매하려면 로그인이 필요해요. Google로 로그인할까요?', 'You need to sign in to buy. Sign in with Google?', '購入するにはログインが必要です。Google でログインしますか？'))) {
+      if (window.MagAuthUI.confirmLogin(i18n.t('구매하려면 로그인이 필요해요. Google로 로그인할까요?', 'You need to sign in to buy. Sign in with Google?', '購入するにはログインが必要です。Google でログインしますか？'))) {
         m.auth.signInWithGoogle(location.href.split('#')[0]);
       }
       return;

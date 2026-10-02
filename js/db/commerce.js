@@ -2,6 +2,10 @@
 (function () {
   'use strict';
   function create({ client, session, url, webzine }) {
+    // 로그인 사용자 id. 세션이 없거나 못 읽으면 null (열람권 조회·부여가 쓴다).
+    async function userId() {
+      try { const current = await session(); return current?.user?.id || null; } catch (_) { return null; }
+    }
   async function postFunction(name, body, timeoutMs = 25_000) {
     const headers = { 'content-type': 'application/json' };
     try {

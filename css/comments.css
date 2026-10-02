@@ -35,7 +35,9 @@
 .cm-auth-buttons {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
+.cm-auth-buttons .login-consent { flex-basis: 100%; }
 .cm-auth-on .cm-avatar-sm {
   width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
 }

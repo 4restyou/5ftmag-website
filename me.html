@@ -60,8 +60,7 @@
 <div id="gate" class="gate" hidden>
   <h2>로그인이 필요해요</h2>
   <p>로그인하면 내가 올린 사진과 매물을 한곳에서 관리할 수 있어요.</p>
-  <button class="gate-btn" id="gateLogin">Google로 로그인</button>
-  <p class="gate-consent" style="font-size:12px; line-height:1.6; color:var(--text-muted); margin-top:14px; max-width:320px;">로그인 시 만 14세 이상이며 <a href="/legal/terms.html" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">이용약관</a> · <a href="/legal/privacy.html" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">개인정보처리방침</a>에 동의한 것으로 간주합니다. 만 14세 미만은 가입할 수 없습니다.</p>
+  <div id="gateLoginSlot"></div>
 </div>
 
 <div id="app" hidden>
@@ -226,13 +225,13 @@
 <div class="img-zoom" id="imgZoom"><img decoding="async" id="imgZoomTarget" alt="" /></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="./js/db/commerce.js?v=20261002-c1" defer></script>
+<script src="./js/db/commerce.js?v=20261002-c3" defer></script>
   <script src="./js/db-client.js?v=20261002-c2" defer></script>
 <script src="./js/util.js?v=20261002-ja" defer></script>
   <script src="./js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="./js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="./js/site-common.js?v=20261002-c2" defer></script>
-<script src="./js/me-page.js?v=20261002-c2" defer></script>
+  <script src="./js/site-common.js?v=20261002-c3" defer></script>
+<script src="./js/me-page.js?v=20261002-c3" defer></script>
 
 </body>
 </html>

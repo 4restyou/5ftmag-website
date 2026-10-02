@@ -39,6 +39,9 @@ function db() { return window.MagDB; }
 function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
 function escapeAttr(s) { return window.MagUtil.escapeAttr(s); }
 function nl2br(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
+// 판매자 연락처는 핸드폰·기타 중 하나만 있어도 된다. 비운 칸은 DB 에 '미입력'으로 들어가므로 화면에선 빈 값으로 본다.
+const CONTACT_BLANK = '미입력';
+function contactValue(v) { return v && v !== CONTACT_BLANK ? v : ''; }
 function fmtDate(iso) {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
@@ -380,8 +383,8 @@ function renderDetail(r) {
         <strong>${i18n.t('판매자 연락처', 'Seller contact', '出品者の連絡先')}</strong>
         ${isAuthed ? `
           ${r.seller_name ? `<div>${i18n.t('이름', 'Name', '名前')} · ${escapeHtml(r.seller_name)}</div>` : ''}
-          ${r.phone ? `<div>${i18n.t('핸드폰', 'Phone', '携帯電話')} · ${escapeHtml(r.phone)}</div>` : ''}
-          ${r.contact ? `<div>${i18n.t('기타', 'Other', 'その他')} · ${nl2br(r.contact)}</div>` : ''}
+          ${contactValue(r.phone) ? `<div>${i18n.t('핸드폰', 'Phone', '携帯電話')} · ${escapeHtml(r.phone)}</div>` : ''}
+          ${contactValue(r.contact) ? `<div>${i18n.t('기타', 'Other', 'その他')} · ${nl2br(r.contact)}</div>` : ''}
         ` : `
           <div class="mkt-detail-contact-locked">${i18n.t('로그인하면 판매자의 이름·핸드폰·연락처를 확인할 수 있어요.', 'Log in to see the seller\'s name, phone and contact details.', 'ログインすると、出品者の名前・携帯電話・連絡先を確認できます。')}</div>
         `}
@@ -486,13 +489,76 @@ function bindDetailHandlers(r) {
       }
       if (a === 'report') {
         if (!STATE.user) return window.notify?.(i18n.t('신고는 로그인 후에 가능해요. 로그인하면 보던 매물로 다시 돌아옵니다.', 'Log in to report a listing. You will come back to this item after logging in.', '通報はログイン後にできます。ログインすると、見ていた出品に戻ります。'), 'info');
-        const reason = prompt(i18n.t('신고 사유를 적어주세요 (300자 이내):', 'Why are you reporting this listing? (300 characters max)', '通報の理由を入力してください（300字以内）：'), '');
+        const reason = await askReportReason();
         if (!reason) return;
         const { error } = await db().market.report(r.id, reason);
         if (error) return window.notify?.(i18n.t('신고를 접수하지 못했어요. 잠시 뒤 다시 시도해 주세요. (', 'Could not send your report. Try again in a moment. (', '通報を受け付けられませんでした。しばらくしてから、もう一度お試しください。(') + error.message + ')', 'danger');
         window.notify?.(i18n.t('신고가 접수되었습니다. 편집부에서 검토할게요.', 'Report received. Our editors will review it.', '通報を受け付けました。編集部で確認します。'), 'info');
       }
     });
+  });
+}
+
+// ═════════════════════════════════════════
+// 신고 사유 창 (prompt 대신)
+// ═════════════════════════════════════════
+// 고른 사유 문구와 직접 적은 내용을 합쳐 돌려준다. 취소하면 null.
+// DB 는 사유를 300자까지 받는다. 사유 문구가 짧으니 직접 입력은 250자로 막는다.
+let closeReportDialog = null;
+function askReportReason() {
+  const reasons = [
+    i18n.t('허위·사기 의심', 'Suspected fake or scam', '虚偽・詐欺の疑い'),
+    i18n.t('금지 품목', 'Prohibited item', '禁止されている品物'),
+    i18n.t('연락 두절', 'Seller stopped responding', '連絡が取れない'),
+    i18n.t('기타', 'Other', 'その他'),
+  ];
+  const OTHER = reasons.length - 1;
+  return new Promise((resolve) => {
+    const prevFocus = document.activeElement;
+    const wrap = document.createElement('div');
+    wrap.className = 'mkt-modal mkt-report-modal open';
+    wrap.setAttribute('role', 'dialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.setAttribute('aria-labelledby', 'mktReportTitle');
+    wrap.innerHTML = `
+      <form class="mkt-modal-card mkt-report-card" novalidate>
+        <h2 class="mkt-form-title" id="mktReportTitle">${i18n.t('매물 신고', 'Report this listing', '出品を通報')}</h2>
+        <fieldset class="mkt-report-reasons">
+          <legend class="mkt-field-label">${i18n.t('어떤 문제인가요?', 'What is the problem?', 'どんな問題ですか？')}</legend>
+          ${reasons.map((label, i) => `
+            <label class="mkt-report-reason"><input type="radio" name="reason" value="${i}" /> <span>${escapeHtml(label)}${i === OTHER ? i18n.t(' (직접 입력)', ' (describe below)', '（下に入力）') : ''}</span></label>`).join('')}
+        </fieldset>
+        <label class="mkt-field">
+          <span class="mkt-field-label">${i18n.t('자세한 내용', 'Details', '詳しい内容')}</span>
+          <textarea name="detail" maxlength="250" rows="3" placeholder="${i18n.t('기타를 골랐다면 꼭 적어 주세요. 다른 사유도 덧붙일 수 있어요.', 'Required if you chose Other. You can add details for any reason.', 'その他を選んだ場合は必ず入力してください。ほかの理由にも書き添えられます。')}"></textarea>
+        </label>
+        <p class="mkt-report-error" role="alert"></p>
+        <div class="mkt-report-actions">
+          <button type="button" class="mkt-btn mkt-btn-secondary" data-action="cancel">${i18n.t('취소', 'Cancel', 'キャンセル')}</button>
+          <button type="submit" class="mkt-btn mkt-btn-primary">${i18n.t('신고 보내기', 'Send report', '通報する')}</button>
+        </div>
+      </form>`;
+    const form = wrap.querySelector('form');
+    const errEl = wrap.querySelector('.mkt-report-error');
+    const finish = (value) => {
+      closeReportDialog = null;
+      wrap.remove();
+      prevFocus?.focus?.();
+      resolve(value);
+    };
+    closeReportDialog = () => finish(null);
+    wrap.addEventListener('click', (e) => { if (e.target === wrap || e.target.closest('[data-action="cancel"]')) finish(null); });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const picked = form.querySelector('input[name="reason"]:checked');
+      const detail = form.detail.value.trim();
+      if (!picked) { errEl.textContent = i18n.t('신고 사유를 골라 주세요.', 'Choose a reason.', '通報の理由を選んでください。'); return; }
+      const idx = Number(picked.value);
+      if (idx === OTHER && !detail) { errEl.textContent = i18n.t('기타 사유를 적어 주세요.', 'Describe the problem.', 'その他の理由を入力してください。'); form.detail.focus(); return; }
+      finish(detail ? `${reasons[idx]}: ${detail}` : reasons[idx]);
+    });
+    document.body.appendChild(wrap);
+    wrap.querySelector('input[name="reason"]').focus();
   });
 }
 
@@ -532,8 +598,8 @@ function renderGate() {
     <div class="mkt-gate">
       <h2>${i18n.t('로그인이 필요해요', 'Please log in', 'ログインが必要です')}</h2>
       <p>${i18n.t('로그인하면 지금 화면으로 돌아와 매물 올리기를 이어갈 수 있어요.', 'After logging in, you will come back here to finish your listing.', 'ログインすると、この画面に戻って出品を続けられます。')}</p>
-      <button type="button" class="mkt-btn mkt-btn-primary" data-action="login">${i18n.t('Google로 계속하기', 'Continue with Google', 'Google で続ける')}</button>
-      <button type="button" class="mkt-btn-link" data-action="close" style="margin-left:8px;">${i18n.t('취소', 'Cancel', 'キャンセル')}</button>
+      ${window.MagAuthUI.loginButton({ className: 'mkt-btn mkt-btn-primary', attrs: 'data-action="login"' })}
+      <button type="button" class="mkt-btn-link" data-action="close" style="margin-top:12px;">${i18n.t('취소', 'Cancel', 'キャンセル')}</button>
     </div>`;
   $('mktFormCard').querySelectorAll('[data-action]').forEach(el => {
     el.addEventListener('click', async () => {
@@ -602,15 +668,14 @@ function renderForm(existing) {
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('핸드폰 번호', 'Phone number', '携帯電話番号')} <em>*</em></span>
-        <input type="tel" name="phone" maxlength="20" required value="${escapeAttr(e.phone || '')}" placeholder="${i18n.t('예: 010-1234-5678', 'e.g. 010-1234-5678', '例：010-1234-5678')}" pattern="[0-9\-\s]{9,20}" />
-        <span class="mkt-field-hint">${i18n.t('로그인한 사용자에게만 공개됩니다.', 'Visible to logged-in members only.', 'ログイン中の会員にのみ公開されます。')}</span>
+        <span class="mkt-field-label">${i18n.t('핸드폰 번호', 'Phone number', '携帯電話番号')}</span>
+        <input type="tel" name="phone" maxlength="20" value="${escapeAttr(contactValue(e.phone))}" placeholder="${i18n.t('예: 010-1234-5678', 'e.g. 010-1234-5678', '例：010-1234-5678')}" pattern="[0-9\-\s]{9,20}" />
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('기타 연락처', 'Other contact', 'その他の連絡先')} <em>*</em></span>
-        <textarea name="contact" maxlength="100" required placeholder="${i18n.t('카톡 ID, 인스타 DM 등 — 핸드폰 외 추가로 받을 수 있는 방법', 'KakaoTalk ID, Instagram DM, or another way to reach you besides phone', 'カカオトーク ID、Instagram DM など、携帯電話以外の連絡方法')}">${escapeHtml(e.contact || '')}</textarea>
-        <span class="mkt-field-hint">${i18n.t('로그인한 사용자에게만 공개됩니다.', 'Visible to logged-in members only.', 'ログイン中の会員にのみ公開されます。')}</span>
+        <span class="mkt-field-label">${i18n.t('기타 연락처', 'Other contact', 'その他の連絡先')}</span>
+        <textarea name="contact" maxlength="100" placeholder="${i18n.t('카톡 ID, 인스타 DM 등 — 핸드폰 외에 받을 수 있는 방법', 'KakaoTalk ID, Instagram DM, or another way to reach you besides phone', 'カカオトーク ID、Instagram DM など、携帯電話以外の連絡方法')}">${escapeHtml(contactValue(e.contact))}</textarea>
+        <span class="mkt-field-hint">${i18n.t('핸드폰과 기타 연락처 중 하나만 적어도 돼요. 로그인한 독자 누구나 매물의 \'판매자 연락처\'에서 볼 수 있어요.', 'Fill in at least one of phone or other contact. Any signed-in reader can see it under \'Seller contact\' on the listing.', '携帯電話とその他の連絡先のどちらか一つで構いません。ログインした読者なら誰でも、出品ページの「出品者の連絡先」で確認できます。')}</span>
       </label>
 
       <label class="mkt-safety-check">
@@ -817,7 +882,7 @@ async function onSubmit(e) {
     const contact         = String(fd.get('contact') || '').trim();
     const requiredFields = [
       ['title', title], ['price', price], ['category', category], ['location', location],
-      ['delivery_method', delivery_method], ['seller_name', seller_name], ['phone', phone], ['contact', contact],
+      ['delivery_method', delivery_method], ['seller_name', seller_name],
     ];
     const missing = requiredFields.find(([, v]) => !v);
     if (missing) {
@@ -828,10 +893,17 @@ async function onSubmit(e) {
         field.scrollIntoView({ behavior: 'smooth', block: 'center' });
         field.focus({ preventScroll: true });
       }
-      throw new Error(i18n.t('필수 항목(제목·가격·카테고리·지역·거래 방식·이름·핸드폰·기타 연락처)을 모두 입력해 주세요.', 'Please fill in all required fields (title, price, category, location, delivery, name, phone, other contact).', '必須項目（タイトル・価格・カテゴリー・地域・取引方法・名前・携帯電話・その他の連絡先）をすべて入力してください。'));
+      throw new Error(i18n.t('필수 항목(제목·가격·카테고리·지역·거래 방식·이름)을 모두 입력해 주세요.', 'Please fill in all required fields (title, price, category, location, delivery, name).', '必須項目（タイトル・価格・カテゴリー・地域・取引方法・名前）をすべて入力してください。'));
+    }
+    if (!phone && !contact) {
+      const field = form.querySelector('[name="phone"]');
+      field?.setAttribute('aria-invalid', 'true');
+      field?.setAttribute('aria-describedby', 'mktFormError');
+      field?.focus();
+      throw new Error(i18n.t('연락처를 하나 이상 적어 주세요.', 'Please add at least one way to contact you.', '連絡先を一つ以上入力してください。'));
     }
     if (!['courier','direct','both'].includes(delivery_method)) throw new Error(i18n.t('거래 방식을 다시 선택해 주세요.', 'Please choose a delivery option again.', '取引方法をもう一度選択してください。'));
-    if (!/[0-9]{8,}/.test(phone.replace(/[^0-9]/g, ''))) throw new Error(i18n.t('핸드폰 번호 형식을 확인해 주세요. (숫자 8자리 이상)', 'Check your phone number. (At least 8 digits)', '携帯電話番号の形式を確認してください。（数字8桁以上）'));
+    if (phone && !/[0-9]{8,}/.test(phone.replace(/[^0-9]/g, ''))) throw new Error(i18n.t('핸드폰 번호 형식을 확인해 주세요. (숫자 8자리 이상)', 'Check your phone number. (At least 8 digits)', '携帯電話番号の形式を確認してください。（数字8桁以上）'));
     if (fd.get('safety_agree') !== 'on') throw new Error(i18n.t('개인 간 거래 확인사항에 동의해야 매물을 올릴 수 있어요.', 'You need to agree to the private sale terms to post a listing.', '個人間取引の確認事項に同意すると出品できます。'));
 
     // 사진 업로드 — 신규 추가된 것만
@@ -872,7 +944,8 @@ async function onSubmit(e) {
       uploadedNew.push(path);
     }
 
-    const record = { title, price, category, description, location, delivery_method, seller_name, phone, contact, storage_paths: finalPaths };
+    // DB 는 두 칸 모두 비어 있지 않아야 한다(NOT NULL + 길이 1 이상). 비운 칸은 기존 backfill 값과 같은 '미입력'으로 저장한다.
+    const record = { title, price, category, description, location, delivery_method, seller_name, phone: phone || CONTACT_BLANK, contact: contact || CONTACT_BLANK, storage_paths: finalPaths };
 
     if (STATE.editId) {
       submit.textContent = i18n.t('수정 저장 중…', 'Saving changes…', '変更を保存中…');
@@ -950,6 +1023,8 @@ $('mktFormModal').addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  // 신고 창이 떠 있으면 그것만 닫는다 (상세 모달은 유지)
+  if (closeReportDialog) { closeReportDialog(); return; }
   // 상태 드롭다운이 열려 있으면 그것만 닫기 (모달은 유지)
   const openMenu = document.querySelector('#mktDetailCard .mkt-status-menu:not([hidden])');
   if (openMenu) {
@@ -975,7 +1050,7 @@ document.addEventListener('click', (e) => {
     await new Promise(r => setTimeout(r, 50));
   }
   if (!db() || !db().isReady()) {
-    renderMarketLoadError(i18n.t('마켓 연결을 준비하지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요 (인스타그램 @5ft.magazine DM).', 'Could not connect to the market. If this keeps happening after a refresh, let our editors know (Instagram DM @5ft.magazine).', 'マーケットへの接続を準備できませんでした。再読み込みしても続く場合は、編集部にお知らせください（Instagram @5ft.magazine に DM）。'));
+    renderMarketLoadError(i18n.t(`마켓 연결을 준비하지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요 (${window.MagContact.text()}).`, `Could not connect to the market. If this keeps happening after a refresh, let our editors know (${window.MagContact.text()}).`, `マーケットへの接続を準備できませんでした。再読み込みしても続く場合は、編集部にお知らせください（${window.MagContact.text()}）。`));
     return;
   }
   const session = await db().auth.getSession();

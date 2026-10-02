@@ -94,7 +94,7 @@ function showAuthError() {
   $('app').hidden = true;
   gate.innerHTML = `
     <h2>${i18n.t('인증 모듈을 불러오지 못했습니다', 'Couldn\'t load the sign-in module', '認証モジュールを読み込めませんでした')}</h2>
-    <p>${i18n.t('새로고침 후에도 반복되면 편집부에 알려주세요 (인스타그램 @5ft.magazine DM).', 'If this keeps happening after a refresh, please let the editors know (Instagram DM @5ft.magazine).', '再読み込みしても続く場合は、編集部にお知らせください（Instagram @5ft.magazine に DM）。')}</p>
+    <p>${i18n.t(`새로고침 후에도 반복되면 편집부에 알려주세요 (${window.MagContact.text()}).`, `If this keeps happening after a refresh, please let the editors know (${window.MagContact.text()}).`, `再読み込みしても続く場合は、編集部にお知らせください（${window.MagContact.text()}）。`)}</p>
     <button type="button" class="gate-btn" id="gateRetry">${i18n.t('다시 시도', 'Try again', 'もう一度試す')}</button>
     <p class="gate-home"><a href="${i18n.url('/')}">${i18n.t('홈으로 가기 →', 'Back to home →', 'ホームへ戻る →')}</a></p>`;
   gate.hidden = false;
@@ -104,6 +104,7 @@ function showAuthError() {
 function showGate() {
   $('gate').hidden = false;
   $('app').hidden = true;
+  $('gateLoginSlot').innerHTML = window.MagAuthUI.loginButton({ label: i18n.t('Google로 로그인', 'Sign in with Google', 'Google でログイン'), className: 'gate-btn', attrs: 'id="gateLogin"' });
   $('gateLogin').addEventListener('click', async () => {
     await db().auth.signInWithGoogle(window.location.href.split('#')[0]);
   });
@@ -227,7 +228,7 @@ async function deletePhoto(card) {
   // RLS 가 silently 차단하면 error 없이 data: [] 로 돌아옴 — 반드시 명시 검사.
   // 검사 없이 storage 만 지우면 DB row 남아서 깨진 썸네일이 생김.
   if (error || !data?.length) {
-    window.notify?.(i18n.t('사진 제출을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (', 'Couldn\'t delete the photo submission. Check your permissions or connection. (', '写真の投稿を削除できませんでした。権限または通信状況を確認してください。(') + (error?.message || i18n.t('서버에서 거부했습니다. 관리자에게 문의해 주세요.', 'The server refused the request. Please contact the editors.', 'サーバーに拒否されました。編集部にお問い合わせください。')) + ')', 'danger');
+    window.notify?.(i18n.t('사진 제출을 삭제하지 못했어요. 권한이나 네트워크 상태를 확인해 주세요. (', 'Couldn\'t delete the photo submission. Check your permissions or connection. (', '写真の投稿を削除できませんでした。権限または通信状況を確認してください。(') + (error?.message || i18n.t(`서버에서 거부했습니다. 편집부에 알려주세요 (${window.MagContact.text()})`, `The server refused the request. Please let the editors know (${window.MagContact.text()})`, `サーバーに拒否されました。編集部にお知らせください（${window.MagContact.text()}）`)) + ')', 'danger');
     if (btn) { btn.disabled = false; btn.textContent = origLabel || i18n.t('삭제', 'Delete', '削除'); }
     return;
   }
@@ -1205,7 +1206,8 @@ async function loadMyBooks() {
     [owned, list] = await Promise.all([db().ebooks.myEntitlementIds(), db().ebooks.listPublished({ strict: true })]);
   } catch (e) {
     console.warn('[me] 내 책 불러오기 실패', e);
-    $('myBooksGrid').innerHTML = `<div class="me-empty">${i18n.t('책 목록을 불러오지 못했어요.', 'Couldn\'t load your books.', '本の一覧を読み込めませんでした。')}<br /><button type="button" class="me-btn" id="myBooksRetry">${i18n.t('다시 시도', 'Try again', '再試行')}</button></div>`;
+    const why = escapeHtml(e?.message || e?.error?.message || String(e || ''));
+    $('myBooksGrid').innerHTML = `<div class="me-empty">${i18n.t('책 목록을 불러오지 못했어요.', 'Couldn\'t load your books.', '本の一覧を読み込めませんでした。')}${why ? `<br /><small>(${why})</small>` : ''}<br /><button type="button" class="me-btn me-btn-secondary" id="myBooksRetry" style="margin-top:12px;">${i18n.t('다시 시도', 'Try again', '再試行')}</button></div>`;
     $('myBooksRetry').addEventListener('click', loadMyBooks, { once: true });
     return;
   }
