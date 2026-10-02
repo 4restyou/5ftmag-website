@@ -1,5 +1,25 @@
 [
   {
+    "id": "yu-hwajeong-faces",
+    "title": "유화정 사진전 《얼굴들》, 사람과 동물과 풍경의 얼굴",
+    "excerpt": "10월 21일부터 27일까지 꼬메아미꼬 갤러리. 8년간 찍은 필름을 모은 유화정의 첫 개인전. 전시에 맞춰 첫 사진 에세이집도 독립출판으로 낸다.",
+    "titleEn": "Yu Hwa-jeong's 《Faces of All Things》: Faces of People, Animals and Places",
+    "excerptEn": "At Comeamico Gallery, October 21 to 27. Yu Hwa-jeong's first solo show gathers eight years of film. A first photo-essay book, self-published, comes out alongside it.",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "Yu Hwa-jeong写真展《顔たち》、人と動物と風景の顔",
+    "excerptJa": "10月21日から27日までComeamico Galleryで。8年間撮りためたフィルムを集めたYu Hwa-jeongの初個展。展示に合わせて初の写真エッセイ集も自主出版する。",
+    "authorJa": "5ft.mag 編集部",
+    "date": "2026-10-02",
+    "category": "exhibition",
+    "categoryLabel": "EXHIBITION",
+    "author": "5ft.mag 편집부",
+    "films": [],
+    "manual": true,
+    "page": "stories/yu-hwajeong-faces.html",
+    "published": true,
+    "thumbnail": "img/stories/yu-hwajeong-faces/yu-hwajeong-faces-poster.jpg"
+  },
+  {
     "id": "oct-2026-exhibitions",
     "title": "2026 / 10, 이달의 사진 전시",
     "category": "exhibition",
