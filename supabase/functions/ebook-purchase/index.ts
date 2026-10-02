@@ -36,7 +36,10 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 function allowOrigin(origin: string | null): string {
   const o = origin || '';
   if (o === 'https://www.5ftmag.com' || o === 'https://5ftmag.com') return o;
-  if (/^https:\/\/[a-z0-9-]+\.netlify\.app$/.test(o)) return o;
+  // Netlify 는 우리 사이트(5ftmag)의 기본 주소와 미리보기·브랜치 주소(<무엇>--5ftmag.netlify.app)만 연다.
+  // 예전처럼 *.netlify.app 전체를 열면 남의 Netlify 사이트도 응답을 읽을 수 있었다.
+  // 앞부분에 '--' 가 다시 들어가지 않게 해 'evil--x--5ftmag' 같은 주소를 거른다(Netlify 사이트 이름엔 '--' 를 쓸 수 없다고 본다).
+  if (/^https:\/\/([a-z0-9]+(-[a-z0-9]+)*--)?5ftmag\.netlify\.app$/.test(o)) return o;
   return 'https://www.5ftmag.com';
 }
 function cors(origin: string | null): Record<string, string> {

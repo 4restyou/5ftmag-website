@@ -5,6 +5,156 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# 저장소 내부 파일은 서빙하지 않는다. publish = "." 라 저장소 전체가 사이트 루트에 올라가므로
+# 운영 문서·DB 스키마·스크립트·엣지 함수 소스·설정 파일이 URL 로 열렸다. 맨 앞에 두어 다른 규칙보다
+# 먼저 잡히게 하고 force 로 실제 파일이 있어도 404 를 돌려준다. Netlify 경로 규칙은 확장자 와일드카드
+# (/*.md)를 지원하지 않아 루트의 .md·설정 파일은 하나씩 적는다(새로 만들면 여기에도 더한다).
+# data/ 는 공개 페이지가 읽는 JSON 이라 의도적으로 공개, llms.txt·rss.xml·sitemap.xml·
+# manifest.webmanifest·sw.js·robots.txt 도 공개 파일이라 그대로 둔다.
+[[redirects]]
+  from = "/CLAUDE.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/README.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/COMMENTS_SETUP.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/CONTENT_GUIDE.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/OPERATIONS.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/db/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/supabase/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/tests/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/test-results/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/playwright-report/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/relay/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.claude/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.github/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.git/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.gitignore"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/node_modules/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/netlify.toml"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/playwright.config.js"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/vitest.config.mjs"
+  to = "/404.html"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/refund.html"
   to = "/legal/refund.html"
@@ -424,10 +574,13 @@
 #       그동안 동적 innerHTML 삽입은 모두 escapeHtml/escapeAttr 로 가드함 (XSS 1차 차단).
 #       script-src-attr 'none' 으로 inline event handler 는 차단하고, 실제 사용하는 외부 실행/통신
 #       도메인만 명시한다. img-src 는 기사 외부 출처와 Naver 지도 타일 때문에 아직 https: 를 유지.
+#       script-src·style-src·font-src 의 jsdelivr 는 실제로 쓰는 패키지 경로만 연다(호스트 전체를 열면
+#       jsdelivr 에 올라온 아무 npm/gh 패키지나 실행할 수 있다). 새 CDN 라이브러리를 붙이면 그 경로를 더한다.
+#       connect-src 의 jsdelivr 는 pdf.js 가 cmap·글꼴 자료를 받아 오는 데 쓰여 아직 호스트 단위로 둔다.
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://oapi.map.naver.com https://nrbe.pstatic.net https://map.pstatic.net https://plausible.io https://js.sentry-cdn.com https://cdn.portone.io; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net https://pucpqsfwqouqohwsvmnd.supabase.co wss://pucpqsfwqouqohwsvmnd.supabase.co https://oapi.map.naver.com https://naveropenapi.apigw.ntruss.com https://maps.apigw.ntruss.com https://nrbe.map.naver.com https://map.pstatic.net https://simg.pstatic.net https://ssl.pstatic.net https://kr-col-ext.nelo.navercorp.com https://api.github.com https://plausible.io https://*.ingest.sentry.io https://*.portone.io https://*.iamport.co https://*.kakao.com https://*.kakaopay.com https://*.naver.com https://*.pay.naver.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://*.portone.io https://*.iamport.co https://*.kakao.com https://*.kakaopay.com https://*.naver.com https://*.pay.naver.com; object-src 'none'; base-uri 'self'; form-action 'self' https://*.portone.io https://*.iamport.co https://*.kakao.com https://*.kakaopay.com https://*.naver.com https://*.pay.naver.com; frame-ancestors 'self'; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' data: blob:; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/ https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/ https://cdn.jsdelivr.net/npm/page-flip@2.0.7/ https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/ https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/ https://cdn.jsdelivr.net/npm/lenis@1.1.20/ https://oapi.map.naver.com https://nrbe.pstatic.net https://map.pstatic.net https://plausible.io https://js.sentry-cdn.com https://cdn.portone.io; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/; connect-src 'self' https://cdn.jsdelivr.net https://pucpqsfwqouqohwsvmnd.supabase.co wss://pucpqsfwqouqohwsvmnd.supabase.co https://oapi.map.naver.com https://naveropenapi.apigw.ntruss.com https://maps.apigw.ntruss.com https://nrbe.map.naver.com https://map.pstatic.net https://simg.pstatic.net https://ssl.pstatic.net https://kr-col-ext.nelo.navercorp.com https://api.github.com https://plausible.io https://*.ingest.sentry.io https://*.portone.io https://*.iamport.co https://*.kakao.com https://*.kakaopay.com https://*.naver.com https://*.pay.naver.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://*.portone.io https://*.iamport.co https://*.kakao.com https://*.kakaopay.com https://*.naver.com https://*.pay.naver.com; object-src 'none'; base-uri 'self'; form-action 'self' https://*.portone.io https://*.iamport.co https://*.kakao.com https://*.kakaopay.com https://*.naver.com https://*.pay.naver.com; frame-ancestors 'self'; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' data: blob:; upgrade-insecure-requests"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"

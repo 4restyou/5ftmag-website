@@ -65,7 +65,7 @@ function nextStatusOf(s) {
 
 async function checkAuth() {
   if (!db() || !db().isReady()) {
-    document.body.innerHTML = i18n.t('<div class="gate"><h2>인증 모듈을 불러오지 못했습니다</h2><p>새로고침 후에도 반복되면 편집부에 알려주세요.</p></div>', '<div class="gate"><h2>Couldn\'t load the sign-in module</h2><p>If this keeps happening after a refresh, please let the editors know.</p></div>', '<div class="gate"><h2>認証モジュールを読み込めませんでした</h2><p>再読み込みしても続く場合は、編集部にお知らせください。</p></div>');
+    document.body.innerHTML = i18n.t('<div class="gate"><h2>인증 모듈을 불러오지 못했습니다</h2><p>새로고침 후에도 반복되면 편집부에 알려주세요 (인스타그램 @5ft.magazine DM).</p></div>', '<div class="gate"><h2>Couldn\'t load the sign-in module</h2><p>If this keeps happening after a refresh, please let the editors know (Instagram DM @5ft.magazine).</p></div>', '<div class="gate"><h2>認証モジュールを読み込めませんでした</h2><p>再読み込みしても続く場合は、編集部にお知らせください（Instagram @5ft.magazine に DM）。</p></div>');
     return false;
   }
   const session = await db().auth.getSession();
@@ -840,6 +840,19 @@ async function loadNotifs() {
   renderNotifs();
 }
 
+// 알림 링크는 같은 사이트 안의 경로만 연다(javascript:·외부 주소는 버린다). site-common.js 의 헤더 알림 패널과 같은 규칙.
+function safeInternalHref(value) {
+  const raw = String(value || '').trim();
+  if (!raw || raw === '#') return '#';
+  try {
+    const url = new URL(raw, window.location.origin);
+    if (url.origin !== window.location.origin) return '#';
+    return `${url.pathname}${url.search}${url.hash}` || '#';
+  } catch (_) {
+    return '#';
+  }
+}
+
 function renderNotifs() {
   const rows = STATE.notifs || [];
   const markBtn = $('notifsMarkAll');
@@ -855,7 +868,7 @@ function renderNotifs() {
       <div class="me-notif-body">
         <div class="me-notif-title">${escapeHtml(r.title || '')}</div>
         ${r.body ? `<div class="me-notif-text">${escapeHtml(r.body)}</div>` : ''}
-        <div class="me-notif-meta">${fmtDate(r.created_at)}${r.link ? ` · <a href="${escapeAttr(i18n.url(r.link))}">${i18n.t('바로가기 →', 'Open →', '開く →')}</a>` : ''}</div>
+        <div class="me-notif-meta">${fmtDate(r.created_at)}${safeInternalHref(r.link) !== '#' ? ` · <a href="${escapeAttr(i18n.url(safeInternalHref(r.link)))}">${i18n.t('바로가기 →', 'Open →', '開く →')}</a>` : ''}</div>
       </div>
     </div>`).join('');
 }

@@ -62,6 +62,7 @@
 
 <main class="article">
   <h1>ニュースレターの配信停止</h1>
+  <p>ニュースレターの配信は現在お休みしています。配信停止の手続きはこれまでどおり受け付けます。</p>
   <div id="unsubResult" aria-live="polite">
     <p>少々お待ちください…</p>
   </div>
@@ -86,7 +87,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="/js/db/commerce.js?v=20260927-ebookdiag" defer></script>
-  <script src="/js/db-client.js?v=20261002-ja" defer></script>
+  <script src="/js/db-client.js?v=20261002-sec" defer></script>
 <script src="/js/util.js?v=20261002-ja" defer></script>
   <script src="/js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="/js/site-pwa.js?v=20260712-modules" defer></script>
@@ -98,7 +99,7 @@
 
   const token = (new URLSearchParams(location.search).get('token') || '').trim();
   if (!token) {
-    setHtml('<p>このページは、5ft magazine の新刊案内メールに記載された配信停止リンクから開いてください。リンクが見つからない場合は <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a> までお知らせください。</p>');
+    setHtml('<p>このページは、以前お受け取りになった 5ft magazine のメールに記載された配信停止リンクから開いてください。リンクが見つからない場合は Instagram <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine</a> に DM でお知らせください。</p>');
     return;
   }
 
@@ -123,7 +124,7 @@
     setHtml('<p>このリンクは形式が正しくありません。いちばん新しいメールに記載された配信停止リンクをもう一度ご確認ください。</p>');
     return;
   }
-  setHtml('<p>すでに配信停止済みのリンクか、処理に失敗しました。同じ画面が続く場合は <a href="mailto:hello@5ftmag.com">hello@5ftmag.com</a> までお知らせください。</p>');
+  setHtml('<p>すでに配信停止済みのリンクか、処理に失敗しました。同じ画面が続く場合は Instagram <a href="https://instagram.com/5ft.magazine" target="_blank" rel="noopener">@5ft.magazine</a> に DM でお知らせください。</p>');
 })();
 </script>
 

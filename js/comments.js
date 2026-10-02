@@ -315,7 +315,7 @@
     pageId = pageId || container.dataset.pageId;
     if (!pageId) return;
     if (!db() || !db().isReady()) {
-      container.innerHTML = `<p class="cm-error">${tr('댓글을 불러오지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요.', 'Could not load comments. If this keeps happening after a refresh, please let the editors know.', 'コメントを読み込めませんでした。再読み込みしても続く場合は、編集部までお知らせください。')}</p>`;
+      container.innerHTML = `<p class="cm-error">${tr('댓글을 불러오지 못했습니다. 새로고침 후에도 반복되면 편집부에 알려주세요 (인스타그램 @5ft.magazine DM).', 'Could not load comments. If this keeps happening after a refresh, please let the editors know (Instagram DM @5ft.magazine).', 'コメントを読み込めませんでした。再読み込みしても続く場合は、編集部までお知らせください（Instagram @5ft.magazine に DM）。')}</p>`;
       return;
     }
 

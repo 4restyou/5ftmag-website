@@ -726,49 +726,8 @@
       });
   }
 
-  // ════════════════════════════
-  // 뉴스레터 구독
-  // ════════════════════════════
-  // 이메일만 수집 — newsletter_subscribers 테이블에 저장. 발송 서비스 연동은 추후.
-  const newsletterForm = document.getElementById('newsletterForm');
-  const newsletterMessage = document.getElementById('newsletterMessage');
-  const newsletterEmail = document.getElementById('newsletterEmail');
-
-  if (newsletterForm) {
-    newsletterForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = newsletterEmail.value.trim();
-
-      // 간단한 이메일 형식 검증
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        newsletterMessage.textContent = ht('올바른 이메일 주소를 입력해주세요.', 'Please enter a valid email address.', '正しいメールアドレスを入力してください。');
-        newsletterMessage.className = 'nl-message error';
-        return;
-      }
-
-      const submitBtn = newsletterForm.querySelector('button[type="submit"]');
-      if (submitBtn) submitBtn.disabled = true;
-
-      const { error } = (await window.MagDB?.newsletter?.subscribe(email)) || { error: { message: 'unavailable' } };
-
-      if (submitBtn) submitBtn.disabled = false;
-
-      if (error) {
-        newsletterMessage.textContent = ht('잠시 후 다시 시도해주세요. 계속 안 되면 hello@5ftmag.com 으로 알려주세요.', 'Please try again in a moment. If it keeps failing, email hello@5ftmag.com.', 'しばらくしてからもう一度お試しください。うまくいかない場合は hello@5ftmag.com までお知らせください。');
-        newsletterMessage.className = 'nl-message error';
-        return;
-      }
-
-      newsletterMessage.textContent = ht('구독 신청이 완료됐어요. 새 이슈 안내 메일에 언제든 해지할 수 있는 링크를 함께 보내드릴게요.', 'You are subscribed. Every issue email includes a link to unsubscribe anytime.', '購読を受け付けました。新しい号のお知らせメールには、いつでも解除できるリンクを添えてお送りします。');
-      newsletterMessage.className = 'nl-message success';
-      newsletterEmail.value = '';
-
-      setTimeout(() => {
-        newsletterMessage.textContent = '';
-        newsletterMessage.className = 'nl-message';
-      }, 10000);
-    });
-  }
+  // 뉴스레터 구독 칸은 발송을 쉬는 동안 걷어 냈다(2026-10 운영자 결정). 다시 열 때는 구독 RPC
+  // newsletter_subscribe(p_email) 를 db-client.js 의 MagDB.newsletter.subscribe 로 감싸 부른다.
 
   // ════════════════════════════
   // ── 이주의 사진 ──

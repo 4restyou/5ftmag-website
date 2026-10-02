@@ -454,10 +454,9 @@
       const c = client(); if (!c) return { error: { message: 'unavailable' } };
       const clean = String(email || '').trim().toLowerCase();
       if (!clean || clean.length > 200) return { error: { message: 'invalid email' } };
-      const { error } = await c.from('newsletter_subscribers').insert({ email: clean, source: 'home' });
-      // 23505 = unique_violation → 이미 구독한 이메일. 사용자에겐 성공으로 처리.
-      if (error && error.code !== '23505') return { error };
-      return { error: null };
+      // 직접 INSERT 는 막혀 있다(20261002000004). 정의자 권한 RPC 가 형식을 검사하고 중복이어도 같은 결과를 돌려준다.
+      const { error } = await c.rpc('newsletter_subscribe', { p_email: clean });
+      return { error: error || null };
     },
     // 토큰으로 해지. 운영자가 새 이슈 메일에 unsubscribe.html?token=... 형태로 박는다.
     // SECURITY DEFINER 함수가 RLS 를 우회하며 정확히 일치하는 row 하나만 삭제.
