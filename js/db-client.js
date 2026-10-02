@@ -828,6 +828,7 @@
           ? `보내주신 사진이 5ft.mag 홈 첫 화면에 걸렸어요.${row.film ? ` (${row.film})` : ''}`
           : `보내주신 사진이 ${when}부터 홈 첫 화면에 걸립니다.${row.film ? ` (${row.film})` : ''}`,
         link: '/',
+        meta: { film: row.film || null, date: dateStr, live },
       });
     },
     // 선정 저장과 알림을 한 번에. 관리 화면과 사진 라이트박스가 함께 쓴다.
@@ -1869,6 +1870,7 @@
         title: titles[kind] || '신청 결과',
         body: `${proposal.brand} ${proposal.name}` + (proposal.reviewer_notes ? ` · ${proposal.reviewer_notes}` : ''),
         link: link || null,
+        meta: { brand: proposal.brand, name: proposal.name, notes: proposal.reviewer_notes || null },
       });
     },
   };

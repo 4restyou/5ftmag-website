@@ -595,7 +595,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20261002-c1" defer></script>
-  <script src="../js/db-client.js?v=20261002-c1" defer></script>
+  <script src="../js/db-client.js?v=20261002-c2" defer></script>
 <script src="../js/image-processor.js?v=20261002-ja" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20261002-ja" defer></script>
@@ -608,7 +608,7 @@
   <script src="../js/util.js?v=20261002-ja" defer></script>
   <script src="../js/site-telemetry.js?v=20260907-security" defer></script>
   <script src="../js/site-pwa.js?v=20260712-modules" defer></script>
-  <script src="../js/site-common.js?v=20261002-b1" defer></script>
+  <script src="../js/site-common.js?v=20261002-c2" defer></script>
 <script>
 'use strict';
 
@@ -1016,8 +1016,10 @@ function bindCardActions() {
           if (error) { window.notify?.('승인 처리에 실패했어요. 권한과 네트워크 상태를 확인해 주세요. (' + error.message + ')'); btn.disabled = false; btn.textContent = '승인'; return; }
           await Promise.all([loadCounts(), loadList()]);
         } else if (action === 'reject') {
-          const reason = prompt('반려 사유를 입력하세요. 사용자가 내 정보에서 확인할 수 있습니다. (선택)', '');
-          if (reason === null) return;
+          const input = prompt('반려 사유를 적어 주세요. 독자 알림에 그대로 나갑니다.', '');
+          if (input === null) return;
+          const reason = input.trim();
+          if (!reason && !confirm('사유 없이 반려할까요? 독자에게는 "이번 사진은 싣지 않기로 했어요. 다른 컷으로 다시 응모해 주세요." 가 갑니다.')) return;
           btn.disabled = true; btn.textContent = '처리 중…';
           const { error } = await db().review.patch(id, {
             status: 'rejected', rejection_reason: reason || null,
@@ -1193,8 +1195,10 @@ async function bulkApply(action) {
   if (!verb) return;
   let reason = null;
   if (action === 'reject') {
-    reason = prompt(`${ids.length}건을 한꺼번에 반려합니다.\n공통 반려 사유 (선택, 빈 값이면 사유 없음)`, '');
-    if (reason === null) return;
+    const input = prompt(`${ids.length}건을 한꺼번에 반려합니다.\n반려 사유를 적어 주세요. 독자 알림에 그대로 나갑니다.`, '');
+    if (input === null) return;
+    reason = input.trim();
+    if (!reason && !confirm('사유 없이 반려할까요? 독자에게는 "이번 사진은 싣지 않기로 했어요. 다른 컷으로 다시 응모해 주세요." 가 갑니다.')) return;
   } else {
     if (!confirm(`${ids.length}건을 한꺼번에 ${verb}할까요?`)) return;
   }

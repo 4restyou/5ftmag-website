@@ -883,15 +883,19 @@ function renderNotifs() {
     $('notifsList').innerHTML = `<div class="me-empty">${i18n.t('아직 알림이 없어요.', 'No notifications yet.', 'まだお知らせはありません。')}</div>`;
     return;
   }
-  $('notifsList').innerHTML = rows.map(r => `
+  const notifText = window.MagNotifText || ((n) => ({ title: n.title || '', body: n.body || '' }));
+  $('notifsList').innerHTML = rows.map(r => {
+    const text = notifText(r);
+    return `
     <div class="me-notif${r.read_at ? '' : ' is-unread'}" data-id="${escapeAttr(r.id)}">
       <span class="me-notif-dot" aria-hidden="true"></span>
       <div class="me-notif-body">
-        <div class="me-notif-title">${escapeHtml(r.title || '')}</div>
-        ${r.body ? `<div class="me-notif-text">${escapeHtml(r.body)}</div>` : ''}
+        <div class="me-notif-title">${escapeHtml(text.title)}</div>
+        ${text.body ? `<div class="me-notif-text">${escapeHtml(text.body)}</div>` : ''}
         <div class="me-notif-meta">${fmtDate(r.created_at)}${safeInternalHref(r.link) !== '#' ? ` · <a href="${escapeAttr(i18n.url(safeInternalHref(r.link)))}">${i18n.t('바로가기 →', 'Open →', '開く →')}</a>` : ''}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function markNotifsRead() {
