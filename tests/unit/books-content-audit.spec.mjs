@@ -38,7 +38,7 @@ describe('U03 bookshelf content', () => {
     ['ko', '전자책 열람권', '유료 전자책', '무료 열람'],
     ['en', 'Ebook reading access', 'Paid ebook', 'Free to read'],
     ['ja', '電子書籍の閲覧権', '有料電子書籍', '無料閲覧'],
-  ])('labels access and selection separately from binding in %s', async (lang, access, paid, free) => {
+  ])('keeps the visual shelf and labels access separately from binding in %s', async (lang, access, paid, free) => {
     const window = await setup(lang);
     const doc = window.document;
     expect(doc.querySelector('.wz-buy').textContent).toContain(access);
@@ -47,13 +47,12 @@ describe('U03 bookshelf content', () => {
     expect(doc.querySelector('.wz-kind').textContent).not.toContain('Hardcover');
     expect(doc.querySelector('.wz-by').textContent).toBe('Photographer');
     expect(doc.querySelector('.wz-buy').getAttribute('href')).toMatch(new RegExp(`^/${lang === 'ko' ? '' : lang + '/'}ebook-read.html`));
-    const select = doc.getElementById('wzBookSelect');
-    expect(select.options[0].textContent).toContain('SPC <Photo> book');
-    expect(doc.getElementById('wzSelectedBook').textContent).toContain(paid);
-    select.value = '1';
-    select.dispatchEvent(new window.Event('change'));
-    expect(doc.getElementById('wzSelectedBook').textContent).toContain('Free issue');
-    expect(doc.getElementById('wzSelectedBook').textContent).toContain(free);
+    expect(doc.querySelector('#wzBookSelect, #wzSelectedBook, .wz-selection')).toBeNull();
+    const hits = doc.querySelectorAll('.wz-hit');
+    expect(hits[0].getAttribute('aria-label')).toContain('SPC <Photo> book');
+    expect(hits[0].getAttribute('aria-label')).toContain(paid);
+    expect(hits[1].getAttribute('aria-label')).toContain('Free issue');
+    expect(hits[1].getAttribute('aria-label')).toContain(free);
     expect(doc.querySelectorAll('.wz-row').length).toBe(2);
     expect(doc.querySelector('Photo')).toBeNull();
   });
@@ -87,19 +86,18 @@ describe('U04 selection and observer ownership', () => {
     const window = await setup();
     const doc = window.document;
     const rows = Array.from(doc.querySelectorAll('.wz-row'));
-    const select = doc.getElementById('wzBookSelect');
     rows.forEach((row, i) => { row.getBoundingClientRect = () => ({ top: 374 + i * 80, height: 20 }); });
-    select.value = '1';
-    select.dispatchEvent(new window.Event('change'));
+    doc.querySelectorAll('.wz-mark')[1].click();
     expect(rows[1].scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'center' });
     expect(doc.querySelectorAll('.wz-hit')[1].tabIndex).toBe(0);
     const observer = window.auditObservers.find(o => !o.options.root);
     observer.callback([{ target: rows[0], isIntersecting: true }]);
-    expect(select.value).toBe('1');
+    expect(doc.querySelectorAll('.wz-hit')[1].tabIndex).toBe(0);
     rows[1].getBoundingClientRect = () => ({ top: 375, height: 20 });
     rows[0].getBoundingClientRect = () => ({ top: 500, height: 20 });
     observer.callback([{ target: rows[1], isIntersecting: true }]);
-    expect(select.value).toBe('1');
+    expect(doc.querySelectorAll('.wz-hit')[1].tabIndex).toBe(0);
+    expect(doc.querySelectorAll('.wz-mark')[1].classList.contains('on')).toBe(true);
   });
 
   it('uses the nearest visible row, not intersection callback order', async () => {
@@ -110,20 +108,20 @@ describe('U04 selection and observer ownership', () => {
     rows[1].getBoundingClientRect = () => ({ top: 390, height: 20 });
     const observer = window.auditObservers.find(o => !o.options.root);
     observer.callback(rows.map(target => ({ target, isIntersecting: true })).reverse());
-    expect(doc.getElementById('wzBookSelect').value).toBe('0');
     expect(doc.querySelectorAll('.wz-hit')[0].tabIndex).toBe(0);
     expect(doc.querySelectorAll('.wz-hit')[1].tabIndex).toBe(-1);
   });
 
-  it('leaves a focused selector unchanged during shelf observation', async () => {
+  it('keeps keyboard focus on a book during shelf observation', async () => {
     const window = await setup();
     const doc = window.document;
-    const select = doc.getElementById('wzBookSelect');
-    select.focus(); select.value = '1';
+    const hit = doc.querySelectorAll('.wz-hit')[1];
+    hit.focus();
+    expect(hit.tabIndex).toBe(0);
     const first = doc.querySelector('.wz-row');
     first.getBoundingClientRect = () => ({ top: 375, height: 20 });
     window.auditObservers.find(o => !o.options.root).callback([{ target: first, isIntersecting: true }]);
-    expect(select.value).toBe('1');
+    expect(doc.activeElement).toBe(hit);
   });
 
   it('includes fixed controls and excludes inactive inert pages in the shared focus trap', async () => {
