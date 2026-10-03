@@ -172,6 +172,7 @@
   let rows = [], hits = [], pages = [], markEls = [];
   let favSet = new Set();
   let inDetail = false, closing = false, savedScroll = 0, current = 0;
+  let detailTransition = 0;
   let shelfObserver = null, pendingSelection = null, releaseDetailFocus = null;
 
   function pubOf(it) {
@@ -341,7 +342,10 @@
     if (visibleHeight(active) > 0 && Number(active.dataset.i) !== current) activateDetailPage(Number(active.dataset.i));
   }
   function openDetail(i, viaKeyboard) {
-    if (closing) return;
+    if (closing && inDetail) return;
+    detailTransition++;
+    closing = false;
+    detail.classList.remove('closing');
     placeBack();
     inDetail = true; current = i; savedScroll = window.scrollY;
     pendingSelection = null;
@@ -365,15 +369,19 @@
   function closeDetail(viaKeyboard) {
     if (!inDetail || closing) return;
     closing = true;
+    const transition = ++detailTransition;
+    const returnIndex = current;
+    const returnRow = rows[returnIndex];
     // 1) 세운 책이 먼저 눕는다 → 2) 소개 화면이 걷히고 목록이 돌아온다 → 3) 목록의 그 책이 들린 자세에서 내려앉는다
     // 끊기지 않게 겹친다: 책이 눕기 시작하면 소개 화면이 서서히 투명해지고(.closing), 반쯤 누웠을 때 목록이 뒤에서 떠오른다
     pages[current].classList.remove('on');
     rows.forEach((r, k) => r.classList.toggle('lifted', k === current));
     detail.classList.add('closing');
     setTimeout(() => {
+      if (transition !== detailTransition) return;
       inDetail = false;
       window.scrollTo(0, savedScroll);
-      rows[current].scrollIntoView({ behavior: 'auto', block: 'center' });
+      returnRow.scrollIntoView({ behavior: 'auto', block: 'center' });
       document.body.classList.remove('wz-mode-detail');
       detail.setAttribute('inert', '');
       detail.setAttribute('aria-hidden', 'true');
@@ -381,13 +389,15 @@
       document.body.appendChild(marks);
       marks.style.removeProperty('--wz-fg');
       releaseDetailFocus?.(); releaseDetailFocus = null;
-      hits[current].focus({ preventScroll: true });
+      hits[returnIndex].focus({ preventScroll: true });
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        rows[current].classList.add('settling'); rows[current].classList.remove('lifted');
-        setTimeout(() => rows[current].classList.remove('settling'), 1100);
+        if (transition !== detailTransition) return;
+        returnRow.classList.add('settling'); returnRow.classList.remove('lifted');
+        setTimeout(() => returnRow.classList.remove('settling'), 1100);
       }));
     }, 380);
     setTimeout(() => {
+      if (transition !== detailTransition) return;
       detail.classList.remove('on', 'closing'); detail.setAttribute('aria-hidden', 'true');
       detail.setAttribute('inert', '');
       closing = false;

@@ -53,10 +53,8 @@ function parseMarketPrice(value) {
   const raw = String(value ?? '').trim();
   if (/^(가격\s*협의|협의|negotiable|応相談)$/i.test(raw)) return { valid: true, amount: null };
   if (/^(무료|나눔|free|無料)$/i.test(raw)) return { valid: true, amount: 0 };
-  const match = raw.match(/^(?:KRW\s*|₩\s*)?((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)\s*(만|천)?\s*(?:원|won|KRW|ウォン)?(?:\s*\((?:택포|배송비 포함|shipping incl\.?|送料込み)\))?$/i);
-  if (!match) return { valid: false, amount: null };
-  const amount = Number(match[1].replace(/,/g, '')) * (match[2] === '만' ? 10000 : match[2] === '천' ? 1000 : 1);
-  return { valid: Number.isSafeInteger(amount) && amount >= 0, amount };
+  const amount = window.MagUtil.parseKrwPrice(value);
+  return { valid: amount !== null, amount };
 }
 function krwPreview(amount) {
   return `${amount.toLocaleString('en-US')} ${i18n.t('원', 'won', 'ウォン')} (KRW)`;

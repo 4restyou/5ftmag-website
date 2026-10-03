@@ -167,6 +167,22 @@
     return storiesPromise;
   }
 
+  // 명시적인 원화 금액만 읽는다. 배송 메모의 숫자나 여러 가격을 합치지 않는다.
+  function parseKrwPrice(value) {
+    if (typeof value === 'number') return Number.isSafeInteger(value) && value >= 0 ? value : null;
+    if (typeof value !== 'string') return null;
+    const raw = value.trim();
+    const match = raw.match(/^(?:KRW\s*|₩\s*)?((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)\s*(만|천)?\s*(?:원|won|KRW|ウォン)?(?:\s*(?:\(\s*(?:택포|배송비 포함|shipping incl\.?|送料込み)\s*\)|\/\s*(?:택포|배송비 포함|shipping incl\.?|送料込み)))?$/i);
+    if (!match) return null;
+    const parts = match[1].replace(/,/g, '').split('.');
+    const scale = match[2] === '만' ? 4 : match[2] === '천' ? 3 : 0;
+    const fraction = (parts[1] || '').replace(/0+$/, '');
+    if (fraction.length > scale) return null;
+    // 정수 원 단위로 계산해 소수 배수의 부동소수점 오차를 피한다.
+    const amount = Number(parts[0]) * (10 ** scale) + Number(fraction.padEnd(scale, '0'));
+    return Number.isSafeInteger(amount) ? amount : null;
+  }
+
   // 가격 표기 통합. 페이지마다 따로 구현돼 같은 금액이 다르게 보이던 것을 하나로.
   //   opts.empty    — 값이 없거나 0 이하일 때 표시 (기본 '')
   //   opts.keepText — 숫자가 아닌 값("가격 협의" 등)을 원문 그대로 살릴지 (기본 false)
@@ -179,8 +195,8 @@
     const keepText = !!(opts && opts.keepText);
     const raw = String(value ?? '').trim();
     if (!raw) return empty;
-    const n = Number(raw.replace(/[^0-9.-]/g, ''));
-    if (!Number.isFinite(n) || n <= 0) return keepText ? escapeHtml(raw) : empty;
+    const n = parseKrwPrice(value);
+    if (n === null || n <= 0) return keepText ? escapeHtml(raw) : empty;
     const unit = PRICE_UNITS[window.i18n && window.i18n.lang] || PRICE_UNITS.ko;
     return n.toLocaleString(unit[0]) + unit[1];
   }
@@ -263,6 +279,7 @@
     normalizeFilmLabel: normalizeFilmLabel,
     seoulTodayIso: seoulTodayIso,
     isPublishedContent: isPublishedContent,
+    parseKrwPrice: parseKrwPrice,
     formatPrice: formatPrice,
     errorMessage: errorMessage,
     pickByAuthorRoundRobin: pickByAuthorRoundRobin,

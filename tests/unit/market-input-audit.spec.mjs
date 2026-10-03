@@ -41,13 +41,33 @@ describe('R10 market input', () => {
   it.each([
     ['23', 23], ['6', 6], ['230,000', 230000], ['23만원', 230000], ['2.5만원', 25000],
     ['5만원 (택포)', 50000], ['KRW 230,000', 230000], ['250,000 won (shipping incl.)', 250000],
+    ['23만원 / 택포', 230000], ['6만원 / 택포', 60000], ['23만원(택포)', 230000],
+    ['2.5천원 / 배송비 포함', 2500], ['6만원 ( 배송비 포함 )', 60000],
+    ['KRW 230,000 / shipping incl.', 230000], ['60,000ウォン (送料込み)', 60000],
+    ['60,000ウォン / 送料込み', 60000], ['1.001만원', 10010],
     ['0', 0], ['무료', 0], ['negotiable', null],
   ])('previews %s without guessing a missing unit', (value, amount) => {
     expect(setup().parse(value)).toEqual({ valid: true, amount });
   });
 
-  it.each(['', '-23', '23.5', '23,00', '23abc', '2e5', '$23', '23 / 6', '9007199254740992', 'Infinity'])('rejects malformed or unsafe amount %s', value => {
+  it.each(['', '-23', '23.5', '23,00', '23abc', '2e5', '$23', '23 / 6', '9007199254740992', 'Infinity',
+    false, '23만원 / 6만원', '23만원 (배송비 3000원)', '23만원 / 택포 2개', '23만원 / 협의',
+    '23만원 (택포) / 택포', '23만원 /', '23만원 / (택포)', '23만원~25만원', '1.00000000000000001원',
+  ])('rejects malformed or unsafe amount %s', value => {
     expect(setup().parse(value).valid).toBe(false);
+  });
+
+  describe.each(['ko', 'en', 'ja'])('shipping-inclusive submission in %s', lang => {
+    it.each(['23만원 / 택포', '6만원 / 택포', '5만원 (택포)'])('previews %s and submits the original string', async price => {
+      const { window, form, create, setPrice, submit } = setup(lang);
+      setPrice(price);
+      const amount = window.MagUtil.parseKrwPrice(price);
+      const unit = { ko: '원', en: 'won', ja: 'ウォン' }[lang];
+      expect(window.document.getElementById('mktPricePreview').textContent).toBe(`${amount.toLocaleString('en-US')} ${unit} (KRW)`);
+      expect(form.elements.low_price_confirm.required).toBe(false);
+      await submit();
+      expect(create).toHaveBeenLastCalledWith(expect.objectContaining({ price }));
+    });
   });
 
   it.each(['ko', 'en', 'ja'])('requires a fresh low-price confirmation in %s', async lang => {

@@ -199,9 +199,15 @@ async function savePhotoEdits(card) {
   if (patch.instagram) patch.instagram = '@' + patch.instagram.replace(/^@/, '');
   const saveBtn = card.querySelector('[data-action="save"]');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = i18n.t('저장 중…', 'Saving…', '保存中…'); }
-  const { error } = await db().submissions.updateMine(id, patch);
-  if (error) {
-    window.notify?.(i18n.t('수정 내용을 저장하지 못했어요. 새로고침 후 다시 시도해 주세요. (', 'Couldn\'t save your changes. Refresh and try again. (', '変更内容を保存できませんでした。再読み込みしてから、もう一度お試しください。(') + error.message + ')', 'danger');
+  let result;
+  try {
+    result = await db().submissions.updateMine(id, patch);
+  } catch (error) {
+    result = { error: { message: error?.message || 'Network error', code: 'NETWORK' } };
+  }
+  if (result.error || !result.data?.some(row => row.id === id)) {
+    const message = result.error ? window.MagUtil.errorMessage(result.error) : i18n.t('서버에서 수정 내용을 확인하지 못했어요.', 'The server did not confirm the update.', 'サーバーで変更を確認できませんでした。');
+    window.notify?.(i18n.t('수정 내용을 저장하지 못했어요. (', 'Couldn\'t save your changes. (', '変更内容を保存できませんでした。(') + message + ')', 'danger');
     if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = i18n.t('저장', 'Save', '保存'); }
     return;
   }
