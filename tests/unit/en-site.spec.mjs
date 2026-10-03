@@ -12,6 +12,17 @@ import { leftoverKorean } from '../../scripts/lib/en-text.mjs';
 const enAbout = join(ROOT, 'en/about.html');
 const koAbout = join(ROOT, 'about.html');
 
+describe('생성된 필름 페이지의 현지화', () => {
+  it.each(['en', 'ja'])('%s uses a catalog English alias and translates the cinema type', lang => {
+    const ototo = readFileSync(join(ROOT, lang, 'film/fujiototo200.html'), 'utf8');
+    expect(ototo).toContain('<h1>Fujicolor Auto Auto 200</h1>');
+    expect(leftoverKorean(ototo)).toEqual([]);
+    const cinema = readFileSync(join(ROOT, lang, 'film/kodakvision350d.html'), 'utf8');
+    expect(cinema).toContain(lang === 'ja' ? '<dd>映画用</dd>' : '<dd>Cinema</dd>');
+    expect(cinema).not.toContain('영화용');
+  });
+});
+
 describe('공통 셸: 영문 페이지', () => {
   it('en/ 아래 파일만 영문 페이지로 본다', () => {
     expect(isEnFile(enAbout)).toBe(true);

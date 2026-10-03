@@ -12,6 +12,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ROOT, navHtml, mobileNavHtml, footerHtml, footerPublisherHtml, alternatesHtml } from './lib/site-shell.mjs';
+import { removeStaleFilmPages } from './lib/film-page-cleanup.mjs';
+import { withDbVisibility, isPublishedContent } from './story-visibility.mjs';
 
 const FILMS_JSON = path.join(ROOT, 'data/films.json');
 const OUT_DIR = path.join(ROOT, 'film');
@@ -98,14 +100,26 @@ async function contentHash(relPath) {
   return crypto.createHash('sha1').update(buf).digest('hex').slice(0, 8);
 }
 
-function absoluteImage(candidate) {
-  if (!candidate) return FALLBACK_OG;
+function imageSrc(candidate) {
   if (/^https?:\/\//.test(candidate)) return candidate;
-  return `${ORIGIN}/${String(candidate).replace(/^\.?\//, '')}`;
+  return `/${String(candidate).replace(/^\.?\//, '')}`;
 }
 
-function displayNameOf(film) {
-  return film.displayName || film.name || film.slug;
+function absoluteImage(candidate) {
+  return candidate ? new URL(imageSrc(candidate), ORIGIN).href : FALLBACK_OG;
+}
+
+function displayNameOf(film, T = TEXT.ko) {
+  const name = film.displayName || film.name || film.slug;
+  if (T.lang === 'ko' || !HANGUL.test(name)) return name;
+  const aliases = (film.aliases || []).filter(alias => !HANGUL.test(alias) && /\s/.test(alias));
+  const brand = name.split(' ')[0].toLowerCase();
+  return aliases.find(alias => alias.toLowerCase().startsWith(`${brand} `)) || aliases[0] || name;
+}
+
+function typeOf(film, T) {
+  return film.type === '영화용' && T.lang !== 'ko'
+    ? (T.lang === 'ja' ? '映画用' : 'Cinema') : film.type;
 }
 
 // 검색·공유에 쓰이는 한 줄 설명. desc 가 비면 규격으로 대체한다.
@@ -116,14 +130,14 @@ function descOf(film, T) {
 function descriptionOf(film, T = TEXT.ko) {
   const desc = descOf(film, T);
   if (desc) return desc.length > 180 ? `${desc.slice(0, 177)}…` : desc;
-  const parts = [film.brand, film.iso && `ISO ${film.iso}`, film.type, film.format].filter(Boolean);
+  const parts = [film.brand, film.iso && `ISO ${film.iso}`, typeOf(film, T), film.format].filter(Boolean);
   return T.fallbackDesc(parts.join(' · '));
 }
 
 // 별칭에는 한글 표기가 섞여 있다("코닥 울트라맥스 400"). 검색어와 직접 맞물리는
 // 부분이라 페이지에 그대로 노출한다. 표시 이름과 겹치는 항목은 뺀다.
 function aliasesOf(film, T = TEXT.ko) {
-  const name = displayNameOf(film).toLowerCase();
+  const name = displayNameOf(film, T).toLowerCase();
   const seen = new Set([name]);
   const out = [];
   for (const alias of film.aliases || []) {
@@ -140,7 +154,7 @@ function specRows(film, T = TEXT.ko) {
   return [
     [T.spec[0], film.brand],
     [T.spec[1], film.iso ? `ISO ${film.iso}` : ''],
-    [T.spec[2], film.type],
+    [T.spec[2], typeOf(film, T)],
     [T.spec[3], film.format],
     [T.spec[4], film.issue],
   ].filter(([, value]) => value);
@@ -161,7 +175,7 @@ function filmNameCandidates(film) {
 }
 
 function jsonLd(film, sameBrand, T) {
-  const name = displayNameOf(film);
+  const name = displayNameOf(film, T);
   const url = `${ORIGIN}${T.prefix}/film/${film.slug}.html`;
   const properties = specRows(film, T).map(([label, value]) => ({
     '@type': 'PropertyValue', name: label, value: String(value),
@@ -183,7 +197,7 @@ function jsonLd(film, sameBrand, T) {
   if (properties.length) product.additionalProperty = properties;
   if (sameBrand.length) {
     product.isRelatedTo = sameBrand.map((other) => ({
-      '@type': 'Product', name: displayNameOf(other), url: `${ORIGIN}${T.prefix}/film/${other.slug}.html`,
+      '@type': 'Product', name: displayNameOf(other, T), url: `${ORIGIN}${T.prefix}/film/${other.slug}.html`,
     }));
   }
 
@@ -216,8 +230,8 @@ async function writeFilmIndex(films, T = TEXT.ko, page = path.join(ROOT, 'films.
   const brands = [...byBrand.keys()].sort((a, b) => a.localeCompare(b, 'ko'));
   const html = brands.map((brand) => {
     const items = byBrand.get(brand)
-      .sort((a, b) => displayNameOf(a).localeCompare(displayNameOf(b), 'ko'))
-      .map((film) => `        <li><a href="${T.prefix ? `${T.prefix}/` : './'}films.html?film=${encodeURIComponent(film.slug)}">${esc(displayNameOf(film))}</a></li>`)
+      .sort((a, b) => displayNameOf(a, T).localeCompare(displayNameOf(b, T), T.lang))
+      .map((film) => `        <li><a href="${T.prefix ? `${T.prefix}/` : './'}films.html?film=${encodeURIComponent(film.slug)}">${esc(displayNameOf(film, T))}</a></li>`)
       .join('\n');
     return `    <div class="film-index-brand">
       <h3>${esc(brand)}</h3>
@@ -252,7 +266,7 @@ ${html}
 
 function render(film, sameBrand, versioned, outFile, articles, T = TEXT.ko) {
   const P = T.prefix;
-  const name = displayNameOf(film);
+  const name = displayNameOf(film, T);
   const title = `${name} | 5ft magazine`;
   const description = descriptionOf(film, T);
   const desc = descOf(film, T);
@@ -282,7 +296,7 @@ ${aliases.map((alias) => `          <li>${esc(alias)}</li>`).join('\n')}
         <h2>${esc(T.shotOn(name))}</h2>
         <div class="film-detail-photos">
 ${photos.map((photo) => `          <figure>
-            <img src="/${esc(String(photo.src).replace(/^\.?\//, ''))}" alt="${esc(T.photoAlt(name, photo.author && personOf(photo.author, T)))}" loading="lazy" decoding="async" />
+            <img src="${esc(imageSrc(photo.src))}" alt="${esc(T.photoAlt(name, photo.author && personOf(photo.author, T)))}" loading="lazy" decoding="async" />
 ${photo.author ? `            <figcaption>${esc(personOf(photo.author, T))}</figcaption>` : ''}
           </figure>`).join('\n')}
         </div>
@@ -310,7 +324,7 @@ ${articles.map((st) => {
       <section class="film-detail-block">
         <h2>${esc(T.sameBrand(film.brand))}</h2>
         <ul class="film-detail-siblings">
-${sameBrand.map((other) => `          <li><a href="${P}/film/${esc(other.slug)}.html">${esc(displayNameOf(other))}</a><span>${esc([other.iso && `ISO ${other.iso}`, other.format].filter(Boolean).join(' · '))}</span></li>`).join('\n')}
+${sameBrand.map((other) => `          <li><a href="${P}/film/${esc(other.slug)}.html">${esc(displayNameOf(other, T))}</a><span>${esc([other.iso && `ISO ${other.iso}`, other.format].filter(Boolean).join(' · '))}</span></li>`).join('\n')}
         </ul>
       </section>` : '';
 
@@ -377,7 +391,7 @@ ${jsonLd(film, sameBrand, T)}
   </nav>
 
   <div class="film-detail-head">
-    ${thumb ? `<div class="film-detail-thumb"><img src="/${esc(String(thumb).replace(/^\.?\//, ''))}" alt="${esc(T.thumbAlt(name))}" width="240" height="320" decoding="async" /></div>` : ''}
+    ${thumb ? `<div class="film-detail-thumb"><img src="${esc(imageSrc(thumb))}" alt="${esc(T.thumbAlt(name))}" width="240" height="320" decoding="async" /></div>` : ''}
     <div class="film-detail-headline">
       ${film.brand ? `<p class="film-detail-brand">${esc(film.brand)}</p>` : ''}
       <h1>${esc(name)}</h1>
@@ -459,8 +473,8 @@ ${articleHtml}
   const storiesRaw = await fs.readFile(STORIES_JSON, 'utf-8').catch(() => null);
   const byFilm = new Map();
   if (storiesRaw) {
-    const stories = JSON.parse(storiesRaw)
-      .filter((st) => st.published !== false && Array.isArray(st.films) && st.films.length)
+    const stories = (await withDbVisibility(JSON.parse(storiesRaw), { label: 'film-pages' }))
+      .filter((st) => isPublishedContent(st) && Array.isArray(st.films) && st.films.length)
       .sort((x, y) => String(y.date || '').localeCompare(String(x.date || '')));
     for (const st of stories) {
       for (const slug of st.films) {
@@ -473,6 +487,8 @@ ${articleHtml}
   await fs.mkdir(OUT_DIR, { recursive: true });
   await fs.mkdir(EN_OUT_DIR, { recursive: true });
   await fs.mkdir(JA_OUT_DIR, { recursive: true });
+  const removed = await removeStaleFilmPages([OUT_DIR, EN_OUT_DIR, JA_OUT_DIR], films.map(film => film.slug));
+  if (removed) console.log(`[build-film-pages] removed ${removed} stale generated details`);
 
   const written = [];
   for (const film of films) {
@@ -481,7 +497,8 @@ ${articleHtml}
       .slice(0, SAME_BRAND_LIMIT);
     for (const [dir, T] of [[OUT_DIR, TEXT.ko], [EN_OUT_DIR, TEXT.en], [JA_OUT_DIR, TEXT.ja]]) {
       const outFile = path.join(dir, `${film.slug}.html`);
-      await fs.writeFile(outFile, render(film, sameBrand, versioned, outFile, byFilm.get(film.slug), T), 'utf-8');
+      const page = render(film, sameBrand, versioned, outFile, byFilm.get(film.slug), T);
+      await fs.writeFile(outFile, page.split('\n').map(line => line.trimEnd()).join('\n'), 'utf-8');
       written.push(outFile);
     }
   }

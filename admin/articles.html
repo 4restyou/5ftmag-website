@@ -10,7 +10,7 @@
   <link rel="icon" type="image/svg+xml" href="../img/favicon/icon.svg">
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css?v=20261002-e1">
-  <link rel="stylesheet" href="../css/common.css?v=20261002-e1">
+  <link rel="stylesheet" href="../css/common.css?v=20261002-product-audit">
   <link rel="stylesheet" href="../css/admin-shell.css?v=20261002-d2">
   <script src="../js/theme-init.js?v=20261002-e1"></script>
   <style>
@@ -29,6 +29,10 @@
 
     /* List wrap */
     .articles-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .publishing-process { margin-bottom: 24px; line-height: 1.7; overflow-wrap: anywhere; }
+    .publishing-process h2 { font-size: 17px; margin-bottom: 8px; }
+    .publishing-process p { margin-bottom: 8px; }
+    .articles-load-status { font-size: 13px; line-height: 1.6; margin-bottom: 12px; overflow-wrap: anywhere; }
     .articles-toolbar {
       display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
       margin-bottom: 16px; padding: 12px 14px;
@@ -94,13 +98,14 @@
     .article-author-chip { font-size: 11px; color: var(--text-muted); }
     .article-date-chip { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
     .article-actions { display: flex; gap: 8px; align-items: center; }
-    .article-link-btn {
+    .articles-refresh {
       font: inherit; font-size: 11px; padding: 6px 10px;
       background: transparent; color: var(--text-muted);
       border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
       text-decoration: none;
     }
-    .article-link-btn:hover { color: var(--text); border-color: var(--text); }
+    .articles-refresh:hover { color: var(--text); border-color: var(--text); }
+    .articles-refresh { margin-bottom: 12px; }
 
     /* Toggle switch */
     .pub-toggle {
@@ -121,7 +126,9 @@
     }
     .pub-toggle input:checked + .pub-toggle-track { background: #16a34a; }
     .pub-toggle input:checked + .pub-toggle-track::after { transform: translateX(16px); }
-    .pub-toggle-label { color: var(--text-muted); min-width: 32px; }
+    .pub-toggle-label { color: var(--text-muted); min-width: 32px; max-width: 130px; letter-spacing: 0; }
+    .pub-toggle input:disabled + .pub-toggle-track { opacity: 0.4; }
+    .pub-toggle input:focus-visible + .pub-toggle-track { outline: 2px solid var(--text); outline-offset: 3px; }
     .pub-toggle input:checked ~ .pub-toggle-label { color: var(--text); }
 
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
@@ -142,14 +149,13 @@
         padding: 10px 12px;
       }
       .article-thumb { width: 48px; height: 48px; }
-      .article-badge, .article-author-chip, .article-date-chip, .article-link-btn { display: none; }
+      .article-badge, .article-author-chip, .article-date-chip { display: none; }
       .article-sub { font-size: 11px; }
-      .pub-toggle-label { display: none; }
+      .article-actions { max-width: 112px; }
+      .pub-toggle { flex-wrap: wrap; gap: 4px; }
+      .pub-toggle-label { display: block; font-size: 11px; line-height: 1.5; }
     }
 
-    /* PAT modal — minimal */
-      background: var(--text); color: var(--bg); border-color: var(--text);
-    }
   </style>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
@@ -196,7 +202,6 @@
   <nav class="admin-subnav" aria-label="편집부 페이지">
     <span class="admin-subnav-group">운영</span>
     <a href="/admin/index.html" class="admin-subnav-link">홈</a>
-    <a href="/admin/article-editor.html" class="admin-subnav-link">기사 작성</a>
     <a href="/admin/articles.html" class="admin-subnav-link is-current">기사 목록</a>
     <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
     <a href="/admin/potw.html" class="admin-subnav-link">이주의 사진</a>
@@ -225,11 +230,19 @@
 </div>
 
 <main id="app" class="articles-wrap" hidden>
+  <section class="publishing-process" id="publishing-process" aria-labelledby="publishing-title">
+    <h2 id="publishing-title">기사 발행·수정 절차</h2>
+    <p>새 기사와 본문 수정은 편집 담당자에게 원고·사진 또는 기사 URL과 수정 내용을 전달해 저장소에서 진행합니다. <code>new-article</code> 절차로 한국어·영문·일문과 목록 정보를 함께 준비하고, 공통 셸·이미지·번역·RSS·사이트맵 검수 및 PR의 CI 통과 후 머지·배포합니다.</p>
+    <p>기사 자동 예약 발행은 지원하지 않습니다. 공개할 시점에 검수된 PR을 머지합니다. 미래 날짜 입력만으로 예약되지 않습니다. 구형 에디터의 작성·초안 저장·브라우저 발행은 중단했습니다.</p>
+    <p><strong>“목록에서 숨김”은 접근 보호가 아닙니다.</strong> 홈·기사 목록에서만 숨기며 직접 URL로는 계속 읽을 수 있습니다. RSS·사이트맵은 다음 빌드 후, 검색엔진은 재수집 후 반영됩니다. 공개 전 원고는 배포되는 기사 파일로 올리지 마세요.</p>
+  </section>
+  <p class="articles-load-status" id="articlesLoadStatus" role="status">확인 중</p>
+  <button type="button" class="articles-refresh" id="articlesRetry">목록 상태 새로고침</button>
   <div class="articles-toolbar">
     <input type="search" id="searchInput" placeholder="제목·작성자·slug 검색" autocomplete="off" />
     <button type="button" class="pill-btn is-active" data-filter="all">전체</button>
-    <button type="button" class="pill-btn" data-filter="published">공개</button>
-    <button type="button" class="pill-btn" data-filter="hidden">비공개</button>
+    <button type="button" class="pill-btn" data-filter="published">목록에 표시</button>
+    <button type="button" class="pill-btn" data-filter="hidden">목록에서 숨김</button>
     <select id="categorySelect">
       <option value="">전체 카테고리</option>
     </select>
@@ -243,12 +256,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/commerce.js?v=20261002-f2" defer></script>
-  <script src="../js/db-client.js?v=20261002-f2" defer></script>
-<script src="../js/util.js?v=20261002-f2" defer></script>
-<script src="../js/site-telemetry.js?v=20260907-security" defer></script>
+  <script src="../js/db-client.js?v=20261002-product-audit" defer></script>
+<script src="../js/util.js?v=20261002-product-audit" defer></script>
+<script src="../js/site-telemetry.js?v=20261002-product-audit" defer></script>
   <script src="../js/site-pwa.js?v=20261002-f2" defer></script>
-  <script src="../js/site-common.js?v=20261002-f1" defer></script>
-<script src="../js/admin-articles-page.js?v=20260914-visibility" defer></script>
+  <script src="../js/site-common.js?v=20261002-product-audit" defer></script>
+<script src="../js/admin-articles-page.js?v=20261002-product-audit" defer></script>
 
 </body>
 </html>

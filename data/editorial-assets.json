@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "storyId": "oct-2026-exhibitions",
+  "auditDate": "2026-10-02",
+  "auditBasis": "Current KO/EN/JA article text and repository references only. No external source, transfer history or permission was independently verified. Reviewed flags record this audit, not clearance.",
+  "assets": [
+    {
+      "id": "jeong-bongchae",
+      "files": ["img/stories/oct-2026-exhibitions/jeong-bongchae.jpg", "img/stories/oct-2026-exhibitions/jeong-bongchae.webp"],
+      "subject": "정봉채 〈向, 물위에 그려지다〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "lee-juhyung",
+      "files": ["img/stories/oct-2026-exhibitions/lee-juhyung-bloom-boundary.jpg", "img/stories/oct-2026-exhibitions/lee-juhyung-bloom-boundary.webp"],
+      "subject": "이주형 〈Bloom and Boundary〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "photo-cinema",
+      "files": ["img/stories/oct-2026-exhibitions/photo-cinema-ap9.jpg", "img/stories/oct-2026-exhibitions/photo-cinema-ap9.webp"],
+      "subject": "이재용·이관용·김미림 〈사진으로 읽는 영화: 고사동에서 헐리우드까지〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "yuhwajeong",
+      "files": ["img/stories/oct-2026-exhibitions/yuhwajeong-faces-of-all-things.jpg", "img/stories/oct-2026-exhibitions/yuhwajeong-faces-of-all-things.webp"],
+      "subject": "유화정 〈FACES OF ALL THINGS〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "Exhibition poster / public Threads post", "url": "https://www.threads.com/@mayieouva/post/Dd03-GTHfNF", "status": "credited-only", "note": "URL and attribution are transcribed from the article; viewing a public post is not evidence of provision or permission."},
+      "captionCredits": {"ko": "이미지 출처: 전시 포스터 및 Threads 공개 게시물.", "en": "Image source: exhibition poster and public Threads post.", "ja": "画像出典：展示ポスターおよびThreadsの公開投稿。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "Public visibility does not establish a license. Approval scope and image creator remain unknown."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "still-chubby",
+      "files": ["img/stories/oct-2026-exhibitions/still-chubby.jpg", "img/stories/oct-2026-exhibitions/still-chubby.webp"],
+      "subject": "〈STILL CHUBBY - 이대로 오래〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "photo-jinju",
+      "files": ["img/stories/oct-2026-exhibitions/photo-jinju-2026.jpg", "img/stories/oct-2026-exhibitions/photo-jinju-2026.webp"],
+      "subject": "사진진주 2026 〈관계, 세상과 연결되다〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "miners-life",
+      "files": ["img/stories/oct-2026-exhibitions/miners-life.jpg", "img/stories/oct-2026-exhibitions/miners-life.webp"],
+      "subject": "박병문·야스메얀도 〈막장 광부들의 삶〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "photo-world",
+      "files": ["img/stories/oct-2026-exhibitions/photo-world-moka.jpg", "img/stories/oct-2026-exhibitions/photo-world-moka.webp"],
+      "subject": "〈사진 세계〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "deborah-turbeville",
+      "files": ["img/stories/oct-2026-exhibitions/deborah-turbeville-atmosphere.jpg", "img/stories/oct-2026-exhibitions/deborah-turbeville-atmosphere.webp"],
+      "subject": "데보라 터브빌 〈분위기〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "피크닉 / piknic", "url": "https://www.piknic.kr/home/include/board_view.php?SEQ=CATEEXHIBITION0018", "status": "credited-only", "note": "Caption names piknic and the article links this official exhibition page; original image provenance was not independently verified."},
+      "captionCredits": {"ko": "이미지 출처: 피크닉.", "en": "Image source: piknic.", "ja": "画像出典：piknic。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "An official exhibition page alone does not establish a reuse license."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "min-byunghun",
+      "files": ["img/stories/oct-2026-exhibitions/min-byunghun.jpg", "img/stories/oct-2026-exhibitions/min-byunghun.webp"],
+      "subject": "민병헌 〈BETWEEN FORMS〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    },
+    {
+      "id": "lee-inmi",
+      "files": ["img/stories/oct-2026-exhibitions/lee-inmi-fluid-scape.jpg", "img/stories/oct-2026-exhibitions/lee-inmi-fluid-scape.webp"],
+      "subject": "이인미 〈흐르는 도시 FLUID SCAPE〉",
+      "creator": null,
+      "acquisition": null,
+      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
+      "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
+      "reviewed": {"source": true, "use": true}
+    }
+  ]
+}

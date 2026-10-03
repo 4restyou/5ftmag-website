@@ -79,11 +79,13 @@
     }
 
     const analytics = {
-      async summary() {
-        const c = client(); if (!c) return null;
+      async summary({ strict = false } = {}) {
+        const c = client(); if (!c) { if (strict) throw new Error('Analytics unavailable'); return null; }
         const { data, error } = await c.rpc('admin_analytics_summary');
-        if (error) { console.warn('[analytics.summary]', error.message); return null; }
-        return Array.isArray(data) ? (data[0] || null) : data;
+        if (error) { if (strict) throw error; console.warn('[analytics.summary]', error.message); return null; }
+        const value = Array.isArray(data) ? (data[0] || null) : data;
+        if (strict && (!value || typeof value !== 'object')) throw new Error('Invalid analytics summary');
+        return value;
       },
       async daily(from = null, to = null) {
         const c = client(); if (!c) return [];
@@ -148,11 +150,13 @@
         if (error) { console.warn('[analytics.firstDay]', error.message); return null; }
         return (data && data[0]) || null;
       },
-      async uploadsSummary() {
-        const c = client(); if (!c) return null;
+      async uploadsSummary({ strict = false } = {}) {
+        const c = client(); if (!c) { if (strict) throw new Error('Upload summary unavailable'); return null; }
         const { data, error } = await c.rpc('admin_uploads_summary');
-        if (error) { console.warn('[analytics.uploadsSummary]', error.message); return null; }
-        return Array.isArray(data) ? (data[0] || null) : data;
+        if (error) { if (strict) throw error; console.warn('[analytics.uploadsSummary]', error.message); return null; }
+        const value = Array.isArray(data) ? (data[0] || null) : data;
+        if (strict && (!value || typeof value !== 'object')) throw new Error('Invalid upload summary');
+        return value;
       },
       async uploadsDaily(from = null, to = null) {
         const c = client(); if (!c) return [];
@@ -196,12 +200,16 @@
         if (error) { console.warn('[analytics.uploadsThemeRatio]', error.message); return null; }
         return Array.isArray(data) ? (data[0] || null) : data;
       },
-      async clientErrorsRecent(hours = 24, limit = 20) {
-        const c = client(); if (!c) return [];
+      async clientErrorsRecent(hours = 24, limit = 20, { strict = false } = {}) {
+        const c = client(); if (!c) { if (strict) throw new Error('Error logs unavailable'); return []; }
         const modern = await c.rpc('admin_client_errors_recent_v2', { p_hours: hours, p_limit: limit });
-        if (!modern.error) return modern.data || [];
+        if (!modern.error) {
+          if (strict && !Array.isArray(modern.data)) throw new Error('Invalid error logs');
+          return modern.data || [];
+        }
         const legacy = await c.rpc('admin_client_errors_recent', { p_hours: hours, p_limit: limit });
-        if (legacy.error) { console.warn('[analytics.clientErrorsRecent]', legacy.error.message || modern.error.message); return []; }
+        if (legacy.error) { if (strict) throw legacy.error; console.warn('[analytics.clientErrorsRecent]', legacy.error.message || modern.error.message); return []; }
+        if (strict && !Array.isArray(legacy.data)) throw new Error('Invalid error logs');
         return legacy.data || [];
       },
       async clientErrorsPurge(keepDays = 30) {
@@ -402,11 +410,13 @@
             .eq('user_id', data.user_id).maybeSingle();
           return { ...data, display_name: prof?.display_name || null };
         },
-        async adminReportCount(status = 'pending') {
-          const c = client(); if (!c) return 0;
-          const { count } = await c.from('market_reports')
+        async adminReportCount(status = 'pending', { strict = false } = {}) {
+          const c = client(); if (!c) { if (strict) throw new Error('Report count unavailable'); return 0; }
+          const { count, error } = await c.from('market_reports')
             .select('id', { count: 'exact', head: true })
             .eq('status', status);
+          if (error) { if (strict) throw error; console.warn('[market.adminReportCount]', error.message); }
+          if (strict && (!Number.isSafeInteger(count) || count < 0)) throw new Error('Invalid report count');
           return count || 0;
         },
         async adminListReports(status, from, to) {
@@ -471,13 +481,14 @@
       analytics,
       filmProposals: {
         // 편집부 전용 — pending(또는 전체) 목록
-        async listForReview({ status = 'pending', limit = 100 } = {}) {
-          const c = client(); if (!c) return [];
+        async listForReview({ status = 'pending', limit = 100, strict = false } = {}) {
+          const c = client(); if (!c) { if (strict) throw new Error('Film proposals unavailable'); return []; }
           let q = c.from('film_proposals')
             .select('*').order('created_at', { ascending: false }).limit(limit);
           if (status && status !== 'all') q = q.eq('status', status);
           const { data, error } = await q;
-          if (error) { console.warn('[filmProposals.listForReview]', error.message); return []; }
+          if (error) { if (strict) throw error; console.warn('[filmProposals.listForReview]', error.message); return []; }
+          if (strict && !Array.isArray(data)) throw new Error('Invalid film proposals');
           return data || [];
         },
         // 승인: status=approved + approved_slug 기록. 실제 films INSERT 는 admin/films 폼에서.

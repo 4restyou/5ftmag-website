@@ -57,6 +57,13 @@ body.webzine-page .announcement-bar { border-bottom-color: transparent; }
 .wz-page-title { font-size: clamp(40px, 6vw, 66px); font-weight: var(--fw-heading); letter-spacing: -.03em; line-height: 1; margin: 0 0 18px; color: var(--wz-ink); }
 .wz-lede { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: var(--wz-ink-2); margin: 0 0 12px; word-break: keep-all; }
 .wz-howto { font-size: 14px; line-height: 1.65; color: var(--wz-ink-3); margin: 0; word-break: keep-all; }
+.wz-selection { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 12px; text-align: left; font-size: 14px; letter-spacing: 0; }
+.wz-selection[hidden] { display: none; }
+.wz-selection label { align-self: center; color: var(--wz-ink-2); }
+.wz-selection select { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--wz-ink-3); border-radius: 4px; background: var(--wz-base); color: var(--wz-ink); font: inherit; }
+.wz-selection p { grid-column: 1 / -1; margin: 0; line-height: 1.6; color: var(--wz-ink); overflow-wrap: anywhere; }
+.wz-selection a { grid-column: 1 / -1; width: fit-content; color: var(--wz-ink-2); line-height: 1.6; }
+.wz-selection :focus-visible { outline: 2px solid var(--wz-ink); outline-offset: 3px; }
 .wz-empty { text-align: center; color: var(--wz-ink-3); padding: 80px 24px; }
 
 /* ── 왼쪽 눈금: 책 수만큼. 지금 보이는 책이 길다. 목록에서도 소개 화면에서도 쓴다 ── */
@@ -78,7 +85,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 @media (max-width: 700px) { .wz-marks { display: none; } .wz-back { top: 12px; left: 10px; } }
 
 /* ── 목록: 눕힌 책을 세로로 쌓는다 ── */
-.wz-stack { padding: clamp(60px, 11vw, 130px) max(16px, 3vw) clamp(40px, 6vw, 70px); display: flex; flex-direction: column; align-items: center; gap: clamp(44px, 6.4vw, 84px); }
+.wz-stack { padding: clamp(60px, 11vw, 130px) max(16px, 3vw) max(clamp(40px, 6vw, 70px), var(--wz-scroll-tail, 0px)); display: flex; flex-direction: column; align-items: center; gap: clamp(44px, 6.4vw, 84px); }
 .wz-row {
   /* 책 높이(책등 길이)만 화면에 따라 정한다. 가로는 책마다 다른 비율(--ar = 표지 가로/세로), 두께는 높이의 10%(종이) / 13%(양장) */
   --w: min(640px, 82vw);
@@ -91,6 +98,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   position: relative; width: var(--w); height: var(--th);
   perspective: 1500px; perspective-origin: 50% 60%;
   cursor: pointer;
+  scroll-margin-top: var(--wz-scroll-inset, 0px);
 }
 .wz-row.cloth { --th: calc(var(--w) * .13); --ov: 3px; }
 .wz-row .wz-book { position: absolute; inset: 0; transform-style: preserve-3d;
@@ -287,7 +295,8 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 /* 소개 */
 .wz-meta { max-width: 480px; }
 .wz-meta .wz-kind { display: inline-block; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; padding: 5px 10px; border: 1px solid color-mix(in srgb, var(--wz-fg) 45%, transparent); margin-bottom: 18px; }
-.wz-meta h2 { margin: 0 0 6px; font-size: clamp(22px, 2.6vw, 30px); font-weight: var(--fw-heading); letter-spacing: -.02em; line-height: 1.2; word-break: keep-all; }
+.wz-meta h2 { margin: 0 0 6px; font-size: 30px; font-weight: var(--fw-heading); letter-spacing: 0; line-height: 1.2; word-break: keep-all; overflow-wrap: anywhere; }
+.wz-book-info, .wz-access-note { margin: 12px 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
 .wz-meta .wz-by { margin: 0 0 22px; font-size: 14px; font-style: italic; color: color-mix(in srgb, var(--wz-fg) 74%, transparent); }
 .wz-meta .wz-rule { width: 44px; height: 1px; background: color-mix(in srgb, var(--wz-fg) 50%, transparent); margin: 0 0 22px; }
 /* 소개글: 폰은 3줄, PC 는 화면 높이에 따라 9~14줄. 넘치면 "더 보기" 로 펼친다 */
@@ -300,7 +309,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-acts { display: grid; margin-top: 28px; }
 .wz-act { display: grid; grid-template-columns: 1fr 44px; border: 1px solid color-mix(in srgb, var(--wz-fg) 55%, transparent); margin-top: -1px; color: inherit; text-decoration: none;
   font-size: 14px; font-weight: 600; background: none; padding: 0; font-family: inherit; text-align: left; cursor: pointer; }
-.wz-act span { padding: 12px 14px; }
+.wz-act span { padding: 12px 14px; min-width: 0; overflow-wrap: anywhere; }
 .wz-act span b { font-weight: 500; margin-left: 8px; opacity: .8; }
 .wz-act i { font-style: normal; display: grid; place-items: center; border-left: 1px solid color-mix(in srgb, var(--wz-fg) 55%, transparent); font-size: 13px; }
 .wz-act:hover { background: color-mix(in srgb, var(--wz-fg) 8%, transparent); }
@@ -311,11 +320,12 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-side-act.is-on { background: var(--wz-fg); color: var(--c); border-color: var(--wz-fg); }
 
 @media (max-width: 760px) {
-  .wz-intro { padding: 28px 20px 0; }
+  .wz-intro { padding: 28px 20px 24px; }
   .wz-dpage { --H: clamp(210px, 64vw, 325px); padding-top: 56px; }
   .wz-page-in { grid-template-columns: 1fr; gap: 26px; }
   .wz-stage3d { min-height: calc(var(--H) + 30px); }
   .wz-meta { max-width: none; }
+  .wz-meta h2 { font-size: 22px; }
   .wz-desc { --lines: 3; }
 }
 

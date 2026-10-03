@@ -48,6 +48,36 @@ function fmtDate(iso) {
 }
 // "30000000" → "30,000,000원". 숫자가 아니면 (예: "가격 협의") 원문 그대로.
 function fmtPrice(v) { return window.MagUtil.formatPrice(v, { keepText: true }); }
+const LOW_PRICE_KRW = 1000;
+function parseMarketPrice(value) {
+  const raw = String(value ?? '').trim();
+  if (/^(가격\s*협의|협의|negotiable|応相談)$/i.test(raw)) return { valid: true, amount: null };
+  if (/^(무료|나눔|free|無料)$/i.test(raw)) return { valid: true, amount: 0 };
+  const match = raw.match(/^(?:KRW\s*|₩\s*)?((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)\s*(만|천)?\s*(?:원|won|KRW|ウォン)?(?:\s*\((?:택포|배송비 포함|shipping incl\.?|送料込み)\))?$/i);
+  if (!match) return { valid: false, amount: null };
+  const amount = Number(match[1].replace(/,/g, '')) * (match[2] === '만' ? 10000 : match[2] === '천' ? 1000 : 1);
+  return { valid: Number.isSafeInteger(amount) && amount >= 0, amount };
+}
+function krwPreview(amount) {
+  return `${amount.toLocaleString('en-US')} ${i18n.t('원', 'won', 'ウォン')} (KRW)`;
+}
+function marketPriceError() {
+  return i18n.t('가격은 원(KRW) 단위의 정수로 입력해 주세요. 예: 230,000원 또는 23만원. 가격 협의도 가능합니다.', 'Enter a whole amount in Korean won (KRW), e.g. 230,000 won. You can also enter "negotiable".', '価格は韓国ウォン（KRW）の整数で入力してください。例：230,000ウォン。「応相談」も入力できます。');
+}
+function updateMarketPricePreview(form) {
+  const input = form.elements.price;
+  const parsed = parseMarketPrice(input.value);
+  const check = form.elements.low_price_confirm;
+  check.checked = false;
+  check.removeAttribute('aria-invalid');
+  check.removeAttribute('aria-describedby');
+  const low = parsed.valid && parsed.amount !== null && parsed.amount < LOW_PRICE_KRW;
+  $('mktLowPriceCheck').hidden = !low;
+  check.required = low;
+  $('mktPricePreview').textContent = !input.value.trim() ? '' : !parsed.valid ? marketPriceError()
+    : parsed.amount === null ? i18n.t('가격 협의', 'Price negotiable', '価格は応相談') : krwPreview(parsed.amount);
+  $('mktLowPriceLabel').textContent = low ? i18n.t(`${krwPreview(parsed.amount)}이 맞습니다. 수량과 판매 가격의 단위를 확인했습니다.`, `I confirm ${krwPreview(parsed.amount)}. I checked the quantity and price unit.`, `${krwPreview(parsed.amount)}で間違いありません。数量と価格の単位を確認しました。`) : '';
+}
 function categoryLabel(k) {
   return (CATEGORIES.find(c => c.key === k) || {}).label || k;
 }
@@ -620,13 +650,20 @@ function renderForm(existing) {
       </label>
 
       <label class="mkt-field">
-        <span class="mkt-field-label">${i18n.t('가격', 'Price', '価格')} <em>*</em></span>
-        <input type="text" name="price" maxlength="40" required value="${escapeAttr(e.price || '')}" placeholder="${i18n.t('예: 25만원 / 5만원 (택포)', 'e.g. 250,000 won / 50,000 won (shipping incl.)', '例：25万ウォン / 5万ウォン（送料込み）')}" />
+        <span class="mkt-field-label">${i18n.t('가격 · 원(KRW)', 'Price · Korean won (KRW)', '価格 · 韓国ウォン（KRW）')} <em>*</em></span>
+        <input type="text" name="price" maxlength="40" required value="${escapeAttr(e.price ?? '')}" aria-describedby="mktPriceHint mktPricePreview" placeholder="${i18n.t('예: 250,000원 또는 25만원', 'e.g. 250,000 won', '例：250,000ウォン')}" />
+        <span class="mkt-field-hint" id="mktPriceHint">${i18n.t('총 판매 가격을 원 단위로 적어주세요. 단위 없이 23을 입력하면 23원입니다.', 'Enter the total asking price in KRW. Entering 23 without a unit means 23 won.', '販売価格の合計をウォンで入力してください。単位なしの23は23ウォンです。')}</span>
+        <output class="mkt-price-preview" id="mktPricePreview" aria-live="polite"></output>
+      </label>
+      <label class="mkt-safety-check mkt-low-price-check" id="mktLowPriceCheck" hidden>
+        <input type="checkbox" name="low_price_confirm" />
+        <span id="mktLowPriceLabel"></span>
       </label>
 
       <label class="mkt-field">
         <span class="mkt-field-label">${i18n.t('카테고리', 'Category', 'カテゴリー')} <em>*</em></span>
         <select name="category" required>
+          <option value="" ${!e.category ? 'selected' : ''} disabled>${i18n.t('선택해주세요', 'Choose one', '選択してください')}</option>
           ${CATEGORIES.filter(c => c.key !== 'all').map(c => `
             <option value="${escapeAttr(c.key)}" ${e.category === c.key ? 'selected' : ''}>${escapeHtml(c.label)}</option>
           `).join('')}
@@ -692,9 +729,15 @@ function renderForm(existing) {
   renderPhotoSlots();
   $('mktFormCard').querySelectorAll('[data-action="close"]').forEach(b => b.addEventListener('click', closeForm));
   $('mktForm').addEventListener('submit', onSubmit);
+  updateMarketPricePreview($('mktForm'));
+  $('mktForm').elements.price.addEventListener('input', () => updateMarketPricePreview($('mktForm')));
   // 입력 시작하면 누락 표시(aria-invalid) 해제
   $('mktForm').querySelectorAll('[name]').forEach(el => {
-    el.addEventListener('input', () => { el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); });
+    el.addEventListener('input', () => {
+      el.removeAttribute('aria-invalid');
+      if (el.name === 'price') el.setAttribute('aria-describedby', 'mktPriceHint mktPricePreview');
+      else el.removeAttribute('aria-describedby');
+    });
   });
 }
 
@@ -886,6 +929,22 @@ async function onSubmit(e) {
         field.focus({ preventScroll: true });
       }
       throw new Error(i18n.t('필수 항목(제목·가격·카테고리·지역·거래 방식·이름)을 모두 입력해 주세요.', 'Please fill in all required fields (title, price, category, location, delivery, name).', '必須項目（タイトル・価格・カテゴリー・地域・取引方法・名前）をすべて入力してください。'));
+    }
+    const parsedPrice = parseMarketPrice(price);
+    if (!parsedPrice.valid) {
+      form.elements.price.setAttribute('aria-invalid', 'true');
+      form.elements.price.setAttribute('aria-describedby', 'mktPriceHint mktPricePreview mktFormError');
+      form.elements.price.focus();
+      throw new Error(marketPriceError());
+    }
+    if (parsedPrice.amount !== null && parsedPrice.amount < LOW_PRICE_KRW && !form.elements.low_price_confirm.checked) {
+      form.elements.low_price_confirm.setAttribute('aria-invalid', 'true');
+      form.elements.low_price_confirm.setAttribute('aria-describedby', 'mktFormError');
+      form.elements.low_price_confirm.focus();
+      throw new Error(i18n.t('1,000원 미만의 가격입니다. 표시된 원(KRW) 금액이 맞는지 확인해 주세요.', 'The price is below KRW 1,000. Confirm that the displayed KRW amount is correct.', '1,000ウォン未満の価格です。表示されたウォン（KRW）の金額が正しいか確認してください。'));
+    }
+    if (!CATEGORIES.some(c => c.key !== 'all' && c.key === category) || !['courier', 'direct', 'both'].includes(delivery_method)) {
+      throw new Error(i18n.t('카테고리와 거래 방식을 목록에서 선택해 주세요.', 'Choose a category and delivery method from the lists.', 'カテゴリーと取引方法を一覧から選んでください。'));
     }
     if (!phone && !contact) {
       const field = form.querySelector('[name="phone"]');

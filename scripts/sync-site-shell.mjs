@@ -8,7 +8,7 @@ const changed = [];
 
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (['.git', 'node_modules', 'playwright-report', 'test-results'].includes(entry.name)) continue;
+    if (entry.name.startsWith('.') || ['node_modules', 'playwright-report', 'test-results', 'research', 'docs', 'supabase', 'relay', 'tests'].includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
     else if (entry.name.endsWith('.html')) out.push(full);

@@ -1021,7 +1021,7 @@ footer {
 }
 
 /* ════════════════════════════════════════════════
-   공지 배너 — header 바로 아래, 마퀴 좌→우, 닫기 X.
+   공지 배너 — header 바로 아래, 두 줄 요약 + 펼쳐보기, 닫기 X.
    site-common.js 가 활성 공지가 있을 때만 주입.
    ════════════════════════════════════════════════ */
 .announcement-bar {
@@ -1038,37 +1038,37 @@ footer {
   margin: 0 auto;
   padding: 10px 24px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 8px;
   overflow: hidden;
 }
 .announcement-bar-track {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 .announcement-bar-text {
-  display: inline-block;
-  white-space: nowrap;
-  padding-left: 100%;
-  animation: announcement-marquee linear infinite;
-}
-.announcement-bar.is-static .announcement-bar-text {
-  padding-left: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  text-align: left;
+  padding: 0;
   animation: none;
+  transform: none;
+}
+.announcement-bar.is-expanded .announcement-bar-text {
   display: block;
-  text-align: center;
+  -webkit-line-clamp: unset;
 }
-@keyframes announcement-marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-100%); }
-}
-.announcement-bar:hover .announcement-bar-text { animation-play-state: paused; }
 .announcement-bar-close {
   flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1083,12 +1083,36 @@ footer {
 }
 .announcement-bar-close:hover { color: var(--text); background: rgba(0,0,0,0.04); }
 [data-theme="dark"] .announcement-bar-close:hover { background: rgba(255,255,255,0.06); }
+.announcement-bar-expand {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.announcement-bar-expand[hidden] { display: none; }
+.announcement-bar-expand:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+body.webzine-page .announcement-bar {
+  position: relative;
+  z-index: 1;
+  background: var(--wz-base);
+  color: var(--wz-ink);
+}
+body.webzine-page .announcement-bar-close { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
-  .announcement-bar-text { animation: none; padding-left: 0; }
-  .announcement-bar-inner { justify-content: center; }
+  .announcement-bar { transition: none; }
 }
 @media (max-width: 640px) {
-  .announcement-bar-inner { padding: 8px 16px; }
+  .announcement-bar-inner { padding: 8px 16px; flex-wrap: wrap; }
+  .announcement-bar-track { flex: 1 1 calc(100% - 52px); }
+  .announcement-bar-close { order: 1; }
+  .announcement-bar-expand { order: 2; margin-top: -8px; }
   .announcement-bar { font-size: 12px; }
 }
 

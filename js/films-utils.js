@@ -14,10 +14,10 @@
 
   function filterCategoryOf(film) {
     const type = String(film?.type || '').toLowerCase();
-    if (type.includes('color negative')) return 'color';
-    if (type.includes('black') || type.includes('white')) return 'bw';
+    if (type.replace(/\s+/g, '').includes('colornegative')) return 'color';
+    if (type.includes('black') || type.includes('white') || type === 'bw negative') return 'bw';
     if (type.includes('slide') || type.includes('e-6') || type.includes('reversal')) return 'slide';
-    if (type.includes('tungsten') || type.includes('daylight') || type.includes('cinema')) return 'cinema';
+    if (type.includes('tungsten') || type.includes('daylight') || type.includes('cinema') || type === '영화용') return 'cinema';
     return 'other';
   }
 

@@ -840,7 +840,7 @@ async function loadThumbnailDebt() {
     if (window.MagDB && window.MagDB.isReady()) {
       films = await window.MagDB.films.listAsObject();
     }
-    if (!films || Object.keys(films).length === 0) {
+    if (!films) {
       const res = await fetch('../data/films.json');
       if (!res.ok) throw new Error('films load failed');
       films = await res.json();

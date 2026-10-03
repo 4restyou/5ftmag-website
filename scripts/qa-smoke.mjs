@@ -19,7 +19,7 @@ const failures = [];
 
 function walk(dir, test, out = []) {
   for (const name of readdirSync(dir)) {
-    if (name.startsWith('.') || name === 'node_modules') continue;
+    if (name.startsWith('.') || ['node_modules', 'playwright-report', 'test-results', 'research', 'docs', 'supabase', 'relay', 'tests'].includes(name)) continue;
     const file = join(dir, name);
     const stat = statSync(file);
     if (stat.isDirectory()) walk(file, test, out);

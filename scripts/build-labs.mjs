@@ -6,7 +6,7 @@
 //   SUPABASE_URL        (선택, 기본값: 운영 프로젝트)
 //   SUPABASE_ANON_KEY   (선택, 기본값: 운영 anon — db-client.js 와 동일)
 //
-// fetch 실패/빈 테이블이면 기존 data/labs.json 유지 + warn (빌드 통과).
+// 성공한 빈 배열도 반영한다. fetch 실패 시 유효한 마지막 snapshot만 유지한다.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -46,6 +46,10 @@ export function rowToJson(r) {
   };
 }
 
+function validLabs(rows) {
+  return Array.isArray(rows) && rows.every(row => row && typeof row.name === 'string' && row.name.trim());
+}
+
 async function main() {
   const url = new URL('/rest/v1/labs', SUPABASE_URL);
   url.searchParams.set('select', '*');
@@ -63,19 +67,19 @@ async function main() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
     rows = await res.json();
-    if (!Array.isArray(rows)) throw new Error('expected array');
+    if (!validLabs(rows)) throw new Error('expected array of named labs');
   } catch (err) {
+    let snapshot;
+    try { snapshot = JSON.parse(await fs.readFile(TARGET, 'utf8')); } catch { /* Checked below. */ }
+    const saved = Array.isArray(snapshot) ? snapshot : snapshot?.labs;
+    if (!validLabs(saved)) throw new Error('Supabase labs fetch failed; no valid data/labs.json snapshot. Refusing stale/seed fallback.');
     warnBuild('build-labs', `Supabase labs fetch 실패. data/labs.json 유지: ${err.message}`);
-    process.exit(0);
-  }
-
-  if (rows.length === 0) {
-    warnBuild('build-labs', 'Supabase labs 가 비어 있음. data/labs.json 유지.');
-    process.exit(0);
+    return;
   }
 
   const labs = rows.map(rowToJson);
   const out = { source: 'supabase:public.labs', type: 'film-lab', count: labs.length, labs };
+  await fs.mkdir(path.dirname(TARGET), { recursive: true });
   await fs.writeFile(TARGET, JSON.stringify(out, null, 2) + '\n', 'utf8');
   console.log(`🧪 Labs: ${labs.length} entry → data/labs.json`);
 }
@@ -83,7 +87,7 @@ async function main() {
 // 직접 실행될 때만 동작 (import 시엔 rowToJson 만 노출 — 테스트용)
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(err => {
-    warnBuild('build-labs', `build-labs 예외, data/labs.json 유지: ${err?.message || err}`);
-    process.exit(0);
+    warnBuild('build-labs', `build-labs 실패: ${err?.message || err}`);
+    process.exitCode = 1;
   });
 }

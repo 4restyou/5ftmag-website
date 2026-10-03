@@ -12,17 +12,20 @@
   // 봇·크롤러 — 가벼운 UA 필터 (정밀하지 않아도 됨, 정확도는 집계 단에서 충분)
   const PV_BOT_RE = /bot|crawler|spider|crawling|preview|fetch|monitor|googlebot|bingbot|yandex|baidu|duckduck|slurp|facebookexternal/i;
 
+  let memorySessionId = null;
   function pvSessionId() {
+    if (memorySessionId) return memorySessionId;
     try {
       let sid = sessionStorage.getItem(PV_SS_KEY);
       if (!sid) {
         sid = (crypto.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)));
         sessionStorage.setItem(PV_SS_KEY, sid);
       }
-      return sid;
+      memorySessionId = sid;
     } catch (_) {
-      return null;
+      memorySessionId = crypto.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
     }
+    return memorySessionId;
   }
 
   function pvUaFamily(ua) {

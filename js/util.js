@@ -61,6 +61,25 @@
   const SB_URL  = 'https://pucpqsfwqouqohwsvmnd.supabase.co';
   const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1Y3Bxc2Z3cW91cW9od3N2bW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjYyMDUsImV4cCI6MjA5Mzc0MjIwNX0.adLzT0UrX3e1IbkQ70G6LeFWeKbuGaa0PTL6AmrSBD8';
   const OVERRIDE_TIMEOUT_MS = 1500;
+  const VISIBILITY_CACHE_KEY = '5ft-story-visibility-v1';
+
+  function validVisibilityRows(rows) {
+    return Array.isArray(rows) && rows.every(function (row) { return row && row.story_id != null && typeof row.published === 'boolean'; });
+  }
+
+  async function fallbackVisibility() {
+    let cached = null;
+    try { cached = JSON.parse(sessionStorage.getItem(VISIBILITY_CACHE_KEY) || 'null'); } catch (_) {}
+    let snapshot = null;
+    try {
+      const response = await fetch('/data/story-visibility.json');
+      if (response.ok) snapshot = await response.json();
+    } catch (_) {}
+    const candidates = [cached, snapshot].filter(function (entry) { return entry && validVisibilityRows(entry.rows); });
+    candidates.sort(function (a, b) { return String(b.checkedAt || '').localeCompare(String(a.checkedAt || '')); });
+    if (candidates.length) return candidates[0].rows;
+    throw new Error('Story visibility unavailable');
+  }
 
   // 오버라이드를 stories 배열에 덮어쓴다. 순수 함수 — 원본을 바꾸지 않는다.
   function applyVisibility(list, rows) {
@@ -77,8 +96,7 @@
     });
   }
 
-  // 오버라이드 조회. 실패하거나 느리면 빈 배열로 떨어져 JSON 기본값을 쓴다.
-  // 목록이 DB 때문에 멈추면 안 된다.
+  // 장애 시 마지막 정상 상태를 유지한다. 기본 공개 상태로 되돌리지 않는다.
   function fetchVisibility() {
     let ctl = null;
     let timer = null;
@@ -93,9 +111,14 @@
       headers: { apikey: SB_ANON, accept: 'application/json' },
       signal: ctl ? ctl.signal : undefined,
     })
-      .then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (rows) { done(); return Array.isArray(rows) ? rows : []; })
-      .catch(function () { done(); return []; });
+      .then(function (r) { if (!r.ok) throw new Error(`Visibility HTTP ${r.status}`); return r.json(); })
+      .then(function (rows) {
+        done();
+        if (!validVisibilityRows(rows)) throw new Error('Invalid visibility response');
+        try { sessionStorage.setItem(VISIBILITY_CACHE_KEY, JSON.stringify({ checkedAt: new Date().toISOString(), rows })); } catch (_) {}
+        return rows;
+      })
+      .catch(function () { done(); return fallbackVisibility(); });
   }
 
   // 영문 페이지(<html lang="en">)에선 번역된 글(titleEn 이 있는 글)의 제목·요약·주소를 영문판으로 바꾼다.

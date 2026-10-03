@@ -11,7 +11,7 @@
   <link rel="shortcut icon" href="../img/favicon/favicon.ico">
   <link rel="stylesheet" href="../pretendard.css" />
   <link rel="stylesheet" href="../css/tokens.css?v=20261002-e1">
-  <link rel="stylesheet" href="../css/common.css?v=20261002-e1">
+  <link rel="stylesheet" href="../css/common.css?v=20261002-product-audit">
   <script src="../js/theme-init.js?v=20261002-e1"></script>
   <script src="../js/i18n.js?v=20261002-f2"></script>
   <style>
@@ -41,7 +41,15 @@
 
     .home-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 40px; }
     .home-card { display: block; padding: 18px; border-radius: 6px; background: var(--bg-sub); color: var(--text); text-decoration: none; transition: outline-color .15s; outline: 1px solid transparent; }
-    a.home-card:hover { outline-color: var(--text); }
+    .home-card:hover { outline-color: var(--text); }
+    .home-card-link { display: block; color: inherit; text-decoration: none; }
+    .home-status { font-size: 12px; line-height: 1.5; margin: 10px 0 0; min-height: 54px; color: var(--text-muted); overflow-wrap: anywhere; }
+    .home-retry { margin-top: 8px; padding: 6px 10px; font: inherit; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); cursor: pointer; }
+    .home-retry[hidden] { display: inline-block; visibility: hidden; pointer-events: none; }
+    .home-retry:focus-visible, .home-card-link:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+    .home-card.is-unavailable { outline-color: var(--text-muted); }
+    .home-card:not(.has-value) .v { font-size: 18px; }
+    .home-card .v { min-height: 42px; line-height: 1.5; }
     .home-card .k { font-size: 11px; font-weight: var(--fw-heading); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
     .home-card .v { font-size: 28px; font-weight: var(--fw-heading); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
     .home-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
@@ -103,7 +111,6 @@
   <nav class="admin-subnav" aria-label="편집부 페이지">
     <span class="admin-subnav-group">운영</span>
     <a href="/admin/index.html" class="admin-subnav-link is-current">홈</a>
-    <a href="/admin/article-editor.html" class="admin-subnav-link">기사 작성</a>
     <a href="/admin/articles.html" class="admin-subnav-link">기사 목록</a>
     <a href="/admin/submissions.html" class="admin-subnav-link">투고 검토</a>
     <a href="/admin/potw.html" class="admin-subnav-link">이주의 사진</a>
@@ -138,44 +145,68 @@
     <button type="button" class="home-refresh" id="homeRefresh">새로고침</button>
   </div>
   <div class="home-cards">
-    <a class="home-card" id="cardPending" href="/admin/submissions.html?status=pending">
+    <div class="home-card" id="cardPending">
+      <a class="home-card-link" href="/admin/submissions.html?status=pending">
       <div class="k">투고 검토 대기</div>
       <div class="v" id="vPending" aria-live="polite">·</div>
       <div class="sub">투고 검토로 이동</div>
-    </a>
-    <a class="home-card" id="cardReports" href="/admin/market-reports.html">
+      </a>
+      <p class="home-status" id="statusPending" role="status">확인 중</p>
+      <button type="button" class="home-retry" id="retryPending" aria-label="투고 다시 조회" hidden>다시 시도</button>
+    </div>
+    <div class="home-card" id="cardReports">
+      <a class="home-card-link" href="/admin/market-reports.html">
       <div class="k">매물 신고 대기</div>
       <div class="v" id="vReports" aria-live="polite">·</div>
       <div class="sub">매물 신고로 이동</div>
-    </a>
-    <a class="home-card" id="cardMessages" href="/admin/messages.html">
+      </a>
+      <p class="home-status" id="statusReports" role="status">확인 중</p>
+      <button type="button" class="home-retry" id="retryReports" aria-label="신고 다시 조회" hidden>다시 시도</button>
+    </div>
+    <div class="home-card" id="cardMessages">
+      <a class="home-card-link" href="/admin/messages.html">
       <div class="k">안 읽은 메시지</div>
       <div class="v" id="vMessages" aria-live="polite">·</div>
       <div class="sub">메시지로 이동</div>
-    </a>
-    <a class="home-card" id="cardProposals" href="/admin/films.html">
+      </a>
+      <p class="home-status" id="statusMessages" role="status">확인 중</p>
+      <button type="button" class="home-retry" id="retryMessages" aria-label="메시지 다시 조회" hidden>다시 시도</button>
+    </div>
+    <div class="home-card" id="cardProposals">
+      <a class="home-card-link" href="/admin/films.html">
       <div class="k">필름 제안 대기</div>
       <div class="v" id="vProposals" aria-live="polite">·</div>
       <div class="sub">필름 카탈로그에서 검토</div>
-    </a>
-    <a class="home-card" id="cardErrors" href="/admin/analytics.html#clientErrorsPanel">
+      </a>
+      <p class="home-status" id="statusProposals" role="status">확인 중</p>
+      <button type="button" class="home-retry" id="retryProposals" aria-label="필름 제안 다시 조회" hidden>다시 시도</button>
+    </div>
+    <div class="home-card" id="cardErrors">
+      <a class="home-card-link" href="/admin/analytics.html#clientErrorsPanel">
       <div class="k">JS 오류 (24시간)</div>
       <div class="v" id="vErrors" aria-live="polite">·</div>
       <div class="sub">통계에서 상세 보기</div>
-    </a>
-    <a class="home-card" href="/admin/analytics.html">
+      </a>
+      <p class="home-status" id="statusErrors" role="status">확인 중</p>
+      <button type="button" class="home-retry" id="retryErrors" aria-label="JS 오류 다시 조회" hidden>다시 시도</button>
+    </div>
+    <div class="home-card" id="cardViews">
+      <a class="home-card-link" href="/admin/analytics.html">
       <div class="k">오늘 페이지뷰</div>
       <div class="v" id="vViews" aria-live="polite">·</div>
       <div class="sub" id="vViewsSub">확인 중…</div>
-    </a>
+      </a>
+      <p class="home-status" id="statusViews" role="status">확인 중</p>
+      <button type="button" class="home-retry" id="retryViews" aria-label="페이지뷰 다시 조회" hidden>다시 시도</button>
+    </div>
   </div>
 
   <div class="home-head">
     <h2>바로가기</h2>
   </div>
   <div class="home-links">
-    <a class="home-link" href="/admin/article-editor.html"><div class="t">기사 작성</div><div class="d">에디터로 새 기사 쓰기, PR 자동 생성·발행</div></a>
-    <a class="home-link" href="/admin/articles.html"><div class="t">기사 목록</div><div class="d">공개·비공개 토글, 카테고리·검색 필터</div></a>
+    <a class="home-link" href="/admin/articles.html#publishing-process"><div class="t">기사 발행 절차</div><div class="d">원고·본문 수정, 번역·검수·PR 발행</div></a>
+    <a class="home-link" href="/admin/articles.html"><div class="t">기사 목록</div><div class="d">목록 표시·숨김, 카테고리·검색 필터</div></a>
     <a class="home-link" href="/admin/submissions.html"><div class="t">투고 검토</div><div class="d">독자 사진 승인·반려, 테마 응모 관리</div></a>
     <a class="home-link" href="/admin/market-reports.html"><div class="t">매물 신고</div><div class="d">장터 신고 검토, 매물 숨김 처리</div></a>
     <a class="home-link" href="/admin/messages.html"><div class="t">메시지</div><div class="d">회원 ↔ 편집부 직접 대화, 안 읽은 메시지 응답</div></a>
@@ -194,15 +225,15 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js"></script>
-<script src="../js/db/admin.js?v=20261002-f2"></script>
+<script src="../js/db/admin.js?v=20261002-product-audit"></script>
 <script src="../js/db/commerce.js?v=20261002-f2"></script>
-  <script src="../js/db-client.js?v=20261002-f2"></script>
-<script src="../js/util.js?v=20261002-f2"></script>
-<script src="../js/site-telemetry.js?v=20260907-security"></script>
+  <script src="../js/db-client.js?v=20261002-product-audit"></script>
+<script src="../js/util.js?v=20261002-product-audit"></script>
+<script src="../js/site-telemetry.js?v=20261002-product-audit"></script>
   <script src="../js/site-pwa.js?v=20261002-f2"></script>
-  <script src="../js/site-common.js?v=20261002-f1"></script>
+  <script src="../js/site-common.js?v=20261002-product-audit"></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/admin-home-page.js?v=20261002-d2"></script>
+<script src="../js/admin-home-page.js?v=20261002-product-audit"></script>
 
 </body>
 </html>

@@ -776,7 +776,7 @@
   ].join(',');
   function focusableIn(modal) {
     return Array.from(modal.querySelectorAll(FOCUSABLE_SEL))
-      .filter(el => !el.hidden && el.offsetParent !== null);
+      .filter(el => !el.hidden && !el.closest('[inert]') && el.getClientRects().length > 0);
   }
   function createFocusTrap(modal) {
     if (!modal || modal.dataset.focusTrapped === '1') return () => {};
@@ -1649,10 +1649,11 @@
   }
 
   // ════════════════════════════════════════════════
-  // 공지 배너 — 활성 공지가 있으면 헤더 아래 마퀴로 표시.
+  // 공지 배너 — 헤더 아래 두 줄 요약, 긴 본문은 펼쳐보기.
   // localStorage 에 dismiss 한 ID 가 있으면 표시하지 않는다.
   // ════════════════════════════════════════════════
   const DISMISS_KEY = '5ftDismissedAnnouncements';
+  let announcementSequence = 0;
   function getDismissed() {
     try { return new Set(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]')); }
     catch { return new Set(); }
@@ -1692,8 +1693,9 @@
     bar.innerHTML = `
       <div class="announcement-bar-inner">
         <div class="announcement-bar-track" aria-live="polite">
-          <span class="announcement-bar-text"></span>
+          <span class="announcement-bar-text" id="announcement-body-${++announcementSequence}"></span>
         </div>
+        <button type="button" class="announcement-bar-expand" aria-expanded="false" aria-controls="announcement-body-${announcementSequence}" hidden>${tr('펼치기', 'Expand', '全文を表示')}</button>
         <button type="button" class="announcement-bar-close" aria-label="${tr('공지 닫기', 'Close notice', 'お知らせを閉じる')}">×</button>
       </div>
     `;
@@ -1704,20 +1706,24 @@
     bar.querySelector('.announcement-bar-text').innerHTML = renderAnnouncementBody(body);
     header.insertAdjacentElement('afterend', bar);
 
-    // 텍스트가 트랙보다 짧으면 마퀴 비활성 (가운데 정렬로 보임)
-    requestAnimationFrame(() => {
-      const text = bar.querySelector('.announcement-bar-text');
-      const track = bar.querySelector('.announcement-bar-track');
-      if (text.offsetWidth <= track.offsetWidth) bar.classList.add('is-static');
-      else {
-        // 텍스트 길이에 비례한 duration (느린 속도, 픽셀당 약 25ms)
-        const distance = text.offsetWidth + track.offsetWidth;
-        text.style.animationDuration = Math.max(12, distance / 40) + 's';
-      }
+    const text = bar.querySelector('.announcement-bar-text');
+    const toggle = bar.querySelector('.announcement-bar-expand');
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(expanded));
+      bar.classList.toggle('is-expanded', expanded);
+      toggle.textContent = expanded ? tr('접기', 'Collapse', '折りたたむ') : tr('펼치기', 'Expand', '全文を表示');
     });
+    function measureAnnouncement() {
+      if (!bar.isConnected) { window.removeEventListener('resize', measureAnnouncement); return; }
+      if (!bar.classList.contains('is-expanded')) toggle.hidden = text.scrollHeight <= text.clientHeight + 1;
+    }
+    requestAnimationFrame(measureAnnouncement);
+    window.addEventListener('resize', measureAnnouncement);
 
     bar.querySelector('.announcement-bar-close').addEventListener('click', () => {
       addDismissed(data.id);
+      window.removeEventListener('resize', measureAnnouncement);
       bar.classList.add('is-closing');
       setTimeout(() => bar.remove(), 220);
     });

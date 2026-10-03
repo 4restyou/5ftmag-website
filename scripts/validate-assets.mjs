@@ -21,7 +21,7 @@ const ROOT = resolve(dirname(__filename), '..');
 
 function walk(dir, ext, out = []) {
   for (const f of readdirSync(dir)) {
-    if (f.startsWith('.') || f === 'node_modules') continue;
+    if (f.startsWith('.') || ['node_modules', 'playwright-report', 'test-results', 'research', 'docs', 'supabase', 'relay', 'tests'].includes(f)) continue;
     const p = join(dir, f);
     const s = statSync(p);
     if (s.isDirectory()) walk(p, ext, out);

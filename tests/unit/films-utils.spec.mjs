@@ -257,11 +257,13 @@ describe('window.FilmsUtils shape', () => {
 describe('window.FilmsUtils.filterCategoryOf (existing helper, regression coverage)', () => {
   it('detects color negative', () => {
     expect(window.FilmsUtils.filterCategoryOf({ type: 'Color Negative' })).toBe('color');
+    expect(window.FilmsUtils.filterCategoryOf({ type: 'ColorNegative' })).toBe('color');
   });
 
   it('detects black and white', () => {
     expect(window.FilmsUtils.filterCategoryOf({ type: 'Black & White' })).toBe('bw');
     expect(window.FilmsUtils.filterCategoryOf({ type: 'monochrome white' })).toBe('bw');
+    expect(window.FilmsUtils.filterCategoryOf({ type: 'BW Negative' })).toBe('bw');
   });
 
   it('detects slide / reversal', () => {
@@ -272,6 +274,7 @@ describe('window.FilmsUtils.filterCategoryOf (existing helper, regression covera
   it('detects cinema stocks', () => {
     expect(window.FilmsUtils.filterCategoryOf({ type: 'Tungsten cinema' })).toBe('cinema');
     expect(window.FilmsUtils.filterCategoryOf({ type: 'Daylight cinema' })).toBe('cinema');
+    expect(window.FilmsUtils.filterCategoryOf({ type: '영화용' })).toBe('cinema');
   });
 
   it('falls back to "other" for unknown/missing types', () => {

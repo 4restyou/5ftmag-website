@@ -2,7 +2,7 @@
 /* TODO mobile-first 리팩토링 대기 — @media (max-width) → (min-width) 플립. base 가 모바일 값을 갖도록 조정 필요. 회귀 위험 있어 별도 라운드에서 처리. (PoC: comments.css / market.css)*/
 /* ── 인트로 ── */
 .intro {
-  padding: 40px calc(40px + var(--wide-inset)) 60px;
+  padding: 24px calc(40px + var(--wide-inset));
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
@@ -33,7 +33,7 @@
 
 /* ── 필름 그리드 ── */
 .films-section {
-  padding: 60px calc(40px + var(--wide-inset)) 80px;
+  padding: 28px calc(40px + var(--wide-inset)) 80px;
 }
 /* 카드 그리드 — Articles 처럼 최대 4열, 좁아지면 3 → 2 (모바일 세부는 아래 미디어쿼리) */
 .films-grid {
@@ -967,16 +967,16 @@
   .modal-name { font-size: 40px; }
 }
 @media (max-width: 900px) {
-  .films-section { padding: 48px 24px; }
+  .films-section { padding: 28px 24px 48px; }
 }
 @media (max-width: 640px) {
-  .intro { padding: 32px 20px 48px; }
+  .intro { padding: 20px; }
   .intro p,
   .films-section-sub {
     word-break: normal;
     overflow-wrap: anywhere;
   }
-  .films-section { padding: 40px 20px 60px; }
+  .films-section { padding: 24px 20px 60px; }
   .film-name { font-size: 20px; }
   .modal-content { padding: 64px 20px; }
   .modal-name { font-size: 28px; }
@@ -1309,6 +1309,7 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
   /* Library 가 첫 섹션 — 상단 구분선/큰 마진 필요 없음 */
   max-width: none;
 }
+.films-section-head-library .films-section-sub { display: none; }
 .films-section-head-library .films-section-title,
 .films-section-head-library .films-section-sub {
   max-width: 720px;

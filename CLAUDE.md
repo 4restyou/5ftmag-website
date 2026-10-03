@@ -73,15 +73,15 @@ PR 생성 후 **CI 통과**하면 **사용자가 "배포하지 마" / "PR 만 �
 - **CI = `.github/workflows/test.yml`** (워크플로우 이름 "CI", 체크 잡 이름 `validate`). 이 잡 하나가 순서대로 실행: 자산검증(`validate`) → `shell:check`(공통 내비/푸터 동기화) → vitest 단위 → `db:baseline:check` + `db-audit --strict`(DB 베이스라인·계약 드리프트) → qa-smoke(rss·sitemap 드리프트) → (코드 파일 변경 시에만) Playwright 스모크. data/img/문서만 바뀐 PR 은 Playwright 를 건너뛴다.
 - 자동 파이프라인(머지 후):
   - **Netlify** — `main` 머지 시 정적 사이트 자동 빌드/배포 (1–2분).
-  - **db-deploy** — `supabase/migrations/**` 변경 시 `supabase db push --include-all`.
-  - **functions-deploy** — `supabase/functions/**` 변경 시 전 함수 디렉토리 스캔 배포(`--no-verify-jwt`, 함수가 자체 인증).
+  - **functions-deploy (Supabase DB and Edge Functions)** — 마이그레이션 또는 함수 변경 시 DB 마이그레이션을 먼저 적용한 뒤 전 함수 디렉토리를 배포한다(`--no-verify-jwt`, 함수가 자체 인증). DB 실패 시 함수 배포도 중단한다.
+  - **db-deploy** — 수동 복구 전용. 자동 배포와 같은 concurrency 그룹으로 DB 동시 적용을 막는다.
   - **feeds-sync** — `data/stories.json` 변경 시 `rss.xml`·`sitemap.xml` 을 재생성해 뒤따라 커밋한다. 관리 페이지 토글이나 main 직접 커밋이 stories.json 만 바꾸는 탓에 main 의 CI 가 드리프트로 실패하던 것을 막는다. main 이 보호 브랜치라 커밋을 임시 브랜치(`bot/feeds-sync-*`)에 올려 CI 를 직접 돌리고, 통과한 커밋만 main 에 fast-forward 로 올린다.
 
 ### 배포 루프 (표준 절차)
 
 1. 브랜치 → 커밋 → 푸시 → PR 생성.
 2. `validate` 체크런 성공을 확인한 뒤 squash 머지. **auto-merge 는 쓰지 않는다** (커밋이 다 올라가기 전에 첫 커밋만 머지된 사고 이력 3회). CI 대기는 **150초 간격**으로 재확인.
-3. 머지 후 후속 워크플로우까지 확인하고 보고한다: 마이그레이션 포함이면 **db-deploy**, `supabase/functions/**` 포함이면 **functions-deploy** 의 성공 여부.
+3. 머지 후 후속 워크플로우까지 확인하고 보고한다: 마이그레이션 또는 함수 변경이 있으면 **Supabase DB and Edge Functions** 의 DB 적용과 함수 배포 성공 여부를 확인한다.
 4. `fatal: no merge base` 로 validate 가 죽으면 코드 문제가 아니다 (squash 머지 직후 얕은 fetch 플레이크). 브랜치에 `git merge origin/main --no-edit` 후 다시 푸시하면 해결.
 
 ### 커밋 규칙
@@ -250,10 +250,10 @@ DB 컬럼을 추가하면 반드시 세 곳을 함께 고친다. 하나라도 �
 
 1. **admin 페이지에서 등록** — `admin/films.html` "+ 새 필름" / `admin/labs.html` 등. 가장 안전. 즉시 반영.
 2. **수량이 많으면 SQL INSERT** — Supabase Studio SQL Editor 에서 한 번에. `films` 의 `aliases`/`photographers`/`photos` 는 **jsonb** (예: `'[...]'::jsonb`). `ON CONFLICT (slug) DO NOTHING` 권장.
-3. 정적 JSON 에 직접 추가하는 경우엔 `build-films.mjs` 의 supplement 로직(DB 에 없는 slug 만 보강) + `films-page.js` 클라이언트 supplement 가 자동 살려주지만, **admin 페이지들은 DB 만 보므로 거기서는 안 보인다** — 임시 노출만 되고 운영 관리 불가. 빠른 노출이 끝나면 위 1·2 로 옮겨야 한다.
+3. 정적 JSON은 장애 시 최근 빌드의 대체 데이터일 뿐이다. 성공한 DB 조회에는 정적 항목을 보충하지 않는다. DB에 없는 항목을 정적 JSON에 추가해도 노출되지 않으며, 숨김·삭제 항목을 복구하는 방법으로 쓰지 않는다.
 
 ### 정공법 우선
-세 경로 중 1·2 가 정공법, 3 은 안전망. **신규 작업은 항상 1 또는 2 로 시작**한다.
+신규 작업은 항상 1 또는 2로 시작한다. 정상 응답이 빈 목록이면 전체 숨김 상태로 취급한다.
 
 ## 사용자(운영자) 커뮤니케이션
 
