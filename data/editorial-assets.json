@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "storyId": "oct-2026-exhibitions",
-  "auditDate": "2026-10-02",
-  "auditBasis": "Current KO/EN/JA article text and repository references only. No external source, transfer history or permission was independently verified. Reviewed flags record this audit, not clearance.",
+  "auditDate": "2026-10-03",
+  "auditBasis": "Current KO/EN/JA article text, repository references and visual inspection of the nine Photo Art assets with previously missing source URLs. Live public Photo Art pages and their displayed JPEGs were checked on 2026-10-03; all nine source JPEGs are byte-identical to the corresponding local JPGs, with matching SHA-256 hashes. This verifies public publication sources only, not original authorship, acquisition history or reuse permission. The two existing non-Photo Art sources were not independently reverified in this follow-up. Reviewed flags record this audit, not clearance.",
   "assets": [
     {
       "id": "jeong-bongchae",
@@ -10,7 +10,7 @@
       "subject": "정봉채 〈向, 물위에 그려지다〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md20471777296abc5fab95b97", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -21,7 +21,7 @@
       "subject": "이주형 〈Bloom and Boundary〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md20301895576abb5cdc706ec", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -32,7 +32,7 @@
       "subject": "이재용·이관용·김미림 〈사진으로 읽는 영화: 고사동에서 헐리우드까지〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md2696558936aa34d5fe8ac1", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -54,7 +54,7 @@
       "subject": "〈STILL CHUBBY - 이대로 오래〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md17068246a9e46d2ed161", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -65,7 +65,7 @@
       "subject": "사진진주 2026 〈관계, 세상과 연결되다〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md12009640916aa9e4a9918ac", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -76,7 +76,7 @@
       "subject": "박병문·야스메얀도 〈막장 광부들의 삶〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md17887708386abb670f58167", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -87,7 +87,7 @@
       "subject": "〈사진 세계〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md15784284546abc58912bb4a", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -109,7 +109,7 @@
       "subject": "민병헌 〈BETWEEN FORMS〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md293474686abb65aa49834", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}
@@ -120,7 +120,7 @@
       "subject": "이인미 〈흐르는 도시 FLUID SCAPE〉",
       "creator": null,
       "acquisition": null,
-      "source": {"name": "사진예술 / Photo Art", "url": null, "status": "credited-only", "note": "The current caption names Photo Art; the original page and image creator are unknown."},
+      "source": {"name": "사진예술 / Photo Art", "url": "https://www.photoart.co.kr/bbs/m/mcb_data_view.php?type=mcb&ep=ep1260394525d70b6363602a&gp=all&item=md4825509346a9f577ca78cb", "status": "credited-only", "note": "On 2026-10-03, the image displayed on this Photo Art page was visually inspected and its JPEG was byte-identical to the local JPG, with matching SHA-256 hashes. This verifies a public publication source, not original authorship, acquisition history or reuse permission."},
       "captionCredits": {"ko": "이미지 출처: 사진예술.", "en": "Image source: Photo Art.", "ja": "画像出典：写真芸術。"},
       "use": {"status": "unknown", "evidence": null, "scope": null, "note": "No permission or license evidence was found in the current article."},
       "reviewed": {"source": true, "use": true}

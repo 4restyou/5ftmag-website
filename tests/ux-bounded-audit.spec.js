@@ -53,7 +53,9 @@ for (const prefix of ['', 'en/', 'ja/']) {
   });
 }
 
-test('book selector preserves keyboard selection and detail return focus', async ({ page }, testInfo) => {
+test('book selector preserves keyboard selection and detail return focus', async ({ page, browserName }, testInfo) => {
+  // WebKit's native link navigation uses Option/Alt+Tab with default macOS settings.
+  const nextLink = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
   await page.goto('/books.html');
   await expect(page.locator('.wz-row')).toHaveCount(12);
   const select = page.locator('#wzBookSelect');
@@ -70,9 +72,9 @@ test('book selector preserves keyboard selection and detail return focus', async
   await expect(select).toBeFocused();
   await page.keyboard.type('Book 9');
   await expect(select).toHaveValue('9');
-  await page.keyboard.press('Tab');
+  await page.keyboard.press(nextLink);
   await expect(page.locator('.wz-selection a')).toBeFocused();
-  await page.keyboard.press('Tab');
+  await page.keyboard.press(nextLink);
   const hit = page.locator('.wz-row').nth(9).locator('.wz-hit');
   await expect(hit).toBeFocused();
   await page.keyboard.press('Enter');
@@ -99,7 +101,7 @@ test('book selector preserves keyboard selection and detail return focus', async
   await expect(active).toHaveCount(1);
 });
 
-test('detail observer follows scrolling after a long description expands', async ({ page }) => {
+test('detail observer follows DOM scrolling after a long description expands (not a touch gesture)', async ({ page }) => {
   await page.goto('/books.html?issue=issue-7');
   const active = page.locator('.wz-dpage.on');
   await expect(active).toHaveCount(1);
@@ -107,14 +109,34 @@ test('detail observer follows scrolling after a long description expands', async
   await active.locator('.wz-more').click();
   await expect(active.locator('.wz-desc')).toHaveClass(/is-open/);
   await expect(active.locator('h2')).toHaveText('Book 7');
-  const bounds = await active.boundingBox();
-  const viewport = page.viewportSize();
-  await page.mouse.move(viewport.width / 2, viewport.height / 2);
-  await page.mouse.wheel(0, bounds.height);
+  // Exercise real scroll/observer updates without relying on wheel support in mobile WebKit.
+  const previousScroll = await page.locator('#wzDetail').evaluate(el => el.scrollTop);
+  await active.evaluate(el => {
+    document.querySelector('#wzDetail').scrollBy({ top: el.getBoundingClientRect().height, behavior: 'instant' });
+  });
+  await expect.poll(() => page.locator('#wzDetail').evaluate(el => el.scrollTop)).toBeGreaterThan(previousScroll);
   await expect(active).toHaveCount(1);
   await expect(active.locator('h2')).toHaveText('Book 8');
   await expect(page.locator('#wzBookSelect')).toHaveValue('8');
   await page.keyboard.press('Escape');
   await expect(page.locator('#wzDetail')).not.toHaveClass(/\bon\b/);
   await expect(page.locator('.wz-row').nth(8).locator('.wz-hit')).toBeFocused();
+});
+
+test('a new book opens as soon as close returns focus and survives the old animation callback', async ({ page }) => {
+  await page.goto('/books.html?issue=issue-7');
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 7');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.wz-row').nth(7).locator('.wz-hit')).toBeFocused();
+  // Use the restored shelf immediately, without waiting for its trailing animation.
+  await page.locator('.wz-row').nth(8).locator('.wz-hit').evaluate(el => el.focus());
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 8');
+  await expect(page.locator('#wzBack')).toBeFocused();
+  const openedAt = await page.evaluate(() => performance.now());
+  // Observe beyond the old close callback's 1050ms deadline, not just first paint.
+  await expect.poll(() => page.evaluate(() => performance.now()), { timeout: 3000 }).toBeGreaterThan(openedAt + 1100);
+  await expect(page.locator('#wzDetail')).toHaveAttribute('aria-hidden', 'false');
+  await expect(page.locator('#wzDetail')).not.toHaveAttribute('inert', '');
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 8');
 });

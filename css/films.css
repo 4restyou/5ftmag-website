@@ -1007,6 +1007,20 @@
   flex-wrap: wrap;
 }
 .library-toolbar-right { gap: 10px; }
+.library-toolbar .ft-chip,
+.library-toolbar .ft-icon-btn,
+.library-toolbar .library-sort select,
+.library-toolbar .library-propose-btn,
+.library-toolbar .library-mine-link,
+.library-toolbar .library-photos-shuffle {
+  min-width: 44px;
+  min-height: 44px;
+}
+.library-toolbar .ms-dropdown-btn { min-height: 44px; }
+.library-toolbar .library-mine-link {
+  display: inline-flex;
+  align-items: center;
+}
 .library-toolbar-count { margin: 0; }
 .library-toolbar-ms {
   display: flex;
@@ -2400,9 +2414,9 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
   border-bottom-color: var(--text);
 }
 
-/* 라이브러리 보기 토글: ui-controls.css 의 .ft-toggle / .ft-toggle-btn 사용.
-   films 페이지 한정 placement 만 조정. */
+/* Keep shared control visuals; enlarge hit areas only in Library. */
 .library-view-toggle { margin-top: 20px; }
+.library-view-btn { min-width: 44px; min-height: 44px; }
 .library-view-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 @media (max-width: 640px) {
   .library-view-toggle { width: 100%; max-width: 292px; display: flex; }

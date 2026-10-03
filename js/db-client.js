@@ -646,7 +646,11 @@
       const uid = await userId();
       if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       // 본인 row 만 매칭 — RLS 가 한 번 더 가드, trigger 가 핵심 컬럼 보호
-      return c.from('reader_submissions').update(patch).eq('id', id).eq('user_id', uid);
+      const result = await c.from('reader_submissions').update(patch).eq('id', id).eq('user_id', uid).select('id');
+      if (!result.error && !result.data?.some(row => row.id === id)) {
+        return { ...result, error: { message: '사진 수정 권한이 없거나 제출이 삭제되었어요.', code: 'RLS_DENIED' } };
+      }
+      return result;
     },
     async deleteMine(id) {
       const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
@@ -1197,6 +1201,8 @@
       const cleanSlug = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
       if (!cleanSlug) return { url: null, error: { message: 'invalid slug' } };
       if (!file || !file.size) return { url: null, error: { message: 'no file' } };
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return { url: null, error: { message: 'JPG, PNG, WebP 이미지만 업로드할 수 있어요.', code: 'UNSUPPORTED_TYPE' } };
+      if (file.size > 5 * 1024 * 1024) return { url: null, error: { message: '썸네일은 5MB 이하여야 해요.', code: 'FILE_TOO_LARGE' } };
       // 확장자 보존(웹 호환 webp/png/jpg 우선).
       const ext = (file.name.match(/\.[a-z0-9]+$/i) || ['.webp'])[0].toLowerCase();
       const path = `${cleanSlug}-can${ext}`;
@@ -1492,6 +1498,8 @@
     },
     async uploadMedia(path, blob) {
       const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+      if (!blob?.size || !['image/jpeg', 'image/png', 'image/webp'].includes(blob.type)) return { error: { message: 'JPG, PNG, WebP 이미지만 업로드할 수 있어요.', code: 'UNSUPPORTED_TYPE' } };
+      if (blob.size > 10 * 1024 * 1024) return { error: { message: '기사 이미지는 10MB 이하여야 해요.', code: 'FILE_TOO_LARGE' } };
       return c.storage.from(ARTICLE_MEDIA_BUCKET).upload(path, blob, {
         cacheControl: '31536000', upsert: false, contentType: blob.type || 'application/octet-stream',
       });
