@@ -53,27 +53,26 @@ for (const prefix of ['', 'en/', 'ja/']) {
   });
 }
 
-test('book selector preserves keyboard selection and detail return focus', async ({ page, browserName }, testInfo) => {
+test('visual bookshelf preserves marker navigation, keyboard access and detail return focus', async ({ page, browserName }, testInfo) => {
   // WebKit's native link navigation uses Option/Alt+Tab with default macOS settings.
   const nextLink = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
   await page.goto('/books.html');
   await expect(page.locator('.wz-row')).toHaveCount(12);
-  const select = page.locator('#wzBookSelect');
-  await select.focus();
-  await select.selectOption('8');
-  await expect(select).toHaveValue('8');
-  await expect(page.locator('#wzSelectedBook')).toContainText('Book 8');
-  const row = page.locator('.wz-row').nth(8);
+  await expect(page.locator('#wzBookSelect, #wzSelectedBook, .wz-selection')).toHaveCount(0);
+  const row = page.locator('.wz-row').nth(9);
+  if ((page.viewportSize()?.width || 0) > 700) {
+    await page.locator('.wz-mark').nth(9).click();
+  } else {
+    // The original mobile shelf hides desktop markers; browsing uses the book stack.
+    await row.evaluate(el => el.scrollIntoView({ behavior: 'instant', block: 'center' }));
+  }
   await expect.poll(async () => row.evaluate(el => {
     const r = el.getBoundingClientRect();
     const intro = document.querySelector('.wz-intro').getBoundingClientRect();
     return r.top >= intro.bottom && r.bottom <= innerHeight;
   })).toBe(true);
-  await expect(select).toBeFocused();
-  await page.keyboard.type('Book 9');
-  await expect(select).toHaveValue('9');
-  await page.keyboard.press(nextLink);
-  await expect(page.locator('.wz-selection a')).toBeFocused();
+  await expect(row.locator('.wz-hit')).toHaveAttribute('tabindex', '0');
+  await page.locator('.wz-saved-link').evaluate(el => el.focus({ preventScroll: true }));
   await page.keyboard.press(nextLink);
   const hit = page.locator('.wz-row').nth(9).locator('.wz-hit');
   await expect(hit).toBeFocused();
@@ -90,12 +89,11 @@ test('book selector preserves keyboard selection and detail return focus', async
   await page.keyboard.press('Escape');
   await expect(page.locator('#wzDetail')).not.toHaveClass(/\bon\b/);
   await expect(hit).toBeFocused();
-  await expect(select).toHaveValue('9');
+  await expect(hit).toHaveAttribute('tabindex', '0');
   await expect(page.locator('#wzDetail')).toHaveAttribute('inert', '');
   // Resize the shelf and select its last book, exercising rebuilt observer margins.
   await page.setViewportSize({ width: 320, height: 740 });
-  await select.selectOption('11');
-  await expect(select).toHaveValue('11');
+  await page.locator('.wz-row').nth(11).evaluate(el => el.scrollIntoView({ behavior: 'instant', block: 'center' }));
   await page.locator('.wz-row').nth(11).locator('.wz-hit').click();
   await expect(active.locator('h2')).toHaveText('Book 11');
   await expect(active).toHaveCount(1);
@@ -117,7 +115,7 @@ test('detail observer follows DOM scrolling after a long description expands (no
   await expect.poll(() => page.locator('#wzDetail').evaluate(el => el.scrollTop)).toBeGreaterThan(previousScroll);
   await expect(active).toHaveCount(1);
   await expect(active.locator('h2')).toHaveText('Book 8');
-  await expect(page.locator('#wzBookSelect')).toHaveValue('8');
+  await expect(page.locator('.wz-row').nth(8).locator('.wz-hit')).toHaveAttribute('tabindex', '0');
   await page.keyboard.press('Escape');
   await expect(page.locator('#wzDetail')).not.toHaveClass(/\bon\b/);
   await expect(page.locator('.wz-row').nth(8).locator('.wz-hit')).toBeFocused();

@@ -14,8 +14,6 @@
   const detail = document.getElementById('wzDetail');
   const pagesEl = document.getElementById('wzPages');
   const backBtn = document.getElementById('wzBack');
-  const bookSelect = document.getElementById('wzBookSelect');
-  const selectedBook = document.getElementById('wzSelectedBook');
   const shelfStage = stack.closest('.wz-stage');
   detail.prepend(backBtn);
   detail.setAttribute('role', 'dialog');
@@ -188,10 +186,6 @@
     return it.author || pubOf(it);
   }
   function updateSelection(i) {
-    if (!selectedBook || !bookSelect) return;
-    const it = issues[i];
-    bookSelect.value = String(i);
-    selectedBook.textContent = `${it.title} · ${bookByline(it)} · ${accessLabel(it)}${isPaid(it) ? ' · ' + won(it.price) : ''}`;
     hits.forEach((hit, k) => { hit.tabIndex = k === i ? 0 : -1; });
   }
 
@@ -216,7 +210,6 @@
       const i = Number(nearest.dataset.i);
       if (pendingSelection !== null && pendingSelection !== i) return;
       pendingSelection = null;
-      if (document.activeElement === bookSelect && Number(bookSelect.value) !== i) return;
       updateSelection(i); setMark(i); root.style.setProperty('--wz-mood', issues[i]._c);
     }, { rootMargin: `-${Math.round(center - 16)}px 0px -${Math.round(window.innerHeight - center - 16)}px 0px`, threshold: 0 });
     rows.forEach(row => shelfObserver.observe(row));
@@ -502,17 +495,7 @@
     hits = rows.map(r => r.querySelector('.wz-hit'));
     pages = Array.from(pagesEl.querySelectorAll('.wz-dpage'));
     markEls = Array.from(marks.querySelectorAll('.wz-mark'));
-    if (bookSelect) {
-      bookSelect.innerHTML = issues.map((it, i) => `<option value="${i}">${esc(it.title)} · ${esc(bookByline(it))} · ${accessLabel(it)}</option>`).join('');
-      document.getElementById('wzSelection').hidden = false;
-      updateSelection(0);
-      bookSelect.onchange = () => {
-        const i = Number(bookSelect.value);
-        pendingSelection = i;
-        updateSelection(i);
-        rows[i].scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
-      };
-    }
+    updateSelection(0);
     issues.forEach((it, i) => setBookColor(i, it._c, 0));
     observeShelf();
 

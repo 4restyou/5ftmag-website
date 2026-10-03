@@ -57,13 +57,8 @@ body.webzine-page .announcement-bar { border-bottom-color: transparent; }
 .wz-page-title { font-size: clamp(40px, 6vw, 66px); font-weight: var(--fw-heading); letter-spacing: -.03em; line-height: 1; margin: 0 0 18px; color: var(--wz-ink); }
 .wz-lede { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: var(--wz-ink-2); margin: 0 0 12px; word-break: keep-all; }
 .wz-howto { font-size: 14px; line-height: 1.65; color: var(--wz-ink-3); margin: 0; word-break: keep-all; }
-.wz-selection { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 12px; text-align: left; font-size: 14px; letter-spacing: 0; }
-.wz-selection[hidden] { display: none; }
-.wz-selection label { align-self: center; color: var(--wz-ink-2); }
-.wz-selection select { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--wz-ink-3); border-radius: 4px; background: var(--wz-base); color: var(--wz-ink); font: inherit; }
-.wz-selection p { grid-column: 1 / -1; margin: 0; line-height: 1.6; color: var(--wz-ink); overflow-wrap: anywhere; }
-.wz-selection a { grid-column: 1 / -1; width: fit-content; color: var(--wz-ink-2); line-height: 1.6; }
-.wz-selection :focus-visible { outline: 2px solid var(--wz-ink); outline-offset: 3px; }
+.wz-saved-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--wz-ink-2); font-size: 14px; line-height: 1.6; letter-spacing: 0; }
+.wz-saved-link:focus-visible { outline: 2px solid var(--wz-ink); outline-offset: 3px; }
 .wz-empty { text-align: center; color: var(--wz-ink-3); padding: 80px 24px; }
 
 /* ── 왼쪽 눈금: 책 수만큼. 지금 보이는 책이 길다. 목록에서도 소개 화면에서도 쓴다 ── */
