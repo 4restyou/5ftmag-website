@@ -27,7 +27,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function checkTargets(page, view) {
-  const controls = page.locator('.library-view-btn, .library-toolbar button:visible, .library-toolbar a:visible, .library-toolbar select:visible');
+  // 바로가기 링크는 폰에서 목록 아래(#libraryFoot)로 옮겨 가므로 자리와 상관없이 함께 센다.
+  const controls = page.locator('.library-view-btn, .library-toolbar button:visible, .library-toolbar a:visible, .library-toolbar select:visible, .library-foot #libraryQuickLinks > :visible');
   const boxes = await controls.evaluateAll(elements => elements.map(el => {
     const r = el.getBoundingClientRect();
     return { name: el.id || el.textContent.trim(), x: r.x, y: r.y, width: r.width, height: r.height };
