@@ -59,7 +59,7 @@
   <link rel="stylesheet" href="./css/comments.css?v=20261002-e1">
   <link rel="stylesheet" href="./css/reader-submissions.css?v=20261002-e1">
   <link rel="stylesheet" href="./css/ui-controls.css?v=20261002-e1">
-  <link rel="stylesheet" href="./css/films.css?v=20261003-member-stability">
+  <link rel="stylesheet" href="./css/films.css?v=20261004-films-mobile">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -168,9 +168,11 @@
   <!-- 통합 툴바 — 액션 + 카운트 + 필터 + 검색을 한 줄로 -->
   <div class="library-toolbar">
     <div class="library-toolbar-left">
-      <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
-      <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
-      <a href="me.html#fav-films" class="library-mine-link">좋아한 필름 →</a>
+      <span class="library-quick-links" id="libraryQuickLinks">
+        <button type="button" class="library-propose-btn" id="proposeFilmBtn">+ 새 필름 제안</button>
+        <a href="me.html" class="library-mine-link">내 사진 보기 →</a>
+        <a href="me.html#fav-films" class="library-mine-link">좋아한 필름 →</a>
+      </span>
       <button type="button" class="library-photos-shuffle library-toolbar-photos-only" id="libraryPhotosShuffle" aria-label="다시 섞기">
         <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
           <path d="M3 5h3l2 3M3 15h3l2-3M14 5h3l-3-3M14 5l-2 3M14 15h3l-3 3M14 15l-2-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -261,6 +263,9 @@
       <button type="button" class="btn btn-secondary btn-md library-photos-more-btn" id="libraryPhotosMoreBtn">사진 더 보기</button>
     </div>
   </div>
+
+  <!-- 폰에서만 테마 띠와 바로가기 링크가 이리 내려온다(js/films-page.js) -->
+  <div class="library-foot" id="libraryFoot"></div>
 
   <!-- 5ft Issue 섹션은 Library 아래로 — 매거진 호별 필름은 카탈로그를 둘러본 뒤 만나도록 -->
   <div class="films-section-head films-section-head-issue">
@@ -768,7 +773,7 @@
 <script src="./js/films-reader-export.js?v=20261002-f2" defer></script>
 <script src="./js/films-reader-roll-ui.js?v=20261002-f2" defer></script>
 <script src="./js/films-reader-roll-data.js?v=20260908-nocap" defer></script>
-<script src="./js/films-page.js?v=20261002-f2" defer></script>
+<script src="./js/films-page.js?v=20261004-films-mobile" defer></script>
 <script src="./js/films-propose.js?v=20261002-f2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="./js/db/commerce.js?v=20261002-f2" defer></script>

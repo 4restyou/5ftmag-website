@@ -343,6 +343,24 @@
     });
   }
 
+  // 폰에서는 상단을 가볍게: 테마 띠와 바로가기 링크(제안·내 사진·좋아한 필름)를 목록 아래
+  // #libraryFoot 로 내린다. 노드를 옮기는 것이라 걸어 둔 클릭 처리는 그대로다. PC 는 원래 자리.
+  (function placeLibraryExtras() {
+    const mq = window.matchMedia('(max-width: 640px)');
+    const foot = document.getElementById('libraryFoot');
+    const band = document.getElementById('themeFilmBand');
+    const links = document.getElementById('libraryQuickLinks');
+    const head = document.querySelector('.films-section-head-library');
+    const left = document.querySelector('.library-toolbar-left');
+    if (!foot || !band || !links || !head || !left) return;
+    const place = () => {
+      if (mq.matches) foot.append(band, links);
+      else { head.before(band); left.prepend(links); }
+    };
+    mq.addEventListener('change', place);
+    place();
+  })();
+
   // 필름 카탈로그 — DB 우선, 정적 data/films.json fallback 및 보강.
   (async () => {
     try {

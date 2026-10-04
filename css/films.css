@@ -2717,3 +2717,34 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
   .film-index { padding: 40px 16px 16px; }
   .film-index-grid { column-count: 2; column-gap: 16px; }
 }
+
+/* ── 폰: Library 상단 정리 ──
+   테마 띠와 바로가기 링크는 js/films-page.js 가 폰에서 목록 아래 #libraryFoot 로 옮긴다. */
+.library-quick-links { display: contents; }
+.library-foot:empty { display: none; }
+@media (max-width: 640px) {
+  /* 소개 문단은 빼고 독자 사진 수 한 줄만 둔다. 수를 못 불러오면 줄째 숨긴다 */
+  .intro { padding: 14px 20px; }
+  .intro p:not(.intro-count) { display: none; }
+  .intro-count { margin-top: 0; }
+  .intro:has(.intro-count[hidden]) { display: none; }
+  /* 제목과 필름/사진 토글을 한 줄로 */
+  .films-section-head-library { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .films-section-head-library .films-section-title { margin: 0; }
+  .films-section-head-library .library-view-toggle { margin-top: 0; width: auto; flex: 0 1 200px; }
+  [data-library-view="films"] .library-toolbar-left { display: none; }
+  /* 정렬·검색·필터는 한 줄, 종류 칩은 그 아래 한 줄 */
+  .library-toolbar { margin-top: 16px; gap: 10px; }
+  .library-toolbar-right { width: 100%; }
+  .library-toolbar-right > .library-sort { order: 1; margin-right: auto; }
+  .library-toolbar-right > .ft-icon-btn { order: 2; }
+  .library-toolbar-right > .library-filter,
+  .library-toolbar-right > .library-photos-chips { order: 3; flex-basis: 100%; }
+  .library-toolbar-right > .library-toolbar-ms { order: 4; }
+  /* 목록 아래로 내려온 테마 띠와 바로가기 */
+  .library-foot { display: flex; flex-direction: column; gap: 12px; margin-top: 36px; }
+  .library-foot .theme-film-band { margin: 0; }
+  .library-foot .library-quick-links { display: flex; flex-wrap: wrap; gap: 0 18px; }
+  .library-foot .library-propose-btn,
+  .library-foot .library-mine-link { display: inline-flex; align-items: center; min-height: 44px; }
+}
