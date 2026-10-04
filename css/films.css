@@ -2721,6 +2721,8 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
 /* ── 폰: Library 상단 정리 ──
    테마 띠와 바로가기 링크는 js/films-page.js 가 폰에서 목록 아래 #libraryFoot 로 옮긴다. */
 .library-quick-links { display: contents; }
+.library-sort-icon,
+.library-sort-dot { display: none; }
 .library-foot:empty { display: none; }
 @media (max-width: 640px) {
   /* 소개 문단은 빼고 독자 사진 수 한 줄만 둔다. 수를 못 불러오면 줄째 숨긴다 */
@@ -2733,11 +2735,36 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
   .films-section-head-library .films-section-title { margin: 0; }
   .films-section-head-library .library-view-toggle { margin-top: 0; width: auto; flex: 0 1 200px; }
   [data-library-view="films"] .library-toolbar-left { display: none; }
-  /* 정렬·검색·필터는 한 줄, 종류 칩은 그 아래 한 줄 */
+  /* 검색·필터·정렬 아이콘은 한 줄, 종류 칩은 그 아래 한 줄 */
   .library-toolbar { margin-top: 16px; gap: 10px; }
   .library-toolbar-right { width: 100%; }
-  .library-toolbar-right > .library-sort { order: 1; margin-right: auto; }
-  .library-toolbar-right > .ft-icon-btn { order: 2; }
+  .library-toolbar-right > .ft-icon-btn { order: 1; }
+  /* 정렬은 아이콘만 보이고, 투명한 select 를 그 위에 겹쳐 폰의 기본 선택 창을 쓴다 */
+  .library-toolbar-right > .library-sort {
+    order: 2;
+    position: relative;
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text);
+    border-radius: 8px;
+  }
+  .library-toolbar .library-sort select {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    min-width: 0; padding: 0;
+    border: 0;
+    opacity: 0;
+  }
+  .library-sort-icon { display: block; pointer-events: none; }
+  .library-sort-dot:not([hidden]) {
+    display: block;
+    position: absolute; top: 8px; right: 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ffd400;
+    pointer-events: none;
+  }
+  .library-sort:focus-within { outline: 2px solid var(--text); outline-offset: 2px; }
   .library-toolbar-right > .library-filter,
   .library-toolbar-right > .library-photos-chips { order: 3; flex-basis: 100%; }
   .library-toolbar-right > .library-toolbar-ms { order: 4; }
