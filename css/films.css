@@ -2418,6 +2418,35 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
 .library-view-toggle { margin-top: 20px; }
 .library-view-btn { min-width: 44px; min-height: 44px; }
 .library-view-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+/* 누르는 영역은 44px 로 두고, 보이는 회색 띠·흰 알약은 홈 토글(.mh-view-toggle)과 같은 높이로
+   그린다. 띠는 토글의 ::before, 선택 표시는 버튼의 ::before 가 맡는다. */
+.library-view-toggle { position: relative; padding: 0 3px; background: none; }
+.library-view-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 3px 0;
+  background: var(--bg-sub);
+  border-radius: 999px;
+}
+.library-view-toggle .library-view-btn {
+  position: relative;
+  z-index: 1;
+  background: none;
+  box-shadow: none;
+}
+.library-view-toggle .library-view-btn::before {
+  content: '';
+  position: absolute;
+  inset: 6px 0;
+  z-index: -1;
+  border-radius: 999px;
+  transition: background .15s, box-shadow .15s;
+}
+.library-view-toggle .library-view-btn.is-active::before {
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .library-view-toggle .library-view-btn.is-active::before { box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
 @media (max-width: 640px) {
   .library-view-toggle { width: 100%; max-width: 292px; display: flex; }
 }
