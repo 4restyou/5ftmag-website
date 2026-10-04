@@ -60,7 +60,7 @@
   <link rel="stylesheet" href="/css/comments.css?v=20261002-e1">
   <link rel="stylesheet" href="/css/reader-submissions.css?v=20261002-e1">
   <link rel="stylesheet" href="/css/ui-controls.css?v=20261002-e1">
-  <link rel="stylesheet" href="/css/films.css?v=20261004-films-mobile">
+  <link rel="stylesheet" href="/css/films.css?v=20261004-sort-icon">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -190,6 +190,8 @@
           <option value="name">Name</option>
           <option value="iso">ISO, low to high</option>
         </select>
+        <svg class="library-sort-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3.5 7.5 7 4l3.5 3.5"/><path d="M17 20V4M13.5 16.5 17 20l3.5-3.5"/></svg>
+        <span class="library-sort-dot" hidden></span>
       </label>
       <div class="library-toolbar-films-only library-toolbar-ms" id="libraryAdvancedFilters">
         <div class="ms-dropdown" id="libraryBrandMS" data-key="brand">
@@ -774,7 +776,7 @@
 <script src="/js/films-reader-export.js?v=20261002-f2" defer></script>
 <script src="/js/films-reader-roll-ui.js?v=20261002-f2" defer></script>
 <script src="/js/films-reader-roll-data.js?v=20260908-nocap" defer></script>
-<script src="/js/films-page.js?v=20261004-films-mobile" defer></script>
+<script src="/js/films-page.js?v=20261004-sort-icon" defer></script>
 <script src="/js/films-propose.js?v=20261002-f2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="/js/db/commerce.js?v=20261002-f2" defer></script>

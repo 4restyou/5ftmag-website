@@ -171,8 +171,13 @@
     const select = document.getElementById('librarySort');
     if (!select) return;
     select.value = librarySort;
+    // 폰에선 정렬이 아이콘만 보이므로, 기본값(사진 많은 순)이 아니면 노란 점으로 알린다.
+    const dot = select.parentElement.querySelector('.library-sort-dot');
+    const syncDot = () => { if (dot) dot.hidden = librarySort === 'photos'; };
+    syncDot();
     select.addEventListener('change', () => {
       librarySort = LIBRARY_SORTS.includes(select.value) ? select.value : 'photos';
+      syncDot();
       try { localStorage.setItem(LIBRARY_SORT_KEY, librarySort); } catch (_) {}
       try {
         const u = new URL(location.href);
