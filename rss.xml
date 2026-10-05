@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Fri, 02 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 05 Oct 2026 00:00:00 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>주머니에 넣고 다니는 신 노구치 사진집</title>
+      <link>https://www.5ftmag.com/stories/shin-noguchi-playing-cards.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/shin-noguchi-playing-cards.html</guid>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 GMT</pubDate>
+      <description>신 노구치가 미국 트럼프 회사 Fulton&apos;s Playing Cards 와 사진 트럼프를 냈다. 사진을 거의 자르지 않고 카드마다 한 장씩 넣어, 주머니에 넣고 다니는 작은 사진집이 됐다. 후지산 상자, 오니 상자, 박 오니 상자 세 가지다.</description>
+      <category>GOODS</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>유화정 사진전 《얼굴들》, 사람과 동물과 풍경의 얼굴</title>
       <link>https://www.5ftmag.com/stories/yu-hwajeong-faces.html</link>
