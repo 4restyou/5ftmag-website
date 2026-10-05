@@ -60,7 +60,7 @@ test('real book first-page preparation and range fallback', async ({ browser }, 
       const page = await context.newPage();
       page.on('pageerror', e => console.log('benchmark page error:', e.message));
       page.on('console', msg => { if (msg.type() === 'error' || msg.type() === 'warning') console.log('benchmark:', msg.text()); });
-      if (scenario.startsWith('range')) await page.route('**/js/webzine-reader.js', route => route.fulfill({ contentType: 'text/javascript', body: readFileSync('js/webzine-reader.js', 'utf8').replace('        url,', '        url, disableStream: true, disableAutoFetch: true, rangeChunkSize: 262144,') }));
+      if (scenario.startsWith('range')) await page.route('**/js/webzine-reader.js', route => route.fulfill({ contentType: 'text/javascript', body: readFileSync('js/webzine-reader.js', 'utf8').replace('{ ...pdfOptions, url: source }', '{ ...pdfOptions, url: source, disableStream: true, disableAutoFetch: true, rangeChunkSize: 262144 }') }));
       await page.goto(`http://127.0.0.1:${port}/benchmark.html`);
       // Warm only the libraries, measuring document preparation separately.
       await page.evaluate(() => window.WebzineReader.prepare());
