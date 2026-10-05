@@ -104,7 +104,11 @@ test('visual bookshelf preserves marker navigation, keyboard access and detail r
   await expect(active).toHaveCount(1);
 });
 
-for (const [prefix, access] of [['', '전자책 열람권'], ['en/', 'Ebook reading access'], ['ja/', '電子書籍の閲覧権']]) {
+for (const [prefix, access, preview, purchase, read, purchased] of [
+  ['', '전자책 열람권', '미리보기', '구매하기', '전체 읽기', '구매함'],
+  ['en/', 'Ebook reading access', 'Preview', 'Purchase', 'Read the whole book', 'Purchased'],
+  ['ja/', '電子書籍の閲覧権', 'プレビュー', '購入する', '全編を読む', '購入済み'],
+]) {
   for (const owned of [false, true]) {
     test(`paid book detail keeps its price visible regardless of ownership: ${prefix || 'ko'} / ${owned}`, async ({ page }, testInfo) => {
       await page.addInitScript(ownsBook => {
@@ -112,7 +116,8 @@ for (const [prefix, access] of [['', '전자책 열람권'], ['en/', 'Ebook read
           id: 'paid-book', slug: 'paid-book', title: 'Paid photobook', price: 4000,
           description: 'A paid ebook description.', created_at: '2026-10-05',
         }];
-        window.MagDB.ebooks.myEntitlementIds = async () => new Set(ownsBook ? ['paid-book'] : []);
+        window.auditBookOwned = ownsBook;
+        window.MagDB.ebooks.myEntitlementIds = async () => new Set(window.auditBookOwned ? ['paid-book'] : []);
       }, owned);
       await page.goto(`/${prefix}books.html?issue=paid-book`);
       const active = page.locator('.wz-dpage.on');
@@ -123,12 +128,33 @@ for (const [prefix, access] of [['', '전자책 열람권'], ['en/', 'Ebook read
       await expect(price).toContainText('4,000');
       await expect(active.locator(owned ? '.wz-own' : '.wz-buy')).toHaveCount(1);
       await expect(active.locator(owned ? '.wz-buy' : '.wz-own')).toHaveCount(0);
+      await expect(active.locator('.wz-act:not([hidden])')).toHaveCount(owned ? 1 : 2);
+      if (owned) {
+        await expect(active.getByRole('link', { name: new RegExp('^' + preview) })).toHaveCount(0);
+        await expect(active.locator('.wz-own')).toHaveText(new RegExp(read));
+        await expect(price.locator('.wz-owned')).toBeVisible();
+        await expect(price.locator('.wz-owned')).toHaveText(purchased);
+        await expect(active.locator('.wz-stage3d')).toHaveAttribute('aria-label', `Paid photobook ${read}`);
+      } else {
+        await expect(active.getByRole('link', { name: new RegExp('^' + preview) })).toBeVisible();
+        await expect(active.getByRole('link', { name: new RegExp('^' + purchase) })).toBeVisible();
+        await expect(price.locator('.wz-owned')).toBeHidden();
+      }
       expect(await price.evaluate(el => {
         const r = el.getBoundingClientRect();
         return r.left >= 0 && r.right <= innerWidth && el.scrollWidth <= el.clientWidth;
       })).toBe(true);
       await expect(active).toHaveClass(/\bsettled\b/);
       await page.screenshot({ path: testInfo.outputPath('paid-book-detail.png') });
+      await page.evaluate(() => window.auditAuthChange('SIGNED_OUT', null));
+      await expect(active.locator('.wz-own')).toHaveCount(0);
+      await expect(active.getByRole('link', { name: new RegExp('^' + preview) })).toBeVisible();
+      await expect(active.getByRole('link', { name: new RegExp('^' + purchase) })).toBeVisible();
+      await expect(price.locator('.wz-owned')).toBeHidden();
+      await page.evaluate(() => { window.auditBookOwned = true; return window.auditAuthChange('SIGNED_IN', {user:{id:'book-reader'}}); });
+      await expect(active.locator('.wz-act:not([hidden])')).toHaveCount(1);
+      await expect(active.getByRole('link', { name: new RegExp('^' + preview) })).toHaveCount(0);
+      await expect(price.locator('.wz-owned')).toBeVisible();
       await page.keyboard.press('Escape');
       await page.locator('.wz-row').filter({ hasText: 'Book 0' }).locator('.wz-hit').click();
       await expect(active.locator('h2')).toHaveText('Book 0');

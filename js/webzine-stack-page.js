@@ -173,6 +173,7 @@
   let inDetail = false, closing = false, savedScroll = 0, current = 0;
   let detailTransition = 0;
   let shelfObserver = null, pendingSelection = null, releaseDetailFocus = null;
+  let ownershipRequest = 0, ownershipSubscribed = false;
 
   function pubOf(it) {
     if (it._ebook) return it.kind === 'backissue' ? '5ft.mag' : T('S.P.C 사진첩', 'S.P.C Photobook', 'S.P.C 写真集');
@@ -232,8 +233,8 @@
   function actsMarkup(it) {
     if (it._ebook) {
       const href = `${i18n.url('/ebook-read.html')}?slug=${encodeURIComponent(it.slug)}`;
-      return `<a class="wz-act" href="${href}"><span>${T('미리보기', 'Preview', 'プレビュー')}</span><i>↗</i></a>` +
-        (isPaid(it) ? `<a class="wz-act wz-buy" href="${href}&amp;buy=1"><span>${T('전자책 열람권', 'Ebook reading access', '電子書籍の閲覧権')}<b>${won(it.price)}</b></span><i>↗</i></a>` : '');
+      return `<a class="wz-act wz-preview" href="${href}"><span>${T('미리보기', 'Preview', 'プレビュー')}</span><i>↗</i></a>` +
+        (isPaid(it) ? `<a class="wz-act wz-buy" href="${href}&amp;buy=1"><span>${T('구매하기', 'Purchase', '購入する')}</span><i>↗</i></a>` : '');
     }
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
     return read ? `<a class="wz-act wz-read" href="${read}" target="_blank" rel="noopener"><span>${T('읽기', 'Read', '読む')}</span><i>→</i></a>` : '';
@@ -259,7 +260,7 @@
         <span class="wz-kind">${accessLabel(it)}</span>
         <h2 id="wz-book-title-${i}">${esc(it.title)}</h2>
         <p class="wz-by">${esc(bookByline(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</p>
-        ${isPaid(it) ? `<p class="wz-book-info wz-price">${T('전자책 열람권', 'Ebook reading access', '電子書籍の閲覧権')} · ${won(it.price)}</p>` : ''}
+        ${isPaid(it) ? `<p class="wz-book-info wz-price"><span>${T('전자책 열람권', 'Ebook reading access', '電子書籍の閲覧権')} · ${won(it.price)}</span><span class="wz-owned" hidden>${T('구매함', 'Purchased', '購入済み')}</span></p>` : ''}
         ${it.binding ? `<p class="wz-book-info">${T('도서 제본 정보', 'Book binding', '本の製本情報')}: ${esc(it.binding)}</p>` : ''}
         <div class="wz-rule"></div>
         ${it.description ? `<p class="wz-desc">${esc(it.description)}</p><button type="button" class="wz-more" aria-expanded="false">${T('더 보기', 'More', 'もっと見る')}</button>` : ''}
@@ -555,8 +556,8 @@
         stage3d.classList.add('is-link');
         stage3d.setAttribute('role', 'link'); stage3d.tabIndex = 0;
         stage3d.setAttribute('aria-label', `${it.title} ${it._ebook ? T('미리보기', 'Preview', 'プレビュー') : T('읽기', 'Read', '読む')}`);
-        stage3d.addEventListener('click', () => first.click());
-        stage3d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); first.click(); } });
+        stage3d.addEventListener('click', () => page.querySelector('.wz-act:not([hidden])')?.click());
+        stage3d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); page.querySelector('.wz-act:not([hidden])')?.click(); } });
       }
       const likeBtn = page.querySelector('.wz-like');
       if (likeBtn) likeBtn.addEventListener('click', () => toggleLike(it, likeBtn));
@@ -590,22 +591,27 @@
   window.addEventListener('wheel', () => { pendingSelection = null; }, { passive: true });
   window.addEventListener('touchstart', () => { pendingSelection = null; }, { passive: true });
 
-  // 열람권이 있는 책은 "구매하고 전체 보기" 를 "전체 읽기" 로 바꾼다. 로그인 전·조회 실패면 구매 버튼 그대로.
-  // 클릭 처리기는 a 의 class 를 누를 때 보므로, 같은 a 를 그 자리에서 고친다
-  async function markOwned() {
+  // 버튼은 유지해 클릭 처리기를 보존하고, 보유 상태에 따라 표시와 목적지만 바꾼다.
+  async function markOwned(knownIds) {
+    const request = ++ownershipRequest;
     let owned;
-    try { owned = await db().ebooks.myEntitlementIds(); } catch (_) { return; }
-    if (!owned || !owned.size) return;
+    try { owned = knownIds || await db().ebooks.myEntitlementIds(); } catch (_) { return; }
+    if (request !== ownershipRequest || !owned) return;
     issues.forEach((it, i) => {
-      if (!it._ebook || !owned.has(it._pid)) return;
-      const buy = pages[i] && pages[i].querySelector('.wz-buy');
-      if (!buy) return;
-      buy.classList.remove('wz-buy');
-      buy.classList.add('wz-own');
-      buy.href = i18n.url('/ebook-read.html') + '?slug=' + encodeURIComponent(it.slug);
-      buy.innerHTML = `<span>${T('전체 읽기', 'Read the whole book', '全編を読む')}</span><i>→</i>`;
-      const note = pages[i].querySelector('.wz-access-note');
-      if (note) note.textContent = T('전자책 열람권 보유 · 전체를 읽을 수 있습니다.', 'Ebook reading access owned · Full edition available.', '電子書籍の閲覧権あり · 全ページを読めます。');
+      if (!isPaid(it) || !pages[i]) return;
+      const page = pages[i];
+      const owns = owned.has(it._pid);
+      const action = page.querySelector('.wz-buy, .wz-own');
+      action.classList.toggle('wz-buy', !owns);
+      action.classList.toggle('wz-own', owns);
+      action.href = i18n.url('/ebook-read.html') + '?slug=' + encodeURIComponent(it.slug) + (owns ? '' : '&buy=1');
+      action.innerHTML = `<span>${owns ? T('전체 읽기', 'Read the whole book', '全編を読む') : T('구매하기', 'Purchase', '購入する')}</span><i>${owns ? '→' : '↗'}</i>`;
+      page.querySelector('.wz-preview').hidden = owns;
+      page.querySelector('.wz-owned').hidden = !owns;
+      page.querySelector('.wz-stage3d').setAttribute('aria-label', `${it.title} ${owns ? T('전체 읽기', 'Read the whole book', '全編を読む') : T('미리보기', 'Preview', 'プレビュー')}`);
+      page.querySelector('.wz-access-note').textContent = owns
+        ? T('전자책 열람권 보유 · 전체를 읽을 수 있습니다.', 'Ebook reading access owned · Full edition available.', '電子書籍の閲覧権あり · 全ページを読めます。')
+        : T('미리보기는 일부 페이지만 제공됩니다. 전자책 열람권을 구매하면 전체를 읽을 수 있으며, 실물 도서는 포함되지 않습니다.', 'The preview includes selected pages. Ebook reading access unlocks the full edition; a printed book is not included.', 'プレビューは一部のページのみです。電子書籍の閲覧権で全ページを読めます。紙の本は含まれません。');
     });
   }
 
@@ -648,6 +654,13 @@
     render();
 
     markOwned();
+    if (!ownershipSubscribed && db().auth?.onChange) {
+      ownershipSubscribed = true;
+      db().auth.onChange(event => {
+        if (event === 'SIGNED_OUT') markOwned(new Set());
+        else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') markOwned();
+      });
+    }
 
     try { favSet = await db().favorites.idsForType('webzine'); } catch (_) { favSet = new Set(); }
     pages.forEach((p, i) => { const b = p.querySelector('.wz-like'); if (b) setLikeBtn(b, favSet.has(issues[i].id)); });
