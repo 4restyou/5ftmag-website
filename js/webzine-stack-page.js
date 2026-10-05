@@ -298,6 +298,35 @@
     const read = it.pdf_path ? esc(db().webzine.publicUrl(it.pdf_path)) : '';
     return read ? `<a class="wz-act wz-read" href="${read}" target="_blank" rel="noopener"><span>${T('읽기', 'Read', '読む')}</span><i>→</i></a>` : '';
   }
+  function progressKey(it, entitled = it._owns) { return `${it._ebook ? 'ebook' : 'webzine'}:${it.slug}:${it._ebook ? (entitled || !isPaid(it) ? 'full' : 'preview') : 'free'}`; }
+  function updateReadingProgress() {
+    const reader = window.WebzineReader;
+    if (!reader?.progressFor) return;
+    issues.forEach((it, i) => {
+      const page = pages[i], progress = reader.progressFor(progressKey(it));
+      const action = page.querySelector('.wz-read, .wz-own') || page.querySelector('.wz-preview');
+      if (!action) return;
+      const resume = progress && progress.page > 1;
+      const label = resume
+        ? T(`이어서 읽기 · ${progress.page}쪽`, `Continue · page ${progress.page}`, `続きから読む · ${progress.page}ページ`)
+        : (it._ebook ? (it._owns ? T('전체 읽기', 'Read the whole book', '全編を読む') : T('미리보기', 'Preview', 'プレビュー')) : T('읽기', 'Read', '読む'));
+      action.querySelector('span').textContent = label;
+      page.querySelector('.wz-start-over').hidden = !resume;
+    });
+    const recent = reader.recentProgress?.().find(p => issues.some(it => progressKey(it) === p.key) && p.page > 1);
+    const intro = document.querySelector('.wz-intro-inner');
+    let link = intro?.querySelector('.wz-continue');
+    if (!intro) return;
+    if (!recent) { link?.remove(); return; }
+    const i = issues.findIndex(it => progressKey(it) === recent.key);
+    if (!link) {
+      link = document.createElement('a'); link.className = 'wz-continue'; intro.appendChild(link);
+      link.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); openDetail(Number(link.dataset.i), e.detail === 0); });
+    }
+    link.dataset.i = i;
+    link.href = i18n.url('/books.html') + '?issue=' + encodeURIComponent(issues[i].slug);
+    link.textContent = T(`읽던 책 · ${issues[i].title} · ${recent.page}쪽 →`, `Last read · ${issues[i].title} · page ${recent.page} →`, `読んでいた本 · ${issues[i].title} · ${recent.page}ページ →`);
+  }
   function pageMarkup(it, i) {
     const cu = coverUrl(it);
     const front = cu
@@ -328,6 +357,7 @@
           <div class="wz-opening-status" hidden><p role="status" id="wz-preparation-${i}"><strong>${T('책을 여는 중입니다', 'Preparing your book', '本を開く準備をしています')}</strong><span class="wz-opening-hint" hidden>${T('처음 열 때는 시간이 조금 걸릴 수 있습니다.', 'The first opening may take a little longer.', '初回は少し時間がかかる場合があります。')}</span></p><button type="button" class="wz-cancel-read" aria-describedby="wz-preparation-${i}">${T('취소', 'Cancel', 'キャンセル')}</button></div>
         </div>
         ${isPaid(it) ? `<p class="wz-access-note">${T('미리보기는 일부 페이지만 제공됩니다. 전자책 열람권을 구매하면 전체를 읽을 수 있으며, 실물 도서는 포함되지 않습니다.', 'The preview includes selected pages. Ebook reading access unlocks the full edition; a printed book is not included.', 'プレビューは一部のページのみです。電子書籍の閲覧権で全ページを読めます。紙の本は含まれません。')}</p>` : ''}
+        <button type="button" class="wz-start-over" hidden>${T('처음부터 읽기', 'Read from the beginning', '最初から読む')}</button>
         ${side}
       </div>
     </div>`;
@@ -629,6 +659,11 @@
     pages.forEach((page, i) => {
       const it = issues[i];
       const more = page.querySelector('.wz-more');
+      page.querySelector('.wz-start-over').addEventListener('click', () => {
+        page._readFromStart = true;
+        page.querySelector('.wz-act:not([hidden])')?.click();
+        page._readFromStart = false;
+      });
       if (more) more.addEventListener('click', () => { page.querySelector('.wz-desc').classList.add('is-open'); more.classList.remove('show'); more.setAttribute('aria-expanded', 'true'); measureDetailMotion(); });
       page.querySelector('.wz-cancel-read').addEventListener('click', () => {
         resetOpening(page); page.querySelector('.wz-act:not([hidden])')?.focus({ preventScroll: true });
@@ -655,6 +690,7 @@
             setTimeout(() => { if (active()) location.href = href; else fade.remove(); }, 430);
           };
           const needsAccess = it._ebook && !a.classList.contains('wz-buy') && db().ebooks?.getAccess;
+          const fromStart = page._readFromStart === true;
           if (window.WebzineReader && (a.classList.contains('wz-read') || needsAccess)) {
             const actions = page.querySelector('.wz-action-area').getBoundingClientRect();
             const viewport = detail.getBoundingClientRect();
@@ -671,13 +707,16 @@
             prepareBook(i, 'high');
             window.WebzineReader.prepare?.();
             (async () => {
+              const accessStarted = performance.now();
               const acc = needsAccess ? await db().ebooks.getAccess(it.slug) : { url: a.href, entitled: true };
+              const accessMs = performance.now() - accessStarted;
               if (!pending()) return;
               if (!acc?.url) { closed(); leaveTo(a.href); return; }
               const buyHref = i18n.url('/ebook-read.html') + '?slug=' + encodeURIComponent(it.slug) + '&buy=1';
               const label = T('전자책 열람권', 'Ebook reading access', '電子書籍の閲覧権') + (isPaid(it) ? ' · ' + won(it.price) : '');
               await window.WebzineReader.open(acc.url, it.title, {
                 deferReveal: true, signal: request.controller.signal,
+                bookKey: progressKey(it, acc.entitled), startPage: fromStart ? 0 : undefined, accessMs,
                 onReady: async () => {
                   if (!pending()) return;
                   clearTimeout(request.hintTimer);
@@ -727,6 +766,7 @@
   }
 
   backBtn.addEventListener('click', (e) => closeDetail(e.detail === 0));
+  window.addEventListener('webzine-progress', updateReadingProgress);
   let detailScrollFrame = null;
   detail.addEventListener('scroll', () => {
     lastInteraction = performance.now();
@@ -749,6 +789,7 @@
       if (!isPaid(it) || !pages[i]) return;
       const page = pages[i];
       const owns = owned.has(it._pid);
+      it._owns = owns;
       const action = page.querySelector('.wz-buy, .wz-own');
       action.classList.toggle('wz-buy', !owns);
       action.classList.toggle('wz-own', owns);
@@ -761,6 +802,7 @@
         ? T('전자책 열람권 보유 · 전체를 읽을 수 있습니다.', 'Ebook reading access owned · Full edition available.', '電子書籍の閲覧権あり · 全ページを読めます。')
         : T('미리보기는 일부 페이지만 제공됩니다. 전자책 열람권을 구매하면 전체를 읽을 수 있으며, 실물 도서는 포함되지 않습니다.', 'The preview includes selected pages. Ebook reading access unlocks the full edition; a printed book is not included.', 'プレビューは一部のページのみです。電子書籍の閲覧権で全ページを読めます。紙の本は含まれません。');
     });
+    updateReadingProgress();
     if (inDetail) measureDetailMotion();
   }
 
@@ -802,6 +844,7 @@
     issues.sort((a, b) => (new Date(b.created_at || 0) - new Date(a.created_at || 0)) || ((b.sort_order || 0) - (a.sort_order || 0)));
     issues.forEach((it, i) => { it._c = FALLBACK[i % FALLBACK.length]; });
     render();
+    updateReadingProgress();
 
     markOwned();
     if (!ownershipSubscribed && db().auth?.onChange) {

@@ -311,6 +311,9 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-cancel-read:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .wz-dpage.preparing .wz-acts { visibility: hidden; }
 .wz-meta { transition: opacity .3s ease, transform .3s ease; }
+.wz-start-over { display: block; margin-top: 12px; border: 0; padding: 6px 0; background: none; color: inherit; font: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.wz-start-over[hidden] { display: none; }
+.wz-continue { display: inline-block; max-width: 100%; margin-top: 16px; color: inherit; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 4px; }
 /* 중앙으로 펼치는 동안 설명이 표지 위에 겹치지 않게, 공간은 유지한다. */
 .wz-dpage.opening .wz-meta { opacity: 0; visibility: hidden; pointer-events: none; transition: none; }
 /* 표지가 반쯤 열려 첫 페이지가 드러나는 순간부터 리더가 겹쳐 떠오른다(표지는 그 아래서 마저 열린다) */

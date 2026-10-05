@@ -62,6 +62,7 @@
       ? window.MagUtil.formatPrice(product.price) + i18n.t(' · 구매하고 전체 보기', ' · Buy to read it all', ' · 購入して全ページを読む')
       : i18n.t('구매하고 전체 보기', 'Buy to read it all', '購入して全ページを読む');
     const opts = {
+      bookKey: `ebook:${slug}:${access.entitled ? 'full' : 'preview'}`,
       // 책장(소개 화면)에서 왔으면 뒤로 가서 그 책의 소개 화면으로 돌아간다(표지가 다시 덮인다). 아니면 그 책의 소개 화면을 연다
       onClose: () => {
         let fromShelf = false;
