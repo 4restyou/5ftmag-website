@@ -11,6 +11,7 @@
   const stack = document.getElementById('wzStack');
   if (!stack) return;
   const marks = document.getElementById('wzMarks');
+  const libraryLink = marks.querySelector('.wz-library-link');
   const detail = document.getElementById('wzDetail');
   const pagesEl = document.getElementById('wzPages');
   const backBtn = document.getElementById('wzBack');
@@ -490,6 +491,10 @@
     const label = document.createElement('span');
     label.className = 'wz-mark-label'; label.setAttribute('aria-hidden', 'true');
     marks.appendChild(label);
+    if (libraryLink) {
+      marks.appendChild(libraryLink);
+      libraryLink.addEventListener('mouseenter', () => hoverMark(-1));
+    }
     marks.addEventListener('mouseleave', () => hoverMark(-1));
     rows = Array.from(stack.querySelectorAll('.wz-row'));
     hits = rows.map(r => r.querySelector('.wz-hit'));

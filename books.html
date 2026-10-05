@@ -51,7 +51,7 @@
   <link rel="stylesheet" href="./pretendard.css" />
   <link rel="stylesheet" href="./css/tokens.css?v=20261002-e1">
   <link rel="stylesheet" href="./css/common.css?v=20261002-product-audit">
-  <link rel="stylesheet" href="./css/webzine-stack.css?v=20261003-books-revert">
+  <link rel="stylesheet" href="./css/webzine-stack.css?v=20261005-books-liked">
   <style>
     /* header { z-index: 300 } 가 stacking context 라 그 안의 메뉴가 .wz-veil(2000) 아래로 paint 되는 것을 막는다.
        (`> header` 로 직계만 — wz-intro 도 <header> 라서.) 소개 화면(.wz-detail 2120)은 헤더 위로 덮는다. 색 강제는 다크톤 유지. */
@@ -106,7 +106,6 @@
       <span class="wz-kicker">5ft magazine · 디지털 책장</span>
       <h1 class="wz-page-title">Magazine</h1>
       <p class="wz-lede">필름 한 롤에 여러 사람의 시선이 모여, 한 권의 이야기가 됩니다.</p>
-      <a class="wz-saved-link" href="/me.html#fav-webzine">좋아한 책 →</a>
     </div>
   </header>
   <div class="wz-stack" id="wzStack" aria-label="책 목록">
@@ -114,7 +113,12 @@
   </div>
 </main>
 <div class="wz-mood" aria-hidden="true"></div>
-<nav class="wz-marks" id="wzMarks" aria-label="책 위치"></nav>
+<nav class="wz-marks" id="wzMarks" aria-label="책 위치">
+  <a class="wz-library-link" href="/me.html#fav-webzine" aria-label="좋아한 책 모음" aria-describedby="wzLibraryTooltip">
+    <span class="wz-library-icon" aria-hidden="true"></span>
+    <span class="wz-library-tooltip" id="wzLibraryTooltip" role="tooltip">좋아한 책 모음</span>
+  </a>
+</nav>
 <button class="wz-back" id="wzBack" type="button" aria-label="목록으로 돌아가기">←</button>
 <div class="wz-detail" id="wzDetail" aria-hidden="true"><div id="wzPages"></div></div>
 
@@ -140,9 +144,9 @@
 <script src="./js/ui-states.js?v=20261002-f2" defer></script>
   <script src="./js/site-telemetry.js?v=20261002-product-audit" defer></script>
   <script src="./js/site-pwa.js?v=20261002-f2" defer></script>
-  <script src="./js/site-common.js?v=20261002-product-audit" defer></script>
+  <script src="./js/site-common.js?v=20261005-books-liked" defer></script>
 <script src="./js/webzine-reader.js?v=20261002-f2" defer></script>
-<script src="./js/webzine-stack-page.js?v=20261003-books-revert" defer></script>
+<script src="./js/webzine-stack-page.js?v=20261005-books-liked" defer></script>
 
 </body>
 </html>

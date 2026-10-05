@@ -48,6 +48,13 @@ describe('U03 bookshelf content', () => {
     expect(doc.querySelector('.wz-by').textContent).toBe('Photographer');
     expect(doc.querySelector('.wz-buy').getAttribute('href')).toMatch(new RegExp(`^/${lang === 'ko' ? '' : lang + '/'}ebook-read.html`));
     expect(doc.querySelector('#wzBookSelect, #wzSelectedBook, .wz-selection')).toBeNull();
+    expect(doc.querySelector('.wz-intro a')).toBeNull();
+    const library = doc.querySelector('.wz-library-link');
+    expect(library.parentElement.id).toBe('wzMarks');
+    expect(library.previousElementSibling.className).toBe('wz-mark-label');
+    expect(library.getAttribute('href')).toBe(`/${lang === 'ko' ? '' : lang + '/'}me.html#fav-webzine`);
+    expect(library.getAttribute('aria-label')).toBeTruthy();
+    expect(doc.getElementById(library.getAttribute('aria-describedby')).getAttribute('role')).toBe('tooltip');
     const hits = doc.querySelectorAll('.wz-hit');
     expect(hits[0].getAttribute('aria-label')).toContain('SPC <Photo> book');
     expect(hits[0].getAttribute('aria-label')).toContain(paid);

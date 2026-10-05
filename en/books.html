@@ -52,7 +52,7 @@
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="/css/tokens.css?v=20261002-e1">
   <link rel="stylesheet" href="/css/common.css?v=20261002-product-audit">
-  <link rel="stylesheet" href="/css/webzine-stack.css?v=20261003-books-revert">
+  <link rel="stylesheet" href="/css/webzine-stack.css?v=20261005-books-liked">
   <style>
     /* header { z-index: 300 } 가 stacking context 라 그 안의 메뉴가 .wz-veil(2000) 아래로 paint 되는 것을 막는다.
        (`> header` 로 직계만 — wz-intro 도 <header> 라서.) 소개 화면(.wz-detail 2120)은 헤더 위로 덮는다. 색 강제는 다크톤 유지. */
@@ -107,7 +107,6 @@
       <span class="wz-kicker">5ft magazine · Digital Bookshelf</span>
       <h1 class="wz-page-title">Magazine</h1>
       <p class="wz-lede">Many people look through a single roll of film. Together, their pictures become one book.</p>
-      <a class="wz-saved-link" href="/en/me.html#fav-webzine">Liked books →</a>
     </div>
   </header>
   <div class="wz-stack" id="wzStack" aria-label="Books">
@@ -115,7 +114,12 @@
   </div>
 </main>
 <div class="wz-mood" aria-hidden="true"></div>
-<nav class="wz-marks" id="wzMarks" aria-label="Book position"></nav>
+<nav class="wz-marks" id="wzMarks" aria-label="Book position">
+  <a class="wz-library-link" href="/en/me.html#fav-webzine" aria-label="Liked books" aria-describedby="wzLibraryTooltip">
+    <span class="wz-library-icon" aria-hidden="true"></span>
+    <span class="wz-library-tooltip" id="wzLibraryTooltip" role="tooltip">Liked books</span>
+  </a>
+</nav>
 <button class="wz-back" id="wzBack" type="button" aria-label="Back to the list">←</button>
 <div class="wz-detail" id="wzDetail" aria-hidden="true"><div id="wzPages"></div></div>
 
@@ -140,10 +144,10 @@
   <script src="/js/site-telemetry.js?v=20261002-product-audit" defer></script>
   <script src="/js/site-pwa.js?v=20261002-f2" defer></script>
   <script src="/js/i18n.js?v=20261002-f2" defer></script>
-  <script src="/js/site-common.js?v=20261002-product-audit" defer></script>
+  <script src="/js/site-common.js?v=20261005-books-liked" defer></script>
 <script src="/js/ui-states.js?v=20261002-f2" defer></script>
 <script src="/js/webzine-reader.js?v=20261002-f2" defer></script>
-<script src="/js/webzine-stack-page.js?v=20261003-books-revert" defer></script>
+<script src="/js/webzine-stack-page.js?v=20261005-books-liked" defer></script>
 
 </body>
 </html>
