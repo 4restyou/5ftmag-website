@@ -6,7 +6,15 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.MagDB = {
       isReady: () => true,
-      auth: { getSession: async () => null, onChange: () => {} },
+      auth: {
+        getSession: async () => null,
+        onChange: callback => {
+          (window.auditAuthCallbacks ||= []).push(callback);
+          window.auditAuthChange = async (...args) => {
+            for (const listener of window.auditAuthCallbacks) await listener(...args);
+          };
+        },
+      },
       favorites: { idsForType: async () => new Set() },
       webzine: {
         publicUrl: path => path,
@@ -53,9 +61,7 @@ for (const prefix of ['', 'en/', 'ja/']) {
   });
 }
 
-test('visual bookshelf preserves marker navigation, keyboard access and detail return focus', async ({ page, browserName }, testInfo) => {
-  // WebKit's native link navigation uses Option/Alt+Tab with default macOS settings.
-  const nextLink = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+test('visual bookshelf preserves marker navigation, keyboard access and detail return focus', async ({ page }, testInfo) => {
   await page.goto('/books.html');
   await expect(page.locator('.wz-row')).toHaveCount(12);
   await expect(page.locator('#wzBookSelect, #wzSelectedBook, .wz-selection')).toHaveCount(0);
@@ -72,9 +78,8 @@ test('visual bookshelf preserves marker navigation, keyboard access and detail r
     return r.top >= intro.bottom && r.bottom <= innerHeight;
   })).toBe(true);
   await expect(row.locator('.wz-hit')).toHaveAttribute('tabindex', '0');
-  await page.locator('.wz-saved-link').evaluate(el => el.focus({ preventScroll: true }));
-  await page.keyboard.press(nextLink);
   const hit = page.locator('.wz-row').nth(9).locator('.wz-hit');
+  await hit.evaluate(el => el.focus({ preventScroll: true }));
   await expect(hit).toBeFocused();
   await page.keyboard.press('Enter');
   const active = page.locator('.wz-dpage.on');
@@ -98,6 +103,49 @@ test('visual bookshelf preserves marker navigation, keyboard access and detail r
   await expect(active.locator('h2')).toHaveText('Book 11');
   await expect(active).toHaveCount(1);
 });
+
+for (const [prefix, label] of [['', '좋아한 책 모음'], ['en/', 'Liked books'], ['ja/', 'お気に入りの本']]) {
+  test(`liked books collection stays below shelf markers and in the mobile account group: ${prefix || 'ko'}`, async ({ page }, testInfo) => {
+    await page.goto(`/${prefix}books.html`);
+    await expect(page.locator('.wz-row')).toHaveCount(12);
+    await expect(page.locator('.wz-intro a')).toHaveCount(0);
+    const library = page.locator('#wzMarks .wz-library-link');
+    const href = `/${prefix}me.html#fav-webzine`;
+    await expect(library).toHaveAttribute('aria-label', label);
+    await expect(library).toHaveAttribute('href', href);
+    const mobileLink = page.locator('#mobileNav [data-group="account"] a').filter({ hasText: label });
+    await expect(mobileLink).toHaveCount(1);
+    await expect(mobileLink).toHaveAttribute('href', href);
+    await expect.poll(() => page.evaluate(() => typeof window.auditAuthChange)).toBe('function');
+    await page.evaluate(() => window.auditAuthChange('SIGNED_IN', { user: { id: 'reader-test' } }));
+    await expect(mobileLink).toHaveCount(1);
+    await expect(page.locator('.nav-account-menu a').filter({ hasText: label })).toHaveAttribute('href', href);
+    await page.evaluate(() => window.auditAuthChange('SIGNED_OUT', null));
+    await expect(mobileLink).toHaveCount(1);
+    if (testInfo.project.name.includes('mobile')) {
+      await expect(library).toBeHidden();
+      await page.locator('#menuBtn').click();
+      await expect(mobileLink).toBeVisible();
+      await mobileLink.click();
+    } else {
+      await expect(library).toBeVisible();
+      const lastMark = await page.locator('.wz-mark').last().boundingBox();
+      const box = await library.boundingBox();
+      expect(box.width).toBe(44);
+      expect(box.height).toBe(44);
+      expect(box.y).toBeGreaterThan(lastMark.y + lastMark.height + 12);
+      const tooltip = library.locator('[role="tooltip"]');
+      await expect(tooltip).toBeHidden();
+      await library.hover();
+      await expect(tooltip).toBeVisible();
+      await library.focus();
+      await expect(tooltip).toBeVisible();
+      expect(await library.locator('.wz-library-icon').evaluate(el => getComputedStyle(el).maskImage)).toContain('/img/icons/library-big.svg');
+      await library.click();
+    }
+    await expect(page).toHaveURL(new RegExp(`/${prefix}me\\.html#fav-webzine$`));
+  });
+}
 
 test('detail observer follows DOM scrolling after a long description expands (not a touch gesture)', async ({ page }) => {
   await page.goto('/books.html?issue=issue-7');

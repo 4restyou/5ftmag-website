@@ -970,6 +970,9 @@
     document.querySelectorAll('[data-nav-auth]').forEach(el => el.remove());
     const meHref    = authPathTo('me.html');
     const adminHref = authPathTo('admin/submissions.html');
+    const savedBooksItem = document.getElementById('wzStack')
+      ? { label: tr('좋아한 책 모음', 'Liked books', 'お気に入りの本'), href: i18n.url('/me.html') + '#fav-webzine' }
+      : null;
     const items = [];
     if (!loggedIn) {
       items.push({ label: tr('로그인', 'Sign in', 'ログイン'), action: 'auth-login' });
@@ -978,6 +981,7 @@
       if (isEditor) items.push({ label: tr('관리', 'Admin', '管理'), href: adminHref });
       items.push({ label: tr('로그아웃', 'Sign out', 'ログアウト'), action: 'auth-logout' });
     }
+    if (savedBooksItem) items.splice(loggedIn ? 1 : 0, 0, savedBooksItem);
     function accountIconSvg() {
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     }
@@ -998,6 +1002,7 @@
         li.className = 'nav-account';
         const menuItems = [
           { label: tr('내 정보', 'My page', 'マイページ'), href: meHref },
+          ...(savedBooksItem ? [savedBooksItem] : []),
           ...(isEditor ? [{ label: tr('관리', 'Admin', '管理'), href: adminHref }] : []),
           { label: tr('로그아웃', 'Sign out', 'ログアウト'), action: 'auth-logout' },
         ];
