@@ -301,7 +301,14 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-f-inside { visibility: hidden; transition: visibility 0s; }
 .wz-dpage.opening .wz-f-inside { visibility: visible; transition-delay: .52s; }
 .wz-dpage.opening .wz-acts { pointer-events: none; }
-.wz-opening-status { position: absolute; top: 100%; left: 0; margin: 10px 0 0; font-size: 13px; color: inherit; }
+.wz-opening-status { grid-area: 1 / 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid currentColor; font-size: 13px; color: inherit; }
+.wz-opening-status[hidden], .wz-opening-hint[hidden] { display: none; }
+.wz-opening-status p { margin: 0; line-height: 1.5; }
+.wz-opening-status strong { font-weight: 600; }
+.wz-opening-hint { display: block; font-size: 12px; opacity: .8; }
+.wz-cancel-read { flex: 0 0 auto; min-height: 32px; padding: 4px 0 4px 8px; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.wz-cancel-read:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.wz-dpage.preparing .wz-acts { visibility: hidden; }
 .wz-meta { transition: opacity .3s ease, transform .3s ease; }
 /* 표지가 반쯤 열려 첫 페이지가 드러나는 순간부터 리더가 겹쳐 떠오른다(표지는 그 아래서 마저 열린다) */
 .wz-reader { animation: wzReaderIn .55s cubic-bezier(.3, 0, .2, 1) both; }
@@ -310,6 +317,9 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-pagefade.out { animation: none; opacity: 0; transition: opacity .45s ease; }
 @keyframes wzReaderIn { from { opacity: 0; } to { opacity: 1; } }
 .wz-f-front img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; -webkit-user-drag: none; }
+.wz-f-front img, .wz-cover img { opacity: 0; transition: opacity .16s ease; }
+.cover-ready .wz-f-front img, .cover-ready .wz-cover img { opacity: 1; }
+.cover-ready .wz-cover-fallback { visibility: hidden; }
 .wz-f-front .wz-plain2 { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 8% 9%; color: var(--ct); }
 .wz-f-front .wz-plain2 b { font-size: calc(var(--W) * .07); font-weight: 700; letter-spacing: -.02em; line-height: 1.15; word-break: keep-all; }
 .wz-f-front .wz-plain2 span { font-size: 10px; letter-spacing: .22em; opacity: .55; text-transform: uppercase; margin-top: 8px; }
@@ -358,7 +368,8 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 @media (min-height: 900px) { .wz-desc { --lines: 14; } }
 .wz-more { display: none; margin: 8px 0 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; opacity: .8; }
 .wz-more.show { display: inline-block; }
-.wz-acts { display: grid; margin-top: 28px; }
+.wz-action-area { display: grid; margin-top: 28px; }
+.wz-acts { display: grid; grid-area: 1 / 1; }
 .wz-act { display: grid; grid-template-columns: 1fr 44px; border: 1px solid color-mix(in srgb, var(--wz-fg) 55%, transparent); margin-top: -1px; color: inherit; text-decoration: none;
   font-size: 14px; font-weight: 600; background: none; padding: 0; font-family: inherit; text-align: left; cursor: pointer; }
 .wz-act span { padding: 12px 14px; min-width: 0; overflow-wrap: anywhere; }
@@ -389,6 +400,8 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 
 /* ── 책 읽기(flipbook 리더, webzine-reader.js) ── */
 .wz-reader { position: fixed; inset: 0; z-index: 2200; background: #0b0a0d; display: flex; flex-direction: column; }
+.wz-reader.is-preparing { visibility: hidden; pointer-events: none; animation: none; }
+@media (prefers-reduced-motion: reduce) { .wz-f-front img, .wz-cover img { transition: none; } }
 /* 유료 미리보기의 구매 영역(ebook-read.html 과 같은 모양). 본문을 가리지 않는 고정 높이 */
 .wz-reader-cta-wrap { order: 2; flex: 0 0 auto; height: calc(104px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box;
   padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; }

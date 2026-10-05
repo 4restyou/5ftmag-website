@@ -165,14 +165,16 @@
   let detailTransition = 0;
   let shelfObserver = null, pendingSelection = null, releaseDetailFocus = null;
   let ownershipRequest = 0, ownershipSubscribed = false;
+  let coverWarmTimer = null, lastInteraction = 0;
+  const readRequests = new Map();
 
   // 표지와 색 분석은 같은 이미지를 공유하고, 보이는 책과 이웃 책만 준비한다.
   function prepareBook(i, priority = 'low') {
     const it = issues[i], page = pages[i], row = rows[i];
-    if (!it || !page || !row) return;
+    if (!it || !page || !row) return Promise.resolve();
     const images = [row.querySelector('img'), page.querySelector('img')].filter(Boolean);
     const img = images[0];
-    if (!img) return;
+    if (!img) return Promise.resolve();
     if (!it._coverPrepared) {
       it._coverPrepared = true;
       const analyze = () => {
@@ -188,22 +190,48 @@
       };
       img.addEventListener('load', analyze, { once: true });
       if (img.complete && img.naturalWidth) analyze();
+      it._coverPromise = Promise.all(images.map((image, k) => new Promise(resolve => {
+        const ready = async () => {
+          try { await image.decode?.(); } catch (_) {}
+          if (issues[i] === it && image.naturalWidth) (k === 0 ? row : page).classList.add('cover-ready');
+          resolve();
+        };
+        let retried = false;
+        image.addEventListener('load', ready, { once: true });
+        image.addEventListener('error', () => {
+          if (retried) { resolve(); return; }
+          retried = true; image.removeAttribute('crossorigin'); image.src = image.dataset.cover;
+        });
+        if (image.complete && image.naturalWidth) ready();
+      })));
     }
     images.forEach(image => {
       if (priority === 'high' || !image.hasAttribute('src')) image.fetchPriority = priority;
       if (!image.hasAttribute('src')) {
-        image.addEventListener('error', () => {
-          image.removeAttribute('crossorigin'); image.src = image.dataset.cover;
-        }, { once: true });
         image.src = image.dataset.cover;
       }
     });
+    return it._coverPromise;
   }
   function prepareNearby(i) {
     for (let k = Math.max(0, i - 1); k <= Math.min(issues.length - 1, i + 1); k++) {
       pages[k].classList.add('is-near');
       prepareBook(k, k === i ? 'high' : 'low');
     }
+  }
+  function warmRemainingCovers() {
+    clearTimeout(coverWarmTimer);
+    if (navigator.connection?.saveData || ['slow-2g', '2g'].includes(navigator.connection?.effectiveType)) return;
+    coverWarmTimer = setTimeout(async () => {
+      if (document.hidden || performance.now() - lastInteraction < 1200 || readRequests.size || document.querySelector('.wz-reader')) {
+        warmRemainingCovers(); return;
+      }
+      const i = issues.map((it, k) => ({ it, k })).filter(({ it }) => !it._coverPrepared && coverUrl(it))
+        .sort((a, b) => Math.abs(a.k - current) - Math.abs(b.k - current))[0]?.k;
+      if (i === undefined) return;
+      await prepareBook(i);
+      warmRemainingCovers();
+    }, 3000);
   }
 
   function pubOf(it) {
@@ -273,7 +301,7 @@
   function pageMarkup(it, i) {
     const cu = coverUrl(it);
     const front = cu
-      ? `<img data-cover="${esc(cu)}" alt="${esc(it.title)}${T(' 표지', ' cover', ' 表紙')}" crossorigin="anonymous" decoding="async" />`
+      ? `<img data-cover="${esc(cu)}" alt="${esc(it.title)}${T(' 표지', ' cover', ' 表紙')}" crossorigin="anonymous" decoding="async" /><span class="wz-plain2 wz-cover-fallback" aria-hidden="true"><b>${esc(it.title)}</b><span>${esc(pubOf(it))}</span></span>`
       : `<span class="wz-plain2"><b class="wz-foil">${esc(it.title)}</b><span class="wz-foil">${esc(pubOf(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</span></span>`;
     const side = it._ebook ? '' : `<div class="wz-side-acts">
         <button type="button" class="wz-side-act wz-like" aria-pressed="false">♡ <span>${T('좋아요', 'Like', 'いいね')}</span></button>
@@ -295,10 +323,12 @@
         ${it.binding ? `<p class="wz-book-info">${T('도서 제본 정보', 'Book binding', '本の製本情報')}: ${esc(it.binding)}</p>` : ''}
         <div class="wz-rule"></div>
         ${it.description ? `<p class="wz-desc">${esc(it.description)}</p><button type="button" class="wz-more" aria-expanded="false">${T('더 보기', 'More', 'もっと見る')}</button>` : ''}
-        <div class="wz-acts">${actsMarkup(it)}</div>
+        <div class="wz-action-area">
+          <div class="wz-acts">${actsMarkup(it)}</div>
+          <div class="wz-opening-status" hidden><p role="status" id="wz-preparation-${i}"><strong>${T('책을 여는 중입니다', 'Preparing your book', '本を開く準備をしています')}</strong><span class="wz-opening-hint" hidden>${T('처음 열 때는 시간이 조금 걸릴 수 있습니다.', 'The first opening may take a little longer.', '初回は少し時間がかかる場合があります。')}</span></p><button type="button" class="wz-cancel-read" aria-describedby="wz-preparation-${i}">${T('취소', 'Cancel', 'キャンセル')}</button></div>
+        </div>
         ${isPaid(it) ? `<p class="wz-access-note">${T('미리보기는 일부 페이지만 제공됩니다. 전자책 열람권을 구매하면 전체를 읽을 수 있으며, 실물 도서는 포함되지 않습니다.', 'The preview includes selected pages. Ebook reading access unlocks the full edition; a printed book is not included.', 'プレビューは一部のページのみです。電子書籍の閲覧権で全ページを読めます。紙の本は含まれません。')}</p>` : ''}
         ${side}
-        <p class="wz-opening-status" role="status" hidden>${T('불러오는 중…', 'Loading…', '読み込み中…')}</p>
       </div>
     </div>`;
   }
@@ -388,6 +418,7 @@
   }
   function openDetail(i, viaKeyboard) {
     if (closing && inDetail) return;
+    lastInteraction = performance.now();
     detailTransition++;
     closing = false;
     detail.classList.remove('closing');
@@ -414,6 +445,7 @@
   }
   function closeDetail(viaKeyboard) {
     if (!inDetail || closing) return;
+    lastInteraction = performance.now();
     closing = true;
     resetOpening(pages[current]);
     const transition = ++detailTransition;
@@ -454,8 +486,13 @@
 
   const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   function resetOpening(page) {
-    page.classList.remove('opening'); page.removeAttribute('aria-busy');
+    const request = readRequests.get(page);
+    if (request) {
+      readRequests.delete(page); clearTimeout(request.hintTimer); request.controller.abort();
+    }
+    page.classList.remove('opening', 'preparing'); page.querySelector('.wz-acts').removeAttribute('aria-busy');
     page.querySelector('.wz-opening-status').hidden = true;
+    page.querySelector('.wz-opening-hint').hidden = true;
   }
   function openBookThen(page, go) {
     if (page.classList.contains('opening')) return;
@@ -470,8 +507,6 @@
       page.style.setProperty('--shift-y', Math.round(window.innerHeight / 2 - (r.top + r.height / 2)) + 'px');
     }
     page.classList.add('opening');
-    page.setAttribute('aria-busy', 'true');
-    page.querySelector('.wz-opening-status').hidden = false;
     // 표지가 열리기 시작하는 .3s 뒤, 반쯤 열려 첫 페이지가 드러나는 때(.55s)에 곧바로 이어 간다
     setTimeout(go, 550);
   }
@@ -543,6 +578,7 @@
       m.dataset.pub = pubOf(it); m.dataset.title = it.title + (it.issue_label ? ' ' + it.issue_label : '');
       m.addEventListener('mouseenter', () => hoverMark(i));
       m.addEventListener('click', () => {
+        lastInteraction = performance.now();
         if (inDetail) { prepareNearby(i); page.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }
         else { pendingSelection = i; updateSelection(i); row.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }); }
       });
@@ -564,6 +600,7 @@
     updateSelection(0);
     issues.forEach((it, i) => setBookColor(i, it._c, 0));
     observeShelf();
+    warmRemainingCovers();
     const coverObserver = new IntersectionObserver(entries => {
       if (inDetail) return;
       entries.forEach(en => { if (en.isIntersecting) prepareBook(Number(en.target.dataset.i), 'high'); });
@@ -585,16 +622,22 @@
       const it = issues[i];
       const more = page.querySelector('.wz-more');
       if (more) more.addEventListener('click', () => { page.querySelector('.wz-desc').classList.add('is-open'); more.classList.remove('show'); more.setAttribute('aria-expanded', 'true'); measureDetailMotion(); });
+      page.querySelector('.wz-cancel-read').addEventListener('click', () => {
+        resetOpening(page); page.querySelector('.wz-act:not([hidden])')?.focus({ preventScroll: true });
+      });
       // 읽기(유료는 미리보기·구매)로 들어갈 때 책이 정면으로 돌아서 표지가 열린 뒤 넘어간다
       page.querySelectorAll('.wz-act').forEach((a) => {
         a.addEventListener('click', (e) => {
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;   // 새 탭 열기는 그대로
           e.preventDefault();
-          if (page.classList.contains('opening')) return;
+          if (page.classList.contains('opening') || readRequests.has(page)) return;
+          lastInteraction = performance.now();
           const transition = detailTransition;
           const active = () => inDetail && !closing && detailTransition === transition && page.classList.contains('on');
-          const closed = () => resetOpening(page);
-          if (!a.classList.contains('wz-buy') && !a.classList.contains('wz-own')) window.WebzineReader?.prepare?.();
+          const closed = () => {
+            resetOpening(page);
+            if (active()) page.querySelector('.wz-act:not([hidden])')?.focus({ preventScroll: true });
+          };
           // 다른 페이지(ebook-read)로 넘어갈 때: 어두운 막을 덮고, 돌아올 때 이 책의 소개 화면으로 오게 주소에 책을 적어 둔다
           const leaveTo = (href) => {
             if (!active()) { closed(); return; }
@@ -602,28 +645,43 @@
             try { history.replaceState(null, '', 'books.html?issue=' + encodeURIComponent(it.slug)); } catch (_) {}
             setTimeout(() => { if (active()) location.href = href; else fade.remove(); }, 430);
           };
-          let go;
-          if (a.classList.contains('wz-read') && window.WebzineReader) {
-            go = () => window.WebzineReader.open(a.href, it.title, { onClose: closed });
-          } else if (it._ebook && !a.classList.contains('wz-buy') && !a.classList.contains('wz-own') && window.WebzineReader && db().ebooks?.getAccess) {
-            // 유료 미리보기도 무료와 같이 이 페이지에서 연다. 열람 주소는 표지가 열리는 동안 미리 받아 둔다.
-            // 받지 못하면(서버·파일 문제) 원인을 보여 주는 ebook-read 로 넘긴다
-            const accessP = db().ebooks.getAccess(it.slug).catch(() => null);
-            go = async () => {
-              const acc = await accessP;
-              if (!active()) { closed(); return; }
-              if (!acc || !acc.url) { leaveTo(a.href); return; }
+          const needsAccess = it._ebook && !a.classList.contains('wz-buy') && db().ebooks?.getAccess;
+          if (window.WebzineReader && (a.classList.contains('wz-read') || needsAccess)) {
+            const request = { controller: new AbortController(), hintTimer: null };
+            readRequests.set(page, request);
+            page.classList.add('preparing'); page.querySelector('.wz-acts').setAttribute('aria-busy', 'true');
+            page.querySelector('.wz-opening-status').hidden = false;
+            page.querySelector('.wz-cancel-read').focus({ preventScroll: true });
+            request.hintTimer = setTimeout(() => {
+              if (readRequests.get(page) === request) page.querySelector('.wz-opening-hint').hidden = false;
+            }, 8000);
+            const pending = () => active() && readRequests.get(page) === request && !request.controller.signal.aborted;
+            prepareBook(i, 'high');
+            window.WebzineReader.prepare?.();
+            (async () => {
+              const acc = needsAccess ? await db().ebooks.getAccess(it.slug) : { url: a.href, entitled: true };
+              if (!pending()) return;
+              if (!acc?.url) { closed(); leaveTo(a.href); return; }
               const buyHref = i18n.url('/ebook-read.html') + '?slug=' + encodeURIComponent(it.slug) + '&buy=1';
               const label = T('전자책 열람권', 'Ebook reading access', '電子書籍の閲覧権') + (isPaid(it) ? ' · ' + won(it.price) : '');
-              window.WebzineReader.open(acc.url, it.title, {
+              await window.WebzineReader.open(acc.url, it.title, {
+                deferReveal: true, signal: request.controller.signal,
+                onReady: async () => {
+                  if (!pending()) return;
+                  clearTimeout(request.hintTimer);
+                  await new Promise(resolve => openBookThen(page, resolve));
+                },
                 onClose: closed,
+                onError: () => window.notify?.(T('책을 열지 못했습니다. 다시 시도해 주세요.', 'Could not open the book. Please try again.', '本を開けませんでした。もう一度お試しください。'), 'danger'),
                 cta: acc.entitled ? null : { label, note: T('미리보기는 여기까지예요', 'End of the preview', 'プレビューはここまでです'), onClick: () => leaveTo(buyHref) },
               });
-            };
+            })().catch(() => {
+              if (!pending()) return;
+              closed(); window.notify?.(T('책을 열지 못했습니다. 다시 시도해 주세요.', 'Could not open the book. Please try again.', '本を開けませんでした。もう一度お試しください。'), 'danger');
+            });
           } else {
-            go = () => leaveTo(a.href);
+            openBookThen(page, () => { if (active()) leaveTo(a.href); else closed(); });
           }
-          openBookThen(page, () => { if (active()) go(); else closed(); });
         });
       });
       // 세운 책을 눌러도 첫 줄(읽기, 유료는 미리보기)과 같다
@@ -659,14 +717,15 @@
   backBtn.addEventListener('click', (e) => closeDetail(e.detail === 0));
   let detailScrollFrame = null;
   detail.addEventListener('scroll', () => {
+    lastInteraction = performance.now();
     if (detailScrollFrame !== null) return;
     detailScrollFrame = requestAnimationFrame(() => { detailScrollFrame = null; syncDetailPage(); });
   }, { passive: true });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.wz-reader')) closeDetail(true); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.wz-reader:not(.is-preparing)')) closeDetail(true); });
   let resizeT = null;
   window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { pages.forEach(measureDesc); measureDetailMotion(); placeBack(); observeShelf(); }, 120); });
-  window.addEventListener('wheel', () => { pendingSelection = null; }, { passive: true });
-  window.addEventListener('touchstart', () => { pendingSelection = null; }, { passive: true });
+  window.addEventListener('wheel', () => { pendingSelection = null; lastInteraction = performance.now(); }, { passive: true });
+  window.addEventListener('touchstart', () => { pendingSelection = null; lastInteraction = performance.now(); }, { passive: true });
 
   // 버튼은 유지해 클릭 처리기를 보존하고, 보유 상태에 따라 표시와 목적지만 바꾼다.
   async function markOwned(knownIds) {
