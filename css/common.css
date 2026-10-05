@@ -1021,8 +1021,9 @@ footer {
 }
 
 /* ════════════════════════════════════════════════
-   공지 배너 — header 바로 아래, 두 줄 요약 + 펼쳐보기, 닫기 X.
-   site-common.js 가 활성 공지가 있을 때만 주입.
+   공지 배너 — header 바로 아래, 한 줄로 흐르는 마퀴, 닫기 X.
+   site-common.js 가 활성 공지가 있을 때만 주입. 길이와 상관없이 늘 흐른다(운영자 결정).
+   배너는 얇게(한 줄 + 위아래 7px) 두고, X 의 누르는 영역은 ::before 로 44px 를 지킨다.
    ════════════════════════════════════════════════ */
 .announcement-bar {
   background: var(--bg-sub);
@@ -1036,39 +1037,37 @@ footer {
   position: relative;
   max-width: var(--header-max-w, 1200px);
   margin: 0 auto;
-  padding: 10px 24px;
+  padding: 0 12px 0 24px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
-  overflow: hidden;
 }
 .announcement-bar-track {
   flex: 1;
   min-width: 0;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
+  padding: 7px 0;
+  line-height: 1.4;
 }
 .announcement-bar-text {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-  line-height: 1.6;
-  text-align: left;
-  padding: 0;
-  animation: none;
-  transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 100%;
+  animation: announcement-marquee linear infinite;
 }
-.announcement-bar.is-expanded .announcement-bar-text {
-  display: block;
-  -webkit-line-clamp: unset;
+@keyframes announcement-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
 }
+/* 읽으려고 마우스를 올리거나 키보드로 들어오면 멈춘다 */
+.announcement-bar:hover .announcement-bar-text,
+.announcement-bar:focus-within .announcement-bar-text { animation-play-state: paused; }
 .announcement-bar-close {
+  position: relative;
   flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1081,23 +1080,9 @@ footer {
   border-radius: 2px;
   transition: color .15s, background .15s;
 }
+.announcement-bar-close::before { content: ''; position: absolute; inset: -8px; }
 .announcement-bar-close:hover { color: var(--text); background: rgba(0,0,0,0.04); }
 [data-theme="dark"] .announcement-bar-close:hover { background: rgba(255,255,255,0.06); }
-.announcement-bar-expand {
-  flex: 0 0 auto;
-  min-width: 44px;
-  min-height: 44px;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  padding: 6px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.announcement-bar-expand[hidden] { display: none; }
-.announcement-bar-expand:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 body.webzine-page .announcement-bar {
   position: relative;
   z-index: 1;
@@ -1105,14 +1090,13 @@ body.webzine-page .announcement-bar {
   color: var(--wz-ink);
 }
 body.webzine-page .announcement-bar-close { color: inherit; }
+/* 움직임을 줄이도록 설정한 사람에게는 흐르지 않고 줄바꿈해 전부 보여 준다 */
 @media (prefers-reduced-motion: reduce) {
   .announcement-bar { transition: none; }
+  .announcement-bar-text { animation: none; padding-left: 0; display: block; white-space: normal; text-align: center; }
 }
 @media (max-width: 640px) {
-  .announcement-bar-inner { padding: 8px 16px; flex-wrap: wrap; }
-  .announcement-bar-track { flex: 1 1 calc(100% - 52px); }
-  .announcement-bar-close { order: 1; }
-  .announcement-bar-expand { order: 2; margin-top: -8px; }
+  .announcement-bar-inner { padding: 0 6px 0 16px; }
   .announcement-bar { font-size: 12px; }
 }
 
