@@ -33,6 +33,61 @@ async function openReader({ total = 3, orientation = 'portrait', cta = true } = 
 }
 
 describe('PDF reader', () => {
+  it('keeps preparation hidden until the first canvas and the opening handoff are ready', async () => {
+    const { window } = await openReader({ total: 1 });
+    window.document.querySelector('[data-close]').click();
+    let finishRender, finishHandoff;
+    const rendered = new Promise(resolve => { finishRender = resolve; });
+    const onReady = vi.fn(() => new Promise(resolve => { finishHandoff = resolve; }));
+    const page = { getViewport: () => ({ width: 400, height: 600 }), render: () => ({ promise: rendered }) };
+    window.pdfjsLib.getDocument.mockReturnValue({ promise: Promise.resolve({ numPages: 1, getPage: async () => page, destroy() {} }) });
+    const opened = window.WebzineReader.open('/delayed.pdf', 'Delayed', { deferReveal: true, onReady });
+    await vi.waitFor(() => expect(window.document.querySelector('.wz-reader-book .wz-page')).not.toBeNull());
+    expect(window.document.querySelector('.wz-reader').classList.contains('is-preparing')).toBe(true);
+    expect(window.document.querySelector('.wz-reader').hasAttribute('inert')).toBe(true);
+    expect(window.document.querySelector('canvas')).toBeNull();
+    expect(onReady).not.toHaveBeenCalled();
+    finishRender();
+    await vi.waitFor(() => expect(onReady).toHaveBeenCalledOnce());
+    expect(window.document.querySelector('.wz-reader-book canvas')).not.toBeNull();
+    expect(window.document.querySelector('.wz-reader-loading')).not.toBeNull();
+    finishHandoff(); await opened;
+    expect(window.document.querySelector('.wz-reader').classList.contains('is-preparing')).toBe(false);
+    expect(window.document.querySelector('.wz-reader').hasAttribute('inert')).toBe(false);
+    expect(window.document.querySelector('.wz-reader-loading')).toBeNull();
+  });
+  it('cancels preparation and ignores its delayed document when another book is opened', async () => {
+    const { window } = await openReader({ total: 1 });
+    window.document.querySelector('[data-close]').click();
+    let finishOld;
+    const destroy = vi.fn();
+    const controller = new window.AbortController();
+    const onReady = vi.fn();
+    const oldDoc = { numPages: 1, getPage: vi.fn(), destroy() {} };
+    window.pdfjsLib.getDocument.mockReturnValueOnce({ promise: new Promise(resolve => { finishOld = resolve; }), destroy });
+    const old = window.WebzineReader.open('/old.pdf', 'Old', { deferReveal: true, signal: controller.signal, onReady });
+    await vi.waitFor(() => expect(finishOld).toBeTypeOf('function'));
+    controller.abort();
+    expect(destroy).toHaveBeenCalledOnce();
+    expect(window.document.querySelector('.wz-reader')).toBeNull();
+    await window.WebzineReader.open('/new.pdf', 'New');
+    finishOld(oldDoc); await old;
+    expect(oldDoc.getPage).not.toHaveBeenCalled();
+    expect(onReady).not.toHaveBeenCalled();
+    expect(window.document.querySelector('.wz-reader-title').textContent).toBe('New');
+    expect(window.document.querySelector('canvas')).not.toBeNull();
+  });
+  it('returns a deferred rendering failure to the detail instead of revealing a blank reader', async () => {
+    const { window } = await openReader({ total: 1 });
+    window.document.querySelector('[data-close]').click();
+    const page = { getViewport: () => ({ width: 400, height: 600 }), render: () => ({ promise: Promise.reject(new Error('render failed')) }) };
+    window.pdfjsLib.getDocument.mockReturnValue({ promise: Promise.resolve({ numPages: 1, getPage: async () => page, destroy() {} }) });
+    const onError = vi.fn(), onClose = vi.fn(), onReady = vi.fn();
+    await window.WebzineReader.open('/failed.pdf', 'Failed', { deferReveal: true, onError, onClose, onReady });
+    expect(window.document.querySelector('.wz-reader')).toBeNull();
+    expect(onError).toHaveBeenCalledOnce(); expect(onClose).toHaveBeenCalledOnce();
+    expect(onReady).not.toHaveBeenCalled();
+  });
   it('prepares dependencies without opening the reader or requesting a PDF', async () => {
     const { window } = await openReader();
     window.document.querySelector('[data-close]').click();

@@ -54,6 +54,8 @@ describe('U03 bookshelf content', () => {
     expect(doc.querySelector('.wz-by').textContent).toBe('Photographer');
     expect(doc.querySelector('.wz-buy').getAttribute('href')).toMatch(new RegExp(`^/${lang === 'ko' ? '' : lang + '/'}ebook-read.html`));
     expect(doc.querySelector('#wzBookSelect, #wzSelectedBook, .wz-selection')).toBeNull();
+    expect(doc.querySelector('.wz-opening-status').hidden).toBe(true);
+    expect(doc.querySelector('.wz-opening-status strong').textContent).toBe({ ko: '책을 여는 중입니다', en: 'Preparing your book', ja: '本を開く準備をしています' }[lang]);
     expect(doc.querySelector('.wz-intro a')).toBeNull();
     const library = doc.querySelector('.wz-library-link');
     expect(library.parentElement.id).toBe('wzMarks');

@@ -32,7 +32,8 @@
     return libsP;
   }
 
-  let overlay = null, flip = null, pdfDoc = null;
+  let overlay = null, flip = null, pdfDoc = null, loadingTask = null;
+  let readerToken = 0, renderTasks = [], releaseAbort = null, releaseFocus = null;
   let total = 0, busy = false, onKey = null, readerOpts = null;
   let pageDivs = [], rendered = [], baseW = 1, baseH = 1, dispW = 0, dpr = 1;
   let zoom = 1, panX = 0, panY = 0;
@@ -102,7 +103,10 @@
 
   function build(title) {
     overlay = document.createElement('div');
-    overlay.className = 'wz-reader';
+    overlay.className = 'wz-reader' + (readerOpts?.deferReveal ? ' is-preparing' : '');
+    overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', title);
+    if (readerOpts?.deferReveal) { overlay.setAttribute('inert', ''); overlay.setAttribute('aria-hidden', 'true'); }
     overlay.innerHTML = `
       <div class="wz-reader-bar">
         <span class="wz-reader-title">${esc(title)}</span>
@@ -121,7 +125,7 @@
         <div class="wz-reader-zoom"><div class="wz-reader-book"></div></div>
       </div>`;
     document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
+    if (!readerOpts?.deferReveal) document.body.style.overflow = 'hidden';
     overlay.querySelector('[data-close]').addEventListener('click', close);
     const ctaBtn = overlay.querySelector('[data-cta]');
     if (ctaBtn && readerOpts && readerOpts.cta) ctaBtn.addEventListener('click', () => { try { readerOpts.cta.onClick && readerOpts.cta.onClick(); } catch (_) {} });
@@ -138,6 +142,7 @@
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
     onKey = (e) => {
+      if (overlay?.classList.contains('is-preparing')) return;
       if (e.key === 'Escape') close();
       else if (e.key === 'ArrowLeft') flip && flip.flipPrev();
       else if (e.key === 'ArrowRight') flip && flip.flipNext();
@@ -148,15 +153,20 @@
   }
 
   function close() {
+    readerToken++; busy = false;
+    releaseAbort?.(); releaseAbort = null;
+    releaseFocus?.(); releaseFocus = null;
     const cb = readerOpts && readerOpts.onClose;
     if (onKey) { document.removeEventListener('keydown', onKey); onKey = null; }
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
     if (flip) { try { flip.destroy(); } catch (_) {} flip = null; }
-    if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
+    if (loadingTask?.destroy) { try { Promise.resolve(loadingTask.destroy()).catch(() => {}); } catch (_) {} }
+    else if (pdfDoc) { try { Promise.resolve(pdfDoc.destroy()).catch(() => {}); } catch (_) {} }
+    loadingTask = null; pdfDoc = null;
     if (overlay) { overlay.remove(); overlay = null; }
     document.body.style.overflow = '';
-    total = 0; pageDivs = []; rendered = [];
+    total = 0; pageDivs = []; rendered = []; renderTasks = [];
     zoom = 1; panX = 0; panY = 0; pinchD0 = 0; panActive = false; mDrag = false;
     readerOpts = null;
     if (typeof cb === 'function') { try { cb(); } catch (_) {} }
@@ -173,20 +183,27 @@
     return { w: Math.round(w), h: Math.round(h), portrait };
   }
 
-  async function renderPage(i) {
-    if (!pdfDoc || i < 0 || i >= total || rendered[i]) return;
-    rendered[i] = true;
-    let page;
-    try { page = await pdfDoc.getPage(i + 1); } catch (_) { rendered[i] = false; return; }
-    if (!overlay || !pageDivs[i]) return;
-    const vp = page.getViewport({ scale: (dispW * dpr) / baseW });
-    const cv = document.createElement('canvas');
-    cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
-    try { await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise; }
-    catch (_) { rendered[i] = false; return; }
-    if (!overlay || !pageDivs[i]) return;
-    pageDivs[i].innerHTML = '';
-    pageDivs[i].appendChild(cv);
+  function renderPage(i) {
+    if (!pdfDoc || i < 0 || i >= total) return Promise.resolve(false);
+    if (rendered[i]) return Promise.resolve(true);
+    if (renderTasks[i]) return renderTasks[i];
+    const doc = pdfDoc, target = pageDivs[i], token = readerToken, tasks = renderTasks;
+    const valid = () => token === readerToken && pdfDoc === doc && pageDivs[i] === target;
+    tasks[i] = (async () => {
+      try {
+        const page = await doc.getPage(i + 1);
+        if (!valid()) return false;
+        const vp = page.getViewport({ scale: (dispW * dpr) / baseW });
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+        await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+        if (!valid()) return false;
+        target.replaceChildren(cv); rendered[i] = true;
+        return true;
+      } catch (_) { return false; }
+      finally { tasks[i] = null; }
+    })();
+    return tasks[i];
   }
   function evictPage(i) {
     if (!rendered[i] || !pageDivs[i]) return;
@@ -202,13 +219,23 @@
 
   async function open(url, title, opts) {
     if (busy) return;
+    if (opts?.signal?.aborted) return;
+    if (overlay) close();
     busy = true;
+    const token = ++readerToken;
     readerOpts = opts || null;
     build(title);
     const mine = overlay;
+    const active = () => readerToken === token && overlay === mine;
+    if (opts?.signal) {
+      const abort = () => { if (active()) close(); };
+      opts.signal.addEventListener('abort', abort, { once: true });
+      releaseAbort = () => opts.signal.removeEventListener('abort', abort);
+    }
     try {
       await ensureLibs();
-      pdfDoc = await window.pdfjsLib.getDocument({
+      if (!active()) return;
+      const task = loadingTask = window.pdfjsLib.getDocument({
         url,
         isEvalSupported: false,
         useWasm: false,
@@ -216,11 +243,14 @@
         cMapUrl: PDFJS_BASE + 'cmaps/',
         cMapPacked: true,
         standardFontDataUrl: PDFJS_BASE + 'standard_fonts/',
-      }).promise;
-      if (overlay !== mine) return;
+      });
+      const doc = await task.promise;
+      if (!active()) return;
+      pdfDoc = doc;
       total = pdfDoc.numPages;
       rendered = new Array(total).fill(false);
       const first = await pdfDoc.getPage(1);
+      if (!active()) return;
       const base = first.getViewport({ scale: 1 });
       baseW = base.width; baseH = base.height;
       const { w, h, portrait } = fit(baseW / baseH);
@@ -240,17 +270,33 @@
       flip.on('flip', () => { resetZoom(); updateNo(); renderAround(); });
       flip.on('changeState', renderAround);
       resetZoom();
-      renderAround();
+      // 첫 캔버스가 준비되기 전에는 빈 리더로 전환하지 않는다.
+      if (!await renderPage(0)) {
+        if (active()) throw new Error('First page could not render');
+        return;
+      }
+      if (!active()) return;
+      if (opts?.onReady) await opts.onReady();
+      if (!active()) return;
+      mine.classList.remove('is-preparing'); mine.removeAttribute('inert'); mine.removeAttribute('aria-hidden');
+      document.body.style.overflow = 'hidden';
       clearLoading();
       updateNo();
+      renderAround();
+      releaseFocus = window.createFocusTrap?.(mine);
+      if (opts?.deferReveal) mine.querySelector('[data-close]').focus({ preventScroll: true });
     } catch (err) {
+      if (!active()) return;
       console.warn('[webzine-reader]', err && err.message);
-      if (overlay === mine) {
+      if (active() && opts?.deferReveal) {
+        const failed = opts.onError;
+        close(); failed?.();
+      } else if (active()) {
         const el = overlay.querySelector('.wz-reader-loading');
         if (el) { el.className = 'wz-reader-error'; el.innerHTML = `${T('불러오지 못했어요.', 'Could not load.', '読み込めませんでした。')} <a href="${esc(url)}" target="_blank" rel="noopener">${T('새 탭에서 열기 →', 'Open in a new tab →', '新しいタブで開く →')}</a>`; }
       }
     } finally {
-      busy = false;
+      if (active()) busy = false;
     }
   }
 
