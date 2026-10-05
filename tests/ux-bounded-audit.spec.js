@@ -37,6 +37,72 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+for (const owned of [false, true]) {
+  test(`paid progress never replaces the server access check: owned=${owned}`, async ({ page }) => {
+    await page.addInitScript(owns => {
+      localStorage.setItem('5ft-book-progress-v1', JSON.stringify([
+        { key: 'ebook:paid:full', page: 9, total: 30, at: Date.now() },
+        { key: 'ebook:paid:preview', page: 3, total: 10, at: Date.now() },
+      ]));
+      window.MagDB.webzine.listPublished = async () => [];
+      window.MagDB.ebooks.listPublished = async () => [{ id: 'paid', slug: 'paid', title: 'Paid book', price: 4000 }];
+      window.MagDB.ebooks.myEntitlementIds = async () => new Set(owns ? ['paid'] : []);
+      // Simulate a revoked entitlement even when the shelf still shows a cached owned state.
+      window.MagDB.ebooks.getAccess = async () => { window.auditAccessChecks = (window.auditAccessChecks || 0) + 1; return { url: '/preview.pdf', entitled: false }; };
+    }, owned);
+    await page.goto('/books.html?issue=paid');
+    const action = page.locator(owned ? '.wz-own' : '.wz-preview');
+    await expect(action).toContainText(owned ? '9쪽' : '3쪽');
+    if (!owned) await expect(page.locator('.wz-buy')).toContainText('구매하기');
+    await page.evaluate(() => {
+      window.WebzineReader.open = async (url, title, options) => {
+        window.auditAccessOptions = { key: options.bookKey, url, hasPurchasePrompt: Boolean(options.cta) };
+        await options.onReady(); window.auditReadingReady = true;
+      };
+    });
+    await action.click();
+    await expect.poll(() => page.evaluate(() => window.auditReadingReady)).toBe(true);
+    expect(await page.evaluate(() => window.auditAccessChecks)).toBe(1);
+    expect(await page.evaluate(() => window.auditAccessOptions)).toEqual({ key: 'ebook:paid:preview', url: '/preview.pdf', hasPurchasePrompt: true });
+  });
+}
+
+for (const prefix of ['', 'en/', 'ja/']) {
+  test(`reading progress resumes the selected book and supports start over: ${prefix || 'ko'}`, async ({ page }, testInfo) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('5ft-book-progress-v1', JSON.stringify([{ key: 'webzine:issue-9:free', page: 108, total: 120, at: Date.now(), fingerprint: 'qa-edition' }]));
+      window.pdfjsLib = { GlobalWorkerOptions: {}, getDocument: () => ({ promise: Promise.resolve({ numPages: 120, fingerprints: ['qa-edition'], getPage: async () => ({
+        getViewport: ({ scale = 1 } = {}) => ({ width: 400 * scale, height: 600 * scale }),
+        render: ({ canvasContext, viewport }) => ({ promise: Promise.resolve().then(() => { canvasContext.fillStyle = '#ffe500'; canvasContext.fillRect(0, 0, viewport.width, viewport.height); }) }),
+      }), destroy() {} }) }) };
+      window.St = { PageFlip: class {
+        constructor(book, options) { this.index = options.startPage; this.events = {}; book.style.width = options.width + 'px'; book.style.height = options.height + 'px'; this.options = options; }
+        loadFromHTML(pages) { pages.forEach((p, i) => { p.style.width = this.options.width + 'px'; p.style.height = this.options.height + 'px'; p.style.display = i === this.index ? 'block' : 'none'; }); this.pages = pages; }
+        on(name, cb) { this.events[name] = cb; } getCurrentPageIndex() { return this.index; } getOrientation() { return 'portrait'; }
+        turnToPage(i) { this.index = i; this.pages.forEach((p, n) => { p.style.display = n === i ? 'block' : 'none'; }); this.events.flip?.(); } destroy() {}
+      } };
+    });
+    await page.goto(`/${prefix}books.html`);
+    await expect(page.locator('.wz-continue')).toContainText('Book 9');
+    await page.locator('.wz-continue').click();
+    const active = page.locator('.wz-dpage.on');
+    await expect(active.locator('h2')).toHaveText('Book 9');
+    await expect(active.locator('.wz-read')).toContainText('108');
+    await expect(active.locator('.wz-start-over')).toBeVisible();
+    await active.locator('.wz-read').click();
+    await expect(page.locator('[data-pageno]')).toHaveText('108 / 120');
+    if (testInfo.project.name.includes('mobile')) await page.setViewportSize({ width: 320, height: 740 });
+    await expect(page.locator('.wz-reader canvas').filter({ visible: true }).first()).toBeVisible();
+    expect(await page.locator('.wz-reader-tools').evaluate(el => { const r = el.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth + 1; })).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`resume-${prefix.replace('/', '') || 'ko'}.png`) });
+    await page.locator('[data-close]').click();
+    await active.locator('.wz-start-over').click();
+    await expect(page.locator('[data-pageno]')).toHaveText('1 / 120');
+    await page.locator('[data-close]').click();
+    await expect(active.locator('.wz-start-over')).toBeHidden();
+  });
+}
+
 // 공지 배너: 늘 한 줄로 흐르고 배너는 얇다. 움직임 줄이기 설정이면 흐르지 않고 줄바꿈해 전부 보인다(운영자 결정, 2026-10-05).
 for (const prefix of ['', 'en/', 'ja/']) {
   test(`global notice scrolls in a thin bar and persists dismissal: ${prefix || 'ko'}`, async ({ page }) => {
