@@ -20,7 +20,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/books.html</loc>
-    <lastmod>2026-10-05T13:26:22+09:00</lastmod>
+    <lastmod>2026-10-05T15:37:07+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -50,7 +50,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/authors.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:08:00+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -62,27 +62,33 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/terms.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/privacy.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/copyright.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/refund.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/stories/kaido-pasm-seoul.html</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/stories/shin-noguchi-playing-cards.html</loc>
@@ -476,7 +482,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/authors/5ftmag.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:08:00+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1619,7 +1625,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/books.html</loc>
-    <lastmod>2026-10-05T13:26:22+09:00</lastmod>
+    <lastmod>2026-10-05T15:37:07+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1649,7 +1655,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/authors.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:08:00+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1661,27 +1667,33 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/terms.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/privacy.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/copyright.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/refund.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/en/stories/kaido-pasm-seoul.html</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/stories/shin-noguchi-playing-cards.html</loc>
@@ -2075,7 +2087,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/authors/5ftmag.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:08:00+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -3218,7 +3230,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/books.html</loc>
-    <lastmod>2026-10-05T13:26:22+09:00</lastmod>
+    <lastmod>2026-10-05T15:37:07+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3248,7 +3260,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/authors.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:08:00+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3260,27 +3272,33 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/terms.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/privacy.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/copyright.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/refund.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:30:49+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/ja/stories/kaido-pasm-seoul.html</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/stories/shin-noguchi-playing-cards.html</loc>
@@ -3674,7 +3692,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/authors/5ftmag.html</loc>
-    <lastmod>2026-10-05T12:50:34+09:00</lastmod>
+    <lastmod>2026-10-05T14:08:00+09:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

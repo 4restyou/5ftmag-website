@@ -18,6 +18,7 @@ RSS: https://www.5ftmag.com/rss.xml
 
 ## 최근 기사
 
+- [도쿄의 독립 갤러리 KAIDO, 사진가 셋이 서울에 온다](https://www.5ftmag.com/stories/kaido-pasm-seoul.html): 도쿄 독립 사진 갤러리 KAIDO 의 오나카 코지, 사토 하루나, 후지타 스스무가 10월 10일 서울 서초 P/A/S/M 에서 오리지널 프린트 전시와 북 사이닝, 슬라이드 쇼를 연다. 참가비와 신청 없이 누구나 갈 수 있다. (5ft.mag 편집부, 2026-10-05)
 - [주머니에 넣고 다니는 신 노구치 사진집](https://www.5ftmag.com/stories/shin-noguchi-playing-cards.html): 신 노구치가 미국 트럼프 회사 Fulton's Playing Cards 와 사진 트럼프를 냈다. 사진을 거의 자르지 않고 카드마다 한 장씩 넣어, 주머니에 넣고 다니는 작은 사진집이 됐다. 후지산 상자, 오니 상자, 박 오니 상자 세 가지다. (5ft.mag 편집부, 2026-10-05)
 - [유화정 사진전 《얼굴들》, 사람과 동물과 풍경의 얼굴](https://www.5ftmag.com/stories/yu-hwajeong-faces.html): 10월 21일부터 27일까지 꼬메아미꼬 갤러리. 8년간 찍은 필름을 모은 유화정의 첫 개인전. 전시에 맞춰 첫 사진 에세이집도 독립출판으로 낸다. (5ft.mag 편집부, 2026-10-02)
 - [2026 / 10, 이달의 사진 전시](https://www.5ftmag.com/stories/oct-2026-exhibitions.html): 10월의 사진 전시는 우포늪, 도시, 지역 사진제와 큰 회고전을 따라 움직인다. 정봉채, 마틴 파, 유승호 〈BLUE HOUR〉, 유화정, 데보라 터브빌, 로저 발렌, 사진진주 2026까지. (5ft.mag 편집부, 2026-10-01)
@@ -47,7 +48,6 @@ RSS: https://www.5ftmag.com/rss.xml
 - [Leica Monopan 50, 라이카가 만든 첫 필름](https://www.5ftmag.com/stories/leica-monopan-50.html): 라이카 I 100주년에 맞춰 나온 라이카의 첫 35mm 흑백 필름. ISO 50 초미립자, 280 line pairs/mm, 근적외선까지 뻗는 적색 감도. 그런데 뚜껑을 열면 아비포트가 있다 — 가장 솔직한 리뷰. (Film Social Club, 2026-07-09)
 - [2026 / 7, 이달의 사진 전시](https://www.5ftmag.com/stories/jul-2026-exhibitions.html): 7월 안에 닫히는 세 장면과 여름을 건너가는 세 장면. 곽명우의 스무 해, 대구의 달, 온빛사진상 광주전, 그리고 부산에 문 연 국내 첫 랄프 깁슨 미술관까지. 일정과 동선을 한자리에. (5ft.mag 편집부, 2026-07-09)
 - [Kodak UltraMax 400, 가장 솔직한 필름](https://www.5ftmag.com/stories/18.html): 코닥 골드의 혈통을 잇지만 'Gold'라는 이름을 잃은 일반 소비자용 필름. 균형 잡힌 색과 자연스러운 피부 톤, Print Grain Index까지 짚으며 다시 보게 되는 울트라맥스 400. (Film Social Club, 2026-06-30)
-- [사진을 찍기만 하고, 보여주지 않은 사람](https://www.5ftmag.com/stories/vivian-maier.html): 평생 남의 집 아이를 돌보며 15만 장을 찍은 유모 비비안 마이어. 롤라이플렉스로 거리를 담고, 현상조차 안 한 채 떠난 사진가의 이야기. (Film Social Club, 2026-06-27)
 
 ## 지역별 현상소
 
