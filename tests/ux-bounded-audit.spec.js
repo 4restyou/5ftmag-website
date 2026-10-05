@@ -37,27 +37,31 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+// 공지 배너: 늘 한 줄로 흐르고 배너는 얇다. 움직임 줄이기 설정이면 흐르지 않고 줄바꿈해 전부 보인다(운영자 결정, 2026-10-05).
 for (const prefix of ['', 'en/', 'ja/']) {
-  test(`global notice expands, wraps and persists dismissal: ${prefix || 'ko'}`, async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
+  test(`global notice scrolls in a thin bar and persists dismissal: ${prefix || 'ko'}`, async ({ page }) => {
     await page.goto(`/${prefix}about.html`);
     const bar = page.locator('.announcement-bar');
     const body = bar.locator('.announcement-bar-text');
-    const expand = bar.locator('.announcement-bar-expand');
-    await expect(expand).toBeVisible();
-    const collapsed = await body.boundingBox();
-    expect(await body.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
-    await expand.focus();
-    await page.keyboard.press('Enter');
-    await expect(expand).toHaveAttribute('aria-expanded', 'true');
-    expect((await body.boundingBox()).height).toBeGreaterThan(collapsed.height);
+    await expect(body).toBeVisible();
+    expect(await body.evaluate(el => getComputedStyle(el).animationName)).toBe('announcement-marquee');
+    expect((await bar.boundingBox()).height).toBeLessThanOrEqual(40);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await page.keyboard.press('Enter');
-    await expect(expand).toHaveAttribute('aria-expanded', 'false');
     await bar.locator('.announcement-bar-close').click();
     await expect(bar).toHaveCount(0);
     await page.reload();
     await expect(bar).toHaveCount(0);
+  });
+
+  test(`global notice stops and wraps under reduced motion: ${prefix || 'ko'}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/${prefix}about.html`);
+    const body = page.locator('.announcement-bar-text');
+    await expect(body).toBeVisible();
+    expect(await body.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+    // 줄바꿈해 트랙 안에 전부 들어온다(옆으로 잘리지 않는다)
+    expect(await body.evaluate(el => el.scrollWidth <= el.parentElement.clientWidth + 1)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
 
