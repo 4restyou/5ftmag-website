@@ -411,6 +411,50 @@ test('first page preparation preserves the cover, supports cancellation, and rev
   await expect(active.locator('.wz-opening-status')).toBeHidden();
 });
 
+test('opening hides metadata before the book crosses it and restores the unchanged layout on close', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/books.html?issue=issue-0');
+  const active = page.locator('.wz-dpage.on');
+  await expect(active.locator('h2')).toHaveText('Book 0');
+  await active.locator('.wz-read').scrollIntoViewIfNeeded();
+  const original = await active.locator('.wz-meta').boundingBox();
+  await page.evaluate(() => {
+    window.WebzineReader = {
+      prepare() {},
+      async open(url, title, opts) {
+        window.auditReadOptions = opts;
+        await new Promise(resolve => { window.auditBeginOpening = resolve; });
+        await opts.onReady();
+        window.auditReaderReady = true;
+      },
+    };
+  });
+  await active.locator('.wz-read').click();
+  await expect(active.locator('.wz-meta')).toHaveCSS('visibility', 'visible');
+  await expect(active.locator('.wz-opening-status')).toBeVisible();
+  const preparing = await active.locator('.wz-meta').boundingBox();
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.evaluate(() => window.auditBeginOpening());
+  await expect(active).toHaveClass(/\bopening\b/);
+  for (const advance of [0, 100, 200, 200]) {
+    if (advance) await page.clock.runFor(advance);
+    await expect(active.locator('.wz-meta')).toHaveCSS('visibility', 'hidden');
+    await expect(active.locator('.wz-meta')).toHaveCSS('opacity', '0');
+    expect(await active.locator('.wz-meta').boundingBox()).toEqual(preparing);
+    expect(await page.evaluate(() => Boolean(window.auditReaderReady))).toBe(false);
+  }
+  await page.screenshot({ path: testInfo.outputPath('book-opening-no-overlap.png') });
+  await page.clock.runFor(60);
+  expect(await page.evaluate(() => window.auditReaderReady)).toBe(true);
+  await page.evaluate(() => window.auditReadOptions.onClose());
+  await page.clock.runFor(350);
+  await expect(active.locator('.wz-meta')).toHaveCSS('visibility', 'visible');
+  await expect(active.locator('.wz-meta')).toHaveCSS('opacity', '1');
+  expect(await active.locator('.wz-meta').boundingBox()).toEqual(original);
+  await expect(active.locator('.wz-read')).toBeFocused();
+});
+
 test('a delayed preview keeps the description visible, warms reading and shows loading feedback', async ({ page }) => {
   await page.addInitScript(() => {
     window.MagDB.webzine.listPublished = async () => [];
