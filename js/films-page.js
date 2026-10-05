@@ -82,7 +82,7 @@
   const resolveCanonicalCameraKey = (key) => libraryFilters.resolveCanonicalCameraKey(key);
   // 라이브러리 정렬. 기본은 Reader's Roll 사진 많은 순. 고른 값은 ?sort= 와 localStorage 에 남긴다
   // (모달을 닫으면 주소가 /films 로 돌아가므로 다시 올 때는 저장값을 쓴다).
-  const LIBRARY_SORTS = ['photos', 'name', 'iso'];
+  const LIBRARY_SORTS = ['photos', 'recent', 'name', 'iso'];
   const LIBRARY_SORT_KEY = '5ft_films_sort';
   let librarySort = (() => {
     let v = '';
@@ -92,8 +92,10 @@
   })();
   // slug → 승인된 Reader's Roll 사진 수 (updateReaderCounts 가 채운다)
   let photoCountBySlug = new Map();
+  // slug → 가장 최근 승인 사진의 등록 시각(ms). '최근 사진 순' 정렬에 쓴다 (updateReaderCounts 가 채운다)
+  let latestPhotoBySlug = new Map();
   const sortLibrary = (entries, favs = filmFavSlugs) =>
-    libraryFilters.sortLibrary(entries, favs, { mode: librarySort, photoCounts: photoCountBySlug });
+    libraryFilters.sortLibrary(entries, favs, { mode: librarySort, photoCounts: photoCountBySlug, latestPhotos: latestPhotoBySlug });
 
   const readerExport = window.FilmsReaderExport.create({
     getFilm: (filmKey) => filmsData[filmKey] || {},
@@ -171,8 +173,13 @@
     const select = document.getElementById('librarySort');
     if (!select) return;
     select.value = librarySort;
+    // 폰에선 정렬이 아이콘만 보이므로, 기본값(사진 많은 순)이 아니면 노란 점으로 알린다.
+    const dot = select.parentElement.querySelector('.library-sort-dot');
+    const syncDot = () => { if (dot) dot.hidden = librarySort === 'photos'; };
+    syncDot();
     select.addEventListener('change', () => {
       librarySort = LIBRARY_SORTS.includes(select.value) ? select.value : 'photos';
+      syncDot();
       try { localStorage.setItem(LIBRARY_SORT_KEY, librarySort); } catch (_) {}
       try {
         const u = new URL(location.href);
@@ -343,6 +350,24 @@
     });
   }
 
+  // 폰에서는 상단을 가볍게: 테마 띠와 바로가기 링크(제안·내 사진·좋아한 필름)를 목록 아래
+  // #libraryFoot 로 내린다. 노드를 옮기는 것이라 걸어 둔 클릭 처리는 그대로다. PC 는 원래 자리.
+  (function placeLibraryExtras() {
+    const mq = window.matchMedia('(max-width: 640px)');
+    const foot = document.getElementById('libraryFoot');
+    const band = document.getElementById('themeFilmBand');
+    const links = document.getElementById('libraryQuickLinks');
+    const head = document.querySelector('.films-section-head-library');
+    const left = document.querySelector('.library-toolbar-left');
+    if (!foot || !band || !links || !head || !left) return;
+    const place = () => {
+      if (mq.matches) foot.append(band, links);
+      else { head.before(band); left.prepend(links); }
+    };
+    mq.addEventListener('change', place);
+    place();
+  })();
+
   // 필름 카탈로그 — DB 우선, 정적 data/films.json fallback 및 보강.
   (async () => {
     try {
@@ -396,12 +421,15 @@
     const countPerSlug = new Map();
     const readerSearchPerSlug = new Map();
     const photoCounts = new Map();
+    const latestPhotos = new Map();
     for (const slug of Object.keys(filmsData)) {
       const film = filmsData[slug];
       const aliases = (film.aliases || []).concat([film.displayName, film.name]).filter(Boolean);
       const aliasSet = new Set(aliases.map(normalize));
       const matched = submissions.filter(s => aliasSet.has(normalize(s.film)));
       photoCounts.set(slug, matched.length);
+      const latest = Math.max(0, ...matched.map(s => Date.parse(s.createdAt || s.created_at || '') || 0));
+      if (latest) latestPhotos.set(slug, latest);
       if (matched.length > 0) {
         const rollState = buildReaderRollState(matched);
         const label = typeof window.ReaderRoll?.formatCardLabel === 'function'
@@ -440,9 +468,10 @@
       ctaEls.forEach(el => { el.textContent = fpT('컷 채우기 →', 'Add a frame →', '1コマ投稿する →'); });
     }
 
-    // 사진 수가 들어왔으니 '사진 많은 순' 이면 순서를 다시 잡는다 (첫 로드라 애니메이션 없이).
+    // 사진 수·최근 사진 시각이 들어왔으니 그 둘로 정렬 중이면 순서를 다시 잡는다 (첫 로드라 애니메이션 없이).
     photoCountBySlug = photoCounts;
-    if (librarySort === 'photos') applyLibrarySort({ animate: false });
+    latestPhotoBySlug = latestPhotos;
+    if (librarySort === 'photos' || librarySort === 'recent') applyLibrarySort({ animate: false });
     else applyLibraryFilter();
   }
 

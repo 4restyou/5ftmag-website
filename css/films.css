@@ -2418,6 +2418,35 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
 .library-view-toggle { margin-top: 20px; }
 .library-view-btn { min-width: 44px; min-height: 44px; }
 .library-view-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+/* 누르는 영역은 44px 로 두고, 보이는 회색 띠·흰 알약은 홈 토글(.mh-view-toggle)과 같은 높이로
+   그린다. 띠는 토글의 ::before, 선택 표시는 버튼의 ::before 가 맡는다. */
+.library-view-toggle { position: relative; padding: 0 3px; background: none; }
+.library-view-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 3px 0;
+  background: var(--bg-sub);
+  border-radius: 999px;
+}
+.library-view-toggle .library-view-btn {
+  position: relative;
+  z-index: 1;
+  background: none;
+  box-shadow: none;
+}
+.library-view-toggle .library-view-btn::before {
+  content: '';
+  position: absolute;
+  inset: 6px 0;
+  z-index: -1;
+  border-radius: 999px;
+  transition: background .15s, box-shadow .15s;
+}
+.library-view-toggle .library-view-btn.is-active::before {
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .library-view-toggle .library-view-btn.is-active::before { box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
 @media (max-width: 640px) {
   .library-view-toggle { width: 100%; max-width: 292px; display: flex; }
 }
@@ -2716,4 +2745,62 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
 @media (max-width: 640px) {
   .film-index { padding: 40px 16px 16px; }
   .film-index-grid { column-count: 2; column-gap: 16px; }
+}
+
+/* ── 폰: Library 상단 정리 ──
+   테마 띠와 바로가기 링크는 js/films-page.js 가 폰에서 목록 아래 #libraryFoot 로 옮긴다. */
+.library-quick-links { display: contents; }
+.library-sort-icon,
+.library-sort-dot { display: none; }
+.library-foot:empty { display: none; }
+@media (max-width: 640px) {
+  /* 소개 문단은 빼고 독자 사진 수 한 줄만 둔다. 수를 못 불러오면 줄째 숨긴다 */
+  .intro { padding: 14px 20px; }
+  .intro p:not(.intro-count) { display: none; }
+  .intro-count { margin-top: 0; }
+  .intro:has(.intro-count[hidden]) { display: none; }
+  /* 제목과 필름/사진 토글을 한 줄로 */
+  .films-section-head-library { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .films-section-head-library .films-section-title { margin: 0; }
+  .films-section-head-library .library-view-toggle { margin-top: 0; width: auto; flex: 0 1 200px; }
+  [data-library-view="films"] .library-toolbar-left { display: none; }
+  /* 검색·필터·정렬 아이콘은 한 줄, 종류 칩은 그 아래 한 줄 */
+  .library-toolbar { margin-top: 16px; gap: 10px; }
+  .library-toolbar-right { width: 100%; }
+  .library-toolbar-right > .ft-icon-btn { order: 1; }
+  /* 정렬은 아이콘만 보이고, 투명한 select 를 그 위에 겹쳐 폰의 기본 선택 창을 쓴다 */
+  .library-toolbar-right > .library-sort {
+    order: 2;
+    position: relative;
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text);
+    border-radius: 8px;
+  }
+  .library-toolbar .library-sort select {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    min-width: 0; padding: 0;
+    border: 0;
+    opacity: 0;
+  }
+  .library-sort-icon { display: block; pointer-events: none; }
+  .library-sort-dot:not([hidden]) {
+    display: block;
+    position: absolute; top: 8px; right: 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ffd400;
+    pointer-events: none;
+  }
+  .library-sort:focus-within { outline: 2px solid var(--text); outline-offset: 2px; }
+  .library-toolbar-right > .library-filter,
+  .library-toolbar-right > .library-photos-chips { order: 3; flex-basis: 100%; }
+  .library-toolbar-right > .library-toolbar-ms { order: 4; }
+  /* 목록 아래로 내려온 테마 띠와 바로가기 */
+  .library-foot { display: flex; flex-direction: column; gap: 12px; margin-top: 36px; }
+  .library-foot .theme-film-band { margin: 0; }
+  .library-foot .library-quick-links { display: flex; flex-wrap: wrap; gap: 0 18px; }
+  .library-foot .library-propose-btn,
+  .library-foot .library-mine-link { display: inline-flex; align-items: center; min-height: 44px; }
 }

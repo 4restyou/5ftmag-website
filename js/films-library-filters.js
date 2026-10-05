@@ -464,9 +464,9 @@
       }
     }
 
-    // mode: 'photos'(Reader's Roll 사진 많은 순, 기본) · 'name'(브랜드→이름) · 'iso'(낮은 순).
-    // 'photos'·'iso' 가 같으면 이름순으로 잇는다. photoCounts 는 slug → 사진 수 Map.
-    function sortLibrary(entries, filmFavSlugs, { mode = 'name', photoCounts = new Map() } = {}) {
+    // mode: 'photos'(Reader's Roll 사진 많은 순, 기본) · 'recent'(최근 사진 순) · 'name'(브랜드→이름) · 'iso'(낮은 순).
+    // 값이 같으면 이름순으로 잇는다. photoCounts 는 slug → 사진 수, latestPhotos 는 slug → 최근 사진 시각(ms) Map.
+    function sortLibrary(entries, filmFavSlugs, { mode = 'name', photoCounts = new Map(), latestPhotos = new Map() } = {}) {
       const isoOf = (film) => {
         const n = parseInt(String(film.iso || '').replace(/[^0-9].*$/, ''), 10);
         return Number.isFinite(n) ? n : Infinity;
@@ -478,6 +478,10 @@
         if (favA !== favB) return favA - favB;
         if (mode === 'photos') {
           const diff = (photoCounts.get(b[0]) || 0) - (photoCounts.get(a[0]) || 0);
+          if (diff !== 0) return diff;
+        } else if (mode === 'recent') {
+          // 사진이 없는 필름은 맨 뒤에서 이름순
+          const diff = (latestPhotos.get(b[0]) || 0) - (latestPhotos.get(a[0]) || 0);
           if (diff !== 0) return diff;
         } else if (mode === 'iso') {
           const diff = isoOf(fa) - isoOf(fb);
