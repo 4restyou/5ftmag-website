@@ -183,32 +183,13 @@ describe('PDF reader', () => {
     expect(onMetrics.mock.calls[0][0]).toEqual(expect.objectContaining({ access_ms: 123, libraries_ms: expect.any(Number), document_ms: expect.any(Number), setup_ms: expect.any(Number), visible_pages_ms: expect.any(Number), handoff_ms: expect.any(Number), total_ms: expect.any(Number), pages: 3, start_page: 1 }));
     expect(JSON.stringify(window.WebzineReader.recentProgress())).not.toContain('preview.pdf');
   });
-  it('uses the fixed public-only same-origin proxy for free production PDFs', async () => {
-    const { window } = await openReader({ url: 'https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/public/webzine/vol-21/source.pdf?v=1' });
-    expect(window.pdfjsLib.getDocument).toHaveBeenCalledWith(expect.objectContaining({ url: 'https://5ftmag.com/pdf/webzine/vol-21/source.pdf?v=1' }));
-    const config = readFileSync('netlify.toml', 'utf8');
-    expect(config).toContain('from = "/pdf/webzine/*"');
-    expect(config).toContain('to = "https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/public/webzine/:splat"');
-  });
   it.each([
+    'https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/public/webzine/vol-21/source.pdf?v=1',
     'https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/sign/ebook-pages/paid/full.pdf?token=private',
     'https://other.supabase.co/storage/v1/object/public/webzine/source.pdf',
     '/fixture.pdf',
-  ])('does not proxy protected or unrelated sources (%s)', async url => {
+  ])('preserves the original streaming source (%s)', async url => {
     const { window } = await openReader({ url });
     expect(window.pdfjsLib.getDocument).toHaveBeenCalledWith(expect.objectContaining({ url }));
-  });
-  it('falls back to the original public URL if the proxy is unavailable', async () => {
-    const { window } = await openReader();
-    window.document.querySelector('[data-close]').click();
-    const destroy = vi.fn();
-    window.pdfjsLib.getDocument.mockClear().mockReturnValueOnce({ promise: Promise.reject(new Error('Proxy unavailable')), destroy });
-    const url = 'https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/public/webzine/vol-21/source.pdf';
-    const onMetrics = vi.fn();
-    await window.WebzineReader.open(url, 'Free', { onMetrics });
-    expect(destroy).toHaveBeenCalledOnce();
-    expect(window.pdfjsLib.getDocument.mock.calls.map(([options]) => options.url)).toEqual(['https://5ftmag.com/pdf/webzine/vol-21/source.pdf', url]);
-    expect(onMetrics.mock.calls[0][0].transport).toBe('direct_fallback');
-    expect(window.document.querySelector('canvas')).not.toBeNull();
   });
 });

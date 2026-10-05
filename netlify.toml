@@ -552,13 +552,6 @@
   to = "/me.html"
   status = 200
 
-# Public PDFs use a same-origin proxy so PDF.js can read Accept-Ranges without CORS exposure.
-[[redirects]]
-  from = "/pdf/webzine/*"
-  to = "https://pucpqsfwqouqohwsvmnd.supabase.co/storage/v1/object/public/webzine/:splat"
-  status = 200
-  force = true
-
 # Supabase Storage 의 public 버킷 이미지 프록시.
 # 같은 사진을 100명이 봐도 Netlify edge 캐시가 답해 Supabase egress 가 폭증하지
 # 않게 한다. /i/reader/<path> → reader-submissions, /i/market/<path> →

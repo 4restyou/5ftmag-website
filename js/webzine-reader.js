@@ -17,16 +17,6 @@
   const PROGRESS_KEY = '5ft-book-progress-v1';
   const PROGRESS_TTL = 180 * 86400000;
   const validBookKey = key => typeof key === 'string' && /^(webzine|ebook):[a-z0-9-]{1,100}:(free|full|preview)$/.test(key);
-  function readingUrl(url) {
-    try {
-      const parsed = new URL(url, location.href), prefix = '/storage/v1/object/public/webzine/';
-      if (location.protocol === 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
-        && parsed.origin === 'https://pucpqsfwqouqohwsvmnd.supabase.co' && parsed.pathname.startsWith(prefix) && parsed.pathname.endsWith('.pdf')) {
-        return location.origin + '/pdf/webzine/' + parsed.pathname.slice(prefix.length) + parsed.search;
-      }
-    } catch (_) {}
-    return url;
-  }
   function recentProgress() {
     try {
       const entries = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '[]');
@@ -284,8 +274,7 @@
       if (!active()) return;
       metrics.libraries_ms = Math.round(performance.now() - started);
       const documentStarted = performance.now();
-      const source = readingUrl(url);
-      metrics.transport = source === url ? 'direct' : 'same_origin';
+      metrics.transport = 'direct';
       const pdfOptions = {
         isEvalSupported: false,
         useWasm: false,
@@ -294,17 +283,8 @@
         cMapPacked: true,
         standardFontDataUrl: PDFJS_BASE + 'standard_fonts/',
       };
-      let task = loadingTask = window.pdfjsLib.getDocument({ ...pdfOptions, url: source });
-      let doc;
-      try { doc = await task.promise; }
-      catch (error) {
-        if (!active() || source === url) throw error;
-        try { await task.destroy(); } catch (_) {}
-        if (!active()) return;
-        metrics.transport = 'direct_fallback';
-        task = loadingTask = window.pdfjsLib.getDocument({ ...pdfOptions, url });
-        doc = await task.promise;
-      }
+      loadingTask = window.pdfjsLib.getDocument({ ...pdfOptions, url });
+      const doc = await loadingTask.promise;
       if (!active()) return;
       pdfDoc = doc;
       metrics.document_ms = Math.round(performance.now() - documentStarted);
