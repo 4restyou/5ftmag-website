@@ -142,24 +142,15 @@
     l = Math.min(.88, Math.max(.18, l));
     return hex(hslToRgb(h, s, l));
   }
-  function pickColor(url) {
-    return new Promise((resolve) => {
-      if (!url) { resolve(null); return; }
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const aspect = (img.naturalWidth && img.naturalHeight) ? img.naturalWidth / img.naturalHeight : 0;
-        try {
-          const S = 48, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
-          const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, S, S);
-          const d = ctx.getImageData(0, 0, S, S).data;
-          const color = pickBase(d, S);
-          resolve({ color, accent: color ? pickAccent(d, S, color) : null, aspect });
-        } catch (_) { resolve({ color: null, accent: null, aspect }); }
-      };
-      img.onerror = () => resolve(null);
-      img.src = url;
-    });
+  function pickColor(img) {
+    const aspect = img.naturalWidth / img.naturalHeight;
+    try {
+      const S = 48, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+      const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, S, S);
+      const d = ctx.getImageData(0, 0, S, S).data;
+      const color = pickBase(d, S);
+      return { color, accent: color ? pickAccent(d, S, color) : null, aspect };
+    } catch (_) { return { color: null, accent: null, aspect }; }
   }
   // 배경이 밝으면 검은 글씨, 어두우면 흰 글씨
   function fgFor(h) {
@@ -174,6 +165,46 @@
   let detailTransition = 0;
   let shelfObserver = null, pendingSelection = null, releaseDetailFocus = null;
   let ownershipRequest = 0, ownershipSubscribed = false;
+
+  // 표지와 색 분석은 같은 이미지를 공유하고, 보이는 책과 이웃 책만 준비한다.
+  function prepareBook(i, priority = 'low') {
+    const it = issues[i], page = pages[i], row = rows[i];
+    if (!it || !page || !row) return;
+    const images = [row.querySelector('img'), page.querySelector('img')].filter(Boolean);
+    const img = images[0];
+    if (!img) return;
+    if (!it._coverPrepared) {
+      it._coverPrepared = true;
+      const analyze = () => {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+        const work = () => {
+          if (issues[i] !== it) return;
+          const c = pickColor(img);
+          setBookColor(i, c.color, c.aspect < 1.2 ? c.aspect : 0, c.accent);
+          if (!inDetail && markEls[i]?.classList.contains('on')) root.style.setProperty('--wz-mood', it._c);
+        };
+        if (window.requestIdleCallback) window.requestIdleCallback(work, { timeout: 1000 });
+        else setTimeout(work, 32);
+      };
+      img.addEventListener('load', analyze, { once: true });
+      if (img.complete && img.naturalWidth) analyze();
+    }
+    images.forEach(image => {
+      if (priority === 'high' || !image.hasAttribute('src')) image.fetchPriority = priority;
+      if (!image.hasAttribute('src')) {
+        image.addEventListener('error', () => {
+          image.removeAttribute('crossorigin'); image.src = image.dataset.cover;
+        }, { once: true });
+        image.src = image.dataset.cover;
+      }
+    });
+  }
+  function prepareNearby(i) {
+    for (let k = Math.max(0, i - 1); k <= Math.min(issues.length - 1, i + 1); k++) {
+      pages[k].classList.add('is-near');
+      prepareBook(k, k === i ? 'high' : 'low');
+    }
+  }
 
   function pubOf(it) {
     if (it._ebook) return it.kind === 'backissue' ? '5ft.mag' : T('S.P.C 사진첩', 'S.P.C Photobook', 'S.P.C 写真集');
@@ -220,7 +251,7 @@
   function rowMarkup(it, i) {
     const cu = coverUrl(it);
     const cover = cu
-      ? `<img src="${esc(cu)}" alt="" loading="lazy" />`
+      ? `<img data-cover="${esc(cu)}" alt="" crossorigin="anonymous" decoding="async" />`
       : `<span class="wz-plain"><b class="wz-foil">${esc(it.title)}</b><span class="wz-foil">${esc(pubOf(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</span></span>`;
     return `<div class="wz-book">
       <button class="wz-hit" type="button" aria-label="${esc(bookByline(it))} ${esc(it.title)}, ${accessLabel(it)}${T(' 소개 보기', ', view details', '、詳細を見る')}"></button>
@@ -242,7 +273,7 @@
   function pageMarkup(it, i) {
     const cu = coverUrl(it);
     const front = cu
-      ? `<img src="${esc(cu)}" alt="${esc(it.title)}${T(' 표지', ' cover', ' 表紙')}" loading="lazy" />`
+      ? `<img data-cover="${esc(cu)}" alt="${esc(it.title)}${T(' 표지', ' cover', ' 表紙')}" crossorigin="anonymous" decoding="async" />`
       : `<span class="wz-plain2"><b class="wz-foil">${esc(it.title)}</b><span class="wz-foil">${esc(pubOf(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</span></span>`;
     const side = it._ebook ? '' : `<div class="wz-side-acts">
         <button type="button" class="wz-side-act wz-like" aria-pressed="false">♡ <span>${T('좋아요', 'Like', 'いいね')}</span></button>
@@ -267,6 +298,7 @@
         <div class="wz-acts">${actsMarkup(it)}</div>
         ${isPaid(it) ? `<p class="wz-access-note">${T('미리보기는 일부 페이지만 제공됩니다. 전자책 열람권을 구매하면 전체를 읽을 수 있으며, 실물 도서는 포함되지 않습니다.', 'The preview includes selected pages. Ebook reading access unlocks the full edition; a printed book is not included.', 'プレビューは一部のページのみです。電子書籍の閲覧権で全ページを読めます。紙の本は含まれません。')}</p>` : ''}
         ${side}
+        <p class="wz-opening-status" role="status" hidden>${T('불러오는 중…', 'Loading…', '読み込み中…')}</p>
       </div>
     </div>`;
   }
@@ -317,12 +349,10 @@
       return {
         stage,
         entry: -Math.max(0, stage.offsetTop - (parseFloat(style.paddingTop) || 0)),
-        exit: Math.max(0, page.clientHeight - stage.offsetTop - stage.offsetHeight - (parseFloat(style.paddingBottom) || 0)),
       };
     });
-    positions.forEach(({ stage, entry, exit }) => {
+    positions.forEach(({ stage, entry }) => {
       stage.style.setProperty('--wz-entry-shift', entry + 'px');
-      stage.style.setProperty('--wz-exit-shift', exit + 'px');
     });
   }
 
@@ -333,10 +363,11 @@
   }
   function activateDetailPage(i) {
     current = i;
+    prepareNearby(i);
     pages.forEach((page, k) => {
       page.toggleAttribute('inert', k !== i);
       page.classList.toggle('on', k === i);
-      if (k !== i) page.classList.remove('settled');
+      if (k !== i) { page.classList.remove('settled'); resetOpening(page); }
     });
     updateSelection(i);
     detail.setAttribute('aria-labelledby', `wz-book-title-${i}`);
@@ -347,12 +378,13 @@
   function syncDetailPage() {
     if (!inDetail || closing) return;
     const viewport = detail.getBoundingClientRect();
-    const visibleHeight = page => {
+    let best = current, height = 0;
+    pages.forEach((page, i) => {
       const r = page.getBoundingClientRect();
-      return Math.max(0, Math.min(r.bottom, viewport.bottom) - Math.max(r.top, viewport.top));
-    };
-    const active = pages.reduce((best, page) => visibleHeight(page) > visibleHeight(best) ? page : best, pages[current]);
-    if (visibleHeight(active) > 0 && Number(active.dataset.i) !== current) activateDetailPage(Number(active.dataset.i));
+      const visible = Math.max(0, Math.min(r.bottom, viewport.bottom) - Math.max(r.top, viewport.top));
+      if (visible > height || (visible === height && i === current)) { height = visible; best = i; }
+    });
+    if (height > 0 && best !== current) activateDetailPage(best);
   }
   function openDetail(i, viaKeyboard) {
     if (closing && inDetail) return;
@@ -365,7 +397,7 @@
     updateSelection(i);
     rows.forEach((r, k) => r.classList.toggle('lifted', k === i));
     // 눕힌 자세로 되돌린 뒤(전환 없이) 한 프레임 뒤에 일어선다. 그냥 클래스만 바꾸면 되돌아가던 전환이 반쯤에서 뒤집혀 순간이동처럼 보인다
-    pages.forEach(p => { p.classList.add('reset'); p.classList.remove('on', 'settled'); });
+    pages.forEach(p => { p.classList.add('reset'); p.classList.remove('on', 'settled', 'is-near'); });
     void pagesEl.offsetWidth;
     pages.forEach(p => p.classList.remove('reset'));
     document.body.classList.add('wz-mode-detail');
@@ -383,6 +415,7 @@
   function closeDetail(viaKeyboard) {
     if (!inDetail || closing) return;
     closing = true;
+    resetOpening(pages[current]);
     const transition = ++detailTransition;
     const returnIndex = current;
     const returnRow = rows[returnIndex];
@@ -415,10 +448,15 @@
       detail.classList.remove('on', 'closing'); detail.setAttribute('aria-hidden', 'true');
       detail.setAttribute('inert', '');
       closing = false;
+      pages.forEach(p => p.classList.remove('is-near'));
     }, 1050);
   }
 
   const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  function resetOpening(page) {
+    page.classList.remove('opening'); page.removeAttribute('aria-busy');
+    page.querySelector('.wz-opening-status').hidden = true;
+  }
   function openBookThen(page, go) {
     if (page.classList.contains('opening')) return;
     if (REDUCED) { go(); return; }
@@ -432,14 +470,17 @@
       page.style.setProperty('--shift-y', Math.round(window.innerHeight / 2 - (r.top + r.height / 2)) + 'px');
     }
     page.classList.add('opening');
+    page.setAttribute('aria-busy', 'true');
+    page.querySelector('.wz-opening-status').hidden = false;
     // 표지가 열리기 시작하는 .3s 뒤, 반쯤 열려 첫 페이지가 드러나는 때(.55s)에 곧바로 이어 간다
     setTimeout(go, 550);
   }
   // 뒤로 가기로 돌아왔을 때(bfcache) 표지가 열린 채 남지 않게
   // 뷰어에서 뒤로 돌아왔을 때(bfcache): 어두운 막을 걷고, 열려 있던 표지를 다시 덮는다
-  window.addEventListener('pageshow', () => {
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
     document.querySelectorAll('.wz-pagefade').forEach(n => { n.classList.add('out'); setTimeout(() => n.remove(), 500); });
-    setTimeout(() => pages.forEach(p => p.classList.remove('opening')), 150);
+    setTimeout(() => pages.forEach(resetOpening), 150);
   });
 
   function setLikeBtn(btn, on) {
@@ -502,7 +543,7 @@
       m.dataset.pub = pubOf(it); m.dataset.title = it.title + (it.issue_label ? ' ' + it.issue_label : '');
       m.addEventListener('mouseenter', () => hoverMark(i));
       m.addEventListener('click', () => {
-        if (inDetail) page.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+        if (inDetail) { prepareNearby(i); page.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }
         else { pendingSelection = i; updateSelection(i); row.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }); }
       });
       marks.appendChild(m);
@@ -523,6 +564,18 @@
     updateSelection(0);
     issues.forEach((it, i) => setBookColor(i, it._c, 0));
     observeShelf();
+    const coverObserver = new IntersectionObserver(entries => {
+      if (inDetail) return;
+      entries.forEach(en => { if (en.isIntersecting) prepareBook(Number(en.target.dataset.i), 'high'); });
+    }, { rootMargin: '240px 0px', threshold: 0 });
+    rows.forEach(row => coverObserver.observe(row));
+    const nearObserver = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        en.target.classList.toggle('is-near', inDetail && en.isIntersecting);
+        if (inDetail && en.isIntersecting) prepareBook(Number(en.target.dataset.i));
+      });
+    }, { root: detail, rootMargin: '600px 0px', threshold: 0 });
+    pages.forEach(page => nearObserver.observe(page));
 
     hits.forEach((h, i) => {
       h.addEventListener('click', (e) => { e.stopPropagation(); openDetail(i, e.detail === 0); });
@@ -537,12 +590,17 @@
         a.addEventListener('click', (e) => {
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;   // 새 탭 열기는 그대로
           e.preventDefault();
-          const closed = () => page.classList.remove('opening');
+          if (page.classList.contains('opening')) return;
+          const transition = detailTransition;
+          const active = () => inDetail && !closing && detailTransition === transition && page.classList.contains('on');
+          const closed = () => resetOpening(page);
+          if (!a.classList.contains('wz-buy') && !a.classList.contains('wz-own')) window.WebzineReader?.prepare?.();
           // 다른 페이지(ebook-read)로 넘어갈 때: 어두운 막을 덮고, 돌아올 때 이 책의 소개 화면으로 오게 주소에 책을 적어 둔다
           const leaveTo = (href) => {
+            if (!active()) { closed(); return; }
             const fade = document.createElement('div'); fade.className = 'wz-pagefade'; document.body.appendChild(fade);
             try { history.replaceState(null, '', 'books.html?issue=' + encodeURIComponent(it.slug)); } catch (_) {}
-            setTimeout(() => { location.href = href; }, 430);
+            setTimeout(() => { if (active()) location.href = href; else fade.remove(); }, 430);
           };
           let go;
           if (a.classList.contains('wz-read') && window.WebzineReader) {
@@ -553,6 +611,7 @@
             const accessP = db().ebooks.getAccess(it.slug).catch(() => null);
             go = async () => {
               const acc = await accessP;
+              if (!active()) { closed(); return; }
               if (!acc || !acc.url) { leaveTo(a.href); return; }
               const buyHref = i18n.url('/ebook-read.html') + '?slug=' + encodeURIComponent(it.slug) + '&buy=1';
               const label = T('전자책 열람권', 'Ebook reading access', '電子書籍の閲覧権') + (isPaid(it) ? ' · ' + won(it.price) : '');
@@ -564,7 +623,7 @@
           } else {
             go = () => leaveTo(a.href);
           }
-          openBookThen(page, go);
+          openBookThen(page, () => { if (active()) go(); else closed(); });
         });
       });
       // 세운 책을 눌러도 첫 줄(읽기, 유료는 미리보기)과 같다
@@ -649,21 +708,22 @@
   async function load() {
     for (let i = 0; i < 50; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
     let failed = false;
-    let webzineIssues = [];
-    try { webzineIssues = await db().webzine.listPublished({ strict: true }); } catch (_) { webzineIssues = []; failed = true; }
-    if (!Array.isArray(webzineIssues)) webzineIssues = [];
-
-    let ebookItems = [];
-    try {
-      const eb = (await db().ebooks.listPublished({ strict: true })) || [];
-      ebookItems = eb.map((e) => ({
-        id: 'ebook-' + e.id, _ebook: true, _pid: e.id, slug: e.slug, title: e.title, kind: e.kind,
-        cover_url: e.cover_image || '',
-        spine_color: e.spine_color || '', foil_color: e.foil_color || '',
-        description: e.description || e.excerpt || '',
-        issue_label: '', price: e.price, created_at: e.created_at, author: e.author, binding: e.binding,
-      }));
-    } catch (_) { ebookItems = []; failed = true; }
+    const results = await Promise.allSettled([
+      Promise.resolve().then(() => db().webzine.listPublished({ strict: true })),
+      Promise.resolve().then(() => db().ebooks.listPublished({ strict: true })),
+    ]);
+    const [webzines, ebooks] = results.map(result => {
+      if (result.status === 'fulfilled' && Array.isArray(result.value)) return result.value;
+      failed = true; return [];
+    });
+    const webzineIssues = webzines;
+    const ebookItems = ebooks.map((e) => ({
+      id: 'ebook-' + e.id, _ebook: true, _pid: e.id, slug: e.slug, title: e.title, kind: e.kind,
+      cover_url: e.cover_image || '',
+      spine_color: e.spine_color || '', foil_color: e.foil_color || '',
+      description: e.description || e.excerpt || '',
+      issue_label: '', price: e.price, created_at: e.created_at, author: e.author, binding: e.binding,
+    }));
     if (failed && !webzineIssues.length && !ebookItems.length) { renderLoadError(); return; }
 
     // 유무료·시즌 구분 없이 올린 순서. 최신이 위
@@ -681,22 +741,13 @@
       });
     }
 
-    try { favSet = await db().favorites.idsForType('webzine'); } catch (_) { favSet = new Set(); }
-    pages.forEach((p, i) => { const b = p.querySelector('.wz-like'); if (b) setLikeBtn(b, favSet.has(issues[i].id)); });
+    Promise.resolve().then(() => db().favorites.idsForType('webzine')).then(ids => {
+      favSet = ids;
+      pages.forEach((p, i) => { const b = p.querySelector('.wz-like'); if (b) setLikeBtn(b, favSet.has(issues[i].id)); });
+    }).catch(() => {});
 
     const slug = new URLSearchParams(location.search).get('issue');
     if (slug) { const i = issues.findIndex(x => x.slug === slug); if (i >= 0) openDetail(i); }
-
-    issues.forEach((it, i) => {
-      const cu = coverUrl(it);
-      if (!cu) return;
-      pickColor(cu).then(c => {
-        if (!c) return;
-        // 표지 비율(가로/세로)로 책 가로를 잡는다. 세로 사진첩은 좁고 길게, A판은 그대로
-        setBookColor(i, c.color, (c.aspect && isFinite(c.aspect) && c.aspect < 1.2) ? c.aspect : 0, c.accent);
-        if (!inDetail && markEls[i] && markEls[i].classList.contains('on')) root.style.setProperty('--wz-mood', issues[i]._c);
-      });
-    });
   }
   load();
 })();

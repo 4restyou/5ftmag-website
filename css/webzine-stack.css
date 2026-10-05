@@ -214,7 +214,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-stage3d { position: relative; perspective: 1600px; perspective-origin: 50% 45%; display: grid; place-items: center; min-height: calc(var(--H) + 40px); }
 .wz-sbook {
   /* 누운 자세: 목록과 같다. rotateZ(-90) 으로 책등을 아래로 돌린 뒤 rotateX(84) 로 눕히면 책등이 앞을 보고 표지가 위로 간다(목록의 -6deg 시점 포함) */
-  --ry: 0deg; --rx: 84deg; --rz: -90deg; --ty: 40px;
+  --ry: 0deg; --rx: 84deg; --rz: -90deg; --ty: 0px;
   position: relative; width: var(--W); height: var(--H); transform-style: preserve-3d;
   transform: translateY(var(--ty)) rotateY(var(--ry)) rotateX(var(--rx)) rotateZ(var(--rz)) scale(var(--sc, 1));
   transition: transform var(--wz-t2) var(--wz-e2);
@@ -234,21 +234,21 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   @media (prefers-reduced-motion: no-preference) {
     .wz-detail { scroll-snap-type: none; }
     .wz-dpage { view-timeline: --wz-book block; }
-    .wz-dpage:not(.opening) .wz-sbook {
+    .wz-detail.on:not(.closing) .wz-dpage.is-near:not(.opening) .wz-sbook {
       animation: wzBookScrollPose linear both;
       animation-duration: auto;
       animation-timeline: --wz-book;
       animation-range: cover 0% cover 100%;
       transition: none;
     }
-    .wz-dpage .wz-stage3d {
+    .wz-detail.on:not(.closing) .wz-dpage.is-near:not(.opening) .wz-stage3d {
       animation: wzBookScrollTravel linear both;
       animation-duration: auto;
       animation-timeline: --wz-book;
       animation-range: cover 0% cover 100%;
       transition: none;
     }
-    .wz-dpage .wz-sshadow {
+    .wz-detail.on:not(.closing) .wz-dpage.is-near:not(.opening) .wz-sshadow {
       animation: wzBookScrollShadow linear both;
       animation-duration: auto;
       animation-timeline: --wz-book;
@@ -264,17 +264,17 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   }
 }
 @keyframes wzBookScrollPose {
-  entry 0% { transform: translateY(40px) rotateY(0deg) rotateX(84deg) rotateZ(-90deg) scale(.96); }
+  entry 0% { transform: translateY(0px) rotateY(0deg) rotateX(84deg) rotateZ(-90deg) scale(.96); }
   entry 85%, exit 15% { transform: translateY(0px) rotateY(30deg) rotateX(0deg) rotateZ(0deg) scale(1); }
-  exit 100% { transform: translateY(40px) rotateY(0deg) rotateX(84deg) rotateZ(-90deg) scale(.96); }
+  exit 100% { transform: translateY(0px) rotateY(0deg) rotateX(84deg) rotateZ(-90deg) scale(.96); }
 }
 @keyframes wzBookScrollTravel {
   entry 0% { transform: translateY(var(--wz-entry-shift, 0px)); }
   entry 85%, exit 15% { transform: translateY(0px); }
-  exit 100% { transform: translateY(var(--wz-exit-shift, 0px)); }
+  exit 100% { transform: translateY(0px); }
 }
 @keyframes wzBookScrollShadow {
-  entry 0%, exit 100% { opacity: 0; transform: translateY(24px) scaleX(.6); }
+  entry 0%, exit 100% { opacity: 0; transform: translateY(0px) scaleX(.6); }
   entry 85%, exit 15% { opacity: .8; transform: translateY(0px) scaleX(1); }
 }
 .wz-f { position: absolute; backface-visibility: hidden; overflow: hidden; }
@@ -300,7 +300,8 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 /* 면지는 뒤집힌 면이라 숨김 처리에 기대지 않고, 표지가 90도를 넘긴 뒤에만 보인다(닫혀 있을 땐 앞표지 위로 비치던 것) */
 .wz-f-inside { visibility: hidden; transition: visibility 0s; }
 .wz-dpage.opening .wz-f-inside { visibility: visible; transition-delay: .52s; }
-.wz-dpage.opening .wz-meta { opacity: 0; transform: translateX(12px); }
+.wz-dpage.opening .wz-acts { pointer-events: none; }
+.wz-opening-status { position: absolute; top: 100%; left: 0; margin: 10px 0 0; font-size: 13px; color: inherit; }
 .wz-meta { transition: opacity .3s ease, transform .3s ease; }
 /* 표지가 반쯤 열려 첫 페이지가 드러나는 순간부터 리더가 겹쳐 떠오른다(표지는 그 아래서 마저 열린다) */
 .wz-reader { animation: wzReaderIn .55s cubic-bezier(.3, 0, .2, 1) both; }
@@ -342,7 +343,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-f-fore::after, .wz-f-top::after, .wz-f-bottom::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, .1), rgba(0, 0, 0, .02) 30%, rgba(0, 0, 0, .3)); }
 
 /* 소개 */
-.wz-meta { max-width: 480px; }
+.wz-meta { position: relative; max-width: 480px; }
 .wz-meta .wz-kind { display: inline-block; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; padding: 5px 10px; border: 1px solid color-mix(in srgb, var(--wz-fg) 45%, transparent); margin-bottom: 18px; }
 .wz-meta h2 { margin: 0 0 6px; font-size: 30px; font-weight: var(--fw-heading); letter-spacing: 0; line-height: 1.2; word-break: keep-all; overflow-wrap: anywhere; }
 .wz-book-info, .wz-access-note { margin: 12px 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }

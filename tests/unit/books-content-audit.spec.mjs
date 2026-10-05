@@ -165,7 +165,7 @@ describe('U04 selection and observer ownership', () => {
     Object.defineProperty(page, 'clientHeight', { get: () => 900 });
     doc.querySelector('.wz-hit').click();
     expect(stage.style.getPropertyValue('--wz-entry-shift')).toBe('-130px');
-    expect(stage.style.getPropertyValue('--wz-exit-shift')).toBe('145px');
+    expect(stage.style.getPropertyValue('--wz-exit-shift')).toBe('');
     expect(page.querySelector('.wz-meta').style.transform).toBe('');
     const reads = top.mock.calls.length;
     doc.querySelector('#wzDetail').dispatchEvent(new window.Event('scroll'));

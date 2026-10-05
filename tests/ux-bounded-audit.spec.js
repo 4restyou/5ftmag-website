@@ -153,6 +153,8 @@ test('book motion follows scroll, reverses exactly, and leaves the description i
   expect(upright.pose[5]).toBeCloseTo(1, 3);
   expect(upright.travel).toBeCloseTo(0, 2);
   await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 1');
+  const animatedBooks = await page.locator('.wz-sbook').evaluateAll(books => books.filter(book => getComputedStyle(book).animationName === 'wzBookScrollPose').length);
+  expect(animatedBooks).toBeLessThanOrEqual(4);
   await page.screenshot({ path: testInfo.outputPath('book-scroll-reading.png') });
   const stageImage = await next.locator('.wz-stage3d').screenshot();
   const colorCount = await page.evaluate(async base64 => {
@@ -180,8 +182,13 @@ test('book motion follows scroll, reverses exactly, and leaves the description i
   expect(await next.locator('.wz-sbook').evaluate(el => getComputedStyle(el).animationName)).toBe('wzBookScrollPose');
   await page.locator('#wzDetail').evaluate((el, top) => { el.scrollTop = top; }, geometry.top + geometry.height - travel * .5);
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-  const leaving = await next.locator('.wz-sbook').evaluate(el => Array.from(new DOMMatrixReadOnly(getComputedStyle(el).transform).toFloat64Array()));
-  expect(leaving[5]).toBeLessThan(.9);
+  const leaving = await next.evaluate(el => ({
+    pose: Array.from(new DOMMatrixReadOnly(getComputedStyle(el.querySelector('.wz-sbook')).transform).toFloat64Array()),
+    travel: new DOMMatrixReadOnly(getComputedStyle(el.querySelector('.wz-stage3d')).transform).m42,
+  }));
+  expect(leaving.pose[5]).toBeLessThan(.9);
+  expect(leaving.pose[13]).toBeCloseTo(0, 3);
+  expect(leaving.travel).toBeCloseTo(0, 3);
   await page.screenshot({ path: testInfo.outputPath('book-scroll-exit.png') });
 });
 
@@ -192,6 +199,105 @@ test('reduced motion keeps the book upright without scroll animation', async ({ 
   await expect(active.locator('h2')).toHaveText('Book 1');
   expect(await active.locator('.wz-sbook').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
   expect(await active.locator('.wz-meta').evaluate(el => getComputedStyle(el).transform)).toBe('none');
+});
+
+test('catalog requests overlap and a delayed favorites response does not block a linked book', async ({ page }) => {
+  await page.addInitScript(() => {
+    const catalog = window.MagDB.webzine.listPublished;
+    window.auditCatalog = [];
+    window.MagDB.webzine.listPublished = () => new Promise(resolve => {
+      window.auditCatalog.push('webzine');
+      window.auditFinishCatalog = async () => resolve(await catalog());
+    });
+    window.MagDB.ebooks.listPublished = async () => { window.auditCatalog.push('ebooks'); return []; };
+    window.MagDB.favorites.idsForType = () => new Promise(() => {});
+  });
+  await page.goto('/books.html?issue=issue-8');
+  await expect.poll(() => page.evaluate(() => window.auditCatalog)).toEqual(['webzine', 'ebooks']);
+  await page.evaluate(() => window.auditFinishCatalog());
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 8');
+  await expect(page.locator('.wz-dpage.on .wz-meta')).toBeVisible();
+});
+
+for (const failing of ['webzine', 'ebooks']) {
+  test(`catalog failure preserves the other published source: ${failing}`, async ({ page }) => {
+    await page.addInitScript(source => {
+      window.MagDB.ebooks.listPublished = async () => [{ id: 'paid', slug: 'paid', title: 'Paid book', price: 4000 }];
+      window.MagDB[source].listPublished = () => { throw new Error('Catalog offline'); };
+    }, failing);
+    await page.goto('/books.html');
+    await expect(page.locator('.wz-row')).toHaveCount(failing === 'webzine' ? 1 : 12);
+    await expect(page.locator('[data-state-action="retry-books"]')).toHaveCount(0);
+  });
+}
+
+test('failed catalog sources show a retry instead of leaving an empty loading screen', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.MagDB.webzine.listPublished = window.MagDB.ebooks.listPublished = () => { throw new Error('Catalog offline'); };
+  });
+  await page.goto('/books.html');
+  await expect(page.locator('[data-state-action="retry-books"]')).toBeVisible();
+  await expect(page.locator('.wz-row')).toHaveCount(0);
+});
+
+test('only nearby covers load and a direct jump prepares the destination without fetching every cover', async ({ page }) => {
+  const requested = new Set();
+  await page.route('**/audit-covers/*', async route => {
+    requested.add(new URL(route.request().url()).pathname);
+    await route.fulfill({ path: 'img/favicon/icon-192.png', contentType: 'image/png' });
+  });
+  await page.addInitScript(() => {
+    const catalog = window.MagDB.webzine.listPublished;
+    window.MagDB.webzine.listPublished = async () => (await catalog()).map((it, i) => ({ ...it, cover_url: '/audit-covers/' + i + '.png' }));
+  });
+  await page.goto('/books.html?issue=issue-8');
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 8');
+  await expect.poll(() => page.locator('.wz-dpage.on img').evaluate(img => img.naturalWidth)).toBeGreaterThan(0);
+  await page.waitForTimeout(150);
+  expect(requested.size).toBeLessThanOrEqual(3);
+  expect(requested.has('/audit-covers/8.png')).toBe(true);
+  expect(requested.has('/audit-covers/0.png')).toBe(false);
+  await expect(page.locator('.wz-dpage').nth(8).locator('img')).toHaveAttribute('fetchpriority', 'high');
+  await page.locator('#wzDetail').evaluate(el => { el.scrollTop = el.querySelectorAll('.wz-dpage')[2].offsetTop; });
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 2');
+  await expect.poll(() => page.locator('.wz-dpage.on img').evaluate(img => img.naturalWidth)).toBeGreaterThan(0);
+  expect(requested.has('/audit-covers/2.png')).toBe(true);
+  expect(requested.size).toBeLessThanOrEqual(6);
+  expect(await page.locator('.wz-sbook').evaluateAll(books => books.filter(book => getComputedStyle(book).animationName === 'wzBookScrollPose').length)).toBeLessThanOrEqual(4);
+});
+
+test('a delayed preview keeps the description visible, warms reading and shows loading feedback', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.MagDB.webzine.listPublished = async () => [];
+    window.MagDB.ebooks.listPublished = async () => [{ id: 'paid', slug: 'paid', title: 'Paid book', price: 4000, description: 'The description stays here.' }];
+    window.MagDB.ebooks.getAccess = () => new Promise(resolve => { window.auditFinishAccess = resolve; });
+  });
+  await page.goto('/books.html?issue=paid');
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Paid book');
+  await page.evaluate(() => {
+    window.WebzineReader.prepare = () => { window.auditReaderWarm = true; };
+    window.WebzineReader.open = (_url, _title, options) => { window.auditPreviewOpened = true; window.auditClosePreview = options.onClose; };
+  });
+  await page.locator('.wz-preview').click();
+  expect(await page.evaluate(() => window.auditReaderWarm)).toBe(true);
+  await expect(page.locator('.wz-opening-status')).toBeVisible();
+  await page.waitForTimeout(650);
+  await expect(page.locator('.wz-meta')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.wz-meta')).toHaveCSS('transform', 'none');
+  await expect(page.locator('.wz-dpage')).toHaveAttribute('aria-busy', 'true');
+  await page.evaluate(() => window.auditFinishAccess({ url: '/preview.pdf', entitled: false }));
+  await expect.poll(() => page.evaluate(() => window.auditPreviewOpened)).toBe(true);
+  await page.evaluate(() => window.auditClosePreview());
+  await expect(page.locator('.wz-opening-status')).toBeHidden();
+  await expect(page.locator('.wz-dpage')).not.toHaveAttribute('aria-busy');
+  await page.evaluate(() => { window.auditPreviewOpened = false; });
+  await page.locator('.wz-preview').click();
+  await page.waitForTimeout(650);
+  await page.getByRole('button', { name: '목록으로 돌아가기', exact: true }).click();
+  await page.evaluate(() => window.auditFinishAccess({ url: '/preview.pdf', entitled: false }));
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => window.auditPreviewOpened)).toBe(false);
+  await expect(page.locator('.wz-opening-status')).toBeHidden();
 });
 
 for (const [prefix, access, preview, purchase, read, purchased] of [

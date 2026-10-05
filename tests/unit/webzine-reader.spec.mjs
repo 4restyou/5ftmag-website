@@ -33,6 +33,14 @@ async function openReader({ total = 3, orientation = 'portrait', cta = true } = 
 }
 
 describe('PDF reader', () => {
+  it('prepares dependencies without opening the reader or requesting a PDF', async () => {
+    const { window } = await openReader();
+    window.document.querySelector('[data-close]').click();
+    window.pdfjsLib.getDocument.mockClear();
+    await window.WebzineReader.prepare();
+    expect(window.pdfjsLib.getDocument).not.toHaveBeenCalled();
+    expect(window.document.querySelector('.wz-reader')).toBeNull();
+  });
   it('keeps the ending note hidden until the final page, including navigating back', async () => {
     const { note, flip, window } = await openReader();
     expect(note.hidden).toBe(true);
