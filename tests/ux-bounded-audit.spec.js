@@ -104,6 +104,96 @@ test('visual bookshelf preserves marker navigation, keyboard access and detail r
   await expect(active).toHaveCount(1);
 });
 
+test('book motion follows scroll, reverses exactly, and leaves the description in normal flow', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/books.html?issue=issue-0');
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 0');
+  expect(await page.evaluate(() => CSS.supports('animation-timeline: view()'))).toBe(true);
+  const next = page.locator('.wz-dpage').nth(1);
+  const geometry = await next.evaluate(el => ({ top: el.offsetTop, height: el.offsetHeight, viewport: document.querySelector('#wzDetail').clientHeight }));
+  const travel = Math.min(geometry.height, geometry.viewport);
+  async function sample(visible) {
+    const scroll = geometry.top - geometry.viewport + travel * visible;
+    await page.locator('#wzDetail').evaluate((el, top) => { el.scrollTop = top; }, scroll);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    return next.evaluate(el => {
+      const stage = el.querySelector('.wz-stage3d');
+      const meta = el.querySelector('.wz-meta');
+      const book = el.querySelector('.wz-sbook');
+      const pose = new DOMMatrixReadOnly(getComputedStyle(book).transform);
+      const move = new DOMMatrixReadOnly(getComputedStyle(stage).transform);
+      return {
+        pose: Array.from(pose.toFloat64Array()), travel: move.m42,
+        metaTop: meta.getBoundingClientRect().top - el.getBoundingClientRect().top,
+        metaTransform: getComputedStyle(meta).transform,
+        transition: getComputedStyle(book).transitionDuration,
+        timeline: getComputedStyle(book).animationTimeline,
+      };
+    });
+  }
+  const early = await sample(.25);
+  const middle = await sample(.5);
+  const later = await sample(.75);
+  expect(early.timeline).toBe('--wz-book');
+  expect(early.transition).toBe('0s');
+  expect(early.pose).not.toEqual(middle.pose);
+  expect(middle.pose).not.toEqual(later.pose);
+  expect(early.pose[5]).toBeLessThan(middle.pose[5]);
+  expect(middle.pose[5]).toBeLessThan(later.pose[5]);
+  expect(middle.metaTop).toBeCloseTo(early.metaTop, 1);
+  expect(later.metaTop).toBeCloseTo(early.metaTop, 1);
+  expect(middle.metaTransform).toBe('none');
+  await page.screenshot({ path: testInfo.outputPath('book-scroll-entry.png') });
+  const reversed = await sample(.5);
+  reversed.pose.forEach((value, i) => expect(value).toBeCloseTo(middle.pose[i], 3));
+  await page.waitForTimeout(150);
+  const stopped = await next.locator('.wz-sbook').evaluate(el => Array.from(new DOMMatrixReadOnly(getComputedStyle(el).transform).toFloat64Array()));
+  stopped.forEach((value, i) => expect(value).toBeCloseTo(middle.pose[i], 3));
+  const upright = await sample(1);
+  expect(upright.pose[5]).toBeCloseTo(1, 3);
+  expect(upright.travel).toBeCloseTo(0, 2);
+  await expect(page.locator('.wz-dpage.on h2')).toHaveText('Book 1');
+  await page.screenshot({ path: testInfo.outputPath('book-scroll-reading.png') });
+  const stageImage = await next.locator('.wz-stage3d').screenshot();
+  const colorCount = await page.evaluate(async base64 => {
+    const image = new Image();
+    image.src = 'data:image/png;base64,' + base64;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width; canvas.height = image.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const colors = new Set();
+    for (let i = 0; i < pixels.length; i += 64) colors.add(`${pixels[i] >> 4},${pixels[i + 1] >> 4},${pixels[i + 2] >> 4}`);
+    return colors.size;
+  }, stageImage.toString('base64'));
+  expect(colorCount).toBeGreaterThan(15);
+  await page.evaluate(() => {
+    window.auditReading = false;
+    window.WebzineReader.open = (_url, _title, options) => { window.auditReading = true; window.auditCloseReading = options.onClose; };
+  });
+  await next.locator('.wz-act').first().click();
+  await expect.poll(() => page.evaluate(() => window.auditReading)).toBe(true);
+  expect(await next.locator('.wz-sbook').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+  await page.evaluate(() => window.auditCloseReading());
+  expect(await next.locator('.wz-sbook').evaluate(el => getComputedStyle(el).animationName)).toBe('wzBookScrollPose');
+  await page.locator('#wzDetail').evaluate((el, top) => { el.scrollTop = top; }, geometry.top + geometry.height - travel * .5);
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const leaving = await next.locator('.wz-sbook').evaluate(el => Array.from(new DOMMatrixReadOnly(getComputedStyle(el).transform).toFloat64Array()));
+  expect(leaving[5]).toBeLessThan(.9);
+  await page.screenshot({ path: testInfo.outputPath('book-scroll-exit.png') });
+});
+
+test('reduced motion keeps the book upright without scroll animation', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/books.html?issue=issue-1');
+  const active = page.locator('.wz-dpage.on');
+  await expect(active.locator('h2')).toHaveText('Book 1');
+  expect(await active.locator('.wz-sbook').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+  expect(await active.locator('.wz-meta').evaluate(el => getComputedStyle(el).transform)).toBe('none');
+});
+
 for (const [prefix, access, preview, purchase, read, purchased] of [
   ['', '전자책 열람권', '미리보기', '구매하기', '전체 읽기', '구매함'],
   ['en/', 'Ebook reading access', 'Preview', 'Purchase', 'Read the whole book', 'Purchased'],

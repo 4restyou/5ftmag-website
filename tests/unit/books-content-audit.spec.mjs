@@ -153,6 +153,26 @@ describe('U01 and C04 bounded HTML links', () => {
 });
 
 describe('U04 selection and observer ownership', () => {
+  it('measures book travel without transforming the description or reading layout on scroll', async () => {
+    const window = await setup();
+    const doc = window.document;
+    const page = doc.querySelector('.wz-dpage');
+    const stage = page.querySelector('.wz-stage3d');
+    page.style.paddingTop = '70px'; page.style.paddingBottom = '60px';
+    const top = vi.fn(() => 200);
+    Object.defineProperty(stage, 'offsetTop', { get: top });
+    Object.defineProperty(stage, 'offsetHeight', { get: () => 495 });
+    Object.defineProperty(page, 'clientHeight', { get: () => 900 });
+    doc.querySelector('.wz-hit').click();
+    expect(stage.style.getPropertyValue('--wz-entry-shift')).toBe('-130px');
+    expect(stage.style.getPropertyValue('--wz-exit-shift')).toBe('145px');
+    expect(page.querySelector('.wz-meta').style.transform).toBe('');
+    const reads = top.mock.calls.length;
+    doc.querySelector('#wzDetail').dispatchEvent(new window.Event('scroll'));
+    await new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+    expect(top).toHaveBeenCalledTimes(reads);
+  });
+
   it('scrolls the selected row and ignores intermediate observer entries', async () => {
     const window = await setup();
     const doc = window.document;

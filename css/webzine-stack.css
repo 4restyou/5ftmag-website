@@ -200,6 +200,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 /* 닫을 때: 책이 눕는 동안 서서히 걷힌다(목록과 교차 페이드) */
 .wz-detail.on.closing { opacity: 0; pointer-events: none; transition: opacity .75s cubic-bezier(.4, 0, .2, 1) .12s; }
 .wz-dpage {
+  position: relative;
   --H: clamp(280px, 37vw, 495px); --ar: .707; --W: calc(var(--H) * var(--ar)); --T: calc(var(--H) * .10); --ov: 2px;
   --sweep: 4%;
   min-height: 100vh; min-height: 100svh; scroll-snap-align: start;
@@ -228,6 +229,54 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
   background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, .55), transparent 70%); filter: blur(12px);
   opacity: 0; transform: translateY(24px) scaleX(.6); transition: opacity var(--wz-t2) ease, transform var(--wz-t2) var(--wz-e2); }
 .wz-dpage.on .wz-sshadow { opacity: .8; transform: none; }
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .wz-detail { scroll-snap-type: none; }
+    .wz-dpage { view-timeline: --wz-book block; }
+    .wz-dpage:not(.opening) .wz-sbook {
+      animation: wzBookScrollPose linear both;
+      animation-duration: auto;
+      animation-timeline: --wz-book;
+      animation-range: cover 0% cover 100%;
+      transition: none;
+    }
+    .wz-dpage .wz-stage3d {
+      animation: wzBookScrollTravel linear both;
+      animation-duration: auto;
+      animation-timeline: --wz-book;
+      animation-range: cover 0% cover 100%;
+      transition: none;
+    }
+    .wz-dpage .wz-sshadow {
+      animation: wzBookScrollShadow linear both;
+      animation-duration: auto;
+      animation-timeline: --wz-book;
+      animation-range: cover 0% cover 100%;
+      transition: none;
+    }
+    .wz-detail.closing .wz-sbook, .wz-detail.closing .wz-stage3d, .wz-detail.closing .wz-sshadow,
+    .wz-dpage.opening .wz-sbook, .wz-dpage.opening .wz-stage3d, .wz-dpage.opening .wz-sshadow { animation: none; }
+    .wz-dpage.opening .wz-sbook { transition: transform .38s cubic-bezier(.3, .7, .3, 1); }
+    .wz-dpage.opening .wz-stage3d { transition: transform .45s cubic-bezier(.3, .7, .3, 1); }
+    .wz-detail.closing .wz-sbook, .wz-detail.closing .wz-stage3d { transition: transform .8s cubic-bezier(.4, 0, .25, 1); }
+    .wz-detail.closing .wz-sshadow { transition: opacity .8s ease, transform .8s ease; }
+  }
+}
+@keyframes wzBookScrollPose {
+  entry 0% { transform: translateY(40px) rotateY(0deg) rotateX(84deg) rotateZ(-90deg) scale(.96); }
+  entry 85%, exit 15% { transform: translateY(0px) rotateY(30deg) rotateX(0deg) rotateZ(0deg) scale(1); }
+  exit 100% { transform: translateY(40px) rotateY(0deg) rotateX(84deg) rotateZ(-90deg) scale(.96); }
+}
+@keyframes wzBookScrollTravel {
+  entry 0% { transform: translateY(var(--wz-entry-shift, 0px)); }
+  entry 85%, exit 15% { transform: translateY(0px); }
+  exit 100% { transform: translateY(var(--wz-exit-shift, 0px)); }
+}
+@keyframes wzBookScrollShadow {
+  entry 0%, exit 100% { opacity: 0; transform: translateY(24px) scaleX(.6); }
+  entry 85%, exit 15% { opacity: .8; transform: translateY(0px) scaleX(1); }
+}
 .wz-f { position: absolute; backface-visibility: hidden; overflow: hidden; }
 .wz-f-front { inset: 0; background: var(--c); }
 /* 앞표지는 책등 쪽 경첩을 축으로 열리는 한 장(.wz-leaf). 바깥은 표지, 안쪽은 면지. 그 밑에 첫 페이지 */
