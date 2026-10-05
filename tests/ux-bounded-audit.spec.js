@@ -342,6 +342,8 @@ test('rapid browsing postpones background covers and records frame timing with b
 
 test('first page preparation preserves the cover, supports cancellation, and reveals only rendered content', async ({ page }, testInfo) => {
   await page.addInitScript(() => {
+    const catalog = window.MagDB.webzine.listPublished;
+    window.MagDB.webzine.listPublished = async () => (await catalog()).map(it => ({ ...it, description: 'A published book description. '.repeat(150) }));
     window.pdfjsLib = {
       GlobalWorkerOptions: {},
       getDocument: () => ({
