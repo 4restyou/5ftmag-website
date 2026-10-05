@@ -385,8 +385,15 @@ test('first page preparation preserves the cover, supports cancellation, and rev
   expect(await page.evaluate(() => window.auditPdfCancelled)).toBe(true);
   await page.evaluate(() => window.auditFinishPage());
   await expect(page.locator('.wz-reader')).toHaveCount(0);
-  await active.locator('.wz-read').click();
+  await active.locator('.wz-more').click();
+  await page.locator('#wzDetail').evaluate(el => { el.scrollTop = 0; });
+  await active.locator('.wz-stage3d').click();
   await expect(page.locator('.wz-reader')).toHaveClass(/is-preparing/);
+  await expect(active.locator('.wz-opening-status')).toHaveClass(/is-floating/);
+  expect(await active.locator('.wz-opening-status').evaluate(el => {
+    const r = el.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
+  })).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('book-preparation-floating.png') });
   await page.evaluate(() => window.auditFinishPage());
   await expect(page.locator('.wz-reader')).not.toHaveClass(/is-preparing/);
   await expect(page.locator('.wz-reader canvas')).toBeVisible();

@@ -303,6 +303,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-dpage.opening .wz-acts { pointer-events: none; }
 .wz-opening-status { grid-area: 1 / 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid currentColor; font-size: 13px; color: inherit; }
 .wz-opening-status[hidden], .wz-opening-hint[hidden] { display: none; }
+.wz-opening-status.is-floating { position: fixed; z-index: 20; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 20px; right: 20px; max-width: 480px; margin: 0 auto; background: var(--wz-bg); }
 .wz-opening-status p { margin: 0; line-height: 1.5; }
 .wz-opening-status strong { font-weight: 600; }
 .wz-opening-hint { display: block; font-size: 12px; opacity: .8; }

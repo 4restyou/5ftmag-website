@@ -492,6 +492,7 @@
     }
     page.classList.remove('opening', 'preparing'); page.querySelector('.wz-acts').removeAttribute('aria-busy');
     page.querySelector('.wz-opening-status').hidden = true;
+    page.querySelector('.wz-opening-status').classList.remove('is-floating');
     page.querySelector('.wz-opening-hint').hidden = true;
   }
   function openBookThen(page, go) {
@@ -613,6 +614,13 @@
       });
     }, { root: detail, rootMargin: '600px 0px', threshold: 0 });
     pages.forEach(page => nearObserver.observe(page));
+    const readStatusObserver = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        const page = en.target.closest('.wz-dpage');
+        if (readRequests.has(page)) page.querySelector('.wz-opening-status').classList.toggle('is-floating', en.intersectionRatio < 1);
+      });
+    }, { root: detail, rootMargin: '-12px 0px -12px 0px', threshold: [0, 1] });
+    pages.forEach(page => readStatusObserver.observe(page.querySelector('.wz-action-area')));
 
     hits.forEach((h, i) => {
       h.addEventListener('click', (e) => { e.stopPropagation(); openDetail(i, e.detail === 0); });
@@ -634,6 +642,7 @@
           lastInteraction = performance.now();
           const transition = detailTransition;
           const active = () => inDetail && !closing && detailTransition === transition && page.classList.contains('on');
+          if (!active()) return;
           const closed = () => {
             resetOpening(page);
             if (active()) page.querySelector('.wz-act:not([hidden])')?.focus({ preventScroll: true });
@@ -647,10 +656,13 @@
           };
           const needsAccess = it._ebook && !a.classList.contains('wz-buy') && db().ebooks?.getAccess;
           if (window.WebzineReader && (a.classList.contains('wz-read') || needsAccess)) {
+            const actions = page.querySelector('.wz-action-area').getBoundingClientRect();
+            const viewport = detail.getBoundingClientRect();
             const request = { controller: new AbortController(), hintTimer: null };
             readRequests.set(page, request);
             page.classList.add('preparing'); page.querySelector('.wz-acts').setAttribute('aria-busy', 'true');
             page.querySelector('.wz-opening-status').hidden = false;
+            page.querySelector('.wz-opening-status').classList.toggle('is-floating', actions.top < viewport.top + 12 || actions.bottom > viewport.bottom - 12);
             page.querySelector('.wz-cancel-read').focus({ preventScroll: true });
             request.hintTimer = setTimeout(() => {
               if (readRequests.get(page) === request) page.querySelector('.wz-opening-hint').hidden = false;
