@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve, extname, sep } from 'node:path';
 
 // Opt-in network integration: real PDF.js + worker under the production CSP.
 test('PDF CDN renders preview pages under CSP', async ({ page }, testInfo) => {
@@ -23,6 +24,17 @@ test('PDF CDN renders preview pages under CSP', async ({ page }, testInfo) => {
   pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
   const csp = readFileSync('netlify.toml', 'utf8').match(/Content-Security-Policy = "([^"]+)"/)[1];
   const html = readFileSync('ebook-read.html', 'utf8');
+  // A synthetic HTTPS origin preserves upgrade-insecure-requests even on WebKit.
+  // Only app assets are local fixtures; PDF.js, its worker and PageFlip remain real CDN loads.
+  const origin = 'https://reader-fixture.test', root = resolve('.');
+  await page.route(origin + '/**', route => {
+    const path = new URL(route.request().url()).pathname;
+    if (['/js/site-telemetry.js', '/js/site-pwa.js'].includes(path)) return route.fulfill({ contentType: 'text/javascript', body: '' });
+    const file = resolve(root, '.' + path);
+    if (!file.startsWith(root + sep) || !/^\/(js|css|img)\//.test(path) && !['/pretendard.css', '/manifest.webmanifest'].includes(path) || !existsSync(file)) return route.fulfill({ status: 404 });
+    const mime = { '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.webmanifest': 'application/manifest+json' };
+    return route.fulfill({ contentType: mime[extname(file)] || 'application/octet-stream', body: readFileSync(file) });
+  });
   await page.route('**/ebook-read.html?*', route => route.fulfill({ contentType: 'text/html', headers: { 'Content-Security-Policy': csp }, body: html }));
   await page.route('**/fixture.pdf', route => route.fulfill({ contentType: 'application/pdf', body: Buffer.from(pdf) }));
   await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
@@ -36,7 +48,7 @@ test('PDF CDN renders preview pages under CSP', async ({ page }, testInfo) => {
       },
     };
   });
-  await page.goto('/ebook-read.html?slug=preview-qa');
+  await page.goto(origin + '/ebook-read.html?slug=preview-qa');
   await expect(page.locator('[data-pageno]')).toHaveText('1 / 3', { timeout: 30000 });
   await expect(page.locator('.wz-reader canvas').first()).toBeVisible();
   await expect(page.locator('.wz-reader-cta-note')).toBeHidden();

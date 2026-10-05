@@ -31,6 +31,7 @@ Publication selected 11 files: Vol.01, 02, 08, 13, 15, 17, 18, 19, 20, 21 and SP
 - `Continue` replaces the read action when a saved page exists. A plain `Read from the beginning` command is available in details and the reader toolbar.
 - `Last read` in the shelf intro opens the appropriate introduction, not a reader without warning.
 - Closing refreshes the shelf labels. Corrupt/blocked storage does not prevent reading.
+- A revealed reader freezes background detail selection; resizing preserves the same book instead of cancelling reading through a background scroll change.
 - Local records never grant access: each paid open still requests an authorized URL from the server, and that server result selects the full/preview history namespace.
 
 ## Operations

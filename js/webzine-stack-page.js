@@ -437,6 +437,7 @@
   }
   function syncDetailPage() {
     if (!inDetail || closing) return;
+    if (document.querySelector('.wz-reader:not(.is-preparing)')) return;
     const viewport = detail.getBoundingClientRect();
     let best = current, height = 0;
     pages.forEach((page, i) => {
@@ -775,7 +776,10 @@
   }, { passive: true });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.wz-reader:not(.is-preparing)')) closeDetail(true); });
   let resizeT = null;
-  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { pages.forEach(measureDesc); measureDetailMotion(); placeBack(); observeShelf(); }, 120); });
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => {
+    pages.forEach(measureDesc); measureDetailMotion(); placeBack(); observeShelf();
+    if (inDetail && document.querySelector('.wz-reader:not(.is-preparing)')) detail.scrollTop = pages[current].offsetTop;
+  }, 120); });
   window.addEventListener('wheel', () => { pendingSelection = null; lastInteraction = performance.now(); }, { passive: true });
   window.addEventListener('touchstart', () => { pendingSelection = null; lastInteraction = performance.now(); }, { passive: true });
 
