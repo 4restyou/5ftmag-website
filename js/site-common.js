@@ -1658,7 +1658,6 @@
   // localStorage 에 dismiss 한 ID 가 있으면 표시하지 않는다.
   // ════════════════════════════════════════════════
   const DISMISS_KEY = '5ftDismissedAnnouncements';
-  let announcementSequence = 0;
   function getDismissed() {
     try { return new Set(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]')); }
     catch { return new Set(); }
@@ -1698,9 +1697,8 @@
     bar.innerHTML = `
       <div class="announcement-bar-inner">
         <div class="announcement-bar-track" aria-live="polite">
-          <span class="announcement-bar-text" id="announcement-body-${++announcementSequence}"></span>
+          <span class="announcement-bar-text"></span>
         </div>
-        <button type="button" class="announcement-bar-expand" aria-expanded="false" aria-controls="announcement-body-${announcementSequence}" hidden>${tr('펼치기', 'Expand', '全文を表示')}</button>
         <button type="button" class="announcement-bar-close" aria-label="${tr('공지 닫기', 'Close notice', 'お知らせを閉じる')}">×</button>
       </div>
     `;
@@ -1711,24 +1709,15 @@
     bar.querySelector('.announcement-bar-text').innerHTML = renderAnnouncementBody(body);
     header.insertAdjacentElement('afterend', bar);
 
-    const text = bar.querySelector('.announcement-bar-text');
-    const toggle = bar.querySelector('.announcement-bar-expand');
-    toggle.addEventListener('click', () => {
-      const expanded = toggle.getAttribute('aria-expanded') !== 'true';
-      toggle.setAttribute('aria-expanded', String(expanded));
-      bar.classList.toggle('is-expanded', expanded);
-      toggle.textContent = expanded ? tr('접기', 'Collapse', '折りたたむ') : tr('펼치기', 'Expand', '全文を表示');
+    // 공지는 늘 한 줄로 흐른다. 속도는 길이와 상관없이 일정하게(초당 약 40px) 맞춘다.
+    // offsetWidth 에는 앞 여백(padding-left: 100% = 트랙 폭)이 들어 있어 흐르는 거리 전체가 된다.
+    requestAnimationFrame(() => {
+      const text = bar.querySelector('.announcement-bar-text');
+      text.style.animationDuration = Math.max(12, text.offsetWidth / 40) + 's';
     });
-    function measureAnnouncement() {
-      if (!bar.isConnected) { window.removeEventListener('resize', measureAnnouncement); return; }
-      if (!bar.classList.contains('is-expanded')) toggle.hidden = text.scrollHeight <= text.clientHeight + 1;
-    }
-    requestAnimationFrame(measureAnnouncement);
-    window.addEventListener('resize', measureAnnouncement);
 
     bar.querySelector('.announcement-bar-close').addEventListener('click', () => {
       addDismissed(data.id);
-      window.removeEventListener('resize', measureAnnouncement);
       bar.classList.add('is-closing');
       setTimeout(() => bar.remove(), 220);
     });
