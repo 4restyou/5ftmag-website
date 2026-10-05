@@ -297,6 +297,8 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-meta .wz-kind { display: inline-block; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; padding: 5px 10px; border: 1px solid color-mix(in srgb, var(--wz-fg) 45%, transparent); margin-bottom: 18px; }
 .wz-meta h2 { margin: 0 0 6px; font-size: 30px; font-weight: var(--fw-heading); letter-spacing: 0; line-height: 1.2; word-break: keep-all; overflow-wrap: anywhere; }
 .wz-book-info, .wz-access-note { margin: 12px 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.wz-price { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.wz-owned { padding: 2px 6px; border: 1px solid currentColor; border-radius: 3px; font-size: 12px; line-height: 1.4; font-weight: 600; }
 .wz-meta .wz-by { margin: 0 0 22px; font-size: 14px; font-style: italic; color: color-mix(in srgb, var(--wz-fg) 74%, transparent); }
 .wz-meta .wz-rule { width: 44px; height: 1px; background: color-mix(in srgb, var(--wz-fg) 50%, transparent); margin: 0 0 22px; }
 /* 소개글: 폰은 3줄, PC 는 화면 높이에 따라 9~14줄. 넘치면 "더 보기" 로 펼친다 */
@@ -314,6 +316,7 @@ body.wz-mode-detail .wz-back { opacity: 1; visibility: visible; transition: opac
 .wz-act i { font-style: normal; display: grid; place-items: center; border-left: 1px solid color-mix(in srgb, var(--wz-fg) 55%, transparent); font-size: 13px; }
 .wz-act:hover { background: color-mix(in srgb, var(--wz-fg) 8%, transparent); }
 .wz-act:focus-visible { outline: 2px solid #c9a227; outline-offset: 2px; }
+.wz-act[hidden] { display: none; }
 .wz-side-acts { display: flex; gap: 8px; margin-top: 14px; }
 .wz-side-act { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--wz-fg) 35%, transparent); background: none; color: inherit; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
 .wz-side-act:hover { background: color-mix(in srgb, var(--wz-fg) 8%, transparent); }

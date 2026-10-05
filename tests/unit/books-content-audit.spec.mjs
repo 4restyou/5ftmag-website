@@ -21,6 +21,7 @@ async function setup(lang = 'ko', owned = false, price = 4000) {
   };
   window.MagDB = {
     isReady: () => true,
+    auth: { onChange: callback => { window.auditBookAuthChange = callback; } },
     webzine: { listPublished: async () => [{ id: 'free', title: 'Free issue', slug: 'free', category: '5ft.mag', pdf_path: 'free.pdf' }], publicUrl: p => '/' + p },
     ebooks: {
       listPublished: async () => [{ id: 'paid', title: 'SPC <Photo> book', slug: 'spc', kind: 'photobook', author: 'Photographer', binding: 'Hardcover', price }],
@@ -41,7 +42,9 @@ describe('U03 bookshelf content', () => {
   ])('keeps the visual shelf and labels access separately from binding in %s', async (lang, access, paid, free) => {
     const window = await setup(lang);
     const doc = window.document;
-    expect(doc.querySelector('.wz-buy').textContent).toContain(access);
+    expect(doc.querySelector('.wz-buy').textContent).toContain({ ko: '구매하기', en: 'Purchase', ja: '購入する' }[lang]);
+    expect(doc.querySelector('.wz-preview').hidden).toBe(false);
+    expect(doc.querySelector('.wz-owned').hidden).toBe(true);
     expect(doc.querySelector('.wz-kind').textContent).toBe(paid);
     expect(doc.querySelector('.wz-book-info:not(.wz-price)').textContent).toContain('Hardcover');
     expect(doc.querySelector('.wz-price').textContent).toContain(access);
@@ -68,10 +71,10 @@ describe('U03 bookshelf content', () => {
   });
 
   it.each([
-    ['ko', '전체 읽기', '열람권 보유', '전자책 열람권'],
-    ['en', 'Read the whole book', 'access owned', 'Ebook reading access'],
-    ['ja', '全編を読む', '閲覧権あり', '電子書籍の閲覧権'],
-  ])('retains the price with full reading and owned access in %s', async (lang, read, owned, access) => {
+    ['ko', '전체 읽기', '열람권 보유', '전자책 열람권', '구매함'],
+    ['en', 'Read the whole book', 'access owned', 'Ebook reading access', 'Purchased'],
+    ['ja', '全編を読む', '閲覧権あり', '電子書籍の閲覧権', '購入済み'],
+  ])('retains the price with full reading and owned access in %s', async (lang, read, owned, access, badge) => {
     const window = await setup(lang, true);
     await vi.waitFor(() => expect(window.document.querySelector('.wz-own')).not.toBeNull());
     expect(window.document.querySelector('.wz-buy')).toBeNull();
@@ -80,6 +83,51 @@ describe('U03 bookshelf content', () => {
     expect(window.document.querySelector('.wz-price').textContent).toContain(access);
     expect(window.document.querySelector('.wz-price').textContent).toContain('4,000');
     expect(window.document.querySelectorAll('.wz-price')).toHaveLength(1);
+    expect(window.document.querySelector('.wz-preview').hidden).toBe(true);
+    expect(window.document.querySelector('.wz-owned').hidden).toBe(false);
+    expect(window.document.querySelector('.wz-owned').textContent).toBe(badge);
+    expect(window.document.querySelector('.wz-stage3d').getAttribute('aria-label')).toContain(read);
+    expect(window.document.querySelector('.wz-own').getAttribute('href')).not.toContain('buy=1');
+  });
+
+  it('restores preview and purchase on sign-out, then full reading on sign-in', async () => {
+    const window = await setup('ko', true);
+    const doc = window.document;
+    await vi.waitFor(() => expect(doc.querySelector('.wz-own')).not.toBeNull());
+    window.auditBookAuthChange('SIGNED_OUT');
+    expect(doc.querySelector('.wz-own')).toBeNull();
+    expect(doc.querySelector('.wz-buy').textContent).toContain('구매하기');
+    expect(doc.querySelector('.wz-buy').getAttribute('href')).toContain('buy=1');
+    expect(doc.querySelector('.wz-preview').hidden).toBe(false);
+    expect(doc.querySelector('.wz-owned').hidden).toBe(true);
+    window.auditBookAuthChange('SIGNED_IN');
+    await vi.waitFor(() => expect(doc.querySelector('.wz-own')).not.toBeNull());
+    expect(doc.querySelector('.wz-preview').hidden).toBe(true);
+  });
+
+  it('does not restore owned UI from an entitlement query that finishes after sign-out', async () => {
+    const window = await setup();
+    let finish;
+    window.MagDB.ebooks.myEntitlementIds = () => new Promise(resolve => { finish = resolve; });
+    window.auditBookAuthChange('SIGNED_IN');
+    window.auditBookAuthChange('SIGNED_OUT');
+    finish(new Set(['paid']));
+    await Promise.resolve();
+    expect(window.document.querySelector('.wz-own')).toBeNull();
+    expect(window.document.querySelector('.wz-preview').hidden).toBe(false);
+    expect(window.document.querySelector('.wz-owned').hidden).toBe(true);
+  });
+
+  it('routes cover clicks and Enter to the currently visible full-read action', async () => {
+    const window = await setup('ko', true);
+    const doc = window.document;
+    await vi.waitFor(() => expect(doc.querySelector('.wz-own')).not.toBeNull());
+    const read = vi.fn(e => { e.preventDefault(); e.stopImmediatePropagation(); });
+    doc.querySelector('.wz-own').addEventListener('click', read, true);
+    const stage = doc.querySelector('.wz-stage3d');
+    stage.click();
+    stage.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(read).toHaveBeenCalledTimes(2);
   });
 
   it('does not show a paid-access price for a free ebook or webzine', async () => {
