@@ -309,6 +309,23 @@
     b.classList.toggle('show', d.scrollHeight - d.clientHeight > 4);
   }
 
+  // 위치는 레이아웃이 바뀔 때만 재고, 실제 스크롤 모션은 브라우저의 view timeline에 맡긴다.
+  function measureDetailMotion() {
+    const positions = pages.map(page => {
+      const stage = page.querySelector('.wz-stage3d');
+      const style = getComputedStyle(page);
+      return {
+        stage,
+        entry: -Math.max(0, stage.offsetTop - (parseFloat(style.paddingTop) || 0)),
+        exit: Math.max(0, page.clientHeight - stage.offsetTop - stage.offsetHeight - (parseFloat(style.paddingBottom) || 0)),
+      };
+    });
+    positions.forEach(({ stage, entry, exit }) => {
+      stage.style.setProperty('--wz-entry-shift', entry + 'px');
+      stage.style.setProperty('--wz-exit-shift', exit + 'px');
+    });
+  }
+
   // ← 는 눈금 바로 위에. 눈금이 길어지면 그만큼 따라 올라간다. 폰(눈금 없음)에서는 CSS 대로 왼쪽 위
   function placeBack() {
     if (getComputedStyle(marks).display === 'none') { backBtn.style.top = ''; return; }
@@ -359,6 +376,7 @@
     releaseDetailFocus = window.createFocusTrap?.(detail);
     shelfStage?.setAttribute('inert', '');
     detail.scrollTop = pages[i].offsetTop;
+    measureDetailMotion();
     requestAnimationFrame(() => requestAnimationFrame(() => { pages[i].classList.add('on'); measureDesc(pages[i]); }));
     backBtn.focus({ preventScroll: true });
   }
@@ -513,7 +531,7 @@
     pages.forEach((page, i) => {
       const it = issues[i];
       const more = page.querySelector('.wz-more');
-      if (more) more.addEventListener('click', () => { page.querySelector('.wz-desc').classList.add('is-open'); more.classList.remove('show'); more.setAttribute('aria-expanded', 'true'); });
+      if (more) more.addEventListener('click', () => { page.querySelector('.wz-desc').classList.add('is-open'); more.classList.remove('show'); more.setAttribute('aria-expanded', 'true'); measureDetailMotion(); });
       // 읽기(유료는 미리보기·구매)로 들어갈 때 책이 정면으로 돌아서 표지가 열린 뒤 넘어간다
       page.querySelectorAll('.wz-act').forEach((a) => {
         a.addEventListener('click', (e) => {
@@ -587,7 +605,7 @@
   }, { passive: true });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.wz-reader')) closeDetail(true); });
   let resizeT = null;
-  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { pages.forEach(measureDesc); placeBack(); observeShelf(); }, 120); });
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { pages.forEach(measureDesc); measureDetailMotion(); placeBack(); observeShelf(); }, 120); });
   window.addEventListener('wheel', () => { pendingSelection = null; }, { passive: true });
   window.addEventListener('touchstart', () => { pendingSelection = null; }, { passive: true });
 
@@ -613,6 +631,7 @@
         ? T('전자책 열람권 보유 · 전체를 읽을 수 있습니다.', 'Ebook reading access owned · Full edition available.', '電子書籍の閲覧権あり · 全ページを読めます。')
         : T('미리보기는 일부 페이지만 제공됩니다. 전자책 열람권을 구매하면 전체를 읽을 수 있으며, 실물 도서는 포함되지 않습니다.', 'The preview includes selected pages. Ebook reading access unlocks the full edition; a printed book is not included.', 'プレビューは一部のページのみです。電子書籍の閲覧権で全ページを読めます。紙の本は含まれません。');
     });
+    if (inDetail) measureDetailMotion();
   }
 
   // 둘 다(웹진·이북) 불러오지 못해 보여 줄 책이 없으면 "발행된 책이 없어요" 대신 실패 안내 + 다시 시도
