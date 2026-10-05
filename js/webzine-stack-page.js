@@ -259,6 +259,7 @@
         <span class="wz-kind">${accessLabel(it)}</span>
         <h2 id="wz-book-title-${i}">${esc(it.title)}</h2>
         <p class="wz-by">${esc(bookByline(it))}${it.issue_label ? ' · ' + esc(it.issue_label) : ''}</p>
+        ${isPaid(it) ? `<p class="wz-book-info wz-price">${T('전자책 열람권', 'Ebook reading access', '電子書籍の閲覧権')} · ${won(it.price)}</p>` : ''}
         ${it.binding ? `<p class="wz-book-info">${T('도서 제본 정보', 'Book binding', '本の製本情報')}: ${esc(it.binding)}</p>` : ''}
         <div class="wz-rule"></div>
         ${it.description ? `<p class="wz-desc">${esc(it.description)}</p><button type="button" class="wz-more" aria-expanded="false">${T('더 보기', 'More', 'もっと見る')}</button>` : ''}
