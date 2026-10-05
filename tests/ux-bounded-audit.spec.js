@@ -70,8 +70,8 @@ for (const owned of [false, true]) {
 for (const prefix of ['', 'en/', 'ja/']) {
   test(`reading progress resumes the selected book and supports start over: ${prefix || 'ko'}`, async ({ page }, testInfo) => {
     await page.addInitScript(() => {
-      localStorage.setItem('5ft-book-progress-v1', JSON.stringify([{ key: 'webzine:issue-9:free', page: 8, total: 12, at: Date.now(), fingerprint: 'qa-edition' }]));
-      window.pdfjsLib = { GlobalWorkerOptions: {}, getDocument: () => ({ promise: Promise.resolve({ numPages: 12, fingerprints: ['qa-edition'], getPage: async () => ({
+      localStorage.setItem('5ft-book-progress-v1', JSON.stringify([{ key: 'webzine:issue-9:free', page: 108, total: 120, at: Date.now(), fingerprint: 'qa-edition' }]));
+      window.pdfjsLib = { GlobalWorkerOptions: {}, getDocument: () => ({ promise: Promise.resolve({ numPages: 120, fingerprints: ['qa-edition'], getPage: async () => ({
         getViewport: ({ scale = 1 } = {}) => ({ width: 400 * scale, height: 600 * scale }),
         render: ({ canvasContext, viewport }) => ({ promise: Promise.resolve().then(() => { canvasContext.fillStyle = '#ffe500'; canvasContext.fillRect(0, 0, viewport.width, viewport.height); }) }),
       }), destroy() {} }) }) };
@@ -87,16 +87,17 @@ for (const prefix of ['', 'en/', 'ja/']) {
     await page.locator('.wz-continue').click();
     const active = page.locator('.wz-dpage.on');
     await expect(active.locator('h2')).toHaveText('Book 9');
-    await expect(active.locator('.wz-read')).toContainText('8');
+    await expect(active.locator('.wz-read')).toContainText('108');
     await expect(active.locator('.wz-start-over')).toBeVisible();
     await active.locator('.wz-read').click();
-    await expect(page.locator('[data-pageno]')).toHaveText('8 / 12');
+    await expect(page.locator('[data-pageno]')).toHaveText('108 / 120');
+    if (testInfo.project.name.includes('mobile')) await page.setViewportSize({ width: 320, height: 740 });
     await expect(page.locator('.wz-reader canvas').filter({ visible: true }).first()).toBeVisible();
     expect(await page.locator('.wz-reader-tools').evaluate(el => { const r = el.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth + 1; })).toBe(true);
     await page.screenshot({ path: testInfo.outputPath(`resume-${prefix.replace('/', '') || 'ko'}.png`) });
     await page.locator('[data-close]').click();
     await active.locator('.wz-start-over').click();
-    await expect(page.locator('[data-pageno]')).toHaveText('1 / 12');
+    await expect(page.locator('[data-pageno]')).toHaveText('1 / 120');
     await page.locator('[data-close]').click();
     await expect(active.locator('.wz-start-over')).toBeHidden();
   });

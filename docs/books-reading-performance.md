@@ -20,7 +20,7 @@ A first-page benchmark with real PDF.js/PageFlip, warm libraries, fresh browser 
 
 Already-linearized originals with less than 1% savings are retained. Other candidates require three original/optimized comparisons; a candidate whose median first-page time regresses by more than 5% is retained as an original too. This avoids trading a smaller file for slower first use.
 
-Publication selected 11 files: Vol.01, 02, 08, 13, 15, 17, 18, 19, 20, 21 and SPC Issue 01's private full PDF. Nine originals had less than 1% savings; five other originals (Vol.14, 16, 22 and both previews) were retained because the first-page benchmark regressed. For example, the controlled median improved from 1,829 to 1,658 ms for Vol.18 and 673 to 605 ms for Vol.17. Other selected files were close to their original timing; no claim is made that every book opens faster.
+Publication selected 11 files: Vol.01, 02, 08, 13, 15, 17, 18, 19, 20, 21 and SPC Issue 01's private full PDF. Ten originals had less than 1% savings; five other originals (Vol.14, 16, 22 and both previews) were retained because the first-page benchmark regressed. For example, the controlled median improved from 1,829 to 1,658 ms for Vol.18 and 673 to 605 ms for Vol.17. Other selected files were close to their original timing; no claim is made that every book opens faster.
 
 ## Reading Progress
 
