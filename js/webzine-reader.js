@@ -23,9 +23,11 @@
   function ensureLibs() {
     if (libsP) return libsP;
     libsP = (async () => {
-      if (!window.pdfjsLib) { window.pdfjsLib = await import(PDFJS); }
+      await Promise.all([
+        window.pdfjsLib ? Promise.resolve() : import(PDFJS).then(lib => { window.pdfjsLib = lib; }),
+        window.St?.PageFlip ? Promise.resolve() : loadScript(FLIP),
+      ]);
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
-      if (!(window.St && window.St.PageFlip)) { await loadScript(FLIP); }
     })().catch(e => { libsP = null; throw e; });
     return libsP;
   }
@@ -252,5 +254,5 @@
     }
   }
 
-  window.WebzineReader = { open };
+  window.WebzineReader = { open, prepare: () => ensureLibs().catch(() => {}) };
 })();
