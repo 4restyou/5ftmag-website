@@ -150,11 +150,22 @@ body {
 }
 .article-body strong { font-weight: var(--fw-heading); }
 .article-body em { font-style: italic; }
+/* 본문 링크: 흐린 1px 선으로는 링크인지 모르고 지나쳐서, 강조색 밑줄을 굵게 두고
+   마우스를 올리거나 키보드로 고르면 강조색으로 칠한다. 클래스가 붙은 카드·버튼·칩은 제 규칙을 따르게 클래스 없는 링크에만 건다. */
 .article-body a {
   color: var(--text);
   border-bottom: 1px solid var(--text-dim);
 }
-.article-body a:hover { border-color: var(--text); }
+.article-body a:not([class]) {
+  text-decoration: none;
+  border-bottom: 2px solid var(--accent);
+  transition: background-color .15s, color .15s;
+}
+.article-body a:not([class]):hover,
+.article-body a:not([class]):focus-visible {
+  background: var(--accent);
+  color: var(--accent-text);
+}
 .article-body ul,
 .article-body ol {
   margin: 0 0 24px;
