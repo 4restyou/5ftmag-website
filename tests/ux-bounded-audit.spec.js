@@ -104,6 +104,39 @@ test('visual bookshelf preserves marker navigation, keyboard access and detail r
   await expect(active).toHaveCount(1);
 });
 
+for (const [prefix, access] of [['', '전자책 열람권'], ['en/', 'Ebook reading access'], ['ja/', '電子書籍の閲覧権']]) {
+  for (const owned of [false, true]) {
+    test(`paid book detail keeps its price visible regardless of ownership: ${prefix || 'ko'} / ${owned}`, async ({ page }, testInfo) => {
+      await page.addInitScript(ownsBook => {
+        window.MagDB.ebooks.listPublished = async () => [{
+          id: 'paid-book', slug: 'paid-book', title: 'Paid photobook', price: 4000,
+          description: 'A paid ebook description.', created_at: '2026-10-05',
+        }];
+        window.MagDB.ebooks.myEntitlementIds = async () => new Set(ownsBook ? ['paid-book'] : []);
+      }, owned);
+      await page.goto(`/${prefix}books.html?issue=paid-book`);
+      const active = page.locator('.wz-dpage.on');
+      await expect(active.locator('h2')).toHaveText('Paid photobook');
+      const price = active.locator('.wz-price');
+      await expect(price).toBeVisible();
+      await expect(price).toContainText(access);
+      await expect(price).toContainText('4,000');
+      await expect(active.locator(owned ? '.wz-own' : '.wz-buy')).toHaveCount(1);
+      await expect(active.locator(owned ? '.wz-buy' : '.wz-own')).toHaveCount(0);
+      expect(await price.evaluate(el => {
+        const r = el.getBoundingClientRect();
+        return r.left >= 0 && r.right <= innerWidth && el.scrollWidth <= el.clientWidth;
+      })).toBe(true);
+      await expect(active).toHaveClass(/\bsettled\b/);
+      await page.screenshot({ path: testInfo.outputPath('paid-book-detail.png') });
+      await page.keyboard.press('Escape');
+      await page.locator('.wz-row').filter({ hasText: 'Book 0' }).locator('.wz-hit').click();
+      await expect(active.locator('h2')).toHaveText('Book 0');
+      await expect(active.locator('.wz-price')).toHaveCount(0);
+    });
+  }
+}
+
 for (const [prefix, label] of [['', '좋아한 책 모음'], ['en/', 'Liked books'], ['ja/', 'お気に入りの本']]) {
   test(`liked books collection stays below shelf markers and in the mobile account group: ${prefix || 'ko'}`, async ({ page }, testInfo) => {
     await page.goto(`/${prefix}books.html`);
