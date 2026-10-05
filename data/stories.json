@@ -1,5 +1,26 @@
 [
   {
+    "id": "kaido-pasm-seoul",
+    "title": "도쿄의 독립 갤러리 KAIDO, 사진가 셋이 서울에 온다",
+    "category": "exhibition",
+    "categoryLabel": "EXHIBITION",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-05",
+    "issue": "",
+    "thumbnail": "img/stories/kaido-pasm-seoul/kaido-poster.webp",
+    "excerpt": "도쿄 독립 사진 갤러리 KAIDO 의 오나카 코지, 사토 하루나, 후지타 스스무가 10월 10일 서울 서초 P/A/S/M 에서 오리지널 프린트 전시와 북 사이닝, 슬라이드 쇼를 연다. 참가비와 신청 없이 누구나 갈 수 있다.",
+    "titleEn": "Three Photographers from Tokyo's Gallery KAIDO Come to Seoul",
+    "excerptEn": "Koji Onaka, Haruna Sato, and Susumu Fujita of Gallery KAIDO, an independent photo gallery in Tokyo, will hold an original print exhibition, a book signing, and a slide show at P/A/S/M in Seocho, Seoul, on October 10. Admission is free and no registration is needed.",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "東京の独立系ギャラリーKAIDOから、写真家3人がソウルへ",
+    "excerptJa": "東京の独立系写真ギャラリーKAIDOのKoji Onaka、Haruna Sato、Susumu Fujitaが、10月10日にソウル・瑞草のP/A/S/Mでオリジナルプリント展、サイン会、スライドショーを開く。参加費・申し込み不要で誰でも参加できる。",
+    "authorJa": "5ft.mag 編集部",
+    "films": [],
+    "page": "stories/kaido-pasm-seoul.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "shin-noguchi-playing-cards",
     "title": "주머니에 넣고 다니는 신 노구치 사진집",
     "category": "goods",
