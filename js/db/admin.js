@@ -345,6 +345,36 @@
           const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
           return c.from('reader_submissions').delete().eq('id', id);
         },
+        // ── 중복 거르기 (편집부) ──
+        // 「중복 의심」 카드가 가리키는 사진들을 한 번에 가져온다.
+        async byIds(ids) {
+          const c = client(); if (!c || !ids?.length) return { data: [], error: null };
+          return c.from('reader_submissions')
+            .select('id, storage_path, status, created_at, submitter_name, instagram')
+            .in('id', ids);
+        },
+        // 기존 사진 지문 채우기: 아직 phash 가 없는 사진 수와 목록.
+        async countMissingPhash() {
+          const c = client(); if (!c) return 0;
+          const { count } = await c.from('reader_submissions')
+            .select('id', { count: 'exact', head: true }).is('phash', null);
+          return count || 0;
+        },
+        async listMissingPhash(limit = 40, skipIds = []) {
+          const c = client(); if (!c) return { data: [], error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+          let q = c.from('reader_submissions').select('id, storage_path').is('phash', null);
+          if (skipIds.length) q = q.not('id', 'in', `(${skipIds.join(',')})`);
+          return q.order('created_at', { ascending: true }).limit(limit);
+        },
+        async setPhash(id, phash) {
+          const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+          return c.from('reader_submissions').update({ phash }).eq('id', id).select('id');
+        },
+        // 같은 사람의 닮은 사진 묶음(기존 사진 정리용). RPC 가 편집부인지 확인한다.
+        async duplicatePairs() {
+          const c = client(); if (!c) return { data: [], error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+          return c.rpc('admin_reader_duplicate_pairs', { p_max_distance: null });
+        },
         // 두 사진의 게재일을 맞바꾼다. 관리 화면의 위/아래 화살표가 쓴다.
         //
         // note 는 건드리지 않는다. setFeatured 는 note 를 덮어쓰므로 여기서는

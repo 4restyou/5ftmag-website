@@ -41,7 +41,7 @@
     if (!window.tus || typeof window.tus.Upload !== 'function')
       jobs.push(loadScriptOnce('https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js'));
     if (typeof window.processImageForUpload !== 'function')
-      jobs.push(loadScriptOnce('./js/image-processor.js?v=20261002-ja'));
+      jobs.push(loadScriptOnce('./js/image-processor.js?v=20261006-photo-dedupe'));
     if (typeof window.normalizeCamera !== 'function')
       jobs.push(loadScriptOnce('./js/camera-brands.js?v=20260611-keyunify'));
     return Promise.all(jobs);
@@ -729,11 +729,18 @@
 
   // 갈래는 오류 code 로 고른다(js/db-client.js · js/reader-upload-flow.js 가 붙인다).
   // 메시지 문자열 판정은 code 가 없는 옛 경로의 대체로만 남긴다.
-  const KNOWN_ERROR_CODES = new Set(['AUTH_EXPIRED', 'AUTH_REQUIRED', 'NETWORK', 'UPLOAD_TIMEOUT', 'FILE_TOO_LARGE', 'UNSUPPORTED_TYPE', 'RLS_DENIED', 'UNAVAILABLE', 'UPLOAD_TOOL', 'ABORTED']);
+  const KNOWN_ERROR_CODES = new Set(['AUTH_EXPIRED', 'AUTH_REQUIRED', 'NETWORK', 'UPLOAD_TIMEOUT', 'FILE_TOO_LARGE', 'UNSUPPORTED_TYPE', 'RLS_DENIED', 'UNAVAILABLE', 'UPLOAD_TOOL', 'ABORTED', 'DUPLICATE']);
   function uploadErrorState({ stage, error, hasUploadedPhoto }) {
     const code = KNOWN_ERROR_CODES.has(error?.code) ? error.code : '';
     const msg = String(error?.message || '');
     const lower = msg.toLowerCase();
+    if (code === 'DUPLICATE') {
+      return {
+        title: tr('이미 올리신 사진이에요', 'Already uploaded', 'すでにアップロード済みの写真です'),
+        detail: tr('같은 사진 파일은 한 번만 올릴 수 있어요. 다른 사진을 골라 주세요.', 'The same photo file can only be submitted once. Please choose another photo.', '同じ写真ファイルは一度しか送信できません。別の写真を選んでください。'),
+        button: tr('다른 사진으로 다시 제출', 'Submit another photo', '別の写真で送信し直す'),
+      };
+    }
     if (hasUploadedPhoto || stage === 'database') {
       return {
         title: tr('사진 저장은 완료됐어요', 'Your photo is saved', '写真の保存は完了しています'),
@@ -906,6 +913,9 @@
         const insertData = pendingUploadedPhoto.record || {
           ...buildSubmissionInsertData({ userId: user.id, path, fields }),
           id: pendingUploadedPhoto.submissionId,
+          // 중복 거르기용 지문(js/image-processor.js 의 PhotoFingerprint). 계산 못 했으면 비운다.
+          ...(uploadResult.sha256 ? { source_sha256: uploadResult.sha256 } : {}),
+          ...(uploadResult.phash ? { phash: uploadResult.phash } : {}),
         };
         pendingUploadedPhoto.record = insertData;
         submitBtn.textContent = tr('제출 기록 저장 중…', 'Saving submission…', '送信記録を保存中…');
@@ -915,6 +925,15 @@
           25000,
           tr('제출 기록 저장', 'Saving the submission', '送信記録の保存')
         ).catch(err => ({ error: { message: err.message } }));
+        // 같은 원본을 동시에 두 번 보낸 경우 등, 저장 단계의 유니크 인덱스가 막았다.
+        // 방금 올린 파일은 쓸모가 없으니 지우고 중복 안내로 끝낸다.
+        if (dbErr?.code === 'DUPLICATE') {
+          withNetworkTimeout(db().submissions.removePhoto(path), 8000, '중복 업로드 정리').catch(() => {});
+          pendingUploadedPhoto = null;
+          const dupErr = new Error(window.ReaderUploadFlow?.duplicateMessage?.() || tr('이미 올리신 사진이에요.', 'You have already uploaded this photo.', 'この写真はすでにアップロードされています。'));
+          dupErr.code = 'DUPLICATE';
+          throw dupErr;
+        }
         if (dbErr && db().submissions.findOwn) {
           const saved = await withNetworkTimeout(
             signal => db().submissions.findOwn(insertData, { signal }), 6000, tr('제출 결과 확인', 'Submission check', '送信結果の確認')
@@ -946,7 +965,8 @@
         setUploadStatus('done', tr('제출 완료', 'Submitted', '送信完了'), tr('Reader’s Roll 검토 큐에 들어갔어요.', 'It is now in the Reader’s Roll review queue.', 'Reader’s Roll の確認待ちに入りました。'));
         openModal(renderSubmittedConfirm({ author: displaySubmissionAuthor(fields), film: fields.film }));
       } catch (err) {
-        if (uploadStage !== 'validate') reportUploadFailure(uploadStage, err, uploadMeta);
+        // 중복 안내는 고장이 아니라 오류 기록에 남기지 않는다.
+        if (uploadStage !== 'validate' && err?.code !== 'DUPLICATE') reportUploadFailure(uploadStage, err, uploadMeta);
         const errState = uploadErrorState({
           stage: uploadStage,
           error: err,

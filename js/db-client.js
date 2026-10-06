@@ -527,7 +527,18 @@
       }
       let query = c.from('reader_submissions').insert(record);
       if (opts.signal) query = query.abortSignal(opts.signal);
-      const result = await query;
+      let result = await query;
+      // 지문 칸(source_sha256·phash)이 아직 DB 에 없으면(배포 순서가 엇갈린 몇 분) 빼고 다시 넣는다.
+      if (result.error?.code === 'PGRST204' && ('source_sha256' in record || 'phash' in record) && !opts.signal?.aborted) {
+        const { source_sha256: _sha, phash: _phash, ...rest } = record;
+        let retry = c.from('reader_submissions').insert(rest);
+        if (opts.signal) retry = retry.abortSignal(opts.signal);
+        result = await retry;
+      }
+      // 같은 원본 파일(사람 + source_sha256 유니크)에 막혔으면 화면이 알아보게 code 를 붙인다.
+      if (result.error?.code === '23505' && /source_sha256/.test(`${result.error.message || ''} ${result.error.details || ''}`)) {
+        return { ...result, error: { ...result.error, code: 'DUPLICATE' } };
+      }
       if (result.error?.code === '23505' && record.id && !opts.signal?.aborted) {
         const existing = await submissions.findOwn(record, opts);
         if (existing.data && !existing.error) return existing;
@@ -536,6 +547,15 @@
     },
     async uploadPhoto(path, blob, opts = {}) {
       return readerStorageRequest('POST', path, blob, opts);
+    },
+    // 같은 원본 파일을 이미 올렸는지(본인 것만). 있으면 그 제출 id, 없거나 확인 실패면 null.
+    async existsBySha(sha256, opts = {}) {
+      const c = client(); if (!c || !sha256) return null;
+      let query = c.rpc('reader_submission_exists_by_sha', { p_sha: sha256 });
+      if (opts.signal) query = query.abortSignal(opts.signal);
+      const { data, error } = await query;
+      if (error) return null;
+      return data || null;
     },
     async photoExists(path, bytes, opts = {}) {
       const result = await readerStorageRequest('HEAD', path, null, opts);

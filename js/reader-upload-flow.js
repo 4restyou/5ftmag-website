@@ -41,12 +41,14 @@
   }
 
   function retryable(error) {
-    if (['AUTH_EXPIRED', 'AUTH_REQUIRED', 'RLS_DENIED', 'UPLOAD_TOOL'].includes(error?.code)) return false;
+    if (['AUTH_EXPIRED', 'AUTH_REQUIRED', 'RLS_DENIED', 'UPLOAD_TOOL', 'DUPLICATE'].includes(error?.code)) return false;
     const status = Number(error?.status || error?.statusCode);
     if (status >= 400 && status < 500 && ![408, 413, 429].includes(status)) return false;
     // code 가 없는 옛 경로의 대체 판정
     return !/로그인|권한|세션|ログイン|権限|セッション|row.level security|unauthorized|forbidden|TUS 클라이언트/i.test(error?.message || '');
   }
+
+  const DUPLICATE_MESSAGE = () => tr('이미 올리신 사진이에요. 같은 파일은 한 번만 올릴 수 있어요. 다른 사진을 골라 주세요.', 'You have already uploaded this photo. The same file can only be submitted once. Please choose another photo.', 'この写真はすでにアップロードされています。同じファイルは一度しか送信できません。別の写真を選んでください。');
 
   async function uploadPhoto({
     file,
@@ -95,6 +97,11 @@
     );
     if (blob.size > MAX_UPLOAD_BYTES) throw codedError(tr('사진 용량이 큽니다. 5MB 이하 이미지로 다시 시도해 주세요.', 'The photo is too large. Please try an image under 5MB.', '写真の容量が大きすぎます。5MB 以下の画像でもう一度お試しください。'), 'FILE_TOO_LARGE');
 
+    // 사진 지문(원본 SHA-256 · 줄인 사진 dHash). 계산에 실패해도 업로드는 그대로 진행한다.
+    const fingerprint = window.PhotoFingerprint
+      ? await window.PhotoFingerprint.fingerprintUpload(file, blob).catch(() => ({ sha256: null, phash: null }))
+      : { sha256: null, phash: null };
+
     markProgress('auth', tr('로그인 상태 확인 중', 'Checking sign-in', 'ログイン状態を確認中'), tr('업로드 권한을 확인하고 있어요.', 'Checking your upload permission.', 'アップロードの権限を確認しています。'));
     let user = readLocalJwtUser();
     if (!user) {
@@ -102,6 +109,17 @@
       user = session?.user;
     }
     if (!user) throw codedError(tr('로그인이 만료되었어요. 다시 로그인한 뒤 제출해 주세요.', 'Your sign-in has expired. Please sign in again and submit.', 'ログインの有効期限が切れました。もう一度ログインしてから送信してください。'), 'AUTH_EXPIRED');
+
+    // 같은 원본 파일을 이미 올렸으면 저장소에 보내기 전에 멈춘다. 확인이 실패하면(오프라인 등)
+    // 그냥 진행하고, 저장 단계의 유니크 인덱스가 마지막으로 막는다.
+    if (fingerprint.sha256 && typeof db.submissions.existsBySha === 'function') {
+      const existingId = await withNetworkTimeout(
+        signal => db.submissions.existsBySha(fingerprint.sha256, { signal }),
+        remaining(6000),
+        tr('중복 사진 확인', 'Duplicate check', '重複写真の確認')
+      ).catch(() => null);
+      if (existingId) throw codedError(DUPLICATE_MESSAGE(), 'DUPLICATE');
+    }
 
     if (uploadState.userId !== user.id) {
       uploadState.userId = user.id;
@@ -235,11 +253,14 @@
       triedPaths,
       user,
       uploadBytes: activeBlob.size,
+      sha256: fingerprint.sha256,
+      phash: fingerprint.phash,
     };
   }
 
   window.ReaderUploadFlow = {
     uploadPhoto,
+    duplicateMessage: DUPLICATE_MESSAGE,
     readerUploadTimeoutMs,
     retryable,
     withNetworkTimeout,

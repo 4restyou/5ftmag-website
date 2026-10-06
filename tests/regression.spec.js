@@ -963,6 +963,61 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
   await expect(page.locator('#rs-modal-title')).toHaveText(/제출 완료/, { timeout: 5000 });
 });
 
+// 같은 사람이 같은 원본 파일을 다시 올리면 막는다(원본 SHA-256). 업로드 전 확인에서 걸리는 경우와,
+// 동시에 두 번 보내 저장 단계의 유니크 인덱스에 걸리는 경우를 함께 본다.
+for (const where of ['precheck', 'insert']) {
+  test(`같은 사진 파일을 다시 올리면 중복 안내로 막는다: ${where}`, async ({ page }) => {
+    await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+    await page.route('**/js/image-processor.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+    await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+    await page.addInitScript((mode) => {
+      window.__dupe = { uploads: 0, removed: [] };
+      window.processImageForUpload = async () => ({ blob: new Blob(['ok'], { type: 'image/jpeg' }), width: 1200, height: 800 });
+      window.PhotoFingerprint = { fingerprintUpload: async () => ({ sha256: 'a'.repeat(64), phash: '00000000000000ff' }) };
+      window.MagDB = {
+        isReady: () => true,
+        auth: { getSession: async () => ({ user: { id: 'user-1' } }), getUser: async () => ({ id: 'user-1' }), onChange: () => {} },
+        profiles: { getMine: async () => ({ is_editor: false }) },
+        submissions: {
+          existsBySha: async () => (mode === 'precheck' ? 'sub-0' : null),
+          uploadPhoto: async () => { window.__dupe.uploads++; return { error: null }; },
+          uploadPhotoResumable: async () => { window.__dupe.uploads++; return { error: null }; },
+          create: async () => (mode === 'insert'
+            ? { error: { code: 'DUPLICATE', message: 'duplicate key value violates unique constraint "reader_submissions_user_source_sha256_key"' } }
+            : { error: null }),
+          findOwn: async () => ({ data: null, error: null }),
+          removePhoto: async (p) => { window.__dupe.removed.push(p); },
+          listApproved: async () => [],
+        },
+        notifications: { unreadCount: async () => 0, list: async () => [], markAllRead: async () => ({ error: null }) },
+        realtime: { subscribeNotifications: async () => null },
+        favorites: { idsForType: async () => new Set(), toggle: async () => ({ error: null }) },
+        cameraOverrides: { list: async () => new Map() },
+      };
+    }, where);
+
+    await page.goto('/');
+    await page.locator('.rs-trigger:visible').first().click();
+    await expect(page.locator('#rs-form')).toBeVisible({ timeout: 5000 });
+    await page.locator('input[name="photo"]').setInputFiles({
+      name: 'renamed-copy.jpg',
+      buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=', 'base64'),
+      mimeType: 'image/png',
+    });
+    await page.locator('input[name="submitter_name"]').fill('테스트');
+    await page.locator('#rs-film-trigger').click();
+    await page.locator('.rs-film-option').first().click();
+    await page.locator('input[name="consent"]').check();
+    await page.locator('#rs-form button[type="submit"]').click();
+
+    await expect(page.locator('#rs-upload-status')).toContainText('이미 올리신 사진이에요', { timeout: 5000 });
+    await expect(page.locator('#rs-modal-title')).not.toHaveText(/제출 완료/);
+    const state = await page.evaluate(() => window.__dupe);
+    if (where === 'precheck') expect(state.uploads).toBe(0);           // 저장소에 보내기 전에 멈춘다
+    else expect(state.removed.length).toBe(1);                         // 이미 올린 파일은 지운다
+  });
+}
+
 test('카메라 입력 힌트는 브랜드+모델과 짧은 모델명 모두 찾는다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({
     contentType: 'text/javascript',
