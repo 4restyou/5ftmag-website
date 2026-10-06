@@ -133,8 +133,8 @@
     '/js/reader-camera-input.js?v=20261002-f2',
     '/js/reader-film-picker.js?v=20261002-f2',
     '/js/reader-upload-form-ui.js?v=20261002-f2',
-    '/js/reader-upload-flow.js?v=20261002-f2',
-    '/js/reader-submissions.js?v=20261002-f2',
+    '/js/reader-upload-flow.js?v=20261006-photo-dedupe',
+    '/js/reader-submissions.js?v=20261006-photo-dedupe',
   ];
 
   // 관리 화면처럼 reader-submissions.js 를 직접 싣는 페이지에선 로더는 매칭 함수만 준다.

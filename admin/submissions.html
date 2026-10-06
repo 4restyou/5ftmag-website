@@ -270,6 +270,36 @@
       font-weight: 700;
       white-space: nowrap;
     }
+    /* 중복 의심 — 같은 사람이 올린 닮은 사진(phash). 막지 않고 편집부가 판단하도록 표시만 한다 */
+    .sub-card-dup {
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: var(--badge-radius, 4px);
+      background: #fee2e2;
+      color: #7f1d1d;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .sub-card-dupref { display: flex; align-items: center; gap: 10px; }
+    .sub-card-row:has(> .sub-card-dupref) { align-items: center; }
+    .sub-card-dupref img { width: 72px; height: 54px; object-fit: cover; cursor: zoom-in; border-radius: 3px; }
+    .dupe-tools {
+      max-width: 1100px; margin: 0 auto 16px; padding: 12px 24px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .dupe-tools button {
+      font: inherit; font-size: 12px; padding: 6px 12px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 3px;
+    }
+    .dupe-tools button:disabled { opacity: .5; cursor: default; }
+    .dupe-pairs { max-width: 1100px; margin: 0 auto 24px; padding: 0 24px; display: grid; gap: 12px; }
+    .dupe-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
+    .dupe-pair-head { grid-column: 1 / -1; font-size: 13px; color: var(--text-muted); }
+    .dupe-side { display: grid; gap: 6px; font-size: 12px; }
+    .dupe-side img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; cursor: zoom-in; border-radius: 3px; }
+    .dupe-side button { justify-self: start; }
     /* ♡ 카운트 배지 (편집부 전용 — 우수작 선정 보조) */
     .sub-card-likes {
       display: inline-block; margin-left: 8px;
@@ -567,6 +597,13 @@
     <button type="button" class="admin-filter-chip" id="likeSort" aria-pressed="false" title="종이 매거진 우수작 선정 보조용 — 편집부에만 보입니다">좋아요 순</button>
     <button type="button" class="admin-filter-chip" id="themeFilter" aria-pressed="false">테마 응모만</button>
   </div>
+  <!-- 중복 거르기: 기존 사진 지문 채우기 + 같은 사람의 닮은 사진 묶음 -->
+  <div class="dupe-tools" id="dupeTools">
+    <span id="dupeStatus">사진 지문 확인 중…</span>
+    <button type="button" id="dupeBackfill" hidden>기존 사진 지문 채우기</button>
+    <button type="button" id="dupePairsBtn">중복 의심 묶음 보기</button>
+  </div>
+  <div class="dupe-pairs" id="dupePairs" hidden></div>
   <!-- 승인됨/반려됨 탭 전용 검색·날짜 필터 -->
   <div class="admin-history-filters" id="historyFilters" hidden>
     <input type="search" id="historyQuery" placeholder="응모자·인스타·필름 으로 검색" aria-label="응모 검색" autocomplete="off" />
@@ -597,17 +634,17 @@
 <!-- util.js 는 reader-submissions 가 첫 줄에서 MagUtil 을 쓰므로 그보다 먼저 -->
   <script src="../js/util.js?v=20261003-member-stability" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
-<script src="../js/db/admin.js?v=20261002-product-audit" defer></script>
+<script src="../js/db/admin.js?v=20261006-photo-dedupe" defer></script>
 <script src="../js/db/commerce.js?v=20261002-f2" defer></script>
-  <script src="../js/db-client.js?v=20261003-member-stability" defer></script>
-<script src="../js/image-processor.js?v=20261002-ja" defer></script>
+  <script src="../js/db-client.js?v=20261006-photo-dedupe" defer></script>
+<script src="../js/image-processor.js?v=20261006-photo-dedupe" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20261002-f2" defer></script>
 <script src="../js/reader-film-picker.js?v=20261002-f2" defer></script>
 <script src="../js/reader-upload-form-ui.js?v=20261002-f2" defer></script>
-<script src="../js/reader-upload-flow.js?v=20261002-f2" defer></script>
-<script src="../js/reader-upload-loader.js?v=20261002-f2" defer></script>
-<script src="../js/reader-submissions.js?v=20261002-f2" defer></script>
+<script src="../js/reader-upload-flow.js?v=20261006-photo-dedupe" defer></script>
+<script src="../js/reader-upload-loader.js?v=20261006-photo-dedupe" defer></script>
+<script src="../js/reader-submissions.js?v=20261006-photo-dedupe" defer></script>
 <script src="../js/film-name-picker.js?v=20261002-f2"></script>
 <script src="../js/potw-picker.js?v=20260914-potwreorder"></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
@@ -722,6 +759,7 @@ async function loadList() {
     STATE.rows = slice;
     $('list').innerHTML = slice.map(renderCard).join('');
     bindCardActions();
+    fillDupRefs();
   updateSelectAllState();
     renderPagination(totalAll, totalPages);
     return;
@@ -761,6 +799,7 @@ async function loadList() {
   }
   $('list').innerHTML = STATE.rows.map(renderCard).join('');
   bindCardActions();
+  fillDupRefs();
   updateSelectAllState();
   renderPagination(total, totalPages);
 }
@@ -846,6 +885,122 @@ function getContributorOpenLink(r) {
   return `<a class="sub-btn sub-btn-nav" href="${href}" target="_blank" rel="noopener" title="이 작가의 사진 모아보기">작가 사진 모아보기 ↗</a>`;
 }
 
+// 「중복 의심」 카드가 가리키는 기존 사진을 한 번에 불러와 작은 사진으로 붙인다.
+async function fillDupRefs() {
+  const slots = [...document.querySelectorAll('[data-dup-ref]')];
+  if (!slots.length) return;
+  const ids = [...new Set(slots.map(el => el.dataset.dupRef))];
+  const { data, error } = await db().review.byIds(ids);
+  const byId = new Map((data || []).map(r => [String(r.id), r]));
+  for (const el of slots) {
+    const ref = byId.get(String(el.dataset.dupRef));
+    if (error || !ref) { el.textContent = '원본을 찾지 못했어요(삭제됐을 수 있음)'; continue; }
+    const url = publicUrl(ref.storage_path);
+    el.innerHTML = `<img src="${escapeHtml(url)}" alt="" loading="lazy" data-zoom-ref="${escapeHtml(url)}" />`
+      + `<span>${escapeHtml(ref.status)} · ${fmtDate(ref.created_at)}</span>`;
+    el.querySelector('img').addEventListener('click', () => openZoom(url));
+  }
+}
+
+function openZoom(url) {
+  $('imgZoomTarget').src = url;
+  $('imgZoom').classList.add('open');
+}
+
+// ── 기존 사진 지문 채우기 ──
+// 아직 phash 가 없는 사진을 저장된 파일로 하나씩 계산해 넣는다(js/image-processor.js 의
+// PhotoFingerprint, 새 업로드와 같은 계산). 원본 파일이 없으니 SHA-256 은 채우지 않는다.
+// 실패한 사진(파일이 없는 경우 등)은 건너뛰고 끝에 수를 알려 준다. 중간에 닫아도 다시
+// 누르면 남은 것부터 이어 간다.
+async function refreshDupeStatus() {
+  const missing = await db().review.countMissingPhash();
+  STATE.phashMissing = missing;
+  $('dupeStatus').textContent = missing > 0
+    ? `사진 지문이 없는 사진 ${missing.toLocaleString('ko-KR')}장`
+    : '모든 사진에 지문이 있어요';
+  $('dupeBackfill').hidden = missing === 0;
+}
+
+async function runPhashBackfill() {
+  const btn = $('dupeBackfill');
+  if (!window.PhotoFingerprint?.phashFromUrl) { window.notify?.('사진 지문 모듈을 불러오지 못했어요. 새로고침해 주세요.', 'danger'); return; }
+  if (!confirm(`지문이 없는 사진 ${Number(STATE.phashMissing || 0).toLocaleString('ko-KR')}장을 지금 계산합니다. 사진을 하나씩 받아 계산하므로 몇 분 걸려요. 이 창을 닫지 마세요.`)) return;
+  btn.disabled = true;
+  const skip = [];
+  let done = 0, failed = 0;
+  const total = STATE.phashMissing || 0;
+  const show = () => { $('dupeStatus').textContent = `지문 계산 중… ${done.toLocaleString('ko-KR')} / ${total.toLocaleString('ko-KR')}장` + (failed ? ` (건너뜀 ${failed})` : ''); };
+  show();
+  for (;;) {
+    const { data, error } = await db().review.listMissingPhash(40, skip);
+    if (error) { window.notify?.('목록을 불러오지 못했어요. (' + error.message + ')', 'danger'); break; }
+    if (!data?.length) break;
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < data.length) {
+        const row = data[cursor++];
+        try {
+          const phash = await window.PhotoFingerprint.phashFromUrl(publicUrl(row.storage_path));
+          const { error: e } = await db().review.setPhash(row.id, phash);
+          if (e) throw e;
+          done++;
+        } catch (err) {
+          console.warn('[phash backfill]', row.id, err?.message || err);
+          skip.push(row.id);
+          failed++;
+        }
+        show();
+      }
+    };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+  }
+  btn.disabled = false;
+  window.notify?.(`지문 계산을 마쳤어요. ${done.toLocaleString('ko-KR')}장 완료` + (failed ? `, ${failed}장은 파일을 읽지 못해 건너뛰었어요.` : '.'), failed ? 'danger' : 'info');
+  await refreshDupeStatus();
+}
+
+// ── 중복 의심 묶음 ── 같은 사람이 올린 닮은 두 장을 나란히 보여 준다.
+async function showDupePairs() {
+  const box = $('dupePairs');
+  if (!box.hidden && box.dataset.loaded) { box.hidden = true; $('dupePairsBtn').textContent = '중복 의심 묶음 보기'; return; }
+  box.hidden = false;
+  box.innerHTML = '<div class="empty-state">찾는 중…</div>';
+  const { data, error } = await db().review.duplicatePairs();
+  box.dataset.loaded = '1';
+  $('dupePairsBtn').textContent = '중복 의심 묶음 닫기';
+  if (error) { box.innerHTML = `<div class="empty-state">묶음을 불러오지 못했어요.<br><small>${escapeHtml(error.message)}</small></div>`; return; }
+  if (!data?.length) {
+    box.innerHTML = `<div class="empty-state">같은 사람이 올린 닮은 사진이 없어요.${STATE.phashMissing ? ' (지문이 없는 사진은 비교하지 않아요. 먼저 「기존 사진 지문 채우기」 를 눌러 주세요.)' : ''}</div>`;
+    return;
+  }
+  const who = (p) => escapeHtml(p.submitter_name || p.instagram || '이름 없음');
+  const side = (id, path, status, created) => `
+    <div class="dupe-side" data-id="${escapeHtml(id)}">
+      <img src="${escapeHtml(publicUrl(path))}" alt="" loading="lazy" data-zoom-pair="${escapeHtml(publicUrl(path))}" />
+      <span>${escapeHtml(status)} · ${fmtDate(created)}</span>
+      ${status !== 'rejected' ? `<button type="button" data-dupe-reject="${escapeHtml(id)}">이 사진 반려(중복)</button>` : ''}
+    </div>`;
+  box.innerHTML = `<p class="dupe-pair-head">닮은 사진 ${data.length}쌍. 차이가 작을수록 같은 사진일 가능성이 커요. 연속 컷처럼 다른 사진일 수도 있으니 비교해 보고 정해 주세요.</p>`
+    + data.map(p => `
+    <div class="dupe-pair">
+      <div class="dupe-pair-head">${who(p)} · 차이 ${p.distance}/64</div>
+      ${side(p.first_id, p.first_path, p.first_status, p.first_created)}
+      ${side(p.second_id, p.second_path, p.second_status, p.second_created)}
+    </div>`).join('');
+  box.querySelectorAll('[data-zoom-pair]').forEach(img => img.addEventListener('click', () => openZoom(img.dataset.zoomPair)));
+  box.querySelectorAll('[data-dupe-reject]').forEach(btn => btn.addEventListener('click', async () => {
+    if (!confirm('이 사진을 중복으로 반려할까요? 제출자에게 반려 알림이 갑니다.')) return;
+    btn.disabled = true;
+    const { error: e } = await db().review.patch(btn.dataset.dupeReject, {
+      status: 'rejected', rejection_reason: '같은 사진이 이미 올라와 있어 한 장만 싣기로 했어요.',
+      reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id,
+    });
+    if (e) { window.notify?.('반려하지 못했어요. (' + e.message + ')', 'danger'); btn.disabled = false; return; }
+    btn.replaceWith(Object.assign(document.createElement('span'), { textContent: '반려함' }));
+    await Promise.all([loadCounts(), loadList()]);
+  }));
+}
+
 function renderCard(r) {
   const url = publicUrl(r.storage_path);
   const igNorm = (r.instagram || '').replace(/^@/, '');
@@ -864,6 +1019,9 @@ function renderCard(r) {
     ? `<span class="sub-card-featured" data-date="${escapeHtml(r.featured_at)}" title="${r.featured_at > todayStr ? '예약된 이주의 사진' : '이주의 사진으로 걸린 사진'}">${r.featured_at > todayStr ? '예약' : '이주의 사진'} ${escapeHtml(r.featured_at)}</span>`
     : '';
   const filmMatchHint = getFilmMatchHint(r.film);
+  const dupBadge = r.dup_of
+    ? `<span class="sub-card-dup" title="같은 사람이 올린 사진 중 닮은 것이 있어요. 아래 '비슷한 사진' 과 비교해 주세요.">중복 의심 · 차이 ${Number(r.dup_distance) || 0}/64</span>`
+    : '';
 
   // 대기 탭에서만 일괄 처리용 체크박스 노출 (승인됨·반려됨 탭은 단건만)
   const checkbox = STATE.status === 'pending'
@@ -881,7 +1039,13 @@ function renderCard(r) {
           ${themeBadge}
           ${likeBadge}
           ${featBadge}
+          ${dupBadge}
         </div>
+        ${r.dup_of ? `
+        <div class="sub-card-row">
+          <span class="k">비슷한 사진</span>
+          <span class="v sub-card-dupref" data-dup-ref="${escapeHtml(r.dup_of)}">불러오는 중…</span>
+        </div>` : ''}
         <div class="sub-card-row">
           <span class="k">제출</span>
           <span class="v">${fmtDate(r.created_at)}</span>
@@ -1292,8 +1456,10 @@ async function loadReportBadge() {
   // 필름 카탈로그를 먼저 로드 — getFilmMatchHint 가 STATE.films 에 의존
   // (loadList 가 먼저 끝나면 모든 카드에 "라이브러리에 없는 필름" 으로 잘못 표시됨)
   await loadFilms();
-  await Promise.all([loadCounts(), loadLikes(), loadList(), loadReportBadge()]);
+  await Promise.all([loadCounts(), loadLikes(), loadList(), loadReportBadge(), refreshDupeStatus()]);
   updateSelectAllRow();
+  $('dupeBackfill').addEventListener('click', runPhashBackfill);
+  $('dupePairsBtn').addEventListener('click', showDupePairs);
 })();
 </script>
 

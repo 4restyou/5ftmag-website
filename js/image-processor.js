@@ -218,4 +218,78 @@
   }
 
   window.processImageForUpload = processImageForUpload;
+
+  // ════════════════════════════════════════════════
+  // 사진 지문 — 같은 사람이 같은 사진을 다시 올리는 것을 거른다
+  //   sha256: 올린 원본 파일 바이트. 같은 파일이면 저장을 막는다(DB 유니크 인덱스).
+  //   phash : 저장되는(줄인) 사진의 dHash 64비트. 닮으면 "중복 의심" 으로 표시만 한다.
+  // 기존 사진의 phash 는 관리 화면이 저장된 파일로 같은 방식으로 계산한다(fromUrl).
+  // ════════════════════════════════════════════════
+  async function sha256Hex(file) {
+    if (!file || !window.crypto?.subtle) return null;
+    const buf = await window.crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+    return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function decodeForHash(blob) {
+    if (typeof createImageBitmap === 'function') return createImageBitmap(blob);
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      return img;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  // dHash: 9×8 회색조로 줄여 이웃한 두 칸의 밝기를 비교한다. 한 번에 줄이면 큰 사진에서
+  // 표본이 튀므로 72×64 를 거쳐 두 단계로 줄인다.
+  async function dHashHex(blob) {
+    if (!blob) return null;
+    const src = await decodeForHash(blob);
+    const mid = document.createElement('canvas');
+    mid.width = 72; mid.height = 64;
+    const mctx = mid.getContext('2d');
+    mctx.imageSmoothingEnabled = true;
+    mctx.imageSmoothingQuality = 'high';
+    mctx.drawImage(src, 0, 0, 72, 64);
+    if (typeof src.close === 'function') src.close();
+    const small = document.createElement('canvas');
+    small.width = 9; small.height = 8;
+    const sctx = small.getContext('2d', { willReadFrequently: true });
+    sctx.imageSmoothingEnabled = true;
+    sctx.imageSmoothingQuality = 'high';
+    sctx.drawImage(mid, 0, 0, 9, 8);
+    const px = sctx.getImageData(0, 0, 9, 8).data;
+    const lum = (x, y) => {
+      const i = (y * 9 + x) * 4;
+      return px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114;
+    };
+    let hex = '';
+    for (let y = 0; y < 8; y++) {
+      let byte = 0;
+      for (let x = 0; x < 8; x++) byte = (byte << 1) | (lum(x, y) > lum(x + 1, y) ? 1 : 0);
+      hex += byte.toString(16).padStart(2, '0');
+    }
+    return hex;
+  }
+
+  // 올리는 경로: 원본 파일과 줄인 결과를 받아 두 지문을 낸다. 실패해도 업로드는 막지 않는다.
+  async function fingerprintUpload(file, processedBlob) {
+    const [sha256, phash] = await Promise.all([
+      sha256Hex(file).catch(() => null),
+      dHashHex(processedBlob).catch(() => null),
+    ]);
+    return { sha256, phash };
+  }
+
+  async function phashFromUrl(url, opts = {}) {
+    const res = await fetch(url, { mode: 'cors', cache: 'no-store', signal: opts.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return dHashHex(await res.blob());
+  }
+
+  window.PhotoFingerprint = { sha256Hex, dHashHex, fingerprintUpload, phashFromUrl };
 })();
