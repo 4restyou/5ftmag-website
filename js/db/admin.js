@@ -11,6 +11,7 @@
     // 응모 검토 — 필터 (query 텍스트 + month YYYY-MM) 공통 적용 헬퍼
     function applyReviewFilters(q, opts) {
       if (opts.themeOnly) q = q.not('theme_month', 'is', null);
+      if (opts.duplicateOnly) q = q.eq('duplicate_rejected', true);
       if (opts.query) {
         // submitter_name / instagram / film 셋 중 하나라도 부분일치
         const safe = String(opts.query).replace(/[%,\\]/g, ' ').trim();
@@ -374,6 +375,21 @@
         async duplicatePairs() {
           const c = client(); if (!c) return { data: [], error: { message: 'unavailable', code: 'UNAVAILABLE' } };
           return c.rpc('admin_reader_duplicate_pairs', { p_max_distance: null });
+        },
+        // 중복 반려: 원래 상태를 남기고 반려한다. 독자에게 알리지 않는다(DB 트리거).
+        async rejectDuplicate(id) {
+          const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+          return c.rpc('admin_reject_duplicate', { p_id: id });
+        },
+        // 중복 반려 취소: 남겨 둔 원래 상태(승인됨/대기)로 되돌린다. 알림 없음.
+        async undoDuplicateReject(id) {
+          const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+          return c.rpc('admin_undo_duplicate_reject', { p_id: id });
+        },
+        // 「다른 사진이에요」: 이 짝을 묶음에서 빼고 중복 의심 표시를 지운다.
+        async dismissDuplicatePair(a, b) {
+          const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+          return c.rpc('admin_dismiss_duplicate_pair', { p_a: a, p_b: b });
         },
         // 두 사진의 게재일을 맞바꾼다. 관리 화면의 위/아래 화살표가 쓴다.
         //
