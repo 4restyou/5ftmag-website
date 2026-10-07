@@ -1,6 +1,6 @@
 # 5ft magazine (오피트)
 
-> 필름 사진 전문 매거진입니다. 발행처는 4rest, 광주에 있습니다. 필름 사진에 관한 기사, 필름 195종의 카탈로그, 전국 필름 현상소 95곳의 주소와 현상 가격, 이북과 종이 매거진, 중고 장터, 독자 사진 투고를 다룹니다. 모든 내용은 한국어입니다.
+> 필름 사진 전문 매거진입니다. 발행처는 4rest, 광주에 있습니다. 필름 사진에 관한 기사, 필름 196종의 카탈로그, 전국 필름 현상소 95곳의 주소와 현상 가격, 이북과 종이 매거진, 중고 장터, 독자 사진 투고를 다룹니다. 모든 내용은 한국어입니다.
 
 사이트 주소: https://www.5ftmag.com/
 전체 주소 목록: https://www.5ftmag.com/sitemap.xml
@@ -9,7 +9,7 @@ RSS: https://www.5ftmag.com/rss.xml
 ## 주요 페이지
 
 - [기사 목록](https://www.5ftmag.com/stories.html): 필름 사진, 사진가, 필름 제품, 전시를 다룬 기사 모음
-- [필름 카탈로그](https://www.5ftmag.com/films.html): 필름 195종의 감도·종류·포맷과 독자들이 찍은 사진
+- [필름 카탈로그](https://www.5ftmag.com/films.html): 필름 196종의 감도·종류·포맷과 독자들이 찍은 사진
 - [현상소 목록](https://www.5ftmag.com/labs.html): 전국 필름 현상소 95곳의 주소·스캔 화질·현상 가격
 - [필자 목록](https://www.5ftmag.com/authors.html): 이 매거진에 글을 쓴 10명(팀)의 아카이브
 - [매거진](https://www.5ftmag.com/books.html): 종이 매거진과 이북
@@ -129,6 +129,7 @@ RSS: https://www.5ftmag.com/rss.xml
 - [Fujifilm Fujicolor Industrial 100](https://www.5ftmag.com/film/industrial100.html): ISO 100, Color Negative, 35mm
 - [Fujifilm Fujicolor Industrial 400](https://www.5ftmag.com/film/industrial400.html): ISO 400, Color Negative, 35mm
 - [Fujifilm Fujicolor Super HG 1600](https://www.5ftmag.com/film/fujisuperhg1600.html): ISO 1600, Color Negative, 35mm
+- [Fujifilm Fujicolor Superia 100](https://www.5ftmag.com/film/fujisuperia100.html): ISO 100, Color Negative, 35mm
 - [Fujifilm Natura 1600](https://www.5ftmag.com/film/natura1600.html): ISO 1600, Color Negative, 35mm
 - [Fujifilm Neopan 1600 Super Presto](https://www.5ftmag.com/film/fujineopan1600.html): ISO 1600, Black & White, 35mm
 - [Fujifilm Neopan 400 Presto](https://www.5ftmag.com/film/fujineopan400.html): ISO 400, Black & White, 35mm
