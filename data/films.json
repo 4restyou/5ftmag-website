@@ -2278,6 +2278,38 @@
     "canThumbnail": "img/films/superia400-can.webp",
     "canThumbnailStatus": "set"
   },
+  "fujisuperia100": {
+    "slug": "fujisuperia100",
+    "tier": "library",
+    "brand": "FUJIFILM",
+    "name": "Fujicolor Superia 100",
+    "displayName": "Fujifilm Fujicolor Superia 100",
+    "aliases": [
+      "Superia 100",
+      "Fujicolor Superia 100",
+      "Fuji Superia 100",
+      "Fujifilm Superia 100",
+      "Superia100",
+      "수페리아 100",
+      "수페리아100",
+      "후지 수페리아 100",
+      "후지필름 수페리아 100",
+      "후지컬러 수페리아 100",
+      "fujisuperia100",
+      "superia100"
+    ],
+    "desc": "Fujifilm Superia 라인의 ISO 100 컬러 네거티브. 같은 ISO 의 Fujicolor 100 과는 다른 필름으로, 2009년 무렵 단종돼 지금은 유통기한이 지난 재고로만 만날 수 있어요. 오래된 롤은 색이 틀어지거나 감도가 떨어질 수 있어 한 스톱쯤 넉넉히 주는 편이 안전합니다. C-41 현상.",
+    "iso": "100",
+    "type": "Color Negative",
+    "format": "35mm",
+    "photographers": [],
+    "photos": [],
+    "descEn": "An ISO 100 color negative from Fujifilm's Superia line. It is a different film from Fujicolor 100 of the same speed. It was discontinued around 2009, so today it turns up only as expired stock. Old rolls can shift color or lose speed, so giving it about a stop of extra exposure is the safer bet. C-41 processing.",
+    "descJa": "FujifilmのSuperiaラインのISO 100カラーネガ。同じISOのFujicolor 100とは別のフィルムで、2009年ごろに生産終了し、いまは期限切れの在庫でしか出会えない。古いロールは色がずれたり感度が落ちたりすることがあるので、1段ほど多めに露光すると安心。C-41現像。",
+    "boxThumbnailStatus": "pending",
+    "canThumbnail": "img/films/fujisuperia100-can.webp",
+    "canThumbnailStatus": "set"
+  },
   "velvia100": {
     "slug": "velvia100",
     "tier": "library",
