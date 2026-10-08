@@ -87,7 +87,7 @@
   function setHtml(html) { results.innerHTML = html; }
 
   function renderHint() {
-    setHtml(`<p class="search-hint">${i18n.t('키워드 한 줄이면 글·필름·책·현상소·매물을 한꺼번에 찾아요.', 'One search covers articles, films, books, labs and market listings.', 'キーワードひとつで、記事・フィルム・本・現像所・出品をまとめて検索できます。')}</p>`);
+    setHtml(`<p class="search-hint">${i18n.t('키워드 한 줄이면 글·필름·책·현상소·수리실·매물을 한꺼번에 찾아요.', 'One search covers articles, films, books, labs, repair shops and market listings.', 'キーワードひとつで、記事・フィルム・本・現像所・修理店・出品をまとめて検索できます。')}</p>`);
   }
 
   function renderEmpty(q) {
@@ -151,11 +151,11 @@
       .replace(/^-+|-+$/g, '');
   }
 
-  function cardLab(l, q) {
+  function cardLab(l, q, kicker = 'LAB') {
     const href = i18n.isEn ? i18n.url('/labs.html?lab=' + encodeURIComponent(labSlug(l))) : `labs.html?lab=${encodeURIComponent(labSlug(l))}`;
     return `<a class="search-card" href="${href}">
       <div class="sc-body">
-        <div class="sc-kicker">LAB${l.region ? ' · ' + esc(l.region) : ''}</div>
+        <div class="sc-kicker">${kicker}${l.region ? ' · ' + esc(l.region) : ''}</div>
         <div class="sc-title">${highlight(l.name || '', q)}</div>
         ${l.address ? `<div class="sc-meta">${esc(l.address)}</div>` : ''}
       </div>
@@ -188,14 +188,25 @@
     </a>`;
   }
 
+  async function loadPlaces(api, staticPath, key) {
+    try {
+      const rows = api ? await api.list({ strict: true }) : null;
+      if (Array.isArray(rows)) return rows;
+    } catch (_) { /* 정적 목록으로 */ }
+    const data = await fetchJsonSafe(staticPath);
+    return Array.isArray(data?.[key]) ? data[key] : [];
+  }
+
   async function searchAll(q) {
     if (!q) { renderHint(); return; }
     setHtml(`<p class="search-hint">${i18n.t('검색 중…', 'Searching…', '検索中…')}</p>`);
     const tokens = tokenize(q);
 
-    const dbReady = db() && db().isReady && db().isReady();
+    // isReady() 는 누군가 클라이언트를 한 번 만든 뒤에야 true 가 된다. 목록 함수는
+    // 클라이언트가 없으면 스스로 만들므로 MagDB 가 있으면 바로 묻는다.
+    const dbReady = !!db();
 
-    const [storiesArr, filmsObj, contributorsArr, webzineArr, labsArr, marketArr] = await Promise.all([
+    const [storiesArr, filmsObj, contributorsArr, webzineArr, labsArr, marketArr, repairsArr] = await Promise.all([
       window.MagUtil.loadStories(),
       window.FilmsCatalogLoader
         ? window.FilmsCatalogLoader.load({ staticPath: '/data/films.json' }).then(result => result.data).catch(() => ({}))
@@ -204,8 +215,10 @@
       // 아이디로 찾을 수 있다.
       fetchJsonSafe('/data/contributors.json'),
       dbReady ? db().webzine.listPublished() : Promise.resolve([]),
-      dbReady ? db().labs.list() : Promise.resolve([]),
+      // 현상소·수리실은 현상소 페이지처럼 DB 를 못 읽으면 정적 목록으로 찾는다.
+      loadPlaces(dbReady && db().labs, '/data/labs.json', 'labs'),
       dbReady ? db().market.list({ limit: 500 }) : Promise.resolve([]),
+      loadPlaces(dbReady && db().repairs, '/data/repairs.json', 'repairs'),
     ]);
 
     // 도메인별 점수 매기기. weight 는 사용자 검색 의도에 맞춰 제목 > 부제목 > 본문 순.
@@ -262,20 +275,31 @@
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score);
 
-    const labs = (labsArr || [])
-      .map((l) => ({
-        item: l,
-        score: scoreMatch(tokens, [
-          { text: l.name, weight: 10 },
-          { text: l.region, weight: 5 },
-          { text: (l.tags || []).join(' '), weight: 4 },
-          { text: l.address, weight: 3 },
-          { text: l.summary, weight: 2 },
-          { text: l.description, weight: 2 },
-        ]),
-      }))
+    // DB 행은 snake_case(name_en), 정적 labs.json 은 camelCase(nameEn) 라 둘 다 본다.
+    const placeFields = (l) => [
+      { text: l.name, weight: 10 },
+      { text: l.name_en ?? l.nameEn, weight: 10 },
+      { text: l.name_ja ?? l.nameJa, weight: 10 },
+      { text: l.region, weight: 5 },
+      { text: l.specialty, weight: 4 },
+      { text: l.specialty_en, weight: 4 },
+      { text: l.specialty_ja, weight: 4 },
+      { text: l.address, weight: 3 },
+      { text: l.address_en ?? l.addressEn, weight: 3 },
+      { text: l.address_ja ?? l.addressJa, weight: 3 },
+      { text: l.features, weight: 2 },
+      { text: l.features_en ?? l.featuresEn, weight: 2 },
+      { text: l.features_ja ?? l.featuresJa, weight: 2 },
+      { text: l.description, weight: 2 },
+      { text: l.description_en, weight: 2 },
+      { text: l.description_ja, weight: 2 },
+    ];
+    const rankPlaces = (arr) => (arr || [])
+      .map((l) => ({ item: l, score: scoreMatch(tokens, placeFields(l)) }))
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score);
+    const labs = rankPlaces(labsArr);
+    const repairs = rankPlaces(repairsArr);
 
     const market = (marketArr || [])
       .map((m) => ({
@@ -310,6 +334,7 @@
       { label: 'Contributors', items: contributors, all: i18n.isEn ? i18n.url('/films.html') : 'films.html', card: (x) => cardContributor(x.item, q) },
       { label: 'Books',    items: webzine, all: i18n.isEn ? i18n.url('/books.html') : 'books.html',                              card: (x) => cardWebzine(x.item, q) },
       { label: 'Labs',     items: labs,    all: i18n.isEn ? i18n.url('/labs.html') : 'labs.html',                               card: (x) => cardLab(x.item, q) },
+      { label: 'Repair Shops', items: repairs, all: i18n.isEn ? i18n.url('/labs.html') : 'labs.html',                         card: (x) => cardLab(x.item, q, 'REPAIR') },
       { label: 'Market',   items: market,  all: i18n.isEn ? i18n.url('/market.html') : 'market.html',                             card: (x) => cardMarket(x.item, q) },
     ];
 
