@@ -1,5 +1,26 @@
 [
   {
+    "id": "park-sungjin-kid-echo",
+    "title": "박성진의 《Kid Echo》, 그때 책에 싣지 못한 얼굴들",
+    "category": "photo",
+    "categoryLabel": "PHOTOBOOK",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-09",
+    "issue": "",
+    "thumbnail": "img/stories/park-sungjin-kid-echo/kid-echo-cheongnyangni-2008.webp",
+    "excerpt": "2000년대 서울의 십대를 찍은 박성진의 흑백사진이 스무 해 만에 사진집 《Kid Echo》로 나왔다. 2014년 《Kid Nostalgia》에서 빠졌던 사진들이다. 뉴욕의 Session Press 가 9월에 펴냈다.",
+    "titleEn": "Sung Jin Park's 《Kid Echo》: The Faces That Couldn't Make the Book",
+    "excerptEn": "Sung Jin Park's black-and-white photographs of Seoul teenagers in the 2000s arrive, twenty years on, as the photobook 《Kid Echo》. They were left out of 《Kid Nostalgia》 in 2014. New York's Session Press published the book in September.",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "Sung Jin Parkの《Kid Echo》、あのとき本に載せられなかった顔",
+    "excerptJa": "2000年代のソウルの十代を撮ったSung Jin Parkのモノクロ写真が、二十年を経て写真集《Kid Echo》になった。2014年の《Kid Nostalgia》から外れた写真だ。ニューヨークのSession Pressが9月に刊行した。",
+    "authorJa": "5ft.mag 編集部",
+    "films": [],
+    "page": "stories/park-sungjin-kid-echo.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "kaido-pasm-seoul",
     "title": "도쿄의 독립 갤러리 KAIDO, 사진가 셋이 서울에 온다",
     "category": "exhibition",

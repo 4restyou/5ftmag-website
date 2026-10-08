@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Mon, 05 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 09 Oct 2026 00:00:00 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>박성진의 《Kid Echo》, 그때 책에 싣지 못한 얼굴들</title>
+      <link>https://www.5ftmag.com/stories/park-sungjin-kid-echo.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/park-sungjin-kid-echo.html</guid>
+      <pubDate>Fri, 09 Oct 2026 00:00:00 GMT</pubDate>
+      <description>2000년대 서울의 십대를 찍은 박성진의 흑백사진이 스무 해 만에 사진집 《Kid Echo》로 나왔다. 2014년 《Kid Nostalgia》에서 빠졌던 사진들이다. 뉴욕의 Session Press 가 9월에 펴냈다.</description>
+      <category>PHOTOBOOK</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>도쿄의 독립 갤러리 KAIDO, 사진가 셋이 서울에 온다</title>
       <link>https://www.5ftmag.com/stories/kaido-pasm-seoul.html</link>
