@@ -11,6 +11,13 @@
   const i18n = window.i18n;
   const tr = i18n.t;
 
+  // 카탈로그에 등록한 지 30일이 안 된 필름.
+  const NEW_DAYS = 30;
+  function isNewFilm(film) {
+    const t = Date.parse(film.createdAt || '');
+    return Number.isFinite(t) && Date.now() - t < NEW_DAYS * 86400000;
+  }
+
   function renderFilmCard(slug, film, context = 'library-grid', options = {}) {
     const rollLimit = options.rollLimit || 36;
     const filmFavSlugs = options.filmFavSlugs || new Set();
@@ -25,6 +32,8 @@
     let badgeHtml = '';
     if (isFeatured && film.issue) {
       badgeHtml = `<span class="film-issue-tag">${escapeAttr(film.issue)}</span>`;
+    } else if (isNewFilm(film)) {
+      badgeHtml = `<span class="film-new-tag">NEW</span>`;
     }
 
     let imgHtml = '';

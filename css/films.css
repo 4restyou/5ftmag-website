@@ -107,6 +107,20 @@
   padding: 4px 10px;
   border-radius: 2px;
 }
+/* 등록한 지 30일이 안 된 필름 (js/films-cards.js isNewFilm) */
+.film-new-tag {
+  position: absolute;
+  top: 14px; left: 14px;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: var(--fw-heading);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  background: var(--text);
+  color: var(--bg);
+  padding: 5px 8px;
+  border-radius: 2px;
+}
 .film-count {
   position: absolute;
   bottom: 14px; right: 14px;

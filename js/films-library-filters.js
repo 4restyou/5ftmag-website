@@ -483,6 +483,11 @@
           // 사진이 없는 필름은 맨 뒤에서 이름순
           const diff = (latestPhotos.get(b[0]) || 0) - (latestPhotos.get(a[0]) || 0);
           if (diff !== 0) return diff;
+        } else if (mode === 'added') {
+          // 카탈로그 등록일(날짜 단위). 처음 한꺼번에 넣은 필름들은 같은 날이라 이름순이 된다.
+          const dayOf = (film) => String(film.createdAt || '').slice(0, 10);
+          const diff = dayOf(fb).localeCompare(dayOf(fa));
+          if (diff !== 0) return diff;
         } else if (mode === 'iso') {
           const diff = isoOf(fa) - isoOf(fb);
           if (diff !== 0) return diff;
