@@ -130,7 +130,7 @@
   // 투고 창 지연 로드
   // ════════════════════════════════════════════════════════════
   const MODULES = [
-    '/js/reader-camera-input.js?v=20261008-photo-edit-hints',
+    '/js/reader-camera-input.js?v=20261008-camera-potw',
     '/js/reader-film-picker.js?v=20261002-f2',
     '/js/reader-upload-form-ui.js?v=20261002-f2',
     '/js/reader-upload-flow.js?v=20261006-photo-dedupe',

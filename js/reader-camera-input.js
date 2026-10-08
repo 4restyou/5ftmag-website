@@ -64,13 +64,39 @@
     try { localStorage.setItem(recentKey, JSON.stringify(next)); } catch {}
   }
 
+  // 모델 키("fm2n", "eos5", "electro35gsn")를 읽기 좋은 이름으로 바꾼다.
+  // 예전에는 글자와 숫자 사이마다 띄어 "FM 2 N" 처럼 나왔다. 실제 표기에 가깝게
+  // 짧은 글자 묶음(FM·F·T·GSN)은 숫자에 붙여 대문자로, 긴 낱말(Electro·Retina)은
+  // 띄어서 첫 글자만 대문자로 쓴다. 키에 브랜드가 들어 있으면 뺀다(nikonsp → SP).
   function prettifyCameraKey(brand, key) {
     if (!key) return '';
-    let s = String(key).replace(/([a-z])(\d)/gi, '$1 $2').replace(/(\d)([a-z])/gi, '$1 $2');
-    s = s.toUpperCase();
-    s = s.replace(/\bTTL\b/g, 'TTL').replace(/\bMD\b/g, 'MD');
+    let k = String(key).toLowerCase();
+    const bk = String(brand || '').toLowerCase();
+    if (bk && k !== bk) {
+      if (k.startsWith(bk)) k = k.slice(bk.length);
+      else if (k.endsWith(bk)) k = k.slice(0, -bk.length);
+    }
+    const parts = k.match(/[a-z\u00c0-\u024f]+|[0-9]+|[^a-z0-9\u00c0-\u024f]+/g) || [];
+    let out = '';
+    let prev = '';
+    for (const part of parts) {
+      const isWord = /^[a-z\u00c0-\u024f]+$/.test(part);
+      const isNum = /^[0-9]+$/.test(part);
+      // 로마 숫자: iiif → IIIF, retinaiia → Retina IIA, mjuii → Mju II
+      const roman = isWord && /^(i{1,3}|iv|vi{0,3})[a-z]?$/.test(part);
+      const tail = isWord && !roman ? part.match(/^([a-z\u00c0-\u024f]{3,}?)(i{2,3}|iv)([a-z]?)$/) : null;
+      const longWord = isWord && !roman && part.length >= 4;
+      const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+      const text = tail ? `${tail[1].length <= 3 ? tail[1].toUpperCase() : cap(tail[1])} ${(tail[2] + tail[3]).toUpperCase()}`
+        : longWord ? cap(part) : part.toUpperCase();
+      // 긴 낱말 앞뒤로만 띄운다. "EOS 5" 처럼 세 글자 이상 묶음 뒤 숫자도 띄운다.
+      const prevLong = /^[a-z\u00c0-\u024f]{3,}$/.test(prev);
+      const space = out && (longWord || (isNum && prevLong) || /^[a-z\u00c0-\u024f]{4,}$/.test(prev));
+      out += (space ? ' ' : '') + text;
+      prev = part;
+    }
     const bl = brand ? (brand.charAt(0).toUpperCase() + brand.slice(1)) : '';
-    return bl ? `${bl} ${s}` : s;
+    return bl ? `${bl} ${out}`.trim() : out;
   }
 
   let cachedCameraList = null;
@@ -243,9 +269,8 @@
         hint.innerHTML = `<span class="rs-camera-hint-label">${tr('혹시 이 카메라?', 'Did you mean?', 'このカメラですか？')}</span> `
           + matches.map(m => {
               const formatted = formatCameraName(m);
-              const labelHtml = m.brand
-                ? `<span class="rs-cam-hint-brand">${escapeHtml(brandLabel(m.brand))}</span> · ${escapeHtml(m.display)}`
-                : escapeHtml(m.display);
+              // 이름에 이미 브랜드가 들어 있어 따로 붙이지 않는다("NIKON · Nikon FM" 중복).
+              const labelHtml = escapeHtml(formatted);
               return `<button type="button" class="rs-cam-hint-btn" data-pick="${escapeAttr(formatted)}">${labelHtml}</button>`;
             }).join(' ');
         hint.hidden = false;
