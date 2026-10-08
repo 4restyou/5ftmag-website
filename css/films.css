@@ -1540,17 +1540,23 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
 .reader-roll-switcher [hidden] {
   display: none;
 }
-.reader-roll-switcher [hidden] {
-  display: none;
+/* 롤이 쌓여 번호가 많아지면 줄을 바꾼다. 줄바꿈이 없으면 번호 줄이 모달 폭을 밀어
+   폰에서 화면 전체가 옆으로 퍼졌다(ColorPlus 200, 9롤). */
+.reader-control-group-roll {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.reader-roll-switcher {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
 }
 .reader-roll-numbers {
   display: inline-flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 6px;
   max-width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
+  min-width: 0;
   padding: 0;
 }
 .reader-roll-toggle,
