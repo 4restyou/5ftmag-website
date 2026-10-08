@@ -168,6 +168,65 @@ function renderPhotoCard(r) {
     </div>`;
 }
 
+const EDIT_PLACEHOLDERS = {
+  submitter_name: i18n.t('사진에 함께 표시할 이름', 'Name shown with the photo', '写真と一緒に表示する名前'),
+  instagram: i18n.t('@아이디', '@username', '@ユーザー名'),
+  film: i18n.t('필름 고르기', 'Choose a film', 'フィルムを選ぶ'),
+  camera: i18n.t('예: Nikon FM2, Contax T2', 'e.g. Nikon FM2, Contax T2', '例: Nikon FM2、Contax T2'),
+  caption: i18n.t('사진 설명 (200자 이내)', 'About this photo (up to 200 characters)', '写真の説明（200文字以内）'),
+};
+
+// 카탈로그의 정식 표기·별칭과 맞으면 그 필름을 돌려준다.
+function catalogFilm(films, name) {
+  const key = window.MagUtil.normalizeFilmLabel(name);
+  if (!key) return null;
+  return Object.values(films || {}).find((film) =>
+    [film.displayName, film.name, ...(film.aliases || [])].filter(Boolean)
+      .some((label) => window.MagUtil.normalizeFilmLabel(label) === key)) || null;
+}
+
+function bindFilmField(card, row) {
+  const input = card.querySelector('[data-edit="film"]');
+  const hint = card.querySelector('[data-film-hint]');
+  if (!input || !hint) return;
+  const original = row.film || '';
+  const showHint = (films) => {
+    const v = input.value.trim();
+    hint.classList.remove('is-warn');
+    if (!v) {
+      hint.textContent = i18n.t('눌러서 카탈로그에서 고르세요.', 'Tap to choose from the catalog.', 'タップしてカタログから選んでください。');
+    } else if (!catalogFilm(films, v)) {
+      hint.classList.add('is-warn');
+      hint.textContent = i18n.t('카탈로그에 없는 필름이라 필름 롤에 붙지 않을 수 있어요.', "This film isn't in the catalog, so the photo may not appear in any film roll.", 'カタログにないフィルムのため、フィルムのロールに表示されないことがあります。');
+    } else if (v !== original) {
+      hint.textContent = i18n.t(`저장하면 ${v} 롤로 옮겨집니다.`, `Saving moves this photo to the ${v} roll.`, `保存すると ${v} のロールに移ります。`);
+    } else {
+      hint.textContent = i18n.t('눌러서 다른 필름으로 바꿀 수 있어요.', 'Tap to change the film.', 'タップして別のフィルムに変更できます。');
+    }
+  };
+  loadFilmsData().then(showHint);
+  input.addEventListener('click', async () => {
+    if (!window.FilmNamePicker) return;
+    const films = await loadFilmsData();
+    const next = await window.FilmNamePicker.open({ films, current: input.value.trim() });
+    if (next == null) return;
+    input.value = next;
+    showHint(films);
+  });
+}
+
+function bindCameraField(card) {
+  const input = card.querySelector('[data-edit="camera"]');
+  if (!input || !window.ReaderCameraInput) return;
+  window.ReaderCameraInput.bindCameraInput({
+    input,
+    recent: card.querySelector('[data-camera-recent]'),
+    hint: card.querySelector('[data-camera-hint]'),
+    escapeHtml,
+    escapeAttr,
+  });
+}
+
 function enterEditMode(card) {
   const id = card.dataset.id;
   const row = STATE.rows.find(r => r.id === id);
@@ -178,10 +237,23 @@ function enterEditMode(card) {
     if (!cell) continue;
     const v = row[f] || '';
     const max = f === 'caption' ? 200 : f === 'film' ? 120 : f === 'instagram' || f === 'camera' ? 80 : 60;
-    cell.innerHTML = f === 'caption'
-      ? `<textarea data-edit="${f}" maxlength="${max}">${escapeHtml(v)}</textarea>`
-      : `<input type="text" data-edit="${f}" maxlength="${max}" value="${escapeAttr(v)}" />`;
+    const ph = escapeAttr(EDIT_PLACEHOLDERS[f] || '');
+    if (f === 'caption') {
+      cell.innerHTML = `<textarea data-edit="${f}" maxlength="${max}" placeholder="${ph}">${escapeHtml(v)}</textarea>`;
+    } else if (f === 'film') {
+      // 직접 치지 않고 카탈로그에서 고른다. 표기가 틀리면 사진이 어느 롤에도 붙지 않는다.
+      cell.innerHTML = `<input type="text" data-edit="film" maxlength="${max}" value="${escapeAttr(v)}" placeholder="${ph}" readonly class="me-edit-film" />
+        <p class="me-edit-hint" data-film-hint>${escapeHtml(i18n.t('눌러서 카탈로그에서 고르세요.', 'Tap to choose from the catalog.', 'タップしてカタログから選んでください。'))}</p>`;
+    } else if (f === 'camera') {
+      cell.innerHTML = `<input type="text" data-edit="camera" maxlength="${max}" value="${escapeAttr(v)}" placeholder="${ph}" autocomplete="off" />
+        <div class="rs-recent-cameras" data-camera-recent hidden></div>
+        <div class="rs-camera-hint" data-camera-hint hidden></div>`;
+    } else {
+      cell.innerHTML = `<input type="text" data-edit="${f}" maxlength="${max}" value="${escapeAttr(v)}" placeholder="${ph}" />`;
+    }
   }
+  bindFilmField(card, row);
+  bindCameraField(card);
   const actions = card.querySelector('.me-card-actions');
   actions.innerHTML = `
     <button type="button" class="me-btn me-btn-primary" data-action="save">${i18n.t('저장', 'Save', '保存')}</button>
@@ -211,6 +283,7 @@ async function savePhotoEdits(card) {
     if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = i18n.t('저장', 'Save', '保存'); }
     return;
   }
+  if (patch.camera) window.ReaderCameraInput?.saveRecentCamera(patch.camera);
   await loadPhotos();
 }
 
@@ -573,6 +646,23 @@ function renderFavPhotos() {
 // ═════════════════════════════════════════
 // 좋아한 필름 (films.json 중 본인이 ♡ 한 것)
 // ═════════════════════════════════════════
+async function loadFilmsData() {
+  if (STATE.filmsData) return STATE.filmsData;
+  try {
+    // Supabase 우선 (admin/films 변경 즉시 반영), fallback 정적 JSON
+    if (db() && db().isReady()) {
+      STATE.filmsData = await db().films.listAsObject();
+    }
+    if (!STATE.filmsData) {
+      const res = await fetch('data/films.json');
+      STATE.filmsData = await res.json();
+    }
+  } catch (_) {
+    STATE.filmsData = {};
+  }
+  return STATE.filmsData;
+}
+
 async function loadFavFilms() {
   $('favFilmsGrid').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…', '読み込み中…')}</div>`;
   const favs = await db().favorites.list('film');
@@ -581,20 +671,7 @@ async function loadFavFilms() {
     $('favFilmsGrid').innerHTML = `<div class="me-empty">${i18n.t('아직 ♡ 누른 필름이 없어요.', 'You haven\'t liked any films yet.', 'まだ ♡ を押したフィルムはありません。')}<br /><a class="me-empty-cta" href="${pageHref('films.html')}">${i18n.t('필름 라이브러리 둘러보기 →', 'Browse the film library →', 'フィルムライブラリーを見る →')}</a></div>`;
     return;
   }
-  if (!STATE.filmsData) {
-    try {
-      // Supabase 우선 (admin/films 변경 즉시 반영), fallback 정적 JSON
-      if (db() && db().isReady()) {
-        STATE.filmsData = await db().films.listAsObject();
-      }
-      if (!STATE.filmsData) {
-        const res = await fetch('data/films.json');
-        STATE.filmsData = await res.json();
-      }
-    } catch (_) {
-      STATE.filmsData = {};
-    }
-  }
+  await loadFilmsData();
   STATE.favFilms = favs
     .map(f => ({ slug: f.target_id, film: STATE.filmsData[f.target_id] }))
     .filter(x => x.film);

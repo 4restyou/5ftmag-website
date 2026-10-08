@@ -456,3 +456,20 @@ body { background: var(--bg); color: var(--text); }
 .me-profile-locked { font-size: 12px; color: var(--text-muted); margin: 0; padding: 10px 12px; background: var(--bg-sub); border-radius: var(--btn-radius); }
 .me-profile-foot { display: flex; align-items: center; gap: 14px; }
 .me-profile-status { font-size: 13px; color: var(--text-muted); }
+
+/* 사진 정보 수정: 필름은 카탈로그에서 고르고, 카메라는 비슷한 모델을 추천한다.
+   카메라 추천 표시는 투고 창(reader-submissions.css)과 같은 모양이다. */
+.me-card-row .v input.me-edit-film { cursor: pointer; }
+.me-edit-hint { margin: 6px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+.me-edit-hint.is-warn { color: var(--color-danger-text); }
+.me-card .rs-recent-cameras { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.me-card .rs-recent-cameras[hidden], .me-card .rs-camera-hint[hidden] { display: none; }
+.me-card .rs-recent-cameras-label { font-size: 12px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+.me-card .rs-recent-camera,
+.me-card .rs-cam-hint-btn { font: inherit; font-size: 12px; line-height: 1.2; padding: 6px 10px; background: var(--bg-sub); color: var(--text); border: 1px solid var(--border); border-radius: 999px; cursor: pointer; }
+.me-card .rs-cam-hint-btn { margin: 2px 4px 2px 0; }
+.me-card .rs-recent-camera:hover,
+.me-card .rs-cam-hint-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+.me-card .rs-camera-hint { margin-top: 6px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+.me-card .rs-camera-hint-label { font-weight: var(--fw-heading); margin-right: 4px; }
+.me-card .rs-cam-hint-brand { font-weight: var(--fw-heading); text-transform: uppercase; }

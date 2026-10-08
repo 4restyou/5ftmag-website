@@ -213,9 +213,10 @@
   }
 
   async function bindCameraInput(options = {}) {
-    const input = document.getElementById('rs-camera-input');
-    const recent = document.getElementById('rs-recent-cameras');
-    const hint = document.getElementById('rs-camera-hint');
+    // 내 정보의 사진 수정 칸처럼 한 화면에 여럿일 땐 요소를 직접 넘긴다.
+    const input = options.input || document.getElementById('rs-camera-input');
+    const recent = options.recent || document.getElementById('rs-recent-cameras');
+    const hint = options.hint || document.getElementById('rs-camera-hint');
     if (!input) return;
     const escapeHtml = options.escapeHtml || window.MagUtil.escapeHtml;
     const escapeAttr = options.escapeAttr || window.MagUtil.escapeAttr;
