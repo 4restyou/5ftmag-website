@@ -47,6 +47,7 @@ function rowToJson(r) {
   if (r.box_thumbnail_status)     out.boxThumbnailStatus = r.box_thumbnail_status;
   if (r.can_thumbnail)            out.canThumbnail = r.can_thumbnail;
   if (r.can_thumbnail_status)     out.canThumbnailStatus = r.can_thumbnail_status;
+  if (r.created_at)               out.createdAt = r.created_at;
   return out;
 }
 

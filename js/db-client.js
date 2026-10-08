@@ -1165,6 +1165,7 @@
         if (r.box_thumbnail_status) entry.boxThumbnailStatus = r.box_thumbnail_status;
         if (r.can_thumbnail)        entry.canThumbnail = r.can_thumbnail;
         if (r.can_thumbnail_status) entry.canThumbnailStatus = r.can_thumbnail_status;
+        if (r.created_at)           entry.createdAt = r.created_at;
         out[r.slug] = entry;
       }
       return out;

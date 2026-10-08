@@ -82,7 +82,7 @@
   const resolveCanonicalCameraKey = (key) => libraryFilters.resolveCanonicalCameraKey(key);
   // 라이브러리 정렬. 기본은 Reader's Roll 사진 많은 순. 고른 값은 ?sort= 와 localStorage 에 남긴다
   // (모달을 닫으면 주소가 /films 로 돌아가므로 다시 올 때는 저장값을 쓴다).
-  const LIBRARY_SORTS = ['photos', 'recent', 'name', 'iso'];
+  const LIBRARY_SORTS = ['photos', 'recent', 'added', 'name', 'iso'];
   const LIBRARY_SORT_KEY = '5ft_films_sort';
   let librarySort = (() => {
     let v = '';
