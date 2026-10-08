@@ -20,17 +20,33 @@
 (function () {
   const db = () => window.MagDB;
 
-  // 아직 비어 있는 다음 월요일. 예약을 쌓아 두는 것이 이 기능의 전제라
-  // 매번 오늘을 제안하지 않고 빈 자리를 찾아 준다.
+  // 한국 시간 기준 YYYY-MM-DD. toISOString() 은 UTC 라서 오전 9시 전에 열면
+  // 하루 앞 날짜(일요일)가 나왔다.
+  function ymd(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function parseYmd(v) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || ''));
+    return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;
+  }
+
+  // 지금 잡혀 있는 마지막 날짜의 한 주 뒤. 예약을 쌓아 두는 것이 이 기능의
+  // 전제라 매번 오늘을 제안하지 않는다. 마지막 날짜가 이미 지났거나 예약이
+  // 없으면 다음 월요일로 한다.
   async function suggestDate(taken) {
-    const d = new Date();
-    d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); // 다음 월요일
-    for (let i = 0; i < 104; i++) {
-      const iso = d.toISOString().slice(0, 10);
-      if (!taken.has(iso)) return iso;
-      d.setDate(d.getDate() + 7);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + ((8 - today.getDay()) % 7 || 7));
+    const last = [...taken].map(parseYmd).filter(Boolean).sort((a, b) => b - a)[0];
+    let d = nextMonday;
+    if (last) {
+      const afterLast = new Date(last);
+      afterLast.setDate(last.getDate() + 7);
+      if (afterLast > d) d = afterLast;
     }
-    return new Date().toISOString().slice(0, 10);
+    while (taken.has(ymd(d))) d.setDate(d.getDate() + 7);
+    return ymd(d);
   }
 
   async function takenDates() {
@@ -130,7 +146,7 @@
         } else {
           hint.textContent = opts.current
             ? '지금 잡혀 있는 날짜입니다.'
-            : '비어 있는 다음 자리를 먼저 채워 두었습니다.';
+            : '마지막으로 잡힌 날짜의 한 주 뒤를 먼저 채워 두었습니다.';
           hint.className = 'potw-hint';
         }
       };
@@ -177,7 +193,7 @@
     }
 
     const taken = await takenDates();
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = ymd(new Date());
     const picked = await askDateAndNote({
       current: opts.current || '',
       note: opts.note || '',
