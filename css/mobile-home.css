@@ -165,7 +165,12 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-card { flex: 0 0 124px; scroll-snap-align: start; text-decoration: none; color: var(--text); background: none; border: none; padding: 0; margin: 0; cursor: pointer; text-align: left; font: inherit; }
 .mh-card-thumb { width: 124px; height: 124px; background: var(--bg-sub); border-radius: 8px; overflow: hidden; margin-bottom: 8px; position: relative; }
 .mh-card-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 6px; box-sizing: border-box; }
-.mh-card-name { font-size: 12px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 0 2px; }
+/* 버튼은 내용을 세로 가운데에 두므로 위로 붙인다. 이름 길이가 달라도 썸네일 줄이 맞는다. */
+.mh-card { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; }
+/* 이름은 브랜드 한 줄 + 필름 이름 한 줄로 고정한다. 길면 말줄임. */
+.mh-card-name { font-size: 12px; line-height: 1.35; padding: 0 2px; min-width: 0; }
+.mh-card-brand, .mh-card-model { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-card-brand { font-size: 11px; color: var(--text-muted); }
 
 /* 그 외 브랜드 그리드 */
 .mh-others { padding: 24px var(--mh-pad) 32px; border-top: 1px solid var(--border); background: var(--bg-sub); }
@@ -208,7 +213,7 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 }
 @keyframes mh-end-pop { 0% { scale: 1; } 45% { scale: 1.35; } 100% { scale: 1; } }
 .mh-new-strip .mh-end-card { min-width: 132px; }
-.mh-film-strip .mh-end-card { margin-bottom: 22px; }   /* 필름 카드 이름 줄 높이만큼 비워 썸네일과 높이를 맞춘다 */
+.mh-film-strip .mh-end-card { margin-bottom: 39px; }   /* 필름 카드 이름 줄 높이만큼 비워 썸네일과 높이를 맞춘다 */
 .mh-all-films {
   display: flex; align-items: center; justify-content: center;
   height: 42px; margin-top: 14px; border: 1px solid var(--text); border-radius: var(--btn-radius);
