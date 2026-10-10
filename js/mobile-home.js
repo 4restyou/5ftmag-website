@@ -116,7 +116,7 @@
     return `
       <button type="button" class="mh-card" data-film-slug="${escAttr(slug)}" aria-label="${mt(`${esc(name)} 자세히 보기`, `${esc(name)} details`, `${esc(name)}の詳細を見る`)}">
         <div class="mh-card-thumb">${filmThumb(f) ? `<img src="${esc(filmThumb(f))}" alt="" loading="lazy" />` : ''}</div>
-        <div class="mh-card-name">${esc(name)}</div>
+        <div class="mh-card-name"><span class="mh-card-brand">${esc(f.brand || '')}</span><span class="mh-card-model">${esc(f.name || name)}</span></div>
       </button>
     `;
   }
