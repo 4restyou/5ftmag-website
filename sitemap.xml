@@ -62,27 +62,33 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/terms.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/privacy.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/copyright.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/refund.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/stories/hamada-hideaki.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/stories/look-back-kore-eda.html</loc>
@@ -1684,27 +1690,33 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/terms.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/privacy.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/copyright.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/refund.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/en/stories/hamada-hideaki.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/stories/look-back-kore-eda.html</loc>
@@ -3306,27 +3318,33 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/terms.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/privacy.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/copyright.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/refund.html</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T21:06:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/ja/stories/hamada-hideaki.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/stories/look-back-kore-eda.html</loc>
