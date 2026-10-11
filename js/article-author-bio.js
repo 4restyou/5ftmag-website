@@ -41,8 +41,15 @@
     try { films = await fetch('/data/films.json').then((r) => r.json()); } catch (_) { return; }
 
     const items = slugs
-      .map((slug) => ({ slug, name: films[slug] && (films[slug].displayName || films[slug].name) }))
-      .filter((x) => x.name);                        // 카탈로그에서 사라진 슬러그는 건너뛴다
+      .map((slug) => {
+        const f = films[slug];
+        if (!f) return null;                         // 카탈로그에서 사라진 슬러그는 건너뛴다
+        const thumb = f.canThumbnailStatus === 'set' && f.canThumbnail
+          ? '/' + String(f.canThumbnail).replace(/^\.?\//, '').replace(/\.(png|jpe?g)$/i, '.webp')
+          : '';
+        return { slug, brand: f.brand || '', model: f.name || f.displayName || '', name: f.displayName || f.name, thumb };
+      })
+      .filter((x) => x && x.name);
     if (!items.length) return;
 
     const sec = document.createElement('section');
@@ -51,8 +58,10 @@
       <h4 class="article-films-head">${tr('이 글에 나온 필름', 'Films in this article', 'この記事に登場するフィルム')}</h4>
       <div class="article-films-chips">
         ${items.map((x) => `
-          <a class="article-film-chip" href="${i18n.url('/films.html')}?film=${encodeURIComponent(x.slug)}">
-            ${escapeText(x.name)}
+          <a class="article-film-chip" href="${i18n.url('/films.html')}?film=${encodeURIComponent(x.slug)}" aria-label="${escapeText(x.name)}">
+            <span class="article-film-thumb">${x.thumb ? `<img src="${escapeText(x.thumb)}" alt="" loading="lazy" decoding="async" />` : ''}</span>
+            <span class="article-film-brand">${escapeText(x.brand)}</span>
+            <span class="article-film-name">${escapeText(x.model)}</span>
           </a>`).join('')}
       </div>`;
 
