@@ -586,7 +586,19 @@
       }
     }
 
-    if (filmKey) openModal(filmKey, { contributor });
+    if (filmKey) {
+      openModal(filmKey, { contributor });
+      // ?submit=1: 기사의 필름 창에서 「이 필름으로 사진 올리기」를 눌러 온 경우. 모달의 투고 버튼을 대신 누른다.
+      if (params.get('submit') === '1') {
+        const started = Date.now();
+        const tryOpen = () => {
+          const btn = document.querySelector('.reader-submit-btn');
+          if (btn) btn.click();
+          else if (Date.now() - started < 4000) setTimeout(tryOpen, 150);
+        };
+        tryOpen();
+      }
+    }
   }
 
   function openModal(filmKey, options = {}) {

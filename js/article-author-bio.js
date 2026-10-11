@@ -47,7 +47,9 @@
         const thumb = f.canThumbnailStatus === 'set' && f.canThumbnail
           ? '/' + String(f.canThumbnail).replace(/^\.?\//, '').replace(/\.(png|jpe?g)$/i, '.webp')
           : '';
-        return { slug, brand: f.brand || '', model: f.name || f.displayName || '', name: f.displayName || f.name, thumb };
+        const desc = i18n.lang === 'ja' ? f.descJa : i18n.lang === 'en' ? f.descEn : f.desc;
+        const spec = [f.iso && `ISO ${f.iso}`, f.type, f.format].filter(Boolean).join(' · ');
+        return { slug, brand: f.brand || '', model: f.name || f.displayName || '', name: f.displayName || f.name, thumb, desc: desc || '', spec };
       })
       .filter((x) => x && x.name);
     if (!items.length) return;
@@ -65,12 +67,58 @@
           </a>`).join('')}
       </div>`;
 
+    // 누르면 기사에 머문 채 작은 창으로 필름 정보를 보여 준다. ⌘·Ctrl·Shift 클릭과
+    // 가운데 버튼은 원래 링크대로 새 탭에서 카탈로그를 연다.
+    sec.addEventListener('click', (e) => {
+      const chip = e.target.closest('.article-film-chip');
+      if (!chip || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      const item = items[[...sec.querySelectorAll('.article-film-chip')].indexOf(chip)];
+      if (!item) return;
+      e.preventDefault();
+      openFilmSheet(item, chip);
+    });
+
     // .article-end 앞에 끼운다. bio 보다 위라 본문 흐름에 바로 이어진다.
     const shareBar = articleEl.querySelector('.share-bar');
     let ref = shareBar;
     while (ref && ref.parentNode !== articleEl) ref = ref.parentNode;
     if (ref) articleEl.insertBefore(sec, ref);
     else articleEl.appendChild(sec);
+  }
+
+  // 필름 정보 창. 폰에서는 아래에서 올라오는 시트, 넓은 화면에서는 가운데 작은 창이다(css/article.css).
+  let filmSheet = null;
+  function openFilmSheet(item, opener) {
+    if (!filmSheet) {
+      filmSheet = document.createElement('dialog');
+      filmSheet.className = 'film-sheet';
+      filmSheet.addEventListener('click', (e) => {
+        if (e.target === filmSheet || e.target.closest('[data-film-sheet-close]')) filmSheet.close();
+      });
+      filmSheet.addEventListener('close', () => { filmSheet._opener?.focus?.(); });
+      document.body.appendChild(filmSheet);
+    }
+    const catalog = `${i18n.url('/films.html')}?film=${encodeURIComponent(item.slug)}`;
+    filmSheet.setAttribute('aria-label', item.name);
+    filmSheet.innerHTML = `
+      <div class="film-sheet-panel">
+        <button type="button" class="film-sheet-close" data-film-sheet-close aria-label="${escapeAttr(tr('닫기', 'Close', '閉じる'))}">×</button>
+        <div class="film-sheet-head">
+          <span class="film-sheet-thumb">${item.thumb ? `<img src="${escapeAttr(item.thumb)}" alt="" />` : ''}</span>
+          <div>
+            <span class="film-sheet-brand">${escapeText(item.brand)}</span>
+            <h3 class="film-sheet-name">${escapeText(item.model)}</h3>
+            ${item.spec ? `<p class="film-sheet-spec">${escapeText(item.spec)}</p>` : ''}
+          </div>
+        </div>
+        ${item.desc ? `<p class="film-sheet-desc">${escapeText(item.desc)}</p>` : ''}
+        <div class="film-sheet-actions">
+          <a class="film-sheet-btn film-sheet-btn-primary" href="${escapeAttr(catalog)}">${tr('카탈로그에서 보기 →', 'View in catalog →', 'カタログで見る →')}</a>
+          <a class="film-sheet-btn" href="${escapeAttr(catalog)}&amp;submit=1">${tr('이 필름으로 사진 올리기', 'Upload a photo on this film', 'このフィルムで写真を投稿')}</a>
+        </div>
+      </div>`;
+    filmSheet._opener = opener;
+    filmSheet.showModal();
   }
 
   // ── 작가 bio + 같은 작가 다른 글 ──
