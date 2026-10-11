@@ -1,5 +1,28 @@
 [
   {
+    "id": "hamada-hideaki",
+    "title": "하마다 히데아키, 한 걸음 물러서서 찍은 가족",
+    "category": "photographer",
+    "categoryLabel": "PHOTOGRAPHER",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-11",
+    "issue": "",
+    "thumbnail": "img/stories/hamada-hideaki/hamada-haru-blossom.webp",
+    "excerpt": "두 아들을 11년 동안 찍은 《Haru and Mina》부터 여행지의 이름 없는 길, 카메라를 든 사람을 다시 찍는 《Camera Talk》까지. 사진가 하마다 히데아키의 남의 집 아이 사진은 왜 내 어린 시절처럼 보일까.",
+    "titleEn": "Hideaki Hamada, Family Seen from a Step Back",
+    "excerptEn": "From 《Haru and Mina》, eleven years of photographs of his two sons, to nameless streets abroad and 《Camera Talk》, which photographs people holding cameras. Why do Hideaki Hamada's pictures of someone else's children look like our own childhoods?",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "濱田英明、一歩引いて撮った家族",
+    "excerptJa": "二人の息子を11年撮り続けた《Haru and Mina》から、旅先の名もない道、カメラを構える人を撮り返す《Camera Talk》まで。濱田英明が撮る他人の子どもの写真は、なぜ自分の子ども時代のように見えるのか。",
+    "authorJa": "5ft.mag 編集部",
+    "films": [
+      "portra400"
+    ],
+    "page": "stories/hamada-hideaki.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "look-back-kore-eda",
     "title": "고레에다 히로카즈의 「룩백」, 사계절을 35mm 필름에 담다",
     "category": "cinema",
