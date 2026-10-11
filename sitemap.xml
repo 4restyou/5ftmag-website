@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.5ftmag.com/</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T00:30:19+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -83,6 +83,12 @@
     <lastmod>2026-10-09T03:34:17+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/stories/look-back-kore-eda.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/stories/park-sungjin-kid-echo.html</loc>
@@ -1618,7 +1624,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T00:30:19+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -1699,6 +1705,12 @@
     <lastmod>2026-10-09T03:34:17+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/en/stories/look-back-kore-eda.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/stories/park-sungjin-kid-echo.html</loc>
@@ -3234,7 +3246,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/</loc>
-    <lastmod>2026-10-09T03:34:17+09:00</lastmod>
+    <lastmod>2026-10-11T00:30:19+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -3315,6 +3327,12 @@
     <lastmod>2026-10-09T03:34:17+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/ja/stories/look-back-kore-eda.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/stories/park-sungjin-kid-echo.html</loc>
