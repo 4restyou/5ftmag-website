@@ -1,5 +1,29 @@
 [
   {
+    "id": "look-back-kore-eda",
+    "title": "고레에다 히로카즈의 「룩백」, 사계절을 35mm 필름에 담다",
+    "category": "cinema",
+    "categoryLabel": "CINEMA",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-11",
+    "issue": "",
+    "thumbnail": "img/films/vision500t-can.webp",
+    "excerpt": "후지모토 타츠키의 단편 만화 「룩백」이 고레에다 히로카즈의 실사 영화가 됐다. 감독은 처음부터 35mm 필름을 고집했고, 코닥 비전3 500T 와 250D 로 아키타의 일 년을 찍었다. 국내 개봉은 10월 8일.",
+    "titleEn": "Kore-eda Hirokazu's \"Look Back\": Four Seasons on 35mm Film",
+    "excerptEn": "Tatsuki Fujimoto's one-shot manga \"Look Back\" is now a live-action film by Kore-eda Hirokazu. He insisted on 35mm film from the start and spent a year in Akita shooting on Kodak Vision3 500T and 250D. It opened in Korea on October 8.",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "是枝裕和の『ルックバック』、四季を35mmフィルムに収める",
+    "excerptJa": "藤本タツキの読み切り漫画『ルックバック』が是枝裕和の実写映画になった。監督は最初から35mmフィルムにこだわり、コダックVISION3 500Tと250Dで秋田の一年を撮った。韓国公開は10月8日。",
+    "authorJa": "5ft.mag 編集部",
+    "films": [
+      "vision500t",
+      "vision250d"
+    ],
+    "page": "stories/look-back-kore-eda.html",
+    "published": false,
+    "manual": true
+  },
+  {
     "id": "park-sungjin-kid-echo",
     "title": "박성진의 《Kid Echo》, 그때 책에 싣지 못한 얼굴들",
     "category": "photo",
