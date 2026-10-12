@@ -354,6 +354,13 @@
             .select('id, storage_path, status, created_at, submitter_name, instagram')
             .in('id', ids);
         },
+        // 자동 승인 예약·이력(편집부만 읽는 표). 독자 화면에는 나오지 않는다.
+        async autoApprovals(ids) {
+          const c = client(); if (!c || !ids?.length) return { data: [], error: null };
+          return c.from('reader_auto_approvals')
+            .select('submission_id, due_at, approved_at, skipped_at, skip_reason')
+            .in('submission_id', ids);
+        },
         // 기존 사진 지문 채우기: 아직 phash 가 없는 사진 수와 목록.
         async countMissingPhash() {
           const c = client(); if (!c) return 0;

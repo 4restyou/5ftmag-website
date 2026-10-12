@@ -270,6 +270,18 @@
       font-weight: 700;
       white-space: nowrap;
     }
+    /* 자동 승인 예약·이력 (편집부만) */
+    .sub-card-auto {
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: var(--badge-radius, 4px);
+      background: #dbeafe;
+      color: #1e3a8a;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .sub-card-auto[hidden] { display: none; }
     /* 중복 의심 — 같은 사람이 올린 닮은 사진(phash). 막지 않고 편집부가 판단하도록 표시만 한다 */
     .sub-card-dup {
       margin-left: 8px;
@@ -637,7 +649,7 @@
 <!-- util.js 는 reader-submissions 가 첫 줄에서 MagUtil 을 쓰므로 그보다 먼저 -->
   <script src="../js/util.js?v=20261003-member-stability" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
-<script src="../js/db/admin.js?v=20261007-dedupe-review" defer></script>
+<script src="../js/db/admin.js?v=20261012-auto-approve" defer></script>
 <script src="../js/db/commerce.js?v=20261002-f2" defer></script>
   <script src="../js/db-client.js?v=20261008-sort-added" defer></script>
 <script src="../js/image-processor.js?v=20261006-photo-dedupe" defer></script>
@@ -765,6 +777,7 @@ async function loadList() {
     $('list').innerHTML = slice.map(renderCard).join('');
     bindCardActions();
     fillDupRefs();
+    fillAutoApprovals();
   updateSelectAllState();
     renderPagination(totalAll, totalPages);
     return;
@@ -805,6 +818,7 @@ async function loadList() {
   $('list').innerHTML = STATE.rows.map(renderCard).join('');
   bindCardActions();
   fillDupRefs();
+  fillAutoApprovals();
   updateSelectAllState();
   renderPagination(total, totalPages);
 }
@@ -904,6 +918,29 @@ async function fillDupRefs() {
     el.innerHTML = `<img src="${escapeHtml(url)}" alt="" loading="lazy" data-zoom-ref="${escapeHtml(url)}" />`
       + `<span>${escapeHtml(ref.status)} · ${fmtDate(ref.created_at)}</span>`;
     el.querySelector('img').addEventListener('click', () => openZoom(url));
+  }
+}
+
+// 자동 승인(믿을 수 있는 투고자, 승인 20장 이상) 예약과 이력을 카드에 표시한다. 편집부에게만 보인다.
+async function fillAutoApprovals() {
+  const slots = [...document.querySelectorAll('[data-auto-slot]')];
+  if (!slots.length) return;
+  const { data } = await db().review.autoApprovals(slots.map(el => el.dataset.autoSlot));
+  const byId = new Map((data || []).map(a => [String(a.submission_id), a]));
+  const hm = (iso) => new Date(iso).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  for (const el of slots) {
+    const a = byId.get(el.dataset.autoSlot);
+    if (!a) continue;
+    if (a.approved_at) {
+      el.textContent = '자동 승인됨';
+      el.title = `${hm(a.approved_at)} 자동 승인. 독자에게는 편집부 승인과 똑같이 보여요.`;
+    } else if (a.skipped_at) {
+      continue;
+    } else {
+      el.textContent = `자동 승인 예정 · ${hm(a.due_at)}`;
+      el.title = '그 전에 승인하거나 반려하면 자동 승인은 일어나지 않아요.';
+    }
+    el.hidden = false;
   }
 }
 
@@ -1069,6 +1106,7 @@ function renderCard(r) {
           ${likeBadge}
           ${featBadge}
           ${dupBadge}
+          <span class="sub-card-auto" data-auto-slot="${escapeHtml(String(r.id))}" hidden></span>
         </div>
         ${r.dup_of ? `
         <div class="sub-card-row">
