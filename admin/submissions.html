@@ -1315,6 +1315,15 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
   });
 });
 
+// 알림 링크(?status=approved 등)로 들어오면 그 탭을 먼저 연다. 자동 승인 알림이 「승인됨」 으로 보낸다.
+{
+  const wanted = new URLSearchParams(location.search).get('status');
+  if (wanted === 'approved' || wanted === 'rejected') {
+    STATE.status = wanted;
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.status === wanted));
+  }
+}
+
 // ── 승인됨/반려됨 전용 검색 + 월별 필터 ──
 function updateHistoryFiltersVisibility() {
   const wrap = $('historyFilters');
