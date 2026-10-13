@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Sun, 11 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 13 Oct 2026 00:00:00 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>35mm 를 만든 사람의 이름으로, 라이카 오스카 바르낙 상과 2026년 수상작</title>
+      <link>https://www.5ftmag.com/stories/loba-2026-damir-faizulin.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/loba-2026-damir-faizulin.html</guid>
+      <pubDate>Tue, 13 Oct 2026 00:00:00 GMT</pubDate>
+      <description>35mm 카메라를 처음 만든 오스카 바르낙의 이름을 딴 라이카 오스카 바르낙 상(LOBA)은 1980년부터 사람과 환경의 관계를 찍은 사진가에게 주어졌다. 올해 수상자는 서른셋까지 레슬러였던 다미르 파이줄린, 다게스탄 산간을 찍은 연작이다.</description>
+      <category>PHOTOGRAPHER</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>하마다 히데아키, 한 걸음 물러서서 찍은 가족</title>
       <link>https://www.5ftmag.com/stories/hamada-hideaki.html</link>
