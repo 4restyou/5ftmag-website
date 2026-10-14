@@ -85,6 +85,12 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://www.5ftmag.com/stories/brisnap-04.html</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.5ftmag.com/stories/loba-2026-damir-faizulin.html</loc>
     <lastmod>2026-10-13</lastmod>
     <changefreq>yearly</changefreq>
@@ -1719,6 +1725,12 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://www.5ftmag.com/en/stories/brisnap-04.html</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.5ftmag.com/en/stories/loba-2026-damir-faizulin.html</loc>
     <lastmod>2026-10-13</lastmod>
     <changefreq>yearly</changefreq>
@@ -3351,6 +3363,12 @@
     <lastmod>2026-10-12T01:50:40+09:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/ja/stories/brisnap-04.html</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/stories/loba-2026-damir-faizulin.html</loc>

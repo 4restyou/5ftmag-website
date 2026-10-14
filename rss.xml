@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Tue, 13 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 14 Oct 2026 00:00:00 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>브리스냅 필름헛소리 04. 세상에 하나뿐인 나만의 카메라 가방, 누베스 프레스 센터</title>
+      <link>https://www.5ftmag.com/stories/brisnap-04.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/brisnap-04.html</guid>
+      <pubDate>Wed, 14 Oct 2026 00:00:00 GMT</pubDate>
+      <description>카메라와 렌즈에는 아낌없이 쓰면서 가방에는 돈을 아끼던 브리스냅이 내돈내산한 누베스 프레스 센터. 직접 찍은 사진을 겉면에 넣고, 물통 자리까지 따로 만든 커스텀 카메라 가방 이야기.</description>
+      <category>GOODS</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Brisnap TV</dc:creator>
+    </item>
     <item>
       <title>35mm 를 만든 사람의 이름으로, 라이카 오스카 바르낙 상과 2026년 수상작</title>
       <link>https://www.5ftmag.com/stories/loba-2026-damir-faizulin.html</link>
