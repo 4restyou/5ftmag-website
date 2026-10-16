@@ -1775,4 +1775,26 @@
     init();
     revealAdminSubnavCurrent();
   }
+
+  // ════════════════════════════════════════════════
+  // 이스터에그: 푸터 「© 2026 5ft magazine」을 2초 안에 5번 누르면 필름 슬롯머신을 연다.
+  // 슬롯머신 코드(js/film-slot.js)는 그때 처음 불러온다. 평소 페이지 무게에는 들어가지 않는다.
+  // ════════════════════════════════════════════════
+  (function bindFilmSlotEgg() {
+    let taps = 0;
+    let timer = null;
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.footer-copy')) return;
+      taps += 1;
+      clearTimeout(timer);
+      timer = setTimeout(() => { taps = 0; }, 2000);
+      if (taps < 5) return;
+      taps = 0;
+      if (window.FilmSlot) { window.FilmSlot.open(); return; }
+      const s = document.createElement('script');
+      s.src = '/js/film-slot.js?v=20261016-film-slot';
+      s.onload = () => window.FilmSlot && window.FilmSlot.open();
+      document.head.appendChild(s);
+    });
+  })();
 })();
