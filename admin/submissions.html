@@ -934,7 +934,8 @@ async function fillAutoApprovals() {
     if (a.approved_at) {
       el.textContent = '자동 승인됨';
       el.title = `${hm(a.approved_at)} 자동 승인. 독자에게는 편집부 승인과 똑같이 보여요.`;
-    } else if (a.skipped_at) {
+    } else if (a.skipped_at || el.dataset.status !== 'pending') {
+      // 편집부가 먼저 처리한 사진은 예약이 남아 있어도 「예정」을 띄우지 않는다.
       continue;
     } else {
       el.textContent = `자동 승인 예정 · ${hm(a.due_at)}`;
@@ -1106,7 +1107,7 @@ function renderCard(r) {
           ${likeBadge}
           ${featBadge}
           ${dupBadge}
-          <span class="sub-card-auto" data-auto-slot="${escapeHtml(String(r.id))}" hidden></span>
+          <span class="sub-card-auto" data-auto-slot="${escapeHtml(String(r.id))}" data-status="${escapeHtml(r.status)}" hidden></span>
         </div>
         ${r.dup_of ? `
         <div class="sub-card-row">
