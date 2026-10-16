@@ -822,6 +822,10 @@ footer {
 }
 
 .footer-copy {
+  /* 이스터에그(5번 누르기)를 눌러도 글자가 선택되지 않게 (js/site-common.js bindFilmSlotEgg) */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
   font-size: 12px;
   font-weight: var(--fw-all);
   letter-spacing: var(--ls-default);
