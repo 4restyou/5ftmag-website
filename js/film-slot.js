@@ -19,7 +19,7 @@
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const state = { films: [], favs: null, source: 'all', kind: 'all', iso: 'all', spinning: false, picking: false };
+  const state = { films: [], favs: null, source: 'all', kind: 'all', iso: 'all', spinning: false, picking: true };
 
   // ── 데이터 ──
   function kindOf(f) {
@@ -65,16 +65,21 @@
     try { localStorage.setItem(MY_KEY, JSON.stringify([...set])); } catch (_) { /* 저장 못 해도 이번 창에서는 쓴다 */ }
   }
 
-  function candidates() {
-    let list = state.films;
-    if (state.source === 'fav') list = list.filter((f) => state.favs && state.favs.has(f.slug));
-    if (state.source === 'mine') { const mine = readMine(); list = list.filter((f) => mine.has(f.slug)); }
+  // 종류·ISO 거름. 슬롯 후보와 「내 필름」 고르기 목록이 같이 쓴다.
+  function byKindIso(list) {
     if (state.kind !== 'all') list = list.filter((f) => kindOf(f) === state.kind);
     if (state.iso !== 'all') list = list.filter((f) => {
       const n = isoOf(f);
       return state.iso === 'low' ? n > 0 && n <= 200 : state.iso === 'mid' ? n > 200 && n < 800 : n >= 800;
     });
     return list;
+  }
+
+  function candidates() {
+    let list = state.films;
+    if (state.source === 'fav') list = list.filter((f) => state.favs && state.favs.has(f.slug));
+    if (state.source === 'mine') { const mine = readMine(); list = list.filter((f) => mine.has(f.slug)); }
+    return byKindIso(list);
   }
 
   // ── 스타일 ──
@@ -112,8 +117,20 @@
 .fslot-name { margin: 2px 0 2px; font-size: 20px; font-weight: var(--fw-heading, 700); }
 .fslot-spec { margin: 0; font-size: 12px; color: var(--text-muted, #666); }
 .fslot-desc { margin: 10px 0 0; font-size: 14px; line-height: 1.7; }
-.fslot-mine { margin-top: 8px; }
+.fslot-mine { margin: 2px 0 10px; }
 .fslot-mine[hidden] { display: none; }
+.fslot-picked-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: var(--fw-heading, 700); margin-bottom: 6px; }
+.fslot-link { font: inherit; font-size: 12px; font-weight: var(--fw-heading, 700); background: none; border: 0; padding: 6px 0; color: var(--text-muted, #666); text-decoration: underline; cursor: pointer; }
+.fslot-picked { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.fslot-picked:empty { display: none; }
+.fslot-pick { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; font-weight: var(--fw-heading, 700); padding: 0 2px 0 10px; min-height: 30px; border-radius: 999px; background: var(--text, #111); color: var(--bg, #fff); }
+.fslot-pick button { width: 28px; height: 28px; border: 0; background: none; color: inherit; font-size: 15px; line-height: 1; cursor: pointer; }
+.fslot-list input[type="checkbox"] { -webkit-appearance: none; appearance: none; flex: 0 0 auto; width: 20px; height: 20px; margin: 0; border: 1.5px solid var(--text-muted, #888); border-radius: 5px; background: var(--bg, #fff); display: grid; place-items: center; cursor: pointer; }
+.fslot-list input[type="checkbox"]:checked { background: var(--text, #111); border-color: var(--text, #111); }
+.fslot-list input[type="checkbox"]:checked::after { content: '✓'; color: var(--bg, #fff); font-size: 13px; font-weight: 700; line-height: 1; }
+.fslot-list label.is-on { background: var(--bg-sub, #f4f4f4); }
+.fslot-list-empty { padding: 12px 10px; font-size: 13px; color: var(--text-muted, #666); }
+.fslot-done { margin-top: 8px; min-height: 40px; font-size: 14px; }
 .fslot-search { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid var(--border, #ddd); border-radius: 8px; background: var(--bg, #fff); color: inherit; }
 .fslot-list { max-height: 220px; overflow: auto; margin-top: 8px; border: 1px solid var(--border, #ddd); border-radius: 8px; }
 .fslot-list label { display: flex; gap: 10px; align-items: center; padding: 8px 10px; font-size: 13px; cursor: pointer; }
@@ -142,13 +159,19 @@
         <h2 class="fslot-title">${tr('오늘은 무슨 필름으로 찍지?', 'What film should I shoot today?', '今日はどのフィルムで撮ろう？')}</h2>
         <p class="fslot-lead">${tr('숨은 버튼을 찾으셨네요. 레버를 당겨 오늘의 한 롤을 정해 보세요.', 'You found the hidden button. Pull the lever and let it pick today’s roll.', '隠しボタンを見つけましたね。レバーを引いて今日の1本を決めましょう。')}</p>
         <div class="fslot-row" data-row="source"></div>
-        <div class="fslot-mine" hidden>
+        <div class="fslot-mine" data-mine-top hidden>
+          <div class="fslot-picked-head"><span data-picked-count></span><button type="button" class="fslot-link" data-mine-clear>${tr('모두 지우기', 'Clear all', 'すべて外す')}</button></div>
+          <div class="fslot-picked"></div>
           <input type="search" class="fslot-search" placeholder="${esc(tr('가진 필름 찾기 (예: 포트라, gold)', 'Find films you have (e.g. portra, gold)', '持っているフィルムを探す（例: portra, gold）'))}" />
-          <div class="fslot-list"></div>
-          <p class="fslot-note">${tr('체크한 필름은 이 브라우저에 기억해 둡니다.', 'Checked films are remembered in this browser.', 'チェックしたフィルムはこのブラウザに保存されます。')}</p>
+          <button type="button" class="fslot-link" data-mine-open hidden>${tr('필름 더 고르기', 'Pick more films', 'フィルムを追加で選ぶ')}</button>
         </div>
         <div class="fslot-row" data-row="kind"></div>
         <div class="fslot-row" data-row="iso"></div>
+        <div class="fslot-mine" data-mine-bottom hidden>
+          <div class="fslot-list"></div>
+          <p class="fslot-note">${tr('위의 종류·ISO 버튼으로 목록을 좁힐 수 있어요. 체크한 필름은 이 브라우저에 기억해 둡니다.', 'Use the type and ISO buttons above to narrow the list. Checked films are remembered in this browser.', '上の種類・ISOボタンでリストを絞り込めます。チェックしたフィルムはこのブラウザに保存されます。')}</p>
+          <button type="button" class="fslot-btn ghost fslot-done" data-mine-done>${tr('다 골랐어요', 'Done picking', '選び終わった')}</button>
+        </div>
         <p class="fslot-count" aria-live="polite"></p>
         <div class="fslot-window" aria-hidden="true"><div class="fslot-strip"></div></div>
         <button type="button" class="fslot-btn" data-fslot-spin>${tr('레버 당기기', 'Pull the lever', 'レバーを引く')}</button>
@@ -162,25 +185,28 @@
       const kind = e.target.closest('[data-kind]');
       const iso = e.target.closest('[data-iso]');
       if (src) { setSource(src.dataset.source); return; }
-      if (kind) { state.kind = kind.dataset.kind; renderControls(); return; }
-      if (iso) { state.iso = iso.dataset.iso; renderControls(); return; }
+      if (kind) { state.kind = kind.dataset.kind; renderControls(); renderMineList(); return; }
+      if (iso) { state.iso = iso.dataset.iso; renderControls(); renderMineList(); return; }
+      const unpick = e.target.closest('[data-unpick]');
+      if (unpick) { togglePick(unpick.dataset.unpick, false); return; }
+      if (e.target.closest('[data-mine-clear]')) { writeMine(new Set()); renderMineList(); afterPickChange(); return; }
+      if (e.target.closest('[data-mine-done]')) { state.picking = false; renderControls(); return; }
+      if (e.target.closest('[data-mine-open]')) { state.picking = true; renderControls(); renderMineList(); return; }
       if (e.target.closest('[data-fslot-spin]')) spin();
     });
     $('.fslot-search').addEventListener('input', renderMineList);
     $('.fslot-list').addEventListener('change', (e) => {
       const box = e.target.closest('input[type="checkbox"]');
-      if (!box) return;
-      const mine = readMine();
-      if (box.checked) mine.add(box.value); else mine.delete(box.value);
-      writeMine(mine);
-      renderControls();
+      if (box) togglePick(box.value, box.checked);
     });
   }
 
   async function setSource(v) {
     state.source = v;
     if (v === 'fav') await loadFavs();
+    if (v === 'mine') state.picking = !readMine().size || state.picking;
     renderControls();
+    renderMineList();
   }
 
   function renderControls() {
@@ -202,8 +228,12 @@
       ['mid', 'ISO 400'],
       ['high', 'ISO 800+'],
     ], state.iso);
-    $('.fslot-mine').hidden = state.source !== 'mine';
-    if (state.source === 'mine') renderMineList();
+    const mineOn = state.source === 'mine';
+    $('[data-mine-top]').hidden = !mineOn;
+    $('[data-mine-bottom]').hidden = !mineOn || !state.picking;
+    $('.fslot-search').hidden = !state.picking;
+    $('[data-mine-open]').hidden = state.picking;
+    if (mineOn) renderPicked();
 
     const n = candidates().length;
     let note = tr(`후보 ${n}종`, `${n} candidates`, `候補 ${n}種`);
@@ -211,22 +241,53 @@
       note = state.source === 'fav' && !(state.favs && state.favs.size)
         ? tr('♡ 누른 필름이 없어요. 로그인한 뒤 카탈로그에서 ♡ 를 눌러 보세요.', 'No liked films yet. Sign in and tap ♡ in the catalog.', '♡したフィルムがありません。ログインしてカタログで♡を押してください。')
         : state.source === 'mine' && !readMine().size
-          ? tr('위 목록에서 가진 필름을 체크해 주세요.', 'Check the films you have in the list above.', '上のリストで持っているフィルムにチェックしてください。')
+          ? (state.picking
+            ? tr('아래 목록에서 가진 필름을 체크해 주세요.', 'Check the films you have in the list below.', '下のリストで持っているフィルムにチェックしてください。')
+            : tr('「필름 더 고르기」를 눌러 가진 필름을 골라 주세요.', 'Tap “Pick more films” to choose the films you have.', '「フィルムを追加で選ぶ」から持っているフィルムを選んでください。'))
           : tr('조건에 맞는 필름이 없어요. 거름을 풀어 보세요.', 'No films match. Try loosening the filters.', '条件に合うフィルムがありません。絞り込みを緩めてください。');
     }
     $('.fslot-count').textContent = note;
     $('[data-fslot-spin]').disabled = n === 0 || state.spinning;
   }
 
+  // 고르기 목록. 순서는 이름순으로 고정한다(체크해도 자리가 바뀌지 않게). 종류·ISO 거름을 따른다.
   function renderMineList() {
+    if (state.source !== 'mine' || !state.picking) return;
     const q = $('.fslot-search').value.trim().toLowerCase();
     const mine = readMine();
-    const list = state.films
+    const list = byKindIso(state.films)
       .filter((f) => !q || [f.displayName, f.name, f.brand, ...(f.aliases || [])].join(' ').toLowerCase().includes(q))
-      .sort((a, b) => (mine.has(b.slug) - mine.has(a.slug)) || String(a.displayName || a.name).localeCompare(String(b.displayName || b.name)))
-      .slice(0, 80);
-    $('.fslot-list').innerHTML = list.map((f) => `
-      <label><input type="checkbox" value="${esc(f.slug)}" ${mine.has(f.slug) ? 'checked' : ''} /> ${esc(f.displayName || f.name)}</label>`).join('');
+      .sort((a, b) => String(a.displayName || a.name).localeCompare(String(b.displayName || b.name)))
+      .slice(0, 120);
+    $('.fslot-list').innerHTML = list.length
+      ? list.map((f) => `
+      <label class="${mine.has(f.slug) ? 'is-on' : ''}"><input type="checkbox" value="${esc(f.slug)}" ${mine.has(f.slug) ? 'checked' : ''} /> ${esc(f.displayName || f.name)}</label>`).join('')
+      : `<p class="fslot-list-empty">${tr('맞는 필름이 없어요.', 'No matching films.', '該当するフィルムがありません。')}</p>`;
+  }
+
+  // 고른 필름 칩. ×를 누르면 바로 뺀다.
+  function renderPicked() {
+    const mine = readMine();
+    const picked = state.films.filter((f) => mine.has(f.slug))
+      .sort((a, b) => String(a.displayName || a.name).localeCompare(String(b.displayName || b.name)));
+    $('[data-picked-count]').textContent = tr(`내 필름 ${picked.length}`, `My films: ${picked.length}`, `マイフィルム ${picked.length}`);
+    $('[data-mine-clear]').hidden = !picked.length;
+    $('.fslot-picked').innerHTML = picked.map((f) => `
+      <span class="fslot-pick">${esc(f.displayName || f.name)}<button type="button" data-unpick="${esc(f.slug)}" aria-label="${esc(tr(`${f.displayName || f.name} 빼기`, `Remove ${f.displayName || f.name}`, `${f.displayName || f.name}を外す`))}">×</button></span>`).join('');
+  }
+
+  function togglePick(slug, on) {
+    const mine = readMine();
+    if (on) mine.add(slug); else mine.delete(slug);
+    writeMine(mine);
+    const box = dlg.querySelector(`.fslot-list input[value="${CSS.escape(slug)}"]`);
+    if (box) { box.checked = on; box.closest('label').classList.toggle('is-on', on); }
+    afterPickChange();
+  }
+
+  function afterPickChange() {
+    renderPicked();
+    renderControls();
   }
 
   function itemHtml(f) {

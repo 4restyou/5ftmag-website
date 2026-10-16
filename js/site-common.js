@@ -1792,7 +1792,7 @@
       taps = 0;
       if (window.FilmSlot) { window.FilmSlot.open(); return; }
       const s = document.createElement('script');
-      s.src = '/js/film-slot.js?v=20261016-film-slot';
+      s.src = '/js/film-slot.js?v=20261016-film-slot-pick';
       s.onload = () => window.FilmSlot && window.FilmSlot.open();
       document.head.appendChild(s);
     });
