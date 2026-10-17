@@ -1196,6 +1196,14 @@ body {
 .sensitive-media.is-loading .sensitive-reveal { opacity: .6; pointer-events: none; }
 .sensitive-media.is-revealed .sensitive-cover { display: none; }
 
+/* 이 카메라로 찍은 독자 사진 (js/site-common.js bindCameraRoll) */
+.camera-roll[hidden] { display: none; }
+.camera-roll-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0 6px; }
+.camera-roll-item { display: block; color: var(--text); text-decoration: none; border-bottom: 0; min-width: 0; }
+.camera-roll-item img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--bg-sub); }
+.camera-roll-credit { display: block; margin-top: 4px; font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.camera-roll-note { font-size: 13px; color: var(--text-muted); }
+
 /* ════════ Author bio + Related by author (article 끝 inject) ════════ */
 .article-author-bio {
   max-width: var(--read-width);
