@@ -1797,4 +1797,40 @@
       document.head.appendChild(s);
     });
   })();
+
+  // ════════════════════════════════════════════════
+  // 민감한 사진 가리기 (누드 등). 스레드의 스포일러처럼 흐린 미리보기 위에 안내와 버튼을 덮고,
+  // 누른 뒤에야 원본을 불러온다. 원본 주소는 data-full 에만 있어 누르기 전에는 내려받지 않는다.
+  //   <figure class="sensitive-media">
+  //     <div class="sensitive-frame">
+  //       <img class="sensitive-img" src="…-blur.webp" data-full="….webp" alt="…" />
+  //       <div class="sensitive-cover"><p class="sensitive-msg">…</p><button type="button" class="sensitive-reveal">…</button></div>
+  //     </div>
+  //     <figcaption>…</figcaption>
+  //   </figure>
+  // ════════════════════════════════════════════════
+  (function bindSensitiveMedia() {
+    function reveal(fig) {
+      const img = fig.querySelector('.sensitive-img');
+      if (!img || fig.classList.contains('is-revealed')) return;
+      const full = img.dataset.full;
+      fig.classList.add('is-loading');
+      const done = () => { fig.classList.remove('is-loading'); fig.classList.add('is-revealed'); };
+      if (!full) { done(); return; }
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+      img.src = full;
+    }
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.sensitive-reveal');
+      if (!btn) return;
+      const fig = btn.closest('.sensitive-media');
+      if (!fig) return;
+      const others = [...document.querySelectorAll('.sensitive-media:not(.is-revealed)')].filter((f) => f !== fig);
+      reveal(fig);
+      if (others.length && window.confirm(tr('이 글의 다른 사진도 모두 펼칠까요?', 'Show the other photos in this article too?', 'この記事のほかの写真もすべて表示しますか？'))) {
+        others.forEach(reveal);
+      }
+    });
+  })();
 })();
