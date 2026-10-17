@@ -6,13 +6,31 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Wed, 14 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 17 Oct 2026 00:00:00 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>야시카 T4, 주머니에 들어가는 칼 자이스</title>
+      <link>https://www.5ftmag.com/stories/yashica-t4.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/yashica-t4.html</guid>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 GMT</pubDate>
+      <description>라이언 맥긴리가 무명 시절 매일 밤 주머니에 넣고 다닌 카메라. 칼 자이스 테사 35mm f/3.5 를 단 1990년대 자동 똑딱이 야시카 T4 가 어떤 카메라인지, 왜 지금 값이 이렇게 올랐는지 짚는다.</description>
+      <category>CAMERA</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
+    <item>
+      <title>라이언 맥긴리, 친구들의 여름에서 밤의 뉴욕까지</title>
+      <link>https://www.5ftmag.com/stories/ryan-mcginley-night-shift.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/ryan-mcginley-night-shift.html</guid>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 GMT</pubDate>
+      <description>스물다섯에 휘트니 미술관 개인전을 연 라이언 맥긴리. 친구들과 떠난 여름 로드트립 사진으로 이름을 알린 그가 올여름 「Night Shift」로 십 년 만에 뉴욕 개인전을 열었다. 밤 9시부터 새벽 5시까지 다섯 개 자치구를 찍은 연작이다.</description>
+      <category>PHOTOGRAPHER</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>브리스냅 필름헛소리 04. 세상에 하나뿐인 나만의 카메라 가방, 누베스 프레스 센터</title>
       <link>https://www.5ftmag.com/stories/brisnap-04.html</link>
