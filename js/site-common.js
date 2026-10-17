@@ -1833,4 +1833,42 @@
       }
     });
   })();
+
+  // ════════════════════════════════════════════════
+  // 이 카메라로 찍은 독자 사진 (카메라 기사용). <section data-camera-roll="정규식" hidden> 안의
+  // .camera-roll-grid 에 승인된 독자 사진 가운데 카메라 칸이 정규식과 맞는 것을 최신순으로 채운다.
+  // 한 장도 없으면 칸을 숨긴 채 둔다.
+  // ════════════════════════════════════════════════
+  (function bindCameraRoll() {
+    const box = document.querySelector('[data-camera-roll]');
+    if (!box) return;
+    let re;
+    try { re = new RegExp(box.dataset.cameraRoll, 'i'); } catch (_) { return; }
+    const max = Number(box.dataset.cameraRollMax) || 9;
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const started = Date.now();
+    (function wait() {
+      const db = window.MagDB;
+      if (!db?.submissions?.listApproved) {
+        if (Date.now() - started < 8000) setTimeout(wait, 200);
+        return;
+      }
+      db.submissions.listApproved(2000).then((rows) => {
+        const picks = (rows || []).filter((r) => re.test(String(r.camera || ''))).slice(0, max);
+        if (!picks.length) return;
+        const grid = box.querySelector('.camera-roll-grid');
+        grid.innerHTML = picks.map((r) => {
+          const who = String(r.instagram || r.submitter_name || '').trim();
+          const key = who.replace(/^@/, '').toLowerCase();
+          const href = key ? `${i18n.url('/films.html')}?contributor=${encodeURIComponent(key)}` : i18n.url('/films.html');
+          const label = r.instagram ? '@' + String(r.instagram).replace(/^@/, '') : (r.submitter_name || '');
+          return `<a class="camera-roll-item" href="${esc(href)}">
+            <img src="${esc(db.submissions.publicUrl(r.storage_path))}" alt="${esc(tr(`${label} 님이 ${r.film || '필름'}로 찍은 사진`, `Photo by ${label} on ${r.film || 'film'}`, `${label}さんが${r.film || 'フィルム'}で撮った写真`))}" loading="lazy" decoding="async" />
+            <span class="camera-roll-credit">${esc(label)}${r.film ? ' · ' + esc(r.film) : ''}</span>
+          </a>`;
+        }).join('');
+        box.hidden = false;
+      }).catch(() => {});
+    })();
+  })();
 })();
