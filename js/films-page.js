@@ -1004,13 +1004,17 @@
       }
       try { history.replaceState(null, '', prettyContributorPath(personKey)); } catch (_) {}
       const authorLabel = (instagram || '').replace(/^@/, '') || label;
+      // 편집부 ✉ 버튼용: 이 작가의 투고 하나(공개 뷰엔 회원 id 가 없어 열 때 투고 id 로 찾는다)
+      const contributorSubmissionId = personEntries
+        .map((e) => (typeof e.id === 'string' && e.id.startsWith('sub-') ? e.id.slice(4) : (e.submissionId || '')))
+        .find(Boolean) || '';
       const isContribFav = contributorFavKeys.has(personKey);
       contributorView.innerHTML = `
         <div class="reader-contributor-head">
           <div>
             <span class="reader-contributor-kicker">CONTRIBUTOR</span>
             <div class="reader-contributor-name-row">
-              <h3>${escapeAttr(label)}</h3>
+              <h3${contributorSubmissionId ? ` data-msg-submission="${escapeAttr(contributorSubmissionId)}" data-msg-name="${escapeAttr(label)}"` : ''}>${escapeAttr(label)}</h3>
               <button type="button"
                 class="reader-contributor-fav${isContribFav ? ' is-fav' : ''}"
                 data-contributor-key="${escapeAttr(personKey)}"

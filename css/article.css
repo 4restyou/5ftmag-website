@@ -415,6 +415,15 @@ body {
 .article-signature .role {
   color: var(--text-dim); margin-right: 8px;
 }
+.article-msg-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.article-msg-link:hover { color: var(--text); }
 .share-bar {
   display: flex;
   align-items: center;

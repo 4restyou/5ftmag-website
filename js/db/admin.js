@@ -628,14 +628,6 @@
         },
       },
       messages: {
-        // 편집부가 특정 회원에게 보냄
-        async sendAsEditor(targetUserId, body) {
-          const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
-          const text = String(body || '').trim();
-          if (!text) return { error: { message: 'empty' } };
-          if (text.length > 2000) return { error: { message: 'too long' } };
-          return c.from('messages').insert({ user_id: targetUserId, from_editor: true, body: text });
-        },
         // 편집부 인박스: 회원별 스레드 목록 (마지막 메시지 / 안읽음 카운트 포함)
         async listThreads({ limit = 200 } = {}) {
           const c = client(); if (!c) return [];

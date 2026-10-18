@@ -1645,6 +1645,23 @@
       if (strict && (!Number.isSafeInteger(count) || count < 0)) throw new Error('Invalid message count');
       return count || 0;
     },
+    // 편집부가 특정 회원에게 보냄 (RLS messages_insert_editor 가 편집부만 통과시킨다).
+    // 관리 화면 밖(댓글·장터·라이브러리)의 ✉ 버튼도 쓰므로 여기 둔다.
+    async sendAsEditor(targetUserId, body) {
+      const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
+      const text = String(body || '').trim();
+      if (!text) return { error: { message: 'empty' } };
+      if (text.length > 2000) return { error: { message: 'too long' } };
+      return c.from('messages').insert({ user_id: targetUserId, from_editor: true, body: text });
+    },
+    // 편집부: 사진(투고) id 로 올린 회원을 찾는다. 공개 뷰에는 user_id 가 없어 베이스 테이블을 읽는다
+    // (RLS "editors read all" 이 편집부만 통과시킨다).
+    async ownerOfSubmission(submissionId) {
+      const c = client(); if (!c || !submissionId) return null;
+      const { data, error } = await c.from('reader_submissions').select('user_id').eq('id', submissionId).maybeSingle();
+      if (error) { console.warn('[messages.ownerOfSubmission]', error.message); return null; }
+      return data?.user_id || null;
+    },
     // 본인 메시지 수정 (회원: 자기 발신, 편집부: 편집부 발신)
     async edit(id, body) {
       const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };

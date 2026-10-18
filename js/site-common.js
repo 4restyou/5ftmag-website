@@ -1951,4 +1951,31 @@
       document.head.appendChild(s);
     }, 2500);
   })();
+
+  // 편집부만: 회원 이름(data-msg-user / data-msg-submission) 옆에 ✉ 버튼 → 그 자리에서 메시지(js/editor-message.js).
+  (function bindEditorMessage() {
+    if (!readEditorCache()) return;
+    const load = () => {
+      const s = document.createElement('script');
+      s.src = '/js/editor-message.js?v=20261018-editor-msg2';
+      document.head.appendChild(s);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
+    else load();
+  })();
+
+  // 독자: 기사 끝(공유 버튼 아래)에 「이 글에 대해 편집부에 이야기하기」. 메시지 입력창에 기사 제목을 미리 적어 둔다.
+  (function bindArticleMessageLink() {
+    if (!/\/stories\/[^/]+$/.test(location.pathname)) return;
+    const share = document.querySelector('.share-bar');
+    // 제목이 두 줄(span.title-break)로 나뉜 기사가 있어 조각을 띄어 붙인다
+    const h1 = document.querySelector('.article-title');
+    const title = (h1 ? [...h1.childNodes].map((n) => n.textContent.trim()).filter(Boolean).join(' ') : document.title || '').trim();
+    if (!share || !title) return;
+    const a = document.createElement('a');
+    a.className = 'article-msg-link';
+    a.href = i18n.url('/me.html') + '?compose=' + encodeURIComponent(title.slice(0, 120)) + '#messages';
+    a.textContent = tr('이 글에 대해 편집부에 이야기하기 →', 'Talk to the editors about this story →', 'この記事について編集部に伝える →');
+    share.after(a);
+  })();
 })();

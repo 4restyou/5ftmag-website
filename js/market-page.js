@@ -402,7 +402,7 @@ function renderDetail(r) {
       <div class="mkt-detail-contact">
         <strong>${i18n.t('판매자 연락처', 'Seller contact', '出品者の連絡先')}</strong>
         ${isAuthed ? `
-          ${r.seller_name ? `<div>${i18n.t('이름', 'Name', '名前')} · ${escapeHtml(r.seller_name)}</div>` : ''}
+          ${r.seller_name ? `<div>${i18n.t('이름', 'Name', '名前')} · <span${r.user_id ? ` data-msg-user="${escapeAttr(r.user_id)}"` : ''}>${escapeHtml(r.seller_name)}</span></div>` : ''}
           ${contactValue(r.phone) ? `<div>${i18n.t('핸드폰', 'Phone', '携帯電話')} · ${escapeHtml(r.phone)}</div>` : ''}
           ${contactValue(r.contact) ? `<div>${i18n.t('기타', 'Other', 'その他')} · ${nl2br(r.contact)}</div>` : ''}
         ` : `
