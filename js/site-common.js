@@ -1905,15 +1905,21 @@
       if (!row) return;
       const n = (v) => Number(v || 0).toLocaleString();
       const since = row.first_day ? String(row.first_day).replace(/-/g, '.') : '';
-      const el = document.createElement('span');
-      el.className = 'story-views';
-      el.title = tr(
-        `편집부만 보입니다. 본 사람 ${n(row.sessions)}명 · 조회 ${n(row.views)}회 (누적${since ? `, ${since}부터` : ''})`,
-        `Editors only. ${n(row.sessions)} visitors · ${n(row.views)} views (all time${since ? `, since ${since}` : ''})`,
-        `編集部のみ表示。閲覧者 ${n(row.sessions)}人・閲覧 ${n(row.views)}回（累計${since ? `、${since}から` : ''}）`
+      // 기본 title 툴팁은 늦게 뜨고 Safari·폰에선 안 뜨기도 해서, 올리거나 누르면 바로 뜨는 말풍선을 쓴다.
+      const tip = tr(
+        `본 사람 ${n(row.sessions)}명 · 조회 ${n(row.views)}회\n누적${since ? `, ${since}부터` : ''} · 편집부만 보입니다`,
+        `${n(row.sessions)} visitors · ${n(row.views)} views\nAll time${since ? `, since ${since}` : ''} · editors only`,
+        `閲覧者 ${n(row.sessions)}人・閲覧 ${n(row.views)}回\n累計${since ? `、${since}から` : ''}・編集部のみ表示`
       );
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'story-views';
+      el.dataset.tip = tip;
+      el.setAttribute('aria-label', tip.replace('\n', ' · '));
       el.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
-        + `<span>${n(row.sessions)}</span>`;
+        + `<span aria-hidden="true">${n(row.sessions)}</span>`;
+      el.addEventListener('click', () => el.classList.toggle('is-open'));
+      document.addEventListener('click', (e) => { if (!el.contains(e.target)) el.classList.remove('is-open'); });
       const dot = document.createElement('span');
       dot.className = 'dot';
       dateEl.after(dot, el);
