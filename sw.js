@@ -1,15 +1,22 @@
 // 5ft.mag service worker — PWA 기초.
 // 정책:
-//   - HTML: network-first (3초 타임아웃) + 실패 시 캐시 fallback
+//   - HTML: network-first (0.8초 타임아웃) + 실패 시 캐시 fallback
 //     배포 직후 즉시 새 HTML 받게. stale-while-revalidate 의 "2번 새로고침 후 갱신"
 //     UX 결함 해소. 오프라인 시는 캐시로 그대로 동작.
-//     3초가 지나도 캐시가 없으면 오류로 끝내지 않고 네트워크 응답을 끝까지 기다린다.
-//   - 정적 자산 (JS/CSS): 네트워크 우선 + 캐시 fallback (캐시 키로 버스트됨)
+//     3초를 기다리던 때는 느린 회선에서 홈 화면 앱이 2~3초 빈 화면으로 떴다. 늦으면 캐시를 먼저
+//     보여 주고, 네트워크 응답은 끝까지 받아 캐시를 갱신한다(다음 실행에 반영).
+//     타임아웃이 지나도 캐시가 없으면 오류로 끝내지 않고 네트워크 응답을 끝까지 기다린다.
+//   - 정적 자산 (JS/CSS): ?v= 가 붙은 것은 cache-first(내용이 바뀌면 주소가 바뀐다).
+//     같은 파일의 옛 버전은 새 버전을 담을 때 지운다. ?v= 가 없는 CSS 는 캐시를 바로 쓰고 뒤에서 갱신한다.
+//   - 그 밖(data/*.json 등): 네트워크 우선 + 캐시 fallback (새 글이 늦게 보이지 않게 기다린다)
+//   - Pretendard 글꼴(jsdelivr, 버전 고정): cache-first. 화면 그리기를 막는 CSS 라 매번 받지 않는다.
 //   - 이미지: 캐시에 담지 않는다 (/img/* 는 HTTP immutable 캐시가 맡는다, 무한 누적 방지)
 //   - 캐시 이름을 바꾸면 activate 에서 옛 캐시를 통째로 지운다.
 // 푸시 알림 핸들러 포함.
 
 const CACHE = '5ft-v3-20261002';
+const HTML_TIMEOUT_MS = 800;
+const FONT_PREFIX = '/gh/orioncactus/pretendard@v1.3.9/';
 const CORE = [
   '/',
   '/index.html',
@@ -70,6 +77,10 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  if (url.origin === 'https://cdn.jsdelivr.net' && url.pathname.startsWith(FONT_PREFIX)) {
+    e.respondWith(cacheFirst(req));
+    return;
+  }
   if (url.origin !== self.location.origin) return;
   // POST/admin/Supabase 등 API 는 캐시 안 함
   if (url.pathname.startsWith('/i/') || url.pathname.includes('/admin/')) return;
@@ -83,11 +94,22 @@ self.addEventListener('fetch', (e) => {
 
   if (isHtml) {
     // network-first — 새 배포는 즉시 반영, 느리거나 끊겼을 때만 캐시.
-    e.respondWith(networkFirst(req, 3000));
+    e.respondWith(networkFirst(req, HTML_TIMEOUT_MS));
     return;
   }
 
-  // 기타 정적: 네트워크 우선 + 캐시 fallback
+  // 버전이 붙은 정적 자산은 캐시 먼저
+  if (url.searchParams.has('v')) {
+    e.respondWith(cacheFirst(req, true));
+    return;
+  }
+  // 버전 없는 CSS(pretendard.css 등)는 화면 그리기를 막으므로 캐시를 바로 쓰고 뒤에서 갱신한다
+  if (url.pathname.endsWith('.css')) {
+    e.respondWith(staleWhileRevalidate(req));
+    return;
+  }
+
+  // 기타(data/*.json 등): 네트워크 우선 + 캐시 fallback
   e.respondWith(
     fetch(req).then((res) => {
       const type = res && res.headers.get('content-type') || '';
@@ -103,6 +125,40 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+
+// 캐시가 있으면 바로 쓰고, 네트워크로 받은 새 내용은 다음 번을 위해 담아 둔다.
+async function staleWhileRevalidate(req) {
+  const cached = await caches.match(req).catch(() => null);
+  const net = fetch(req).then((res) => {
+    if (res && res.ok) {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => null);
+    }
+    return res;
+  });
+  if (cached) { net.catch(() => null); return cached; }
+  return net;
+}
+
+// 캐시에 있으면 바로, 없으면 받아서 담는다. dropOld: 같은 경로의 다른 ?v= 항목을 지운다.
+async function cacheFirst(req, dropOld = false) {
+  const cached = await caches.match(req).catch(() => null);
+  if (cached) return cached;
+  const res = await fetch(req);
+  // 글꼴 CSS 는 @import(no-cors)라 opaque 응답으로 온다. 그것도 담는다.
+  if (res && (res.ok || res.type === 'opaque')) {
+    const copy = res.clone();
+    caches.open(CACHE).then(async (c) => {
+      if (dropOld) {
+        const path = new URL(req.url).pathname;
+        const keys = await c.keys();
+        await Promise.all(keys.filter((k) => k.url !== req.url && new URL(k.url).pathname === path).map((k) => c.delete(k)));
+      }
+      await c.put(req, copy);
+    }).catch(() => null);
+  }
+  return res;
+}
 
 // ════════════════════════════════════════════════════════════
 // Web Push — send-push edge function 이 보낸 페이로드를 OS 알림으로.
