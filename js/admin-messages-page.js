@@ -77,7 +77,7 @@
     STATE.currentUserId = userId;
     renderThreads();
     const thread = STATE.threads.find((t) => t.user_id === userId);
-    $('viewTitle').textContent = thread?.display_name || '회원';
+    $('viewTitle').textContent = thread?.display_name || STATE.deepName || '회원';
     $('composeRow').hidden = false;
     $('viewList').innerHTML = '<div class="msg-view-empty">불러오는 중…</div>';
     // 폰에서는 목록 아래에 대화창이 있어, 고른 뒤 손으로 내려가야 했다.
@@ -340,6 +340,13 @@
     if (!(await checkAccess())) return;
     $('app').hidden = false;
     await loadThreads();
+    // 다른 화면의 ✉ 「대화 전체 보기」 → ?user=<id>&name=<이름>
+    const params = new URLSearchParams(location.search);
+    const deepUser = params.get('user');
+    if (deepUser && /^[0-9a-f-]{36}$/i.test(deepUser)) {
+      STATE.deepName = params.get('name') || '';
+      await openThread(deepUser);
+    }
     startPolling();
   })();
 })();

@@ -649,9 +649,9 @@
 <!-- util.js 는 reader-submissions 가 첫 줄에서 MagUtil 을 쓰므로 그보다 먼저 -->
   <script src="../js/util.js?v=20261003-member-stability" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
-<script src="../js/db/admin.js?v=20261012-auto-approve" defer></script>
+<script src="../js/db/admin.js?v=20261018-editor-msg" defer></script>
 <script src="../js/db/commerce.js?v=20261002-f2" defer></script>
-  <script src="../js/db-client.js?v=20261018-list-views" defer></script>
+  <script src="../js/db-client.js?v=20261018-editor-msg" defer></script>
 <script src="../js/image-processor.js?v=20261006-photo-dedupe" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20261008-camera-potw" defer></script>
@@ -665,7 +665,7 @@
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
   <script src="../js/site-telemetry.js?v=20261002-product-audit" defer></script>
   <script src="../js/site-pwa.js?v=20261002-f2" defer></script>
-  <script src="../js/site-common.js?v=20261018-install-guide" defer></script>
+  <script src="../js/site-common.js?v=20261018-editor-msg2" defer></script>
 <script>
 'use strict';
 
@@ -1125,7 +1125,7 @@ function renderCard(r) {
         </div>` : ''}
         <div class="sub-card-row">
           <span class="k">인스타</span>
-          <span class="v">${igUrl ? `<a href="${escapeHtml(igUrl)}" target="_blank" rel="noopener">${escapeHtml(r.instagram)}</a>` : escapeHtml(r.instagram || '-')}</span>
+          <span class="v"${r.user_id ? ` data-msg-user="${escapeHtml(r.user_id)}" data-msg-name="${escapeHtml(r.submitter_name || r.instagram || '회원')}"` : ''}>${igUrl ? `<a href="${escapeHtml(igUrl)}" target="_blank" rel="noopener">${escapeHtml(r.instagram)}</a>` : escapeHtml(r.instagram || '-')}</span>
         </div>
         <div class="sub-card-row">
           <span class="k">필름</span>

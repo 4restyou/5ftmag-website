@@ -132,7 +132,7 @@
         <img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" class="cm-avatar" />
         <div class="cm-body">
           <div class="cm-head">
-            <span class="cm-name">${escapeHtml(name)}</span>
+            <span class="cm-name"${c.is_editor ? '' : ` data-msg-user="${escapeHtml(c.user_id)}"`}>${escapeHtml(name)}</span>
             ${c.is_editor ? `<span class="cm-badge-editor">${tr('편집부', 'Editor', '編集部')}</span>` : ''}
             <span class="cm-time">${timeAgo(c.created_at)}${c.updated_at && c.updated_at !== c.created_at && !isDeleted ? tr(' · 수정됨', ' · edited', ' · 編集済み') : ''}</span>
           </div>

@@ -1331,4 +1331,11 @@ function renderMyBooks() {
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);
   }
+  // 기사 끝 「편집부에 이야기하기」에서 왔으면 기사 제목을 입력창에 적어 둔다(?compose=제목#messages).
+  const composeAbout = new URLSearchParams(location.search).get('compose');
+  if (hashSection === 'messages' && composeAbout && $('messageBody') && !$('messageBody').value) {
+    $('messageBody').value = i18n.t(`〈${composeAbout}〉 관련: `, `About "${composeAbout}": `, `「${composeAbout}」について: `);
+    $('messageBody').dispatchEvent(new Event('input'));
+    $('messageBody').focus();
+  }
 })();

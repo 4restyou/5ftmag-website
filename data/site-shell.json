@@ -31,6 +31,13 @@
   ],
   "footerLinks": [
     {
+      "label": "편집부에 메시지",
+      "label_en": "Message the editors",
+      "label_ja": "編集部にメッセージ",
+      "path": "me.html",
+      "hash": "#messages"
+    },
+    {
       "label": "Shop",
       "path": "shop.html"
     },

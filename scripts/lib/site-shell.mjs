@@ -64,10 +64,12 @@ export function mobileNavHtml(file) {
 }
 
 export function footerHtml(file) {
+  const lang = langOf(file);
   const links = shellConfig.footerLinks.map((item) => {
-    const href = item.path ? hrefFrom(file, item.path) : item.href;
+    const href = item.path ? hrefFrom(file, item.path) + (item.hash || '') : item.href;
     const external = item.external ? ' target="_blank" rel="noopener"' : '';
-    return `    <a href="${href}"${external}>${item.label}</a>`;
+    const label = (lang !== 'ko' && item[`label_${lang}`]) || item.label;
+    return `    <a href="${href}"${external}>${label}</a>`;
   }).join('\n');
   return `<div class="footer-links">\n${links}\n  </div>`;
 }
