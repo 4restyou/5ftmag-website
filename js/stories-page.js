@@ -17,6 +17,7 @@
   let allStories = []; // 전체 글 데이터 캐시
   // 본인이 스크랩한 글 id 집합 — DB 준비 후 비동기 로드
   let articleFavIds = new Set();
+  let storyViews = null; // 편집부만: slug → { views, sessions }
 
   // XSS 가드: 동적 삽입 escape
   const escapeHtml = window.MagUtil.escapeHtml;
@@ -162,6 +163,7 @@
     if (currentPage > totalPages) currentPage = totalPages;
     const start = (currentPage - 1) * pageSize;
     grid.innerHTML = stories.slice(start, start + pageSize).map(renderCard).join('');
+    syncCardViews();
     renderPagination(stories.length);
   }
 
@@ -336,6 +338,17 @@
           if (sess) articleFavIds = await window.MagDB.favorites.idsForType('article');
         } catch (_) {}
         syncCardFavMarks();
+        // 편집부만: 카드 날짜 옆에 본 사람 수. 헤더가 확인해 둔 편집부 표시가 있을 때만 부르고,
+        // 숫자는 편집부만 통과하는 RPC 가 준다.
+        let editor = false;
+        try { editor = localStorage.getItem('5ft-is-editor') === '1'; } catch (_) {}
+        if (editor && window.MagDB?.storyStats?.all) {
+          const rows = await window.MagDB.storyStats.all();
+          if (rows) {
+            storyViews = new Map(rows.map((r) => [r.slug, r]));
+            syncCardViews();
+          }
+        }
       })();
     })
     .catch(err => {
@@ -345,6 +358,27 @@
         : `<div class="empty-state">${st('글 목록을 불러오지 못했습니다.', 'Could not load articles.', '記事一覧を読み込めませんでした。')}</div>`;
       window.MagState?.bindAction(grid, 'retry', () => location.reload());
     });
+
+  function syncCardViews() {
+    if (!storyViews) return;
+    const fmt = (v) => Number(v || 0).toLocaleString();
+    document.querySelectorAll('.article-card').forEach((card) => {
+      const m = (card.getAttribute('href') || '').match(/stories\/([a-z0-9][a-z0-9_-]*?)(?:\.html)?$/i);
+      const meta = card.querySelector('.article-meta');
+      if (!m || !meta || meta.querySelector('.card-views')) return;
+      const row = storyViews.get(m[1].toLowerCase());
+      const el = document.createElement('span');
+      el.className = 'card-views';
+      el.title = st(
+        `본 사람 ${fmt(row?.sessions)}명 · 조회 ${fmt(row?.views)}회 (누적, 편집부만 보입니다)`,
+        `${fmt(row?.sessions)} visitors · ${fmt(row?.views)} views (all time, editors only)`,
+        `閲覧者 ${fmt(row?.sessions)}人・閲覧 ${fmt(row?.views)}回（累計、編集部のみ表示）`
+      );
+      el.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+        + `<span>${fmt(row?.sessions)}</span>`;
+      meta.append(el);
+    });
+  }
 
   function syncCardFavMarks() {
     document.querySelectorAll('.article-card-fav').forEach(el => {

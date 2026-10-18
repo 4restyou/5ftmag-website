@@ -375,6 +375,8 @@
   color: var(--text-muted);
   letter-spacing: var(--ls-default);
 }
+/* 편집부만: 날짜 옆 본 사람 수 (js/stories-page.js syncCardViews) */
+.article-meta .card-views { display: inline-flex; align-items: center; gap: 3px; margin-left: 10px; vertical-align: -2px; color: var(--text); font-weight: var(--fw-heading); }
 
 /* 빈 결과 (필터링 후) */
 .empty-state, .loading-state {

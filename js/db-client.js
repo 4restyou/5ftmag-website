@@ -1669,6 +1669,13 @@
       if (error) { console.warn('[storyStats.views]', error.message); return null; }
       return Array.isArray(data) ? (data[0] || null) : data;
     },
+    // 글 목록용: 모든 기사의 { slug, views, sessions }
+    async all() {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.rpc('admin_story_views_all');
+      if (error) { console.warn('[storyStats.all]', error.message); return null; }
+      return data || [];
+    },
   };
 
   // 편집부 전용 함수(응모 검토·장터 신고·통계·공지/메시지 관리 등)는 js/db/admin.js 에 있다.
