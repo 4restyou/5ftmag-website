@@ -1957,7 +1957,7 @@
     if (!readEditorCache()) return;
     const load = () => {
       const s = document.createElement('script');
-      s.src = '/js/editor-message.js?v=20261018-editor-msg2';
+      s.src = '/js/editor-message.js?v=20261019-editor-msg-icon';
       document.head.appendChild(s);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);

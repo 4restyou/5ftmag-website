@@ -11,15 +11,16 @@
   'use strict';
   if (window.EditorMessage) return;
   const SEL = '[data-msg-user], [data-msg-submission]';
-  const ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>';
+  const ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>';
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const db = () => window.MagDB;
 
   const CSS = `
-.editor-msg-btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; margin-left: 4px;
-  padding: 0; border: 1px solid var(--border, #ddd); border-radius: 50%; background: var(--bg, #fff); color: var(--text, #111);
+/* 다른 아이콘 버튼처럼 테두리 없이 선 아이콘만. 누르는 자리는 28px 로 넉넉히 둔다 */
+.editor-msg-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin: -6px 0 -6px 2px;
+  padding: 0; border: 0; border-radius: 6px; background: none; color: var(--text-muted, #666);
   cursor: pointer; vertical-align: middle; flex: 0 0 auto; }
-.editor-msg-btn:hover { background: #ffd400; border-color: #ffd400; color: #111; }
+.editor-msg-btn:hover, .editor-msg-btn:focus-visible { color: var(--text, #111); background: var(--bg-sub, #f2f2f2); }
 .editor-msg-dialog { position: fixed; inset: 0; margin: auto; height: fit-content; max-height: calc(100vh - 32px); overflow: auto; width: min(440px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--border, #ddd); border-radius: 14px;
   background: var(--bg, #fff); color: var(--text, #111); box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
 .editor-msg-dialog::backdrop { background: rgba(0,0,0,0.35); }
@@ -74,7 +75,8 @@
         e.stopPropagation();
         open({ userId: el.dataset.msgUser, submissionId: el.dataset.msgSubmission, name: nameOf(el) });
       });
-      el.after(btn);
+      // 이름 요소 안 끝에 붙인다. 밖에 붙이면 이름 칸이 줄 단위(block)인 화면에서 다음 줄로 떨어진다
+      el.append(btn);
     });
   }
 
