@@ -144,7 +144,7 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-new-strip { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 18px; scroll-snap-type: x mandatory; scroll-padding-inline: var(--mh-pad); }
 .mh-new-strip::-webkit-scrollbar { display: none; }
 .mh-new-card { flex: 0 0 78%; max-width: 280px; scroll-snap-align: start; text-decoration: none; color: var(--text); background: var(--bg); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-.mh-new-card .mh-new-thumb { aspect-ratio: 16/10; background: var(--border); overflow: hidden; }
+.mh-new-card .mh-new-thumb { aspect-ratio: 3/2; background: var(--border); overflow: hidden; }
 .mh-new-card .mh-new-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .mh-new-card .mh-new-meta { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin: 12px 12px 4px; }
 .mh-new-card .mh-new-headline { font-size: 14px; font-weight: var(--fw-heading); line-height: 1.4; letter-spacing: -0.01em; margin: 0 12px 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

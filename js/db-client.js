@@ -1661,6 +1661,16 @@
     ? window.MagDBCommerce.create({ client, session, url: URL_, webzine })
     : { shop: {}, ebooks: {} };
 
+  // 기사 조회 수 — 편집부만 결과를 받는다(RPC 안에서 is_editor 검사). 기사 날짜 옆 눈 아이콘에 쓴다.
+  const storyStats = {
+    async views(slug) {
+      const c = client(); if (!c) return null;
+      const { data, error } = await c.rpc('admin_story_views', { p_slug: slug });
+      if (error) { console.warn('[storyStats.views]', error.message); return null; }
+      return Array.isArray(data) ? (data[0] || null) : data;
+    },
+  };
+
   // 편집부 전용 함수(응모 검토·장터 신고·통계·공지/메시지 관리 등)는 js/db/admin.js 에 있다.
   // 관리 화면(admin/*.html)만 그 파일을 이 파일 앞에 싣고, 여기서 같은 이름으로 붙인다.
   // 공개 화면이 편집부에게만 보여 주는 기능(이주의 사진 선정·필름명 수정·메시지 배지)은 여기 남긴다.
@@ -1678,6 +1688,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages, shop, ebooks,
+    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages, shop, ebooks, storyStats,
   };
 })();

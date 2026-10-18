@@ -1871,4 +1871,52 @@
       }).catch(() => {});
     })();
   })();
+
+  // 글 카드 썸네일(3:2)에 세로·정사각 사진이 오면 잘라 내지 않고 전체를 보여 준다(css/common.css .thumb-blur).
+  // 카드는 페이지마다 나중에 그려지므로 문서 전체에서 이미지 load 를 잡는다(load 는 버블링되지 않아 capture).
+  (function bindThumbFit() {
+    const BOX = '.post-img, .article-img, .mh-new-thumb, .related-card-img, .related-img';
+    const fit = (img) => {
+      const box = img.closest && img.closest(BOX);
+      if (!box || box.classList.contains('text-only') || !img.naturalWidth) return;
+      // 4:3(1.33)까지는 살짝 잘라 꽉 채우는 편이 낫다. 그보다 좁은 것만 전체를 보여 준다.
+      if (img.naturalWidth / img.naturalHeight >= 1.2) return;
+      if (box.classList.contains('is-on-white')) { box.classList.add('thumb-contain'); return; }
+      box.classList.add('thumb-blur');
+      box.style.setProperty('--thumb-bg-src', `url("${img.currentSrc || img.src}")`);
+    };
+    document.addEventListener('load', (e) => { if (e.target.tagName === 'IMG') fit(e.target); }, true);
+    const scan = () => document.querySelectorAll(BOX.split(', ').map((s) => s + ' img').join(', '))
+      .forEach((img) => { if (img.complete) fit(img); });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
+    else scan();
+  })();
+
+  // 편집부만: 기사 날짜 옆에 눈 아이콘과 조회한 사람 수(방문 세션, 최근 1년, 세 언어판 합계).
+  // 편집부 여부는 헤더가 확인해 둔 값(5ft-is-editor)으로 먼저 거르고, 숫자는 편집부만 통과하는 RPC 가 준다.
+  (function bindStoryViews() {
+    const m = location.pathname.match(/^\/(?:en\/|ja\/)?stories\/([a-z0-9][a-z0-9_-]*?)(?:\.html)?$/i);
+    const dateEl = document.querySelector('.article-author .date');
+    if (!m || !dateEl || !readEditorCache()) return;
+    (async () => {
+      for (let i = 0; i < 60 && !(window.MagDB && window.MagDB.isReady()); i++) await new Promise((r) => setTimeout(r, 50));
+      if (!window.MagDB?.storyStats) return;
+      const row = await window.MagDB.storyStats.views(m[1].toLowerCase());
+      if (!row) return;
+      const n = (v) => Number(v || 0).toLocaleString();
+      const since = row.first_day ? String(row.first_day).replace(/-/g, '.') : '';
+      const el = document.createElement('span');
+      el.className = 'story-views';
+      el.title = tr(
+        `편집부만 보입니다. 본 사람 ${n(row.sessions)}명 · 조회 ${n(row.views)}회 (최근 1년${since ? `, ${since}부터` : ''})`,
+        `Editors only. ${n(row.sessions)} visitors · ${n(row.views)} views (last 12 months${since ? `, since ${since}` : ''})`,
+        `編集部のみ表示。閲覧者 ${n(row.sessions)}人・閲覧 ${n(row.views)}回（直近1年${since ? `、${since}から` : ''}）`
+      );
+      el.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+        + `<span>${n(row.sessions)}</span>`;
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      dateEl.after(dot, el);
+    })().catch(() => {});
+  })();
 })();

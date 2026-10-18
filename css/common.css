@@ -1616,3 +1616,31 @@ kbd, .kbd {
 /* 일본어판 줄바꿈 — 사이트 전체에 건 한국어 규칙(word-break: keep-all, 띄어쓰기에서만 줄바꿈)이 일본어엔 맞지 않는다.
    일본어는 띄어쓰기가 거의 없어 문장 하나가 끊기지 않는 덩어리가 되고, 그 폭이 그리드 칸(1fr)을 밀어 레이아웃 비율이 깨졌다. */
 :lang(ja), :lang(ja) * { word-break: normal !important; line-break: strict; }
+
+/* ── 글 카드 썸네일(3:2) 안의 세로·정사각 사진 ──
+   잘라 내지 않고 전체를 보여 주고, 남는 자리는 같은 사진을 흐리게 깔아 채운다.
+   흰 배경 사진(.is-on-white)은 흐림 없이 흰 바탕에 전체를 보여 준다.
+   js/site-common.js 의 bindThumbFit 이 사진 비율을 보고 클래스를 붙인다. */
+.thumb-blur, .thumb-contain { position: relative; overflow: hidden; }
+.thumb-blur { isolation: isolate; background: var(--bg-sub); }
+.thumb-blur::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--thumb-bg-src);
+  background-size: cover;
+  background-position: center;
+  filter: blur(28px) saturate(1.15) brightness(0.92);
+  transform: scale(1.18);
+  z-index: 0;
+  pointer-events: none;
+}
+[data-theme="dark"] .thumb-blur::before { filter: blur(28px) saturate(1.05) brightness(0.6); }
+.thumb-blur img,
+.thumb-contain img {
+  position: relative;
+  z-index: 1;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+.thumb-blur > :not(picture):not(img) { z-index: 2; }
