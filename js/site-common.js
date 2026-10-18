@@ -1892,7 +1892,7 @@
     else scan();
   })();
 
-  // 편집부만: 기사 날짜 옆에 눈 아이콘과 조회한 사람 수(방문 세션, 최근 1년, 세 언어판 합계).
+  // 편집부만: 기사 날짜 옆에 눈 아이콘과 조회한 사람 수(방문 세션, 누적, 세 언어판 합계).
   // 편집부 여부는 헤더가 확인해 둔 값(5ft-is-editor)으로 먼저 거르고, 숫자는 편집부만 통과하는 RPC 가 준다.
   (function bindStoryViews() {
     const m = location.pathname.match(/^\/(?:en\/|ja\/)?stories\/([a-z0-9][a-z0-9_-]*?)(?:\.html)?$/i);
@@ -1908,9 +1908,9 @@
       const el = document.createElement('span');
       el.className = 'story-views';
       el.title = tr(
-        `편집부만 보입니다. 본 사람 ${n(row.sessions)}명 · 조회 ${n(row.views)}회 (최근 1년${since ? `, ${since}부터` : ''})`,
-        `Editors only. ${n(row.sessions)} visitors · ${n(row.views)} views (last 12 months${since ? `, since ${since}` : ''})`,
-        `編集部のみ表示。閲覧者 ${n(row.sessions)}人・閲覧 ${n(row.views)}回（直近1年${since ? `、${since}から` : ''}）`
+        `편집부만 보입니다. 본 사람 ${n(row.sessions)}명 · 조회 ${n(row.views)}회 (누적${since ? `, ${since}부터` : ''})`,
+        `Editors only. ${n(row.sessions)} visitors · ${n(row.views)} views (all time${since ? `, since ${since}` : ''})`,
+        `編集部のみ表示。閲覧者 ${n(row.sessions)}人・閲覧 ${n(row.views)}回（累計${since ? `、${since}から` : ''}）`
       );
       el.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
         + `<span>${n(row.sessions)}</span>`;
