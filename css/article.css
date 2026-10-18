@@ -70,6 +70,7 @@ body {
 .article-author .author-name {
   color: var(--text); font-weight: var(--fw-heading);
 }
+.article-author .story-views { display: inline-flex; align-items: center; gap: 4px; cursor: help; }
 
 /* ── 메인 이미지 (히어로) ── */
 .article-hero {
@@ -587,7 +588,7 @@ body {
 .related-card:hover { opacity: var(--card-hover-opacity); }
 .related-card .related-img {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: transparent;
   margin-bottom: 12px;
@@ -1265,7 +1266,7 @@ body {
 }
 .related-card:hover { opacity: var(--card-hover-opacity); }
 .related-card-img {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--bg-sub);
   border-radius: var(--radius-md);
@@ -1297,7 +1298,7 @@ body {
   }
   .related-by-author .related-grid::-webkit-scrollbar { display: none; }
   .related-by-author .related-card { flex: 0 0 64%; max-width: 260px; scroll-snap-align: start; }
-  .related-by-author .related-card-img { aspect-ratio: 16 / 10; margin-bottom: 8px; }
+  .related-by-author .related-card-img { margin-bottom: 8px; }
   .related-by-author .related-card h5 {
     font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
