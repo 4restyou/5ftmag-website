@@ -184,6 +184,11 @@
     }
     return null;
   }
+  // 한국 시간 기준 오늘(YYYY-MM-DD). toISOString() 은 UTC 라 오전 9시 전에는 하루 늦다(이주의 사진 게재일 비교).
+  function seoulToday() {
+    return window.MagUtil?.seoulTodayIso?.() || new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  }
+
   async function userId() {
     const s = await session();
     return s?.user?.id || null;
@@ -477,7 +482,7 @@
     // featured_at 으로 찾는다. 미래 날짜로 예약해 둔 것은 그 날이 되어야 걸린다.
     async featuredCurrent() {
       const c = client(); if (!c) return null;
-      const today = new Date().toISOString().slice(0, 10);
+      const today = seoulToday();
       const { data, error } = await c.from('reader_submissions_approved')
         .select('*')
         .not('featured_at', 'is', null)
@@ -712,7 +717,7 @@
       const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       if (!row?.user_id) return { error: { message: '제출자를 찾을 수 없습니다' } };
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = seoulToday();
       const live  = String(dateStr) <= today;
       const [, mm, dd] = String(dateStr).split('-');
       const when = `${Number(mm)}월 ${Number(dd)}일`;
