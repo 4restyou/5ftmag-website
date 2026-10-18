@@ -1925,4 +1925,30 @@
       dateEl.after(dot, el);
     })().catch(() => {});
   })();
+
+  // 폰에서 「앱처럼 설치하기」 안내. 두 번째 페이지부터, 닫은 적·설치한 적이 없을 때만
+  // js/pwa-install.js 를 그때 불러온다(평소에는 싣지 않는다). 안드로이드의 설치 창은 일찍 오므로 여기서 받아 둔다.
+  (function bindInstallGuide() {
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); window.__pwaInstallPrompt = e; });
+    if (location.pathname.includes('/admin/')) return;
+    const standalone = window.navigator.standalone === true
+      || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    if (standalone || !window.matchMedia || !window.matchMedia('(max-width: 820px)').matches) return;
+    let state = '', views = 0;
+    try {
+      state = localStorage.getItem('5ft-install-guide') || '';
+      views = Number(localStorage.getItem('5ft-install-views') || 0) + 1;
+      localStorage.setItem('5ft-install-views', String(views));
+    } catch (_) { return; }
+    if (state === 'done' || views < 2) return;
+    const later = /^later:(\d+)$/.exec(state);
+    if (later && Date.now() - Number(later[1]) < 14 * 864e5) return;
+    setTimeout(() => {
+      if (document.querySelector('dialog[open], .modal.is-open')) return;
+      const s = document.createElement('script');
+      s.src = '/js/pwa-install.js?v=20261018-install-guide';
+      s.onload = () => window.PwaInstall?.show();
+      document.head.appendChild(s);
+    }, 2500);
+  })();
 })();

@@ -931,27 +931,6 @@
     }, 1500);
   }
 
-  // ── iOS 사용자에게 "홈 화면에 추가" 안내 (한 번만) ──
-  function maybeShowIosPwaPrompt() {
-    const KEY = '5ft-pwa-ios-prompted';
-    try { if (localStorage.getItem(KEY) === '1') return; } catch {}
-    const ua = navigator.userAgent;
-    const isIos = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-    if (!isIos || isStandalone) return;
-    const toast = document.createElement('div');
-    toast.className = 'mh-pwa-toast';
-    toast.innerHTML = `
-      <span>${mt('홈 화면에 추가하면 앱처럼 쓸 수 있어요. 공유 ↗ → "홈 화면에 추가"', 'Add to your Home Screen to use it like an app. Share ↗ → "Add to Home Screen"', 'ホーム画面に追加すると、アプリのように使えます。共有 ↗ →「ホーム画面に追加」')}</span>
-      <button type="button" aria-label="${mt('닫기', 'Close', '閉じる')}">${mt('알겠어요', 'Got it', 'わかりました')}</button>
-    `;
-    toast.querySelector('button').addEventListener('click', () => {
-      try { localStorage.setItem(KEY, '1'); } catch {}
-      toast.remove();
-    });
-    document.body.appendChild(toast);
-  }
-
   // ─── "사진으로 보기" 모드 ───
   // 전체 독자 사진 최근순 그리드. 카테고리 필터 + 검색은 그대로 적용
   // (검색은 사진의 film 이름으로 매칭).
@@ -1078,6 +1057,5 @@
     // 로그인 사용자라면 DB 개인화를 백그라운드로 hydrate
     setTimeout(hydrateFromDb, 200);
     maybeShowOnboarding();
-    setTimeout(maybeShowIosPwaPrompt, 1500);
   })();
 })();
