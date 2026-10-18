@@ -175,7 +175,12 @@
     select.value = librarySort;
     // 폰에선 정렬이 아이콘만 보이므로, 기본값(사진 많은 순)이 아니면 노란 점으로 알린다.
     const dot = select.parentElement.querySelector('.library-sort-dot');
-    const syncDot = () => { if (dot) dot.hidden = librarySort === 'photos'; };
+    const label = select.parentElement;
+    const syncDot = () => {
+      if (dot) dot.hidden = librarySort === 'photos';
+      const opt = select.selectedOptions && select.selectedOptions[0];
+      if (opt) label.title = `${select.previousElementSibling?.textContent || ''}: ${opt.textContent}`;
+    };
     syncDot();
     select.addEventListener('change', () => {
       librarySort = LIBRARY_SORTS.includes(select.value) ? select.value : 'photos';

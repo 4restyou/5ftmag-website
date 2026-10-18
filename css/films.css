@@ -2824,3 +2824,54 @@ a.theme-film-name:hover { text-decoration: underline; text-underline-offset: 4px
   .library-foot .library-propose-btn,
   .library-foot .library-mine-link { display: inline-flex; align-items: center; min-height: 44px; }
 }
+
+/* ── PC: 정렬·브랜드·카메라도 폰처럼 아이콘으로 접어 검색 아이콘 옆에 둔다 ──
+   순서: 종류 칩 → 검색 → 정렬 → 필터. 필터를 누르면 브랜드·카메라 칸이 툴바 아래로 뜬다. */
+@media (min-width: 641px) {
+  .library-advanced-toggle { display: inline-flex !important; }
+  .library-toolbar-right { position: relative; }
+  .library-toolbar-right > .library-filter,
+  .library-toolbar-right > .library-photos-chips { order: 0; }
+  .library-toolbar-right > .ft-icon-btn { order: 1; }
+  .library-toolbar-right > .library-sort {
+    order: 2;
+    position: relative;
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text);
+    border-radius: 8px;
+  }
+  .library-toolbar-right > .library-advanced-toggle { order: 3; }
+  .library-toolbar .library-sort select {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    min-width: 0; padding: 0;
+    border: 0;
+    opacity: 0;
+  }
+  .library-sort-icon { display: block; pointer-events: none; }
+  .library-sort-dot:not([hidden]) {
+    display: block;
+    position: absolute; top: 8px; right: 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ffd400;
+    pointer-events: none;
+  }
+  .library-sort:hover { background: var(--bg-sub); }
+  .library-sort:focus-within { outline: 2px solid var(--text); outline-offset: 2px; }
+  .library-toolbar-ms { display: none; }
+  .library-toolbar-ms.is-open {
+    display: flex;
+    position: absolute;
+    top: calc(100% + 8px); right: 0;
+    z-index: 30;
+    padding: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--btn-radius);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+  .library-toolbar-ms .ms-dropdown-btn { min-width: 180px; }
+  .library-toolbar-ms .ms-dropdown:last-child .ms-dropdown-panel { left: auto; right: 0; }
+}
