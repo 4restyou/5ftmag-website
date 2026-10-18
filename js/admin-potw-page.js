@@ -13,7 +13,8 @@ function $(id) { return document.getElementById(id); }
 function db() { return window.MagDB; }
 function escapeHtml(s) { return window.MagUtil.escapeHtml(s); }
 
-function todayStr() { return new Date().toISOString().slice(0, 10); }
+// 한국 시간 기준 오늘. toISOString() 은 UTC 라 오전 9시 전에는 하루 늦게 나와 예약분이 「내일」로 보였다.
+function todayStr() { return window.MagUtil.seoulTodayIso(); }
 
 // 게재일까지 며칠 남았는지. 지난 것은 음수가 아니라 "며칠 전" 으로 읽는다.
 function relDays(dateStr, today) {

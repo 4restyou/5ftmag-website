@@ -651,7 +651,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/admin.js?v=20261018-editor-msg" defer></script>
 <script src="../js/db/commerce.js?v=20261002-f2" defer></script>
-  <script src="../js/db-client.js?v=20261018-editor-msg" defer></script>
+  <script src="../js/db-client.js?v=20261019-kst-today" defer></script>
 <script src="../js/image-processor.js?v=20261006-photo-dedupe" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/reader-camera-input.js?v=20261008-camera-potw" defer></script>
@@ -1077,7 +1077,7 @@ function renderCard(r) {
     ? `<span class="sub-card-likes" title="이 사진에 ♡ 누른 사용자 수">♡ ${likeCount}</span>`
     : '';
   // 이주의 사진 배지. 오늘 이후 날짜면 예약분이라 따로 표시한다.
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = window.MagUtil.seoulTodayIso(); // 한국 시간 기준(UTC 면 오전 9시 전에 하루 늦다)
   const featBadge = r.featured_at
     ? `<span class="sub-card-featured" data-date="${escapeHtml(r.featured_at)}" title="${r.featured_at > todayStr ? '예약된 이주의 사진' : '이주의 사진으로 걸린 사진'}">${r.featured_at > todayStr ? '예약' : '이주의 사진'} ${escapeHtml(r.featured_at)}</span>`
     : '';
@@ -1255,7 +1255,7 @@ function bindCardActions() {
             reviewed_at: new Date().toISOString(), reviewed_by: STATE.user.id,
           });
           if (error) { window.notify('승인 처리에 실패했어요. (' + error.message + ')', 'danger'); btn.disabled = false; btn.textContent = label; return; }
-          const today = new Date().toISOString().slice(0, 10);
+          const today = window.MagUtil.seoulTodayIso();
           const res = await db().review.feature(id, today, input.trim());
           if (res.error) window.notify('승인은 했지만 이주의 사진으로 걸지 못했어요. 승인됨 탭에서 다시 걸어 주세요. (' + res.error.message + ')', 'danger');
           else if (res.notifyError) window.notify('승인하고 걸었지만 알림을 보내지 못했어요. (' + res.notifyError.message + ')', 'danger');
