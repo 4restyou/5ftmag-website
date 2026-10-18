@@ -127,7 +127,6 @@ html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background:
 
 /* PWA standalone 일 때 — "PC 화면으로 보기" 토글 같은 비-앱 요소 숨김 */
 html.is-standalone-pwa #mhBackToMobile,
-html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-search { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-sub); }
 .mh-search svg { color: var(--text-muted); flex: 0 0 auto; }
 .mh-search input { flex: 1; border: 0; background: none; font: inherit; color: var(--text); outline: none; padding: 0; min-width: 0; font-size: 14px; }
@@ -259,8 +258,6 @@ html.is-standalone-pwa .mh-pwa-toast { display: none !important; }
 .mh-empty { padding: 60px var(--mh-pad); text-align: center; color: var(--text-muted); font-size: 13px; }
 
 /* PWA 설치 안내 토스트 */
-.mh-pwa-toast { position: fixed; left: 12px; right: 12px; bottom: 16px; z-index: 1000; background: var(--text); color: var(--bg); padding: 14px 16px; border-radius: 12px; font-size: 13px; line-height: 1.5; box-shadow: 0 8px 24px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 12px; }
-.mh-pwa-toast button { font: inherit; font-size: 12px; background: none; border: 1px solid currentColor; color: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer; flex: 0 0 auto; }
 
 /* ─── 마이크로 인터랙션 ─── */
 /* 하트 토글 시 짧은 bounce */
