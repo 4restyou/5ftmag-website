@@ -75,7 +75,8 @@
         badge.remove();
       }
       btn.classList.toggle('has-active', count > 0);
-      if (count > 0 && isMobileFilms()) {
+      // 폰은 칩까지, PC 는 브랜드·카메라를 골랐을 때만 펼쳐 둔다(칩은 툴바에 늘 보인다).
+      if (isMobileFilms() ? count > 0 : currentBrands.size + currentCameras.size > 0) {
         panel.classList.add('is-open');
         btn.setAttribute('aria-expanded', 'true');
       }
