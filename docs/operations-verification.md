@@ -9,6 +9,7 @@ R12의 로그 보존 자동화와 배포 후 읽기 전용 점검 기준이다. 
 | 대상 | 기준 컬럼 | 보존 기간 | 근거 마이그레이션 |
 |---|---|---|---|
 | `page_views`, `page_dwells` | `ts` | 365일 | `20260518000004_analytics_retention.sql` |
+| `page_view_daily` (경로·날짜·숫자만) | `day` | 영구 (매일 최근 7일 재합산) | `20261018000002_page_view_daily_rollup.sql` |
 | `app_events` | `ts` | 90일 | `20260614000003_app_events.sql` |
 | `client_error_logs` | `ts` | 30일 | `20260519000002_client_error_logs.sql` |
 | `push_subscriptions` | `last_seen_at` | 미갱신 30일 | `20260614000004_push_security_ops.sql` |
