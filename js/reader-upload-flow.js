@@ -207,7 +207,7 @@
       setSubmitText(tr(`${attemptLabel} 준비 중…`, `Preparing ${attemptLabel}…`, `${attemptLabel} を準備中…`));
       markProgress('storage', tr(`${attemptLabel} 준비 중`, `Preparing ${attemptLabel}`, `${attemptLabel} を準備中`), tr(`더 가벼운 ${longSide}px 이미지로 다시 인코딩하고 있어요.`, `Re-encoding a lighter ${longSide}px image.`, `より軽い ${longSide}px の画像にエンコードし直しています。`));
       const out = await withNetworkTimeout(
-        signal => resizeToJpeg(file, ({ stage, width: w, height: h }) => {
+        signal => resizeToJpeg(source, ({ stage, width: w, height: h }) => {
           if (signal.aborted) return;
           if (stage === 'resize') {
             setSubmitText(tr(`${attemptLabel} 준비 중… (${w}×${h})`, `Preparing ${attemptLabel}… (${w}×${h})`, `${attemptLabel} を準備中…（${w}×${h}）`));

@@ -302,9 +302,30 @@
     await renderAll();
   }
 
+  // 실시간 변경·로그인 갱신은 쓰는 중이면 미룬다. 댓글 영역을 통째로 다시 그려서, 쓰던 댓글·답글이
+  // 사라졌다(사이트 어디서든 좋아요 하나에도 다시 그린다). 입력칸이 비거나 포커스가 빠지면 그때 그린다.
+  function isComposing() {
+    const c = STATE.container;
+    if (!c) return false;
+    if (c.contains(document.activeElement) && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName)) return true;
+    return [...c.querySelectorAll('textarea')].some(t => t.value.trim());
+  }
+  let softTimer = null;
+  function softRefresh() {
+    clearTimeout(softTimer);
+    softTimer = setTimeout(() => {
+      if (isComposing()) { STATE.pendingRefresh = true; return; }
+      STATE.pendingRefresh = false;
+      refresh();
+    }, 300);
+  }
+
   function setupRealtime() {
     if (STATE.realtimeChannel) return;
-    STATE.realtimeChannel = db().realtime.subscribeComments(STATE.pageId, refresh);
+    STATE.realtimeChannel = db().realtime.subscribeComments(STATE.pageId, softRefresh);
+    STATE.container.addEventListener('focusout', () => {
+      setTimeout(() => { if (STATE.pendingRefresh && !isComposing()) softRefresh(); }, 0);
+    });
   }
 
   async function init({ pageId, container } = {}) {
@@ -328,7 +349,10 @@
     setupRealtime();
 
     db().auth.onChange(async (_event, sess) => {
+      const prevId = STATE.user?.id || null;
       STATE.user = sess?.user || null;
+      // 토큰 갱신처럼 사용자가 그대로면 다시 그리지 않는다
+      if ((STATE.user?.id || null) === prevId) return;
       await loadProfile();
       await refresh();
     });

@@ -255,7 +255,11 @@ function enterEditMode(card) {
   bindFilmField(card, row);
   bindCameraField(card);
   const actions = card.querySelector('.me-card-actions');
-  actions.innerHTML = `
+  // 승인된 사진을 고치면 DB 가 검토 대기로 되돌린다(20261019000001)
+  const reviewNote = row?.status === 'approved'
+    ? `<p class="me-edit-hint">${escapeHtml(i18n.t('승인된 사진을 고치면 편집부가 다시 확인한 뒤 공개돼요.', 'Editing an approved photo sends it back for review before it reappears.', '承認済みの写真を編集すると、編集部が確認してから再び公開されます。'))}</p>`
+    : '';
+  actions.innerHTML = `${reviewNote}
     <button type="button" class="me-btn me-btn-primary" data-action="save">${i18n.t('저장', 'Save', '保存')}</button>
     <button type="button" class="me-btn me-btn-secondary" data-action="cancel-edit">${i18n.t('취소', 'Cancel', 'キャンセル')}</button>`;
 }
@@ -284,6 +288,9 @@ async function savePhotoEdits(card) {
     return;
   }
   if (patch.camera) window.ReaderCameraInput?.saveRecentCamera(patch.camera);
+  if (result.data?.some(r => r.id === id && r.status === 'pending') && STATE.rows.find(r => r.id === id)?.status === 'approved') {
+    window.notify?.(i18n.t('저장했어요. 편집부가 확인하면 다시 공개돼요.', 'Saved. It will reappear once the editors review it.', '保存しました。編集部が確認すると再び公開されます。'), 'info');
+  }
   await loadPhotos();
 }
 

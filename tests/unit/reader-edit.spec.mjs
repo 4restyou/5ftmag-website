@@ -23,7 +23,7 @@ describe('reader update confirmation', () => {
     const { api, q } = clientSetup({ data: [{ id: 'photo' }], error: null });
     expect((await api.updateMine('photo', { caption: 'Note' })).error).toBeNull();
     expect(q.eq.mock.calls).toEqual([['id', 'photo'], ['user_id', 'owner']]);
-    expect(q.select).toHaveBeenCalledWith('id');
+    expect(q.select).toHaveBeenCalledWith('id, status');
   });
   it.each([[[]], [null], [[{ id: 'different-photo' }]]])('rejects unconfirmed data %j', async data => {
     expect((await clientSetup({ data, error: null }).api.updateMine('photo', { caption: 'Note' })).error.code).toBe('RLS_DENIED');
