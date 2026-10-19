@@ -273,9 +273,31 @@
     return picked;
   }
 
+  // 로컬 /img/ 원본(대개 1600px)을 Netlify 이미지 변환으로 칸 폭에 맞춰 줄인다.
+  // 기사 HTML 의 /.netlify/images?url=/img/...&w=900&q=82&fm=webp 와 같은 방식.
+  // 외부 URL·/i/reader/ 같은 프록시 경로·data:·SVG·GIF 는 그대로 돌려준다.
+  function cdnImage(src, w) {
+    const s = String(src ?? '').trim();
+    const path = s.replace(/^\.?\//, '');
+    if (!/^img\/[^?#]+\.(?:jpe?g|png|webp)$/i.test(path)) return s;
+    return `/.netlify/images?url=/${encodeURI(path)}&w=${w}&q=80&fm=webp`;
+  }
+
+  // <img> 에 넣을 src·srcset·sizes 속성 문자열(이스케이프 포함).
+  // widths 는 [1x 폭, 2x 폭] 처럼 작은 것부터. 변환 대상이 아니면 src 만 준다.
+  function thumbAttrs(src, widths, sizes) {
+    const s = String(src ?? '').trim();
+    const top = widths[widths.length - 1];
+    if (cdnImage(s, top) === s) return `src="${escapeAttr(s)}"`;
+    const set = widths.map((w) => `${cdnImage(s, w)} ${w}w`).join(', ');
+    return `src="${escapeAttr(cdnImage(s, top))}" srcset="${escapeAttr(set)}" sizes="${escapeAttr(sizes)}"`;
+  }
+
   window.MagUtil = Object.freeze({
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
+    cdnImage: cdnImage,
+    thumbAttrs: thumbAttrs,
     normalizeFilmLabel: normalizeFilmLabel,
     seoulTodayIso: seoulTodayIso,
     isPublishedContent: isPublishedContent,

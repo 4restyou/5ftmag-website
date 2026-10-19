@@ -701,8 +701,15 @@ test('picture WebP 로드 실패 시 원본 이미지로 복구한다', async ({
 test('홈과 Stories 카드 썸네일은 깨진 이미지 없이 로드된다', async ({ page }, testInfo) => {
   // 모바일 홈은 Articles 섹션을 숨김 (PR #485) — 데스크탑 뷰포트에서만 테스트.
   test.skip(testInfo.project.name === 'chromium-mobile', '모바일 홈은 #storyList 숨김');
+  // 첫 카드만 eager 이고 나머지는 lazy 라 화면 밖 카드는 받지 않는다. 깨짐만 보려고 모두 받게 한다.
+  const loadAll = (sel) => page.waitForFunction((s) => {
+    const imgs = Array.from(document.querySelectorAll(s));
+    imgs.forEach((img) => { img.loading = 'eager'; });
+    return imgs.length > 0 && imgs.every((img) => img.complete);
+  }, sel, { timeout: 8000 });
   await page.goto('/');
   await page.waitForSelector('#storyList img', { timeout: 8000 });
+  await loadAll('#storyList img');
   const homeBroken = await page.locator('#storyList img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).length);
   expect(homeBroken).toBe(0);
   const homePolicyGaps = await page.locator('#storyList .post-img img').evaluateAll(imgs => imgs.filter(img => {
@@ -714,6 +721,7 @@ test('홈과 Stories 카드 썸네일은 깨진 이미지 없이 로드된다', 
 
   await page.goto('/stories.html');
   await page.waitForSelector('#articlesGrid img', { timeout: 8000 });
+  await loadAll('#articlesGrid img');
   const storiesBroken = await page.locator('#articlesGrid img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).length);
   expect(storiesBroken).toBe(0);
   const storiesPolicyGaps = await page.locator('#articlesGrid .article-img img').evaluateAll(imgs => imgs.filter(img => {

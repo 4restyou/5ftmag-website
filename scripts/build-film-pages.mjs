@@ -372,7 +372,7 @@ ${jsonLd(film, sameBrand, T)}
 
 <header>
   <div class="header-inner">
-    <a href="${P}/" class="site-logo"><img decoding="async" src="/img/symbol-b.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w.svg" alt="5ft magazine" class="logo-dark" /></a>
+    <a href="${P}/" class="site-logo"><img decoding="async" src="/img/symbol-b-opt.svg" alt="5ft magazine" class="logo-light" /><img decoding="async" src="/img/symbol-w-opt.svg" alt="5ft magazine" class="logo-dark" /></a>
     ${navHtml(outFile)}
     <div class="nav-right">
       <a href="${P}/search.html" class="icon-btn" id="headerSearchBtn" aria-label="${T.search}" title="${T.search}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg></a>

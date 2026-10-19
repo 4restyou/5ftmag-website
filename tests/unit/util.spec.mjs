@@ -229,10 +229,33 @@ describe('window.MagUtil.pickByAuthorRoundRobin', () => {
   });
 });
 
+describe('window.MagUtil.cdnImage / thumbAttrs', () => {
+  it('rewrites local /img/ rasters to the Netlify image CDN', () => {
+    expect(window.MagUtil.cdnImage('img/stories/a/b.jpg', 800))
+      .toBe('/.netlify/images?url=/img/stories/a/b.jpg&w=800&q=80&fm=webp');
+    expect(window.MagUtil.cdnImage('/img/x.webp', 400))
+      .toBe('/.netlify/images?url=/img/x.webp&w=400&q=80&fm=webp');
+  });
+
+  it('leaves external, proxied, data:, svg and gif sources untouched', () => {
+    for (const s of ['https://example.com/img/a.jpg', '/i/reader/a.jpg', 'data:image/png;base64,AA', 'img/logo.svg', 'img/a.gif', '']) {
+      expect(window.MagUtil.cdnImage(s, 800)).toBe(s);
+    }
+  });
+
+  it('builds escaped src/srcset/sizes, or src only when not rewritten', () => {
+    const a = window.MagUtil.thumbAttrs('img/a.jpg', [400, 800], '50vw');
+    expect(a).toContain('src="/.netlify/images?url=/img/a.jpg&amp;w=800&amp;q=80&amp;fm=webp"');
+    expect(a).toContain(' 400w, ');
+    expect(a).toContain('sizes="50vw"');
+    expect(window.MagUtil.thumbAttrs('/i/reader/a.jpg', [400, 800], '50vw')).toBe('src="/i/reader/a.jpg"');
+  });
+});
+
 describe('window.MagUtil shape', () => {
   it('exposes the shared browser utilities', () => {
     expect(Object.keys(window.MagUtil).sort()).toEqual(
-      ['applyVisibility', 'errorMessage', 'escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'loadStories', 'localizeStories', 'normalizeFilmLabel', 'parseKrwPrice', 'pickByAuthorRoundRobin', 'seoulTodayIso', 'supabaseConfig']
+      ['applyVisibility', 'cdnImage', 'errorMessage', 'escapeAttr', 'escapeHtml', 'formatPrice', 'isPublishedContent', 'loadStories', 'localizeStories', 'normalizeFilmLabel', 'parseKrwPrice', 'pickByAuthorRoundRobin', 'seoulTodayIso', 'supabaseConfig', 'thumbAttrs']
     );
   });
 

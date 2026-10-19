@@ -271,6 +271,9 @@
   grid-template-columns: 1fr 1fr;
   gap: 0;
 }
+/* 사진을 받기 전 빈 그리드가 0 높이라 아래 참여 안내·Film Finder 가 첫 화면에
+   올라왔다가 사진이 채워지며 밀려 내려갔다(CLS 0.4). 채워질 때까지 자리를 잡는다. */
+.discover-grid:not(:has(> *)) { min-height: 100vh; }
 .disc-cell {
   display: block;
   position: relative;

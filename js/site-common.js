@@ -619,6 +619,9 @@
     });
     document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
     wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { close(); btn.focus(); } });
+    // Tab 으로 메뉴 밖에 포커스가 옮겨 가면 닫는다. relatedTarget 이 없는 경우(Safari 는
+    // 링크를 눌러도 포커스를 옮기지 않는다)는 바깥 클릭 처리에 맡겨, 누르는 도중 닫히지 않게 한다.
+    wrap.addEventListener('focusout', (e) => { if (!menu.hidden && e.relatedTarget && !wrap.contains(e.relatedTarget)) close(); });
   }
 
   // ════════════════════════════════════════════════
@@ -640,14 +643,23 @@
     if (document.querySelector('.skip-link')) return;
     const main = findMainTarget();
     if (!main) return;
+    // 모든 페이지에 <base href="/"> 가 있어 '#main' 만 쓰면 홈(/#main)으로 이동한다.
+    // 현재 주소를 붙이고, 누르면 이동 대신 본문에 포커스를 옮긴다.
+    const hrefFor = (t) => location.pathname + location.search + '#' + t.id;
     const a = document.createElement('a');
     a.className = 'skip-link';
-    a.href = '#' + main.id;
+    a.href = hrefFor(main);
     a.textContent = tr('본문으로 건너뛰기', 'Skip to content', '本文へスキップ');
     // 화면 폭이나 'PC 보기' 토글로 보이는 본문이 바뀔 수 있어 누르기 직전에 다시 고른다.
-    const retarget = () => { const t = findMainTarget(); if (t) a.href = '#' + t.id; };
-    a.addEventListener('focus', retarget);
-    a.addEventListener('click', retarget);
+    a.addEventListener('focus', () => { const t = findMainTarget(); if (t) a.href = hrefFor(t); });
+    a.addEventListener('click', (e) => {
+      const t = findMainTarget();
+      if (!t) return;
+      e.preventDefault();
+      if (!t.hasAttribute('tabindex')) { t.tabIndex = -1; t.classList.add('skip-target'); }
+      t.focus({ preventScroll: true });
+      t.scrollIntoView({ block: 'start' });
+    });
     document.body.insertBefore(a, document.body.firstChild);
   }
 

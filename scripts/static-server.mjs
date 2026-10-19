@@ -36,6 +36,9 @@ createServer((req, res) => {
     res.end(TRANSPARENT_PIXEL);
     return;
   }
+  // prod 의 Netlify 이미지 변환(/.netlify/images?url=/img/...&w=...)은 로컬에 없다.
+  // 줄이지 않은 원본을 그대로 돌려줘 화면이 깨지지 않게만 한다.
+  if (p === '/.netlify/images') p = url.searchParams.get('url') || '';
   p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/(css|js|img|data)\//, '/$2/');
   p = p.replace(/^\/(film|camera|contributor|market|stories|authors|legal)\/pretendard\.css$/, '/pretendard.css');
   if (/^\/film\/[^/.]+$/.test(p)) {

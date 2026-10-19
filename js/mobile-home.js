@@ -83,9 +83,10 @@
       .slice()
       .sort((a, b) => new Date(b.date) - new Date(a.date));
     if (!fresh.length) return '';
-    const cards = fresh.slice(0, RECENT_COUNT).map(s => `
+    // 썸네일은 칸 폭(약 72vw)에 맞춘 변환본. 첫 장만 바로 받는다.
+    const cards = fresh.slice(0, RECENT_COUNT).map((s, i) => `
       <a class="mh-new-card" href="/${esc(s.page)}">
-        <div class="mh-new-thumb">${s.thumbnail ? `<img src="/${esc(s.thumbnail)}" alt="" loading="lazy" />` : ''}</div>
+        <div class="mh-new-thumb">${s.thumbnail ? `<img ${window.MagUtil.thumbAttrs('/' + s.thumbnail, [300, 600], '72vw')} alt="" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" />` : ''}</div>
         <div class="mh-new-meta">${esc(s.categoryLabel || s.category || '')}</div>
         <div class="mh-new-headline">${esc(s.title)}</div>
       </a>
@@ -115,7 +116,7 @@
     const name = f.displayName || f.name || '';
     return `
       <button type="button" class="mh-card" data-film-slug="${escAttr(slug)}" aria-label="${mt(`${esc(name)} 자세히 보기`, `${esc(name)} details`, `${esc(name)}の詳細を見る`)}">
-        <div class="mh-card-thumb">${filmThumb(f) ? `<img src="${esc(filmThumb(f))}" alt="" loading="lazy" />` : ''}</div>
+        <div class="mh-card-thumb">${filmThumb(f) ? `<img ${window.MagUtil.thumbAttrs(filmThumb(f), [130, 260], '124px')} alt="" loading="lazy" decoding="async" />` : ''}</div>
         <div class="mh-card-name"><span class="mh-card-brand">${esc(f.brand || '')}</span><span class="mh-card-model">${esc(f.name || name)}</span></div>
       </button>
     `;
@@ -445,7 +446,7 @@
     const cells = Array.isArray(_homeStrip)
       ? _homeStrip.map((r, i) => `
         <button type="button" class="mh-photo-cell" data-strip-index="${i}" aria-label="${mt(`${esc(r.film || '독자 사진')} 크게 보기`, `View ${esc(r.film || 'reader photo')}`, `${esc(r.film || '読者の写真')}を拡大`)}">
-          <img src="${esc(r.image)}" alt="" loading="lazy" />
+          <img ${window.MagUtil.thumbAttrs(r.image, [200, 400], '33vw')} alt="" loading="lazy" decoding="async" />
         </button>`).join('')
       : Array.from({ length: 9 }).map(() => '<div class="mh-photo-cell mh-photo-cell-skel"></div>').join('');
     return `
@@ -614,7 +615,7 @@
     container.removeAttribute('aria-busy');
     container.innerHTML = picked.map((row, i) => `
       <button type="button" class="mh-sheet-photo" data-photo-index="${i}" aria-label="${mt(`사진 ${i + 1} 크게 보기`, `View photo ${i + 1}`, `写真 ${i + 1}を拡大`)}">
-        <img src="${escAttr(row.image)}" alt="" loading="lazy" />
+        <img ${window.MagUtil.thumbAttrs(row.image, [200, 400], '33vw')} alt="" loading="lazy" decoding="async" />
       </button>
     `).join('');
     container.addEventListener('click', (e) => {
@@ -970,7 +971,7 @@
     }
     grid.innerHTML = shuffled.map((r, i) => `
       <button type="button" class="mh-photo-cell" data-photo-index="${i}" aria-label="${mt(`${esc(r.film || '사진')} ${i + 1} 크게 보기`, `View ${esc(r.film || 'photo')} ${i + 1}`, `${esc(r.film || '写真')} ${i + 1}を拡大`)}">
-        <img src="${esc(r.image)}" alt="" loading="lazy" />
+        <img ${window.MagUtil.thumbAttrs(r.image, [200, 400], '33vw')} alt="" loading="lazy" decoding="async" />
       </button>
     `).join('');
     grid.addEventListener('click', (e) => {

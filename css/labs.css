@@ -550,6 +550,11 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
   html.labs-view-map .labs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* 목록을 불러오는 동안 자리를 한 화면 높이로 잡아 둔다. 자리가 작으면 아래의
+   지역 색인·푸터가 첫 화면에 보였다가 목록이 그려질 때 밀려 내려갔다(CLS 0.5). */
+.labs-list > .labs-empty:only-child,
+.labs-list > .mag-state--loading { min-height: 100vh; }
+
 /* ── 지역별 현상소 목록 (정적 인덱스) ──
    scripts/build-lab-pages.mjs 가 채우는 블록. 목록을 JS 로만 그려서
    크롤러가 읽을 본문도, 지역 페이지로 갈 링크도 없었다. */
@@ -616,6 +621,10 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
 /* 수리점 목록만 가게 이름이 링크다. 지역이 비어 있는 가게가 있어서 지역
    링크만으로는 닿지 않기 때문에, 이름을 누르면 상세가 바로 열리게 한다. */
 .lab-index-region li a { color: inherit; text-decoration: none; }
+/* 지역·가게 링크의 터치 영역을 24px 이상으로. 늘어난 만큼 위아래 여백을 덜어 목록 간격은 그대로 둔다. */
+.lab-index-region h3 a { display: inline-flex; align-items: center; min-height: 24px; margin: -4px 0; }
+.lab-index-region li a { display: inline-flex; align-items: center; min-height: 24px; }
+.lab-index-region li:has(> a) { margin-bottom: 0; }
 .lab-index-region li a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 
 /* 현상소 목록 바로 아래에 수리점 목록이 이어진다. 구분선과 위 여백은 한 번만 둔다. */

@@ -23,14 +23,11 @@
   const escapeHtml = window.MagUtil.escapeHtml;
   const escapeAttr = window.MagUtil.escapeAttr;
 
+  // 카드 썸네일. 원본(1600px) 대신 칸 폭에 맞춘 변환본을 받는다(MagUtil.thumbAttrs).
+  // 카드 폭: 640px 이하 한 줄(약 90vw), 그 위로는 두세 칸(최대 약 340px).
   function thumbnailPicture(src, alt, loading = 'lazy') {
-    const cleanSrc = String(src || '');
-    const webpSrc = /\.(jpe?g|png)$/i.test(cleanSrc)
-      ? cleanSrc.replace(/\.(jpe?g|png)$/i, '.webp')
-      : '';
-    const img = `<img src="${escapeAttr(cleanSrc)}" loading="${escapeAttr(loading)}" alt="${escapeAttr(alt)}" />`;
-    if (!webpSrc) return img;
-    return `<picture><source srcset="${escapeAttr(webpSrc)}" type="image/webp">${img}</picture>`;
+    const attrs = window.MagUtil.thumbAttrs(src, [400, 800], '(max-width: 640px) 90vw, (max-width: 1100px) 46vw, 340px');
+    return `<img ${attrs} loading="${escapeAttr(loading)}" decoding="async" alt="${escapeAttr(alt)}" />`;
   }
 
   // 날짜 포맷팅 (2024-11-15 → 2024.11.15)
@@ -80,7 +77,7 @@
   }
 
   // 카드 HTML 생성
-  function renderCard(story) {
+  function renderCard(story, idx) {
     const link = story.page || '#';
     // Vol.XX가 있으면 매거진 호 배지, 없으면 카테고리 라벨로 자동 폴백
     const badgeLabel = story.issue || story.categoryLabel || (story.category || '').toUpperCase();
@@ -100,7 +97,7 @@
     const whiteBgCls = story.thumbnailWhiteBg ? ' is-on-white' : '';
     const imgBlock = story.thumbnail
       ? `<div class="article-img${whiteBgCls}">
-           ${thumbnailPicture(story.thumbnail, story.title, 'eager')}
+           ${thumbnailPicture(story.thumbnail, story.title, idx === 0 ? 'eager' : 'lazy')}
            ${issueBadge}
          </div>`
       : `<div class="article-img text-only">

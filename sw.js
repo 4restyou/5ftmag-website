@@ -30,8 +30,8 @@ const CORE = [
   '/pretendard.css',
   '/css/tokens.css',
   '/css/common.css',
-  '/img/symbol-b.svg',
-  '/img/symbol-w.svg',
+  '/img/symbol-b-opt.svg',
+  '/img/symbol-w-opt.svg',
   '/img/favicon/icon.svg',
 ];
 const CORE_URLS = new Set(CORE.map((p) => new URL(p, self.location.origin).href));

@@ -20,14 +20,11 @@
       : fetch('data/films.json').then(r => r.json())).catch(() => ({})));
   }
 
+  // 글 카드 썸네일. 원본(1600px) 대신 칸 폭에 맞춘 변환본을 받는다(MagUtil.thumbAttrs).
+  // 카드 폭: PC 분할 화면에서 약 47vw, 900px 이하는 한 줄 전체.
   function thumbnailPicture(src, alt, loading = 'lazy') {
-    const cleanSrc = String(src || '');
-    const webpSrc = /\.(jpe?g|png)$/i.test(cleanSrc)
-      ? cleanSrc.replace(/\.(jpe?g|png)$/i, '.webp')
-      : '';
-    const img = `<img src="${escapeAttr(cleanSrc)}" loading="${escapeAttr(loading)}" alt="${escapeAttr(alt)}" />`;
-    if (!webpSrc) return img;
-    return `<picture><source srcset="${escapeAttr(webpSrc)}" type="image/webp">${img}</picture>`;
+    const attrs = window.MagUtil.thumbAttrs(src, [700, 1400], '(max-width: 900px) 100vw, 47vw');
+    return `<img ${attrs} loading="${escapeAttr(loading)}" decoding="async" alt="${escapeAttr(alt)}" />`;
   }
 
   // PC 홈 Film Finder. 사진이 있는 필름 중 한 편을 방문할 때마다 추천한다.
@@ -321,7 +318,7 @@
           const imgBlock = s.thumbnail
             ? `<div class="post-img${whiteBgCls}">
                  <span class="post-label">${escapeHtml(cardLabel)}</span>
-                 ${thumbnailPicture(s.thumbnail, s.title, 'eager')}
+                 ${thumbnailPicture(s.thumbnail, s.title, idx === 0 ? 'eager' : 'lazy')}
                </div>`
             : `<div class="post-img text-only">
                  <span class="post-label">${escapeHtml(cardLabel)}</span>
@@ -651,17 +648,10 @@
         function renderPhotoCellsHtml(list) {
           return list.map((photo, idx) => {
             const imgSrc = photo.src || `https://picsum.photos/seed/${photo.seed || idx}/600/600`;
-            const webpSrc = (photo.source === 'editorial' && photo.src)
-              ? photo.src.replace(/\.(jpg|jpeg|png)$/i, '.webp')
-              : null;
             const author = photo.author || '';
             const filmName = photo.filmName || '';
-            const pictureBlock = webpSrc
-              ? `<picture>
-                   <source srcset="${escapeAttr(webpSrc)}" type="image/webp">
-                   <img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />
-                 </picture>`
-              : `<img src="${escapeAttr(imgSrc)}" loading="lazy" alt="${escapeAttr(author)}" />`;
+            // 정사각 칸(PC 약 25vw, 900px 이하 50vw). 로컬 /img/ 만 변환본, 독자 사진(/i/reader/)은 그대로.
+            const pictureBlock = `<img ${window.MagUtil.thumbAttrs(imgSrc, [400, 800], '(max-width: 900px) 50vw, 25vw')} loading="lazy" decoding="async" alt="${escapeAttr(author)}" />`;
             return `
               <button type="button" class="disc-cell" data-photo-index="${idx}" aria-label="${escapeAttr(filmName + ' - ' + author)}">
                 ${pictureBlock}
@@ -732,7 +722,7 @@
     // 데스크톱 — 마크업이 index.html 에 이미 있다
     if (sec) {
       const img = document.getElementById('potwImg');
-      img.src = pick.image;
+      img.src = window.MagUtil.cdnImage(pick.image, 1400);
       img.alt = altText;
       const note = document.getElementById('potwNote');
       if (pick.featuredNote) { note.textContent = pick.featuredNote; note.hidden = false; }
@@ -754,7 +744,7 @@
             <button type="button" class="mh-potw-close" aria-label="${ht('이주의 사진 접기', 'Collapse Photo of the Week', '今週の一枚をたたむ')}">✕</button>
           </h3>
           <button type="button" class="mh-potw-shot">
-            <img src="${esc(pick.image)}" alt="${esc(altText)}" decoding="async" />
+            <img ${window.MagUtil.thumbAttrs(pick.image, [400, 800], '100vw')} alt="${esc(altText)}" decoding="async" />
           </button>
           ${pick.featuredNote ? `<p class="mh-potw-note">${esc(pick.featuredNote)}</p>` : ''}
           <p class="mh-potw-by">

@@ -169,7 +169,7 @@
         <div class="related-grid">
           ${related.map((s) => `
             <a class="related-card" href="/${escapeAttr(s.page)}">
-              ${s.thumbnail ? `<div class="related-card-img"><img src="/${escapeAttr(s.thumbnail)}" alt="${escapeAttr(s.title)}" loading="lazy"></div>` : '<div class="related-card-img is-text"></div>'}
+              ${s.thumbnail ? `<div class="related-card-img"><img ${window.MagUtil.thumbAttrs('/' + s.thumbnail, [240, 480], '220px')} alt="${escapeAttr(s.title)}" loading="lazy" decoding="async"></div>` : '<div class="related-card-img is-text"></div>'}
               <h5>${escapeText(s.title)}</h5>
             </a>`).join('')}
         </div>`;
