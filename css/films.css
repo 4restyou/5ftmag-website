@@ -62,7 +62,7 @@
   text-align: left;
   border-radius: 2px;
 }
-.film-card-link:focus-visible { outline: none; box-shadow: var(--ring); }
+.film-card-link:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 
 .film-img {
   width: 100%;
@@ -161,7 +161,7 @@
 }
 .film-fav:hover { transform: scale(1.12); }
 .film-fav:active { transform: scale(0.9); }
-.film-fav:focus-visible { outline: none; box-shadow: var(--ring); }
+.film-fav:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .film-fav svg {
   width: 24px; height: 24px;
   stroke: currentColor;

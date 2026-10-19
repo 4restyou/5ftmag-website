@@ -142,7 +142,8 @@ html.is-standalone-pwa #mhBackToMobile,
 .mh-new { padding: 18px 0 6px; background: var(--bg-sub); }
 .mh-new-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 var(--mh-pad) 10px; }
 .mh-new-title { font-size: 13px; font-weight: var(--fw-heading); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin: 0; }
-.mh-new-more { font-size: 12px; color: var(--text-muted); text-decoration: none; }
+/* 글자 높이만큼만 눌려서 터치 영역을 44px 로 넓힌다. 음수 여백으로 머리줄 높이는 그대로. */
+.mh-new-more { font-size: 12px; color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; margin: -14px 0; padding-left: 12px; }
 .mh-new-strip { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 0 var(--mh-pad) 18px; scroll-snap-type: x mandatory; scroll-padding-inline: var(--mh-pad); }
 .mh-new-strip::-webkit-scrollbar { display: none; }
 .mh-new-card { flex: 0 0 78%; max-width: 280px; scroll-snap-align: start; text-decoration: none; color: var(--text); background: var(--bg); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }

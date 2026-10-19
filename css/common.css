@@ -727,11 +727,17 @@ button.disc-cell {
   text-transform: uppercase;
 }
 
+/* 로고 높이(18px)만 누를 수 있어서 터치 영역이 작았다. 링크 자체를 44px 로 두고
+   늘어난 높이만큼 .footer-partners 의 위아래 여백을 덜어 띠 높이는 그대로 둔다. */
 .footer-partner {
   display: flex;
   align-items: center;
+  min-height: 44px;
+  margin: -13px 0;
   transition: opacity .15s;
 }
+/* 김현아 로고는 글자가 가늘고 작아 18px 높이에서 읽히지 않는다. 한 단계 크게. */
+.footer-partner img[src$="logo-kimhyuna-lockup.svg"] { height: 30px; }
 
 .footer-partner:hover {
   opacity: 0.5;
@@ -800,6 +806,9 @@ footer {
 }
 
 .footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   font-size: 12px;
   font-weight: var(--fw-all);
   letter-spacing: var(--ls-default);
@@ -931,6 +940,7 @@ footer {
   .footer-partner img {
     height: 14px;
   }
+  .footer-partner img[src$="logo-kimhyuna-lockup.svg"] { height: 24px; }
 
   footer {
     flex-direction: column;
@@ -1005,6 +1015,8 @@ footer {
   .ft-toast-host { left: 12px; right: 12px; bottom: 16px; transform: none; }
   .ft-toast { min-width: 0; max-width: none; width: 100%; padding: 10px 14px; }
   .ft-toast-host .ft-toast:nth-last-child(n + 3) { display: none; }
+  /* 사진 올리기 버튼(#mhUploadFab, 아래 32px·높이 60px)이 있으면 토스트를 그 위로 올린다. */
+  body:has(#mhUploadFab) .ft-toast-host { bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
 }
 
 
@@ -1279,7 +1291,7 @@ body.webzine-page .announcement-bar-close { color: inherit; }
   white-space: nowrap;
 }
 .btn:disabled { opacity: 0.4; cursor: progress; pointer-events: none; }
-.btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 
 /* sizes */
@@ -1375,8 +1387,8 @@ body.webzine-page .announcement-bar-close { color: inherit; }
 .skip-link:focus,
 .skip-link:focus-visible {
   top: 12px;
-  outline: none;
-  box-shadow: var(--ring);
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 /* 스크린리더 전용 — 화면엔 안 보이고 a11y 트리에만 남음 (페이지 h1 등) */
@@ -1396,27 +1408,25 @@ body.webzine-page .announcement-bar-close { color: inherit; }
    글로벌 focus-visible — 키보드 사용자 가독성
    ──────────────────────────────────────────────
    마우스 클릭에는 link/button 모두 ring 안 보임 (UA 기본 동작).
-   Tab/화살표로 포커스 받았을 때만 ring 노출. */
-:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-  border-radius: 2px;
-}
+   Tab/화살표로 포커스 받았을 때만 링 노출.
+   예전 --ring(옅은 그림자, 대비 1.5:1)은 거의 보이지 않았고 overflow:hidden 카드 안에서
+   잘렸다. 글자색 실선 outline 으로 바꿔 라이트·다크 모두 배경과 대비가 나게 한다. */
+:focus-visible,
 button:focus-visible,
 a:focus-visible,
 [role="button"]:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-/* 카드는 자체 hover/focus 스타일이 더 큼 — 링 제거 */
+textarea:focus-visible,
 .film-card:focus-visible,
 .article-card:focus-visible,
 .market-card:focus-visible {
-  box-shadow: var(--ring);
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+  box-shadow: none;
 }
+/* 「본문으로 건너뛰기」로 포커스만 옮긴 본문 영역에는 링을 그리지 않는다. */
+.skip-target:focus { outline: none; }
 
 /* ════════════════════════════════════════════════
    Print stylesheet — 글 페이지 인쇄 최적화
@@ -1496,7 +1506,6 @@ textarea:focus-visible {
 input:focus,
 textarea:focus,
 select:focus {
-  outline: none;
   box-shadow: var(--ring);
 }
 

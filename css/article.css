@@ -21,7 +21,9 @@ body {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 13px; font-weight: var(--fw-heading);
   letter-spacing: 0.04em; color: var(--text-muted);
-  margin-bottom: 32px; transition: color .15s;
+  /* 터치 영역 44px. 늘어난 높이는 위아래 여백에서 덜어 본문 위치는 그대로 둔다. */
+  min-height: 44px; margin: -12px 0 20px;
+  transition: color .15s;
 }
 .article-back:hover { color: var(--text); }
 .article-meta {
