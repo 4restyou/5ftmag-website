@@ -170,9 +170,9 @@ function renderFilterChips() {
 function renderStatusToggle() {
   const btn = $('marketStatusToggle');
   if (!btn) return;
-  const labelEl = btn.querySelector('.market-status-toggle-label');
+  // 라벨은 「판매중만」으로 고정하고 켜짐/꺼짐은 aria-pressed 하나로만 알린다.
+  // 라벨까지 바꾸면 스크린리더가 "전체 보기, 눌림" 처럼 반대로 읽었다.
   btn.setAttribute('aria-pressed', STATE.hideSold ? 'true' : 'false');
-  if (labelEl) labelEl.textContent = STATE.hideSold ? i18n.t('판매중만', 'For sale only', '販売中のみ') : i18n.t('전체 보기', 'Show all', 'すべて表示');
 }
 
 function applyFilters() {
