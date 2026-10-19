@@ -1,5 +1,26 @@
 [
   {
+    "id": "new-film-compacts",
+    "title": "중고를 뒤지지 않아도 된다, 새로 나온 필름 똑딱이 여섯 대",
+    "category": "camera",
+    "categoryLabel": "CAMERA",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-19",
+    "issue": "",
+    "thumbnail": "img/films/1shot400-can.webp",
+    "excerpt": "코닥 에크타 H35N 부터 롤라이 35AF 까지, 최근 몇 년 사이 새로 나온 필름 똑딱이 여섯 대를 값이 싼 순서로 정리했다. 출시를 미루고 있는 아날로그 aF-1 까지.",
+    "titleEn": "No More Digging Through Used Listings: Six New Film Compacts",
+    "excerptEn": "From the Kodak Ektar H35N to the Rollei 35AF, six film compacts released in the last few years, sorted from cheapest to most expensive. Plus the Analogue aF-1, still waiting to ship.",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "中古を探さなくてもいい、新しく出たフィルムコンパクト6台",
+    "excerptJa": "コダック エクター H35N からローライ 35AF まで、ここ数年で新しく登場したフィルムコンパクト6台を安い順にまとめた。発売が延期されている Analogue aF-1 も取り上げる。",
+    "authorJa": "5ft.mag 編集部",
+    "films": [],
+    "page": "stories/new-film-compacts.html",
+    "published": false,
+    "manual": true
+  },
+  {
     "id": "yashica-t4",
     "title": "야시카 T4, 주머니에 들어가는 칼 자이스",
     "category": "camera",
