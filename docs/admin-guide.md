@@ -47,6 +47,7 @@
 - `main` 에 머지되면 1~2분 안에 Netlify 가 사이트를 다시 만든다.
 - 데이터베이스 변경이 든 PR 은 머지 뒤 GitHub Actions 의 "Supabase DB and Edge Functions" 에서 「Push migrations before functions」 단계가 성공(초록)인지 본다("Supabase Migrations (Manual Recovery)" 는 수동 복구용이다). 실패하면 `docs/secrets-rotation.md` 의 토큰 갱신 절차를 따른다.
 - 서버 함수(`supabase/functions/`)가 든 PR 은 같은 워크플로우의 함수 배포 단계도 본다.
+- 매일 오전 9시쯤 GitHub Actions 「health」가 공개 페이지와 예약 작업(자동 승인 10분마다, 페이지뷰 합산·로그 정리 매일)을 확인한다. 문제가 있으면 GitHub 이 메일로 알린다. 메일의 링크를 열면 빨간 줄(`::error::`)에 무엇이 멈췄는지 적혀 있다. 그 화면을 캡처해 Claude 세션에 붙이면 된다.
 - 새 기사가 들어오면 RSS·사이트맵은 자동 갱신 워크플로우(feeds-sync)가 따라간다. 관리 화면에서 기사를 “목록에서 숨김”으로 바꾸면 다음 빌드(매일 새벽 또는 다음 배포) 때 RSS·사이트맵도 따라간다. 기사 파일의 직접 URL 접근은 그대로다.
 
 ## 매주 한 번
