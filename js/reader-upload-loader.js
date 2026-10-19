@@ -132,7 +132,7 @@
   const MODULES = [
     '/js/reader-camera-input.js?v=20261008-camera-potw',
     '/js/reader-film-picker.js?v=20261002-f2',
-    '/js/reader-upload-form-ui.js?v=20261019-photo-editor',
+    '/js/reader-upload-form-ui.js?v=20261019-photo-straighten',
     '/js/reader-upload-flow.js?v=20261019-photo-editor',
     '/js/reader-submissions.js?v=20261019-photo-editor',
   ];
