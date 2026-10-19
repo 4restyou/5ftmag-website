@@ -285,7 +285,7 @@ function footer(outFile, prefix = '') {
   ${footerHtml(outFile)}
   <span class="footer-copy">© 2026 5ft magazine</span>
 </footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js"></script>
+<script src="/js/vendor/supabase-js.js?v=2.117.3"></script>
 <script src="${prefix}js/db-client.js${v('js/db-client.js')}"></script>
 <script src="${prefix}js/site-common.js${v('js/site-common.js')}"></script>`;
 }
@@ -534,7 +534,7 @@ function foreignFooter(outFile) {
   ${footerHtml(outFile)}
   ${footerCopyHtml(outFile)}
 </footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js"></script>
+<script src="/js/vendor/supabase-js.js?v=2.117.3"></script>
 <script src="/js/db-client.js${v('js/db-client.js')}"></script>
 <script src="/js/site-common.js${v('js/site-common.js')}"></script>`;
 }

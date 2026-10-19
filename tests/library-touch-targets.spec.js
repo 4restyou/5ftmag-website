@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.beforeEach(async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await page.route('**/js/reader-upload-loader.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await page.route('https://*.supabase.co/**', route => route.abort());
   await page.route('**/data/readers.json*', route => route.fulfill({ json: [] }));
   await page.addInitScript(() => {

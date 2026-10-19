@@ -42,11 +42,10 @@ describe('security headers', () => {
 
   it('allows only the known external execution and telemetry origins', () => {
     const header = csp();
-    expect(header).toContain('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/');
+    expect(header).not.toContain('supabase-js');      // 같은 도메인(js/vendor)에서 내려 준다
     expect(header).toContain('https://oapi.map.naver.com');
     expect(header).toContain('https://plausible.io');
-    expect(header).toContain('https://js.sentry-cdn.com');
-    expect(header).toContain('https://*.ingest.sentry.io');
+    expect(header).not.toContain('sentry');            // 쓰지 않아 뺐다
     expect(header).toContain('https://api.github.com');
   });
 
@@ -66,8 +65,6 @@ describe('security headers', () => {
       for (const src of jsd(d)) expect(src).toMatch(/^https:\/\/cdn\.jsdelivr\.net\/(npm|gh)\/.+\/$/);
     }
     expect(jsd('script-src').sort()).toEqual([
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/',
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/',
       'https://cdn.jsdelivr.net/npm/lenis@1.1.20/',
       'https://cdn.jsdelivr.net/npm/page-flip@2.0.7/',
       'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/',
