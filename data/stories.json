@@ -1,5 +1,26 @@
 [
   {
+    "id": "new-film-compacts",
+    "title": "중고를 뒤지지 않아도 된다, 새로 나온 필름 똑딱이 여섯 대",
+    "category": "camera",
+    "categoryLabel": "CAMERA",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-19",
+    "issue": "",
+    "thumbnail": "img/films/1shot400-can.webp",
+    "excerpt": "코닥 에크타 H35N 부터 롤라이 35AF 까지, 최근 몇 년 사이 새로 나온 필름 똑딱이 여섯 대를 값이 싼 순서로 정리했다. 출시를 미루고 있는 아날로그 aF-1 까지.",
+    "titleEn": "",
+    "excerptEn": "",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "",
+    "excerptJa": "",
+    "authorJa": "5ft.mag 編集部",
+    "films": [],
+    "page": "stories/new-film-compacts.html",
+    "published": false,
+    "manual": true
+  },
+  {
     "id": "yashica-t4",
     "title": "야시카 T4, 주머니에 들어가는 칼 자이스",
     "category": "camera",
