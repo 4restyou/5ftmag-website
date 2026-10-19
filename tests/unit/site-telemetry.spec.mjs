@@ -54,3 +54,46 @@ describe('telemetry privacy', () => {
     expect(payloads(window)[0].path).toBe('/films.html');
   });
 });
+
+describe('article read depth', () => {
+  function story(path, rect) {
+    dom = new JSDOM('<article><div class="article-body">본문</div></article>',
+      { url: 'https://5ftmag.com' + path, runScripts: 'outside-only', pretendToBeVisual: true });
+    const { window } = dom;
+    window.fetch = vi.fn().mockResolvedValue({ ok: true });
+    let now = 0;
+    window.performance.now = () => now;
+    window.document.querySelector('.article-body').getBoundingClientRect = () => ({ top: rect.top, height: rect.height });
+    window.eval(source);
+    window.SiteTelemetry.recordPageView();
+    const leave = () => { now = 5000; window.dispatchEvent(new window.Event('pagehide')); };
+    const scroll = async top => {
+      rect.top = top;
+      window.dispatchEvent(new window.Event('scroll'));
+      await new Promise(r => window.requestAnimationFrame(() => r()));
+    };
+    const dwell = () => payloads(window).find(p => 'dwell_ms' in p);
+    return { leave, scroll, dwell };
+  }
+
+  it('keeps the deepest point reached in the article body', async () => {
+    const t = story('/en/stories/foo.html', { top: 0, height: 4000 });
+    await t.scroll(-2000);          // (768 + 2000) / 4000 = 69%
+    await t.scroll(-500);           // 위로 돌아가도 최댓값은 남는다
+    t.leave();
+    expect(t.dwell()).toMatchObject({ path: '/en/stories/foo.html', dwell_ms: 5000, depth: 69 });
+  });
+
+  it('counts a short article that fits the first screen as fully read', () => {
+    const t = story('/stories/short', { top: 100, height: 300 });
+    t.leave();
+    expect(t.dwell().depth).toBe(100);
+  });
+
+  it('does not send depth outside individual articles', () => {
+    const t = story('/stories.html', { top: 0, height: 300 });
+    t.leave();
+    expect(t.dwell()).toBeTruthy();
+    expect('depth' in t.dwell()).toBe(false);
+  });
+});

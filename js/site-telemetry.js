@@ -295,6 +295,37 @@
     img.src = fallbackSrc;
   }, true);
 
+  // ─── 기사 읽은 깊이 (page_dwells.depth) ───
+  // 개별 기사 페이지에서만 잰다. 본문(.article-body, 없으면 article)의 위끝부터
+  // 화면 아래 끝까지가 본문 높이의 몇 % 인지, 페이지에 머무는 동안의 최댓값(0~100).
+  // 본문이 첫 화면에 다 들어오는 짧은 기사는 처음부터 100 이다.
+  const STORY_PATH_RE = /^\/(en\/|ja\/)?stories\/[a-z0-9][a-z0-9_-]*(\.html)?$/;
+  function startDepthTracker() {
+    let max = null;
+    let queued = false;
+    function measure() {
+      queued = false;
+      const el = document.querySelector('.article-body') || document.querySelector('article');
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (!(rect.height > 0)) return;
+      const viewBottom = window.innerHeight || document.documentElement.clientHeight || 0;
+      const pct = Math.max(0, Math.min(100, Math.round((viewBottom - rect.top) / rect.height * 100)));
+      if (max == null || pct > max) max = pct;
+    }
+    function schedule() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(measure);
+    }
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    // 이미지가 자리를 잡은 뒤 첫 화면을 잰다. 먼저 재면 본문이 짧게 잡혀 깊이가 부풀려진다.
+    if (document.readyState === 'complete') schedule();
+    else window.addEventListener('load', schedule, { once: true });
+    return function currentDepth() { measure(); return max; };
+  }
+
   // ─── 체류 시간 트래커 (page_dwells) ───
   // foreground 시간만 누적해서 페이지 떠날 때 1회 INSERT.
   function startDwellTracker(path) {
@@ -302,6 +333,7 @@
     let accumulatedMs = 0;
     let sent = false;
     const sid = pvSessionId();
+    const depthOf = STORY_PATH_RE.test(location.pathname) ? startDepthTracker() : null;
 
     function flush() {
       if (sent) return;
@@ -313,6 +345,9 @@
       // 1초 미만 / 4시간 초과는 의미 없는 표본
       if (ms < 1000 || ms > 14400000) return;
       sent = true;
+      const body = { path, session_id: sid, dwell_ms: ms };
+      const depth = depthOf ? depthOf() : null;
+      if (depth != null) body.depth = depth;
       try {
         fetch(PV_URL + '/rest/v1/page_dwells', {
           method: 'POST',
@@ -324,7 +359,7 @@
             'Content-Type': 'application/json',
             Prefer: 'return=minimal',
           },
-          body: JSON.stringify({ path, session_id: sid, dwell_ms: ms }),
+          body: JSON.stringify(body),
         }).catch(function () {});
       } catch (_) {}
     }

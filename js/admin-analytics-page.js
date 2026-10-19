@@ -11,6 +11,8 @@ const STATE = {
   camerasMode: 'range',
   cameraAliasMap: new Map(),
   cameraDisplayOverrides: new Map(),
+  storyRows: [],
+  storySort: { key: 'views', dir: 'desc' },
   ops: { previous: null, timer: null, loading: false },
 };
 
@@ -511,6 +513,152 @@ async function loadAppEvents() {
     </tr>`;
   }).join('');
 }
+
+// ── 기사별 성과 ──────────────────────────────────────────
+// 제목은 정적 목록(data/stories.json)에서 slug → 제목으로 붙인다. 없으면 slug 를 그대로 쓴다.
+const STORY_MIN_SAMPLES = 5;
+let storyTitlesPromise = null;
+function loadStoryTitles() {
+  if (!storyTitlesPromise) {
+    storyTitlesPromise = fetch('/data/stories.json')
+      .then(r => (r.ok ? r.json() : []))
+      .then(list => new Map((Array.isArray(list) ? list : []).map(s => [s.id, s])))
+      .catch(() => new Map());
+  }
+  return storyTitlesPromise;
+}
+
+const ratio = (n, d) => (Number(d) > 0 ? Number(n) / Number(d) : 0);
+// 표본이 적으면 % 가 들쭉날쭉하다. 정렬에서는 맨 뒤로 보낸다.
+const reachRatio = (r, key) =>
+  (Number(r.depth_samples) >= STORY_MIN_SAMPLES ? ratio(r[key], r.depth_samples) : -1);
+
+const STORY_SORTERS = {
+  title:    r => r._title,
+  views:    r => Number(r.views) || 0,
+  sessions: r => Number(r.sessions) || 0,
+  lang:     r => ratio((Number(r.views_en) || 0) + (Number(r.views_ja) || 0), r.views),
+  dwell:    r => (Number(r.dwell_samples) > 0 ? Number(r.avg_dwell_ms) || 0 : -1),
+  full:     r => reachRatio(r, 'reach_100'),
+  half:     r => reachRatio(r, 'reach_50'),
+};
+
+function sortStoryRows(rows, key, dir) {
+  const get = STORY_SORTERS[key] || STORY_SORTERS.views;
+  const sign = dir === 'asc' ? 1 : -1;
+  return rows.slice().sort((a, b) => {
+    const x = get(a), y = get(b);
+    const c = typeof x === 'string' ? x.localeCompare(y, 'ko') : x - y;
+    return c * sign || (Number(b.views) || 0) - (Number(a.views) || 0) || a.slug.localeCompare(b.slug);
+  });
+}
+
+function pctCell(r, key) {
+  const n = Number(r.depth_samples) || 0;
+  if (n < STORY_MIN_SAMPLES) return `<span title="표본 ${fmtNum(n)}건">—</span>`;
+  return `${Math.round(ratio(r[key], n) * 100)}%<span class="sample-n">${fmtNum(n)}</span>`;
+}
+
+function langCell(r) {
+  const total = (Number(r.views_ko) || 0) + (Number(r.views_en) || 0) + (Number(r.views_ja) || 0);
+  if (!total) return '<span class="lang-txt">—</span>';
+  const p = k => Math.round(ratio(r[k], total) * 100);
+  const ko = p('views_ko'), en = p('views_en'), ja = p('views_ja');
+  return `<div class="lang-bar" aria-hidden="true"><span style="width:${ratio(r.views_ko, total) * 100}%"></span><span class="en" style="width:${ratio(r.views_en, total) * 100}%"></span><span class="ja" style="width:${ratio(r.views_ja, total) * 100}%"></span></div>`
+    + `<span class="lang-txt">한 ${ko} · 영 ${en} · 일 ${ja}</span>`;
+}
+
+function renderStoryPerf() {
+  const tbody = $('storyPerf');
+  if (!tbody) return;
+  const { key, dir } = STATE.storySort;
+  document.querySelectorAll('.story-perf th[data-key]').forEach(th => {
+    if (th.dataset.key === key) th.setAttribute('aria-sort', dir === 'asc' ? 'ascending' : 'descending');
+    else th.removeAttribute('aria-sort');
+  });
+  const rows = STATE.storyRows || [];
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">데이터 없음</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sortStoryRows(rows, key, dir).map(r => {
+    const href = r._page ? '/' + r._page.replace(/^\/+/, '') : `/stories/${r.slug}.html`;
+    return `<tr>
+      <td class="path-cell title-cell"><a href="${escapeAttr(href)}" target="_blank" rel="noopener" title="${escapeAttr(r.slug)}">${escapeHtml(r._title)}</a></td>
+      <td class="num">${fmtNum(r.views)}</td>
+      <td class="num">${fmtNum(r.sessions)}</td>
+      <td>${langCell(r)}</td>
+      <td class="num">${Number(r.dwell_samples) > 0 ? escapeHtml(fmtDuration(r.avg_dwell_ms)) : '—'}</td>
+      <td class="num">${pctCell(r, 'reach_100')}</td>
+      <td class="num">${pctCell(r, 'reach_50')}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function setStoryPerf(rows) {
+  const titles = await loadStoryTitles();
+  STATE.storyRows = (rows || []).filter(r => r && r.slug).map(r => {
+    const s = titles.get(r.slug);
+    return { ...r, _title: String(s?.title || r.slug), _page: s?.page || '' };
+  });
+  renderStoryPerf();
+}
+
+document.querySelectorAll('.story-perf th[data-key] .sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.closest('th').dataset.key;
+    const cur = STATE.storySort;
+    STATE.storySort = cur.key === key
+      ? { key, dir: cur.dir === 'asc' ? 'desc' : 'asc' }
+      : { key, dir: key === 'title' ? 'asc' : 'desc' };
+    renderStoryPerf();
+  });
+});
+
+// ── 요일·시간대 히트맵 (한국 시간) ──────────────────────
+const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+const HEAT_ROWS = [1, 2, 3, 4, 5, 6, 0];   // 월요일부터
+const heatLabel = (dow, hour) => `${DOW_LABELS[dow]} ${hour}시`;
+
+function renderHeatmap(rows) {
+  const grid = $('heatGrid');
+  if (!grid) return;
+  const counts = new Map();
+  for (const r of rows || []) {
+    const d = Number(r.dow), h = Number(r.hour);
+    if (d >= 0 && d <= 6 && h >= 0 && h <= 23) counts.set(d * 24 + h, (counts.get(d * 24 + h) || 0) + (Number(r.views) || 0));
+  }
+  const max = Math.max(0, ...counts.values());
+  const top = [...counts.entries()].filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, 3)
+    .map(([k]) => heatLabel(Math.floor(k / 24), k % 24));
+  $('heatPeak').textContent = top.length ? `많이 보는 때: ${top.join(', ')}` : '이 기간에는 조회 기록이 없습니다.';
+
+  let html = '<span></span>';
+  for (let h = 0; h < 24; h++) html += `<span class="heat-hour">${h % 3 === 0 ? h : ''}</span>`;
+  for (const d of HEAT_ROWS) {
+    html += `<span class="heat-day">${DOW_LABELS[d]}</span>`;
+    for (let h = 0; h < 24; h++) {
+      const v = counts.get(d * 24 + h) || 0;
+      const a = v > 0 && max > 0 ? (0.08 + 0.92 * v / max).toFixed(3) : 0;
+      const tip = `${heatLabel(d, h)} · ${fmtNum(v)}회`;
+      html += `<span class="heat-cell" style="--a:${a}" title="${escapeAttr(tip)}" data-tip="${escapeAttr(tip)}"></span>`;
+    }
+  }
+  grid.innerHTML = html;
+  grid.setAttribute('aria-label', `요일·시간대별 조회 수. ${top.length ? `많이 보는 때 ${top.join(', ')}` : '기록 없음'}`);
+  $('heatReadout').textContent = '칸에 마우스를 올리거나 누르면 조회 수가 나옵니다.';
+}
+
+function showHeatTip(event) {
+  const cell = event.target?.closest?.('.heat-cell');
+  if (!cell) return;
+  $('heatGrid').querySelectorAll('.heat-cell.is-on').forEach(c => c.classList.remove('is-on'));
+  cell.classList.add('is-on');
+  $('heatReadout').textContent = cell.dataset.tip || '';
+}
+$('heatGrid')?.addEventListener('pointerover', showHeatTip);
+$('heatGrid')?.addEventListener('click', showHeatTip);
 
 function renderUploadsSummary(s) {
   if (!s) {
@@ -1076,6 +1224,8 @@ async function reload() {
   $('siteLangRangeLabel').textContent = label;
   $('sessRangeLabel').textContent   = label;
   $('dwellRangeLabel').textContent  = label;
+  $('storyPerfRangeLabel').textContent = label;
+  $('heatRangeLabel').textContent   = label;
   $('uploadChartRangeLabel').textContent = label;
   $('themeRangeLabel').textContent       = label;
   $('topContribRangeLabel').textContent  = label;
@@ -1088,7 +1238,7 @@ async function reload() {
   const [
     summary, daily, paths, refs, regs, langs, sitePaths, sess, dwellSum, dwellPaths,
     upSummary, upDaily, upTopContrib, upTopFilms, upTopCameras, upThemeRatio, pendingReports,
-    ebookProducts, ebookSales,
+    ebookProducts, ebookSales, storyPerf, heat,
   ] = await Promise.all([
     db().analytics.summary(),
     db().analytics.daily(f, t),
@@ -1109,6 +1259,8 @@ async function reload() {
     getPendingReportCount(),
     (db().ebooks && db().ebooks.listAll) ? db().ebooks.listAll() : Promise.resolve([]),
     (db().ebooks && db().ebooks.salesByProduct) ? db().ebooks.salesByProduct() : Promise.resolve({}),
+    db().analytics.storyPerformance(f, t),
+    db().analytics.heatmap(f, t),
   ]);
 
   await loadCameraOverrides();
@@ -1122,6 +1274,8 @@ async function reload() {
   renderRegions(regs);
   renderLanguages(langs);
   renderSiteLangs(sitePaths);
+  renderHeatmap(heat);
+  await setStoryPerf(storyPerf);
 
   renderUploadsSummary(upSummary);
   renderUploadChart(upDaily);
