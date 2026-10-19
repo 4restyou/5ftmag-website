@@ -52,6 +52,7 @@
 
   async function uploadPhoto({
     file,
+    editedFile = null, // 편집 창(js/photo-editor.js)에서 자르거나 돌린 사본. 변환에만 쓰고 중복 지문은 원본으로 센다
     db,
     fmtBytes,
     readLocalJwtUser,
@@ -76,13 +77,14 @@
       markProgress('storage', tr('네트워크 연결 필요', 'No network connection', 'ネットワーク接続が必要です'), tr('연결을 확인한 뒤 다시 시도해 주세요.', 'Check your connection and try again.', '接続を確認してから、もう一度お試しください。'));
       throw codedError(tr('네트워크 연결이 끊겼어요. 연결을 확인한 뒤 다시 시도해 주세요.', 'Your network connection dropped. Check your connection and try again.', 'ネットワーク接続が切れました。接続を確認してから、もう一度お試しください。'), 'NETWORK');
     }
-    setSubmitText(tr(`사진 읽는 중… (${fmtBytes(file.size)})`, `Reading photo… (${fmtBytes(file.size)})`, `写真を読み込み中…（${fmtBytes(file.size)}）`));
-    markProgress('decode', tr('사진을 읽는 중', 'Reading the photo', '写真を読み込んでいます'), tr(`${fmtBytes(file.size)} 파일을 웹용 이미지로 준비하고 있어요.`, `Preparing the ${fmtBytes(file.size)} file for the web.`, `${fmtBytes(file.size)} のファイルを Web 用の画像に準備しています。`));
+    const source = editedFile || file;
+    setSubmitText(tr(`사진 읽는 중… (${fmtBytes(source.size)})`, `Reading photo… (${fmtBytes(source.size)})`, `写真を読み込み中…（${fmtBytes(source.size)}）`));
+    markProgress('decode', tr('사진을 읽는 중', 'Reading the photo', '写真を読み込んでいます'), tr(`${fmtBytes(source.size)} 파일을 웹용 이미지로 준비하고 있어요.`, `Preparing the ${fmtBytes(source.size)} file for the web.`, `${fmtBytes(source.size)} のファイルを Web 用の画像に準備しています。`));
     const { blob } = await withNetworkTimeout(
-      signal => resizeToJpeg(file, ({ stage, width: w, height: h }) => {
+      signal => resizeToJpeg(source, ({ stage, width: w, height: h }) => {
         if (signal.aborted) return;
         if (stage === 'decode') {
-          setSubmitText(tr(`사진 읽는 중… (${fmtBytes(file.size)})`, `Reading photo… (${fmtBytes(file.size)})`, `写真を読み込み中…（${fmtBytes(file.size)}）`));
+          setSubmitText(tr(`사진 읽는 중… (${fmtBytes(source.size)})`, `Reading photo… (${fmtBytes(source.size)})`, `写真を読み込み中…（${fmtBytes(source.size)}）`));
           markProgress('decode', tr('사진을 읽는 중', 'Reading the photo', '写真を読み込んでいます'), tr('큰 사진은 이 단계에서 몇 초 걸릴 수 있어요.', 'Large photos can take a few seconds at this step.', '大きな写真はこの段階で数秒かかることがあります。'));
         } else if (stage === 'resize') {
           setSubmitText(tr(`사진 크기 줄이는 중… (${w}×${h})`, `Resizing photo… (${w}×${h})`, `写真を縮小中…（${w}×${h}）`));

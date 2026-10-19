@@ -61,12 +61,46 @@
           : tr('선택된 사진 없음', 'No photo selected', '写真が選択されていません');
       }
       if (file) {
-        const url = URL.createObjectURL(file);
+        // 편집한 사본이 있으면 그것을 보여 준다. 다시 편집하면 언제나 원본에서 시작한다
+        const shown = fileInput?.__editedFile || file;
+        const url = URL.createObjectURL(shown);
         const img = document.createElement('img');
         img.src = url;
         img.onload = () => URL.revokeObjectURL(url);
         preview.appendChild(img);
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'rs-preview-edit';
+        editBtn.textContent = fileInput?.__editedFile
+          ? tr('편집됨 · 다시 편집', 'Edited · edit again', '編集済み · もう一度編集')
+          : tr('회전·자르기', 'Rotate · crop', '回転・切り抜き');
+        editBtn.addEventListener('click', () => openEditor(file));
+        preview.appendChild(editBtn);
       }
+    }
+
+    // 회전·크롭 편집 창. js/photo-editor.js 는 처음 누를 때 불러온다
+    function loadEditor() {
+      if (window.PhotoEditor) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = '/js/photo-editor.js?v=20261019-photo-editor';
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('load failed'));
+        document.head.appendChild(s);
+      });
+    }
+    async function openEditor(file) {
+      try {
+        await loadEditor();
+      } catch (_) {
+        showError(tr('편집 도구를 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the editor. Please refresh and try again.', '編集ツールを読み込めませんでした。再読み込みしてからもう一度お試しください。'));
+        return;
+      }
+      const edited = await window.PhotoEditor.open(file);
+      if (!edited || !fileInput) return;
+      fileInput.__editedFile = edited;
+      renderPhotoPreview(file, tr('편집됨', 'edited', '編集済み'));
     }
 
     function setDroppedPhoto(files) {
@@ -90,6 +124,7 @@
     }
 
     fileInput?.addEventListener('change', () => {
+      fileInput.__editedFile = null; // 새 사진을 고르면 이전 편집은 버린다
       renderPhotoPreview(fileInput.files?.[0] || null);
       clearUploadStatus();
     });
