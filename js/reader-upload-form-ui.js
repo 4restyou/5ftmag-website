@@ -84,7 +84,7 @@
       if (window.PhotoEditor) return Promise.resolve();
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = '/js/photo-editor.js?v=20261019-photo-straighten';
+        s.src = '/js/photo-editor.js?v=20261019-bugs-batch2';
         // 실패 원인(어느 주소가, 어떻게)을 오류에 담아 화면에 보인다.
         s.onload = () => (window.PhotoEditor ? resolve() : reject(new Error(`${s.src} 를 불렀지만 PhotoEditor 가 없어요`)));
         s.onerror = () => reject(new Error(`스크립트 로드 실패: ${s.src}`));
