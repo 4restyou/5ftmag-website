@@ -68,6 +68,7 @@ im.save(dst_webp, "WEBP", quality=82, method=6)  # webp 페어 필수 (validate 
 - 공개 상태(`published: true`)로 등록했다면 `npm run build:rss && npm run build:sitemap` 을 돌려 함께 커밋한다.
   CI 의 qa-smoke 가 커밋된 두 파일에 발행 글이 들어 있는지 검사하므로, 빠뜨리면 main 이 빨간색이 된다.
   비공개(`published: false`)로 넣는 경우엔 두 파일에 들어가지 않는 것이 정상이라 그대로 두면 된다.
+- **이미지를 기다리는 초안은 main 에 머지하지 않는다.** PR 브랜치에 두고 Netlify 미리보기(`deploy-preview-<번호>--5ftmag.netlify.app`)로 운영자 확인을 받는다. Codex 이미지 작업도 그 브랜치에서 시작하게 하고, 공개하는 날 머지한다(CLAUDE.md 「초안은 main 에 올리지 않는다」).
 
 ## 4.5. 영문판 (en/stories/)
 

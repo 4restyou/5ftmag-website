@@ -5,7 +5,7 @@ test('알림 항목 클릭 시 그 알림만 읽음 처리', async ({ page }) =>
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -66,7 +66,7 @@ test('알림 링크는 내부 경로만 href 로 렌더링한다', async ({ page
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -110,7 +110,7 @@ test('데스크톱 헤더는 계정 메뉴 안에 내 정보와 로그아웃을 
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -162,7 +162,7 @@ test('데스크톱 헤더 유틸 아이콘은 같은 크기로 맞춘다', async
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -214,7 +214,7 @@ test('데스크톱 헤더 유틸 아이콘은 같은 크기로 맞춘다', async
 });
 
 test('내 정보와 관리 화면은 공통 헤더를 사용한다', async ({ page }) => {
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -496,7 +496,7 @@ test('이전 책장(books-classic) 인터랙션은 책을 열고 이동 상태�
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -536,7 +536,7 @@ test('이전 책장(books-classic) 인터랙션은 책을 열고 이동 상태�
 
 test('세로 책장(books)은 유무료를 한 줄로 쌓고, 책을 누르면 소개 화면으로 갔다가 돌아온다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await page.addInitScript(() => {
     window.MagDB = {
       isReady: () => true,
@@ -594,7 +594,7 @@ test('마켓 등록 저장이 지연되면 에러를 보여주고 버튼을 복�
       });
     `,
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -775,7 +775,7 @@ test('메인 Photo는 라이브 독자 사진 응답이 느려도 먼저 렌더�
       window.fetchApprovedSubmissions = async () => new Promise(resolve => setTimeout(() => resolve([]), 10000));
     `,
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -842,7 +842,7 @@ test('메인 Photo 최근 모드는 최근 200장 안에서 작가를 분산한�
     contentType: 'application/json',
     body: '[]',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -892,7 +892,7 @@ test('사진 업로드 폼이 단계별 진행 상태를 보여준다', async ({
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -977,7 +977,7 @@ for (const where of ['precheck', 'insert']) {
   test(`같은 사진 파일을 다시 올리면 중복 안내로 막는다: ${where}`, async ({ page }) => {
     await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
     await page.route('**/js/image-processor.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
-    await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+    await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
     await page.addInitScript((mode) => {
       window.__dupe = { uploads: 0, removed: [] };
       window.processImageForUpload = async () => ({ blob: new Blob(['ok'], { type: 'image/jpeg' }), width: 1200, height: 800 });
@@ -1031,7 +1031,7 @@ test('카메라 입력 힌트는 브랜드+모델과 짧은 모델명 모두 찾
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1090,7 +1090,7 @@ test('사진 업로드가 지연되면 저용량 이미지로 자동 재시도�
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1195,7 +1195,7 @@ test('사진 업로드 실패는 실패 단계를 운영 오류 로그로 남긴
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1291,7 +1291,7 @@ test('사진은 올라갔고 기록 저장만 실패하면 재업로드 없이 �
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1397,7 +1397,7 @@ test('로그인 복귀 후 사진 업로드 폼을 자동으로 다시 연다', 
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1454,7 +1454,7 @@ test('Reader Roll 지난 롤 탐색은 숫자만 압축해 보여준다', async 
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1539,7 +1539,7 @@ test('Reader Roll 모달은 필요한 롤 범위만 가져온다', async ({ page
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1612,7 +1612,7 @@ test('Reader 라이트박스에서 사진 좋아요와 작가 모아보기가 �
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1738,7 +1738,7 @@ test('Reader Roll 선택 저장은 고른 사진만 저장 대상으로 보낸�
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1870,7 +1870,7 @@ test('Films Library 카드는 여러 롤이 쌓인 필름을 Roll N 진행률로
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -1951,7 +1951,7 @@ test('Films Library 검색은 독자 사진 작가명, SNS, 카메라도 찾는�
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -2034,7 +2034,7 @@ test('관리 통계 화면은 새 업로드를 운영 알림으로 감지한다'
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -2179,7 +2179,7 @@ test('관리 필름 카탈로그는 Reader 승인 사진 장수를 필름별로 
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -2250,7 +2250,7 @@ test('관리 통계 상위 카메라는 띄어쓰기와 별칭 차이를 병합�
     contentType: 'text/javascript',
     body: '',
   }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({
     contentType: 'text/javascript',
     body: '',
   }));
@@ -2325,7 +2325,7 @@ test('관리 통계 상위 카메라는 띄어쓰기와 별칭 차이를 병합�
 
 test('알림 패널은 같은 사람의 auth 변화로 다시 만들지 않고, 열면 포커스를 옮기고 Esc 로 종에 돌려준다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await page.addInitScript(() => {
     window.__auth = { cbs: [], subscribed: [], unsubscribed: [] };
     window.MagDB = {
@@ -2367,7 +2367,7 @@ test('알림 패널은 같은 사람의 auth 변화로 다시 만들지 않고, 
 test('필름 사진 보기는 DB 실패를 0컷이 아니라 실제 오류와 다시 시도로 보여 준다', async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await page.route('**/js/reader-upload-loader.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await page.route('https://*.supabase.co/**', route => route.abort());
   await page.route('**/data/readers.json*', route => route.fulfill({ json: [] }));
   await page.addInitScript(() => {

@@ -6,9 +6,9 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 
 - **무엇** — `5ft.mag` (오피트). 필름 사진 매거진 웹사이트. 발행처 4rest, 광주 기반. 기사·필름 카탈로그·현상소(labs)·이북·중고장터(market)·독자 사진 투고를 다룬다.
 - **스택** — 정적 HTML + **vanilla JS (ES 모듈, 프레임워크 없음)** + CSS(`css/tokens.css` 디자인 토큰 기반). 데이터/인증은 **Supabase** (Postgres + RLS + Deno 엣지 함수). 호스팅 **Netlify**. 빌드·검증은 Node 스크립트(`scripts/*.mjs`). 네이버 커머스 연동용 고정 IP **중계 서버**(`relay/`) 별도 운영.
-- **규모(현재)** — 기사 42, 저자 12, 마이그레이션 84, 엣지 함수 4(`ebook-page` · `ebook-purchase` · `ebook-redeem` · `send-push`).
+- **규모(2026-10 기준)** — 기사 74(영·일판 각각 따로), 마이그레이션 138, Supabase 엣지 함수 4(`ebook-page` · `ebook-purchase` · `ebook-redeem` · `send-push`), Netlify 엣지 함수 1(`netlify/edge-functions/market-og.ts`). 숫자는 늘 바뀌므로 판단에 쓸 때는 `ls` 로 다시 센다.
 - **언어** — 사이트 기본·커밋 메시지·운영자 소통은 **한국어**. 영문판은 `en/` 아래(아래 "영문판" 참고).
-- **의존성** — 런타임 프레임워크·번들러 없음. devDependencies 는 검증/테스트용(`@playwright/test`, `vitest`, `jsdom`)뿐. Node ≥ 18.
+- **의존성** — 런타임 프레임워크·번들러 없음. devDependencies 는 검증/테스트용(`@playwright/test`, `vitest`, `jsdom`, `@electric-sql/pglite` — 마이그레이션을 실제 Postgres 로 시험)뿐. Node 는 `package.json` engines(`^20.19 || ^22.12 || >=24`).
 
 ## 저장소 지도
 
@@ -70,12 +70,18 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 PR 생성 후 **CI 통과**하면 **사용자가 "배포하지 마" / "PR 만 만들어" 등으로 명시적 중단을 지시하지 않는 한** 머지·배포까지 자동 진행한다. 실행 절차서는 `ship` 스킬.
 
 - main 에 **직접 커밋 금지**. 모든 작업은 새 브랜치 `claude/<feature-or-fix-slug>` → PR → **squash 머지** (커밋 제목 = PR 제목 + ` (#NN)`).
-- **CI = `.github/workflows/test.yml`** (워크플로우 이름 "CI", 체크 잡 이름 `validate`). 이 잡 하나가 순서대로 실행: 자산검증(`validate`) → `shell:check`(공통 내비/푸터 동기화) → vitest 단위 → `db:baseline:check` + `db-audit --strict`(DB 베이스라인·계약 드리프트) → qa-smoke(rss·sitemap 드리프트) → (코드 파일 변경 시에만) Playwright 스모크. data/img/문서만 바뀐 PR 은 Playwright 를 건너뛴다.
+- **CI = `.github/workflows/test.yml`** (워크플로우 이름 "CI", 체크 잡 이름 `validate`). 이 잡 하나가 순서대로 실행: 자산검증(`validate`) → `shell:check`(공통 내비/푸터 동기화) → `i18n:check`(영·일판에 남은 한국어) → vitest 단위 → `db:baseline:check` + `db-audit --strict`(DB 베이스라인·계약 드리프트) → qa-smoke(rss·sitemap 드리프트) → (코드 파일 변경 시에만) Playwright 스모크. data/img/문서만 바뀐 PR 은 Playwright 를 건너뛴다.
 - 자동 파이프라인(머지 후):
   - **Netlify** — `main` 머지 시 정적 사이트 자동 빌드/배포 (1–2분).
   - **functions-deploy (Supabase DB and Edge Functions)** — 마이그레이션 또는 함수 변경 시 DB 마이그레이션을 먼저 적용한 뒤 전 함수 디렉토리를 배포한다(`--no-verify-jwt`, 함수가 자체 인증). DB 실패 시 함수 배포도 중단한다.
   - **db-deploy** — 수동 복구 전용. 자동 배포와 같은 concurrency 그룹으로 DB 동시 적용을 막는다.
   - **feeds-sync** — `data/stories.json` 변경 시 `rss.xml`·`sitemap.xml` 을 재생성해 뒤따라 커밋한다. 관리 페이지 토글이나 main 직접 커밋이 stories.json 만 바꾸는 탓에 main 의 CI 가 드리프트로 실패하던 것을 막는다. main 이 보호 브랜치라 커밋을 임시 브랜치(`bot/feeds-sync-*`)에 올려 CI 를 직접 돌리고, 통과한 커밋만 main 에 fast-forward 로 올린다.
+
+### 초안은 main 에 올리지 않는다
+
+이미지 대기 등으로 아직 공개하지 않을 기사는 **PR 브랜치에만 둔다.** 운영자는 PR 의 Netlify 미리보기(`https://deploy-preview-<PR번호>--5ftmag.netlify.app/stories/<id>.html`)로 확인하고, **공개 = 머지**다. Codex 에 이미지를 맡길 때는 그 PR 브랜치에서 시작해 같은 PR(또는 그 브랜치를 base 로 한 PR)로 올리게 프롬프트를 쓴다. main 에 `published: false` 로 올리면 제목·요약이 `data/stories.json` 으로, 본문이 주소로 노출된다.
+
+`data/stories.json` 의 `published` 는 관리 화면 토글(DB `story_visibility`)이 덮어쓸 수 있다. 실제 공개 여부는 `data/story-visibility.json`(빌드 스냅샷)과 함께 본다.
 
 ### 배포 루프 (표준 절차)
 

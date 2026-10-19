@@ -684,7 +684,7 @@
     const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
     const s = document.createElement('script');
     s.defer = true;
-    s.src = base + 'js/analytics.js?v=20260515-bootstrap';
+    s.src = base + 'js/analytics.js?v=20261019-no-sentry';
     document.head.appendChild(s);
   }
 

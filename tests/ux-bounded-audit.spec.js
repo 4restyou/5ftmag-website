@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
-  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route(/cdn\.jsdelivr\.net|\/js\/vendor\/supabase-js\.js/, route => route.fulfill({ contentType: 'text/javascript', body: '' }));
   await page.addInitScript(() => {
     window.MagDB = {
       isReady: () => true,
