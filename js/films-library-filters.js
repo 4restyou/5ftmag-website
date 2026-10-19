@@ -486,7 +486,11 @@
           if (diff !== 0) return diff;
         } else if (mode === 'added') {
           // 카탈로그 등록일(날짜 단위). 처음 한꺼번에 넣은 필름들은 같은 날이라 이름순이 된다.
-          const dayOf = (film) => String(film.createdAt || '').slice(0, 10);
+          // createdAt 은 UTC 시각이라 앞 10자를 자르면 한국 시간 오전 9시 전 등록이 전날로 묶인다. 한국 날짜로 바꾼다.
+          const dayOf = (film) => {
+            const d = new Date(film.createdAt || NaN);
+            return Number.isNaN(d.getTime()) ? '' : window.MagUtil.seoulTodayIso(d);
+          };
           const diff = dayOf(fb).localeCompare(dayOf(fa));
           if (diff !== 0) return diff;
         } else if (mode === 'iso') {

@@ -883,15 +883,6 @@
   //   - 편집부  : 데스크톱 계정 메뉴/모바일 메뉴 안에 "관리" 추가
   //   - Shop ↗ 다음 자리에 노출 (메인 nav + 모바일 nav 모두)
   // ════════════════════════════════════════════════
-  function isStoryPath() { return /\/stories\//.test(location.pathname); }
-  function isAdminPath() { return /\/admin\//.test(location.pathname); }
-  function authPathTo(name) {
-    // me.html · admin/submissions.html 로의 상대 경로 계산
-    if (isStoryPath() || isAdminPath()) {
-      return '../' + name;
-    }
-    return name;
-  }
   // Supabase JS v2 가 localStorage 의 'sb-<ref>-auth-token' 에 세션을 저장.
   // db-client 의 session() 폴링(최대 3.6초)을 기다리지 않고 즉시 로그인 여부를 추정.
   function hasLocalSupabaseSession() {
@@ -968,8 +959,10 @@
   function renderAuthNav({ mainNav, mobileNav, loggedIn, isEditor }) {
     // 기존 inject 항목 제거 (auth 상태 바뀌었을 때 재호출 가능)
     document.querySelectorAll('[data-nav-auth]').forEach(el => el.remove());
-    const meHref    = authPathTo('me.html');
-    const adminHref = authPathTo('admin/submissions.html');
+    // 절대경로로 쓴다. 상대경로는 <base href="/"> 때문에 영·일판에서도 한국어 /me.html 로 풀렸다.
+    const meHref    = i18n.url('/me.html');
+    const adminHref = '/admin/submissions.html'; // 관리 화면은 한국어판만 있다.
+
     const savedBooksItem = document.getElementById('wzStack')
       ? { label: tr('좋아한 책 모음', 'Liked books', 'お気に入りの本'), href: i18n.url('/me.html') + '#fav-webzine' }
       : null;
@@ -1067,13 +1060,29 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeAccountMenus();
   });
+  // MagDB 가 준비되지 않은 이유를 알린다. 「잠시 후 다시 시도」만으로는 캡처를 받아도 원인을 알 수 없다.
+  function authNotReadyMessage() {
+    if (!window.supabase) {
+      return tr('인증 라이브러리(supabase-js)를 불러오지 못했어요. 광고 차단·네트워크를 확인해 주세요.',
+        "Couldn't load the sign-in library (supabase-js). Check your ad blocker or network.",
+        '認証ライブラリ(supabase-js)を読み込めませんでした。広告ブロッカーやネットワークを確認してください。');
+    }
+    if (!window.MagDB) {
+      return tr('DB 연결 스크립트(db-client.js)를 불러오지 못했어요. 새로고침해 주세요.',
+        "Couldn't load the database script (db-client.js). Please refresh.",
+        'DB 接続スクリプト(db-client.js)を読み込めませんでした。再読み込みしてください。');
+    }
+    return tr('인증 연결을 준비하는 중이에요. 잠시 후 다시 시도해 주세요.',
+      'The sign-in connection is still starting. Please try again in a moment.',
+      '認証の接続を準備しています。しばらくしてからもう一度お試しください。');
+  }
   // 로그인 액션 위임
   document.addEventListener('click', async (e) => {
     const t = e.target.closest('[data-action="auth-login"]');
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
+      window.notify?.(authNotReadyMessage(), 'danger');
       return;
     }
     // 현재 페이지로 복귀 (site-common.js · db-client.js 의 origin restore 가 처리)
@@ -1085,7 +1094,7 @@
     if (!t) return;
     e.preventDefault();
     if (!window.MagDB || !window.MagDB.isReady()) {
-      window.notify?.(tr('잠시 후 다시 시도해주세요.', 'Please try again in a moment.', 'しばらくしてからもう一度お試しください。'), 'info');
+      window.notify?.(authNotReadyMessage(), 'danger');
       return;
     }
     try {
@@ -1135,6 +1144,60 @@
     return bell;
   }
 
+  // 알림 패널 상태. 예전엔 auth onChange 가 올 때마다 패널을 새로 만들면서 종·문서·창 리스너,
+  // realtime 채널, serviceWorker message 리스너가 계속 쌓였다(토큰 갱신에도 와서 한 번 열면 여러 번
+  // 토글되고 토스트가 겹쳤다). 문서·창 리스너는 한 번만 붙여 지금 패널에 위임하고, 패널은 로그인한
+  // 사람이 실제로 바뀔 때(이전 uid ≠ 새 uid)만 다시 만든다. 채널은 정리한 뒤 다시 구독한다.
+  const notifUi = { uid: undefined, seq: 0, panel: null, open: null, close: null, channel: null, reflectPush: null, globalsBound: false };
+
+  function focusFirstIn(panel) {
+    const first = focusableIn(panel)[0];
+    if (first) first.focus();
+  }
+  function closeNotifPanel({ focusBell = false } = {}) {
+    const panel = notifUi.panel;
+    if (!panel || panel.hidden) return;
+    if (notifUi.close) notifUi.close();
+    else panel.hidden = true;
+    const bell = document.getElementById('notifBell');
+    if (bell) {
+      bell.setAttribute('aria-expanded', 'false');
+      if (focusBell) bell.focus();
+    }
+  }
+  function bindNotifGlobalsOnce() {
+    if (notifUi.globalsBound) return;
+    notifUi.globalsBound = true;
+    // 종 클릭과 바깥 클릭을 한 리스너에서 처리한다.
+    document.addEventListener('click', (e) => {
+      const bell = document.getElementById('notifBell');
+      const panel = notifUi.panel;
+      if (bell && bell.contains(e.target)) {
+        if (!panel) return;
+        if (panel.hidden) notifUi.open?.();
+        else closeNotifPanel();
+        return;
+      }
+      if (!panel || panel.hidden || panel.contains(e.target)) return;
+      closeNotifPanel();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && notifUi.panel && !notifUi.panel.hidden) closeNotifPanel({ focusBell: true });
+    });
+    window.addEventListener('resize', () => {
+      if (notifUi.panel && !notifUi.panel.hidden) alignNotifPanel(notifUi.panel, document.getElementById('notifBell'));
+    });
+    // SW 가 push subscription 을 재발급한 경우 (pushsubscriptionchange) 동기화.
+    // 푸시 토글이 떠 있는(로그인·지원 기기) 동안만 처리한다.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', async (e) => {
+        if (e.data?.type !== 'push-resubscribed' || !notifUi.reflectPush) return;
+        try { await window.MagDB.push.subscribe(); } catch (_) {}
+        notifUi.reflectPush?.();
+      });
+    }
+  }
+
   async function setupNotifications() {
     const navRight = document.querySelector('.nav-right');
     if (!navRight) return;
@@ -1142,6 +1205,8 @@
     const bell = injectNotifBell();
     if (!bell) return;
     if (document.documentElement.dataset.notifBound === '1') return;
+    document.documentElement.dataset.notifBound = '1';
+    bindNotifGlobalsOnce();
 
     // db-client 준비 대기 (종은 이미 떠 있음)
     for (let i = 0; i < 60; i++) {
@@ -1152,21 +1217,43 @@
     let session = null;
     if (ready) { try { session = await window.MagDB.auth.getSession(); } catch (_) {} }
 
-    // auth 변화 시 패널만 다시 구성 — 종 자체는 유지. onChange 한 번만 바인딩.
-    if (ready && typeof window.MagDB.auth.onChange === 'function' && !document.documentElement.dataset.notifAuthBound) {
-      document.documentElement.dataset.notifAuthBound = '1';
-      window.MagDB.auth.onChange((_event, _next) => {
-        const panel = document.getElementById('notifPanel');
-        if (panel) panel.remove();
-        document.documentElement.dataset.notifBound = '';
-        setupNotifications();
+    // 로그인한 사람이 바뀔 때만 패널을 다시 만든다. 토큰 갱신·같은 사람의 SIGNED_IN 은 그대로 둔다.
+    if (ready && typeof window.MagDB.auth.onChange === 'function') {
+      window.MagDB.auth.onChange((_event, next) => {
+        const nextUid = next?.user?.id || null;
+        if (nextUid === notifUi.uid) return;
+        buildNotifPanel(next);
       });
     }
+    buildNotifPanel(session);
+  }
 
-    document.documentElement.dataset.notifBound = '1';
+  async function buildNotifPanel(session) {
+    const uid = session?.user?.id || null;
+    if (notifUi.panel && uid === notifUi.uid) return;
+    const bell = document.getElementById('notifBell');
+    if (!bell) return;
+    notifUi.uid = uid;
+    const seq = ++notifUi.seq;
+
+    // 이전 패널·채널 정리
+    if (notifUi.panel) notifUi.panel.remove();
+    notifUi.panel = null;
+    notifUi.open = null;
+    notifUi.close = null;
+    notifUi.reflectPush = null;
+    bell.setAttribute('aria-expanded', 'false');
+    const oldBadge = document.getElementById('notifBadge');
+    if (oldBadge) oldBadge.hidden = true;
+    bell.classList.remove('has-unread');
+    if (notifUi.channel) {
+      const ch = notifUi.channel;
+      notifUi.channel = null;
+      try { Promise.resolve(window.MagDB?.realtime?.unsubscribe?.(ch)).catch(() => {}); } catch (_) {}
+    }
 
     // 비로그인(또는 DB 미준비) — 종을 누르면 로그인 안내 패널만 노출
-    if (!session) {
+    if (!uid) {
       const guestPanel = document.createElement('div');
       guestPanel.id = 'notifPanel';
       guestPanel.className = 'notif-panel';
@@ -1183,23 +1270,14 @@
           ${window.MagAuthUI.loginButton({ label: tr('Google로 로그인', 'Sign in with Google', 'Googleでログイン'), className: 'notif-panel-guest-btn', attrs: 'data-action="auth-login"' })}
         </div>`;
       document.body.appendChild(guestPanel);
-      bell.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const open = guestPanel.hidden;
-        if (open) alignNotifPanel(guestPanel, bell);
-        guestPanel.hidden = !open;
-        bell.setAttribute('aria-expanded', String(open));
-      });
-      window.addEventListener('resize', () => { if (!guestPanel.hidden) alignNotifPanel(guestPanel, bell); });
-      document.addEventListener('click', (e) => {
-        if (guestPanel.hidden) return;
-        if (guestPanel.contains(e.target) || bell.contains(e.target)) return;
-        guestPanel.hidden = true;
-        bell.setAttribute('aria-expanded', 'false');
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !guestPanel.hidden) { guestPanel.hidden = true; bell.setAttribute('aria-expanded', 'false'); }
-      });
+      notifUi.panel = guestPanel;
+      notifUi.open = () => {
+        alignNotifPanel(guestPanel, bell);
+        guestPanel.hidden = false;
+        bell.setAttribute('aria-expanded', 'true');
+        focusFirstIn(guestPanel);
+      };
+      notifUi.close = () => { guestPanel.hidden = true; };
       return;
     }
 
@@ -1264,6 +1342,7 @@
             } catch (_) { return 0; }
           })(),
         ]);
+        if (seq !== notifUi.seq) return; // 그새 다른 사람으로 바뀌었으면 버린다
         updateBadge((n || 0) + (m || 0));
       } catch (_) {}
     }
@@ -1294,6 +1373,7 @@
       alignNotifPanel(panel, bell);
       panel.hidden = false;
       bell.setAttribute('aria-expanded', 'true');
+      focusFirstIn(panel);
       const list = document.getElementById('notifList');
       list.innerHTML = `<div class="notif-panel-empty">${tr('불러오는 중…', 'Loading…', '読み込み中…')}</div>`;
       const rows = await window.MagDB.notifications.list({ limit: 30 });
@@ -1335,19 +1415,9 @@
       panel.hidden = true;
       bell.setAttribute('aria-expanded', 'false');
     }
-    bell.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (panel.hidden) openPanel(); else closePanel();
-    });
-    window.addEventListener('resize', () => { if (!panel.hidden) alignNotifPanel(panel, bell); });
-    document.addEventListener('click', (e) => {
-      if (panel.hidden) return;
-      if (panel.contains(e.target) || bell.contains(e.target)) return;
-      closePanel();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !panel.hidden) closePanel();
-    });
+    notifUi.panel = panel;
+    notifUi.open = openPanel;
+    notifUi.close = closePanel;
     document.getElementById('notifAllRead').addEventListener('click', async (e) => {
       e.stopPropagation();
       await window.MagDB.notifications.markAllRead();
@@ -1372,8 +1442,9 @@
       const msg = batch.length === 1 ? (batch[0] || tr('새 알림', 'New notification', '新しい通知')) : tr(`새 알림 ${batch.length}건`, `${batch.length} new notifications`, `新しい通知 ${batch.length}件`);
       window.showToast(msg, { type: 'info', duration: 4200 });
     };
+    let channel = null;
     try {
-      await window.MagDB.realtime.subscribeNotifications((n, kind) => {
+      channel = await window.MagDB.realtime.subscribeNotifications((n, kind) => {
         refreshBadge();
         // 새 알림(INSERT)일 때만 토스트. 읽음 처리(UPDATE)는 뱃지만 조용히 갱신.
         if (kind === 'UPDATE') return;
@@ -1382,6 +1453,13 @@
         _burstTimer = setTimeout(flushBurst, 900);
       });
     } catch (_) {}
+    if (!channel) return;
+    // 구독하는 사이 다른 사람으로 바뀌었으면 이 채널은 바로 닫는다.
+    if (seq !== notifUi.seq) {
+      try { Promise.resolve(window.MagDB.realtime.unsubscribe?.(channel)).catch(() => {}); } catch (_) {}
+      return;
+    }
+    notifUi.channel = channel;
   }
 
   // 푸시 알림 켜기/끄기 — 알림 패널 헤더 아래 행
@@ -1453,15 +1531,8 @@
     if (confirmBtn) confirmBtn.addEventListener('click', doSubscribe);
     if (cancelBtn) cancelBtn.addEventListener('click', () => { if (detail) detail.hidden = true; });
 
-    // SW 가 push subscription 을 재발급한 경우 (pushsubscriptionchange) 동기화
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', async (e) => {
-        if (e.data?.type === 'push-resubscribed') {
-          try { await window.MagDB.push.subscribe(); } catch (_) {}
-          reflect();
-        }
-      });
-    }
+    // SW 의 push-resubscribed 메시지는 bindNotifGlobalsOnce 의 리스너 하나가 받아 이 reflect 를 부른다.
+    notifUi.reflectPush = reflect;
   }
 
   // ════════════════════════════════════════════════
@@ -1957,7 +2028,7 @@
     if (!readEditorCache()) return;
     const load = () => {
       const s = document.createElement('script');
-      s.src = '/js/editor-message.js?v=20261019-editor-msg-icon';
+      s.src = '/js/editor-message.js?v=20261019-bugs-batch2';
       document.head.appendChild(s);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);

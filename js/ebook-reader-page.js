@@ -28,7 +28,18 @@
     for (let i = 0; i < 60; i++) { if (db() && db().isReady()) break; await new Promise(r => setTimeout(r, 50)); }
     if (!db() || !db().isReady()) { gate(i18n.t('<p>서비스 준비에 실패했어요. 잠시 후 새로고침해 주세요.</p>', '<p>The service failed to start. Please refresh in a moment.</p>', '<p>サービスの準備に失敗しました。しばらくしてから再読み込みしてください。</p>')); return; }
 
-    product = await db().ebooks.get(slug);
+    // 조회 실패와 「없는 이북」을 나눈다. 실패를 없는 이북으로 안내하면 원인을 찾을 수 없다.
+    try {
+      product = await db().ebooks.get(slug, { strict: true });
+    } catch (err) {
+      console.error('[ebook] 이북 정보 조회 실패', { slug, err });
+      const reason = esc(err?.message || err?.code || String(err));
+      gate(i18n.t('<h2>불러오기 실패</h2><p>이북 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>', '<h2>Couldn\'t load</h2><p>We couldn\'t load this e-book. Please try again in a moment.</p>', '<h2>読み込めませんでした</h2><p>電子書籍の情報を読み込めませんでした。しばらくしてからもう一度お試しください。</p>')
+        + `<p><button type="button" class="ebook-gate-retry" id="ebookRetry">${i18n.t('다시 시도', 'Try again', '再試行')}</button></p>`
+        + `<p class="ebook-gate-code">(code: ${reason})</p>`);
+      $('ebookRetry')?.addEventListener('click', () => { gate(''); init(); }, { once: true });
+      return;
+    }
     if (!product || !product.published) { gate(i18n.t('<h2>없는 이북</h2><p>공개되지 않았거나 삭제된 이북이에요.</p>', '<h2>E-book not found</h2><p>This e-book is unpublished or has been removed.</p>', '<h2>電子書籍が見つかりません</h2><p>非公開になったか、削除された電子書籍です。</p>')); return; }
     document.title = `${product.title} | 5ft magazine`;
 

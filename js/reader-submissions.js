@@ -582,8 +582,10 @@
       // 업로드/폼 전용 스크립트를 이 시점에 동적 로드 (첫 화면에서는 받지 않는다)
       try {
         await ensureUploadDeps();
-      } catch (_) {
-        window.notify?.(tr('업로드 도구를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.', 'Could not load the upload tools. Please refresh and try again.', 'アップロードツールを読み込めませんでした。再読み込みしてからもう一度お試しください。'), 'danger');
+      } catch (err) {
+        // 어느 스크립트가 막혔는지(주소)를 함께 보인다. 광고 차단·CSP·네트워크 중 무엇인지 캡처로 가려낼 수 있게.
+        console.error('[reader-submissions] upload deps', err);
+        window.notify?.(tr('업로드 도구를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.', 'Could not load the upload tools. Please refresh and try again.', 'アップロードツールを読み込めませんでした。再読み込みしてからもう一度お試しください。') + ` (${err?.message || err})`, 'danger');
         return;
       }
       // 8초 외부 timeout — 안쪽 fetchWithTimeout 이 우회되는 극단적 케이스 대비
@@ -817,15 +819,10 @@
       uploadState = {};
     });
 
-    // 드롭존(span role=button) 키보드 작동 + 숨은 파일 input 은 탭 순서에서 제외(이중 탭스톱 방지)
+    // 숨은 파일 input 은 탭 순서에서 제외(이중 탭스톱 방지). 드롭존 Enter/Space 는
+    // reader-upload-form-ui.js 가 맡는다(여기서도 붙이면 파일 창이 두 번 열렸다).
     const photoInput = form.querySelector('input[name="photo"]');
-    const dropzone = form.querySelector('#rs-dropzone');
-    if (photoInput && dropzone) {
-      photoInput.setAttribute('tabindex', '-1');
-      dropzone.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); photoInput.click(); }
-      });
-    }
+    if (photoInput && form.querySelector('#rs-dropzone')) photoInput.setAttribute('tabindex', '-1');
 
     if (!window.ReaderFilmPicker?.bindFilmPicker) {
       showError(tr('필름 선택 모듈을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the film picker. Please refresh and try again.', 'フィルム選択モジュールを読み込めませんでした。再読み込みしてからもう一度お試しください。'));

@@ -111,17 +111,21 @@
   window.findFilmMatch = findFilmMatch;
 
   // 외부 노출: 승인된 제출 가져오기 (MagDB 위임)
+  // 실패(연결 미준비·조회 오류·시간 초과)는 빈 목록이 아니라 오류로 던진다. 빈 목록으로 바꾸면
+  // 화면이 「0컷」으로 안내해 버린다. 정상 응답이 빈 목록일 때만 [] 가 나온다.
   window.fetchApprovedSubmissions = async function (limit = null) {
     const db = window.MagDB;
-    if (!db || !db.isReady()) return [];
+    if (!db || !db.isReady()) {
+      throw new Error(tr('DB 연결이 준비되지 않았어요(supabase-js 를 불러오지 못했을 수 있어요).', 'The database connection is not ready (supabase-js may have failed to load).', 'DB 接続の準備ができていません(supabase-js を読み込めなかった可能性があります)。'));
+    }
     let timer = null;
     const timeout = new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error('승인된 사진 목록 불러오기 시간 초과 (30초)')), 30000);
+      timer = setTimeout(() => reject(new Error(tr('승인된 사진 목록 불러오기 시간 초과 (30초)', 'Timed out loading approved photos (30s)', '承認済み写真の読み込みがタイムアウトしました(30秒)'))), 30000);
     });
     return Promise.race([db.submissions.listApproved(limit), timeout])
       .catch(err => {
         console.warn('[reader-submissions] approved list:', err?.message || err);
-        return [];
+        throw err;
       })
       .finally(() => clearTimeout(timer));
   };
@@ -132,9 +136,9 @@
   const MODULES = [
     '/js/reader-camera-input.js?v=20261008-camera-potw',
     '/js/reader-film-picker.js?v=20261002-f2',
-    '/js/reader-upload-form-ui.js?v=20261019-photo-straighten',
+    '/js/reader-upload-form-ui.js?v=20261019-bugs-batch2',
     '/js/reader-upload-flow.js?v=20261019-sec-batch1',
-    '/js/reader-submissions.js?v=20261019-sec-batch1',
+    '/js/reader-submissions.js?v=20261019-bugs-batch2',
   ];
 
   // 관리 화면처럼 reader-submissions.js 를 직접 싣는 페이지에선 로더는 매칭 함수만 준다.

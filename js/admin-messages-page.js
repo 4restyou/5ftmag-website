@@ -14,7 +14,16 @@
     currentUserId: null,
     messages: [],
     sending: false,
+    // 스레드 요청 순번. 응답이 왔을 때 그사이 다른 회원을 열었으면(순번·currentUserId 가 다르면) 버린다.
+    threadSeq: 0,
+    deepUser: '',
+    deepName: '',
   };
+
+  // 화면에 그릴 내용이 바뀌었는지 비교하는 서명(폴링 때 같은 내용이면 다시 그리지 않는다).
+  function messagesSignature(list) {
+    return JSON.stringify((list || []).map((m) => [m.id, m.body, m.edited_at, m.deleted_at, m.read_at]));
+  }
 
   // 접근 권한 — 공통 게이트(js/admin-guard.js) 위임.
   async function checkAccess() { return window.AdminGuard.requireEditor({}); }
@@ -74,7 +83,10 @@
   }
 
   async function openThread(userId) {
+    const seq = ++STATE.threadSeq;
     STATE.currentUserId = userId;
+    // 딥링크(?user=&name=)로 연 그 회원이 아니면 딥링크 이름을 쓰지 않는다.
+    if (userId !== STATE.deepUser) STATE.deepName = '';
     renderThreads();
     const thread = STATE.threads.find((t) => t.user_id === userId);
     $('viewTitle').textContent = thread?.display_name || STATE.deepName || '회원';
@@ -85,7 +97,9 @@
     if (window.matchMedia('(max-width: 720px)').matches) {
       document.querySelector('.msg-view')?.scrollIntoView({ block: 'start' });
     }
-    STATE.messages = await db().messages.list(userId);
+    const messages = await db().messages.list(userId);
+    if (seq !== STATE.threadSeq || STATE.currentUserId !== userId) return; // 그새 다른 회원을 열었다
+    STATE.messages = messages;
     renderMessages();
     // 회원이 보낸 메시지 읽음 처리
     if (thread?.unread_for_admin > 0) {
@@ -97,7 +111,11 @@
     }
   }
 
-  function renderMessages() {
+  // keepScroll: 폴링으로 다시 그릴 때 읽던 자리를 지킨다(맨 아래에 있었으면 맨 아래로).
+  function renderMessages({ keepScroll = false } = {}) {
+    const listEl = $('viewList');
+    const prevTop = listEl.scrollTop;
+    const wasAtBottom = listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight < 40;
     if (!STATE.messages.length) {
       $('viewList').innerHTML = '<div class="msg-view-empty">메시지가 없습니다.</div>';
       return;
@@ -128,8 +146,8 @@
         </div>
       `;
     }).join('');
-    $('viewList').innerHTML = html;
-    $('viewList').scrollTop = $('viewList').scrollHeight;
+    listEl.innerHTML = html;
+    listEl.scrollTop = (keepScroll && !wasAtBottom) ? prevTop : listEl.scrollHeight;
     document.querySelectorAll('#viewList [data-action="edit-msg"]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const row = btn.closest('.msg-row');
@@ -221,10 +239,18 @@
     pollTimer = setInterval(async () => {
       if (document.hidden) return;
       await loadThreads();
-      if (STATE.currentUserId) {
-        STATE.messages = await db().messages.list(STATE.currentUserId);
-        renderMessages();
-      }
+      const uid = STATE.currentUserId;
+      if (!uid) return;
+      const seq = STATE.threadSeq;
+      const messages = await db().messages.list(uid);
+      // 응답 사이 다른 회원을 열었으면 버린다.
+      if (seq !== STATE.threadSeq || STATE.currentUserId !== uid) return;
+      // 메시지를 고치는 중이면 다시 그리지 않는다(입력하던 내용이 날아간다).
+      if (document.querySelector('#viewList .msg-edit-input')) return;
+      // 내용이 그대로면 다시 그리지 않는다(스크롤이 맨 아래로 튀지 않게).
+      if (messagesSignature(messages) === messagesSignature(STATE.messages)) return;
+      STATE.messages = messages;
+      renderMessages({ keepScroll: true });
     }, 30000);
   }
 
@@ -344,6 +370,7 @@
     const params = new URLSearchParams(location.search);
     const deepUser = params.get('user');
     if (deepUser && /^[0-9a-f-]{36}$/i.test(deepUser)) {
+      STATE.deepUser = deepUser;
       STATE.deepName = params.get('name') || '';
       await openThread(deepUser);
     }

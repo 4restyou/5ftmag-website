@@ -256,13 +256,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="../js/db/admin.js?v=20261018-editor-msg" defer></script>
-<script src="../js/db/commerce.js?v=20261002-f2" defer></script>
-  <script src="../js/db-client.js?v=20261019-sec-batch1" defer></script>
+<script src="../js/db/commerce.js?v=20261019-bugs-batch2" defer></script>
+  <script src="../js/db-client.js?v=20261019-bugs-batch2" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="../js/util.js?v=20261003-member-stability" defer></script>
   <script src="../js/site-telemetry.js?v=20261002-product-audit" defer></script>
   <script src="../js/site-pwa.js?v=20261002-f2" defer></script>
-  <script src="../js/site-common.js?v=20261019-editor-msg-icon" defer></script>
+  <script src="../js/site-common.js?v=20261019-bugs-batch2" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
 <script>
 'use strict';
@@ -556,7 +556,9 @@ function bindRowHandlers() {
 }
 
 async function reload() {
-  await buildCameraIndex();
+  // listApproved 는 조회 실패를 던진다. 일부만 읽힌 목록으로 그리면 카메라가 빠져 보이므로 오류를 그대로 알린다.
+  try { await buildCameraIndex(); }
+  catch (e) { alert('승인된 사진 목록을 불러오지 못했어요: ' + (e?.message || e)); return; }
   render();
 }
 

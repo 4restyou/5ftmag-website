@@ -169,9 +169,20 @@
     return Promise.race([promise, guard]).finally(() => clearTimeout(timer));
   }
 
+  // OAuth 로그인에서 막 돌아온 방문인가. 이때만 세션이 생길 때까지 잠깐 기다린다.
+  // URL 에 PKCE code·implicit access_token·error_description 이 있거나, 로그인 시작 때
+  // saveLoginOrigin() 이 남긴 복귀 표시(10분 TTL, 복귀가 끝나면 지움)가 남아 있으면 그렇다.
+  // 평소(로그아웃 방문자 포함)엔 한 번만 읽는다. 24번×150ms 를 돌면 장터·댓글이 3.5초씩 늦었다.
+  function isAuthReturn() {
+    const q = `${location.search}&${location.hash.replace(/^#/, '')}`;
+    if (/(?:^|[?&])(?:code|access_token|error_description)=/.test(q)) return true;
+    return !!readLoginOrigin({ remove: false });
+  }
+
   async function session() {
     const c = client(); if (!c) return null;
-    for (let i = 0; i < 24; i++) {
+    const tries = isAuthReturn() ? 24 : 1;
+    for (let i = 0; i < tries; i++) {
       let data;
       try {
         ({ data } = await withTimeout(c.auth.getSession(), 7000, 'getSession'));
@@ -180,7 +191,7 @@
         return null;
       }
       if (data.session) return data.session;
-      if (i < 23) await wait(150);
+      if (i < tries - 1) await wait(150);
     }
     return null;
   }
@@ -470,7 +481,8 @@
           .select('*')
           .order('created_at', { ascending: false })
           .range(from, to);
-        if (error) return rows;
+        // 실패를 빈 목록(「0컷」)으로 돌려주면 화면이 「사진이 없다」고 안내한다. 던져서 호출부가 오류로 보이게 한다.
+        if (error) throw new Error(error.message || error.code || 'reader_submissions_approved 조회 실패');
         const page = data || [];
         rows.push(...page);
         if (page.length < (to - from + 1)) break;
@@ -1119,6 +1131,11 @@
           (payload) => onChange(payload.new, 'UPDATE'))
         .subscribe();
     },
+    // 구독한 채널을 닫고 클라이언트 목록에서 뺀다(알림 패널을 다른 사람으로 다시 만들 때).
+    unsubscribe(channel) {
+      const c = client(); if (!c || !channel) return null;
+      return c.removeChannel(channel);
+    },
   };
 
   // ─── 필름 카탈로그 (films 테이블) ───
@@ -1669,7 +1686,8 @@
     async ownerOfSubmission(submissionId) {
       const c = client(); if (!c || !submissionId) return null;
       const { data, error } = await c.from('reader_submissions').select('user_id').eq('id', submissionId).maybeSingle();
-      if (error) { console.warn('[messages.ownerOfSubmission]', error.message); return null; }
+      // 조회 실패는 「회원을 찾지 못함」(null)과 다르다. 던져서 화면이 실제 오류를 보이게 한다.
+      if (error) { console.warn('[messages.ownerOfSubmission]', error.message); throw new Error(error.message || error.code || 'reader_submissions 조회 실패'); }
       return data?.user_id || null;
     },
     // 본인 메시지 수정 (회원: 자기 발신, 편집부: 편집부 발신)

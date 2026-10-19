@@ -89,7 +89,16 @@
 
   async function open({ userId, submissionId, name }) {
     injectCss();
-    if (!userId && submissionId) userId = await db()?.messages?.ownerOfSubmission?.(submissionId);
+    if (!userId && submissionId) {
+      try {
+        userId = await db()?.messages?.ownerOfSubmission?.(submissionId);
+      } catch (err) {
+        // 예전엔 처리되지 않은 rejection 이 되어 버튼을 눌러도 아무 반응이 없었다.
+        console.error('[editor-message] ownerOfSubmission', err);
+        window.notify?.('이 사진을 올린 회원을 조회하지 못했습니다: ' + (err?.message || err), 'danger');
+        return;
+      }
+    }
     if (!userId) {
       window.notify?.('이 사진을 올린 회원 계정을 찾지 못했습니다. (투고 기록이 없는 사진일 수 있어요)', 'danger');
       return;
