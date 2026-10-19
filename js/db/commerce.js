@@ -112,11 +112,12 @@
       if (error) { console.warn('[ebooks.listAll]', error.message); return []; }
       return data || [];
     },
-    async get(slug) {
-      const c = client(); if (!c) return null;
+    // strict: 조회 실패를 null(=「없는 이북」) 대신 던진다. 없는 행은 그대로 null.
+    async get(slug, { strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw Object.assign(new Error('unavailable'), { code: 'UNAVAILABLE' }); return null; }
       const { data, error } = await c.from('ebook_products')
         .select('*').eq('slug', slug).maybeSingle();
-      if (error) { console.warn('[ebooks.get]', error.message); return null; }
+      if (error) { console.warn('[ebooks.get]', error.message); if (strict) throw error; return null; }
       return data;
     },
     async upsert(row) {
@@ -137,13 +138,14 @@
 
     // ── 열람권 ──
     // 현재 로그인 사용자가 열람권을 가진 product_id 집합 (Set)
-    async myEntitlementIds() {
-      const c = client(); if (!c) return new Set();
+    // strict: 조회 실패를 빈 Set(=「산 책 없음」) 대신 던진다.
+    async myEntitlementIds({ strict = false } = {}) {
+      const c = client(); if (!c) { if (strict) throw Object.assign(new Error('unavailable'), { code: 'UNAVAILABLE' }); return new Set(); }
       const uid = await userId();
       if (!uid) return new Set();
       const { data, error } = await c.from('ebook_entitlements')
         .select('product_id').eq('user_id', uid).eq('status', 'active');
-      if (error) { console.warn('[ebooks.myEntitlementIds]', error.message); return new Set(); }
+      if (error) { console.warn('[ebooks.myEntitlementIds]', error.message); if (strict) throw error; return new Set(); }
       return new Set((data || []).map(r => r.product_id));
     },
     async hasAccess(productId) {

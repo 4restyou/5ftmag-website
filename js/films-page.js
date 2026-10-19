@@ -400,7 +400,10 @@
   //  - 5ft Issue 영역의 featured 카드(editorial "36 photos")는 건드리지 않음
   // ════════════════════════════
   async function updateReaderCounts() {
-    const submissions = await getApprovedSubmissions({ force: true });
+    let submissions;
+    try { submissions = await getApprovedSubmissions({ force: true }); }
+    catch (_) { return; } // 카드 카운트는 보강 정보다. 실패면 기본 표기를 그대로 둔다(오류는 사진 보기·모달에서 보인다).
+
     if (!submissions || !submissions.length) return;
 
     // 인트로 하단: 지금까지 모인 독자 사진 총 개수
@@ -533,21 +536,21 @@
     if (!force && approvedSubmissionsCache) return approvedSubmissionsCache;
     if (!force && approvedSubmissionsPromise) return approvedSubmissionsPromise;
 
+    // 실패는 캐시하지 않고 던진다. 예전엔 실패 때 정적 사진만 캐시해, 한 번 끊기면 새로고침 전까지
+    // 「0컷」으로 보였다. 정상 응답이 빈 목록인 경우만 그대로 캐시한다.
     approvedSubmissionsPromise = (async () => {
-      const fetcher = await waitForApprovedFetcher();
-      const staticReaders = await getStaticReaders();
-      if (!fetcher) {
-        approvedSubmissionsCache = approvedSubmissionsCache || staticReaders;
-        return approvedSubmissionsCache;
-      }
       try {
+        const fetcher = await waitForApprovedFetcher();
+        const staticReaders = await getStaticReaders();
+        if (!fetcher) {
+          throw new Error(fpT('DB 연결이 준비되지 않았어요(supabase-js 를 불러오지 못했을 수 있어요).', 'The database connection is not ready (supabase-js may have failed to load).', 'DB 接続の準備ができていません(supabase-js を読み込めなかった可能性があります)。'));
+        }
         const rows = await fetcher();
         approvedSubmissionsCache = (Array.isArray(rows) ? rows : []).concat(staticReaders);
         return approvedSubmissionsCache;
       } catch (e) {
         console.warn('승인된 제출 fetch 실패:', e);
-        approvedSubmissionsCache = approvedSubmissionsCache || staticReaders;
-        return approvedSubmissionsCache;
+        throw e;
       } finally {
         approvedSubmissionsPromise = null;
       }
@@ -574,10 +577,14 @@
     }
 
     if (!filmKey && contributor) {
-      const submissions = await getApprovedSubmissions();
+      let submissions = null;
+      let loadError = null;
+      try { submissions = await getApprovedSubmissions(); } catch (err) { loadError = err; }
       const personKeyOf = contributorKeyOfSubmission;
-      const first = submissions.find(sub => personKeyOf(sub) === contributor);
-      if (first) {
+      const first = submissions?.find(sub => personKeyOf(sub) === contributor);
+      if (loadError) {
+        window.notify?.(fpT(`작가의 사진을 불러오지 못했어요: ${loadError?.message || loadError}`, `Couldn't load this photographer's photos: ${loadError?.message || loadError}`, `この撮影者の写真を読み込めませんでした: ${loadError?.message || loadError}`), 'error');
+      } else if (first) {
         const match = typeof window.findFilmMatch === 'function'
           ? window.findFilmMatch(first.film, filmsData)
           : null;
@@ -801,16 +808,28 @@
     const submitBtn = modalContent.querySelector('.reader-submit-btn');
     if (!grid) return;
 
-    const rollSource = await readerRollData.createSource({
-      rawAliases,
-      normalize,
-      rollLimit: ROLL_LIMIT,
-      currentCameras,
-      getStaticReaders,
-      getApprovedSubmissions,
-      buildReaderRollState,
-      resolveCanonicalCameraKey,
-    });
+    let rollSource;
+    try {
+      rollSource = await readerRollData.createSource({
+        rawAliases,
+        normalize,
+        rollLimit: ROLL_LIMIT,
+        currentCameras,
+        getStaticReaders,
+        getApprovedSubmissions,
+        buildReaderRollState,
+        resolveCanonicalCameraKey,
+      });
+    } catch (err) {
+      // 조회 실패를 빈 롤(0/36)로 그리지 않는다. 실제 오류와 다시 시도를 보여 준다.
+      if (currentFilmKey !== filmKey || !grid.isConnected) return;
+      const reason = String(err?.message || err || '');
+      grid.innerHTML = window.MagState
+        ? window.MagState.error({ title: fpT("Reader's Roll 사진을 불러오지 못했어요.", "Couldn't load Reader's Roll photos.", "Reader's Roll の写真を読み込めませんでした。"), desc: reason || undefined })
+        : `<p class="library-photos-empty">${fpT("Reader's Roll 사진을 불러오지 못했어요.", "Couldn't load Reader's Roll photos.", "Reader's Roll の写真を読み込めませんでした。")} ${escapeHtml(reason)}</p>`;
+      window.MagState?.bindAction(grid, 'retry', () => loadReaderRollForFilm(filmKey, options));
+      return;
+    }
     const rangeApi = rollSource.rangeApi;
     const rollTotal = rollSource.rollTotal;
     const currentNumber = rollSource.currentNumber;
@@ -969,7 +988,12 @@
 
     async function renderContributorView(personKey) {
       if (!contributorView) return;
-      const personEntries = await submissionsForPerson(personKey);
+      let personEntries;
+      try { personEntries = await submissionsForPerson(personKey); }
+      catch (err) {
+        window.notify?.(fpT(`작가의 사진을 불러오지 못했어요: ${err?.message || err}`, `Couldn't load this photographer's photos: ${err?.message || err}`, `この撮影者の写真を読み込めませんでした: ${err?.message || err}`), 'error');
+        return;
+      }
       if (!personEntries.length) return;
       const first = personEntries[0];
       const label = personLabelOf(first);
@@ -1222,7 +1246,12 @@
   // ════════════════════════════
   async function openCameraModal(input) {
     if (!input) return false;
-    const submissions = await getApprovedSubmissions();
+    let submissions;
+    try { submissions = await getApprovedSubmissions(); }
+    catch (err) {
+      window.notify?.(fpT(`사진 목록을 불러오지 못했어요: ${err?.message || err}`, `Couldn't load photos: ${err?.message || err}`, `写真の一覧を読み込めませんでした: ${err?.message || err}`), 'error');
+      return false;
+    }
     if (!Array.isArray(submissions) || !submissions.length) {
       console.warn('[openCameraModal] 승인된 제출이 없어 카메라 모달을 열 수 없음');
       return false;
@@ -1419,7 +1448,12 @@
 
     let targetFilmKey = currentFilmKey;
     if (!targetFilmKey) {
-      const submissions = await getApprovedSubmissions();
+      let submissions;
+      try { submissions = await getApprovedSubmissions(); }
+      catch (err) {
+        window.notify?.(fpT(`사진 목록을 불러오지 못했어요: ${err?.message || err}`, `Couldn't load photos: ${err?.message || err}`, `写真の一覧を読み込めませんでした: ${err?.message || err}`), 'error');
+        return;
+      }
       const first = submissions.find(sub => contributorKeyOfSubmission(sub) === key);
       if (first) targetFilmKey = resolveLightboxFilmSlug(first.film);
     }
@@ -1849,9 +1883,11 @@
       applyPhotosFilter({ reshuffle: true });
     } catch (err) {
       console.warn('[films] photos view 로드 실패:', err);
+      // 실제 오류 문구를 함께 보여 준다(캡처 한 장으로 원인이 잡히게).
+      const reason = String(err?.message || err || '');
       libraryPhotosGrid.innerHTML = window.MagState
-        ? window.MagState.error({ title: fpT('사진을 불러오지 못했어요.', "Couldn't load photos.", '写真を読み込めませんでした。') })
-        : `<p class="library-photos-empty">${fpT('사진을 불러오지 못했어요.', "Couldn't load photos.", '写真を読み込めませんでした。')}</p>`;
+        ? window.MagState.error({ title: fpT('사진을 불러오지 못했어요.', "Couldn't load photos.", '写真を読み込めませんでした。'), desc: reason || undefined })
+        : `<p class="library-photos-empty">${fpT('사진을 불러오지 못했어요.', "Couldn't load photos.", '写真を読み込めませんでした。')} ${escapeHtml(reason)}</p>`;
       window.MagState?.bindAction(libraryPhotosGrid, 'retry', () => ensurePhotosShuffled({ force: true }));
       if (libraryPhotosCount) libraryPhotosCount.textContent = '';
     }

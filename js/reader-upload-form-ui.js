@@ -85,16 +85,18 @@
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
         s.src = '/js/photo-editor.js?v=20261019-photo-straighten';
-        s.onload = resolve;
-        s.onerror = () => reject(new Error('load failed'));
+        // 실패 원인(어느 주소가, 어떻게)을 오류에 담아 화면에 보인다.
+        s.onload = () => (window.PhotoEditor ? resolve() : reject(new Error(`${s.src} 를 불렀지만 PhotoEditor 가 없어요`)));
+        s.onerror = () => reject(new Error(`스크립트 로드 실패: ${s.src}`));
         document.head.appendChild(s);
       });
     }
     async function openEditor(file) {
       try {
         await loadEditor();
-      } catch (_) {
-        showError(tr('편집 도구를 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the editor. Please refresh and try again.', '編集ツールを読み込めませんでした。再読み込みしてからもう一度お試しください。'));
+      } catch (err) {
+        console.error('[upload] photo-editor', err);
+        showError(tr('편집 도구를 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.', 'Could not load the editor. Please refresh and try again.', '編集ツールを読み込めませんでした。再読み込みしてからもう一度お試しください。') + ` (${err?.message || err})`);
         return;
       }
       const edited = await window.PhotoEditor.open(file);

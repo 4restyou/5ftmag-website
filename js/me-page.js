@@ -1285,7 +1285,7 @@ async function loadMyBooks() {
   $('myBooksGrid').innerHTML = `<div class="me-empty">${i18n.t('불러오는 중…', 'Loading…', '読み込み中…')}</div>`;
   let owned, list;
   try {
-    [owned, list] = await Promise.all([db().ebooks.myEntitlementIds(), db().ebooks.listPublished({ strict: true })]);
+    [owned, list] = await Promise.all([db().ebooks.myEntitlementIds({ strict: true }), db().ebooks.listPublished({ strict: true })]);
   } catch (e) {
     console.warn('[me] 내 책 불러오기 실패', e);
     const why = escapeHtml(e?.message || e?.error?.message || String(e || ''));
@@ -1333,13 +1333,14 @@ function renderMyBooks() {
   refreshNotifsBadge();
   refreshMessagesBadge();
   // URL hash 로 초기 탭 결정
-  const validSections = ['photos', 'market', 'notifs', 'messages', 'my-comments', 'my-proposals', 'my-books', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
-  const hashSection = (location.hash || '').replace(/^#/, '');
+  const validSections = ['photos', 'profile', 'market', 'notifs', 'messages', 'my-comments', 'my-proposals', 'my-books', 'fav-photos', 'fav-films', 'fav-webzine', 'fav-contributors', 'fav-articles'];
+  // 기사 끝 「편집부에 이야기하기」에서 왔으면 기사 제목을 입력창에 적어 둔다(?compose=제목#messages).
+  // 로그아웃 상태에서 로그인하고 돌아오면 복귀 주소에 해시가 빠지므로, compose 가 있으면 해시 없이도 메시지 탭을 연다.
+  const composeAbout = new URLSearchParams(location.search).get('compose');
+  const hashSection = (location.hash || '').replace(/^#/, '') || (composeAbout ? 'messages' : '');
   if (validSections.includes(hashSection) && hashSection !== 'photos') {
     switchSection(hashSection);
   }
-  // 기사 끝 「편집부에 이야기하기」에서 왔으면 기사 제목을 입력창에 적어 둔다(?compose=제목#messages).
-  const composeAbout = new URLSearchParams(location.search).get('compose');
   if (hashSection === 'messages' && composeAbout && $('messageBody') && !$('messageBody').value) {
     $('messageBody').value = i18n.t(`〈${composeAbout}〉 관련: `, `About "${composeAbout}": `, `「${composeAbout}」について: `);
     $('messageBody').dispatchEvent(new Event('input'));

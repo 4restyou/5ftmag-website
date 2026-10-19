@@ -2314,3 +2314,73 @@ test('관리 통계 상위 카메라는 띄어쓰기와 별칭 차이를 병합�
   await expect(page.locator('#topCameras')).toContainText('79');
   await expect(page.locator('#topCameras')).not.toContainText('Pentax17');
 });
+
+test('알림 패널은 같은 사람의 auth 변화로 다시 만들지 않고, 열면 포커스를 옮기고 Esc 로 종에 돌려준다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.addInitScript(() => {
+    window.__auth = { cbs: [], subscribed: [], unsubscribed: [] };
+    window.MagDB = {
+      isReady: () => true,
+      auth: {
+        getSession: async () => ({ user: { id: 'user-1' } }),
+        onChange: (cb) => { window.__auth.cbs.push(cb); return { unsubscribe() {} }; },
+      },
+      profiles: { getMine: async () => ({ is_editor: false }) },
+      notifications: { unreadCount: async () => 0, list: async () => [], markAllRead: async () => ({ error: null }) },
+      realtime: {
+        subscribeNotifications: async () => { const ch = { id: window.__auth.subscribed.length }; window.__auth.subscribed.push(ch.id); return ch; },
+        unsubscribe: (ch) => { window.__auth.unsubscribed.push(ch.id); },
+      },
+      favorites: { idsForType: async () => new Set(), toggle: async () => ({ error: null }) },
+    };
+  });
+  await page.goto('/');
+  await expect(page.locator('#notifBell')).toBeVisible({ timeout: 5000 });
+  await expect.poll(() => page.evaluate(() => window.__auth.subscribed.length)).toBe(1);
+  // 토큰 갱신처럼 같은 사람의 auth 변화가 여러 번 와도 패널·리스너·채널을 새로 만들지 않는다.
+  await page.evaluate(() => { for (let i = 0; i < 3; i++) window.__auth.cbs.forEach(cb => cb('TOKEN_REFRESHED', { user: { id: 'user-1' } })); });
+  await page.locator('#notifBell').click();
+  await expect(page.locator('#notifPanel')).toBeVisible();
+  await expect(page.locator('#notifAllRead')).toBeFocused();
+  expect(await page.evaluate(() => window.__auth.subscribed.length)).toBe(1);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#notifPanel')).toBeHidden();
+  await expect(page.locator('#notifBell')).toBeFocused();
+  // 로그아웃하면 채널을 닫고 손님 패널로 바꾼다.
+  await page.evaluate(() => window.__auth.cbs.forEach(cb => cb('SIGNED_OUT', null)));
+  expect(await page.evaluate(() => window.__auth.unsubscribed)).toEqual([0]);
+  await page.locator('#notifBell').click();
+  await expect(page.locator('#notifPanel .notif-panel-guest')).toBeVisible();
+  await expect(page.locator('#notifPanel [data-action="auth-login"]')).toBeFocused();
+  await expect(page.locator('#notifPanel')).toHaveCount(1);
+});
+
+test('필름 사진 보기는 DB 실패를 0컷이 아니라 실제 오류와 다시 시도로 보여 준다', async ({ page }) => {
+  await page.route('**/js/db-client.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route('**/js/reader-upload-loader.js*', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route('https://cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route('https://*.supabase.co/**', route => route.abort());
+  await page.route('**/data/readers.json*', route => route.fulfill({ json: [] }));
+  await page.addInitScript(() => {
+    window.__fail = true;
+    window.MagDB = {
+      isReady: () => true,
+      auth: { getSession: async () => null, onChange: () => {} },
+      favorites: { idsForType: async () => new Set() },
+      films: { listAsObject: async () => ({ 'test-0': { tier: 'library', brand: 'Test', name: 'Film 0', displayName: 'Film 0', type: 'Color Negative', iso: 100, format: '35mm', aliases: [], photos: [] } }) },
+      announcements: { current: async () => ({ data: null }) },
+    };
+    window.fetchApprovedSubmissions = async () => {
+      if (window.__fail) throw new Error('permission denied for view reader_submissions_approved');
+      return [{ id: 'p1', film: 'Film 0', author: 'Tester', image: '/img/filmstrip-frame.svg' }];
+    };
+  });
+  await page.goto('/films.html?view=photos');
+  const grid = page.locator('#libraryPhotosGrid');
+  await expect(grid.locator('.mag-state--error')).toContainText('permission denied for view reader_submissions_approved', { timeout: 8000 });
+  await expect(page.locator('#libraryPhotosCount')).not.toHaveText('0컷');
+  await page.evaluate(() => { window.__fail = false; });
+  await grid.locator('[data-state-action="retry"]').click();
+  await expect(grid.locator('.library-photo-card')).toHaveCount(1);
+});

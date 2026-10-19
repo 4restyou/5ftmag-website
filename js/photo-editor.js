@@ -381,9 +381,15 @@
           const out = document.createElement('canvas');
           out.width = Math.max(1, Math.round(sw * scale));
           out.height = Math.max(1, Math.round(sh * scale));
+          // 비율이 고정이면 짧은 변을 긴 변/비율로 다시 맞춘다. 가로·세로를 따로 반올림하면 3:2 가 1px 어긋났다.
+          const r = currentRatio();
+          if (r) {
+            if (out.width >= out.height) out.height = Math.max(1, Math.round(out.width / r));
+            else out.width = Math.max(1, Math.round(out.height * r));
+          }
           const ctx = out.getContext('2d');
           ctx.imageSmoothingQuality = 'high';
-          ctx.scale(scale, scale);
+          ctx.scale(out.width / sw, out.height / sh);
           ctx.translate(-sx, -sy);
           drawScene(ctx, bmp, state, rw, rh);
           const blob = await new Promise((res) => out.toBlob(res, 'image/jpeg', 0.95));
@@ -413,6 +419,11 @@
           state.flip = !state.flip;
           flipBtn.setAttribute('aria-pressed', String(state.flip));
           relayout(true);
+          // 사진이 좌우로 뒤집혔으니 자르기 틀도 따라 뒤집는다(같은 부분을 계속 가리키게).
+          // 기울기가 있으면 뒤집힌 자리가 사진 밖에 걸칠 수 있어 안으로 줄인다.
+          state.crop = { ...state.crop, x: state.view.cw - state.crop.x - state.crop.w };
+          shrinkToFit();
+          paintCrop();
         } else if (act === 'orient') {
           state.portrait = !state.portrait;
           orientBtn.setAttribute('aria-pressed', String(state.portrait));

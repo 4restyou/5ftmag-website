@@ -556,7 +556,9 @@ function bindRowHandlers() {
 }
 
 async function reload() {
-  await buildCameraIndex();
+  // listApproved 는 조회 실패를 던진다. 일부만 읽힌 목록으로 그리면 카메라가 빠져 보이므로 오류를 그대로 알린다.
+  try { await buildCameraIndex(); }
+  catch (e) { alert('승인된 사진 목록을 불러오지 못했어요: ' + (e?.message || e)); return; }
   render();
 }
 
