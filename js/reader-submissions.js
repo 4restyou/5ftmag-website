@@ -214,7 +214,8 @@
       if (t.dataset && t.dataset.action === 'rs-close') closeModal();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && wrap.classList.contains('open')) closeModal();
+      // 사진 편집 창 같은 대화창이 위에 떠 있으면 그 창만 닫히게 둔다(투고 창까지 닫혀 입력이 사라졌다)
+      if (e.key === 'Escape' && wrap.classList.contains('open') && !document.querySelector('dialog[open]')) closeModal();
     });
   }
 

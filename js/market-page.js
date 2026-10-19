@@ -604,7 +604,7 @@ async function openForm(existing) {
 function closeForm() {
   clearMarketUploadStatus();
   // 신규 추가 시 생성한 blob URL 정리
-  for (const p of STATE.formPhotos) {
+  for (const p of STATE.formPhotos.filter(Boolean)) {
     if (p.blobUrl) URL.revokeObjectURL(p.blobUrl);
   }
   STATE.formPhotos = [];
@@ -811,6 +811,8 @@ function renderPhotoSlots() {
         if (blob.size > MAX_UPLOAD_BYTES) throw new Error(i18n.t('파일이 너무 큽니다 (5MB 이하).', 'File is too large (5MB max).', 'ファイルが大きすぎます（5MBまで）。'));
         const blobUrl = URL.createObjectURL(blob);
         STATE.formPhotos[Number(el.dataset.i)] = { blob, blobUrl, previewUrl: blobUrl, originalBytes: file.size };
+        // 뒤 칸에 먼저 넣으면 배열에 빈자리가 생겨 저장이 TypeError 로 멈췄다. 앞으로 당겨 채운다
+        STATE.formPhotos = STATE.formPhotos.filter(Boolean);
         setMarketUploadStatus('done', i18n.t('사진 준비 완료', 'Photo ready', '写真の準備ができました'), i18n.t('계속해서 매물 정보를 입력해 주세요.', 'Go ahead and fill in the details.', '続けて出品情報を入力してください。'));
         renderPhotoSlots();
       } catch (err) {
@@ -969,6 +971,7 @@ async function onSubmit(e) {
     if (!user) throw new Error(i18n.t('로그인이 만료되었어요. 다시 로그인한 뒤 저장해 주세요.', 'Your login has expired. Log in again and save.', 'ログインの有効期限が切れました。もう一度ログインしてから保存してください。'));
     const finalPaths = [];
     const uploadedNew = [];
+    STATE.formPhotos = STATE.formPhotos.filter(Boolean);
     for (const p of STATE.formPhotos) {
       if (p.existingPath) { finalPaths.push(p.existingPath); continue; }
       const totalNew = STATE.formPhotos.filter(x => !x.existingPath).length;

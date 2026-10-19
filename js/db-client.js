@@ -671,7 +671,7 @@
       const uid = await userId();
       if (!uid) return { error: { message: 'login required', code: 'AUTH_REQUIRED' } };
       // 본인 row 만 매칭 — RLS 가 한 번 더 가드, trigger 가 핵심 컬럼 보호
-      const result = await c.from('reader_submissions').update(patch).eq('id', id).eq('user_id', uid).select('id');
+      const result = await c.from('reader_submissions').update(patch).eq('id', id).eq('user_id', uid).select('id, status');
       if (!result.error && !result.data?.some(row => row.id === id)) {
         return { ...result, error: { message: '사진 수정 권한이 없거나 제출이 삭제되었어요.', code: 'RLS_DENIED' } };
       }
@@ -690,6 +690,11 @@
 
   // ─── 편집부 검토 — RLS 가 권한 검증 ───
   const review = {
+    // 같은 사진 파일(storage_path)을 쓰는 투고 (편집부 — RLS "editors read all")
+    async byStoragePath(path) {
+      const c = client(); if (!c) return { data: null, error: { message: 'unavailable' } };
+      return c.from('reader_submissions').select('id').eq('storage_path', path).limit(5);
+    },
     async patch(id, patch) {
       const c = client(); if (!c) return { error: { message: 'unavailable', code: 'UNAVAILABLE' } };
       return c.from('reader_submissions').update(patch).eq('id', id);
