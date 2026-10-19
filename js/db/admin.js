@@ -138,6 +138,20 @@
         if (error) { console.warn('[analytics.dwellByPath]', error.message); return []; }
         return data || [];
       },
+      // 기사별 조회·언어별 조회·평균 체류·읽은 깊이 도달 표본 (slug 단위)
+      async storyPerformance(from = null, to = null) {
+        const c = client(); if (!c) return [];
+        const { data, error } = await c.rpc('admin_story_performance', { p_from: from, p_to: to });
+        if (error) { console.warn('[analytics.storyPerformance]', error.message); return []; }
+        return data || [];
+      },
+      // 한국 시간 요일(0=일)·시간별 조회 수
+      async heatmap(from = null, to = null) {
+        const c = client(); if (!c) return [];
+        const { data, error } = await c.rpc('admin_analytics_heatmap', { p_from: from, p_to: to });
+        if (error) { console.warn('[analytics.heatmap]', error.message); return []; }
+        return data || [];
+      },
       async sessionStats(from = null, to = null) {
         const c = client(); if (!c) return null;
         const { data, error } = await c.rpc('admin_analytics_session_stats', { p_from: from, p_to: to });

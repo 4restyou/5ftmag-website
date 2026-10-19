@@ -133,6 +133,36 @@
     .stat-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
     .stat-bar > span { display: block; height: 100%; background: var(--text); }
 
+    /* 기사별 성과 — 열이 많아 폰에서는 표만 가로로 민다 */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; padding: 0 4px; }
+    .story-perf { min-width: 760px; }
+    .story-perf th, .story-perf td.num { white-space: nowrap; }
+    .story-perf .sort-btn { font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+    .story-perf .sort-btn:hover, .story-perf th[aria-sort] .sort-btn { color: var(--text); }
+    .story-perf .sort-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+    .story-perf .title-cell { max-width: 300px; }
+    .story-perf .title-cell a { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.45; border-bottom: none; }
+    .story-perf .title-cell a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .lang-bar { display: flex; width: 84px; height: 6px; border-radius: 3px; overflow: hidden; background: var(--bg); }
+    .lang-bar span { display: block; height: 100%; background: var(--text); }
+    .lang-bar .en { opacity: 0.5; }
+    .lang-bar .ja { opacity: 0.22; }
+    .lang-txt, .sample-n { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+    .lang-txt { display: block; margin-top: 4px; }
+    .sample-n { margin-left: 4px; }
+
+    /* 요일·시간대 히트맵 */
+    .heat-peak { font-size: 13px; font-weight: var(--fw-heading); margin: 0 0 14px; }
+    .heat-grid { display: grid; grid-template-columns: 22px repeat(24, minmax(0, 1fr)); gap: 2px; }
+    .heat-day, .heat-hour { font-size: 10px; font-weight: var(--fw-heading); color: var(--text-muted); line-height: 1; }
+    .heat-day { display: flex; align-items: center; }
+    .heat-hour { text-align: left; padding-bottom: 4px; white-space: nowrap; overflow: visible; }
+    .heat-cell { height: 18px; border-radius: 2px; cursor: pointer;
+      background: color-mix(in srgb, var(--text) calc(var(--a, 0) * 100%), var(--bg)); }
+    .heat-cell.is-on { outline: 2px solid var(--text); outline-offset: 1px; }
+    .heat-readout { font-size: 12px; color: var(--text-muted); margin: 12px 0 0; min-height: 1.5em; font-variant-numeric: tabular-nums; }
+    @media (max-width: 560px) { .heat-cell { height: 14px; } .heat-grid { gap: 1px; } }
+
     .empty-state { text-align: center; padding: 40px 24px; color: var(--text-muted); font-size: 13px; }
     .gate { max-width: 560px; margin: 80px auto; padding: 40px 24px; text-align: center; }
     .gate h2 { font-size: 22px; font-weight: var(--fw-heading); margin: 0 0 12px; }
@@ -318,6 +348,39 @@
     <div class="chart-wrap">
       <svg class="chart-svg" id="chart" viewBox="0 0 800 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
       <div class="chart-tooltip" id="chartTip"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="heatmapPanel">
+    <div class="panel-head">
+      <h2 class="panel-title">요일·시간대 <span class="panel-sub" style="margin-left:6px">한국 시간 기준</span></h2>
+      <span class="panel-sub" id="heatRangeLabel"></span>
+    </div>
+    <p class="heat-peak" id="heatPeak">불러오는 중…</p>
+    <div class="heat-grid" id="heatGrid" role="img" aria-label="요일·시간대별 조회 수"></div>
+    <p class="heat-readout" id="heatReadout" aria-live="polite">칸에 마우스를 올리거나 누르면 조회 수가 나옵니다.</p>
+  </div>
+
+  <div class="panel" id="storyPerfPanel">
+    <div class="panel-head">
+      <h2 class="panel-title">기사별 성과 <span class="panel-sub" style="margin-left:6px">읽은 깊이는 표본 5건 이상부터</span></h2>
+      <span class="panel-sub" id="storyPerfRangeLabel"></span>
+    </div>
+    <div class="table-scroll">
+      <table class="stat-table story-perf">
+        <thead>
+          <tr>
+            <th data-key="title"><button type="button" class="sort-btn">기사</button></th>
+            <th class="num" data-key="views"><button type="button" class="sort-btn">조회</button></th>
+            <th class="num" data-key="sessions"><button type="button" class="sort-btn">본 사람</button></th>
+            <th data-key="lang"><button type="button" class="sort-btn" title="영·일문판 비율 순">언어 한/영/일</button></th>
+            <th class="num" data-key="dwell"><button type="button" class="sort-btn">평균 체류</button></th>
+            <th class="num" data-key="full"><button type="button" class="sort-btn">끝까지 읽음</button></th>
+            <th class="num" data-key="half"><button type="button" class="sort-btn">절반 이상</button></th>
+          </tr>
+        </thead>
+        <tbody id="storyPerf"><tr><td colspan="7" class="empty-state">불러오는 중…</td></tr></tbody>
+      </table>
     </div>
   </div>
 
@@ -523,15 +586,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117/dist/umd/supabase.min.js" defer></script>
 <script src="../js/camera-brands.js?v=20260611-keyunify" defer></script>
-<script src="../js/db/admin.js?v=20261018-editor-msg" defer></script>
+<script src="../js/db/admin.js?v=20261019-story-stats" defer></script>
 <script src="../js/db/commerce.js?v=20261019-bugs-batch2" defer></script>
   <script src="../js/db-client.js?v=20261019-bugs-batch2" defer></script>
 <script src="../js/util.js?v=20261019-perf-a11y" defer></script>
-  <script src="../js/site-telemetry.js?v=20261002-product-audit" defer></script>
+  <script src="../js/site-telemetry.js?v=20261019-story-stats" defer></script>
   <script src="../js/site-pwa.js?v=20261002-f2" defer></script>
   <script src="../js/site-common.js?v=20261019-perf-a11y" defer></script>
 <script src="../js/admin-guard.js?v=20260803-guard"></script>
-<script src="../js/admin-analytics-page.js?v=20261002-product-audit" defer></script>
+<script src="../js/admin-analytics-page.js?v=20261019-story-stats2" defer></script>
 
 </body>
 </html>
