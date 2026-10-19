@@ -1259,8 +1259,9 @@ async function reload() {
     getPendingReportCount(),
     (db().ebooks && db().ebooks.listAll) ? db().ebooks.listAll() : Promise.resolve([]),
     (db().ebooks && db().ebooks.salesByProduct) ? db().ebooks.salesByProduct() : Promise.resolve({}),
-    db().analytics.storyPerformance(f, t),
-    db().analytics.heatmap(f, t),
+    // 새 패널은 실패해도 다른 통계를 막지 않는다
+    db().analytics.storyPerformance ? db().analytics.storyPerformance(f, t).catch(() => []) : Promise.resolve([]),
+    db().analytics.heatmap ? db().analytics.heatmap(f, t).catch(() => []) : Promise.resolve([]),
   ]);
 
   await loadCameraOverrides();
