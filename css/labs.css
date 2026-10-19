@@ -550,6 +550,11 @@ html.labs-modal-open, html.labs-modal-open body { overflow: hidden; }
   html.labs-view-map .labs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* 목록을 불러오는 동안 자리를 한 화면 높이로 잡아 둔다. 자리가 작으면 아래의
+   지역 색인·푸터가 첫 화면에 보였다가 목록이 그려질 때 밀려 내려갔다(CLS 0.5). */
+.labs-list > .labs-empty:only-child,
+.labs-list > .mag-state--loading { min-height: 100vh; }
+
 /* ── 지역별 현상소 목록 (정적 인덱스) ──
    scripts/build-lab-pages.mjs 가 채우는 블록. 목록을 JS 로만 그려서
    크롤러가 읽을 본문도, 지역 페이지로 갈 링크도 없었다. */

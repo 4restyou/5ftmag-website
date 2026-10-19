@@ -22,6 +22,9 @@ html.is-mobile-home .split-layout { display: none !important; }
 
 .mh-root { display: none; }
 html.is-mobile-home .mh-root { display: block; padding-bottom: 80px; background: var(--bg); }
+/* 데이터가 오기 전 본문이 비면 푸터가 첫 화면에 올라왔다가 밀려 내려갔다(CLS 0.47).
+   채워지기 전까지 한 화면 높이를 잡아 둔다. */
+html.is-mobile-home #mhBody:empty { min-height: 100vh; }
 
 /* 상단 검색·필터 */
 .mh-controls { position: sticky; top: var(--header-h, 60px); z-index: 30; background: var(--bg); padding: 10px var(--mh-pad); border-bottom: 1px solid var(--border); }
