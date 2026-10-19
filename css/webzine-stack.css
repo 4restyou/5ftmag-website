@@ -4,7 +4,7 @@
    이전 코버플로우 책장은 css/webzine.css + js/webzine-page.js (books-classic.html) 에 그대로 있다. */
 #themeBtn { display: none; }   /* 다크 고정이라 테마 버튼을 아예 뺀다 (빈 칸 없이) */
 html {
-  --wz-mark: url("../img/symbol-w.svg");
+  --wz-mark: url("../img/symbol-w-opt.svg");
   --wz-base: #16121a;
   --wz-ink: #fff;
   --wz-ink-2: rgba(255, 255, 255, .74);

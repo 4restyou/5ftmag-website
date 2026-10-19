@@ -4,7 +4,7 @@
 /* 다크 강제라 토글이 무의미하지만, 슬롯은 유지해서 다른 페이지와 아이콘 위치 점프 방지 */
 #themeBtn { display: none; }   /* 다크 고정이라 테마 버튼을 아예 뺀다 */
 html {
-  --wz-mark: url("../img/symbol-w.svg");
+  --wz-mark: url("../img/symbol-w-opt.svg");
   --paper: url("../img/textures/paper-gray.webp");
   --wz-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --wz-bg: radial-gradient(120% 70% at 50% 0%, #211c25 0%, #151219 48%, #100e13 100%) fixed;
