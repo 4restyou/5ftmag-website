@@ -338,9 +338,11 @@ async function refreshHolders(row) {
     $('entHolders').innerHTML = ents.map(e => {
       const state = e.external_status ? ` · ${e.external_status}` : '';
       const checked = e.last_verified_at ? ` · 확인 ${new Date(e.last_verified_at).toLocaleDateString('ko-KR')}` : '';
-      const meta = escapeHtml(`${e.source}${state}${checked}${e.order_ref ? ' · ' + e.order_ref : ''} · ${(e.user_id || '').slice(0, 8)}`);
+      // 탈퇴한 회원의 구매 기록은 5년 보존(user_id 만 빈다). 회수할 대상이 없어 버튼을 두지 않는다
+      const meta = escapeHtml(`${e.source}${state}${checked}${e.order_ref ? ' · ' + e.order_ref : ''} · ${e.user_id ? e.user_id.slice(0, 8) : '탈퇴한 회원'}`);
       const date = e.created_at ? new Date(e.created_at).toLocaleDateString('ko-KR') : '';
-      return `<div class="ent-row"><span class="ent-name">${escapeHtml(date)}</span><span class="ent-meta">${meta}</span><button type="button" class="ent-act revoke" data-revoke="${escapeAttr(e.user_id)}">회수</button></div>`;
+      const act = e.user_id ? `<button type="button" class="ent-act revoke" data-revoke="${escapeAttr(e.user_id)}">회수</button>` : '';
+      return `<div class="ent-row"><span class="ent-name">${escapeHtml(date)}</span><span class="ent-meta">${meta}</span>${act}</div>`;
     }).join('');
   }
   if (!revoked.length) {
@@ -349,7 +351,7 @@ async function refreshHolders(row) {
     $('entRevoked').innerHTML = revoked.map(e => {
       const date = e.revoked_at ? new Date(e.revoked_at).toLocaleDateString('ko-KR') : '';
       const reason = e.revoke_reason || e.external_status || '회수';
-      const meta = escapeHtml(`${e.source} · ${reason}${e.order_ref ? ' · ' + e.order_ref : ''} · ${(e.user_id || '').slice(0, 8)}`);
+      const meta = escapeHtml(`${e.source} · ${reason}${e.order_ref ? ' · ' + e.order_ref : ''} · ${e.user_id ? e.user_id.slice(0, 8) : '탈퇴한 회원'}`);
       return `<div class="ent-row"><span class="ent-name">${escapeHtml(date)}</span><span class="ent-meta">${meta}</span></div>`;
     }).join('');
   }

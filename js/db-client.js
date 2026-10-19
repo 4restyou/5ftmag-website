@@ -1706,6 +1706,39 @@
     ? window.MagDBCommerce.create({ client, session, url: URL_, webzine })
     : { shop: {}, ebooks: {} };
 
+  // 회원 스스로 탈퇴. 엣지 함수 account-delete 가 본인 확인 뒤 회원 데이터와 auth 사용자를 지운다.
+  // confirm 은 언어와 무관하게 '탈퇴' 를 보낸다(함수가 이 값만 받는다).
+  // 성공: { ok: true }. 실패: { error: 실제 메시지, code, step } — 화면에 그대로 보여 준다.
+  const account = {
+    async deleteMe() {
+      const c = client(); if (!c) return { error: 'unavailable', code: 'UNAVAILABLE' };
+      const current = await session();
+      if (!current?.access_token) return { error: 'login required', code: 'login_required' };
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60_000);
+      let res, data;
+      try {
+        res = await fetch(`${URL_}/functions/v1/account-delete`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', Authorization: `Bearer ${current.access_token}` },
+          body: JSON.stringify({ confirm: '탈퇴' }),
+          signal: controller.signal,
+        });
+        data = await res.json().catch(() => null);
+      } catch (e) {
+        return { error: e?.name === 'AbortError' ? 'timeout' : (e?.message || 'network'), code: 'network' };
+      } finally {
+        clearTimeout(timer);
+      }
+      if (!res.ok || !data?.ok) {
+        return { error: data?.error || `HTTP ${res.status}`, code: data?.code || `http_${res.status}`, step: data?.step || '', status: res.status };
+      }
+      // 계정이 이미 없으니 서버 로그아웃 대신 이 브라우저의 세션만 지운다
+      try { await c.auth.signOut({ scope: 'local' }); } catch (_) {}
+      return { ok: true };
+    },
+  };
+
   // 기사 조회 수 — 편집부만 결과를 받는다(RPC 안에서 is_editor 검사). 기사 날짜 옆 눈 아이콘에 쓴다.
   const storyStats = {
     async views(slug) {
@@ -1740,6 +1773,6 @@
   window.MagDB = {
     isReady() { return !!_client; },
     storageBaseUrl: `/i/reader/`,
-    auth, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages, shop, ebooks, storyStats,
+    auth, account, profiles, comments, commentFilterTerms, likes, submissions, review, market, favorites, notifications, push, personalization, cameraOverrides, analytics, realtime, films, filmProposals, labs, repairs, newsletter, webzine, announcements, articles, messages, shop, ebooks, storyStats,
   };
 })();

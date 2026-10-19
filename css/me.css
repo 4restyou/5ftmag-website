@@ -473,3 +473,26 @@ body { background: var(--bg); color: var(--text); }
 .me-card .rs-camera-hint { margin-top: 6px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
 .me-card .rs-camera-hint-label { font-weight: var(--fw-heading); margin-right: 4px; }
 .me-card .rs-cam-hint-brand { font-weight: var(--fw-heading); text-transform: uppercase; }
+
+/* 회원 탈퇴: 프로필 탭 맨 아래. 확인 창(.me-leave-modal)은 js/me-page.js 가 그린다.
+   읽기 오버레이(2200)·헤더보다 위에 뜬다. */
+.me-leave { max-width: 1100px; margin: 8px auto 40px; padding: 24px; }
+.me-leave > * { max-width: 520px; }
+.me-leave-title { font-size: 15px; font-weight: var(--fw-heading); margin: 0 0 6px; padding-top: 24px; border-top: 1px solid var(--border); }
+.me-leave-desc { font-size: 13px; line-height: 1.6; color: var(--text-muted); margin: 0 0 12px; }
+.me-leave-modal { position: fixed; inset: 0; z-index: 2300; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.me-leave-modal[hidden] { display: none; }
+.me-leave-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); }
+.me-leave-card { position: relative; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; background: var(--bg); color: var(--text); border-radius: 8px; padding: 28px 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
+.me-leave-card-title { font-size: 20px; font-weight: var(--fw-heading); margin: 0 0 8px; }
+.me-leave-card-title:focus { outline: none; }
+.me-leave-lead { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin: 0 0 16px; }
+.me-leave-sub { font-size: 13px; font-weight: var(--fw-heading); margin: 16px 0 6px; }
+.me-leave-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.65; }
+.me-leave-confirm { display: flex; flex-direction: column; gap: 6px; margin-top: 20px; font-size: 13px; }
+.me-leave-confirm input { font: inherit; font-size: 15px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--btn-radius); background: var(--bg); color: var(--text); }
+.me-leave-status { min-height: 1.4em; margin: 12px 0 0; font-size: 13px; line-height: 1.55; color: var(--text-muted); }
+.me-leave-status.is-error { color: var(--color-danger-text); }
+.me-leave-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.me-btn-leave { background: var(--color-danger-bg); color: var(--color-danger-text); border-color: var(--color-danger-border); }
+.me-btn-leave:disabled { cursor: not-allowed; }

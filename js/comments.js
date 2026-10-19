@@ -119,8 +119,10 @@
     const isEditor = STATE.profile?.is_editor;
     const canDelete = isMine || isEditor;
     const liked = myLikes.has(c.id);
-    const name = c.display_name || tr('익명', 'Anonymous', '匿名');
-    const avatar = c.avatar_url || defaultAvatar(name);
+    // 작성자가 탈퇴하면 user_id 가 비고 이름·아바타도 나가지 않는다(댓글 본문은 남긴다)
+    const leftMember = !c.user_id;
+    const name = leftMember ? tr('탈퇴한 회원', 'Deleted member', '退会した会員') : (c.display_name || tr('익명', 'Anonymous', '匿名'));
+    const avatar = (!leftMember && c.avatar_url) || defaultAvatar(name);
 
     const isDeleted = !!c.deleted_at;
     const bodyHtml = isDeleted
@@ -128,11 +130,11 @@
       : nl2br(c.body);
 
     return `
-      <div class="cm-item${depth > 0 ? ' cm-reply' : ''}" data-comment-id="${c.id}" data-user-id="${c.user_id}">
+      <div class="cm-item${depth > 0 ? ' cm-reply' : ''}" data-comment-id="${c.id}" data-user-id="${c.user_id || ''}">
         <img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" class="cm-avatar" />
         <div class="cm-body">
           <div class="cm-head">
-            <span class="cm-name"${c.is_editor ? '' : ` data-msg-user="${escapeHtml(c.user_id)}"`}>${escapeHtml(name)}</span>
+            <span class="cm-name"${c.is_editor || leftMember ? '' : ` data-msg-user="${escapeHtml(c.user_id)}"`}>${escapeHtml(name)}</span>
             ${c.is_editor ? `<span class="cm-badge-editor">${tr('편집부', 'Editor', '編集部')}</span>` : ''}
             <span class="cm-time">${timeAgo(c.created_at)}${c.updated_at && c.updated_at !== c.created_at && !isDeleted ? tr(' · 수정됨', ' · edited', ' · 編集済み') : ''}</span>
           </div>
