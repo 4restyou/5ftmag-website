@@ -84,7 +84,7 @@
       if (window.PhotoEditor) return Promise.resolve();
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = '/js/photo-editor.js?v=20261019-photo-editor';
+        s.src = '/js/photo-editor.js?v=20261019-photo-straighten';
         s.onload = resolve;
         s.onerror = () => reject(new Error('load failed'));
         document.head.appendChild(s);
