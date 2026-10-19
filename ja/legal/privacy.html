@@ -98,7 +98,7 @@
 
     <h2>3. 個人情報の保管期間</h2>
     <ul>
-      <li><strong>会員アカウント</strong>：退会するまで。会員が本人ページ（/me.html）から写真または出品を取り下げた場合は、直ちに削除する。</li>
+      <li><strong>会員アカウント</strong>：退会するまで。会員が本人ページ（/me.html）から写真または出品を取り下げた場合は、直ちに削除する。退会した場合は、アカウントとともに、投稿した写真、出品、プロフィール（プロフィール写真を含む）、メッセージ、いいね・保存・お気に入り、通知、プッシュ通知の登録を直ちに削除する。ただし、コメントは本文を残し、投稿者を「退会した会員」と表示する（投稿者との紐付けは解除し、名前・プロフィール写真は表示しない）。電子書籍の購入・閲覧権の記録は、電子商取引法に基づき5年間保管するが、氏名・連絡先は削除する。</li>
       <li><strong>承認済みの写真</strong>：会員が自ら削除するまで、または紙媒体のマガジンへの掲載後は当該マガジンの発行終了まで保管する。</li>
       <li><strong>出品</strong>：会員が自ら削除するまで、または運営者が規約違反により削除するまで。</li>
       <li><strong>通報データ</strong>：処理完了後1年間保管する（紛争への対応および再発防止のため）。</li>
@@ -129,7 +129,7 @@
     <ul>
       <li><strong>閲覧</strong>：会員ページ（/me.html）で、本人が投稿した写真、出品、いいね、保存のデータを確認できる</li>
       <li><strong>訂正</strong>：会員ページで、写真のメタデータ、出品情報等を直接修正できる</li>
-      <li><strong>削除</strong>：会員ページで、写真、出品、いいね、保存を個別に削除できる。退会のご依頼は <a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a> までお送りください。</li>
+      <li><strong>削除</strong>：会員ページで、写真、出品、いいね、保存を個別に削除できる。退会は、マイページ（/me.html）→ プロフィール → 退会から本人が行うことができる。ご自身で行うのが難しい場合は、<a href="mailto:4rest_design@naver.com">4rest_design@naver.com</a> までご依頼ください。</li>
       <li><strong>処理の停止・異議</strong>：同じメールアドレスにて処理の停止を求めることができる</li>
     </ul>
 
@@ -220,7 +220,7 @@
 
 <script src="/js/vendor/supabase-js.js?v=2.117.3" defer></script>
 <script src="/js/db/commerce.js?v=20261019-bugs-batch2" defer></script>
-<script src="/js/db-client.js?v=20261019-bugs-batch2" defer></script>
+<script src="/js/db-client.js?v=20261019-account-delete2" defer></script>
 <script src="/js/util.js?v=20261019-perf-a11y" defer></script>
   <script src="/js/site-telemetry.js?v=20261019-read-depth2" defer></script>
   <script src="/js/site-pwa.js?v=20261002-f2" defer></script>

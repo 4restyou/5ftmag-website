@@ -485,7 +485,7 @@ function switchSection(sec) {
   if (sec === 'notifs') markNotifsRead();
   if (sec === 'messages') markMessagesRead();
   // URL hash 동기화
-  try { history.replaceState(null, '', '#' + sec); } catch (_) {}
+  try { history.replaceState(null, '', location.pathname + location.search + '#' + sec); } catch (_) {}
 }
 
 document.querySelectorAll('.me-pagetab').forEach(t => {
@@ -1318,6 +1318,113 @@ function renderMyBooks() {
       </div>`;
   }).join('');
 }
+
+// ═════════════════════════════════════════
+// 회원 탈퇴 (프로필 탭 맨 아래). 확인 창에서 지워지는 것·남는 것을 보여 주고,
+// 확인 낱말을 직접 입력해야 버튼이 켜진다. 서버(account-delete)에는 언어와 무관하게 '탈퇴' 를 보낸다.
+// ═════════════════════════════════════════
+const LEAVE_WORD = i18n.t('탈퇴', 'delete', '退会');
+let leaveModal = null;
+let leaveRelease = null;
+let leaveBusy = false;
+
+function leaveErrorText(res) {
+  if (res.code === 'editor_account') return i18n.t('편집부 계정은 운영자가 직접 처리합니다.', 'Editor accounts are closed by the site operator.', '編集部のアカウントは運営者が直接処理します。');
+  const where = [res.code, res.step].filter(Boolean).join(' · ');
+  return i18n.t('탈퇴하지 못했습니다: ', 'Couldn\'t close your account: ', '退会できませんでした：') + (res.error || 'unknown') + (where ? ` (${where})` : '')
+    + i18n.t(' 다시 시도해도 이미 지운 것은 건너뜁니다. 계속 안 되면 이 화면을 캡처해 편집부에 보내 주세요.', ' Trying again skips what was already removed. If it keeps failing, send a screenshot of this to the editors.', ' 再試行しても、削除済みのものは飛ばします。続く場合は、この画面のキャプチャを編集部にお送りください。');
+}
+
+function buildLeaveModal() {
+  const el = document.createElement('div');
+  el.className = 'me-leave-modal';
+  el.hidden = true;
+  el.innerHTML = `
+    <div class="me-leave-backdrop" data-leave-close></div>
+    <div class="me-leave-card" role="dialog" aria-modal="true" aria-labelledby="leaveTitle" aria-describedby="leaveLead">
+      <h2 class="me-leave-card-title" id="leaveTitle">${i18n.t('회원 탈퇴', 'Close your account', '退会')}</h2>
+      <p class="me-leave-lead" id="leaveLead">${i18n.t('탈퇴하면 되돌릴 수 없습니다. 아래 내용을 확인해 주세요.', 'This can\'t be undone. Please check what happens below.', '退会すると元に戻せません。以下の内容をご確認ください。')}</p>
+      <h3 class="me-leave-sub">${i18n.t('지워지는 것', 'What we delete', '削除されるもの')}</h3>
+      <ul class="me-leave-list">
+        <li>${i18n.t('보낸 독자 사진(공개 중인 사진 포함)', 'Reader photos you sent, including published ones', '投稿した読者写真（公開中のものを含む）')}</li>
+        <li>${i18n.t('장터 매물과 사진', 'Market listings and their photos', '出品とその写真')}</li>
+        <li>${i18n.t('프로필(표시 이름·소개·프로필 사진)', 'Your profile (display name, bio, profile photo)', 'プロフィール（表示名・自己紹介・プロフィール写真）')}</li>
+        <li>${i18n.t('편집부와 주고받은 메시지, 알림, 푸시 알림 구독', 'Messages with the editors, notifications and push subscriptions', '編集部とのメッセージ、通知、プッシュ通知の登録')}</li>
+        <li>${i18n.t('좋아요·스크랩·즐겨찾기, 필름 제안', 'Likes, saved articles, favorites and film suggestions', 'いいね・保存・お気に入り、フィルムの提案')}</li>
+        <li>${i18n.t('로그인 계정. 산 이북도 더는 볼 수 없고, 다시 가입해도 되살릴 수 없습니다.', 'Your sign-in account. Books you bought can no longer be read, even if you sign up again.', 'ログインアカウント。購入した電子書籍も読めなくなり、再登録しても戻りません。')}</li>
+      </ul>
+      <h3 class="me-leave-sub">${i18n.t('남는 것', 'What stays', '残るもの')}</h3>
+      <ul class="me-leave-list">
+        <li>${i18n.t('내가 쓴 댓글. 본문은 남고 작성자는 「탈퇴한 회원」으로 표시됩니다. 지우고 싶은 댓글은 탈퇴 전에 글에서 직접 지워 주세요.', 'Your comments. The text stays and the author is shown as "Deleted member". Delete any comments you want gone on the article before you leave.', '書いたコメント。本文は残り、投稿者は「退会した会員」と表示されます。消したいコメントは退会前に記事のページで削除してください。')}</li>
+        <li>${i18n.t('구매 기록은 법령에 따라 5년간 보관되며 이름·연락처는 지웁니다.', 'Purchase records are kept for 5 years as Korean law requires. Names and contact details are removed.', '購入記録は法令に基づき5年間保管し、氏名・連絡先は削除します。')}</li>
+      </ul>
+      <label class="me-leave-confirm">
+        <span>${i18n.t(`확인을 위해 「${LEAVE_WORD}」를 입력하세요.`, `Type "${LEAVE_WORD}" to confirm.`, `確認のため「${LEAVE_WORD}」と入力してください。`)}</span>
+        <input type="text" id="leaveInput" autocomplete="off" autocapitalize="off" spellcheck="false" />
+      </label>
+      <p class="me-leave-status" id="leaveStatus" role="status" aria-live="polite"></p>
+      <div class="me-leave-actions">
+        <button type="button" class="me-btn me-btn-secondary" data-leave-close>${i18n.t('취소', 'Cancel', 'キャンセル')}</button>
+        <button type="button" class="me-btn me-btn-leave" id="leaveSubmit" disabled>${i18n.t('탈퇴', 'Close account', '退会する')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  const input = el.querySelector('#leaveInput');
+  const submit = el.querySelector('#leaveSubmit');
+  const matches = () => input.value.trim().toLowerCase() === LEAVE_WORD.toLowerCase();
+  input.addEventListener('input', () => { submit.disabled = leaveBusy || !matches(); });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !submit.disabled) submit.click(); });
+  el.addEventListener('click', e => { if (e.target.closest('[data-leave-close]')) closeLeaveModal(); });
+  el.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); closeLeaveModal(); } });
+  submit.addEventListener('click', async () => {
+    if (!matches() || leaveBusy) return;
+    leaveBusy = true;
+    submit.disabled = true;
+    input.disabled = true;
+    const status = el.querySelector('#leaveStatus');
+    status.classList.remove('is-error');
+    status.textContent = i18n.t('탈퇴하는 중…', 'Closing your account…', '退会処理中…');
+    let res;
+    try { res = await db().account.deleteMe(); } catch (e) { res = { error: e?.message || String(e), code: 'client' }; }
+    if (res?.ok) {
+      const home = i18n.url('/');
+      el.querySelector('.me-leave-card').innerHTML = `
+        <h2 class="me-leave-card-title" id="leaveTitle" tabindex="-1">${i18n.t('탈퇴했습니다', 'Your account is closed', '退会しました')}</h2>
+        <p class="me-leave-lead" role="status">${i18n.t('그동안 함께해 주셔서 고맙습니다. 잠시 뒤 홈으로 이동합니다.', 'Thank you for being with us. Taking you to the home page.', 'これまでありがとうございました。まもなくホームへ移動します。')}</p>
+        <div class="me-leave-actions"><a class="me-btn me-btn-primary" href="${escapeAttr(home)}">${i18n.t('홈으로', 'Go home', 'ホームへ')}</a></div>`;
+      el.querySelector('#leaveTitle').focus();
+      setTimeout(() => { location.href = home; }, 2500);
+      return;
+    }
+    leaveBusy = false;
+    input.disabled = false;
+    submit.disabled = !matches();
+    status.classList.add('is-error');
+    status.textContent = leaveErrorText(res || {});
+  });
+  return el;
+}
+
+function openLeaveModal() {
+  if (!leaveModal) leaveModal = buildLeaveModal();
+  const input = leaveModal.querySelector('#leaveInput');
+  input.value = '';
+  leaveModal.querySelector('#leaveSubmit').disabled = true;
+  leaveModal.querySelector('#leaveStatus').textContent = '';
+  leaveModal.hidden = false;
+  document.body.classList.add('modal-open');
+  leaveRelease = window.createFocusTrap ? window.createFocusTrap(leaveModal) : null;
+  setTimeout(() => input.focus(), 0);
+}
+
+function closeLeaveModal() {
+  if (!leaveModal || leaveModal.hidden || leaveBusy) return;
+  leaveModal.hidden = true;
+  document.body.classList.remove('modal-open');
+  if (leaveRelease) { leaveRelease(); leaveRelease = null; }
+}
+
+$('accountLeaveOpen')?.addEventListener('click', openLeaveModal);
 
 (async function main() {
   for (let i = 0; i < 50; i++) {

@@ -6,7 +6,7 @@ Claude Code 가 이 저장소에서 작업할 때 따라야 할 정책. **이 �
 
 - **무엇** — `5ft.mag` (오피트). 필름 사진 매거진 웹사이트. 발행처 4rest, 광주 기반. 기사·필름 카탈로그·현상소(labs)·이북·중고장터(market)·독자 사진 투고를 다룬다.
 - **스택** — 정적 HTML + **vanilla JS (ES 모듈, 프레임워크 없음)** + CSS(`css/tokens.css` 디자인 토큰 기반). 데이터/인증은 **Supabase** (Postgres + RLS + Deno 엣지 함수). 호스팅 **Netlify**. 빌드·검증은 Node 스크립트(`scripts/*.mjs`). 네이버 커머스 연동용 고정 IP **중계 서버**(`relay/`) 별도 운영.
-- **규모(2026-10 기준)** — 기사 74(영·일판 각각 따로), 마이그레이션 138, Supabase 엣지 함수 4(`ebook-page` · `ebook-purchase` · `ebook-redeem` · `send-push`), Netlify 엣지 함수 1(`netlify/edge-functions/market-og.ts`). 숫자는 늘 바뀌므로 판단에 쓸 때는 `ls` 로 다시 센다.
+- **규모(2026-10 기준)** — 기사 74(영·일판 각각 따로), 마이그레이션 138, Supabase 엣지 함수 5(`account-delete` · `ebook-page` · `ebook-purchase` · `ebook-redeem` · `send-push`), Netlify 엣지 함수 1(`netlify/edge-functions/market-og.ts`). 숫자는 늘 바뀌므로 판단에 쓸 때는 `ls` 로 다시 센다.
 - **언어** — 사이트 기본·커밋 메시지·운영자 소통은 **한국어**. 영문판은 `en/` 아래(아래 "영문판" 참고).
 - **의존성** — 런타임 프레임워크·번들러 없음. devDependencies 는 검증/테스트용(`@playwright/test`, `vitest`, `jsdom`, `@electric-sql/pglite` — 마이그레이션을 실제 Postgres 로 시험)뿐. Node 는 `package.json` engines(`^20.19 || ^22.12 || >=24`).
 

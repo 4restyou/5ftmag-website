@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/pretendard.css" />
   <link rel="stylesheet" href="/css/tokens.css?v=20261002-e1">
   <link rel="stylesheet" href="/css/common.css?v=20261019-perf-a11y">
-  <link rel="stylesheet" href="/css/me.css?v=20261008-photo-edit-hints">
+  <link rel="stylesheet" href="/css/me.css?v=20261019-account-delete2">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <link rel="preconnect" href="https://pucpqsfwqouqohwsvmnd.supabase.co" crossorigin>
@@ -116,6 +116,13 @@
         <span class="me-profile-status" id="profileStatus" aria-live="polite"></span>
       </div>
     </form>
+
+    <!-- 회원 탈퇴: 눈에 띄되 실수로 누르지 않게 프로필 탭 맨 아래. 확인 창은 js/me-page.js 가 그린다 -->
+    <div class="me-leave">
+      <h2 class="me-leave-title">Close your account</h2>
+      <p class="me-leave-desc">Deletes your account and the photos, listings and profile you added. This can't be undone.</p>
+      <button type="button" class="me-btn me-btn-secondary" id="accountLeaveOpen" aria-haspopup="dialog">Close account…</button>
+    </div>
   </section>
 
   <!-- ─── 사진 섹션 ─── -->
@@ -227,7 +234,7 @@
 
 <script src="/js/vendor/supabase-js.js?v=2.117.3" defer></script>
 <script src="/js/db/commerce.js?v=20261019-bugs-batch2" defer></script>
-  <script src="/js/db-client.js?v=20261019-bugs-batch2" defer></script>
+  <script src="/js/db-client.js?v=20261019-account-delete2" defer></script>
 <script src="/js/util.js?v=20261019-perf-a11y" defer></script>
   <script src="/js/site-telemetry.js?v=20261019-read-depth2" defer></script>
   <script src="/js/site-pwa.js?v=20261002-f2" defer></script>
@@ -235,7 +242,7 @@
 <script src="/js/film-name-picker.js?v=20261002-f2" defer></script>
 <script src="/js/camera-brands.js?v=20260611-keyunify" defer></script>
 <script src="/js/reader-camera-input.js?v=20261008-camera-potw" defer></script>
-<script src="/js/me-page.js?v=20261019-bugs-batch2" defer></script>
+<script src="/js/me-page.js?v=20261019-account-delete3" defer></script>
 
 </body>
 </html>

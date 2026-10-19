@@ -684,7 +684,7 @@
     const base = /\/(stories|admin|authors|legal)\//.test(location.pathname) ? '../' : './';
     const s = document.createElement('script');
     s.defer = true;
-    s.src = base + 'js/analytics.js?v=20261019-no-sentry';
+    s.src = base + 'js/analytics.js?v=20261019-account-delete2';
     document.head.appendChild(s);
   }
 
