@@ -431,6 +431,20 @@
   background: var(--bg-sub);
   border-radius: 4px;
 }
+/* 미리보기 아래 회전·자르기 (js/photo-editor.js) */
+.rs-preview-edit {
+  margin-top: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.rs-preview-edit:hover { border-color: var(--text); }
 
 /* 동의 체크박스 */
 .rs-checkbox {

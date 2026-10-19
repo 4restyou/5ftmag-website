@@ -867,7 +867,9 @@
         uploadMeta.fileName = file.name || '';
         uploadMeta.fileType = file.type || '';
         uploadMeta.fileLastModified = file.lastModified || '';
-        const currentFileSignature = fileSignature(file);
+        // 미리보기의 「편집」으로 자르거나 돌린 사본(js/reader-upload-form-ui.js 가 입력칸에 달아 둔다)
+        const editedFile = form.querySelector('input[name="photo"]')?.__editedFile || null;
+        const currentFileSignature = fileSignature(file) + (editedFile ? '|edit:' + fileSignature(editedFile) : '');
         fields = validateAndNormalizeSubmissionFields(fields, films);
         controls.forEach(el => { el.disabled = true; });
 
@@ -886,6 +888,7 @@
         } else {
           uploadResult = await window.ReaderUploadFlow.uploadPhoto({
             file,
+            editedFile,
             db: db(),
             fmtBytes,
             readLocalJwtUser,
