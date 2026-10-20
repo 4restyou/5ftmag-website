@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Mon, 19 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 20 Oct 2026 00:00:00 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>사진가 둘이 만든 영화, 「바르다가 사랑한 얼굴들」</title>
+      <link>https://www.5ftmag.com/stories/varda-faces-places.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/varda-faces-places.html</guid>
+      <pubDate>Tue, 20 Oct 2026 00:00:00 GMT</pubDate>
+      <description>아녜스 바르다와 JR 이 사진 트럭을 몰고 프랑스 시골을 돌며 마을 사람들의 얼굴을 벽에 붙인 다큐멘터리. 영화를 찍기 전 사진가였던 바르다와 거리에 사진을 붙이는 JR, 두 사진가가 만든 영화를 다시 본다.</description>
+      <category>CINEMA</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>중고를 뒤지지 않아도 된다, 새로 나온 필름 똑딱이 여섯 대</title>
       <link>https://www.5ftmag.com/stories/new-film-compacts.html</link>
