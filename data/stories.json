@@ -1,5 +1,26 @@
 [
   {
+    "id": "varda-faces-places",
+    "title": "사진가 둘이 만든 영화, 「바르다가 사랑한 얼굴들」",
+    "category": "cinema",
+    "categoryLabel": "CINEMA",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-20",
+    "issue": "",
+    "thumbnail": "img/films/1shot400-can.webp",
+    "excerpt": "아녜스 바르다와 JR 이 사진 트럭을 몰고 프랑스 시골을 돌며 마을 사람들의 얼굴을 벽에 붙인 다큐멘터리. 영화를 찍기 전 사진가였던 바르다와 거리에 사진을 붙이는 JR, 두 사진가가 만든 영화를 다시 본다.",
+    "titleEn": "",
+    "excerptEn": "",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "",
+    "excerptJa": "",
+    "authorJa": "5ft.mag 編集部",
+    "films": [],
+    "page": "stories/varda-faces-places.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "new-film-compacts",
     "title": "중고를 뒤지지 않아도 된다, 새로 나온 필름 똑딱이 여섯 대",
     "category": "camera",
