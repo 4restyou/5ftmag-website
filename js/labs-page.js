@@ -656,7 +656,11 @@
     activeMapSlug = null;
     closeMapInfo();
     const bounds = new naver.maps.LatLngBounds();
+    // 지역·검색 없이 전체를 볼 땐 가장 많이 몰린 서울로 시작한다(전국 화면에선 서울 핀이 한 덩어리로 겹친다)
+    const seoulBounds = new naver.maps.LatLngBounds();
+    const focusSeoul = region === 'all' && !query;
     let count = 0;
+    let seoulCount = 0;
     for (const item of items) {
       const coord = await resolveItemCoord(item);
       if (token !== renderToken || view !== 'map') return;
@@ -673,9 +677,12 @@
       markerBySlug.set(slug, { marker, item });
       bounds.extend(pos);
       count++;
+      if (focusSeoul && item.region === '서울') { seoulBounds.extend(pos); seoulCount++; }
     }
     if (token !== renderToken) return;
-    if (count === 1) {
+    if (seoulCount > 1) {
+      map.fitBounds(seoulBounds, { top: 48, right: 48, bottom: 48, left: 48 });
+    } else if (count === 1) {
       map.setCenter(bounds.getCenter());
       map.setZoom(15);
     } else if (count > 1) {
@@ -1035,12 +1042,14 @@
       if (!button || !viewToggleEl.contains(button)) return;
       e.preventDefault();
       setView(button.dataset.view);
+      saveView();
     });
     viewToggleEl.querySelectorAll('[data-view]').forEach((b) => {
       b.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
         setView(b.dataset.view);
+        saveView();
       });
     });
   }
@@ -1059,9 +1068,11 @@
     });
   }
 
-  // 모바일에선 지도가 더 강력한 디스커버리이므로 기본을 'map' 으로.
-  // 데스크톱은 리스트가 정공법 (한눈에 가격·정보 비교).
-  const defaultView = window.matchMedia('(max-width: 640px)').matches ? 'map' : 'list';
-  setView(defaultView);
+  // 처음엔 목록(가격·정보를 한눈에 비교, 지도 SDK 를 기다리지 않음). 그다음부터는 독자가 마지막으로 고른 화면.
+  const VIEW_KEY = '5ft-labs-view';
+  function saveView() { try { localStorage.setItem(VIEW_KEY, view); } catch (_) {} }
+  let savedView = 'list';
+  try { savedView = localStorage.getItem(VIEW_KEY) || 'list'; } catch (_) {}
+  setView(savedView);
   setTab('labs');
 })();
