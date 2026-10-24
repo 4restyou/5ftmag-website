@@ -527,8 +527,9 @@
       return;
     }
     map = new naver.maps.Map(el, {
-      center: new naver.maps.LatLng(36.5, 127.8),
-      zoom: 7,
+      // 처음 화면도 서울. 결과가 그려지면 updateMarkers 가 다시 맞춘다
+      center: new naver.maps.LatLng(37.55, 126.98),
+      zoom: 11,
       scaleControl: false,
       mapDataControl: false,
     });
@@ -661,6 +662,18 @@
     const focusSeoul = region === 'all' && !query;
     let count = 0;
     let seoulCount = 0;
+    // 좌표가 저장된 서울 결과로 먼저 맞춘다. 좌표 없는 곳은 아래에서 하나씩 지오코딩하느라
+    // 몇 초 걸려서, 끝날 때까지 기다리면 그동안 전국 화면이 보였다.
+    let fitted = false;
+    if (focusSeoul) {
+      const known = new naver.maps.LatLngBounds();
+      let n = 0;
+      for (const item of items) {
+        const c = { lat: Number(item.lat), lng: Number(item.lng) };
+        if (item.region === '서울' && isValidCoord(c)) { known.extend(new naver.maps.LatLng(c.lat, c.lng)); n++; }
+      }
+      if (n > 1) { map.fitBounds(known, { top: 48, right: 48, bottom: 48, left: 48 }); fitted = true; }
+    }
     for (const item of items) {
       const coord = await resolveItemCoord(item);
       if (token !== renderToken || view !== 'map') return;
@@ -679,7 +692,7 @@
       count++;
       if (focusSeoul && item.region === '서울') { seoulBounds.extend(pos); seoulCount++; }
     }
-    if (token !== renderToken) return;
+    if (token !== renderToken || fitted) return;
     if (seoulCount > 1) {
       map.fitBounds(seoulBounds, { top: 48, right: 48, bottom: 48, left: 48 });
     } else if (count === 1) {
