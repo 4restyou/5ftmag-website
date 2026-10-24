@@ -82,6 +82,15 @@ describe('MagNotifText', () => {
     expect(notifText(row)).toEqual({ title: 'Your film suggestion was added', body: 'Kodak Gold 200 · thanks' });
   });
 
+  it('ja: 기사 게재 알림', () => {
+    const notifText = setup('ja');
+    const row = { type: 'submission_in_story', title: '기사에 사진이 실렸어요', body: '…', meta: { story: 'readers-5000', title_ja: '5,000コマから選んだ12枚' } };
+    expect(notifText(row)).toEqual({
+      title: '記事に写真が掲載されました',
+      body: 'お送りいただいた写真が「5,000コマから選んだ12枚」に掲載されました。ありがとうございます。',
+    });
+  });
+
   it('모르는 type 은 저장된 문구', () => {
     const notifText = setup('en');
     const row = { type: 'submission_pending_editor', title: '검토할 사진', body: '새 투고 1건', meta: { x: 1 } };

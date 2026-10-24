@@ -108,6 +108,16 @@
           body: pick(`It goes up on ${date}.${filmPart}`, `${date}からホームに掲載されます。${filmPart}`),
         };
       }
+      case 'submission_in_story': {
+        // 기사 제목은 meta 에 언어별로 넣는다(마이그레이션이 알림을 넣을 때). 없으면 제목 없이 쓴다.
+        const story = meta ? String(pick(meta.title_en || '', meta.title_ja || '')) : '';
+        return {
+          title: pick('Your photo is in an article', '記事に写真が掲載されました'),
+          body: story
+            ? pick(`Your photo appears in “${story}”. Thank you.`, `お送りいただいた写真が「${story}」に掲載されました。ありがとうございます。`)
+            : pick('Your photo appears in a 5ft.mag article. Thank you.', 'お送りいただいた写真が 5ft.mag の記事に掲載されました。ありがとうございます。'),
+        };
+      }
       case 'listing_hidden':
         return {
           title: pick('Your listing was hidden', '出品が非表示になりました'),
