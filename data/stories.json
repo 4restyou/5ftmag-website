@@ -1,5 +1,26 @@
 [
   {
+    "id": "photobook-awards-2026",
+    "title": "올해의 사진집은 어떻게 고를까, 2026 파리 포토–아퍼처 사진집상",
+    "category": "photo",
+    "categoryLabel": "PHOTOBOOK",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-24",
+    "issue": "",
+    "thumbnail": "img/stories/photobook-awards-2026/pb-group.webp",
+    "excerpt": "2026 파리 포토–아퍼처 사진집상 최종 후보 35권이 발표됐다. 11월 13일 수상작 발표를 앞두고, 세 부문에서 네 권을 골라 사진 한 장이 아닌 책의 편집과 형태로 읽는다.",
+    "films": [],
+    "titleEn": "How Do You Choose the Photobook of the Year? The 2026 Paris Photo–Aperture PhotoBook Awards",
+    "excerptEn": "The 35-title shortlist for the 2026 Paris Photo–Aperture PhotoBook Awards is out. Ahead of the November 13 announcement, we pick four books across three categories and read them for their editing and form, not just their single pictures.",
+    "authorEn": "5ft.mag Editors",
+    "titleJa": "今年の写真集はどう選ばれるのか、2026年パリフォト=アパチャー写真集賞",
+    "excerptJa": "2026年パリフォト=アパチャー写真集賞の最終候補35冊が発表された。11月13日の受賞発表を前に、3部門から4冊を選び、写真1枚ではなく本の編集と形から読む。",
+    "authorJa": "5ft.mag 編集部",
+    "page": "stories/photobook-awards-2026.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "readers-5000",
     "title": "5천 컷 사이에서 꺼낸 열두 장",
     "category": "photo",
