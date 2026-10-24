@@ -563,10 +563,31 @@
     return window.ReaderRoll.buildState(rows, ROLL_LIMIT);
   }
 
+  // 기사·홈 같은 다른 페이지에서 필름·작가·카메라 주소로 들어왔으면, 독자가 창을 닫을 때
+  // 그 페이지로 돌려보낸다. 예전엔 닫으면 카탈로그에 남아 기사로 돌아갈 길을 잃었다.
+  let returnOnClose = false;
+  function cameFromOtherPage() {
+    try {
+      const ref = new URL(document.referrer);
+      if (ref.origin !== location.origin) return false;
+      return !/^\/(?:(?:en|ja)\/)?films\.html$|^\/(?:(?:en|ja)\/)?(?:film|camera|contributor)\//.test(ref.pathname);
+    } catch (_) { return false; }
+  }
+  function dismissModal() {
+    closeModal();
+    if (returnOnClose && history.length > 1) {
+      returnOnClose = false;
+      history.back();
+    }
+  }
+
   async function handleInitialDeepLink() {
     const params = new URLSearchParams(window.location.search);
     const contributor = normalizeContributorKey(params.get('contributor') || routeParam('contributor'));
     const cameraRaw = params.get('camera') || routeParam('camera');
+    if ((contributor || cameraRaw || params.get('film') || params.get('slug') || routeParam('film')) && cameFromOtherPage()) {
+      returnOnClose = true;
+    }
     let filmKey = resolveFilmKey(params.get('film') || params.get('slug') || routeParam('film'));
 
     // ?camera= 우선 처리 — 카메라 모달 열기 (openCameraModal 가 자체적으로 매칭/대기 처리)
@@ -1386,12 +1407,12 @@
   });
 
   // 닫기 버튼
-  modalClose.addEventListener('click', closeModal);
+  modalClose.addEventListener('click', dismissModal);
 
   // Escape 로 닫기 — 라이트박스가 열려 있으면 포커스가 그쪽(형제 요소)에 있어
   // 이 핸들러는 발동하지 않고 라이트박스 자체 핸들러가 처리한다.
   modalOverlay.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalOverlay.classList.contains('open')) closeModal();
+    if (e.key === 'Escape' && modalOverlay.classList.contains('open')) dismissModal();
   });
 
   // 공유 버튼
@@ -1409,7 +1430,7 @@
 
   // 오버레이 빈 공간 클릭 시 닫기
   modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) closeModal();
+    if (e.target === modalOverlay) dismissModal();
   });
 
   function setPhotoFavoriteState(subId, on) {
