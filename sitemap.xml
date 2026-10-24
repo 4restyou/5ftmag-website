@@ -1761,6 +1761,12 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://www.5ftmag.com/en/stories/photobook-awards-2026.html</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.5ftmag.com/en/stories/readers-5000.html</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>yearly</changefreq>
@@ -3429,6 +3435,12 @@
     <lastmod>2026-10-24T13:34:04+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/ja/stories/photobook-awards-2026.html</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/stories/readers-5000.html</loc>
