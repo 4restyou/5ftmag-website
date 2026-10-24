@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/labs.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-24T11:12:15+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -62,27 +62,33 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/terms.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/privacy.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/copyright.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/legal/refund.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.5ftmag.com/stories/readers-5000.html</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/stories/varda-faces-places.html</loc>
@@ -1690,7 +1696,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/labs.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-24T11:12:15+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1726,25 +1732,25 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/terms.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/privacy.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/copyright.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/en/legal/refund.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -3354,7 +3360,7 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/labs.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-24T11:12:15+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3390,25 +3396,25 @@
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/terms.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/privacy.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/copyright.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.5ftmag.com/ja/legal/refund.html</loc>
-    <lastmod>2026-10-19T13:19:59+00:00</lastmod>
+    <lastmod>2026-10-20T08:21:43+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

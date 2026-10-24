@@ -1,5 +1,20 @@
 [
   {
+    "id": "readers-5000",
+    "title": "5천 컷 사이에서 꺼낸 열두 장",
+    "category": "photo",
+    "categoryLabel": "PHOTO",
+    "author": "5ft.mag 편집부",
+    "date": "2026-10-24",
+    "issue": "",
+    "thumbnail": "img/films/1shot400-can.webp",
+    "excerpt": "오피트 웹사이트를 연 지 다섯 달, 독자들이 올린 필름 사진이 5천 컷을 넘었다. 서로 다른 작가 열두 명의 사진을 한 장씩 골라 빛과 계절과 공간을 따라 소개한다.",
+    "films": [],
+    "page": "stories/readers-5000.html",
+    "published": true,
+    "manual": true
+  },
+  {
     "id": "varda-faces-places",
     "title": "사진가 둘이 만든 영화, 「바르다가 사랑한 얼굴들」",
     "category": "cinema",

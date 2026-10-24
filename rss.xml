@@ -6,13 +6,22 @@
     <atom:link href="https://www.5ftmag.com/rss.xml" rel="self" type="application/rss+xml" />
     <description>필름 한 롤의 길이, 5ft. 36컷 안에 담긴 빛과 그림자의 이야기.</description>
     <language>ko-KR</language>
-    <lastBuildDate>Tue, 20 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 00:00:00 GMT</lastBuildDate>
     <generator>5ft magazine</generator>
     <image>
       <url>https://www.5ftmag.com/img/favicon/icon-512.png</url>
       <title>5ft magazine</title>
       <link>https://www.5ftmag.com</link>
     </image>
+    <item>
+      <title>5천 컷 사이에서 꺼낸 열두 장</title>
+      <link>https://www.5ftmag.com/stories/readers-5000.html</link>
+      <guid isPermaLink="true">https://www.5ftmag.com/stories/readers-5000.html</guid>
+      <pubDate>Sat, 24 Oct 2026 00:00:00 GMT</pubDate>
+      <description>오피트 웹사이트를 연 지 다섯 달, 독자들이 올린 필름 사진이 5천 컷을 넘었다. 서로 다른 작가 열두 명의 사진을 한 장씩 골라 빛과 계절과 공간을 따라 소개한다.</description>
+      <category>PHOTO</category>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">5ft.mag 편집부</dc:creator>
+    </item>
     <item>
       <title>사진가 둘이 만든 영화, 「바르다가 사랑한 얼굴들」</title>
       <link>https://www.5ftmag.com/stories/varda-faces-places.html</link>
